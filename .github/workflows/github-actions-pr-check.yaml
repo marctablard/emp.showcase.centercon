@@ -1,0 +1,39 @@
+name: Deploy preview
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  build_and_preview:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
+          cache-dependency-path: yarn.lock
+
+      - run: yarn install
+
+      - run: yarn build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        id: firebase-hosting-preview
+        with:
+          firebaseToolsVersion: "12.9.1"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.EMPORIX_SHOWCASE_SA }}"
+          expires: 5d
+          projectId: emporix-showcase-2cf20
+          target: emporix-showcase-2cf20

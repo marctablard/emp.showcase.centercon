@@ -1,0 +1,42 @@
+name: Build and deploy
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Deploy the branch."
+        required: true
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
+          cache-dependency-path: yarn.lock
+
+      - run: yarn install
+
+      - run: yarn build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        id: firebase-hosting-deploy
+        with:
+          firebaseToolsVersion: "12.9.1"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.EMPORIX_SHOWCASE_SA }}"
+          projectId: emporix-showcase-2cf20
+          channelId: live
+          target: emporix-showcase-2cf20
