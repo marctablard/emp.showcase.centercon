@@ -1,0 +1,12 @@
+{
+  "projects": {},
+  "targets": {
+    "emporix-showcase-2cf20": {
+      "hosting": {
+        "emporix-showcase-2cf20": [
+          "emporix-showcase-2cf20"
+        ]
+      }
+    }
+  }
+}
