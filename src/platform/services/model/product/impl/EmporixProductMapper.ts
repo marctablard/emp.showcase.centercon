@@ -1,7 +1,7 @@
-import { Product } from '@/platform/types/data';
+import { Product } from '@/platform/services/model/product';
 import { ProductMapper } from '../ProductMapper';
-import { Product as EmporixProduct } from '@/platform/integration/emporix/model/product';
-import { LocalizedString } from '@/platform/types/data/common-types';
+import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
+import { LocalizedString } from '@/platform/services/model/common';
 import { injectable } from '@/platform/core/di/injectable';
 
 /**

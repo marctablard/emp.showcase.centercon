@@ -143,7 +143,7 @@ const watchFlag = args.includes('--watch') || args.includes('-w');
 // Check if a specific layer was provided
 let specificLayer: Layer | undefined;
 for (const arg of args) {
-  if (arg === 'api' || arg === 'service' || arg === 'repository') {
+  if (arg === 'integration' || arg === 'service' || arg === 'repository') {
     specificLayer = arg as Layer;
     break;
   }

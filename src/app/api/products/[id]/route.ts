@@ -8,10 +8,10 @@ import { ProductService } from '@/platform/services/product/ProductService';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const productId = params.id;
+    const { id: productId } = await params;
     const productService = await services.get<ProductService>('ProductService');
     
     const product = await productService.getProductById(productId);

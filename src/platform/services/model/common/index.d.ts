@@ -46,3 +46,15 @@ export interface SearchParams<T> {
     sort?: string;
     criteria?: Partial<T>;
 }
+
+
+export interface Media {
+  url: string;
+  altText?: string;
+}
+
+export interface LocalizedString {
+  de: string;
+  en: string;
+  dk: string;
+}

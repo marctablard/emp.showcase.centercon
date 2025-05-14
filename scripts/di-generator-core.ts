@@ -200,7 +200,7 @@ async function scanForInjectables(directory?: string): Promise<InjectableInfo[]>
 /**
  * Generates the container file that uses registerModule and getContainer
  * @param injectables The injectable classes to include in the container
- * @param layer The layer for which to generate the container (api, service, etc.)
+ * @param layer The layer for which to generate the container (integration, service, etc.)
  */
 export async function generateContainerFile(layer: Layer): Promise<string> {
   const { directory, outputFile } = LAYER_CONFIGS[layer];
