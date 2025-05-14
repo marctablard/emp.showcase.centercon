@@ -1,0 +1,43 @@
+{
+  "name": "emporix-showcase",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {    
+    "dev": "npm-run-all --parallel generate:watch dev:next",
+    "dev:next": "next dev --turbopack",
+    "build": "npm run generate && next build",
+    "build:next": "next build",
+    "generate": "ts-node --project scripts/tsconfig.json scripts/di-generator.ts",
+    "generate:watch": "ts-node --project scripts/tsconfig.json scripts/di-generator.ts --watch",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@next/env": "^15.3.2",
+    "inversify": "^7.5.1",
+    "next": "15.3.2",
+    "next-api-decorators": "^2.0.2",
+    "next-auth": "^4.24.11",
+    "next-intl": "^4.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/glob": "^8.1.0",
+    "@types/node": "^20.17.45",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "chokidar": "^4.0.3",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.2",
+    "glob": "^10.4.5",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5",
+    "npm-run-all": "^4.1.5"
+  }
+}

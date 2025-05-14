@@ -1,0 +1,357 @@
+openapi: 3.0.0
+info:
+  title: AI Service
+  version: ''
+  description: |
+    The service facilitates and streamlines e-commerce processes of product marketing.
+    ***
+    **Key Features**
+     * Integration with https://platform.openai.com/ platform
+     * Possibility to generate product descriptions 
+    ***
+    **Key Benefits** 
+     * Product managers can facilitate and streamline the process of creating and updating product descriptions
+     * Creating product descriptions that gain more attention and interest by adapting various writing styles
+     * Consistency in tone and language
+     * Increased visibility resulting from optimization for search engines
+  contact: {}
+servers:
+  - url: http://api.emporix.io
+paths:
+  /ai-service/{tenant}/texts:
+    parameters:
+      - name: tenant
+        in: path
+        required: true
+        schema:
+          type: string
+        description: |
+          Your Emporix tenant's name.
+
+          **Note**: The tenant name should always be provided in lowercase.
+    post:
+      summary: Generating text for an object description
+      operationId: POST-ai-generate-description
+      responses:
+        '200':
+          $ref: '#/components/responses/200_resp_GET_text_generation'
+        '400':
+          $ref: '#/components/responses/400_resp_common'
+        '401':
+          $ref: '#/components/responses/401_resp_common'
+        '403':
+          $ref: '#/components/responses/403_resp_common'
+        '500':
+          $ref: '#/components/responses/500_resp_common'
+      description: |-
+        Generates a text based on a prompt. Currently supported AI engines for text generation:
+        * https://platform.openai.com/
+
+        ***
+        Prerequisite: Using the AI service requires an API token, you have to either configure your own OpenAI account, or use the Emporix one. To configure your own OpenAI token, use the configuration service by storing the token under `openAiApiToken` key.  
+
+        If you don't provide your own OpenAI token, the Emporix one is used with the following limits: 3 mln input tokens and 1 mln output tokens. When you reach the limit, the next requests are rejected and you have to provide your own OpenAI token.
+        Emporix uses the gpt-4o-mini model by default.
+        If you want to use your own OpenAI account with a different AI model please contact our [Emporix Support Team](mailto:support@emporix.com) to negotiate the model and usage.
+        ***
+
+        ###Required scopes###
+
+        * `ai.text_manage`
+      security:
+        - OAuth2:
+            - ai.text_manage
+      requestBody:
+        $ref: '#/components/requestBodies/TextGeneration'
+      tags:
+        - Text Generation
+  /ai-service/{tenant}/completions:
+    parameters:
+      - schema:
+          type: string
+        name: tenant
+        in: path
+        required: true
+    post:
+      summary: AI Completions
+      operationId: POST-ai-completions
+      responses:
+        '200':
+          $ref: '#/components/responses/200_resp_GET_text_generation'
+        '400':
+          $ref: '#/components/responses/400_resp_common'
+        '401':
+          $ref: '#/components/responses/401_resp_common'
+        '403':
+          $ref: '#/components/responses/403_resp_common'
+        '500':
+          $ref: '#/components/responses/500_resp_common'
+      description: |-
+        Generates a completion based on chat history. Currently supported AI engines for the completion:
+        * https://platform.openai.com/
+
+
+        ***
+        Prerequisite: Using the AI service requires an API token, you have to either configure your own OpenAI account, or use the Emporix one. To configure your own OpenAI token, use the configuration service by storing the token under `openAiApiToken` key. 
+
+        If you don't provide your own OpenAI token, the Emporix one is used with the following limits: 3 mln input tokens and 1 mln output tokens. When you reach the limit, the next requests are rejected and you have to provide your own OpenAI token. 
+        Emporix uses the gpt-4o-mini model by default. If you want to use your own OpenAI account with a different AI model please contact our [Emporix Support Team](mailto:support@emporix.com) to negotiate the model and usage.
+        ***
+
+        ###Required scopes###
+
+        * `ai.completion_manage`
+      security:
+        - OAuth2:
+            - ai.completion_manage
+      requestBody:
+        $ref: '#/components/requestBodies/Completion'
+      tags:
+        - AI Completions
+components:
+  schemas:
+    ErrorMessage:
+      type: object
+      properties:
+        code:
+          type: integer
+        type:
+          type: string
+        message:
+          type: string
+        moreInfo:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              type:
+                type: string
+              message:
+                type: string
+              moreInfo:
+                type: string
+      description: ''
+    ErrorMessageFault:
+      type: object
+      properties:
+        fault:
+          type: object
+          properties:
+            faultstring:
+              type: string
+            detail:
+              type: object
+              properties:
+                errorcode:
+                  type: string
+    TextGenerationRequest:
+      title: TextGenerationRequest
+      type: object
+      description: Represents a request body for a text generation operation.
+      required:
+        - prompt
+      properties:
+        id:
+          type: string
+          description: Identifier of the request. The value is not mandatory - if provided then the id is returned in the text generation response.
+        prompt:
+          type: string
+          description: A prompt to AI engine. A desired text content is generated based on the prompt.
+        maxTokens:
+          type: integer
+          description: Maximum number of tokens that should be used during text generation. If not provided then 4097 is used.
+    GenerationResponse:
+      title: GenerationResponse
+      type: object
+      description: Object represents the text generation response.
+      properties:
+        id:
+          type: string
+          description: 'Identifier of the text generation request. The value is populated only if the id was provided in the request. '
+        result:
+          type: string
+          description: Text generation result.
+    CompletionRequest:
+      title: CompletionRequest
+      type: object
+      required:
+        - messages
+      properties:
+        id:
+          type: string
+          description: Identifier of the request. The value is not mandatory - if provided then the id is returned in the text generation response.
+        messages:
+          type: array
+          items:
+            type: object
+            required:
+              - role
+              - content
+            properties:
+              role:
+                type: string
+                enum:
+                  - USER
+                  - SYSTEM
+                  - ASSISTANT
+                description: A role of the message. `SYSTEM` role should provide an instruction for AI about background of the conversation. `USER` role is used for user message. `ASSISTANT` is used for content generated by AI.
+              content:
+                type: string
+                description: Content of the message. Depending on the role parameter it can be a background instruction, user instruction or AI response.
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            ai.text_manage: Needed to execute actions related to the text generation.
+            ai.completion_manage: Needed to execute actions related to the AI completions.
+          tokenUrl: https://api.emporix.io/oauth/token
+  parameters:
+    path_tenant:
+      name: tenant
+      in: path
+      required: true
+      schema:
+        type: string
+      description: |
+        Your Emporix tenant's name.
+
+        **Note**: The tenant name should always be provided in lowercase.
+    header_Accept-Language:
+      name: Accept-Language
+      in: header
+      required: false
+      schema:
+        type: string
+      description: |
+        List of language codes acceptable for the response. You can specify factors that indicate which language should be retrieved if the one with a higher factor was not found in the localized fields.
+
+        * If the header is set to a particular language or a list of languages, all localized fields are retrieved as strings.
+        * If the header is set to `*`, all localized fields are retrieved as maps of translations, where the keys are language codes and values are the fields in their respective languages.
+        * If the header is empty, localized fields are retrieved in the default language defined in the Configuration Service.
+    header_Content-Language:
+      name: Content-Language
+      in: header
+      required: false
+      schema:
+        type: string
+      description: |
+        List of languages in which localized fields in the request body are provided.
+
+        * If the header is set to `*`, the localized fields should be provided as maps of translations, where the keys are language codes and values are the fields in their respective languages.
+        * If the header is set to a specific language, the localized fields should be provided as strings.
+        * If the header is empty, the endpoint will assume that the localized fields are provided in the default language defined in the Configuration Service.
+
+        **Note**: You can provide the localized fields only in languages defined in the Configuration Service. In case the fields are provided in languages that are not defined in the Configuration Service, the request will be rejected.
+  responses:
+    401_resp_common:
+      description: The authorization token is invalid or has expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessageFault'
+          examples:
+            Invalid access token:
+              value:
+                fault:
+                  faultstring: Invalid access token
+                  detail:
+                    errorcode: oauth.v2.InvalidAccessToken
+            Access token expired:
+              value:
+                fault:
+                  faultstring: Access Token expired
+                  detail:
+                    errorcode: keymanagement.service.access_token_expired
+    403_resp_common:
+      description: Authorization scopes of the access token are not sufficient and do not match the scopes required by the endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            Access forbidden:
+              value:
+                code: 403
+                status: Forbidden
+                message: The access to the requested resource has been forbidden by the server.
+    500_resp_common:
+      description: A server-side error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            Internal Server Error:
+              value:
+                code: 500
+                status: Internal Server Error
+                message: Problem encountered while trying to connect to the database.
+    400_resp_common:
+      description: The request was syntactically incorrect.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            Code must not be null:
+              value:
+                code: 400
+                status: Bad Request
+                message: Validation problem with request body.
+                details:
+                  - message: code must not be null nor blank
+    404_resp_product:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            Product not found:
+              value:
+                productId: 628cd20c6e8b2432b6346ca6
+                code: 404
+                status: Not Found
+                message: The product with id 628cd20c6e8b2432b6346ca6 has not been found.
+    200_resp_GET_text_generation:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerationResponse'
+          examples:
+            Text Generation Response:
+              value:
+                id: en
+                result: Mini pipe cutters are small cutting tools that are designed to precisely and effectively cut through pipes ranging in size from 3 to 16 millimeters. Unlike some larger pipe cutters, these mini versions are conveniently small and light enough to be carried around easily and used in places where a standard-sized cutter may not be able to fit. They are typically made of hardened steel and are designed to work on most types of tubing and thin-walled plastic piping. The continuous interlocking jaws hold the pipe securely while the cutting blade smoothly and accurately creates a precise and neat cutting edge. Mini pipe cutters are the perfect tool for plumbers, DIYers and those tackling smaller scale pipe work in hard-to-reach places.
+  requestBodies:
+    TextGeneration:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TextGenerationRequest'
+          examples:
+            Text generation request:
+              value:
+                id: en
+                prompt: 'Generate a long description for product ''pipe cutter'' in language EN '
+                maxTokens: 2048
+    Completion:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CompletionRequest'
+          examples:
+            Completion request:
+              value:
+                id: abc-123
+                messages:
+                  - role: SYSTEM
+                    content: You are an assistant responsible for creating a configuration based on information provided by user.
+  examples: {}

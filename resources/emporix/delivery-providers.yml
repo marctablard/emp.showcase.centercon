@@ -1,0 +1,460 @@
+openapi: 3.0.0
+info:
+  title: Delivery Service
+  version: ''
+  contact:
+    name: Emporix
+    url: https://emporix.com
+    email: documentation@emporix.com
+  description: |-
+    Configure Onfleet as route management system or Veloce as logistics provider.
+
+    ***
+
+    **Key Features**:
+    * Deliver orders via Veloce or Onfleet
+    * Synchronize orders with the logistic provider configured for the site
+    * Configure a different logistics provider per site
+
+    ***
+
+    **Key Benefits**:
+    * Save time and money for your last mile delivery by optimizing routes with Onfleet
+    * Utilize third party logistics providers (3PLs) like Veloce to orchestrate the delivery of your orders
+
+    ***
+    **Note**: To configure Veloce or Onfleet delivery provider please contact with Team Emporix
+servers:
+  - url: https://api.emporix.io
+tags:
+  - name: Delivery Orders
+  - name: Delivery Plan
+paths:
+  /delivery-v2/{tenant}/order:
+    get:
+      summary: Retrieving site orders
+      description: |
+        Get orders for given site and tenant
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: siteCode
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              examples:
+                Response example:
+                  value:
+                    - id: MPITO1009
+                      siteCode: main
+                      contactPhone: '+48519374777'
+                      orderStatus: CREATED
+                      orderNumber: MPITO1009
+                      deliveryTime:
+                        deliveryDate: '2020-12-05'
+                        deliveryTimeFrom: '10:00:00'
+                        deliveryTimeTo: '12:00:00'
+                        deliveryCosts: 20
+                        pickupSettings: Fabrikstr. 5.
+                      pickup: false
+                      pickupAddress:
+                        id: Pickup 1
+                        street: Fabrikstr
+                        streetNumber: '5.'
+                        city: Cham
+                        zipCode: '6033'
+                        companyName: Test AG
+                        country: DE
+                        addressName: Fabrikstr. 5.
+                        description: test description for multiple pickup points
+                        addressTag: pickupAddress
+                      shippingAddress:
+                        contactName: John Doe
+                        street: Fritz-Elsas-Straße
+                        streetNumber: '20'
+                        zipCode: '70173'
+                        city: Stuttgart-Mitte
+                        country: DE
+              schema:
+                $ref: '#/components/schemas/OrderDTOList'
+        '400':
+          $ref: '#/components/responses/BadRequest_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+      security:
+        - OAuth2: []
+      operationId: GET-delivery-list-orders
+      tags:
+        - Delivery Orders
+  /delivery-v2/{tenant}/order/{orderId}:
+    get:
+      summary: Retrieving an order
+      description: |
+        Get order by given orderId and tenant
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              examples:
+                Response example:
+                  value:
+                    id: QAC6GQEF
+                    siteCode: main
+                    orderStatus: CREATED
+                    orderNumber: B7012191
+                    deliveryTime:
+                      deliveryDate: '2020-07-28'
+                      deliveryTimeFrom: '15:00:00'
+                      deliveryTimeTo: '22:00:00'
+                      deliveryCosts: 20
+                      pickupSettings: Fabrikstr. 5.
+                    pickup: false
+                    pickupAddress:
+                      id: Pickup 1
+                      street: Fabrikstr
+                      streetNumber: '5.'
+                      city: Cham
+                      zipCode: '6033'
+                      companyName: Test AG
+                      country: DE
+                      addressName: Fabrikstr. 5.
+                      description: test description for multiple pickup points
+                      addressTag: pickupAddress
+                    shippingAddress:
+                      contactName: Nazim Mohammed
+                      street: Calwer Str
+                      streetNumber: '23'
+                      zipCode: '70173'
+                      city: Stuttgart-Mitte
+                      country: DE
+                      contactPhone: +48 519374777
+              schema:
+                $ref: '#/components/schemas/OrderDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '404':
+          $ref: '#/components/responses/NotFound_404'
+      security:
+        - OAuth2: []
+      operationId: GET-delivery-retrieve-order
+      tags:
+        - Delivery Orders
+  /delivery-v2/{tenant}/planRoute:
+    post:
+      summary: Creating orders for delivery provider
+      description: |
+        Push given orders to delivery provider for the given tenant. In case of an unsuccessful route planning for given order (eg. due to invalid address) an email to the Merchant will be send.
+      parameters:
+        - name: tenant
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              orderStatus: CREATED
+              siteCode: main
+              orderIds:
+                - B7016709
+                - QAC6GQEF
+            schema:
+              $ref: '#/components/schemas/PlanRouteCommand'
+      responses:
+        '200':
+          description: Route planning executed. Returned body only for unsuccessfully planned orders (QAC6GQEF in this example). Returned empty body for successfully planned orders (B7016709).
+          content:
+            application/json:
+              examples:
+                Response example:
+                  value:
+                    orderId: QAC6GQEF
+                    deliveryProvider: ONFLEET
+                    errorMessage: completeBefore must not be before creation time
+              schema:
+                $ref: '#/components/schemas/PlanRouteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+      security:
+        - OAuth2: []
+      operationId: POST-delivery-plan-orders-delivery
+      tags:
+        - Delivery Plan
+components:
+  schemas:
+    ErrorMessage:
+      required:
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        _embedded:
+          type: object
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  path:
+                    type: string
+    PlanRouteResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+        deliveryProvider:
+          type: string
+        errorMessage:
+          type: string
+    PlanRouteCommand:
+      type: object
+      properties:
+        orderStatus:
+          $ref: '#/components/schemas/OrderStatus'
+        siteCode:
+          type: string
+        orderIds:
+          $ref: '#/components/schemas/OrderIdList'
+      required:
+        - siteCode
+    OrderDTOList:
+      type: array
+      items:
+        $ref: '#/components/schemas/OrderDTO'
+    OrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        siteCode:
+          type: string
+        task:
+          $ref: '#/components/schemas/Task'
+        taskId:
+          type: string
+        contactPhone:
+          type: string
+        mobilePhone:
+          type: string
+        orderStatus:
+          $ref: '#/components/schemas/OrderStatus'
+        orderNumber:
+          type: string
+        hint:
+          type: string
+        deliveryTime:
+          $ref: '#/components/schemas/DeliveryTime'
+        pickup:
+          type: boolean
+        pickupAddress:
+          $ref: '#/components/schemas/PickupAddress'
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        deliveryHoldingTime:
+          type: number
+        personalHandover:
+          type: boolean
+    ShippingAddress:
+      type: object
+      properties:
+        contactName:
+          type: string
+        companyName:
+          type: string
+        street:
+          type: string
+        streetNumber:
+          type: string
+        streetAppendix:
+          type: string
+        extraLine1:
+          type: string
+        extraLine2:
+          type: string
+        extraLine3:
+          type: string
+        extraLine4:
+          type: string
+        zipCode:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        state:
+          type: string
+        contactPhone:
+          type: string
+        mixins:
+          type: object
+          additionalProperties: true
+    PickupAddress:
+      type: object
+      properties:
+        id:
+          type: string
+        street:
+          type: string
+        streetNumber:
+          type: string
+        city:
+          type: string
+        zipCode:
+          type: string
+        companyName:
+          type: string
+        country:
+          type: string
+        addressName:
+          type: string
+        description:
+          type: string
+        addressTag:
+          type: string
+    DeliveryTime:
+      type: object
+      properties:
+        deliveryDate:
+          type: string
+          format: date
+        deliveryTimeFrom:
+          type: string
+          format: time
+        deliveryTimeTo:
+          type: string
+          format: time
+        deliveryCosts:
+          type: number
+        pickupSettings:
+          type: string
+    Task:
+      type: object
+      properties:
+        taskId:
+          type: string
+        trackingURL:
+          type: string
+        deliveryProvider:
+          $ref: '#/components/schemas/DeliveryProvider'
+        status:
+          type: string
+          enum:
+            - CREATED
+            - CANCELLED
+    OrderIdList:
+      type: array
+      items:
+        type: string
+    DeliveryProvider:
+      type: string
+      enum:
+        - VELOCE
+        - ONFLEET
+    OrderStatus:
+      type: string
+      enum:
+        - IN_CHECKOUT
+        - CREATED
+        - CONFIRMED
+        - DECLINED
+        - SHIPPED
+        - COMPLETED
+  responses:
+    BadRequest_400:
+      description: Request was syntactically incorrect. Details will be provided in the response payload.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            Validation errors:
+              value:
+                message: Validation errors
+                code: 400
+            Bad request:
+              value:
+                message: Problem with the request
+                _embedded:
+                  errors:
+                    - message: property cannot be null
+    NotFound_404:
+      description: Request was syntactically incorrect. Details will be provided in the response payload.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            Not Found:
+              value:
+                message: Cannot find resource
+                code: 404
+    Unauthorized_401:
+      description: Given request is unauthorized - the authorization token is invalid or has expired. Details will be provided in the response payload.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fault:
+                type: object
+                properties:
+                  faultstring:
+                    type: string
+                  detail:
+                    type: object
+                    properties:
+                      errorcode:
+                        type: string
+          examples:
+            Invalid access token:
+              value:
+                fault:
+                  faultstring: Invalid access token
+                  detail:
+                    errorcode: oauth.v2.InvalidAccessToken
+            Access token expired:
+              value:
+                fault:
+                  faultstring: Access Token expired
+                  detail:
+                    errorcode: keymanagement.service.access_token_expired
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.emporix.io/oauth/token
+          scopes: {}
