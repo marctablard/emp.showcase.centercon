@@ -1,4 +1,4 @@
-import { HelloWorldComponent } from "@/app/components/HelloWorldComponent";
+import { HelloWorld } from "@/components/hello-world";
 import { useTranslations } from "next-intl";
 
 export default function Home() {
@@ -8,7 +8,7 @@ export default function Home() {
             <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
                 <h1>{t('friend')}</h1>
                 
-                <HelloWorldComponent />
+                <HelloWorld />
                 
             </main> 
         </div>
