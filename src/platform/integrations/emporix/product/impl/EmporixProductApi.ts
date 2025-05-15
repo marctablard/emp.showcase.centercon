@@ -1,9 +1,9 @@
-import { Product, PaginatedResponse, SearchParams } from "../model";
+import { Product, PaginatedResponse, SearchParams } from "../../model";
 import { ProductApi } from "../ProductApi";
-import { buildPaginatedResponse, buildSearchQuery } from "./util/common";
+import { buildPaginatedResponse, buildSearchQuery } from "../../common/util/common";
 import { inject } from "inversify";
-import type { EmporixConfig } from "../config";
-import type EmporixApiClient from "./EmporixApiInvoker";
+import type { EmporixConfig } from "../../config";
+import type EmporixApiClient from "../../common/impl/EmporixApiInvoker";
 import { injectable } from "@/platform/core/di/injectable";
 
 @injectable('EmporixProductApi', 'Singleton')

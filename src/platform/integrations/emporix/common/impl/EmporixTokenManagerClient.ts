@@ -1,6 +1,6 @@
-import { StoredToken } from '../../types/auth';
+import type { StoredToken } from '@/platform/integrations/types/auth';
 import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
-import { AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from '../OAuthApi';
+import { AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from '../../oauth/OAuthApi';
 import { injectable } from '@/platform/core/di/injectable';
 
 const LOCAL_STORAGE_KEY = 'emporix-token';

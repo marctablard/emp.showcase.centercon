@@ -13,7 +13,7 @@ import { ProductMapper } from "../../model/product/ProductMapper";
  * Implementation of ProductService for Emporix product data.
  * Maps between Emporix API product format and internal Product model.
  */
-@injectable('ProductService', 'Singleton')
+@injectable('ProductService', "Singleton")
 class EmporixProductService implements ProductService {
 
     async getProductById(id: string): Promise<Product | undefined> {
@@ -28,7 +28,7 @@ class EmporixProductService implements ProductService {
         const paginated = await productApi.getProducts(page, pageSize);
         const mapper = await services.get<ProductMapper<EmporixProduct>>('EmporixProductMapper');
         return {
-            items: paginated.items.map(product => mapper.mapToService(product)),
+            items: paginated.items.map((product : EmporixProduct) => mapper.mapToService(product)),
             page: paginated.page,
             pageSize: paginated.size,
             total: paginated.total,

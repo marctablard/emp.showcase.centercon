@@ -1,8 +1,8 @@
-import { StoredToken } from "../../types/auth";
-import { AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from "../OAuthApi";
-import { checkTokenValidity } from "./util/common";
-import apis from "../..";
-import { OAuthApi } from "../OAuthApi";
+import { StoredToken } from "@platform/integrations/types/auth";
+import type { AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from "../../oauth/OAuthApi";
+import { checkTokenValidity } from "../util/common";
+import apis from "@platform/integrations/";
+import { OAuthApi } from "../../oauth/OAuthApi";
 import { TokenManager } from "../TokenManager";
 
 export interface TokenStore {

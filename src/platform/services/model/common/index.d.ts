@@ -54,7 +54,5 @@ export interface Media {
 }
 
 export interface LocalizedString {
-  de: string;
-  en: string;
-  dk: string;
+  [key: string]: string;
 }

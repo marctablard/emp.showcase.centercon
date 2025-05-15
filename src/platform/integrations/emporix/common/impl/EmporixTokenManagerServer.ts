@@ -1,6 +1,6 @@
-import type { AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from '../OAuthApi';
+import type { AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from '../../oauth/OAuthApi';
 import { cookies } from 'next/headers';
-import { StoredToken } from '../../types/auth';
+import { StoredToken } from '@/platform/integrations/types/auth';
 import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 import { injectable } from '@/platform/core/di/injectable';

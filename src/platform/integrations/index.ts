@@ -25,24 +25,24 @@ const provider = {
       if (typeof window === 'undefined') {
         // Server-side modules
         modules.push(
-          await import('./emporix/impl/EmporixTokenManagerServer'),
-      await import('./emporix/config/impl/EmporixConfigServer'),
+          await import('./emporix/config/impl/EmporixConfigServer'),
+      await import('./emporix/common/impl/EmporixTokenManagerServer'),
 
         );
       } else {
         // Client-side modules
         modules.push(
-          await import('./emporix/impl/EmporixTokenManagerClient'),
-      await import('./emporix/config/impl/EmporixConfigClient'),
+          await import('./emporix/config/impl/EmporixConfigClient'),
+      await import('./emporix/common/impl/EmporixTokenManagerClient'),
 
         );
       }
 
       // Add common modules for both client and server
       modules.push(
-        await import('./emporix/impl/EmporixProductApi'),
-    await import('./emporix/impl/EmporixOAuthApi'),
-    await import('./emporix/impl/EmporixApiInvoker'),
+        await import('./emporix/product/impl/EmporixProductApi'),
+    await import('./emporix/oauth/impl/EmporixOAuthApi'),
+    await import('./emporix/common/impl/EmporixApiInvoker'),
 
       );
 

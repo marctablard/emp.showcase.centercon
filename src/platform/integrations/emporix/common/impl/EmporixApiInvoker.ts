@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
-import type { EmporixConfig } from '../config';
+import type { EmporixConfig } from '../../config';
 import { TokenManager } from '../TokenManager'
-import apis from '../..';
+import apis from '../../..';
 import { injectable } from '@/platform/core/di/injectable';
 
 /**
