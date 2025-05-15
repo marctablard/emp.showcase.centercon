@@ -2,5 +2,14 @@
     "hello": {
         "world": "Hello World",
         "friend": "Hey Friend"
+    },
+    "product": {
+        "addToCart": "Add to cart",
+        "noImage": "No image available",
+        "noDescription": "No description available.",
+        "productId": "Product ID"
+    },
+    "header": {
+        "featuredProduct": "Featured Product"
     }
 }

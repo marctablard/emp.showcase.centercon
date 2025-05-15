@@ -2,5 +2,14 @@
     "hello": {
         "world": "Hallo Welt",
         "friend": "Hey Kumpel"
+    },
+    "product": {
+        "addToCart": "In den Warenkorb",
+        "noImage": "Kein Bild verfügbar",
+        "noDescription": "Keine Beschreibung verfügbar.",
+        "productId": "Produkt-ID"
+    },
+    "header": {
+        "featuredProduct": "Ausgewähltes Produkt"
     }
 }
