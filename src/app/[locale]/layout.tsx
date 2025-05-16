@@ -4,7 +4,8 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {ReactNode} from 'react';
 import {routing} from '@/i18n/routing';
 import '../globals.css';
-import Header from '@/components/Header';
+import Header from '@/components/header';
+
 
 type Props = {
   children: ReactNode;
@@ -35,15 +36,16 @@ export default async function LocaleLayout({children, params}: Props) {
   // Enable static rendering
   setRequestLocale(locale);
 
+  // Get all signals registered during this request
   return (
     <html className="h-full" lang={locale}>
       <body className="flex h-full flex-col">
-      <NextIntlClientProvider locale={locale}>
-        <Header />
-        <main className="flex-grow">
-            {children}
-        </main>
-      </NextIntlClientProvider>
+          <NextIntlClientProvider locale={locale}>
+            <Header />
+            <main className="flex-grow">
+              {children}
+            </main>
+          </NextIntlClientProvider>
       </body>
     </html>
   );
