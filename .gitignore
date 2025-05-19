@@ -74,3 +74,7 @@ next-env.d.ts
 
 # data
 /src/server-data/**/*
+
+# Generated Integration-Files
+/src/platform/integration/index.ts
+/src/platform/services/index.ts
