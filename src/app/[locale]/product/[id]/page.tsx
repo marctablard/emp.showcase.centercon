@@ -1,13 +1,22 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { ProductCarousel } from '@/components/product/product-carousel';
+import { ProductPriceComponent } from '@/components/product/product-price';
+import { ProductTabsComponent } from '@/components/product/product-tabs';
+import { Product } from '@/platform/services/model/product';
 
-interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  images?: string[];
-}
+const priceTiers = [
+  { quantity: 1, price: 110.45 },
+  { quantity: 5, price: 95.45 },
+  { quantity: 10, price: 85.45 },
+  { quantity: 20, price: 82.45 },
+  { quantity: 50, price: 79.45 },
+];
 
 // This enables Server Side Rendering
 async function getProduct(id: string): Promise<Product | null> {
@@ -55,58 +64,127 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">
-        {/* Product Image */}
-        <div className="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden">
-          {product.images && product.images.length > 0 ? (
-            <div className="relative h-96 w-full">
-              <Image
-                src={product.images[0]}
-                alt={product.name}
-                fill
-                className="object-cover object-center"
-              />
-            </div>
-          ) : (
-            <div className="bg-gray-200 h-96 flex items-center justify-center">
-              <span className="text-gray-500">{t('noImage')}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Product Details */}
-        <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">{product.name}</h1>
-          
-          {/* Price information removed as requested */}
-
-          <div className="mt-6">
-            <h3 className="sr-only">Description</h3>
-            <div className="text-base text-gray-700 space-y-6">
-              {product.description ? (
-                <p>{product.description}</p>
+      <Card className="overflow-hidden border-0 shadow-none mb-8">
+        <CardContent className="p-0">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">
+            {/* Product Image Carousel */}
+            <div className="overflow-hidden">
+              {product.images && product.images.length > 0 ? (
+                <ProductCarousel images={[product.images[0]]} />
               ) : (
-                <p>{t('noDescription')}</p>
+            <div className="bg-gray-200 h-96 flex items-center justify-center">
+                  <span className="text-gray-500">{t('noImage')}</span>
+                </div>
               )}
             </div>
-          </div>
 
-          <div className="mt-8">
-            <button
-              type="button"
-              className="w-full bg-blue-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              {t('addToCart')}
-            </button>
-          </div>
+            {/* Product Details */}
+            <div className="p-8">
+              <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">
+                In Stock
+              </Badge>
+              <h1 className="text-4xl font-bold tracking-tight text-gray-900">{product.name}</h1>
+              
+              <ProductPriceComponent price={110.45} tiers={priceTiers} />
 
-          <div className="mt-6">
-            <div className="text-sm text-gray-500">
-              <p>{t('productId')}: {product.id}</p>
+              <div className="mt-6">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <Button 
+                      variant="outline" 
+                      className="h-9 w-9 p-0 flex items-center justify-center rounded-l-md rounded-r-none"
+                    >
+                      -
+                    </Button>
+                    <Input 
+                      type="text" 
+                      value="5" 
+                      className="w-12 h-9 text-center rounded-none border-x-0" 
+                      readOnly
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="h-9 w-9 p-0 flex items-center justify-center rounded-r-md rounded-l-none"
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex space-x-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                >
+                  Add to Cart
+                </Button>
+                <Button 
+                  className="flex-1"
+                >
+                  Buy Now
+                </Button>
+              </div>
+
+              <div className="mt-6">
+                <div className="text-sm text-gray-500">
+                  <p>SKU: {product.id }</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+      
+      {/* Frequently Bought Together - Moved outside the main card */}
+      {/*
+      <Card className="border-0 shadow-none">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-medium mb-4">Frequently bought together</h3>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative h-24 w-24 border rounded-md overflow-hidden">
+              <Image 
+                src={product.images?.[0] || '/placeholder.jpg'} 
+                alt="Single Solar" 
+                fill 
+                className="object-cover"
+              />
+            </div>
+            <div className="text-xl">+</div>
+            <div className="relative h-24 w-36 border rounded-md overflow-hidden">
+              <Image 
+                src={product.images?.[0] || '/placeholder.jpg'} 
+                alt="Twin Solar" 
+                fill 
+                className="object-cover"
+              />
+            </div>
+            <div className="text-xl">+</div>
+            <div className="relative h-24 w-36 border rounded-md overflow-hidden">
+              <Image 
+                src="/cable.jpg" 
+                alt="5m Connector" 
+                fill 
+                className="object-cover"
+              />
+            </div>
+            <div className="ml-auto">
+              <div className="text-right">
+                <div className="text-red-500 line-through text-sm">$456.76</div>
+                <div className="text-lg font-medium">$345.75</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="text-sm text-gray-700">
+              <span className="font-medium">Single Solar, Twin Solar, 5m Connector</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      */}
+      {/* Product Tabs */}
+      <ProductTabsComponent product={product} />
     </div>
   );
 }

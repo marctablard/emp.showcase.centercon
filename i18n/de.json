@@ -7,7 +7,13 @@
         "addToCart": "In den Warenkorb",
         "noImage": "Kein Bild verfügbar",
         "noDescription": "Keine Beschreibung verfügbar.",
-        "productId": "Produkt-ID"
+        "productId": "Produkt-ID",
+        "tabs": {
+            "description": "Beschreibung",
+            "specs": "Spezifikationen",
+            "downloads": "Downloads",
+            "reviews": "Bewertungen"
+        }
     },
     "header": {
         "featuredProduct": "Ausgewähltes Produkt"

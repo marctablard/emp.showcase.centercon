@@ -7,7 +7,13 @@
         "addToCart": "Add to cart",
         "noImage": "No image available",
         "noDescription": "No description available.",
-        "productId": "Product ID"
+        "productId": "Product ID",
+        "tabs": {
+            "description": "Description",
+            "specs": "Specs",
+            "downloads": "Downloads",
+            "reviews": "Reviews"
+        }
     },
     "header": {
         "featuredProduct": "Featured Product"
