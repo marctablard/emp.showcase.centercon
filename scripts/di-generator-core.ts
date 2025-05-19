@@ -146,7 +146,13 @@ async function scanForInjectables(directory?: string): Promise<InjectableInfo[]>
   // Process each file
   for (const file of files) {
     // Skip declaration files and test files
-    if (file.endsWith('.d.ts') || file.includes('.test.') || file.includes('.spec.')) {
+    if (file.endsWith('.d.ts') || 
+        file.includes('.test.') || 
+        file.includes('.spec.') || 
+        file.includes('/__tests__/') || 
+        file.includes('/tests/') || 
+        /\btest(s)?\b/i.test(file)) {
+      if (DEBUG) console.debug(`Skipping test file: ${file}`);
       continue;
     }
     

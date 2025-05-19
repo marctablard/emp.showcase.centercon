@@ -78,3 +78,9 @@ next-env.d.ts
 # Generated Integration-Files
 /src/platform/integrations/index.ts
 /src/platform/services/index.ts
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

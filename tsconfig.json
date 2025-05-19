@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "types": ["reflect-metadata"], // Required for InversifyJS
+    "types": ["reflect-metadata", "jest"], // Required for InversifyJS
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,

@@ -75,6 +75,11 @@ Detailed documentation is available in the `/docs` directory:
 - Guidelines for implementing each layer
 - Best practices for cross-layer communication
 
+### [Testing](/docs/testing-strategy.md)
+- Overview of testing setup and available scripts
+- Instructions for running tests
+- Details on test coverage and reporting
+
 ## Project Structure
 
 ```

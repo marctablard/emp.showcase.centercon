@@ -43,13 +43,19 @@ class EmporixProductApi implements ProductApi {
     return buildPaginatedResponse(params, response);
   }
 
-  async getProduct(id: string): Promise<Product> {
+  async getProduct(id: string): Promise<Product | undefined> {
     const response = await this.apiClient.authenticatedFetch(
       `/product/${this.config.tenant}/products/${id}`,
       { method: 'GET' }
     );
+    if (!response.ok) {
+      if (response.status == 404) {
+        return undefined;
+      } else {
+        throw new Error(`Failed to get product: ${response.statusText}`);
+      }
+    }
     return await response.json();
   }
 }
-
 export default EmporixProductApi;

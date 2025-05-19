@@ -1,7 +1,6 @@
 import { inject } from 'inversify';
 import type { EmporixConfig } from '../../config';
-import { TokenManager } from '../TokenManager'
-import apis from '../../..';
+import type { TokenManager } from '../TokenManager'
 import { injectable } from '@/platform/core/di/injectable';
 
 /**
@@ -11,11 +10,14 @@ import { injectable } from '@/platform/core/di/injectable';
 @injectable('EmporixApiInvoker', 'Singleton')
 class EmporixApiInvoker {
   private config: EmporixConfig;
+  private tokenManager: TokenManager;
 
   constructor(
-    @inject('EmporixConfig') config: EmporixConfig
+    @inject('EmporixConfig') config: EmporixConfig,
+    @inject('EmporixTokenManager') tokenManager: TokenManager
   ) {
     this.config = config;
+    this.tokenManager = tokenManager;
   }
 
   /**
@@ -23,8 +25,7 @@ class EmporixApiInvoker {
    * @returns Promise with the token string
    */
   async getAnonymousToken(): Promise<string> {
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    return tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
+    return this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
   }
 
   /**
@@ -33,8 +34,7 @@ class EmporixApiInvoker {
    * @returns Promise with access token and SaaS token
    */
   async getCustomerToken(username: string, password: string): Promise<{accessToken: string, saasToken: string}> {
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    return tokenManager.getCustomerToken(this.config.tenant, this.config.clientId, username, password);
+    return this.tokenManager.getCustomerToken(this.config.tenant, this.config.clientId, username, password);
   }
 
   /**
@@ -50,8 +50,7 @@ class EmporixApiInvoker {
       throw new Error('Client ID and Client Secret are required for service access token');
     }
 
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    return tokenManager.getServiceAccessToken(this.config.tenant, cid, secret);
+    return this.tokenManager.getServiceAccessToken(this.config.tenant, cid, secret);
   }
 
   /**
@@ -109,11 +108,10 @@ class EmporixApiInvoker {
   }
 
   /**
- * Clear all stored tokens
- */
-async clearTokens(): Promise<void> {
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    tokenManager.clearTokens();
+   * Clear all stored tokens
+   */
+  async clearTokens(): Promise<void> {
+    this.tokenManager.clearTokens();
   }
 }
 export default EmporixApiInvoker;

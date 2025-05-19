@@ -10,7 +10,18 @@ let nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-  }
+  },
+  
+  reactStrictMode: true,
+  webpack: (config, { dev, isServer }) => {
+    // Exclude test files from being compiled by Next.js
+    config.module.rules.push({
+      test: /\.test\.(js|jsx|ts|tsx)$/,
+      use: 'ignore-loader',
+    });
+
+    return config;
+  },
 };
  
 // add i18n Logic to Next-Configuration
