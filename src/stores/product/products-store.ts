@@ -44,14 +44,22 @@ export const createProductStore = (
         }
         return { currentProductId: null }
     }),
-    addProduct: (product: Product) => set((state) => ({ products: { ...state.products, [product.id]: product } })),
+    addProduct: (product: Product) => set((state) => {
+      if (product) {
+        state.products = {
+          ...state.products, 
+          [product.id]: product  
+        }
+      }
+      return state;
+    }),
     getCurrentProduct: () => {
         const state = get();
         return state.currentProductId ? state.products[state.currentProductId] : null
     },
     getProduct: (id : string) => {
         const state = get();
-        return state.products[id]
+        return state.products[id] || null
     }
   }))
 }

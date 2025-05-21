@@ -19,19 +19,21 @@ export const useProduct = (id?: string): UseProductResult => {
   const [error, setError] = useState<Error | null>(null);
   const [product, setProduct] = useState<Product | null>(id ? getProduct(id) : null);
 
-  const fetchProduct = useCallback(async () => {
+  const fetchProduct = useCallback(async (forceRefresh = false) => {
     if (!id) return;
     
     try {
       setLoading(true);
       setError(null);
       
-      // Check if product exists in store first
-      const cachedProduct = getProduct(id);
-      if (cachedProduct) {
-        setProduct(cachedProduct);
-        setLoading(false);
-        return;
+      // Check if product exists in store first (unless forceRefresh is true)
+      if (!forceRefresh) {
+        const cachedProduct = getProduct(id);
+        if (cachedProduct) {
+          setProduct(cachedProduct);
+          setLoading(false);
+          return;
+        }
       }
       
       // Fetch from API if not in store using our shared API layer
@@ -47,6 +49,8 @@ export const useProduct = (id?: string): UseProductResult => {
       setLoading(false);
     }
   }, [id, getProduct, addProduct]);
+
+  const refetch = () => fetchProduct(true);
 
   const setAsCurrent = useCallback(() => {
     if (product) {
@@ -64,7 +68,7 @@ export const useProduct = (id?: string): UseProductResult => {
     product,
     loading,
     error,
-    refetch: fetchProduct,
+    refetch,
     setAsCurrent
   };
 };

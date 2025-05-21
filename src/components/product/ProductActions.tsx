@@ -12,7 +12,6 @@ export default function ProductActions({id}: {id: string}) {
   const { product, loading, error } = useProduct(id);
   const [quantity, setQuantity] = useState(1);
 
-  // If product is not available yet, show loading
   if (loading) {
     return (
       <div className="flex items-center justify-center p-6 space-x-2">
@@ -22,7 +21,6 @@ export default function ProductActions({id}: {id: string}) {
     );
   }
   
-  // If there's an error, show error message
   if (error) {
     return (
       <div className="p-4 border border-destructive/20 rounded-md bg-destructive/10 text-destructive">
@@ -31,7 +29,6 @@ export default function ProductActions({id}: {id: string}) {
     );
   }
   
-  // If no product, show not found
   if (!product) {
     return (
       <div className="p-4 border rounded-md bg-muted/50 text-muted-foreground">
@@ -41,7 +38,7 @@ export default function ProductActions({id}: {id: string}) {
   }
   
   const handleAddToCart = () => {
-    // Here you would implement your cart logic
+    // TODO include Cart-Logic
     alert(`Added ${quantity} of ${product.name} to cart!`);
   };
 

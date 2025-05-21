@@ -1,5 +1,3 @@
-import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
@@ -9,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ProductCarousel } from '@/components/product/product-carousel';
 import { ProductPriceComponent } from '@/components/product/product-price';
 import { ProductTabsComponent } from '@/components/product/product-tabs';
-import { Product } from '@/platform/services/model/product';
+import { fetchProductById } from '@/lib/api/products';
 
 const priceTiers = [
   { quantity: 1, price: 110.45 },
@@ -18,28 +16,6 @@ const priceTiers = [
   { quantity: 20, price: 82.45 },
   { quantity: 50, price: 79.45 },
 ];
-
-// This enables Server Side Rendering
-async function getProduct(id: string): Promise<Product | null> {
-  try {
-    // Use server-side fetch for SSR
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/products/${id}`, {
-      cache: 'no-store' // Disable caching to always get fresh data
-    });
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error(`Failed to fetch product: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    throw error;
-  }
-}
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
   const productId = (await params).id;

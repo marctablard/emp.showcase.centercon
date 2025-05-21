@@ -4,9 +4,9 @@
  */
 
 import { Product } from "@/platform/services/model/product";
+import { headers } from "next/headers";
 import { cache } from "react";
 
-const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000';
 
 /**
  * Fetch a product by ID
@@ -14,7 +14,9 @@ const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000';
  */
 export const fetchProductById = cache(async (id: string): Promise<Product> => {
   try {
-    const response = await fetch(`${baseUrl}/api/products/${id}`, {
+    const clientHeaders = await headers();
+    const host = clientHeaders.get('host') || 'localhost:3000'; 
+    const response = await fetch(`http://${host}/api/products/${id}`, {
       // This makes the request work in both client and server environments
       cache: 'no-store',
       next: { tags: [`product-${id}`] }
