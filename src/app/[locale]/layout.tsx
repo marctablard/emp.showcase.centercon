@@ -5,7 +5,7 @@ import {ReactNode} from 'react';
 import {routing} from '@/i18n/routing';
 import '../globals.css';
 import Header from '@/components/header';
-
+import {StoreProvider} from '@/providers/StoreProvider';
 
 type Props = {
   children: ReactNode;
@@ -32,20 +32,20 @@ export default async function LocaleLayout({children, params}: Props) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-
   // Enable static rendering
   setRequestLocale(locale);
-
-  // Get all signals registered during this request
   return (
     <html className="h-full" lang={locale}>
       <body className="flex h-full flex-col">
           <NextIntlClientProvider locale={locale}>
-            <Header />
-            <main className="flex-grow">
-              {children}
-            </main>
+            <StoreProvider>
+              <Header />
+              <main className="flex-grow">
+                {children}
+              </main>
+              </StoreProvider>
           </NextIntlClientProvider>
+          
       </body>
     </html>
   );

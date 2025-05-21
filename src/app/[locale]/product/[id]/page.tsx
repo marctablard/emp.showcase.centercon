@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
@@ -43,24 +44,16 @@ async function getProduct(id: string): Promise<Product | null> {
 export default async function ProductPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
   const productId = (await params).id;
   const locale = (await params).locale;
-  
   // Get translations for the current locale
   const t = await getTranslations({ locale, namespace: 'product' });
-  
-  // Fetch product data server-side
-  let product: Product | null;
-  try {
-    product = await getProduct(productId);
-  } catch (error) {
-    throw new Error(`Error loading product: ${error instanceof Error ? error.message : String(error)}`);
-  }
-  
+    
+  // Fetch product data server-side using our shared API layer
+  const product = await fetchProductById(productId);
+
   // If product not found, show 404 page
   if (!product) {
     notFound();
   }
-
-
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

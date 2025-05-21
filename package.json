@@ -22,11 +22,13 @@
   },
   "dependencies": {
     "@next/env": "^15.3.2",
+    "@preact/signals-react": "^3.0.1",
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-tabs": "^1.1.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
+    "immer": "^10.1.1",
     "inversify": "^7.5.1",
     "lucide-react": "^0.510.0",
     "next": "15.3.2",
@@ -37,7 +39,8 @@
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "reflect-metadata": "^0.2.2",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.0",
+    "zustand": "^5.0.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,0 +1,70 @@
+'use client'
+
+import { useProductStore } from '@/providers/StoreProvider';
+import { Product } from '@/platform/services/model/product';
+import { useCallback, useEffect, useState } from 'react';
+import { fetchProductById } from '@/lib/api/products';
+
+interface UseProductResult {
+  product: Product | null;
+  loading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+  setAsCurrent: () => void;
+}
+
+export const useProduct = (id?: string): UseProductResult => {
+  const { getProduct, setCurrentProduct, addProduct } = useProductStore();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [product, setProduct] = useState<Product | null>(id ? getProduct(id) : null);
+
+  const fetchProduct = useCallback(async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Check if product exists in store first
+      const cachedProduct = getProduct(id);
+      if (cachedProduct) {
+        setProduct(cachedProduct);
+        setLoading(false);
+        return;
+      }
+      
+      // Fetch from API if not in store using our shared API layer
+      const data = await fetchProductById(id);
+      
+      // Add to store
+      addProduct(data);
+      setProduct(data);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+      console.error('Error fetching product:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id, getProduct, addProduct]);
+
+  const setAsCurrent = useCallback(() => {
+    if (product) {
+      setCurrentProduct(product);
+    }
+  }, [product, setCurrentProduct]);
+
+  useEffect(() => {
+    if (id) {
+      fetchProduct();
+    }
+  }, [id, fetchProduct]);
+
+  return {
+    product,
+    loading,
+    error,
+    refetch: fetchProduct,
+    setAsCurrent
+  };
+};
