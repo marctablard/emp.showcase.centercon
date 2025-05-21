@@ -38,15 +38,19 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">
             {/* Product Image Carousel */}
             <div className="overflow-hidden">
+               {/*
               {product.images && product.images.length > 0 ? (
-                <ProductCarousel images={[product.images[0]]} />
+               
+                  <ProductCarousel images={product.images} />
               ) : (
-            <div className="bg-gray-200 h-96 flex items-center justify-center">
+                <div className="bg-gray-200 h-96 flex items-center justify-center">
                   <span className="text-gray-500">{t('noImage')}</span>
                 </div>
-              )}
+              )
+                */}
+            
             </div>
-
+            
             {/* Product Details */}
             <div className="p-8">
               <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">
