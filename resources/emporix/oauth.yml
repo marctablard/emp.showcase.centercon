@@ -1,0 +1,467 @@
+openapi: 3.0.1
+info:
+  title: OAuth Service
+  description: |+
+    The OAuth Service allows you to generate the following token types:
+
+    | Token type | Description |
+    | --- | --- |
+    | Anonymous token | Used by the storefront to access public resources with a reading scope. It allows customers to browse products, view prices or add products to cart. <br><br> The anonymous token is not associated with any customer. |
+    | SaaS (customer) token | A JSON Web Token (JWT) which contains encrypted customer data. <br><br>The SaaS token works similarly to the anonymous token, but it is associated with a specific customer. |
+    | Service access token | Needed to access the Emporix services such as adding new products, managing categories or modifying prices.|
+
+  contact: {}
+  version: ''
+servers:
+  - url: https://api.emporix.io
+paths:
+  /customer/{tenant}/login:
+    post:
+      tags:
+        - Customer Token
+      summary: Requesting a customer token
+      description: |
+        Logs in a customer and sends an authentication request. Returns two customer tokens: 
+            * Customer access token.
+            * Customer SaaS token.
+      operationId: POST-oauth-authorize-customer
+      parameters:
+        - name: tenant
+          in: path
+          description: |
+            Name of the tenant.
+
+            **Note**: Name of the tenant is always written in lowercase.
+          required: true
+          schema:
+            type: string
+          example: '{tenant}'
+        - name: Authorization
+          in: header
+          description: Anonymous customer's access token.
+          required: true
+          schema:
+            type: string
+          example: Bearer {anonymous_access_token}
+        - name: Content-Type
+          in: header
+          required: true
+          content:
+            application/json:
+              schema:
+                type: string
+                example: application/json
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              Payload example:
+                value:
+                  email: customer@emporix.com
+                  password: Qwurmdch673;'
+      responses:
+        '200':
+          description: The request was successful. A customer token is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginAccessToken'
+              examples:
+                Response example:
+                  value:
+                    accessToken: CZXFASGEG@!@$!24fasASDF
+                    saasToken: eyJhbGciOiJIUzI1NiJ9.eyJzdWIAFAFGVZE!@£$FSDVZERTNX0.BK1_F8aRMnnNN6y2Q6TVa4x_Knj3-Qojy4QsPNkHcz8
+                    expiresIn: 14399
+                    refreshToken: QBeG0XJfRqElE67U4tHJAQWrtfas1VR5eg
+                    refreshTokenExpiresIn: 86399
+      servers:
+        - url: https://api.emporix.io
+          description: Production
+  /customer/{tenant}/refreshauthtoken:
+    get:
+      tags:
+        - Customer Token
+      summary: Refreshing a token
+      description: Sends an authentication request and returns a refresh token.
+      operationId: GET-oauth-refresh-token
+      parameters:
+        - name: tenant
+          in: path
+          description: |
+            Name of the tenant.
+
+            **Note**: Name of the tenant is always written in lowercase.
+          required: true
+          schema:
+            type: string
+          example: '{tenant}'
+        - name: Authorization
+          in: header
+          description: Customer's access token generated when the customer token is created.
+          required: true
+          schema:
+            type: string
+          example: Bearer {customer_access_token}
+        - name: refreshToken
+          in: query
+          description: Customer's refresh token generated when the customer token is created.
+          required: true
+          schema:
+            type: string
+            example: '{customer_refresh_token}'
+        - name: legalEntityId
+          in: query
+          description: Identifier of the legal entity associated with the user session.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request was successful. A refresh token is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoggedCustomerRefreshToken'
+              examples:
+                Response example:
+                  value:
+                    token_type: Bearer
+                    access_token: 5UvjlVEsU6G1NTuitcfkNBlAzUn8
+                    expires_in: 1799
+                    refresh_token_expires_in: 86326
+                    refresh_token: xIMsJmuyyltCWYD7uftonNeBtSAQMldH
+                    scope: tenant={tenant}
+      servers:
+        - url: https://api.emporix.io
+          description: Production
+  /customer/{tenant}/validateauthtoken:
+    get:
+      tags:
+        - Customer Token
+      summary: Validate a token
+      description: Checks whether a token is valid. If the token is invalid, it returns a 401 status code. If the token is valid, it provides the token details.
+      operationId: GET-oauth-validate-token
+      parameters:
+        - name: tenant
+          in: path
+          description: |
+            Name of the tenant.
+
+            **Note**: Name of the tenant is always written in lowercase.
+          required: true
+          schema:
+            type: string
+          example: '{tenant}'
+        - name: Authorization
+          in: header
+          description: Customer's access token generated upon the customer token creation.
+          required: true
+          schema:
+            type: string
+          example: Bearer {customer_access_token}
+      responses:
+        '200':
+          description: The request was successful. A token details are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateTokenResponse'
+              examples:
+                Validation response:
+                  value:
+                    token_type: Bearer
+                    expires_in: 2591974
+                    scope: approval.approval_read_own customermanagement.legalentity_read_own customer.customer_read_own quote.quote_read_own returns.returns_read_own iam.scope_read_own iam.user_read_own customersegment.segment_read_own iam.group_read_own order.order_readascustomer coupon.coupon_redeem customer.customerprofile_edit quote.quote_manage_own returns.returns_manage_own customer.customer_manage_own approval.approval_manage_own order.order_updateascustomer iam.assignment_delete_own customer.consent_view customer.customerprofile_view order.history_view iam.assignment_create_own customer.consent_manage tenant=test
+                    sessionId: 415c340b-5996-4112-bb3b-38139a409f93
+        '401':
+          description: Unauthorized
+      servers:
+        - url: https://api.emporix.io
+          description: Production
+  /customerlogin/auth/anonymous/login:
+    get:
+      tags:
+        - Anonymous Token
+      summary: Requesting an anonymous token
+      description: |
+        Sends an authentication request and returns an anonymous token. This operation causes creation of a new session-context document.
+
+        Anonymous token is valid for one hour. After that time it should be refreshed in order to keep the same session ID associated.
+      operationId: GET-oauth-generate-anonymous-access-token
+      parameters:
+        - name: tenant
+          in: query
+          description: |
+            Name of the tenant.
+
+            **Note**: Name of the tenant is always written in lowercase.
+          required: true
+          schema:
+            type: string
+            example: '{tenant}'
+        - name: client_id
+          in: query
+          description: Your Emporix API key - client ID.
+          required: true
+          schema:
+            type: string
+            example: '{client_id}'
+      responses:
+        '200':
+          description: The request was successful. An anonymous token is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonymousAccessToken'
+              examples:
+                Response example:
+                  value:
+                    token_type: Bearer
+                    access_token: tpYgJPZqddEQ2zwfzNtx79noBP65
+                    expires_in: 3599
+                    refresh_token: 7FnviYrxvQWYdzUVBVTvXeNAA4Jy1HPe
+                    refresh_token_expires_in: 86399
+                    sessionId: 6d4d4d5e-04b9-40c5-9074-4df1405c6081
+                    scope: tenant={tenant}
+      servers:
+        - url: https://api.emporix.io
+          description: Production
+  /customerlogin/auth/anonymous/refresh:
+    get:
+      tags:
+        - Anonymous Token
+      summary: Refreshing an anonymous token
+      description: |
+        Sends an authentication request and returns new anonymous token with same session ID attached.
+
+        This operation causes update of a session-context document with given session ID.
+
+        Anonymous token is valid for one hour. After that time, another refresh anonymous token request should be sent.
+      operationId: GET-oauth-refresh-anonymous-access-token
+      parameters:
+        - name: tenant
+          in: query
+          description: |
+            Name of the tenant.
+
+            **Note**: Name of the tenant is always written in lowercase.
+          required: true
+          schema:
+            type: string
+            example: '{tenant}'
+        - name: anonymous_token
+          in: query
+          description: 'NOTE: It''s recommended to use `refresh_token` parameter instead. <br>Anonymous token that needs to be refreshed so that the same session ID will be kept. Provide the value of the `access_token` you get in response to requesting a token request.'
+          required: true
+          deprecated: true
+          schema:
+            type: string
+            example: '{GOToGKaEKFyR8DokPBwHH0Y3AKCo}'
+        - name: refresh_token
+          in: query
+          description: A refresh token generated when the anonymous token is created.
+          required: true
+          schema:
+            type: string
+            example: '{7FnviYrxvQWYdzUVBVTvXeNAA4Jy1HPe}'
+        - name: client_id
+          in: query
+          description: Your Emporix API key - client ID.
+          required: true
+          schema:
+            type: string
+            example: '{client_id}'
+      responses:
+        '200':
+          description: The request was successful. An anonymous token is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonymousAccessToken'
+              examples:
+                Response example - Anonymous Token:
+                  value:
+                    token_type: Bearer
+                    access_token: tpYgJPZqddEQ2zwfzNtx79noBP65
+                    expires_in: 3599
+                    refresh_token: 7FnviYrxvQWYdzUVBVTvXeNAA4Jy1HPe
+                    refresh_token_expires_in: 86399
+                    sessionId: 6d4d4d5e-04b9-40c5-9074-4df1405c6081
+                    scope: tenant={tenant}
+                Response example - Refresh Token (deprecated):
+                  value:
+                    token_type: Bearer
+                    access_token: Zq91ySuLxLIzQ0vd0QxiC7imAIHi
+                    expires_in: 3599
+                    sessionId: 5b7ae416-5d88-4dd9-bbe9-6b262f45b4e8
+                    scope: tenant={tenant}
+      servers:
+        - url: https://api.emporix.io
+          description: Production
+  /oauth/token:
+    post:
+      tags:
+        - Service Access Token
+      summary: Requesting a service access token
+      description: |
+        Sends an authentication request and returns a service access token.
+
+        **Note**: We do not support refresh tokens for service access tokens. In case your service access token expires, you need to send a new authentication request.
+
+        Grant type parameter is always ```client_credentials```.
+      operationId: POST-oauth-request-client-credentials
+      parameters:
+        - name: Content-Type
+          in: header
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: string
+                example: application/x-www-form-urlencoded
+      requestBody:
+        description: ''
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AccessTokenRequest'
+            examples:
+              Payload example:
+                value:
+                  client_id: '{client_id}'
+                  client_secret: '{client_secret}'
+                  grant_type: client_credentials
+                  scope: tenant={tenant} ...
+      responses:
+        '200':
+          description: The request was successful. A service access token is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+              examples:
+                Response example:
+                  value:
+                    refresh_token_expires_in: 0
+                    refresh_token: ''
+                    session_idle_time: 120
+                    token_type: Bearer
+                    access_token: vkFuQ6oTwj8_Ye4eiRSsqMeqLYNeQRJi
+                    expires_in: 14399
+                    scope: tenant={tenant} ...
+      servers:
+        - url: https://api.emporix.io
+          description: Production
+components:
+  schemas:
+    AccessToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
+        session_idle_time:
+          type: integer
+          format: int32
+        refresh_token:
+          type: string
+        refresh_token_expires_in:
+          type: integer
+          format: int32
+        scope:
+          type: string
+    AccessTokenRequest:
+      type: object
+      properties:
+        grant_type:
+          type: string
+        client_id:
+          type: string
+        client_secret:
+          type: string
+        scope:
+          type: string
+    AnonymousAccessToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
+        sessionId:
+          type: string
+        scope:
+          type: string
+    LoggedCustomerRefreshToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
+        refresh_token:
+          type: string
+        refresh_token_expires_in:
+          type: integer
+          format: int32
+        scope:
+          type: string
+    ValidateTokenResponse:
+      type: object
+      x-stoplight:
+        id: rjgbt7z8oqzgq
+      properties:
+        token_type:
+          type: string
+          description: Type of the token. Usually it's `Bearer`.
+        expires_in:
+          type: integer
+          format: int32
+          description: Specifies the token's expiration time, represented in seconds.
+        scope:
+          type: string
+          description: A list of scopes assigned to the user.
+        sessionId:
+          type: string
+          x-stoplight:
+            id: g9aiqlhvwrw1k
+          description: Identifier of the user session.
+    LoginAccessToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        saasToken:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
+        refreshToken:
+          type: string
+        refreshTokenExpiresIn:
+          type: string
+    LoginRequest:
+      required:
+        - email
+        - password
+      type: object
+      properties:
+        email:
+          minLength: 1
+          type: string
+          format: email
+        password:
+          minLength: 6
+          type: string

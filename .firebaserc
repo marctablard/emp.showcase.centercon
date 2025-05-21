@@ -1,5 +1,7 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "emporix-showcase-2cf20"
+  },
   "targets": {
     "emporix-showcase-2cf20": {
       "hosting": {

@@ -1,0 +1,3173 @@
+openapi: 3.0.0
+info:
+  title: Delivery Service
+  contact:
+    name: Emporix
+    url: https://emporix.com
+    email: documentation@emporix.com
+  version: ''
+  description: The Delivery Service is deprecated as of 07/2023. For the newly created tenants, use the [Shipping Service](https://developer.emporix.io/docs/content/delivery-shipping/).
+servers:
+  - url: https://api.emporix.io/delivery
+security:
+  - OAuth2: []
+tags:
+  - name: Delivery Areas
+  - name: Delivery Times
+  - name: Area Delivery Times
+  - name: Delivery Window
+  - name: Actual Delivery Windows
+paths:
+  /deliveryAreas:
+    get:
+      tags:
+        - Delivery Areas
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              example:
+                - id: 1234567890abcdef123abc0
+                  postalcode: '70190'
+                  name: Stuttgart-Ost
+                - id: 1234567890abcdef123abc1
+                  postalcode: '70200'
+                  name: Stuttgart-Nord
+              schema:
+                $ref: '#/components/schemas/deliveryAreas'
+        '400':
+          $ref: '#/components/responses/trait_queryable_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets all delivery areas
+      operationId: GET_deliveryAreas
+      parameters:
+        - $ref: '#/components/parameters/trait_queryable_q'
+      security:
+        - OAuth2: []
+    post:
+      tags:
+        - Delivery Areas
+      responses:
+        '201':
+          description: |
+            The collection resource has been successfully created.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                postalcode: '70190'
+                name: Stuttgart-Ost
+              schema:
+                $ref: '#/components/schemas/deliveryArea'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '409':
+          description: |
+            Creation failed because there was a conflict with another resource. Any details will be provided within the response payload.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 409
+                  message: The requested resource could not be created due to server-side validation.
+                  type: conflict_resource
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Creates a new delivery area. The caller must have the `delivery.area_manage` scope assigned
+      operationId: POST_deliveryAreas
+      requestBody:
+        content:
+          application/json:
+            example:
+              postalcode: '70190'
+              name: Stuttgart-Ost
+            schema:
+              $ref: '#/components/schemas/deliveryArea'
+        required: false
+      parameters: []
+      security:
+        - OAuth2:
+            - delivery.area_manage
+  /deliveryAreas/{deliveryAreaId}:
+    get:
+      tags:
+        - Delivery Areas
+      responses:
+        '200':
+          description: deliveryArea successfully retrieved.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                postalcode: '70190'
+                name: Stuttgart-Ost
+              schema:
+                $ref: '#/components/schemas/deliveryArea'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets a delivery area
+      operationId: GET_deliveryAreas-deliveryAreaId
+      parameters: []
+      security:
+        - OAuth2: []
+    put:
+      tags:
+        - Delivery Areas
+      responses:
+        '200':
+          description: The collection resource has been successfully modified.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                postalcode: '70190'
+                name: Stuttgart-Ost
+              schema:
+                $ref: '#/components/schemas/deliveryArea'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '409':
+          description: |
+            Creation failed because there was a conflict with another resource. Any details will be provided within the response payload.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 409
+                  message: The requested resource could not be updated due to server-side validation.
+                  type: conflict_resource
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Updates a deliveryArea. The caller must have the `delivery.area_manage` scope assigned
+      operationId: PUT_deliveryAreas-deliveryAreaId
+      requestBody:
+        content:
+          application/json:
+            example:
+              postalcode: '70190'
+              name: Stuttgart-Ost
+            schema:
+              $ref: '#/components/schemas/deliveryArea'
+        required: false
+      parameters: []
+      security:
+        - OAuth2:
+            - delivery.area_manage
+    patch:
+      tags:
+        - Delivery Areas
+      responses:
+        '200':
+          description: The collection resource has been successfully modified.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                postalcode: '70190'
+                name: Stuttgart-Ost
+              schema:
+                $ref: '#/components/schemas/deliveryArea'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '409':
+          description: |
+            Creation failed because there was a conflict with another resource. Any details will be provided within the response payload.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 409
+                  message: The requested resource could not be updated due to server-side validation.
+                  type: conflict_resource
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Updates a deliveryArea
+      operationId: PATCH_deliveryAreas-deliveryAreaId
+      requestBody:
+        content:
+          application/merge-patch+json:
+            example:
+              postalcode: '70190'
+            schema:
+              $ref: '#/components/schemas/deliveryArea'
+        required: false
+      parameters: []
+      security:
+        - OAuth2: []
+    delete:
+      tags:
+        - Delivery Areas
+      responses:
+        '204':
+          description: |
+            The resource has been successfully deleted.
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Deletes a deliveryArea. The caller must have the `delivery.area_delete` scope assigned
+      operationId: DELETE_deliveryAreas-deliveryAreaId
+      parameters:
+        - $ref: '#/components/parameters/trait_authorization'
+      security:
+        - OAuth2:
+            - delivery.area_delete
+    parameters:
+      - name: deliveryAreaId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: the id of the delivery area to work on
+  /deliveryTimes:
+    get:
+      tags:
+        - Delivery Times
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              example:
+                - id: 1234567890abcdef123abc0
+                  name: Neues Jahr
+                  kind: DATE
+                  capacity: 20
+                  cutOffTime:
+                    id: 1234567890abcdef123abc1
+                    weekday: 4
+                    time: '2020-12-31T14:00:00.000+02:00'
+                    orderCycleName: silvester-cycle
+                  zoneId: 1234567890abcdef123abc2
+                  deliveryDate: '20210101'
+                  deliveryDayOfWeek: 5
+                  oneOf: DATE
+                  delivery: true
+                  active: true
+                  activeFrom: '2020-08-31T14:00:00.000+02:00'
+                  activeTo: '2022-08-31T14:00:00.000+02:00'
+                  areaIDs:
+                    - '70190'
+                    - '70123'
+                  deliveryTimeRange:
+                    startTime: '10:00'
+                    endTime: '15:00'
+                - id: 1234567890abcdef123abc1
+                  name: Montags
+                  kind: DAYOFWEEK
+                  deliveryDayOfWeek: '1'
+                  delivery: 'true'
+                  areaIDs:
+                    - '70190'
+                    - '70123'
+                  deliveryTimeRange:
+                    startTime: '12:00'
+                    endTime: '16:00'
+                - id: 1234567890abcdef123abc2
+                  name: Heiligabend
+                  kind: DATE
+                  deliveryDate: '20151224'
+                  delivery: 'false'
+              schema:
+                $ref: '#/components/schemas/deliveryTimes'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets all delivery times
+      operationId: GET_deliveryTimes
+      parameters: []
+      security:
+        - OAuth2: []
+    post:
+      tags:
+        - Delivery Times
+      responses:
+        '201':
+          description: |
+            The collection resource has been successfully created.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                name: Montags
+                kind: DAYOFWEEK
+                deliveryDayOfWeek: 1
+                delivery: true
+                areaIDs:
+                  - '001'
+                  - '002'
+                active: true
+                deliveryTimeRange:
+                  startTime: '12:00'
+                  endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/deliveryTime'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '409':
+          description: |
+            Creation failed because there was a conflict with another resource. Any details will be provided within the response payload.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 409
+                  message: The requested resource could not be created due to server-side validation.
+                  type: conflict_resource
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Creates a new delivery time. The caller must have the `delivery.time_manage` scope assigned
+      operationId: POST_deliveryTimes
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: Montags
+              kind: DAYOFWEEK
+              deliveryDayOfWeek: 0
+              delivery: true
+              areaIDs:
+                - '001'
+                - '002'
+              deliveryTimeRange:
+                startTime: '12:00'
+                endTime: '16:00'
+            schema:
+              $ref: '#/components/schemas/deliveryTime'
+        required: false
+      parameters: []
+      security:
+        - OAuth2:
+            - delivery.time_manage
+  /deliveryTimes/{deliveryTimeId}:
+    get:
+      tags:
+        - Delivery Times
+      responses:
+        '200':
+          description: deliveryTime successfully retrieved.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                name: Montags
+                kind: DAYOFWEEK
+                deliveryDayOfWeek: 1
+                delivery: true
+                areaIDs:
+                  - '001'
+                  - '002'
+                active: true
+                deliveryTimeRange:
+                  startTime: '12:00'
+                  endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/deliveryTime'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets a delivery time
+      operationId: GET_deliveryTimes-deliveryTimeId
+      parameters: []
+      security:
+        - OAuth2: []
+    put:
+      tags:
+        - Delivery Times
+      responses:
+        '200':
+          description: The collection resource has been successfully modified.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                name: Montags
+                kind: DAYOFWEEK
+                deliveryDayOfWeek: 1
+                delivery: true
+                areaIDs:
+                  - '001'
+                  - '002'
+                active: true
+                deliveryTimeRange:
+                  startTime: '12:00'
+                  endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/deliveryTime'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '409':
+          description: |
+            Creation failed because there was a conflict with another resource. Any details will be provided within the response payload.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 409
+                  message: The requested resource could not be updated due to server-side validation.
+                  type: conflict_resource
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Updates a deliveryTime. The caller must have the `delivery.time_manage` scope assigned
+      operationId: PUT_deliveryTimes-deliveryTimeId
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: Montags
+              kind: DAYOFWEEK
+              deliveryDayOfWeek: 0
+              delivery: true
+              areaIDs:
+                - '001'
+                - '002'
+              deliveryTimeRange:
+                startTime: '12:00'
+                endTime: '16:00'
+            schema:
+              $ref: '#/components/schemas/deliveryTime'
+        required: false
+      parameters: []
+      security:
+        - OAuth2:
+            - delivery.time_manage
+    patch:
+      tags:
+        - Delivery Times
+      responses:
+        '200':
+          description: The collection resource has been successfully modified.
+          content:
+            application/json:
+              example:
+                id: 1234567890abcdef123abc0
+                name: Montags
+                kind: DAYOFWEEK
+                deliveryDayOfWeek: 1
+                delivery: true
+                areaIDs:
+                  - '001'
+                  - '002'
+                active: true
+                deliveryTimeRange:
+                  startTime: '12:00'
+                  endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/deliveryTime'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '409':
+          description: |
+            Creation failed because there was a conflict with another resource. Any details will be provided within the response payload.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 409
+                  message: The requested resource could not be updated due to server-side validation.
+                  type: conflict_resource
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Updates a deliveryArea
+      operationId: PATCH_deliveryTimes-deliveryTimeId
+      requestBody:
+        content:
+          application/merge-patch+json:
+            example:
+              name: Montags
+              kind: DAYOFWEEK
+              areaIDs:
+                - '001'
+                - '002'
+            schema:
+              $ref: '#/components/schemas/deliveryTime'
+        required: false
+      parameters: []
+      security:
+        - OAuth2: []
+    delete:
+      tags:
+        - Delivery Times
+      responses:
+        '204':
+          description: |
+            The resource has been successfully deleted.
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          description: |
+            The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 404
+                  message: The requested URI does not map to a single element resource.
+                  type: element_resource_non_existing
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Deletes a deliveryTime. The caller must have the `delivery.time_delete` scope assigned
+      operationId: DELETE_deliveryTimes-deliveryTimeId
+      parameters: []
+      security:
+        - OAuth2:
+            - delivery.time_delete
+    parameters:
+      - name: deliveryTimeId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: the id of the delivery time to work on
+  /actualDeliveryWindows/{cartId}:
+    get:
+      tags:
+        - Actual Delivery Windows
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              example:
+                - id: 1234567890abcdef123abc0
+                  deliveryDate: '20150620'
+                  deliveryTimeRange:
+                    startTime: '15:00'
+                    endTime: '23:00'
+                - id: 1234567890abcdef123abc1
+                  deliveryDate: '20150624'
+                  deliveryTimeRange:
+                    startTime: '12:00'
+                    endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/AreaDeliveryTimes'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets all delivery times of a certain area
+      parameters: []
+      security:
+        - OAuth2: []
+      operationId: GET_actualDeliveryWindows-for-cart
+    parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: postalCode
+        in: query
+        required: false
+        schema:
+          type: string
+  /areaDeliveryTimes/{deliveryAreaId}:
+    get:
+      tags:
+        - Area Delivery Times
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              example:
+                - id: 1234567890abcdef123abc0
+                  deliveryDate: '20150620'
+                  deliveryTimeRange:
+                    startTime: '15:00'
+                    endTime: '23:00'
+                - id: 1234567890abcdef123abc1
+                  deliveryDate: '20150624'
+                  deliveryTimeRange:
+                    startTime: '12:00'
+                    endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/AreaDeliveryTimes'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets all delivery times of a certain area
+      parameters: []
+      security:
+        - OAuth2: []
+      operationId: GET_areaDeliveryTimes_for_area
+    parameters:
+      - name: deliveryAreaId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: siteCode
+        in: query
+        required: false
+        schema:
+          type: string
+  /areaDeliveryTimes/zones:
+    post:
+      tags:
+        - Area Delivery Times
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              example:
+                - id: 1234567890abcdef123abc0
+                  deliveryDate: '20150620'
+                  deliveryTimeRange:
+                    startTime: '15:00'
+                    endTime: '23:00'
+                - id: 1234567890abcdef123abc1
+                  deliveryDate: '20150624'
+                  deliveryTimeRange:
+                    startTime: '12:00'
+                    endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/AreaDeliveryTimes'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets all delivery times for the specified zones
+      summary: Getting all delivery times for the specified zones
+      operationId: POST_areaDeliveryTimes-zoneIds
+      requestBody:
+        content:
+          application/json:
+            example:
+              - 1234567890abcdef123abc2
+              - 1234567890abcdef9876543
+              - 1234567890ab7890ab3abc2
+            schema:
+              type: array
+              items:
+                type: string
+      security:
+        - OAuth2: []
+  /areaDeliveryTimes/zones/{zoneId}:
+    get:
+      tags:
+        - Area Delivery Times
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              example:
+                - id: 1234567890abcdef123abc0
+                  deliveryDate: '20150620'
+                  deliveryTimeRange:
+                    startTime: '15:00'
+                    endTime: '23:00'
+                - id: 1234567890abcdef123abc1
+                  deliveryDate: '20150624'
+                  deliveryTimeRange:
+                    startTime: '12:00'
+                    endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/AreaDeliveryTimes'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets all delivery times for a certain zone
+      summary: Getting all delivery times for a certain zone
+      operationId: GET_areaDeliveryTimes-zoneId
+      parameters:
+        - name: zoneId
+          in: path
+          required: true
+          schema:
+            type: string
+            description: zoneId of particular zone
+      security:
+        - OAuth2: []
+  /deliveryWindowValidation:
+    post:
+      responses:
+        '200':
+          description: Resource successfully validated.
+          content:
+            application/json:
+              example:
+                - 'true'
+        '400':
+          $ref: '#/components/responses/trait_deliveryDate_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Check capacity is not fully
+      requestBody:
+        content:
+          application/merge-patch+json:
+            example:
+              deliveryWindowId: '25'
+              deliveryDate: '2021-01-15T12:00:00.000Z'
+            schema:
+              $ref: '#/components/schemas/deliveryArea'
+      parameters: []
+      security:
+        - OAuth2: []
+      operationId: POST-deliverywindowvalidation
+      tags:
+        - Delivery Window
+  /areaDeliveryTimes/{deliveryAreaId}/{cartId}:
+    get:
+      tags:
+        - Area Delivery Times
+      responses:
+        '200':
+          description: Resource successfully retrieved.
+          content:
+            application/json:
+              example:
+                - id: 1234567890abcdef123abc0
+                  deliveryDate: '20150620'
+                  deliveryTimeRange:
+                    startTime: '15:00'
+                    endTime: '23:00'
+                - id: 1234567890abcdef123abc1
+                  deliveryDate: '20150624'
+                  deliveryTimeRange:
+                    startTime: '12:00'
+                    endTime: '16:00'
+              schema:
+                $ref: '#/components/schemas/AreaDeliveryTimes'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '500':
+          description: |
+            Some server side error occurred.
+          content:
+            application/json:
+              schema:
+                title: error
+                description: Schema for API specified errors.
+                example:
+                  status: 500
+                  message: Something went wrong while processing the request. Please contact the administrator.
+                  type: internal_service_error
+                type: object
+                properties:
+                  status:
+                    minimum: 100
+                    maximum: 599
+                    description: original HTTP error code, should be consistent with the response HTTP code
+                    type: integer
+                  type:
+                    pattern: '[a-z]+[a-z_]*[a-z]+'
+                    description: classification of the error type, lower case with underscore eg validation_failure
+                    type: string
+                  message:
+                    description: descriptive error message for debugging
+                    type: string
+                  moreInfo:
+                    format: uri
+                    type: string
+                    description: link to documentation to investigate further and finding support
+                  details:
+                    description: list of problems causing this error
+                    type: array
+                    items:
+                      title: errorDetail
+                      description: schema for specific error cause
+                      type: object
+                      properties:
+                        field:
+                          description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                          type: string
+                        type:
+                          pattern: '[a-z]+[a-z_]*[a-z]+'
+                          description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                          type: string
+                        message:
+                          description: descriptive error detail message for debugging
+                          type: string
+                        moreInfo:
+                          format: uri
+                          type: string
+                          description: link to documentation to investigate further and finding support for error detail
+                      required:
+                        - type
+                required:
+                  - status
+                  - type
+      description: Gets all delivery times of a certain area for a cart
+      parameters: []
+      security:
+        - OAuth2: []
+      operationId: GET-areadeliverytimes-for-area-and-cart
+    parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deliveryAreaId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: siteCode
+        in: query
+        required: false
+        schema:
+          type: string
+  /deliveryWindowReservation:
+    parameters: []
+    post:
+      summary: ''
+      operationId: post-tenant-orderDeliveryWindows-deliveryWindowId-reserve
+      description: Reserve a slot for an order in a delivery window if not fully booked.
+      requestBody:
+        $ref: '#/components/requestBodies/OrderDeliveryTimeWindowReservation'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+              examples:
+                example-1:
+                  value: true
+        '400':
+          $ref: '#/components/responses/400_bad_request'
+        '409':
+          $ref: '#/components/responses/409_conflict'
+      tags:
+        - Delivery Window
+components:
+  schemas:
+    deliveryAreas:
+      title: Collection of delivery areas
+      type: array
+      items:
+        $ref: '#/components/schemas/deliveryArea'
+    deliveryArea:
+      title: DeliveryArea
+      type: object
+      properties:
+        id:
+          type: string
+        postalcode:
+          type: string
+        name:
+          pattern: ^.+
+          type: string
+      required:
+        - postalcode
+        - name
+    deliveryTimes:
+      title: Collection of delivery times
+      type: array
+      items:
+        $ref: '#/components/schemas/deliveryTime'
+    deliveryTime:
+      title: DeliveryTime
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          description: name of the delivery time rule
+          type: string
+        kind:
+          default: DATE
+          description: kind of delivery time rule.
+          enum:
+            - DATE
+            - DAYOFWEEK
+          type: string
+        capacity:
+          description: maximum capacity of delivery
+          type: number
+        cutOffTime:
+          allOf:
+            - description: cut off time of delivery
+            - $ref: '#/components/schemas/CutOffTime'
+        zoneId:
+          description: Id of the delivery zone
+          type: string
+        deliveryDate:
+          description: The delivery date.
+          type: string
+          format: date-time
+        deliveryDayOfWeek:
+          minimum: 0
+          maximum: 6
+          description: The day of week 0..sunday, 6..saturday.
+          type: number
+        oneOf:
+          type: string
+        delivery:
+          default: true
+          description: true:include rule, false:exclude rule
+          type: boolean
+        active:
+          default: true
+          description: With this flag the delivery window time range can be enabled or disabled.
+          type: boolean
+        activeFrom:
+          description: The date from which the time window is active
+          type: string
+          format: date
+        activeTo:
+          description: The date to which the time window is active
+          type: string
+          format: date
+        areaIDs:
+          description: the delivery areas the rule is intended for.
+          type: array
+          items:
+            type: string
+        deliveryTimeRange:
+          allOf:
+            - description: The delivery time period within a day.
+            - $ref: '#/components/schemas/TimeRange'
+        metadata:
+          $ref: '#/components/schemas/metaData'
+      required:
+        - name
+    CutOffTime:
+      title: Cut off time of delivery time
+      type: object
+      properties:
+        id:
+          type: string
+        weekday:
+          minimum: 0
+          maximum: 6
+          description: The day of week 0..sunday, 6..saturday.
+          type: number
+        time:
+          description: The cut off time
+          type: string
+          example: '10:30'
+        orderCycleName:
+          description: Name of the order cycle
+          type: string
+    AreaDeliveryTimes:
+      title: Collection of area delivery times
+      type: array
+      items:
+        $ref: '#/components/schemas/AreaDeliveryTime'
+    AreaDeliveryTime:
+      title: area delivery time
+      type: object
+      properties:
+        id:
+          type: string
+        deliveryDate:
+          description: The delivery date.
+          type: string
+          format: date-time
+        deliveryTimeRange:
+          allOf:
+            - type: object
+              description: The delivery time period within a day.
+            - $ref: '#/components/schemas/TimeRange'
+        orderCycle:
+          description: Order cycle of the delivery
+          type: string
+        zoneId:
+          description: Id of the delivery zone
+          type: string
+        metadata:
+          $ref: '#/components/schemas/metaData'
+      required:
+        - deliveryDate
+    TimeRange:
+      type: object
+      properties:
+        startTime:
+          pattern: ^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$
+          type: string
+        endTime:
+          pattern: ^(2[0-4]|[01]?[0-9]):([0-5]?[0-9])$
+          type: string
+    error:
+      title: error
+      description: Schema for API specified errors.
+      type: object
+      properties:
+        status:
+          minimum: 100
+          maximum: 599
+          description: original HTTP error code, should be consistent with the response HTTP code
+          type: integer
+        type:
+          pattern: '[a-z]+[a-z_]*[a-z]+'
+          description: classification of the error type, lower case with underscore eg validation_failure
+          type: string
+        message:
+          description: descriptive error message for debugging
+          type: string
+        moreInfo:
+          format: uri
+          type: string
+          description: link to documentation to investigate further and finding support
+        details:
+          description: list of problems causing this error
+          type: array
+          items:
+            title: errorDetail
+            description: schema for specific error cause
+            type: object
+            properties:
+              field:
+                description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                type: string
+              type:
+                pattern: '[a-z]+[a-z_]*[a-z]+'
+                description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                type: string
+              message:
+                description: descriptive error detail message for debugging
+                type: string
+              moreInfo:
+                format: uri
+                type: string
+                description: link to documentation to investigate further and finding support for error detail
+            required:
+              - type
+      required:
+        - status
+        - type
+    metaData:
+      type: object
+      properties:
+        id:
+          type: string
+        createdAt:
+          type: string
+        modifiedAt:
+          type: string
+        version:
+          minimum: 0
+          type: integer
+  responses:
+    trait_yaasAware_400:
+      description: Request syntactically incorrect. Any details will be provided within the response payload.
+      content:
+        application/json:
+          schema:
+            title: error
+            description: Schema for API specified errors.
+            example:
+              status: 400
+              message: There are validation problems, see details section for more information
+              type: validation_violation
+              details:
+                - field: tenant
+                  message: size must be between 2 and 16
+                  type: invalid_header
+            type: object
+            properties:
+              status:
+                minimum: 100
+                maximum: 599
+                description: original HTTP error code, should be consistent with the response HTTP code
+                type: integer
+              type:
+                pattern: '[a-z]+[a-z_]*[a-z]+'
+                description: classification of the error type, lower case with underscore eg validation_failure
+                type: string
+              message:
+                description: descriptive error message for debugging
+                type: string
+              moreInfo:
+                format: uri
+                type: string
+                description: link to documentation to investigate further and finding support
+              details:
+                description: list of problems causing this error
+                type: array
+                items:
+                  title: errorDetail
+                  description: schema for specific error cause
+                  type: object
+                  properties:
+                    field:
+                      description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                      type: string
+                    type:
+                      pattern: '[a-z]+[a-z_]*[a-z]+'
+                      description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                      type: string
+                    message:
+                      description: descriptive error detail message for debugging
+                      type: string
+                    moreInfo:
+                      format: uri
+                      type: string
+                      description: link to documentation to investigate further and finding support for error detail
+                  required:
+                    - type
+            required:
+              - status
+              - type
+    trait_deliveryDate_400:
+      description: Delivery Date is not valid.
+      content:
+        application/json:
+          schema:
+            title: error
+            description: Schema for API specified errors.
+            example:
+              status: 400
+              message: 'DeliveryDate: 2021-01-15T12:00:00.000Z is not in future"'
+              type: validation_violation
+              details:
+                - field: tenant
+                  message: size must be between 1 and 16
+                  type: invalid_header
+            type: object
+            properties:
+              status:
+                minimum: 100
+                maximum: 599
+                description: original HTTP error code, should be consistent with the response HTTP code
+                type: integer
+              type:
+                pattern: '[a-z]+[a-z_]*[a-z]+'
+                description: classification of the error type, lower case with underscore eg validation_failure
+                type: string
+              message:
+                description: descriptive error message for debugging
+                type: string
+              moreInfo:
+                format: uri
+                type: string
+                description: link to documentation to investigate further and finding support
+              details:
+                description: list of problems causing this error
+                type: array
+                items:
+                  title: errorDetail
+                  description: schema for specific error cause
+                  type: object
+                  properties:
+                    field:
+                      description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                      type: string
+                    type:
+                      pattern: '[a-z]+[a-z_]*[a-z]+'
+                      description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                      type: string
+                    message:
+                      description: descriptive error detail message for debugging
+                      type: string
+                    moreInfo:
+                      format: uri
+                      type: string
+                      description: link to documentation to investigate further and finding support for error detail
+                  required:
+                    - type
+            required:
+              - status
+              - type
+    trait_yaasAware_403:
+      description: |
+        Given authorization scopes are not sufficient and do not match required scopes.
+      content:
+        application/json:
+          schema:
+            title: error
+            description: Schema for API specified errors.
+            example:
+              status: 403
+              message: Given request does not have required scopes. It is not authorized to perform this operation.
+              type: insufficient_permissions
+            type: object
+            properties:
+              status:
+                minimum: 100
+                maximum: 599
+                description: original HTTP error code, should be consistent with the response HTTP code
+                type: integer
+              type:
+                pattern: '[a-z]+[a-z_]*[a-z]+'
+                description: classification of the error type, lower case with underscore eg validation_failure
+                type: string
+              message:
+                description: descriptive error message for debugging
+                type: string
+              moreInfo:
+                format: uri
+                type: string
+                description: link to documentation to investigate further and finding support
+              details:
+                description: list of problems causing this error
+                type: array
+                items:
+                  title: errorDetail
+                  description: schema for specific error cause
+                  type: object
+                  properties:
+                    field:
+                      description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                      type: string
+                    type:
+                      pattern: '[a-z]+[a-z_]*[a-z]+'
+                      description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                      type: string
+                    message:
+                      description: descriptive error detail message for debugging
+                      type: string
+                    moreInfo:
+                      format: uri
+                      type: string
+                      description: link to documentation to investigate further and finding support for error detail
+                  required:
+                    - type
+            required:
+              - status
+              - type
+    trait_queryable_400:
+      description: Request syntactically incorrect. Any details will be provided within the response payload.
+      content:
+        application/json:
+          schema:
+            title: error
+            description: Schema for API specified errors.
+            example:
+              status: 400
+              message: There are validation problems, see details section for more information
+              type: validation_violation
+              details:
+                - field: q
+                  message: not a valid query
+                  type: invalid_query_parameter
+            type: object
+            properties:
+              status:
+                minimum: 100
+                maximum: 599
+                description: original HTTP error code, should be consistent with the response HTTP code
+                type: integer
+              type:
+                pattern: '[a-z]+[a-z_]*[a-z]+'
+                description: classification of the error type, lower case with underscore eg validation_failure
+                type: string
+              message:
+                description: descriptive error message for debugging
+                type: string
+              moreInfo:
+                format: uri
+                type: string
+                description: link to documentation to investigate further and finding support
+              details:
+                description: list of problems causing this error
+                type: array
+                items:
+                  title: errorDetail
+                  description: schema for specific error cause
+                  type: object
+                  properties:
+                    field:
+                      description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                      type: string
+                    type:
+                      pattern: '[a-z]+[a-z_]*[a-z]+'
+                      description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                      type: string
+                    message:
+                      description: descriptive error detail message for debugging
+                      type: string
+                    moreInfo:
+                      format: uri
+                      type: string
+                      description: link to documentation to investigate further and finding support for error detail
+                  required:
+                    - type
+            required:
+              - status
+              - type
+    400_bad_request:
+      description: Request contains bad data
+      content:
+        application/json:
+          schema:
+            title: error
+            description: Schema for API specified errors.
+            example:
+              status: 400
+              message: 'DeliveryDate: 2021-01-15T12:00:00.000Z is not in future"'
+              type: validation_violation
+              details:
+                - field: tenant
+                  message: size must be between 1 and 16
+                  type: invalid_header
+            type: object
+            properties:
+              status:
+                minimum: 100
+                maximum: 599
+                description: original HTTP error code, should be consistent with the response HTTP code
+                type: integer
+              type:
+                pattern: '[a-z]+[a-z_]*[a-z]+'
+                description: classification of the error type, lower case with underscore eg validation_failure
+                type: string
+              message:
+                description: descriptive error message for debugging
+                type: string
+              moreInfo:
+                format: uri
+                type: string
+                description: link to documentation to investigate further and finding support
+              details:
+                description: list of problems causing this error
+                type: array
+                items:
+                  title: errorDetail
+                  description: schema for specific error cause
+                  type: object
+                  properties:
+                    field:
+                      description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                      type: string
+                    type:
+                      pattern: '[a-z]+[a-z_]*[a-z]+'
+                      description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                      type: string
+                    message:
+                      description: descriptive error detail message for debugging
+                      type: string
+                    moreInfo:
+                      format: uri
+                      type: string
+                      description: link to documentation to investigate further and finding support for error detail
+                  required:
+                    - type
+            required:
+              - status
+              - type
+          examples:
+            Delivery_Date_Not_In_Future:
+              value:
+                status: 400
+                type: application/json
+                message: 'DeliveryDate: {{deliveryDate}} is not in future'
+                details: []
+            Delivery_Date_Not_In_Proper_Format:
+              value:
+                status: 400
+                type: application/json
+                message: 'DeliveryDate: 2022-11-12T:00:00.000+00:00 in not valid format, Proper format is: yyyy-MM-dd''T''HH:mm:ss.SSSZZ'
+                details: []
+    409_conflict:
+      description: The requested resource could not be created, updated, or deleted due to server-side validation. This could be caused either by a temporary issue, such as an optimistic lock or persistent data constraint.
+      content:
+        application/json:
+          schema:
+            title: error
+            description: Schema for API specified errors.
+            example:
+              status: 400
+              message: 'DeliveryDate: 2021-01-15T12:00:00.000Z is not in future"'
+              type: validation_violation
+              details:
+                - field: tenant
+                  message: size must be between 1 and 16
+                  type: invalid_header
+            type: object
+            properties:
+              status:
+                minimum: 100
+                maximum: 599
+                description: original HTTP error code, should be consistent with the response HTTP code
+                type: integer
+              type:
+                pattern: '[a-z]+[a-z_]*[a-z]+'
+                description: classification of the error type, lower case with underscore eg validation_failure
+                type: string
+              message:
+                description: descriptive error message for debugging
+                type: string
+              moreInfo:
+                format: uri
+                type: string
+                description: link to documentation to investigate further and finding support
+              details:
+                description: list of problems causing this error
+                type: array
+                items:
+                  title: errorDetail
+                  description: schema for specific error cause
+                  type: object
+                  properties:
+                    field:
+                      description: a bean notation expression specifying the element in request data causing the error, eg product.variants[3].name, this can be empty if violation was not field specific
+                      type: string
+                    type:
+                      pattern: '[a-z]+[a-z_]*[a-z]+'
+                      description: classification of the error detail type, lower case with underscore eg missing_value, this value must be always interpreted in context of the general error type.
+                      type: string
+                    message:
+                      description: descriptive error detail message for debugging
+                      type: string
+                    moreInfo:
+                      format: uri
+                      type: string
+                      description: link to documentation to investigate further and finding support for error detail
+                  required:
+                    - type
+            required:
+              - status
+              - type
+          examples:
+            Capacity_is_full:
+              value:
+                status: 409
+                type: application/json
+                message: 'Capacity is full for deliveryWindowId: {{deliveryWindowId}} and deliveryDate: {{deliveryDate}}'
+                details: []
+  parameters:
+    trait_authorization:
+      name: authorization
+      in: header
+      required: true
+      description: |
+        Bearer token
+      schema:
+        type: string
+    trait_queryable_q:
+      name: q
+      in: query
+      description: |
+        The simple query criteria based on available fields to limit returned results or a set of modified documents.
+      schema:
+        type: string
+  examples: {}
+  requestBodies:
+    OrderDeliveryTimeWindowReservation:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              deliveryWindowId:
+                type: string
+              deliveryDate:
+                type: string
+  headers: {}
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.emporix.io/oauth/token
+          scopes:
+            delivery.area_manage: delivery.area_manage
+            delivery.time_manage: delivery.time_manage
+            delivery.time_delete: delivery.time_delete
+            delivery.area_delete: delivery.area_delete
+  links: {}
+  callbacks: {}

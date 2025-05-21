@@ -1,0 +1,41 @@
+import { registerModule } from '../core/di/registry';
+import getContainer from '../core/di/registry';
+import { Container } from 'inversify';
+
+let container: Container;
+const provider = {
+  async get<T>(id: string): Promise<T> {
+    if (!container) {
+      // Configure container based on environment
+      // Create an array to hold all modules
+      const modules: any[] = [];
+
+      // Add environment-specific modules
+      if (typeof window === 'undefined') {
+        // Server-side modules
+        modules.push(
+    {{SERVER_MODULES}}
+        );
+      } else {
+        // Client-side modules
+        modules.push(
+    {{CLIENT_MODULES}}
+        );
+      }
+
+      // Add common modules for both client and server
+      modules.push(
+    {{COMMON_MODULES}}
+      );
+
+      // Register all modules
+      for (const m of modules) {
+        registerModule(m, '{{LAYER}}');
+      }
+      // Initialize container
+      container = await getContainer('{{LAYER}}');
+    }
+    return container.get<T>(id);
+  }
+}
+export default provider;

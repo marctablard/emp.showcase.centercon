@@ -1,0 +1,890 @@
+openapi: 3.0.0
+info:
+  title: Sequential ID Service
+  contact:
+    name: Emporix
+    url: https://emporix.com
+    email: documentation@emporix.com
+  version: ''
+  description: |-
+    Create sequentially unique IDs for orders, invoices, customers or similar.
+
+    ***
+
+    **Key Features**:
+    * Custom sequence pattern / schemas
+    * Pre-configured patterns for orders, invoices, pick-packs, and quotes 
+    * Customizable placeholders
+    * Customizable prefix and suffix
+      
+
+    ***
+
+    **Key Benefits**:
+    * Safely create unique IDs
+    * Be tax compliant with unique invoices IDs
+servers:
+  - url: https://api.emporix.io
+security:
+  - OAuth2: []
+tags:
+  - name: Sequential IDs management
+paths:
+  /sequential-id/sequenceSchemas:
+    get:
+      deprecated: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - id: sequentialId
+                  name: order_number
+                  schemaType: orderNoSequence
+                  active: true
+                  preText: C-
+                  postText: '-A'
+                  startValue: 100
+                  maxValue: 999999999
+                  numberOfDigits: 9
+                  counter: 109
+                  placeholders:
+                    __year__:
+                      required: true
+              schema:
+                $ref: '#/components/schemas/SequenceSchemas'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+      summary: Retrieving all schemas
+      description: |-
+        Gets all sequence schemas. 
+
+        This endpoint is `deprecated`. Please use the [/sequential-id/{tenant}/schemas](/openapi/sequential-id/#operation/GET-sequential-id-retrieve-tenant-schemas) instead.
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_view`
+      operationId: GET-sequential-id-retrieve-schemas
+      parameters: []
+      security:
+        - OAuth2:
+            - sequentialid.schema_view
+      tags:
+        - Sequential IDs management
+    post:
+      deprecated: true
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+      summary: Creating a schema
+      description: |-
+        Creates a new sequence schema.
+                
+        This endpoint is `deprecated`. Please use the [/sequential-id/{tenant}/schemas](/openapi/sequential-id/#operation/POST-sequential-id-create-tenant-schema) instead.
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_manage`
+      operationId: POST-sequential-id-create-schema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SequenceSchemaCreate'
+            examples:
+              Create invoice number schema example:
+                value:
+                  name: invoiceNoSequence
+                  schemaType: invoiceNoSequence
+                  preText: INV__num__
+                  maxValue: 999999999
+                  numberOfDigits: 4
+                  startValue: 1000
+                  placeholders:
+                    __num__:
+                      required: true
+              Create order number schema example:
+                value:
+                  name: testSchema
+                  schemaType: orderNoSequence
+                  preText: C-__year__-__month__-
+                  postText: '-D'
+                  maxValue: 999999999
+                  numberOfDigits: 9
+                  startValue: 3
+                  placeholders:
+                    __year__:
+                      required: true
+                    __month__:
+                      required: true
+        required: true
+      parameters: []
+      security:
+        - OAuth2:
+            - sequentialid.schema_manage
+      tags:
+        - Sequential IDs management
+  /sequential-id/sequenceSchemas/{sequenceSchema}/nextIds:
+    post:
+      deprecated: true
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              example:
+                ids:
+                  - C-2016-06-0000000045-D
+                  - asfasf2323
+              schema:
+                $ref: '#/components/schemas/NextIdsResponse'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          $ref: '#/components/responses/trait_yaasAware_404'
+      summary: Creating a nextId
+      description: |-
+        Creates and returns the nextId in the sequence. If you specify the `sequenceKey` parameter in request body, the nextId number is generated for this sequence, otherwise default pool is used. 
+
+          This endpoint is `deprecated`. Please use the [/sequential-id/{tenant}/schemas/types/{schemaType}/nextId](/openapi/sequential-id/#operation/POST-sequential-id-create-schema-type-nextId) instead.
+      operationId: POST-sequential-id-create-nextId
+      requestBody:
+        content:
+          application/json:
+            example:
+              numberOfIds: 3
+              sequenceKey: 2016-05
+              placeholders:
+                __year__: '2016'
+                __month__: '05'
+            schema:
+              $ref: '#/components/schemas/NextIdsRequest'
+        required: true
+      parameters:
+        - $ref: '#/components/parameters/trait_siteCode'
+      security:
+        - OAuth2: []
+      tags:
+        - Sequential IDs management
+    parameters:
+      - name: sequenceSchema
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The sequence schema to generate the nextId for.
+  /sequential-id/{tenant}/schemas:
+    get:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - name: testSchema
+                  schemaType: orderNoSequence
+                  active: true
+                  preText: C-__year__-__month__-
+                  postText: '-D'
+                  startValue: 1
+                  maxValue: 999999999
+                  numberOfDigits: 9
+                  counter: 45684
+                  placeholders:
+                    __year__:
+                      required: true
+                    __month__:
+                      required: true
+                - name: customer_number
+                  startValue: 1
+                  schemaType: orderNoSequence
+                  preText: C-
+                  minValue: 100
+                  maxValue: 999999999
+                  numberOfDigits: 9
+                  counter: 109
+              schema:
+                $ref: '#/components/schemas/SequenceSchemas'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+      summary: Retrieving all schemas
+      description: |-
+        Gets all sequence schemas.
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_view`
+      operationId: GET-sequential-id-retrieve-tenant-schemas
+      security:
+        - OAuth2:
+            - sequentialid.schema_view
+      tags:
+        - Sequential IDs management
+    post:
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+      summary: Creating a schema
+      description: |-
+        Creates a new sequence schema.
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_manage`
+      operationId: POST-sequential-id-create-tenant-schema
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: testSchema
+              schemaType: orderNoSequence
+              preText: C-__year__-__month__-
+              postText: '-D'
+              maxValue: 999999999
+              numberOfDigits: 9
+              startValue: 3
+              placeholders:
+                __year__:
+                  required: true
+                __month__:
+                  required: true
+            schema:
+              $ref: '#/components/schemas/SequenceSchemaCreate'
+        required: true
+      security:
+        - OAuth2:
+            - sequentialid.schema_manage
+      tags:
+        - Sequential IDs management
+    parameters:
+      - name: tenant
+        in: path
+        required: true
+        schema:
+          pattern: '[a-zA-Z0-9_-]+'
+          minLength: 3
+          maxLength: 16
+          type: string
+        description: |
+          The name of your tenant.
+
+          **Note**: The tenant name should always be provided in lowercase.
+  /sequential-id/{tenant}/schemas/{schemaId}:
+    get:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                name: testSchema
+                schemaType: orderNoSequence
+                active: true
+                preText: C-__year__-__month__-
+                postText: '-D'
+                startValue: 1
+                maxValue: 999999999
+                numberOfDigits: 9
+                counter: 45684
+                placeholders:
+                  __year__:
+                    required: true
+                  __month__:
+                    required: true
+              schema:
+                $ref: '#/components/schemas/SequenceSchema'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+      summary: Retrieving a schema
+      description: |-
+        Gets a sequence schema by its id.
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_view`
+      operationId: GET-sequential-id-retrieve-schema
+      parameters:
+        - $ref: '#/components/parameters/trait_tenant'
+      security:
+        - OAuth2:
+            - sequentialid.schema_view
+      tags:
+        - Sequential IDs management
+    parameters:
+      - name: schemaId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The ID of the schema to retrieve.
+  /sequential-id/{tenant}/schemas/{schemaId}/setActive:
+    post:
+      responses:
+        '200':
+          description: Schema set to active
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          $ref: '#/components/responses/trait_yaasAware_404'
+      summary: Activating a schema
+      description: |-
+        Sets the schema as active in the system.
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_manage`
+      operationId: POST-sequential-id-activate-schema
+      parameters:
+        - $ref: '#/components/parameters/trait_tenant'
+      security:
+        - OAuth2:
+            - sequentialid.schema_manage
+      tags:
+        - Sequential IDs management
+    parameters:
+      - name: schemaId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The ID of the schema to activate.
+  /sequential-id/{tenant}/schemas/types/{schemaType}:
+    get:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              example:
+                - name: testSchema
+                  schemaType: orderNoSequence
+                  active: true
+                  preText: C-__year__-__month__-
+                  postText: '-D'
+                  startValue: 1
+                  maxValue: 999999999
+                  numberOfDigits: 9
+                  counter: 45684
+                  placeholders:
+                    __year__:
+                      required: true
+                    __month__:
+                      required: true
+                - name: customer_number
+                  startValue: 1
+                  schemaType: orderNoSequence
+                  preText: C-
+                  minValue: 100
+                  maxValue: 999999999
+                  numberOfDigits: 9
+                  counter: 109
+              schema:
+                $ref: '#/components/schemas/SequenceSchemas'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+      summary: Retrieving all schema types
+      description: |-
+        Gets all sequence schemas.
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_view`
+      operationId: GET-sequential-id-retrieve-schema-types
+      security:
+        - OAuth2:
+            - sequentialid.schema_view
+      tags:
+        - Sequential IDs management
+    parameters:
+      - name: schemaType
+        in: path
+        required: true
+        schema:
+          type: string
+        description: |
+          The schema type corresponding to the entity it is used for. Possible values are:
+          - `orderNoSequence`
+          - `invoiceNoSequence`
+          - `quoteNoSequence`
+          - `pickPackNoSequence`
+          - `orderHoldingAreaNoSequence`
+      - name: tenant
+        in: path
+        required: true
+        schema:
+          pattern: '[a-zA-Z0-9_-]+'
+          minLength: 3
+          maxLength: 16
+          type: string
+        description: |
+          The name of your tenant.
+
+          **Note**: The tenant name should always be provided in lowercase.
+  /sequential-id/{tenant}/schemas/types/{schemaType}/nextId:
+    post:
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              example:
+                id: B7012562
+              schema:
+                $ref: '#/components/schemas/NextIdResponse'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+        '404':
+          $ref: '#/components/responses/trait_yaasAware_404'
+      summary: Creating a nextId for schema type
+      description: |-
+        Creates and returns the nextId according to the specified sequence.
+        If you specify the `sequenceKey` in request body, the nextId number is generated for this sequence, otherwise default pool is used.
+
+
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_view`
+      operationId: POST-sequential-id-create-schema-type-nextId
+      requestBody:
+        content:
+          application/json:
+            example:
+              sequenceKey: 2016-05
+              placeholders:
+                __year__: '2016'
+                __month__: '05'
+            schema:
+              $ref: '#/components/schemas/NextIdCommandRequest'
+        required: true
+      security:
+        - OAuth2:
+            - sequentialid.schema_view
+      tags:
+        - Sequential IDs management
+    parameters:
+      - name: schemaType
+        in: path
+        required: true
+        description: |
+          The schema type corresponding to the entity it is used for. Possible values are:
+            - `orderNoSequence`
+            - `invoiceNoSequence`
+            - `quoteNoSequence`
+            - `pickPackNoSequence`
+            - `orderHoldingAreaNoSequence`
+        schema:
+          type: string
+      - $ref: '#/components/parameters/trait_tenant'
+      - $ref: '#/components/parameters/trait_siteCode'
+  /sequential-id/sequenceSchemaBatch/nextIds:
+    post:
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              example:
+                testSchema:
+                  ids:
+                    - C-2016-05-0000000045-D
+                    - C-2016-05-0000000045-D
+              schema:
+                $ref: '#/components/schemas/SchemaBatchNextIdResponse'
+        '400':
+          $ref: '#/components/responses/trait_yaasAware_400'
+        '401':
+          $ref: '#/components/responses/Unauthorized_401'
+        '403':
+          $ref: '#/components/responses/trait_yaasAware_403'
+      summary: Creating nextIds for schema types
+      description: |-
+        Creates and returns the nextId for the specified sequence schemas.
+        If you specify the `sequenceKey` in request body, the nextId number is generated for this sequence, otherwise default pool is used.
+        ***
+
+         ### Required scopes
+        * `sequentialid.schema_view`
+      parameters:
+        - $ref: '#/components/parameters/trait_siteCode'
+      operationId: POST-sequential-id-create-schema-types-nextIds
+      requestBody:
+        content:
+          application/json:
+            example:
+              testSchema:
+                sequenceKey: 2016-05
+                placeholders:
+                  __year__: '2016'
+                  __month__: '05'
+              testSchema2:
+                numberOfIds: 2
+                placeholders:
+                  '--prefix--': C-
+            schema:
+              $ref: '#/components/schemas/SchemaBatchNextIdRequest'
+        required: true
+      security:
+        - OAuth2:
+            - sequentialid.schema_view
+      tags:
+        - Sequential IDs management
+components:
+  schemas:
+    SequenceSchema:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SequenceSchemaCreate'
+        - properties:
+            active:
+              type: boolean
+              description: Flag indicating whether the schema is active.
+            id:
+              type: string
+              description: ID of the sequence schema.
+            counter:
+              type: number
+              description: Number of created IDs based on the selected schema.
+            metadata:
+              type: object
+              properties:
+                createdAt:
+                  type: string
+                  format: date
+                  description: Date of creation.
+                modifiedAt:
+                  type: string
+                  format: date
+                  description: Date of last modification.
+                version:
+                  type: number
+                  description: The version number.
+    SequenceSchemas:
+      type: array
+      items:
+        $ref: '#/components/schemas/SequenceSchema'
+    Placeholders:
+      type: object
+      description: The filler text for values based on certain properties or settings in the system.
+      additionalProperties:
+        type: object
+        description: Properties used as placeholders.
+        properties:
+          required:
+            type: boolean
+          default:
+            type: string
+    SequenceSchemaCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the sequence schema.
+        schemaType:
+          type: string
+          pattern: ^[a-zA-Z0-9]*$
+          description: |
+            The schema type corresponding to the entity it is used for. Possible values are:
+            - `orderNoSequence`
+            - `invoiceNoSequence`
+            - `quoteNoSequence`
+            - `pickPackNoSequence`
+            - `orderHoldingAreaNoSequence`
+        preText:
+          type: string
+          description: |
+            The prefix of the ID. It can contain placeholders, which are replaced with their values.
+            Placeholders are defined in the `placeholders` property.
+        postText:
+          type: string
+          description: |
+            The suffix of the ID. It can contain placeholders, which are replaced with their values.
+            Placeholders are defined in the `placeholders` property.
+        startValue:
+          type: number
+          description: |
+            The starting value of the sequence. It is used to generate the first ID.
+            The starting value is incremented for each subsequent ID.
+        maxValue:
+          type: number
+          description: |
+            The maximum value of the sequence. It is used to limit the range of generated IDs.
+            If the maximum value is reached, the sequence will not generate any more IDs.
+        numberOfDigits:
+          type: number
+          description: |
+            The number of digits in the generated ID. It is used to format the ID.
+            If the number of digits is less than the maximum value, leading zeros are added.
+        placeholders:
+          $ref: '#/components/schemas/Placeholders'
+      required:
+        - name
+        - startValue
+        - maxValue
+        - numberOfDigits
+    NextIdCommandRequest:
+      type: object
+      properties:
+        sequenceKey:
+          type: string
+          description: The pattern to follow for the nextID.
+        placeholders:
+          additionalProperties:
+            type: string
+            description: Additional property used as a placeholder.
+          description: The filler text for values based on certain properties or settings in the system.
+    NextIdResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The created nextID according to the selected schema.
+    NextIdsRequest:
+      type: object
+      properties:
+        numberOfIds:
+          type: number
+          minimum: 1
+          description: The number of IDs to create sequentially in one request.
+        sequenceKey:
+          type: string
+          description: The pattern to follow for the nextID.
+        placeholders:
+          additionalProperties:
+            type: string
+            description: Properties used as placeholders.
+          description: The filler text for values based on certain properties or settings in the system.
+    NextIdsResponse:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          description: The sequential ID(s) created based on the used schema.
+    SchemaBatchNextIdRequest:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          numberOfIds:
+            type: number
+            minimum: 1
+            description: The number of IDs to create sequentially in one request.
+          sequenceKey:
+            type: string
+            description: The pattern to follow for the nextID.
+          placeholders:
+            additionalProperties:
+              type: string
+              description: Additional property used as a placeholder.
+            description: The filler text for values based on certain properties or settings in the system.
+    SchemaBatchNextIdResponse:
+      type: object
+      additionalProperties:
+        type: object
+        description: Properties used as placeholders.
+        properties:
+          ids:
+            type: array
+            items:
+              type: string
+            description: The sequence ID(s) created according to the selected schema.
+    error:
+      description: Schema for API specified errors.
+      type: object
+      properties:
+        status:
+          minimum: 100
+          maximum: 599
+          description: original HTTP error code, should be consistent with the response HTTP code
+          type: integer
+        type:
+          pattern: '[a-z]+[a-z_]*[a-z]+'
+          description: classification of the error type, lower case with underscore eg validation_failure
+          type: string
+        message:
+          description: descriptive error message for debugging
+          type: string
+        error:
+          type: string
+        timestamp:
+          type: string
+          format: date
+        errorDetails:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              field:
+                type: string
+  responses:
+    trait_yaasAware_400:
+      description: Request syntactically incorrect. Any details will be provided within the response payload.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            Bad Request:
+              value:
+                status: 400
+                message: There are validation problems, see details section for more information
+    Unauthorized_401:
+      description: Given request is unauthorized - the authorization token is invalid or has expired. Details will be provided in the response payload.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fault:
+                type: object
+                properties:
+                  faultstring:
+                    type: string
+                  detail:
+                    type: object
+                    properties:
+                      errorcode:
+                        type: string
+          examples:
+            Invalid access token:
+              value:
+                fault:
+                  faultstring: Invalid access token
+                  detail:
+                    errorcode: oauth.v2.InvalidAccessToken
+            Access token expired:
+              value:
+                fault:
+                  faultstring: Access Token expired
+                  detail:
+                    errorcode: keymanagement.service.access_token_expired
+    trait_yaasAware_403:
+      description: |
+        Given authorization scopes are not sufficient and do not match required scopes.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            Forbidden:
+              value:
+                status: 403
+                message: Given request does not have required scopes. It is not authorized to perform this operation.
+                type: insufficient_permissions
+    trait_yaasAware_404:
+      description: |
+        Resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            Not Found:
+              value:
+                status: 404
+                message: Resource does not exist.
+  parameters:
+    trait_siteCode:
+      name: siteCode
+      in: query
+      required: false
+      description: |
+        Value used to resolve certain placeholders.
+
+        Placeholders such as **\_\_year__**, **\_\_month__**, **\_\_day__**, **\_\_hour__**, **\_\_minute__**, **\_\_second__**, and **\_\_country__**, 
+        which are defined in the schema, can have default values computed when their counterparts are missing in the request body.
+
+        The default values are derived from the `site`. Specifically:
+        - All date-related placeholders are computed based on the `site.homeBase.timezone` field.
+        - The **__country__** placeholder is replaced with the value of `site.homeBase.address.country`.
+
+        If these values are missing in `site`, the following defaults are used:
+        - `UTC` for `timezone`
+        - `DE` for `country`
+      schema:
+        type: string
+    trait_tenant:
+      name: tenant
+      in: path
+      required: true
+      description: |
+        The name of your tenant.
+
+        **Note**: The tenant name should always be provided in lowercase.
+      schema:
+        pattern: ^[a-z][a-z0-9]+$
+        minLength: 3
+        maxLength: 16
+        type: string
+  examples: {}
+  requestBodies: {}
+  headers: {}
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.emporix.io/oauth/token
+          scopes:
+            sequentialid.schema_view: schema_view
+            sequentialid.schema_manage: schema_manage
+  links: {}
+  callbacks: {}
