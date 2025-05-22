@@ -55,5 +55,5 @@ export function checkTokenValidity(token?: string, expiryAt?: number, threshold:
   if (!expiryAt) {
     return true;
   }
-  return Date.now() < (expiryAt - threshold);
+  return Date.now() <= (expiryAt - threshold);
 }
