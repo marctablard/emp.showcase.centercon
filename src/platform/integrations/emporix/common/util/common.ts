@@ -48,12 +48,12 @@ export async function buildPaginatedResponse<T>(params: SearchParams<T>, respons
     };
 }
 
-export function checkTokenValidity(token?: string, expiryAt?: number, threshold: number = 300000): boolean {
+export function checkTokenValidity(token?: string, expiryAt?: number, threshold: number = 6000): boolean {
   if (!token) {
     return false;
   }
   if (!expiryAt) {
     return true;
   }
-  return Date.now() < expiryAt - threshold;
+  return Date.now() < (expiryAt - threshold);
 }

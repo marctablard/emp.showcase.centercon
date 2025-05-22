@@ -12,42 +12,21 @@ const LOCAL_STORAGE_KEY = 'emporix-token';
  @injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerClient extends EmporixTokenManagerAbstract {
   
-
-  protected writeToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service', token: T): Promise<void> {
+  protected async customerAuthAllowed(): Promise<boolean> {
+    return true;
+  }
+  
+  protected async readTokens(): Promise<TokenStore> {
     const tokenStoreString : string | null = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!tokenStoreString) {
-      return Promise.resolve();
+      return Promise.resolve({});
     }
     const tokenStore : TokenStore = JSON.parse(tokenStoreString);
-    switch (type) {
-      case 'anonymous':
-        tokenStore.anonymousToken = token as StoredToken<AnonymousTokenResponse>;
-        break;
-      case 'customer':
-        tokenStore.customerToken = token as StoredToken<CustomerTokenResponse>;
-        break;
-      case 'service':
-        tokenStore.serviceToken = token as StoredToken<ServiceAccessTokenResponse>;
-        break;
-    }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tokenStore));
-    return Promise.resolve();
+    return tokenStore;
   }
 
-  protected readToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service'): Promise<T | undefined> {
-    const tokenStoreString : string | null = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!tokenStoreString) {
-      return Promise.resolve(undefined);
-    }
-    const tokenStore : TokenStore = JSON.parse(tokenStoreString);
-    switch (type) {
-      case 'anonymous':
-        return Promise.resolve(tokenStore.anonymousToken as T);
-      case 'customer':
-        return Promise.resolve(tokenStore.customerToken as T);
-      case 'service':
-        return Promise.resolve(tokenStore.serviceToken as T);
-    }
+  protected async writeTokens(tokens : TokenStore) : Promise<void> {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tokens));
   }
 
   /**

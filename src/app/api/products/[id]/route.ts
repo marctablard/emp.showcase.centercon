@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import services from '@/platform/services';
+import { cookies } from 'next/headers';
 import { ProductService } from '@/platform/services/product/ProductService';
 
 /**
@@ -12,8 +12,8 @@ export async function GET(
 ) {
   try {
     const { id: productId } = await params;
-    const productService = await services.get<ProductService>('ProductService');
     
+    const productService = EMP.platform.server.get<ProductService>('ProductService');
     const product = await productService.getProductById(productId);
     
     if (!product) {

@@ -25,7 +25,8 @@ class EmporixOAuthApi implements OAuthApi {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get anonymous token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to get anonymous token: ${response.statusText} - ${message}`);
     }
 
     return await response.json() as AnonymousTokenResponse;
@@ -49,7 +50,8 @@ class EmporixOAuthApi implements OAuthApi {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to refresh anonymous token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to refresh anonymous token: ${response.statusText} - ${message}`);
     }
 
     return await response.json() as AnonymousTokenResponse;

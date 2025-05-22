@@ -22,4 +22,14 @@ export interface EmporixConfig {
    * Client secret for service access
    */
   clientSecret: string;
+
+  /**
+   * Client ID for service access (for server-side)
+   */
+  serverClientId?: string;
+  
+  /**
+   * Client secret for service access (for server-side)
+   */
+  serverClientSecret?: string;
 }

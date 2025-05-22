@@ -14,7 +14,7 @@ class EmporixProductApi implements ProductApi {
     @inject('EmporixConfig') private config: EmporixConfig
   ) {
     
-      this.apiClient = apiClient;
+    this.apiClient = apiClient;
     this.config = config;
   }
   

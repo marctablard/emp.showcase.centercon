@@ -75,9 +75,10 @@ next-env.d.ts
 # data
 /src/server-data/**/*
 
-# Generated Integration-Files
-/src/platform/integrations/index.ts
-/src/platform/services/index.ts
+# Generated Container-Files
+/src/platform/ssr.ts
+/src/platform/client.ts
+/src/platform/server.ts
 
 # Playwright
 /test-results/

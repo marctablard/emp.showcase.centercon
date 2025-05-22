@@ -2,7 +2,7 @@
 
 ## Overview
 
-Our Dependency Injection (DI) framework provides a robust, type-safe way to manage dependencies throughout the React Whitelabel Storefront application. It enables loose coupling between components, making the codebase more maintainable, testable, and flexible.
+Our Dependency Injection (DI) framework provides a robust, type-safe way to manage dependencies throughout the Emporix Showcase application. It enables loose coupling between components, making the codebase more maintainable, testable, and flexible.
 
 ## Why Dependency Injection?
 
@@ -12,7 +12,7 @@ Our Dependency Injection (DI) framework provides a robust, type-safe way to mana
 
 3. **Code Reusability**: Services and components can be reused across different parts of the application.
 
-4. **Environment-Specific Implementations**: The framework supports different implementations for client and server environments, critical for Next.js applications.
+4. **Environment-Specific Implementations**: The framework supports different implementations for client, server, and SSR environments, critical for Next.js applications.
 
 5. **Centralized Configuration**: All service registrations are managed in one place, making it easier to understand and modify the application's architecture.
 
@@ -21,21 +21,23 @@ Our Dependency Injection (DI) framework provides a robust, type-safe way to mana
 Our DI framework is built on [InversifyJS](https://inversify.io/), a powerful inversion of control container for TypeScript & JavaScript applications. We've extended Inversify with custom functionality to support:
 
 - Automatic container generation
-- Environment-specific implementations (client vs. server)
-- Layer-based organization (Integrations, Services, Repositories)
+- Environment-specific implementations (client, server, and SSR)
+- Unified platform container with environment-specific variants
 - File watching for development
 
 ## Core Principles
 
 1. **Interface-Based Design**: Services are defined by interfaces, allowing for multiple implementations.
 
-2. **Layer Separation**: The application is divided into distinct layers (Integrations, Services, Repositories), each with its own container.
+2. **Unified Platform Container**: The application provides a platform container that includes all layers (Integrations, Services, Repositories) with environment-specific variants.
 
-3. **Environment Awareness**: The framework automatically selects the appropriate implementation based on the execution environment (client or server).
+3. **Environment Awareness**: The framework allows to selects the appropriate implementation based on the execution environment (client, server, or SSR).
 
 4. **Code Generation**: Container configurations are automatically generated, reducing boilerplate and potential errors.
 
 5. **Explicit Dependencies**: Dependencies are explicitly declared through constructor injection, making the code more readable and maintainable.
+
+6. **Server-Side Initialization**: Containers are initialized on the server side through Next.js instrumentation, ensuring they're available throughout the application lifecycle.
 
 ## Usage Guide
 
@@ -134,12 +136,13 @@ export default HelloAgentService;
 
 ### Why Different Implementations Are Necessary
 
-In our example with `UserAgentService`, we have separate implementations for client and server because:
+In our example with `UserAgentService`, we have separate implementations for client, server, and SSR because:
 
 1. **Server-Side Rendering**: In server components, we need to access the user agent from the request headers.
 2. **Client-Side Execution**: In the browser, we access the user agent from the `window.navigator` object.
-3. **Code Splitting**: Server-only code should not be included in client bundles and vice versa.
-4. **Environment-Specific APIs**: Some APIs are only available in one environment.
+3. **SSR-Specific Logic**: Some components need special handling during server-side rendering.
+4. **Code Splitting**: Environment-specific code should not be included in bundles where it's not needed.
+5. **Environment-Specific APIs**: Some APIs are only available in specific environments.
 
 The DI framework automatically selects the correct implementation based on the execution context, making the code that consumes these services simpler and more maintainable.
 
@@ -153,6 +156,7 @@ The following scripts are available in `package.json`:
 
 ```json
 "scripts": {
+  "dev": "npm-run-all --parallel generate:watch dev:next",
   "generate": "ts-node --project scripts/tsconfig.json scripts/di-generator.ts",
   "generate:watch": "ts-node --project scripts/tsconfig.json scripts/di-generator.ts --watch"
 }
@@ -160,25 +164,40 @@ The following scripts are available in `package.json`:
 
 - **generate**: Scans the codebase for `@injectable` decorators and generates container files.
 - **generate:watch**: Continuously watches for changes and regenerates containers as needed.
+- **dev**: Runs both the development server and the container generator in watch mode.
 
 ### How Generation Works
 
 1. The generator scans directories for TypeScript files with `@injectable` decorators.
-2. It identifies which layer each injectable belongs to (Integration, Service, Repository).
-3. It determines if the implementation is client-only, server-only, or common.
-4. It generates container files that:
-   - Import all relevant modules
-   - Register them with the appropriate container
-   - Provide a type-safe way to resolve dependencies
+2. It identifies which environment each injectable belongs to based on naming conventions:
+   - Classes ending with `Server` are server-only
+   - Classes ending with `Client` are client-only
+   - Classes ending with `SSR` are SSR-only
+   - Classes with no specific suffix are common to all environments
+3. It generates three container files:
+   - `server.ts`: For server-only and common implementations
+   - `client.ts`: For client-only and common implementations
+   - `ssr.ts`: For SSR-only and common implementations
+4. Each container file:
+   - Imports all relevant modules
+   - Registers them with the appropriate container
+   - Provides a type-safe way to resolve dependencies
+
+### Container Initialization
+
+Containers are initialized in different ways depending on the environment:
+
+1. **Server Container**: Initialized through Next.js instrumentation in `src/instrumentation.ts`
+2. **Client Container**: Initialized in client components through a provider
+3. **SSR Container**: Initialized during server-side rendering
 
 ### Watch Mode
 
 The watch mode feature:
 
-1. Only regenerates containers for the specific layer where changes are detected
-2. Uses Node.js native fs.watch API for reliable file monitoring
-3. Ignores index.ts files in base paths to prevent recursive regeneration
-4. Uses debouncing to avoid excessive regeneration
+1. Efficiently handles initial file scanning without triggering unnecessary regeneration
+2. Uses the Chokidar library for reliable file monitoring
+3. Only regenerates containers when actual changes are detected
 
 ## Best Practices
 
@@ -186,8 +205,128 @@ The watch mode feature:
 2. **Use meaningful identifiers**: The ID in `@injectable('ServiceId')` should be descriptive.
 3. **Prefer constructor injection**: This makes dependencies explicit and enables proper testing.
 4. **Consider lifecycle scopes**: Use 'Singleton' for stateless services and 'Transient' for stateful ones.
-5. **Separate client and server code**: Use naming conventions like `ServiceClient.ts` and `ServiceServer.ts`.
+5. **Follow naming conventions**: Use suffixes to indicate environment specificity:
+   - `ServiceClient.ts` for client-only implementations
+   - `ServiceServer.ts` for server-only implementations
+   - `ServiceSSR.ts` for SSR-specific implementations
+6. **Avoid duplicate service IDs**: Each service ID should be unique across all environments.
+
+## Container Registry
+
+The container registry has been enhanced to handle duplicate service registrations gracefully. If a service with the same ID is registered multiple times, the latest registration will take precedence. This is particularly useful during development when files are being updated frequently.
+
+```typescript
+// Prevent duplicate identifiers
+if (container.isBound(identifier)) {
+  container.unbind(identifier);
+}
+container.bind(identifier).to(module);
+```
+
+## Instrumentation Integration
+
+The DI containers are initialized during the Next.js bootstrap process using the instrumentation API. This ensures that containers are available throughout the application lifecycle, including during server-side rendering.
+
+The initialization happens in `src/instrumentation.ts`:
+
+```typescript
+export function register() {
+  // Initialize the server container
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    // This code runs only on the server
+    import('./platform/server');
+  }
+}
+```
+
+## Usage Examples: Server vs. SSR Containers
+
+Understanding when to use each container type is crucial for proper application architecture. Here are examples from our codebase:
+
+### SSR Container Usage
+
+The SSR container is used in server components that render pages. It's accessed through the global `EMP.platform.ssr` object. This is ideal for Next.js Server Components that need to fetch data during rendering.
+
+**Example from `src/lib/ssr/products.ts`:**
+
+```typescript
+import { ProductService } from "@/platform/services/product";
+import { Product } from "@/platform/services/model/product";
+import { cache } from "react";
+
+// Access the ProductService from the SSR container
+const getProductService = () => globalThis.EMP.platform.ssr.get<ProductService>("ProductService");
+
+// Use React's cache to memoize product fetching
+const _getProduct = cache(async (id: string) : Promise<Product | null> => {
+    const product = await getProductService().getProductById(id)
+    return product || null;
+});
+
+export function getProductById(id: string) : Promise<Product | null> {
+  return _getProduct(id);
+}
+```
+
+This is then used in a Server Component like `src/app/[locale]/product/[id]/page.tsx`:
+
+```typescript
+// Fetch product data server-side using the SSR container
+let product: Product | null;
+try {
+  product = await getProductById(productId);
+} catch (error) {
+  throw new Error(`Error loading product: ${error instanceof Error ? error.message : String(error)}`);
+}
+```
+
+### Server Container Usage
+
+The Server container is used in API routes and other server-only code that doesn't participate in rendering. It's accessed through the global `EMP.platform.server` object.
+
+**Example from `src/app/api/products/[id]/route.ts`:**
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { ProductService } from '@/platform/services/product/ProductService';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: productId } = await params;
+    
+    // Access the ProductService directly from the server container
+    const productService = EMP.platform.server.get<ProductService>('ProductService');
+    const product = await productService.getProductById(productId);
+    
+    if (!product) {
+      return NextResponse.json(
+        { error: `Product with ID ${productId} not found` },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch product' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### When to Use Which Container
+
+| Container | Use Case | Access Pattern | Example Scenarios |
+|-----------|----------|----------------|-------------------|
+| **SSR** | Server Components, RSC data fetching | `globalThis.EMP.platform.ssr.get<T>(id)` | Product pages, category listings, server-rendered content |
+| **Server** | API routes, middleware, server utilities | `EMP.platform.server.get<T>(id)` | REST endpoints, authentication, server-only operations |
+| **Client** | Client Components, browser-only code | Injected via context providers | Interactive UI elements, client-side state management |
 
 ## Conclusion
 
-Our Dependency Injection framework provides a solid foundation for building maintainable, testable, and flexible applications. By following the patterns and practices outlined in this documentation, you can leverage the full power of dependency injection in your Next.js application.
+Our Dependency Injection framework provides a solid foundation for building maintainable, testable, and flexible applications. The unified platform container with environment-specific variants simplifies dependency management while maintaining the flexibility needed for a Next.js application. By following the patterns and practices outlined in this documentation, you can leverage the full power of dependency injection in your application.

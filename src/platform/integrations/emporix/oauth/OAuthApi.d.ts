@@ -86,7 +86,7 @@ export interface CustomerTokenResponse {
   expires_in: number;
   scope: string;
   saas_token: string;
-  refreshToken?: string;
+  refreshToken?: string; // mismatching casing from original spec
   refreshTokenExpiresIn?: number;
   sessionId?: string;
 }

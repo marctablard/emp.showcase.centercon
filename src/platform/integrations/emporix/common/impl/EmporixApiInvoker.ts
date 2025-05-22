@@ -42,15 +42,11 @@ class EmporixApiInvoker {
    * @param clientSecret Optional client secret (uses config value if not provided)
    * @returns Promise with the token string
    */
-  async getServiceAccessToken(clientId?: string, clientSecret?: string): Promise<string> {
-    const cid = clientId || this.config.clientId;
-    const secret = clientSecret || this.config.clientSecret;
-    
-    if (!cid || !secret) {
-      throw new Error('Client ID and Client Secret are required for service access token');
+  async getServiceAccessToken(): Promise<string> {
+    if (!this.config.serverClientId || !this.config.serverClientSecret) {
+      throw new Error("Service Credentials not available");
     }
-
-    return this.tokenManager.getServiceAccessToken(this.config.tenant, cid, secret);
+    return this.tokenManager.getServiceAccessToken(this.config.tenant, this.config.serverClientId, this.config.serverClientSecret);
   }
 
   /**

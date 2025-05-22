@@ -7,4 +7,5 @@ export class UserAgentServiceClient implements UserAgentService {
         return Promise.resolve(window.navigator.userAgent)
     }
 }
-    
+
+export default UserAgentServiceClient;

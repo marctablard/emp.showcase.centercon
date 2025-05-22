@@ -1,13 +1,11 @@
-
-import apis from "@/platform/integrations/index";
 import type { Product } from "@/platform/services/model/product";
 import type { Paginated } from "@/platform/services/model/common";
 import type { ProductService } from "@/platform/services/product/ProductService";
 import type { ProductApi } from "@/platform/integrations/emporix";
 import { Product as EmporixProduct } from "@/platform/integrations/emporix/model/product";
-import services from "@/platform/services";
 import { injectable } from "@/platform/core/di/injectable";
-import { ProductMapper } from "../../model/product/ProductMapper";
+import type { ProductMapper } from "../../model/product/ProductMapper";
+import { inject } from "inversify";
 
 /**
  * Implementation of ProductService for Emporix product data.
@@ -15,20 +13,26 @@ import { ProductMapper } from "../../model/product/ProductMapper";
  */
 @injectable('ProductService', "Singleton")
 class EmporixProductService implements ProductService {
+    private productApi: ProductApi;
+    private productMapper: ProductMapper<EmporixProduct>;
+    
+    constructor(
+        @inject('EmporixProductMapper') productMapper: ProductMapper<EmporixProduct>,
+        @inject('EmporixProductApi') productApi: ProductApi
+    ) {
+        this.productApi = productApi;
+        this.productMapper = productMapper;
+    }
 
     async getProductById(id: string): Promise<Product | undefined> {
-        const mapper = await services.get<ProductMapper<EmporixProduct>>('EmporixProductMapper');
-        const productApi : ProductApi = await apis.get('EmporixProductApi');
-        const product = await productApi.getProduct(id);
-        return product ? mapper.mapToService(product) : undefined;
+        const product = await this.productApi.getProduct(id);
+        return product ? this.productMapper.mapToService(product) : undefined;
     }
     
     async getProducts(page?: number, pageSize?: number): Promise<Paginated<Product>> {
-        const productApi : ProductApi = await apis.get('EmporixProductApi');
-        const paginated = await productApi.getProducts(page, pageSize);
-        const mapper = await services.get<ProductMapper<EmporixProduct>>('EmporixProductMapper');
+        const paginated = await this.productApi.getProducts(page, pageSize);
         return {
-            items: paginated.items.map((product : EmporixProduct) => mapper.mapToService(product)),
+            items: paginated.items.map((product : EmporixProduct) => this.productMapper.mapToService(product)),
             page: paginated.page,
             pageSize: paginated.size,
             total: paginated.total,

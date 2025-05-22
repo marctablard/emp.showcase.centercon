@@ -4,10 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ProductCarousel } from '@/components/product/product-carousel';
 import { ProductPriceComponent } from '@/components/product/product-price';
 import { ProductTabsComponent } from '@/components/product/product-tabs';
-import { fetchProductById } from '@/lib/api/products';
+import { getProductById } from '@/lib/ssr/products';
 
 const priceTiers = [
   { quantity: 1, price: 110.45 },
@@ -18,13 +17,14 @@ const priceTiers = [
 ];
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
+
   const productId = (await params).id;
   const locale = (await params).locale;
   // Get translations for the current locale
   const t = await getTranslations({ locale, namespace: 'product' });
     
   // Fetch product data server-side using our shared API layer
-  const product = await fetchProductById(productId);
+  const product = await getProductById(productId);
 
   // If product not found, show 404 page
   if (!product) {
