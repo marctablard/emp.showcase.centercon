@@ -36,8 +36,8 @@ export default function Header() {
                     </NavigationMenuContent>
                   </NavigationMenuItem>
                 </NavigationMenuList>
-                <NavigationMenuLink className="no-underline px-4">
-                  Components
+                <NavigationMenuLink href="/product/10637590" className="no-underline px-4">
+                  {t('featuredProduct')}
                 </NavigationMenuLink>
                 <NavigationMenuLink className="no-underline px-4">
                   Components
