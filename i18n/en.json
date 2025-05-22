@@ -16,6 +16,60 @@
         }
     },
     "header": {
-        "featuredProduct": "Featured Product"
+        "featuredProduct": "Featured Product",
+        "signIn": "Sign In",
+        "register": "Register"
+    },
+    "searchBar": {
+        "allProducts": "All Products",
+        "search": "Enter keyword, item, model or part number",
+        "bulkOrder": "Bulk Order",
+        "myAccount": "My Account"
+    },
+    "footer": {
+        "companyName": "Company Name",
+        "street": "123. Line street",
+        "additionalAddress": "Sunrise Business Park",
+        "city": "Manchester"
+    },
+    "login": {
+        "title": "Sign In",
+        "username": "Username",
+        "password": "Password",
+        "forgotPassword": "Forgot password?",
+        "continue": "Continue"
+    },
+    "register": {
+        "title": "Registration",
+        "registrationInfo": "Registration Information",
+        "personalDetails": "Please provide your personal details",
+        "registrationType": "Registration Type",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "emailConfirmation": "Confirm Email Address",
+        "addressInfo": "Address Information",
+        "addressDetails": "Please provide your address details",
+        "companyName": "Company Name",
+        "businessType": "Business Type",
+        "street": "Street",
+        "houseNumber": "House Number",
+        "postalCode": "Postal Code",
+        "city": "City",
+        "country": "Country",
+        "vatNumber": "VAT Number",
+        "shippingSameAsBilling": "Shipping Address Same as Billing",
+        "accountSettings": "Account Settings",
+        "accountDetails": "Please set a username and password",
+        "username": "Username",
+        "password": "Password",
+        "passwordConfirmation": "Confirm Password",
+        "emailSignup": "Email Signup",
+        "newsletter": "Newsletter",
+        "dealsAlerts": "Deals Alerts",
+        "termsNotice": "By clicking \"Register\" you agree to our Privacy Policy and Terms of Use",
+        "registerButton": "Register",
+        "alreadyHaveAccount": "Already have an Account?",
+        "logIn": "Log In"
     }
 }

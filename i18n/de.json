@@ -16,6 +16,60 @@
         }
     },
     "header": {
-        "featuredProduct": "Ausgewähltes Produkt"
+        "featuredProduct": "Ausgewähltes Produkt",
+        "signIn": "Einloggen",
+        "register": "Registrieren"
+    },
+    "searchBar": {
+        "allProducts": "Alle Produkte",
+        "search": "Schlüsselwort, Artikel oder Teilnummer eingeben",
+        "bulkOrder": "Großbestellung",
+        "myAccount": "Mein Account"
+    },
+    "footer": {
+        "companyName": "Company Name",
+        "street": "123. Line street",
+        "additionalAddress": "Sunrise Business Park",
+        "city": "Manchester"
+    },
+    "login": {
+        "title": "Anmelden",
+        "username": "Benutzername",
+        "password": "Passwort",
+        "forgotPassword": "Passwort vergessen?",
+        "continue": "Fortfahren"
+    },
+    "register": {
+        "title": "Registrierung",
+        "registrationInfo": "Registrierungsinformationen",
+        "personalDetails": "Bitte geben Sie Ihre persönlichen Daten an",
+        "registrationType": "Registrierungstyp",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "email": "E-Mail-Adresse",
+        "emailConfirmation": "E-Mail-Adresse bestätigen",
+        "addressInfo": "Adressinformationen",
+        "addressDetails": "Bitte geben Sie Ihre Adressdaten an",
+        "companyName": "Firmenname",
+        "businessType": "Unternehmensart",
+        "street": "Straße",
+        "houseNumber": "Hausnummer",
+        "postalCode": "Postleitzahl",
+        "city": "Stadt",
+        "country": "Land",
+        "vatNumber": "Umsatzsteuer-ID",
+        "shippingSameAsBilling": "Lieferadresse ist gleich Rechnungsadresse",
+        "accountSettings": "Kontoeinstellungen",
+        "accountDetails": "Bitte legen Sie einen Benutzernamen und ein Passwort fest",
+        "username": "Benutzername",
+        "password": "Passwort",
+        "passwordConfirmation": "Passwort bestätigen",
+        "emailSignup": "E-Mail-Anmeldung",
+        "newsletter": "Newsletter",
+        "dealsAlerts": "Angebots-Benachrichtigungen",
+        "termsNotice": "Mit dem Klick auf \"Registrieren\" stimmen Sie unserer Datenschutzerklärung und den Nutzungsbedingungen zu",
+        "registerButton": "Registrieren",
+        "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+        "logIn": "Anmelden"
     }
 }
