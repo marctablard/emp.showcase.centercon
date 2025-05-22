@@ -1,13 +1,13 @@
 import EmporixProductApi from './EmporixProductApi';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
-import { Product, PaginatedResponse, SearchParams } from '../../model';
+import { Product, SearchParams } from '../../model';
 import { EmporixConfig } from '../../config';
-import { Container } from 'inversify';
-import * as commonUtils from '../../common/util/common';
+import { Container, inject } from 'inversify';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
-import { EmporixTokenManagerAbstract } from '../../common/impl/EmporixTokenManagerAbstract';
+import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import { TokenManager } from '../../common/TokenManager';
+import type { OAuthApi } from '../../oauth/OAuthApi';
 
 // Create a test config implementation
 class TestEmporixConfig implements EmporixConfig {
@@ -18,6 +18,16 @@ class TestEmporixConfig implements EmporixConfig {
 }
 
 class TestTokenManager extends EmporixTokenManagerAbstract {
+
+  constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
+    super(oauthApi);
+  }
+  protected readTokens(): Promise<TokenStore> {
+    throw new Error('Method not implemented.');
+  }
+  protected writeTokens(tokens: TokenStore): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
   private tokenStore: Map<string, StoredToken<any>> = new Map();
   protected async readToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service'): Promise<T | undefined> {
     return this.tokenStore.get(type) as T | undefined;
