@@ -158,7 +158,7 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
 
   // Build injectables for a specific environment
   const buildEnvironmentInjectables = (env : 'server' | 'client' | 'ssr') => {
-    let envInjectables;
+    let envInjectables : InjectableInfo[];
     switch (env) {
       case 'server':
         envInjectables = injectables.filter(i => i.isServerOnly)
