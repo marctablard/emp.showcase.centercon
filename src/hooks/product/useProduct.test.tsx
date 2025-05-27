@@ -19,7 +19,7 @@ const mockProduct = {
     amount: 99.99,
     currency: 'USD'
   },
-  images: ['https://example.com/image.jpg']
+  images: [{ url:'https://example.com/image.jpg'}]
 };
 
 // Wrapper component to provide the store context

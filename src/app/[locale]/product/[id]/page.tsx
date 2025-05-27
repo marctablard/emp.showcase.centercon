@@ -1,12 +1,15 @@
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ProductPriceComponent } from '@/components/product/product-price';
 import { ProductTabsComponent } from '@/components/product/product-tabs';
+import { getTranslations } from 'next-intl/server';
 import { getProductById } from '@/lib/ssr/products';
+import { ProductCarousel } from '@/components/product/product-carousel';
+import { useL10n } from '@/hooks/useL10n';
+
 
 const priceTiers = [
   { quantity: 1, price: 110.45 },
@@ -20,12 +23,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   const productId = (await params).id;
   const locale = (await params).locale;
+  const { l10n } = useL10n(locale);
+
   // Get translations for the current locale
   const t = await getTranslations({ locale, namespace: 'product' });
     
   // Fetch product data server-side using our shared API layer
   const product = await getProductById(productId);
-
+  
   // If product not found, show 404 page
   if (!product) {
     notFound();
@@ -38,17 +43,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">
             {/* Product Image Carousel */}
             <div className="overflow-hidden">
-               {/*
-              {product.images && product.images.length > 0 ? (
-               
-                  <ProductCarousel images={product.images} />
-              ) : (
-                <div className="bg-gray-200 h-96 flex items-center justify-center">
-                  <span className="text-gray-500">{t('noImage')}</span>
-                </div>
-              )
-                */}
-            
+              <ProductCarousel images={product.images} />
+              
             </div>
             
             {/* Product Details */}
@@ -56,9 +52,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">
                 In Stock
               </Badge>
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900">{product.name}</h1>
+              <h1 className="text-4xl font-bold tracking-tight text-gray-900">{l10n(product.name)}</h1>
               
-              <ProductPriceComponent price={110.45} tiers={priceTiers} />
+              <ProductPriceComponent price={110.45} tiers={priceTiers} />test
 
               <div className="mt-6">
                 <div className="flex items-center space-x-4">

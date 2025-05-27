@@ -73,8 +73,7 @@
         "termsNotice": "Mit dem Klick auf \"Registrieren\" stimmen Sie unserer <privacyPolicy>Datenschutzerklärung</privacyPolicy> und den <termsOfUse>Nutzungsbedingungen</termsOfUse> zu",
         "registerButton": "Registrieren",
         "registering": "Registrierung läuft...",
-        "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
-        "logIn": "Anmelden",
+        "alreadyHaveAccount": "Haben Sie bereits ein Konto?",        "logIn": "Anmelden",
         "validation": {
             "registrationTypeRequired": "Registrierungstyp ist erforderlich",
             "firstNameRequired": "Vorname ist erforderlich",
@@ -98,5 +97,10 @@
             "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
             "serverError": "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut."
         }
+    },
+    "searchResults": {
+        "showing": "Zeige {start}-{end} von {total} Produkten",
+        "noProductsFound": "Keine Produkte gefunden",
+        "tryAdjusting": "Versuchen Sie, Ihre Suche oder Filter anzupassen"
     }
 }

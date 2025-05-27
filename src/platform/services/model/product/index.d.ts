@@ -1,10 +1,12 @@
-import { Price, TaxType } from "../common";
-
+import { Price, TaxType, Media } from "../common";
+import { LocalizedString } from "../common";
+;
 export interface Product {
     id: string;
-    name: string;
-    description: string;
+    name: string | LocalizedString;
+    description: string | LocalizedString;
     price?: Price;
-    images?: string[];
+    primaryImage?: Media;
+    images?: Media[];
     taxType?: TaxType;
 }

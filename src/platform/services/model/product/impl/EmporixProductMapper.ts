@@ -1,7 +1,7 @@
 import { Product } from '@/platform/services/model/product';
 import { ProductMapper } from '../ProductMapper';
 import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
-import { LocalizedString } from '@/platform/services/model/common';
+import { LocalizedString, Media } from '@/platform/services/model/common';
 import { injectable } from '@/platform/core/di/injectable';
 
 /**
@@ -19,9 +19,14 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
   mapToService(source: EmporixProduct): Product {
     // Extract images from media array
     const images = source.media ? 
-      source.media.map(media => media.url) : 
+      source.media.map(media => ({
+        url: media.url,
+        altText: source.name,
+        contentType: media.contentType,
+      })) : 
       [];
-    
+      
+    const primaryImage = source.media ? source.media[0] : undefined;
     // Extract localized name and description
     const name = this.extractLocalizedText(source.name);
     const description = source.description ? 
@@ -32,6 +37,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       id: source.id || source.code,
       name,
       description,
+      primaryImage,
       images
     };
   }
@@ -44,21 +50,20 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
    */
   mapToSource(service: Product): EmporixProduct {
     // Convert images array to media objects
-    const media = service.images ? service.images.map(url => ({
-      id: `media-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url,
-      contentType: 'image/jpeg', // Assuming JPEG format, adjust as needed
+    const media = service.images ? service.images.map((image, ix) => ({
+      id : service.id + '-' + ix,
+      url : image.url,
+      altText: image.altText,
       tags: [],
-      createdAt: new Date().toISOString()
+      contentType: 'image/jpeg', // Assuming JPEG format, adjust as needed
     })) : [];
-    
     
     return {
       id: service.id,
       code: service.id, // Using id as code since it's required
       name: service.name,
       description: service.description,
-      media,
+      media: media,
       published: true
     };
   }
@@ -71,6 +76,9 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
    * @returns The extracted text string
    */
   private extractLocalizedText(localizedText: string | LocalizedString): string {
+    if (!localizedText) {
+      return '';
+    }
     if (typeof localizedText === 'string') {
       return localizedText;
     }

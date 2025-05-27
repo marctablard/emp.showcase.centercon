@@ -32,11 +32,28 @@ export interface Price {
     tax?: Tax & TaxType;
 }
 
+export interface FilterValue {
+    id: string;
+    name?: string;
+    count?: number;
+    active: boolean;
+}
+
+export interface Filter {
+    id: string;
+    name?: string;
+    values: FilterValue[];
+}
+
 export interface Paginated<T> {
     items: T[];
     total: number;
     page: number;
     pageSize: number;
+}
+
+export interface SearchResult<T> extends Paginated<T> {
+    availableFilters: Filter[];
 }
 
 export interface SearchParams<T> {
@@ -45,14 +62,15 @@ export interface SearchParams<T> {
     size?: number;
     sort?: string;
     criteria?: Partial<T>;
-}
-
-
-export interface Media {
-  url: string;
-  altText?: string;
+    filters?: Record<string, string | string[]>;
 }
 
 export interface LocalizedString {
   [key: string]: string;
+}
+
+export interface Media {
+  url: string;
+  altText?: string | LocalizedString;
+  contentType?: string;
 }

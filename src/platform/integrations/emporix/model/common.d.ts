@@ -18,13 +18,13 @@ export interface Media {
     id: string;
     url: string;
     contentType: string;
-    tags: string[];
+    tags?: string[];
     customAttributes?: {
         name: string;
         id: string;
         type: string;
     };
-    createdAt: string;
+    createdAt?: string;
 }
 
 export interface Metadata {

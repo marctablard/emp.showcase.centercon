@@ -10,12 +10,25 @@ import {
   CarouselPrevious,
   CarouselApi,
 } from '@/components/ui/carousel';
+import { Media } from '@/platform/services/model/common';
+import { useL10n } from '@/hooks/useL10n';
+import { imageSizes } from '@/lib/utils';
 
 interface ProductCarouselProps {
-  images: string[];
+  images: Media[] | undefined;
 }
 
 export function ProductCarousel({ images }: ProductCarouselProps) {
+  
+  const {l10n } = useL10n();
+  
+  if (!images || images.length === 0) {
+    return (
+      <div className="bg-gray-200 h-96 flex items-center justify-center">
+        <span className="text-gray-500"></span>
+      </div>
+    );
+  }
   const [mainApi, setMainApi] = useState<CarouselApi>();
   const [thumbApi, setThumbApi] = useState<CarouselApi>();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -45,9 +58,11 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
             <CarouselItem key={index}>
               <div className="relative h-[500px] w-full">
                 <Image
-                  src={image}
-                  alt={`Product image ${index + 1}`}
+                  src={image.url}
+                  alt={image.altText ? l10n(image.altText) : `Product image ${index + 1}`}
                   fill
+                  sizes={imageSizes}
+                  priority={index === 0}
                   className="object-cover object-center"
                 />
               </div>
@@ -70,9 +85,10 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
                 }}
               >
                 <Image
-                  src={image}
-                  alt={`Thumbnail ${index + 1}`}
+                  src={image.url}
+                  alt={image.altText ? l10n(image.altText) : `Thumbnail ${index + 1}`}
                   fill
+                  sizes={imageSizes}
                   className="object-cover object-center"
                 />
               </div>
