@@ -54,7 +54,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               </Badge>
               <h1 className="text-4xl font-bold tracking-tight text-gray-900">{l10n(product.name)}</h1>
               
-              <ProductPriceComponent price={110.45} tiers={priceTiers} />test
+              <ProductPriceComponent price={110.45} tiers={priceTiers} />
 
               <div className="mt-6">
                 <div className="flex items-center space-x-4">
