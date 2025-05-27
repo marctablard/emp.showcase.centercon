@@ -37,7 +37,10 @@
         "username": "Username",
         "password": "Password",
         "forgotPassword": "Forgot password?",
-        "continue": "Continue"
+        "continue": "Continue",
+        "invalidCredentials": "Invalid username or password",
+        "loginError": "An error occurred during login. Please try again.",
+        "loggingIn": "Signing in..."
     },
     "register": {
         "title": "Registration",
@@ -67,9 +70,33 @@
         "emailSignup": "Email Signup",
         "newsletter": "Newsletter",
         "dealsAlerts": "Deals Alerts",
-        "termsNotice": "By clicking \"Register\" you agree to our Privacy Policy and Terms of Use",
+        "termsNotice": "By clicking \"Register\" you agree to our <privacyPolicy>Privacy Policy</privacyPolicy> and <termsOfUse>Terms of Use</termsOfUse>",
         "registerButton": "Register",
+        "registering": "Registering...",
         "alreadyHaveAccount": "Already have an Account?",
-        "logIn": "Log In"
+        "logIn": "Log In",
+        "validation": {
+            "registrationTypeRequired": "Registration type is required",
+            "firstNameRequired": "First name is required",
+            "lastNameRequired": "Last name is required",
+            "invalidEmail": "Please enter a valid email address",
+            "emailMismatch": "Email addresses don't match",
+            "streetRequired": "Street is required",
+            "houseNumberRequired": "House number is required",
+            "postalCodeRequired": "Postal code is required",
+            "cityRequired": "City is required",
+            "countryRequired": "Country is required",
+            "usernameMinLength": "Username must be at least 3 characters",
+            "passwordMinLength": "Password must be at least 8 characters",
+            "passwordUppercase": "Password must contain at least one uppercase letter",
+            "passwordLowercase": "Password must contain at least one lowercase letter",
+            "passwordNumber": "Password must contain at least one number",
+            "confirmPassword": "Please confirm your password",
+            "passwordMismatch": "Passwords don't match",
+            "usernameTaken": "This username is already taken. Please choose another one.",
+            "emailExists": "This email is already registered. Please use a different email or try to log in.",
+            "registrationFailed": "Registration failed. Please try again.",
+            "serverError": "A server error occurred. Please try again later."
+        }
     }
 }

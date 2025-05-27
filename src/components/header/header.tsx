@@ -51,8 +51,12 @@ export default function Header() {
               </NavigationMenu>
             </div>
             <div className="hidden md:flex items-center gap-2">
-              <Button className="py-4" variant="outline">{t('signIn')}</Button>
-              <Button className="py-4" variant="default">{t('register')}</Button>
+              <Button className="py-4" variant="outline">
+                <Link href="/login">{t('signIn')}</Link>
+              </Button>
+              <Button className="py-4" variant="default">
+                <Link href="/register"> {t('register')}</Link>
+              </Button>
             </div>
             <Button className="md:hidden flex py-4 bg-white text-primary" size="icon">
               <Menu />
