@@ -2,9 +2,6 @@ import { Cart, Cart as ServiceCart, CartItem as ServiceCartItem } from '../cart'
 import { Cart as EmporixCart, CartItem as EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
 import { injectable } from '@/platform/core/di/injectable';
 import { Tax } from '../../common';
-import type { ProductMapper } from '../../product/ProductMapper';
-import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
-import { inject } from 'inversify';
 import { CartMapper } from '../CartMapper';
 
 /**

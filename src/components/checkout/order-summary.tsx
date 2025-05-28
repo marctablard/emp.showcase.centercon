@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Cart } from '@/platform/services/model/cart/cart';
 import Image from 'next/image';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useL10n } from '@/hooks/useL10n';
