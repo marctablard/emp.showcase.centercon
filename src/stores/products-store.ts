@@ -1,4 +1,6 @@
 // src/stores/counter-store.ts
+// re-export for convenience
+export { useProductStore} from '@/providers/StoreProvider'
 import { Product } from '@/platform/services/model/product'
 import { create } from 'zustand/react'
 
@@ -18,20 +20,13 @@ export type ProductActions = {
 
 export type ProductStore = ProductState & ProductActions
 
-export const initProductStore = () : ProductState => {
-  return {
-    currentProductId: null,
-    products: {}
-  }
-}
-
-export const defaultInitState: ProductState = {
+const defaultState: ProductState = {
   currentProductId: null,
   products: {}
 }
 
 export const createProductStore = (
-  initState: ProductState = defaultInitState,
+  initState: ProductState = defaultState,
 ) => {
   return create<ProductStore>()((set, get) => ({
     ...initState,

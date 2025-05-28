@@ -8,24 +8,27 @@ import {z} from "zod";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Link} from "@/i18n/navigation";
-import {useTranslations} from "next-intl";
+import {useLocale, useTranslations} from "next-intl";
 import {RegistrationInfoAccordion} from "./registration-info-accordion";
 import {AddressInfoAccordion} from "./address-info-accordion";
 import {AccountSettingsAccordion} from "./account-settings-accordion";
 import {EmailSignupSection} from "./email-signup-section";
-import {useRegistration} from "@/hooks/registration/use-registration";
+import {useRegistration} from "@/hooks/registration/useRegistration";
 import {useState, useRef, useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {AlertCircle} from "lucide-react";
+import useCurrency from "@/hooks/useCurrency";
+import useSiteConfig from "@/hooks/site/useSiteConfig";
 
 export default function RegistrationCard() {
     const t = useTranslations('register');
     const router = useRouter();
-    const {register, isRegistering, registrationError, isSuccess} = useRegistration();
+    const {register, loading, error, isSuccess} = useRegistration();
     const [formError, setFormError] = useState<string | null>(null);
     const top = useRef<HTMLDivElement>(null);
-
+    const locale = useLocale();
+    const { currency, setCurrency } = useCurrency();
     useEffect(() => {
         if (formError && top.current) {
             top.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -110,7 +113,28 @@ export default function RegistrationCard() {
         setFormError(null);
 
         try {
-            const result = await register(values);
+            const result = await register({
+                credentials : {
+                    username : values.email,
+                    password : values.password
+                },
+                customer : {
+                    email: values.email,
+                    firstName : values.firstName,
+                    lastName : values.lastName,
+                    company: values.companyName,
+                    language: locale, // use current locale
+                    currency: currency, // use current currency 
+                },
+                address : {
+                    contactName : values.firstName + ' ' + values.lastName,
+                    street : values.street,
+                    streetNumber : values.houseNumber,
+                    city : values.city,
+                    zipCode : values.postalCode,
+                    country : values.country,
+                }
+            });
 
             if (result.success) {
                 // Redirect to login page or show success message
@@ -148,11 +172,11 @@ export default function RegistrationCard() {
             <CardContent>
                 <Form {...form}>
                     <form id="register-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-12">
-                        {(formError || registrationError) && (
+                        {(formError || error) && (
                             <Alert variant="destructive" className="mb-4">
                                 <AlertCircle className="h-4 w-4" />
                                 <AlertDescription>
-                                    {formError || registrationError}
+                                    {formError || error}
                                 </AlertDescription>
                             </Alert>
                         )}
@@ -179,9 +203,9 @@ export default function RegistrationCard() {
                     type="submit"
                     form="register-form"
                     className="w-full"
-                    disabled={isRegistering}
+                    disabled={loading}
                 >
-                    {isRegistering ? t('registering') : t('registerButton')}
+                    {loading ? t('registering') : t('registerButton')}
                 </Button>
                 <p>{t('alreadyHaveAccount')} <Link href="/login">{t('logIn')}</Link></p>
             </CardFooter>

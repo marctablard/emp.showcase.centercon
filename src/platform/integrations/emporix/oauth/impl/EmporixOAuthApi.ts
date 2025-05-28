@@ -74,15 +74,16 @@ class EmporixOAuthApi implements OAuthApi {
         'Authorization': `Bearer ${accessToken}`
       },
       body: JSON.stringify({
-        username,
-        password
+        email: username,
+        password: password
       })
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get customer token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to get customer token: ${response.statusText} - ${message}`);
     }
-
+    
     return await response.json() as CustomerTokenResponse;
   }
 
@@ -104,9 +105,10 @@ class EmporixOAuthApi implements OAuthApi {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to refresh customer token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to refresh customer token: ${response.statusText} - ${message}`);
     }
-
+    
     return await response.json() as CustomerTokenResponse;
   }
 
@@ -117,25 +119,28 @@ class EmporixOAuthApi implements OAuthApi {
    * @param clientSecret Client secret for service access
    * @returns Promise with the service access token response
    */
-  async getServiceAccessToken(tenant: string, clientId: string, clientSecret: string): Promise<ServiceAccessTokenResponse> {
-    const url = `${this.baseUrl}/oauth/${tenant}/token`;
+  async getServiceAccessToken(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): Promise<ServiceAccessTokenResponse> {
+    const url = `${this.baseUrl}/oauth/token`;
     
-    // Create Basic Auth header from client ID and secret
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    // Create URL-encoded form data for OAuth token request
+    const formData = new URLSearchParams();
+    formData.append('grant_type', 'client_credentials');
+    formData.append('client_id', clientId);
+    formData.append('client_secret', clientSecret);
+    formData.append('scope', `tenant=${tenant}` + (scopes ? ` ${scopes.join(' ')}` : ''));
     
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${credentials}`
+        'Accept': 'application/json'
       },
-      body: 'grant_type=client_credentials'
+      body: formData
     });
-
+    
     if (!response.ok) {
       throw new Error(`Failed to get service access token: ${response.statusText}`);
     }
-
     return await response.json() as ServiceAccessTokenResponse;
   }
 }

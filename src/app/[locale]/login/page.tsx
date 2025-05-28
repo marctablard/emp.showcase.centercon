@@ -1,9 +1,10 @@
 import LoginCard from "@/components/login/login-card";
 
-export default function Login() {
+export default async function Login({ params }: { params: Promise<{ locale: string, callbackUrl: string }> }) {
+    const { locale, callbackUrl } = await params;
     return (
         <div className="flex flex-col items-center">
-            <LoginCard />
+            <LoginCard callbackUrl={callbackUrl} />
         </div>
     );
 }

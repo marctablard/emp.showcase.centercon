@@ -1,3 +1,23 @@
+export interface EmporixAddress {
+    contactName?: string;
+    companyName?: string;
+    street: string;
+    streetNumber?: string;
+    streetAppendix?: string;
+    extraLine1?: string;
+    extraLine2?: string;
+    extraLine3?: string;
+    extraLine4?: string;
+    zipCode: string;
+    city: string;
+    country: string;
+    state?: string;
+    contactPhone?: string;
+    type?: string;
+    metadata?: Metadata;
+    mixins?: Mixins;
+}
+
 export interface SearchParams<T> {
     query?: string;
     page?: number;
@@ -12,7 +32,6 @@ export interface PaginatedResponse<T> {
     page: number;
     size: number;
 }
-
 
 export interface Media {
     id: string;

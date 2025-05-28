@@ -1,4 +1,4 @@
-import Product from "@/platform/types/data";
+import Product from "@/platform/services/model/product";
 import { Mapper } from "../Mapper";
 
 /**

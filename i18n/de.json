@@ -8,6 +8,11 @@
         "noImage": "Kein Bild verfügbar",
         "noDescription": "Keine Beschreibung verfügbar.",
         "productId": "Produkt-ID",
+        "quantity": "Menge",
+        "buyNow": "Jetzt kaufen",
+        "addedToCart": "In den Warenkorb gelegt",
+        "addedToCartDescription": "wurde Ihrem Warenkorb hinzugefügt",
+        "errorAddingToCart": "Fehler beim Hinzufügen zum Warenkorb",
         "tabs": {
             "description": "Beschreibung",
             "specs": "Spezifikationen",
@@ -18,7 +23,8 @@
     "header": {
         "featuredProduct": "Ausgewähltes Produkt",
         "signIn": "Einloggen",
-        "register": "Registrieren"
+        "register": "Registrieren",
+        "account": "Konto"
     },
     "searchBar": {
         "allProducts": "Alle Produkte",
@@ -31,6 +37,22 @@
         "street": "123. Line street",
         "additionalAddress": "Sunrise Business Park",
         "city": "Manchester"
+    },
+    "cart": {
+        "yourCart": "Ihr Warenkorb",
+        "items": "Artikel",
+        "emptyCart": "Ihr Warenkorb ist leer",
+        "qty": "Menge",
+        "total": "Gesamt",
+        "viewCart": "Zum Warenkorb",
+        "product": "Produkt",
+        "details": "Details",
+        "price": "Preis",
+        "quantity": "Menge",
+        "subtotal": "Zwischensumme",
+        "continueShopping": "Weiter einkaufen",
+        "checkout": "Zur Kasse",
+        "orderSummary": "Bestellübersicht"
     },
     "login": {
         "title": "Anmelden",
@@ -73,7 +95,8 @@
         "termsNotice": "Mit dem Klick auf \"Registrieren\" stimmen Sie unserer <privacyPolicy>Datenschutzerklärung</privacyPolicy> und den <termsOfUse>Nutzungsbedingungen</termsOfUse> zu",
         "registerButton": "Registrieren",
         "registering": "Registrierung läuft...",
-        "alreadyHaveAccount": "Haben Sie bereits ein Konto?",        "logIn": "Anmelden",
+        "logIn": "Anmelden",
+        "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
         "validation": {
             "registrationTypeRequired": "Registrierungstyp ist erforderlich",
             "firstNameRequired": "Vorname ist erforderlich",
@@ -97,6 +120,49 @@
             "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
             "serverError": "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut."
         }
+    },
+    "Checkout": {
+        "title": "Zur Kasse",
+        "description": "Schließen Sie Ihren Einkauf ab",
+        "contactInformation": "Kontaktinformationen",
+        "shippingAddress": "Lieferadresse",
+        "billingAddress": "Rechnungsadresse",
+        "paymentMethod": "Zahlungsmethode",
+        "shippingMethod": "Versandart",
+        "placeOrder": "Bestellung aufgeben",
+        "processing": "Wird bearbeitet...",
+        "sameAsShipping": "Rechnungsadresse ist gleich Lieferadresse",
+        "requiredField": "Dieses Feld ist erforderlich",
+        "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+        "emptyCart": "Ihr Warenkorb ist leer. Bitte fügen Sie Artikel zu Ihrem Warenkorb hinzu, bevor Sie zur Kasse gehen.",
+        "formErrors": "Bitte korrigieren Sie die folgenden Fehler:",
+        "creditCard": "Kreditkarte",
+        "paypal": "PayPal",
+        "invoice": "Auf Rechnung",
+        "cardNumber": "Kartennummer",
+        "cardHolder": "Karteninhaber",
+        "expiryDate": "Ablaufdatum",
+        "cvv": "Prüfnummer",
+        "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
+        "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig.",
+        "freeShipping": "Kostenlos",
+        "standardShipping": "Standardversand",
+        "expressShipping": "Expressversand",
+        "overnightShipping": "Übernachtversand"
+    },
+    "Confirmation": {
+        "title": "Bestellbestätigung",
+        "description": "Vielen Dank für Ihre Bestellung",
+        "orderConfirmed": "Bestellung bestätigt!",
+        "thankYou": "Vielen Dank für Ihren Einkauf. Ihre Bestellung wurde entgegengenommen.",
+        "orderDetails": "Bestelldetails",
+        "orderNumber": "Bestellnummer",
+        "orderDate": "Bestelldatum",
+        "email": "E-Mail",
+        "paymentMethod": "Zahlungsmethode",
+        "emailConfirmation": "Eine Bestätigungs-E-Mail wurde gesendet an",
+        "continueShopping": "Weiter einkaufen",
+        "viewOrders": "Meine Bestellungen anzeigen"
     },
     "searchResults": {
         "showing": "Zeige {start}-{end} von {total} Produkten",

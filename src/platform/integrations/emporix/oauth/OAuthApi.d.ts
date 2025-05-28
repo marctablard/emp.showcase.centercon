@@ -61,7 +61,7 @@ export interface OAuthApi {
    * @param clientSecret Client secret for service access
    * @returns Promise with the service access token response
    */
-  getServiceAccessToken(tenant: string, clientId: string, clientSecret: string): Promise<ServiceAccessTokenResponse>;
+  getServiceAccessToken(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): Promise<ServiceAccessTokenResponse>;
 }
 
 /**
@@ -74,7 +74,7 @@ export interface AnonymousTokenResponse {
   scope: string;
   refresh_token?: string;
   refresh_token_expires_in?: number;
-  sessionId?: string;
+  sessionId: string;
 }
 
 /**
@@ -88,7 +88,7 @@ export interface CustomerTokenResponse {
   saas_token: string;
   refreshToken?: string; // mismatching casing from original spec
   refreshTokenExpiresIn?: number;
-  sessionId?: string;
+  sessionId: string;
 }
 
 /**

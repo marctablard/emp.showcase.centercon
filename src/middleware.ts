@@ -1,11 +1,49 @@
-import createMiddleware from 'next-intl/middleware';
-import {routing} from './i18n/routing';
+
+
+import {withAuth} from 'next-auth/middleware';
+import createIntlMiddleware from 'next-intl/middleware';
+import {NextRequest} from 'next/server';
  
-export default createMiddleware(routing);
+const locales = ['en', 'de'];
+const securedPages = ['/account'];
+ 
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale: 'en'
+});
+ 
+const authMiddleware = withAuth(
+  // Note that this callback is only invoked if
+  // the `authorized` callback has returned `true`
+  // and not for pages listed in `pages`.
+  function onSuccess(req) {
+    return intlMiddleware(req);
+  },
+  {
+    callbacks: {
+      authorized: ({token}) => token != null
+    },
+    pages: {
+      signIn: '/login'
+    }
+  }
+);
+ 
+export default function middleware(req: NextRequest) {
+  const securedPathnameRegex = RegExp(
+    `^(/(${locales.join('|')}))?(${securedPages.join('|')})?/?$`,
+    'i'
+  );
+  const isSecuredPage = securedPathnameRegex.test(req.nextUrl.pathname);
+ 
+  if (!isSecuredPage) {
+    return intlMiddleware(req);
+  } else {
+    return (authMiddleware as any)(req);
+  }
+}
  
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
+  matcher: ['/((?!api|_next|.*\\..*).*)']
 };
+

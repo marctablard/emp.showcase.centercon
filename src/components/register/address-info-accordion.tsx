@@ -1,17 +1,20 @@
 'use client';
 
-import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useTranslations } from "next-intl";
-import { Control } from "react-hook-form";
+import {AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import {Checkbox} from "@/components/ui/checkbox";
+import {FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {useTranslations} from "next-intl";
+import {Control} from "react-hook-form";
+import useSiteConfig from "@/hooks/site/useSiteConfig";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 interface AddressInfoAccordionProps {
     control: Control<any>;
 }
 
 export function AddressInfoAccordion({ control }: AddressInfoAccordionProps) {
+    const { billingCountries, shippingCountries } = useSiteConfig('main');
     const t = useTranslations('register');
 
     return (
@@ -38,6 +41,7 @@ export function AddressInfoAccordion({ control }: AddressInfoAccordionProps) {
                             </FormItem>
                         )}
                     />
+                    {/*}
                     <FormField
                         control={control}
                         name="businessType"
@@ -51,6 +55,7 @@ export function AddressInfoAccordion({ control }: AddressInfoAccordionProps) {
                             </FormItem>
                         )}
                     />
+                    {*/}
                     <FormField
                         control={control}
                         name="street"
@@ -110,7 +115,18 @@ export function AddressInfoAccordion({ control }: AddressInfoAccordionProps) {
                             <FormItem>
                                 <FormLabel htmlFor="country">{t('country')}</FormLabel>
                                 <FormControl>
-                                    <Input id="country" type="text" required {...field}/>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder={t('country')} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                        {billingCountries.map(country => (
+                                            <SelectItem key={country.code} value={country.code}>
+                                                {country.name}
+                                            </SelectItem>
+                                        ))}
+                                        </SelectContent>
+                                    </Select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

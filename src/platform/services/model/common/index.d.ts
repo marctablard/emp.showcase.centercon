@@ -69,6 +69,18 @@ export interface LocalizedString {
   [key: string]: string;
 }
 
+export interface Address {
+  contactName: string;
+  companyName?: string;
+  street: string;
+  streetNumber?: string;
+  streetAppendix?: string;
+  zipCode: string;
+  city: string;
+  country: string;
+  state?: string;
+  contactPhone?: string;
+}
 export interface Media {
   url: string;
   altText?: string | LocalizedString;

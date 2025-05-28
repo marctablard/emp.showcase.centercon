@@ -15,14 +15,14 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
 
     constructor(@inject('EmporixOAuthApi') private oauthApi: OAuthApi) { }
 
-    async getAnonymousToken(tenant: string, clientId: string): Promise<string> {
+    async getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string, sessionId: string }> {
         let anonymousToken = await this.readToken<StoredToken<AnonymousTokenResponse>, AnonymousTokenResponse>('anonymous');
         // Check if token is expired or about to expire (within 5 minutes)
-        if (!anonymousToken || !checkTokenValidity(anonymousToken.token.access_token, anonymousToken.expiryAt)) {
+        if (!this.checkAccessToken(anonymousToken)) {
             anonymousToken = await this.fetchAnonymousToken(anonymousToken, tenant, clientId);
             await this.writeToken<StoredToken<AnonymousTokenResponse>, AnonymousTokenResponse>('anonymous', anonymousToken);
         }
-        return anonymousToken.token.access_token;
+        return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.sessionId };
     }
 
     protected async fetchAnonymousToken(anonymousToken: StoredToken<AnonymousTokenResponse> | undefined, tenant: string, clientId: string) {
@@ -42,17 +42,17 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
         return anonymousToken;
     }
 
-    public async getCustomerToken(tenant: string, clientId: string, username?: string, password?: string): Promise<{ accessToken: string, saasToken: string }> {
+    public async getCustomerToken(tenant: string, clientId: string, credentials?: { username: string; password: string }): Promise<{ accessToken: string, saasToken: string, sessionId: string }> {
         let customerToken = await this.readToken<StoredToken<CustomerTokenResponse>, CustomerTokenResponse>('customer');
         // Check if token is expired or about to expire (within 5 minutes)
-        if (!customerToken || !checkTokenValidity(customerToken.token.access_token, customerToken.expiryAt)) {
-            customerToken = await this.fetchCustomerToken(customerToken, tenant, username, password, clientId);
+        if (!this.checkAccessToken(customerToken)) {
+            customerToken = await this.fetchCustomerToken(customerToken, tenant, credentials?.username, credentials?.password, clientId);
             await this.writeToken<StoredToken<CustomerTokenResponse>, CustomerTokenResponse>('customer', customerToken);
         }
-
         return {
-            accessToken: customerToken.token.access_token,
-            saasToken: customerToken.token.saas_token
+            accessToken: customerToken!.token.access_token,
+            saasToken: customerToken!.token.saas_token,
+            sessionId: customerToken!.token.sessionId
         };
     }
 
@@ -64,7 +64,7 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
         } else if (username && password) {
             // for customer token we need anonymous token first
             const anonymousToken = await this.getAnonymousToken(tenant, clientId);
-            response = await this.oauthApi.getCustomerToken(tenant, anonymousToken, username, password);
+            response = await this.oauthApi.getCustomerToken(tenant, anonymousToken.accessToken, username, password);
         } else {
             throw new Error("No CustomerToken available and now Credentials supplied for Re-Authentication");
         }
@@ -77,11 +77,11 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
         return customerToken;
     }
 
-    public async getServiceAccessToken(tenant: string, clientId: string, clientSecret: string): Promise<string> {
+    public async getServiceAccessToken(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): Promise<string> {
         let serviceToken = await this.readToken<StoredToken<ServiceAccessTokenResponse>, ServiceAccessTokenResponse>('service');
         // Check if token is expired or about to expire (within 5 minutes)
-        if (this.checkAccessToken(serviceToken)) {
-            const response = await this.oauthApi.getServiceAccessToken(tenant, clientId, clientSecret);
+        if (!this.checkAccessToken(serviceToken)) {
+            const response = await this.oauthApi.getServiceAccessToken(tenant, clientId, clientSecret, scopes);
             serviceToken = {
                 token: response,
                 expiryAt: Date.now() + (response.expires_in * 1000)

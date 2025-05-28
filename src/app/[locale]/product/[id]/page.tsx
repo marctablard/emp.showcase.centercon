@@ -1,14 +1,13 @@
 import { notFound } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { ProductPriceComponent } from '@/components/product/product-price';
 import { ProductTabsComponent } from '@/components/product/product-tabs';
 import { getTranslations } from 'next-intl/server';
 import { getProductById } from '@/lib/ssr/products';
 import { ProductCarousel } from '@/components/product/product-carousel';
 import { useL10n } from '@/hooks/useL10n';
+import ProductActions from '@/components/product/product-actions';
 
 
 const priceTiers = [
@@ -19,7 +18,12 @@ const priceTiers = [
   { quantity: 50, price: 79.45 },
 ];
 
-export default async function ProductPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
+interface ProductPageProps {
+  id: string;
+  locale: string;
+}
+
+export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
 
   const productId = (await params).id;
   const locale = (await params).locale;
@@ -56,43 +60,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               
               <ProductPriceComponent price={110.45} tiers={priceTiers} />
 
-              <div className="mt-6">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center">
-                    <Button 
-                      variant="outline" 
-                      className="h-9 w-9 p-0 flex items-center justify-center rounded-l-md rounded-r-none"
-                    >
-                      -
-                    </Button>
-                    <Input 
-                      type="text" 
-                      value="5" 
-                      className="w-12 h-9 text-center rounded-none border-x-0" 
-                      readOnly
-                    />
-                    <Button 
-                      variant="outline" 
-                      className="h-9 w-9 p-0 flex items-center justify-center rounded-r-md rounded-l-none"
-                    >
-                      +
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
               <div className="mt-6 flex space-x-4">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                >
-                  Add to Cart
-                </Button>
-                <Button 
-                  className="flex-1"
-                >
-                  Buy Now
-                </Button>
+                <ProductActions product={product} />
               </div>
 
               <div className="mt-6">

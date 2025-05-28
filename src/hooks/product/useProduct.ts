@@ -3,7 +3,7 @@
 import { useProductStore } from '@/providers/StoreProvider';
 import { Product } from '@/platform/services/model/product';
 import { useCallback, useEffect, useState } from 'react';
-import { fetchProductById } from '@/lib/api/products';
+import { fetchProductById } from '@/lib/client/products';
 
 interface UseProductResult {
   product: Product | null;
@@ -13,8 +13,15 @@ interface UseProductResult {
   setAsCurrent: () => void;
 }
 
-export const useProduct = (id?: string): UseProductResult => {
+export const useProduct = (productOrId?: string | Product): UseProductResult => {
   const { getProduct, setCurrentProduct, addProduct } = useProductStore();
+  let id : string | undefined;
+  if ((productOrId as Product).id) {
+    addProduct(productOrId as Product);
+    id = (productOrId as Product).id;
+  } else {
+    id = productOrId as string;
+  }
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [product, setProduct] = useState<Product | null>(id ? getProduct(id) : null);

@@ -9,7 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuthentication } from "@/hooks/authentication/use-authentication";
+import { useAuthentication } from "@/hooks/authentication/useAuthentication";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -22,10 +22,11 @@ const loginData = z.object({
 
 type LoginData = z.infer<typeof loginData>;
 
-export default function LoginCard() {
+export default function LoginCard({ callbackUrl }: { callbackUrl: string }) {
     const t = useTranslations('login');
+    
     const router = useRouter();
-    const { login, isAuthenticated, isLoading } = useAuthentication();
+    const { login, loading } = useAuthentication();
     const [error, setError] = useState<string | null>(null);
     const top = useRef<HTMLDivElement>(null);
 
@@ -47,14 +48,7 @@ export default function LoginCard() {
         setError(null);
         
         try {
-            const success = await login(values.username, values.password);
-            
-            if (success) {
-                // Redirect to home page or dashboard after successful login
-                router.push('/');
-            } else {
-                setError(t('invalidCredentials'));
-            }
+            await login(values.username, values.password, callbackUrl);
         } catch (err) {
             setError(t('loginError'));
             console.error(err);
@@ -119,9 +113,9 @@ export default function LoginCard() {
                     type="submit" 
                     form="login-form" 
                     className="w-full"
-                    disabled={isLoading}
+                    disabled={loading}
                 >
-                    {isLoading ? t('loggingIn') : t('continue')}
+                    {loading ? t('loggingIn') : t('continue')}
                 </Button>
             </CardFooter>
         </Card>

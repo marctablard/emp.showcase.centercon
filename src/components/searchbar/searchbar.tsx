@@ -1,5 +1,3 @@
-'use client';
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,12 +7,14 @@ import {
   NavigationMenuTrigger
 } from "@/components/ui/navigation-menu"
 import { Input } from "@/components/ui/input"
-import { useTranslations } from "next-intl";
-import { ShoppingCart } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import MiniCart from '@/components/cart/mini-cart';
+import { getCurrentCart } from "@/lib/ssr/carts";
+import { getTranslations } from "next-intl/server";
 
-export default function Searchbar() {
-  const t = useTranslations('searchBar');
+export default async function Searchbar() {
+  // TODO move initial fetch of cart to a more appropriate Place
+  const cart = await getCurrentCart();
+  const t = await getTranslations('searchBar');
   return (
     <div className="bg-primary py-8">
       <div className="max-w-7xl mx-auto px-12">
@@ -45,19 +45,7 @@ export default function Searchbar() {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <NavigationMenu className="hidden md:block">
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-primary">{t('myAccount')}</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <NavigationMenuLink>Link</NavigationMenuLink>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-            <Button className="py-4 bg-primary" size="icon">
-              <ShoppingCart />
-            </Button>
+            <MiniCart initialCart={cart || undefined} />
           </div>
         </div>
       </div>

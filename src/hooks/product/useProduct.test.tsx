@@ -1,9 +1,10 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useProduct } from './useProduct';
-import { fetchProductById } from '@/lib/api/products';
-import { StoreProvider, useProductStore, ProductStoreContext } from '@/providers/StoreProvider';
-import { createProductStore } from '@/stores/product/products-store';
+import { fetchProductById } from '@/lib/client/products';
+import { StoreProvider, useProductStore, StoreContext } from '@/providers/StoreProvider';
+import { createProductStore } from '@/stores/products-store';
 import { ReactNode } from 'react';
+import { createCartStore } from '@/stores/cart-store';
 
 // Mock the API module
 jest.mock('@/lib/api/products', () => ({
@@ -112,10 +113,11 @@ describe('useProduct hook', () => {
   test('should populate the store so other components can access the product', async () => {
     // Create a shared store
     const sharedStore = createProductStore();
+    const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>
+      <StoreContext.Provider value={{productStore : sharedStore, cartStore: cartStore}}>
         {children}
-      </ProductStoreContext.Provider>
+      </StoreContext.Provider>
     );
     
     // Mock the API response
@@ -147,10 +149,11 @@ describe('useProduct hook', () => {
   test('should use cached product from store if available', async () => {
     // Create a shared store
     const sharedStore = createProductStore();
+    const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>
+      <StoreContext.Provider value={{productStore : sharedStore, cartStore: cartStore}}>
         {children}
-      </ProductStoreContext.Provider>
+      </StoreContext.Provider>
     );
     
     // First, add a product to the store
@@ -170,10 +173,11 @@ describe('useProduct hook', () => {
   test('refetch should work correctly', async () => {
     // Create a shared store
     const sharedStore = createProductStore();
+    const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>
+      <StoreContext.Provider value={{productStore : sharedStore, cartStore: cartStore}}>
         {children}
-      </ProductStoreContext.Provider>
+      </StoreContext.Provider>
     );
     
     // Mock the API response

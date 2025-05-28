@@ -8,6 +8,11 @@
         "noImage": "No image available",
         "noDescription": "No description available.",
         "productId": "Product ID",
+        "quantity": "Quantity",
+        "buyNow": "Buy Now",
+        "addedToCart": "Added to Cart",
+        "addedToCartDescription": "has been added to your cart",
+        "errorAddingToCart": "Error Adding to Cart",
         "tabs": {
             "description": "Description",
             "specs": "Specs",
@@ -18,7 +23,8 @@
     "header": {
         "featuredProduct": "Featured Product",
         "signIn": "Sign In",
-        "register": "Register"
+        "register": "Register",
+        "account": "Account"
     },
     "searchBar": {
         "allProducts": "All Products",
@@ -31,6 +37,22 @@
         "street": "123. Line street",
         "additionalAddress": "Sunrise Business Park",
         "city": "Manchester"
+    },
+    "cart": {
+        "yourCart": "Your Cart",
+        "items": "items",
+        "emptyCart": "Your cart is empty",
+        "qty": "Qty",
+        "total": "Total",
+        "viewCart": "View Cart",
+        "product": "Product",
+        "details": "Details",
+        "price": "Price",
+        "quantity": "Quantity",
+        "subtotal": "Subtotal",
+        "continueShopping": "Continue Shopping",
+        "checkout": "Proceed to Checkout",
+        "orderSummary": "Order Summary"
     },
     "login": {
         "title": "Sign In",
@@ -98,6 +120,49 @@
             "registrationFailed": "Registration failed. Please try again.",
             "serverError": "A server error occurred. Please try again later."
         }
+    },
+    "Checkout": {
+        "title": "Checkout",
+        "description": "Complete your purchase",
+        "contactInformation": "Contact Information",
+        "shippingAddress": "Shipping Address",
+        "billingAddress": "Billing Address",
+        "paymentMethod": "Payment Method",
+        "shippingMethod": "Shipping Method",
+        "placeOrder": "Place Order",
+        "processing": "Processing...",
+        "sameAsShipping": "Billing address is the same as shipping address",
+        "requiredField": "This field is required",
+        "invalidEmail": "Please enter a valid email address",
+        "emptyCart": "Your cart is empty. Please add items to your cart before proceeding to checkout.",
+        "formErrors": "Please correct the following errors:",
+        "creditCard": "Credit Card",
+        "paypal": "PayPal",
+        "invoice": "Pay by Invoice",
+        "cardNumber": "Card Number",
+        "cardHolder": "Card Holder",
+        "expiryDate": "Expiry Date",
+        "cvv": "CVV",
+        "paypalRedirect": "You will be redirected to PayPal to complete your payment after reviewing your order.",
+        "invoiceTerms": "You will receive an invoice for this order. Payment is due within 30 days.",
+        "freeShipping": "Free",
+        "standardShipping": "Standard Shipping",
+        "expressShipping": "Express Shipping",
+        "overnightShipping": "Overnight Shipping"
+    },
+    "Confirmation": {
+        "title": "Order Confirmation",
+        "description": "Thank you for your order",
+        "orderConfirmed": "Order Confirmed!",
+        "thankYou": "Thank you for your purchase. Your order has been received.",
+        "orderDetails": "Order Details",
+        "orderNumber": "Order Number",
+        "orderDate": "Order Date",
+        "email": "Email",
+        "paymentMethod": "Payment Method",
+        "emailConfirmation": "A confirmation email has been sent to",
+        "continueShopping": "Continue Shopping",
+        "viewOrders": "View My Orders"
     },
     "searchResults": {
         "showing": "Showing {start}-{end} of {total} products",

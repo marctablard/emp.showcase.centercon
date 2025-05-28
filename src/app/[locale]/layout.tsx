@@ -8,6 +8,9 @@ import Header from '@/components/header';
 import { StoreProvider } from '@/providers/StoreProvider';
 import Searchbar from '@/components/searchbar';
 import Footer from '@/components/footer';
+import { Toaster } from '@/components/ui/sonner';
+import { getServerSession } from "next-auth";
+import CustomerSessionProvider from "@/providers/CustomerSessionProvider";
 
 type Props = {
   children: ReactNode;
@@ -34,22 +37,25 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+  const session = await getServerSession();
   // Enable static rendering
   setRequestLocale(locale);
   return (
     <html className="h-full" lang={locale}>
       <body className="flex h-full flex-col">
-        <NextIntlClientProvider locale={locale}>
-          <StoreProvider>
-            <Header />
-            <Searchbar />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </StoreProvider>
-        </NextIntlClientProvider>
-
+        <CustomerSessionProvider session={session}>
+          <NextIntlClientProvider locale={locale}>
+            <StoreProvider>
+              <Header />
+              <Searchbar />
+              <main className="flex-grow">
+                {children}
+                </main>
+              <Footer />
+              <Toaster />
+            </StoreProvider>
+          </NextIntlClientProvider>
+        </CustomerSessionProvider>
       </body>
     </html>
   );

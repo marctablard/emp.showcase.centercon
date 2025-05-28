@@ -21,11 +21,11 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
         this.ssrToken = {};
     }
 
-    public async getAnonymousToken(tenant: string, clientId: string): Promise<string> {
+    public async getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string; sessionId: string }> {
         let anonymousToken = await this.readToken<StoredToken<AnonymousTokenResponse>, AnonymousTokenResponse>('anonymous');
         // if the Token (from Client Cookie) is invalid
         if (this.checkAccessToken(anonymousToken)) {
-            return anonymousToken!.token.access_token;
+            return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.sessionId };
         } else {
             // we use our own token
             if (!this.checkAccessToken(this.ssrToken.anonymousToken)) {
@@ -33,7 +33,7 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
                 // ...and store it globally, so it can be reused
                 this.ssrToken.anonymousToken = freshSsrAnonymousToken;
             }
-            return this.ssrToken.anonymousToken!.token.access_token;
+            return { accessToken: this.ssrToken.anonymousToken!.token.access_token, sessionId: this.ssrToken.anonymousToken!.token.sessionId };
         }
     }
 

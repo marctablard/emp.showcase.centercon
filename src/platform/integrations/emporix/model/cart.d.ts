@@ -21,9 +21,9 @@ export interface CartItem {
     }[];
   };
   tax?: {
-    rate?: number;
-    grossValue?: number;
-    netValue?: number;
+    rate: number;
+    grossValue: number;
+    netValue: number;
   };
 }
 
@@ -32,6 +32,11 @@ export interface Cart {
   yrn?: string;
   customerId?: string;
   sessionId?: string;
+  legalEntityId?: string;
+  channel?: {
+    name: string;
+    source: string;
+  };
   currency: string;
   siteCode: string;
   type?: string;
@@ -75,6 +80,17 @@ export interface CreatedCart {
   yrn: string;
 }
 
+export interface CartProduct {
+  id: string;
+  name: string;
+  description?: string;
+  sku?: string;
+  images?: {
+    id: string;
+    url: string;
+  }[];
+}
+
 export interface AddCartItemRequest {
   siteCode: string;
   itemYrn: string;
@@ -91,16 +107,7 @@ export interface AddCartItemRequest {
     grossValue: number;
     netValue: number;
   };
-  product?: {
-    id: string;
-    name: string;
-    description?: string;
-    sku?: string;
-    images?: {
-      id: string;
-      url: string;
-    }[];
-  };
+  product?: CartProduct;
 }
 
 export interface CreatedCartItem {
@@ -109,7 +116,6 @@ export interface CreatedCartItem {
 }
 
 export interface UpdateCartItemRequest {
-  itemYrn: string;
   quantity: number;
   price: {
     priceId?: string;

@@ -9,7 +9,7 @@ export interface TokenManager {
    * @param tenant The tenant ID
    * @returns Promise with the token string
    */
-  getAnonymousToken(tenant: string, clientId: string): Promise<string>
+  getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string, sessionId: string }>
   
   /**
    * Get a valid customer token, refreshing if necessary
@@ -18,7 +18,7 @@ export interface TokenManager {
    * @param password Customer password
    * @returns Promise with the token string and SaaS token
    */
-  getCustomerToken(tenant: string, clientId: string, username: string, password: string): Promise<{accessToken: string, saasToken: string}> ;
+  getCustomerToken(tenant: string, clientId: string, credentials? : {username: string, password: string}): Promise<{accessToken: string, saasToken: string, sessionId: string}> ;
   
   /**
    * Get a valid service access token, refreshing if necessary
@@ -27,7 +27,7 @@ export interface TokenManager {
    * @param clientSecret Client secret for service access
    * @returns Promise with the token string
    */
-  getServiceAccessToken(tenant: string, clientId: string, clientSecret: string): Promise<string>
+  getServiceAccessToken(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): Promise<string>
   
   /**
    * Clear all stored tokens
