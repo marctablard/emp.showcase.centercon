@@ -9,7 +9,8 @@ const securedPages = ['/account'];
  
 const intlMiddleware = createIntlMiddleware({
   locales,
-  defaultLocale: 'en'
+  defaultLocale: 'en',
+  localePrefix: 'as-needed'
 });
  
 const authMiddleware = withAuth(
