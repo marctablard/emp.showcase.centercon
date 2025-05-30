@@ -11,6 +11,7 @@ import Footer from '@/components/footer';
 import { Toaster } from '@/components/ui/sonner';
 import { getServerSession } from "next-auth";
 import CustomerSessionProvider from "@/providers/CustomerSessionProvider";
+import { StoryblokProvider } from '@/providers/StoryblokProvider';
 
 type Props = {
   children: ReactNode;
@@ -46,13 +47,15 @@ export default async function LocaleLayout({ children, params }: Props) {
         <CustomerSessionProvider session={session}>
           <NextIntlClientProvider locale={locale}>
             <StoreProvider>
-              <Header />
-              <Searchbar />
-              <main className="flex-grow">
-                {children}
+              <StoryblokProvider>
+                <Header />
+                <Searchbar />
+                <main className="flex-grow">
+                  {children}
                 </main>
-              <Footer />
-              <Toaster />
+                <Footer />
+                <Toaster />
+              </StoryblokProvider>
             </StoreProvider>
           </NextIntlClientProvider>
         </CustomerSessionProvider>
