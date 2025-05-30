@@ -240,6 +240,42 @@ export async function fetchData() {
 
 The integration supports Storyblok's Visual Editor, allowing content creators to edit content directly on your site. The Visual Editor is enabled through the `StoryblokProvider` component in the application layout.
 
+### SSL Configuration
+
+**Important:** The Visual Editor only works with SSL-encrypted connections (HTTPS). To use the Visual Editor locally:
+
+1. Ensure your local development environment is configured with SSL
+2. Start the application with HTTPS support by running the dedicated npm script:
+   ```bash
+   npm run dev:https
+   ```
+3. Accept the self-signed certificate in your browser if necessary
+
+The Visual Editor also works in deployed applications (development, staging, or production environments) as long as:
+
+1. The application is running over HTTPS
+2. The domain of the deployed application is added to the allowed domains in your Storyblok space settings
+3. The correct Storyblok Access Token is configured in the environment variables
+
+To configure the domain in Storyblok:
+1. Go to your Storyblok Space
+2. Navigate to Settings > Visual Editor
+3. Add the domain of your development system to the list of allowed domains
+4. Save the settings
+
+### Real Path Configuration
+
+When the slug of a Storyblok story doesn't match the URL of the application (e.g., when a story with the slug `/home` is displayed at the URL `/storyblok`), you need to configure the "Real Path" in the story settings:
+
+1. Go to the content entry in Storyblok
+2. Open the entry's configuration
+3. Set the "Real Path" field to the actual path of the application (e.g., `/storyblok`)
+4. Save the settings
+
+This configuration is crucial for the Visual Editor to use the correct URL for editing.
+
+### Using the Visual Editor
+
 To use the Visual Editor:
 
 1. Log in to your Storyblok account

@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "npm-run-all --parallel generate:watch dev:next",
     "dev:next": "next dev --turbopack",
+    "dev:https": "npm-run-all --parallel generate:watch dev:next:https",
+    "dev:next:https": "next dev --turbopack --experimental-https",
     "build": "npm run generate && next build",
     "build:next": "next build",
     "generate": "ts-node --project scripts/tsconfig.json scripts/di-generator.ts",
