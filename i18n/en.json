@@ -39,7 +39,7 @@
         "city": "Manchester"
     },
     "cart": {
-        "yourCart": "Your Cart",
+        "yourCart": "My Products",
         "items": "items",
         "emptyCart": "Your cart is empty",
         "qty": "Qty",
@@ -51,7 +51,7 @@
         "quantity": "Quantity",
         "subtotal": "Subtotal",
         "continueShopping": "Continue Shopping",
-        "checkout": "Proceed to Checkout",
+        "checkout": "Go to Checkout",
         "orderSummary": "Order Summary"
     },
     "login": {
@@ -125,6 +125,18 @@
         "title": "Checkout",
         "description": "Complete your purchase",
         "contactInformation": "Contact Information",
+        "emailAddress": "EMail Address",
+        "phoneNumber": "Phone Number",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "companyName": "Company (Optional)",
+        "fullName": "Full Name",
+        "street": "Street",
+        "streetNumber": "Street Number",
+        "zipCode": "Zip/Postal Code",
+        "city": "City",
+        "country": "Country",
+        "state": "State/Province",
         "shippingAddress": "Shipping Address",
         "billingAddress": "Billing Address",
         "paymentMethod": "Payment Method",
@@ -148,7 +160,28 @@
         "freeShipping": "Free",
         "standardShipping": "Standard Shipping",
         "expressShipping": "Express Shipping",
-        "overnightShipping": "Overnight Shipping"
+        "overnightShipping": "Overnight Shipping",
+        "summaryTitle": "Order Summary",
+        "notItems": "No items in cart",
+        "subtotal": "Subtotal",
+        "total": "Total",
+        "validation": {
+            "emailRequired": "Email is required",
+            "invalidEmail": "Please enter a valid email address",
+            "phoneRequired": "Phone",
+            "firstNameRequired": "First name is required",
+            "lastNameRequired": "Last name is required",
+            "companyNameRequired": "Company is required",
+            "fullNameRequired": "Full name is required",
+            "streetRequired": "Street is required",
+            "houseNumberRequired": "House number is required",
+            "postalCodeRequired": "Zip/Postal code is required",
+            "cityRequired": "City is required",
+            "countryRequired": "Country is required",
+            "stateRequired": "State/Province is required",
+            "shippingMethodRequired": "Shipping method is required",
+            "paymentMethodRequired": "Payment method is required"
+        }
     },
     "Confirmation": {
         "title": "Order Confirmation",

@@ -1,14 +1,21 @@
-export interface CartItem {
+export interface EmporixCartItem {
   id: string;
   itemYrn: string;
   quantity: number;
   effectiveQuantity?: number;
   type?: string;
-  price?: {
-    priceId?: string;
-    originalAmount: number;
-    effectiveAmount: number;
-    currency: string;
+  calculatedPrice?: {
+    price: EmporixCalculatedPrice;
+    finalPrice: EmporixCalculatedPrice;
+    upliftValue: EmporixCalculatedPrice;
+    discountedPrice: EmporixCalculatedPrice;
+    totalFee: EmporixCalculatedPrice;
+    totalShipping: EmporixCalculatedPrice;
+    totalDiscount: {
+      calculationType: 'ApplyDiscountBeforeTax' | 'ApplyDiscountAfterTax';
+      value: number;
+      appliedDiscounts: EmporixCalculatedAppliedDiscount[];
+    }
   };
   product?: {
     id: string;
@@ -27,7 +34,23 @@ export interface CartItem {
   };
 }
 
-export interface Cart {
+export interface EmporixCalculatedAppliedDiscount {
+  id : string;
+  value: number;
+  discountType: 'PERCENT' | 'ABSOLUTE' | 'FREE_SHIPPING';
+  origin: 'INTERNAL' | 'EXTERNAL';
+}
+
+export interface EmporixCalculatedPrice {
+  netValue: number;
+  grossValue: number;
+  taxValue: number; // difference between net and gross
+  taxRate: number;
+  taxCode: string;
+  appliedDiscounts?: EmporixCalculatedAppliedDiscount[];
+}
+
+export interface EmporixCart {
   id: string;
   yrn?: string;
   customerId?: string;
@@ -39,16 +62,23 @@ export interface Cart {
   };
   currency: string;
   siteCode: string;
+  countryCode?: string;
+  zipCode?: string;
   type?: string;
   status?: string;
   items?: CartItem[];
-  totalPrice?: {
-    amount: number;
-    currency: string;
-  };
-  subTotalPrice?: {
-    amount: number;
-    currency: string;
+  calculatedPrice?: {
+    price: EmporixCalculatedPrice;
+    finalPrice: EmporixCalculatedPrice;
+    upliftValue: EmporixCalculatedPrice;
+    discountedPrice: EmporixCalculatedPrice;
+    totalFee: EmporixCalculatedPrice;
+    totalShipping: EmporixCalculatedPrice;
+    totalDiscount: {
+      calculationType: 'ApplyDiscountBeforeTax' | 'ApplyDiscountAfterTax';
+      value: number;
+      appliedDiscounts: EmporixCalculatedAppliedDiscount[];
+    }
   };
   totalUnitsCount?: number;
   metadata?: {

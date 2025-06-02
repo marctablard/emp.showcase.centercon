@@ -1,13 +1,13 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useProduct } from './useProduct';
 import { fetchProductById } from '@/lib/client/products';
-import { StoreProvider, useProductStore, StoreContext } from '@/providers/StoreProvider';
+import { StoreProvider, useProductStore, ProductStoreContext } from '@/providers/StoreProvider';
 import { createProductStore } from '@/stores/products-store';
 import { ReactNode } from 'react';
 import { createCartStore } from '@/stores/cart-store';
 
 // Mock the API module
-jest.mock('@/lib/api/products', () => ({
+jest.mock('@/lib/client/products', () => ({
   fetchProductById: jest.fn(),
 }));
 
@@ -115,9 +115,9 @@ describe('useProduct hook', () => {
     const sharedStore = createProductStore();
     const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <StoreContext.Provider value={{productStore : sharedStore, cartStore: cartStore}}>
+      <ProductStoreContext.Provider value={sharedStore}>
         {children}
-      </StoreContext.Provider>
+      </ProductStoreContext.Provider>
     );
     
     // Mock the API response
@@ -151,9 +151,9 @@ describe('useProduct hook', () => {
     const sharedStore = createProductStore();
     const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <StoreContext.Provider value={{productStore : sharedStore, cartStore: cartStore}}>
+      <ProductStoreContext.Provider value={sharedStore}>
         {children}
-      </StoreContext.Provider>
+      </ProductStoreContext.Provider>
     );
     
     // First, add a product to the store
@@ -175,9 +175,9 @@ describe('useProduct hook', () => {
     const sharedStore = createProductStore();
     const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <StoreContext.Provider value={{productStore : sharedStore, cartStore: cartStore}}>
+      <ProductStoreContext.Provider value={sharedStore}>
         {children}
-      </StoreContext.Provider>
+      </ProductStoreContext.Provider>
     );
     
     // Mock the API response

@@ -1,11 +1,9 @@
 import { Container } from 'inversify';
 import EmporixSessionService from './EmporixSessionService';
-import type { SessionContextApi } from '@/platform/integrations/emporix/session/SessionContextApi';
-import type { SessionContext, ContextAttribute } from '@/platform/integrations/emporix/model/session-context';
+import type { EmporixSessionContext, EmporixContextAttribute } from '@/platform/integrations/emporix/model/session-context';
 import type { Session, SessionAttribute } from '@/platform/services/model/session/session';
-import type { SessionMapper } from '@/platform/services/model/session/SessionMapper';
 import type { EmporixSessionMapper } from '@/platform/services/model/session/impl/EmporixSessionMapper';
-import type { SessionMapper as GenericSessionMapper } from '@/platform/services/model/session/SessionMapper';
+import { SessionContextApi } from '@/platform/integrations/emporix/session/SessionContextApi';
 
 describe('EmporixSessionService', () => {
   let container: Container;
@@ -13,7 +11,7 @@ describe('EmporixSessionService', () => {
   let mockSessionContextApi: jest.Mocked<SessionContextApi>;
   let mockSessionMapper: jest.Mocked<EmporixSessionMapper>;
   
-  const mockSessionContext: SessionContext = {
+  const mockSessionContext: EmporixSessionContext = {
     sessionId: 'test-session-id',
     currency: 'USD',
     siteCode: 'test-site',
@@ -42,7 +40,7 @@ describe('EmporixSessionService', () => {
     value: 'test-value'
   };
   
-  const mockContextAttribute: ContextAttribute = {
+  const mockContextAttribute: EmporixContextAttribute = {
     key: 'testAttribute',
     value: 'test-value'
   };
@@ -114,7 +112,7 @@ describe('EmporixSessionService', () => {
         siteCode: 'new-site'
       };
       
-      const mappedPartialContext: Partial<SessionContext> = {
+      const mappedPartialContext: Partial<EmporixSessionContext> = {
         currency: 'EUR',
         siteCode: 'new-site'
       };

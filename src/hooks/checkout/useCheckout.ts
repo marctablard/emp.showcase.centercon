@@ -15,6 +15,7 @@ import type {
 } from '@/platform/services/model/checkout';
 import { useCartStore, useCheckoutStore } from '@/providers/StoreProvider';
 import { Cart } from '@/platform/services/model/cart/cart';
+import { useCart } from '../cart/useCart';
 
 interface UseCheckout {
   // Status
@@ -68,6 +69,7 @@ export const useCheckout = (): UseCheckout => {
   const { currentCart: storeCart } = useCartStore();
 
   const [checkoutCart, setCheckoutCart] = useState<Cart | null>(storeCart);
+  const { updateShippingInfo } = useCart(storeCart || undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [contactData, setContactData] = useState<ContactData | null>(storeContactData);
   const [billingAddress, setBillingAddress] = useState<CheckoutAddress | null>(storeBillingAddress);
@@ -117,6 +119,9 @@ export const useCheckout = (): UseCheckout => {
 
   const submitShippingAddress = useCallback((address: CheckoutAddress) => {
     // TODO validation!
+    if (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode) {
+      updateShippingInfo(address.country, address.zipCode);
+    }
     setStoreShippingAddress(address);
   }, []);
 

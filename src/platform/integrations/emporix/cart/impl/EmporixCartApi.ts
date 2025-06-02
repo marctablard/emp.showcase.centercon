@@ -1,4 +1,4 @@
-import { Cart, CartItem, AddCartItemRequest, CreateCartRequest, CreatedCart, CreatedCartItem, UpdateCartItemRequest } from "../../model";
+import { EmporixCart, EmporixCartItem, AddCartItemRequest, CreateCartRequest, CreatedCart, CreatedCartItem, UpdateCartItemRequest } from "../../model";
 import type { CartApi } from "../CartApi";
 import { inject } from "inversify";
 import type { EmporixConfig } from "../../config";
@@ -30,7 +30,7 @@ class EmporixCartApi implements CartApi {
         body: JSON.stringify(createCartRequest)
       },
       // differentiate between customer and anonymous
-      createCartRequest.customerId ? 'customer-saas' : 'anonymous'
+      createCartRequest.customerId ? 'customer-saas' : 'session'
     );
 
     if (!response.ok) {
@@ -42,10 +42,10 @@ class EmporixCartApi implements CartApi {
     return createdCart.cartId;
   }
 
-  async getCart(cartId: string): Promise<Cart | undefined> {
+  async getCart(cartId: string): Promise<EmporixCart | undefined> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}`,
-      { method: 'GET' }
+      { method: 'GET' }, 'session'
     );
 
     if (!response.ok) {
@@ -64,7 +64,7 @@ class EmporixCartApi implements CartApi {
     sessionId?: string,
     customerId?: string,
     type?: string
-  ): Promise<Cart | undefined> {
+  ): Promise<EmporixCart | undefined> {
     const queryParams = new URLSearchParams();
     queryParams.append('siteCode', siteCode);
     
@@ -82,7 +82,7 @@ class EmporixCartApi implements CartApi {
 
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts?${queryParams.toString()}`,
-      { method: 'GET' }
+      { method: 'GET' }, 'session'
     );
 
     if (!response.ok) {
@@ -106,7 +106,7 @@ class EmporixCartApi implements CartApi {
           'Accept': 'application/json'
         },
         body: JSON.stringify(item)
-      }
+      }, 'session'
     );
 
     if (!response.ok) {
@@ -118,10 +118,10 @@ class EmporixCartApi implements CartApi {
   return createdItem.itemId;
   }
 
-  async getCartItems(cartId: string): Promise<CartItem[]> {
+  async getCartItems(cartId: string): Promise<EmporixCartItem[]> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}/items`,
-      { method: 'GET' }
+      { method: 'GET' }, 'session'
     );
 
     if (!response.ok) {
@@ -149,7 +149,7 @@ class EmporixCartApi implements CartApi {
           'Accept': 'application/json'
         },
         body: JSON.stringify(updateRequest)
-      }
+      }, 'session'
     );
 
     if (!response.ok) {
@@ -161,7 +161,7 @@ class EmporixCartApi implements CartApi {
   async removeCartItem(cartId: string, itemId: string): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}/items/${itemId}`,
-      { method: 'DELETE' }
+      { method: 'DELETE' }, 'session'
     );
 
     if (!response.ok) {
@@ -173,12 +173,31 @@ class EmporixCartApi implements CartApi {
   async deleteCart(cartId: string): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}`,
-      { method: 'DELETE' }
+      { method: 'DELETE' }, 'session'
     );
 
     if (!response.ok) {
       const errorDetails = await response.text();
       throw new Error(`Failed to delete cart: ${response.statusText} ${errorDetails}`);
+    }
+  }
+
+  async updateCart(cartId: string, cart: Partial<EmporixCart>): Promise<void> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/cart/${this.config.tenant}/carts/${cartId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(cart)
+      }, 'session'
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to update cart: ${response.statusText} ${errorDetails}`);
     }
   }
 }

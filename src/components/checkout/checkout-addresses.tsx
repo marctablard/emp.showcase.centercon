@@ -4,11 +4,13 @@ import React, { useState, useMemo } from 'react';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import AddressForm from './address-form';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { UseFormReturn } from 'react-hook-form';
 
 interface AddressesProps {
   initialShippingAddress?: Partial<Omit<CheckoutAddress, 'type'>>;
   initialBillingAddress?: Partial<Omit<CheckoutAddress, 'type'>>;
   isReadOnly?: boolean;
+  form: UseFormReturn<any>;
 }
 
 /**
@@ -16,7 +18,8 @@ interface AddressesProps {
  * Manages both shipping and billing addresses with option to use same address for both
  */
 const Addresses: React.FC<AddressesProps> = ({
-  isReadOnly = false
+  isReadOnly = false,
+  form
 }) => {
   const { submitShippingAddress, submitBillingAddress, shippingAddress: storeShippingAddress, billingAddress: storeBillingAddress } = useCheckout();
 
@@ -91,6 +94,7 @@ const Addresses: React.FC<AddressesProps> = ({
           initialData={shippingAddress}
           onDataChange={handleShippingAddressChange}
           isReadOnly={isReadOnly}
+          form={form}
         />
       </div>
 
@@ -118,6 +122,7 @@ const Addresses: React.FC<AddressesProps> = ({
             initialData={billingAddress}
             onDataChange={handleBillingAddressChange}
             isReadOnly={isReadOnly}
+            form={form}
           />
         </div>
       )}

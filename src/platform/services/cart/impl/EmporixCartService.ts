@@ -1,5 +1,6 @@
 import type { Cart } from "@/platform/services/model/cart/cart";
 import type { CartService } from "@/platform/services/cart/CartService";
+import type { SessionService } from "@/platform/services/session/SessionService";
 import type { CartApi } from "@/platform/integrations/emporix/cart/CartApi";
 import { AddCartItemRequest, UpdateCartItemRequest } from "@/platform/integrations/emporix/model";
 import { injectable } from "@/platform/core/di/injectable";
@@ -8,7 +9,8 @@ import type { CartMapper } from "../../model/cart/CartMapper";
 import type EmporixCommonUtil from "@/platform/integrations/emporix/common/util/EmporixCommonUtil";
 import type { PriceService } from "@/platform/services/price/PriceService";
 import type { ProductService } from "@/platform/services/product/ProductService";
-import { Cart as EmporixCart, CartItem as EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
+import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
+import { Media } from "../../model/common";
 
 /**
  * Implementation of CartService for Emporix cart data.
@@ -21,11 +23,13 @@ class EmporixCartService implements CartService {
   private mapper: CartMapper<EmporixCart, EmporixCartItem>;
   private priceService: PriceService;
   private productService: ProductService;
+  private sessionService: SessionService;
 
   constructor(
     @inject('EmporixCommonUtil') commonUtil: EmporixCommonUtil,
     @inject('EmporixCartApi') cartApi: CartApi,
     @inject('EmporixCartMapper') mapper: CartMapper<EmporixCart, EmporixCartItem>,
+    @inject('SessionService') sessionService: SessionService,
     @inject('PriceService') priceService: PriceService,
     @inject('ProductService') productService: ProductService
   ) {
@@ -34,6 +38,7 @@ class EmporixCartService implements CartService {
     this.mapper = mapper;
     this.priceService = priceService;
     this.productService = productService;
+    this.sessionService = sessionService;
   }
 
   async createCart(currency: string, siteCode: string): Promise<string> {
@@ -48,17 +53,42 @@ class EmporixCartService implements CartService {
       },
       sessionValidated: true
     };
-
-    return await this.cartApi.createCart(createCartRequest);
+    try {
+      const cartId = await this.cartApi.createCart(createCartRequest);
+      return cartId;
+    } catch (error) {
+      // only error can be that it's a duplicate
+      if (error instanceof Error && error.message.includes('Duplicate key found for a unique index.')) {
+        const session = await this.sessionService.getCurrentSession();
+        if (!session) {
+          throw new Error('Failed to get session context');
+        }
+        const cart = await this.cartApi.getCartByCriteria(siteCode, session.id, undefined, 'shopping');
+        if (!cart) {
+          throw new Error('Failed to get session cart');
+        }
+        return cart.id;
+      }
+      throw error;
+    }
   }
 
+
+  async getCart(): Promise<Cart | undefined> {
+    const session = await this.sessionService.getCurrentSession();
+    if (!session) {
+      throw new Error('Failed to get session context');
+    }
+    const cart = await this.cartApi.getCartByCriteria(session.siteCode || 'main', session.id, undefined, 'shopping');
+    return cart ? this.mapper.mapToService(cart) : undefined;
+  }
+  
   async getCartById(id: string): Promise<Cart | undefined> {
     const cart = await this.cartApi.getCart(id);
     return cart ? this.mapper.mapToService(cart) : undefined;
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<string> {
-    const cart = await this.getCartById(cartId);
     const product = await this.productService.getProductById(productId);
     if (!product) {
       throw new Error("Product missing");
@@ -77,9 +107,9 @@ class EmporixCartService implements CartService {
         name: product.name,
         description: product.description,
         sku: product.sku,
-        images: product.images?.map((img : string) => ({
-          id: img,
-          url: img
+        images: product.images?.map((img : Media) => ({
+          id: img.url,
+          url: img.url
         }))
       },
       price: {
@@ -121,6 +151,13 @@ class EmporixCartService implements CartService {
 
   async deleteCart(cartId: string): Promise<void> {
     await this.cartApi.deleteCart(cartId);
+  }
+
+  async updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
+    await this.cartApi.updateCart(cartId, {
+      countryCode,
+      zipCode
+    });
   }
 }
 

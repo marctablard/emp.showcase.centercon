@@ -1,6 +1,4 @@
 import React from 'react';
-import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { getCurrentCart } from '@/lib/ssr/carts';
 import Checkout from '@/components/checkout/checkout';
@@ -8,9 +6,6 @@ import Checkout from '@/components/checkout/checkout';
 interface CheckoutPageProps {
   locale: string;
 }
-
-
-
 export default async function CheckoutPage({ params }: {params: Promise<CheckoutPageProps>}) {
   const {locale : _locale} = await params;
   const cart = await getCurrentCart();

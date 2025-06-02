@@ -1,10 +1,8 @@
 import EmporixOAuthApi from './EmporixOAuthApi';
 import { EmporixConfig } from '../../config';
-import { Container, inject } from 'inversify';
-import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
-import { StoredToken } from '@/platform/integrations/types/auth';
+import { Container } from 'inversify';
 import { TokenManager } from '../../common/TokenManager';
-import type { OAuthApi } from '../OAuthApi';
+import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 
 // Create a test config implementation
 class TestEmporixConfig implements EmporixConfig {
@@ -14,34 +12,7 @@ class TestEmporixConfig implements EmporixConfig {
   clientSecret: string = process.env.NEXT_EMPORIX_TEST_CLIENT_SECRET || '';
 }
 
-class TestTokenManager extends EmporixTokenManagerAbstract {
-  constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
-    super(oauthApi);
-  }
-  
-  protected readTokens(): Promise<TokenStore> {
-    throw new Error('Method not implemented.');
-  }
-  
-  protected writeTokens(tokens: TokenStore): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  
-  private tokenStore: Map<string, StoredToken<any>> = new Map();
-  
-  protected async readToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service'): Promise<T | undefined> {
-    return this.tokenStore.get(type) as T | undefined;
-  }
-  
-  protected writeToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service', token: T): Promise<void> {
-    this.tokenStore.set(type, token);
-    return Promise.resolve();
-  }
-  
-  public clearTokens(): void {
-    this.tokenStore.clear();
-  }
-}
+
 
 describe('EmporixOAuthApi', () => {
   let container: Container;
@@ -55,7 +26,7 @@ describe('EmporixOAuthApi', () => {
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<TokenManager>('EmporixTokenManager').to(TestTokenManager);
+    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
     
     // Get instances from the container
     oauthApi = container.get<EmporixOAuthApi>('EmporixOAuthApi');
@@ -74,7 +45,7 @@ describe('EmporixOAuthApi', () => {
       expect(result.token_type).toBe('Bearer');
       expect(typeof result.expires_in).toBe('number');
       expect(result.scope).toBeDefined();
-      expect(result.sessionId).toBeDefined();
+      expect(result.session_id).toBeDefined();
     });
     
     it('should handle errors when fetching an anonymous token', async () => {
@@ -109,7 +80,7 @@ describe('EmporixOAuthApi', () => {
       expect(result.token_type).toBe('Bearer');
       expect(typeof result.expires_in).toBe('number');
       expect(result.scope).toBeDefined();
-      expect(result.sessionId).toBeDefined();
+      expect(result.session_id).toBeDefined();
     });
   });
   

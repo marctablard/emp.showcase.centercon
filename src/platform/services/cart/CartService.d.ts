@@ -15,6 +15,12 @@ export interface CartService {
   createCart(currency: string, siteCode: string): Promise<string>;
 
   /**
+   * Retrieves the current Sessions Cart.
+   * @returns The cart if found, otherwise undefined.
+   */
+  getCart(): Promise<Cart | undefined>;
+
+  /**
    * Retrieves a cart by its ID.
    * @param id The ID of the cart to retrieve.
    * @returns The cart if found, otherwise undefined.
@@ -50,4 +56,13 @@ export interface CartService {
    * @param cartId The ID of the cart to delete
    */
   deleteCart(cartId: string): Promise<void>;
+
+  /**
+   * Updates the shipping information for a cart
+   * @param cartId The ID of the cart
+   * @param countryCode The country code for the shipping address
+   * @param zipCode The zip code for the shipping address
+   */
+  updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void>;
+  
 }

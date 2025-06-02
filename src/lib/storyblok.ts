@@ -1,15 +1,15 @@
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
-import Feature from '@/components/storyblok/Feature';
-import Teaser from '@/components/storyblok/Teaser';
-import Grid from '@/components/storyblok/Grid';
-import Columns from '@/components/storyblok/Columns';
-import Page from '@/components/storyblok/Page';
-import Logo from '@/components/storyblok/Logo';
-import Navigation from '@/components/storyblok/Navigation';
-import ContentBlock from '@/components/storyblok/ContentBlock';
-import Category from '@/components/storyblok/Category';
-import Segment from '@/components/storyblok/Segment';
-import Article from '@/components/storyblok/Article';
+import Feature from '@/components/cms/feature';
+import Teaser from '@/components/cms/teaser';
+import Grid from '@/components/cms/grid';
+import Columns from '@/components/cms/columns';
+import Page from '@/components/cms/page';
+import Logo from '@/components/cms/logo';
+import Navigation from '@/components/cms/navigation';
+import ContentBlock from '@/components/cms/content-block';
+import Category from '@/components/cms/category';
+import Segment from '@/components/cms/segment';
+import Article from '@/components/cms/article';
 
 /**
  * Initialize Storyblok client with the access token from environment variables

@@ -8,6 +8,7 @@ import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { CartItem, Cart } from '@/platform/services/model/cart/cart.d';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/cart/useCart';
+import { Badge } from '../ui/badge';
 import { useL10n } from '@/hooks/useL10n';
 
 interface CartItemProps {
@@ -47,36 +48,34 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   };
 
   return (
-    <TableRow>
-      <TableCell className="align-middle">
-        <div className="w-20 h-20 bg-muted rounded overflow-hidden">
-          {item.product && item.product.images?.length ? (
-            <img 
-              src={String(item.product.images[0].url)} 
-              alt={String(item.product.name || 'Product')} 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              <ShoppingCart className="h-8 w-8 opacity-30" />
-            </div>
-          )}
+    <div className="flex justify-between my-4 border-t first:border-none">
+      <div className="flex gap-2">
+        {item.product && item.product.images?.length ? (
+          <img
+            src={String(item.product.images[0].url)}
+            alt={String(item.product.name || 'Product')}
+            className="w-40 h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+            <ShoppingCart className="h-8 w-8 opacity-30" />
+          </div>
+        )}
+        <div className="flex flex-col gap-2 p-4">
+          <p className="font-bold text-xl">{l10n(item.product?.name || 'Product')}</p>
+          <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">
+            In Stock
+          </Badge>
         </div>
-      </TableCell>
-      <TableCell>
-        <div>
-          <p className="font-medium">{l10n(item.product?.name || 'Product')}</p>
-          <p className="text-sm text-muted-foreground">{item.product?.id}</p>
+      </div>
+      <div className="flex flex-col gap-4 items-end py-4">
+        <div className="font-bold">
+          {formatCurrency(item.price.amount, item.price.currency)}
         </div>
-      </TableCell>
-      <TableCell className="text-right">
-        {formatCurrency(item.price.amount, item.price.currency)}
-      </TableCell>
-      <TableCell>
         <div className="flex items-center justify-center">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className="h-8 w-8"
             disabled={isProcessing || item.quantity <= 1}
             onClick={() => handleUpdateQuantity(item.quantity - 1)}
@@ -90,9 +89,9 @@ export function CartItemRow({ cart, item }: CartItemProps) {
               item.quantity
             )}
           </span>
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className="h-8 w-8"
             disabled={isProcessing}
             onClick={() => handleUpdateQuantity(item.quantity + 1)}
@@ -100,25 +99,22 @@ export function CartItemRow({ cart, item }: CartItemProps) {
             <Plus className="h-4 w-4" />
           </Button>
         </div>
-      </TableCell>
-      <TableCell className="text-right font-medium">
-        {formatCurrency(itemTotal, item.price.currency)}
-      </TableCell>
-      <TableCell>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 text-destructive hover:text-destructive/90"
-          disabled={isProcessing}
-          onClick={handleRemoveItem}
-        >
-          {isProcessing ? (
-            <div className="animate-spin h-4 w-4 border-2 border-destructive/50 border-t-transparent rounded-full"></div>
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </Button>
-      </TableCell>
-    </TableRow>
+        <div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:text-destructive/90"
+            disabled={isProcessing}
+            onClick={handleRemoveItem}
+          >
+            {isProcessing ? (
+              <div className="animate-spin h-4 w-4 border-2 border-destructive/50 border-t-transparent rounded-full"></div>
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

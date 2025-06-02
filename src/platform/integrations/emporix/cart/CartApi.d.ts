@@ -1,4 +1,4 @@
-import { Cart, CartItem, AddCartItemRequest, CreateCartRequest, UpdateCartItemRequest } from "../model";
+import { EmporixCart, EmporixCartItem, AddCartItemRequest, CreateCartRequest, UpdateCartItemRequest } from "../model";
 
 /**
  * Interface for Cart API operations
@@ -16,7 +16,7 @@ export interface CartApi {
    * @param cartId Cart ID
    * @returns Promise with the cart details
    */
-  getCart(cartId: string): Promise<Cart | undefined>;
+  getCart(cartId: string): Promise<EmporixCart | undefined>;
 
   /**
    * Get cart by criteria (sessionId, customerId, siteCode)
@@ -31,7 +31,8 @@ export interface CartApi {
     sessionId?: string,
     customerId?: string,
     type?: string
-  ): Promise<Cart | undefined>;
+  ): Promise<EmporixCart | undefined>;
+
 
   /**
    * Add item to cart
@@ -71,4 +72,13 @@ export interface CartApi {
    * @returns Promise resolving when deletion is complete
    */
   deleteCart(cartId: string): Promise<void>;
+
+  /**
+   * Update cart
+   * @param cartId Cart ID
+   * @param cart Partial cart to update
+   * @returns Promise resolving when update is complete
+   */
+  updateCart(cartId: string, cart: Partial<EmporixCart>): Promise<void>;
+
 }

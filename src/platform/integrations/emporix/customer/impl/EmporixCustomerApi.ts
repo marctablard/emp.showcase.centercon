@@ -25,7 +25,7 @@ class EmporixCustomerApi implements CustomerApi {
           'Accept': 'application/json'
         }
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok) {
@@ -48,7 +48,7 @@ class EmporixCustomerApi implements CustomerApi {
         },
         body: JSON.stringify(customerData)
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok) {
@@ -67,7 +67,7 @@ class EmporixCustomerApi implements CustomerApi {
           'Accept': 'application/json'
         }
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok && response.status !== 204) {
@@ -86,7 +86,7 @@ class EmporixCustomerApi implements CustomerApi {
           'Accept': 'application/json'
         }
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok) {
@@ -109,7 +109,7 @@ class EmporixCustomerApi implements CustomerApi {
         },
         body: JSON.stringify(address)
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok) {
@@ -131,7 +131,7 @@ class EmporixCustomerApi implements CustomerApi {
           'Accept': 'application/json'
         }
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok) {
@@ -154,7 +154,7 @@ class EmporixCustomerApi implements CustomerApi {
         },
         body: JSON.stringify(address)
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok) {
@@ -173,7 +173,7 @@ class EmporixCustomerApi implements CustomerApi {
           'Accept': 'application/json'
         }
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok && response.status !== 204) {
@@ -192,7 +192,7 @@ class EmporixCustomerApi implements CustomerApi {
           'Accept': 'application/json'
         }
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok && response.status !== 204) {
@@ -211,7 +211,7 @@ class EmporixCustomerApi implements CustomerApi {
           'Accept': 'application/json'
         }
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok && response.status !== 204) {
@@ -227,7 +227,7 @@ class EmporixCustomerApi implements CustomerApi {
       {
         method: 'GET'
       },
-      'customer'
+      'session'
     );
 
     if (!response.ok) {
@@ -244,11 +244,12 @@ class EmporixCustomerApi implements CustomerApi {
         'Accept': 'application/json'
       }
     }, 
-    'customer',
+    'session',
     { credentials: { username, password } });
 
     if (!response.ok) {
-      throw new Error(`Failed to get customer token: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Failed to get customer token: ${response.statusText} - ${errorText}`);
     }
 
     return await response.json() as EmporixSessionContext;
@@ -267,7 +268,7 @@ class EmporixCustomerApi implements CustomerApi {
         },
         body: JSON.stringify(signupRequest)
       },
-      'anonymous'
+      'session'
     );
 
     if (!response.ok) {

@@ -13,7 +13,9 @@ const commonJestConfig = {
   // Exclude e2e tests from Jest runs
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/e2e/'
+    '/e2e/',
+    // excluded, because it just provides a common TokenManager for tests but no own tests
+    'src/platform/integrations/emporix/common/impl/EmporixTokenManager.test.ts'
   ],
 }
 // Any custom config you want to pass to Jest

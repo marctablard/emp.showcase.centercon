@@ -25,7 +25,7 @@ class EmporixProductApi implements ProductApi {
     }
     const { body: _body, query } = buildSearchQuery(params);
     const response = await this.apiClient.authenticatedFetch(`/product/${this.config.tenant}/products?${query}`,
-      { method: 'GET' });
+      { method: 'GET' , headers: { 'X-Total-Count': 'true' } }, 'public');
 
     return buildPaginatedResponse(params, response);
   }
@@ -33,12 +33,15 @@ class EmporixProductApi implements ProductApi {
   async searchProducts(params: SearchParams<Product>): Promise<PaginatedResponse<Product>> {
     const { body, query } = buildSearchQuery(params);
     const response = await this.apiClient.authenticatedFetch(
-      `/product/${this.config.tenant}/products?${query}`,
+      `/product/${this.config.tenant}/products/search?${query}`,
       {
         method: 'POST',
-        headers: { 'Accept': 'application/json', 'X-Total-Count': 'true' },
+        headers: { 
+          'X-Total-Count': 'true',
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ 'q': body })
-      }
+      }, 'public'
     );
     return buildPaginatedResponse(params, response);
   }
@@ -46,7 +49,7 @@ class EmporixProductApi implements ProductApi {
   async getProduct(id: string): Promise<Product | undefined> {
     const response = await this.apiClient.authenticatedFetch(
       `/product/${this.config.tenant}/products/${id}`,
-      { method: 'GET' }
+      { method: 'GET' }, 'public'
     );
     if (!response.ok) {
       if (response.status == 404) {

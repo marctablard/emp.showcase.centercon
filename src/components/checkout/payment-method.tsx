@@ -3,17 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import { PaymentMethod as PaymentMethodType } from '@/platform/services/model/checkout';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { UseFormReturn } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 
 interface PaymentMethodProps {
   initialMethod?: Partial<PaymentMethodType>;
   isReadOnly?: boolean;
+  form: UseFormReturn<any>;
 }
 
 /**
  * Payment method selection component for checkout
  */
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
-  isReadOnly = false
+  isReadOnly = false,
+  form
 }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
   // Available payment methods
@@ -36,12 +42,15 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
     cvv: ''
   });
 
+  const t = useTranslations('Checkout');
+
   useEffect(() => {
     submitPaymentMethod(selectedMethod);
   }, [selectedMethod, submitPaymentMethod]);
 
-  const handleMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const method = paymentOptions.find(option => option.id === e.target.value);
+  const handleMethodChange = (value: string) => {
+    const method = paymentOptions.find(option => option.id === value);
+
     if (method) {
       setSelectedMethod({
         provider: method.provider,
@@ -73,120 +82,134 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
   return (
     <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
       <h2 className="text-xl font-semibold text-gray-800">Payment Method</h2>
-
       {!isReadOnly ? (
-        <div className="space-y-6">
-          <div className="space-y-4">
-            {paymentOptions.map(option => (
-              <div key={option.id} className="flex items-center">
-                <input
-                  id={option.id}
-                  name="paymentMethod"
-                  type="radio"
-                  value={option.id}
-                  checked={selectedMethod.method === option.method}
-                  onChange={handleMethodChange}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                />
-                <label htmlFor={option.id} className="ml-3 block text-sm font-medium text-gray-700">
-                  {option.name}
-                </label>
-              </div>
-            ))}
-          </div>
+        <FormField
+          control={form.control}
+          name="paymentMethod"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <RadioGroup
+                  value={field.value}
+                  onValueChange={(value) => { field.onChange(value); handleMethodChange(value); }}
+                  className="flex flex-col space-y-1"
+                >
 
-          {/* Credit Card Form */}
-          {selectedMethod.method === 'credit-card' && (
-            <div className="mt-6 space-y-4 border-t pt-4">
-              <div>
-                <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                  Card Number
-                </label>
-                <input
-                  type="text"
-                  id="cardNumber"
-                  name="cardNumber"
-                  value={cardDetails.cardNumber}
-                  onChange={handleCardDetailsChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="1234 5678 9012 3456"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="cardHolder" className="block text-sm font-medium text-gray-700 mb-1">
-                  Card Holder
-                </label>
-                <input
-                  type="text"
-                  id="cardHolder"
-                  name="cardHolder"
-                  value={cardDetails.cardHolder}
-                  onChange={handleCardDetailsChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="John Doe"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">
-                    Expiry Date
-                  </label>
-                  <input
-                    type="text"
-                    id="expiryDate"
-                    name="expiryDate"
-                    value={cardDetails.expiryDate}
-                    onChange={handleCardDetailsChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="MM/YY"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
-                    CVV
-                  </label>
-                  <input
-                    type="text"
-                    id="cvv"
-                    name="cvv"
-                    value={cardDetails.cvv}
-                    onChange={handleCardDetailsChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="123"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      {paymentOptions.map(option => (
+                        <div key={option.id}>
+                          <FormItem className="flex items-center">
+                            <FormControl>
+                              <RadioGroupItem value={option.id} id={option.id} />
+                            </FormControl>
+                            <FormLabel htmlFor={option.id} className="w-full ml-3 block text-sm font-medium text-gray-700"> {option.name}</FormLabel>
+                          </FormItem>
+                        </div>
+                      ))}
+                    </div>
 
-          {/* PayPal Form */}
-          {selectedMethod.method === 'paypal' && (
-            <div className="mt-6 border-t pt-4">
-              <p className="text-sm text-gray-600">
-                You will be redirected to PayPal to complete your payment after reviewing your order.
-              </p>
-            </div>
-          )}
+                    {/* Credit Card Form */}
+                    {selectedMethod.method === 'credit-card' && (
+                      <div className="mt-6 space-y-4 border-t pt-4">
+                        <div>
+                          <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('cardNumber')}
+                          </label>
+                          <input
+                            type="text"
+                            id="cardNumber"
+                            name="cardNumber"
+                            value={cardDetails.cardNumber}
+                            onChange={handleCardDetailsChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="1234 5678 9012 3456"
+                          />
+                        </div>
 
-          {/* Invoice Form */}
-          {selectedMethod.method === 'invoice' && (
-            <div className="mt-6 border-t pt-4">
-              <p className="text-sm text-gray-600">
-                You will receive an invoice for this order. Payment is due within 30 days.
-              </p>
-            </div>
+                        <div>
+                          <label htmlFor="cardHolder" className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('cardHolder')}
+                          </label>
+                          <input
+                            type="text"
+                            id="cardHolder"
+                            name="cardHolder"
+                            value={cardDetails.cardHolder}
+                            onChange={handleCardDetailsChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="John Doe"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">
+                              {t('expiryDate')}
+                            </label>
+                            <input
+                              type="text"
+                              id="expiryDate"
+                              name="expiryDate"
+                              value={cardDetails.expiryDate}
+                              onChange={handleCardDetailsChange}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder="MM/YY"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
+                              {t('cvv')}
+                            </label>
+                            <input
+                              type="text"
+                              id="cvv"
+                              name="cvv"
+                              value={cardDetails.cvv}
+                              onChange={handleCardDetailsChange}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder="123"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* PayPal Form */}
+                    {selectedMethod.method === 'paypal' && (
+                      <div className="mt-6 border-t pt-4">
+                        <p className="text-sm text-gray-600">
+                          {t('paypalRedirect')}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Invoice Form */}
+                    {selectedMethod.method === 'invoice' && (
+                      <div className="mt-6 border-t pt-4">
+                        <p className="text-sm text-gray-600">
+                          {t('invoiceTerms')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
+        />
+
       ) : (
         // Read-only view
         <div className="text-gray-700">
           <p className="font-medium">
             {paymentOptions.find(option => option.method === selectedMethod.method)?.name || 'Selected payment method'}
           </p>
-          
+
           {selectedMethod.method === 'credit-card' && selectedMethod.customAttributes?.cardNumber && (
             <p className="text-sm text-gray-600 mt-1">
               Card ending in {selectedMethod.customAttributes.cardNumber.slice(-4)}

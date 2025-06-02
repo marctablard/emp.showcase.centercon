@@ -1,5 +1,5 @@
 import { Cart, Cart as ServiceCart, CartItem as ServiceCartItem } from '../cart';
-import { Cart as EmporixCart, CartItem as EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
+import { EmporixCart as EmporixCart, EmporixCartItem as EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
 import { injectable } from '@/platform/core/di/injectable';
 import { Tax } from '../../common';
 import { CartMapper } from '../CartMapper';
@@ -16,21 +16,57 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
    * @returns A Service Cart
    */
   mapToService(emporixCart: EmporixCart): ServiceCart {
+
+    let totalPrice;
+    if (emporixCart.calculatedPrice?.finalPrice) {
+      totalPrice = {
+        amount: emporixCart.calculatedPrice.finalPrice.grossValue,
+        currency: emporixCart.currency
+      }
+    } else {
+      totalPrice = { 
+        amount: 0, 
+        currency: emporixCart.currency 
+      };
+    }
+    let subTotalPrice;
+    if (emporixCart.calculatedPrice?.price) {
+      subTotalPrice = {
+        amount: emporixCart.calculatedPrice.price.grossValue,
+        currency: emporixCart.currency
+      }
+    } else {
+      subTotalPrice = { 
+        amount: 0, 
+        currency: emporixCart.currency 
+      };
+    }
+    let tax;
+    if (emporixCart.calculatedPrice?.price) {
+      tax = {
+        amount: emporixCart.calculatedPrice.price.taxValue,
+        currency: emporixCart.currency,
+        netValue: emporixCart.calculatedPrice.price.netValue,
+        grossValue: emporixCart.calculatedPrice.price.grossValue
+      }
+    } else {
+      tax = { 
+        amount: 0, 
+        currency: emporixCart.currency,
+        netValue: 0,
+        grossValue: 0
+      };
+    }
     return {
       id: emporixCart.id,
       currency: emporixCart.currency,
       site: emporixCart.siteCode,
       legalEntity: emporixCart.legalEntityId,
       channel: emporixCart.channel?.name,
-      items: emporixCart.items?.map(item => this.mapCartItemToService(item)) || [],
-      totalPrice: emporixCart.totalPrice || { 
-        amount: 0, 
-        currency: emporixCart.currency 
-      },
-      subTotalPrice: emporixCart.subTotalPrice || { 
-        amount: 0, 
-        currency: emporixCart.currency 
-      }
+      items: emporixCart.items?.map(item => this.mapCartItemToService(emporixCart, item)) || [],
+      totalPrice: totalPrice,
+      subTotalPrice: subTotalPrice,
+      tax: tax
     };
   }
 
@@ -39,15 +75,15 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
    * @param emporixCartItem The Emporix CartItem to map
    * @returns A Service CartItem
    */
-  mapCartItemToService(emporixCartItem: EmporixCartItem): ServiceCartItem {
+  mapCartItemToService(emporixCart: EmporixCart, emporixCartItem: EmporixCartItem): ServiceCartItem {
     let tax : Tax | undefined;
-    if (emporixCartItem.tax && emporixCartItem.price) {
-      const amount = emporixCartItem.tax.grossValue - emporixCartItem.tax.netValue;
+    if (emporixCartItem.calculatedPrice?.finalPrice) {
+      const amount = emporixCartItem.calculatedPrice.finalPrice.taxValue;
       tax = {
-        amount,
-        currency: emporixCartItem.price.currency ,
-        netValue: emporixCartItem.tax.netValue,
-        grossValue: emporixCartItem.tax.grossValue
+        amount: amount,
+        currency: emporixCart.currency,
+        netValue: emporixCartItem.calculatedPrice.finalPrice.netValue,
+        grossValue: emporixCartItem.calculatedPrice.finalPrice.grossValue
       };
     } else {
       tax = undefined;
@@ -56,8 +92,8 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
       id: emporixCartItem.id,
       quantity: emporixCartItem.quantity,
       price: {
-        amount: emporixCartItem.price?.effectiveAmount || 0,
-        currency: emporixCartItem.price?.currency || '',
+        amount: emporixCartItem.calculatedPrice?.finalPrice.grossValue || 0,
+        currency: emporixCart.currency,
       },
       product: emporixCartItem.product ? {
         id: emporixCartItem.product.id,

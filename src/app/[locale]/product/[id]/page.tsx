@@ -47,8 +47,16 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">
             {/* Product Image Carousel */}
             <div className="overflow-hidden">
-              <ProductCarousel images={product.images} />
+              {product.images && product.images.length > 0 ? (
+               
+                  <ProductCarousel images={product.images} />
+              ) : (
+                <div className="bg-gray-200 h-96 flex items-center justify-center">
+                  <span className="text-gray-500">{t('noImage')}</span>
+                </div>
+              )}
               
+            
             </div>
             
             {/* Product Details */}

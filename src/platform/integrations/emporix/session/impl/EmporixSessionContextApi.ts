@@ -83,7 +83,7 @@ class EmporixSessionContextApi implements SessionContextApi {
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/me/context`,
       { method: 'GET' },
-      'customer'
+      'session'
     );
     
     if (!response.ok) {
@@ -103,11 +103,13 @@ class EmporixSessionContextApi implements SessionContextApi {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sessionContext)
-      }
+      },
+      'session'
     );
     
     if (!response.ok) {
-      throw new Error(`Failed to update own session context: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to update own session context: ${response.statusText} - ${message}`);
     }
   }
 
@@ -118,7 +120,8 @@ class EmporixSessionContextApi implements SessionContextApi {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(attribute)
-      }
+      },
+      'session'
     );
     
     if (!response.ok) {
@@ -131,7 +134,8 @@ class EmporixSessionContextApi implements SessionContextApi {
   async removeOwnSessionContextAttribute(attributeName: string): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/me/context/attributes/${attributeName}`,
-      { method: 'DELETE' }
+      { method: 'DELETE' },
+      'session'
     );
     
     if (!response.ok) {

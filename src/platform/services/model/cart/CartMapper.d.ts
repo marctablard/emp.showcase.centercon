@@ -17,5 +17,6 @@ export interface CartMapper<SOURCE_TYPE, SOURCE_ITEM_TYPE> extends Mapper<SOURCE
    * @param sourceItem - The cart item in source format
    * @returns The cart item in service format
    */
-  mapCartItemToService(sourceItem: SOURCE_ITEM_TYPE): CartItem;
+  mapCartItemToService(sourceCart: SOURCE_TYPE, sourceItem: SOURCE_ITEM_TYPE): CartItem;
+
 }

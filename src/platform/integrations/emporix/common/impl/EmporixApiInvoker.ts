@@ -11,13 +11,17 @@ import { injectable } from '@/platform/core/di/injectable';
 class EmporixApiInvoker {
   private config: EmporixConfig;
   private tokenManager: TokenManager;
+  private debugCurl: boolean;
 
   constructor(
     @inject('EmporixConfig') config: EmporixConfig,
-    @inject('EmporixTokenManager') tokenManager: TokenManager
+    @inject('EmporixTokenManager') tokenManager: TokenManager,
   ) {
     this.config = config;
     this.tokenManager = tokenManager;
+    // Set to true for debug output as CURL
+    // TODO build environment variable or config property for this
+    this.debugCurl = false;
   }
 
   /**
@@ -26,15 +30,6 @@ class EmporixApiInvoker {
    */
   async getAnonymousToken(): Promise<{ accessToken: string, sessionId: string }> {
     return this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
-  }
-
-  /**
-   * Get a customer token for authenticated user access
-   * @param credentials Optional customer credentials (username and password)
-    * @returns Promise with the token string and SaaS token
-    */
-  async getCustomerToken(credentials?: { username: string; password: string }): Promise<{ accessToken: string; saasToken: string, sessionId: string }> {
-    return this.tokenManager.getCustomerToken(this.config.tenant, this.config.clientId, credentials);
   }
 
 
@@ -68,7 +63,7 @@ class EmporixApiInvoker {
   async authenticatedFetch(
     url: string,
     options: RequestInit = {},
-    tokenType: 'anonymous' | 'customer' | 'customer-saas' | 'service' = 'anonymous',
+    tokenType: 'public' | 'session' | 'customer-saas' | 'service' = 'public',
     authOptions?: {
       credentials?: { username: string; password: string },
       scopes?: string[]
@@ -82,28 +77,32 @@ class EmporixApiInvoker {
     };
     // Get the appropriate token based on the token type
     switch (tokenType) {
-      case 'anonymous':
-        const anonymousToken = await this.getAnonymousToken();
+      case 'public':
+        const anonymousToken = await this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
         token = anonymousToken.accessToken;
-
-        headers = {
-          ...options.headers,
-          'session-id': `${anonymousToken.sessionId}`
-        }
         break;
-      case 'customer':
       case 'customer-saas':
-        const customerTokens = await this.getCustomerToken(authOptions?.credentials);
-        token = customerTokens.accessToken;
+      case 'session':
+        const sessionToken = await this.tokenManager.getSessionToken(this.config.tenant, this.config.clientId, authOptions?.credentials);
+        token = sessionToken.accessToken;
         if (tokenType === 'customer-saas') {
+          if (sessionToken.saasToken) {
+            headers = {
+              ...headers,
+              'saas-token': `Bearer ${sessionToken.saasToken}`
+            }
+          } else {
+            throw new Error('No SaaS token available');
+          }
+        } else {
           headers = {
-            ...options.headers,
-            'saas-token': `Bearer ${token}`
+            ...headers,
+            'session-id': `${sessionToken.sessionId}`
           }
         }
         break;
       case 'service':
-        token = await this.getServiceAccessToken(authOptions?.scopes);
+        token = await this.tokenManager.getServiceAccessToken(this.config.tenant, this.config.clientId, this.config.clientSecret, authOptions?.scopes);
         break;
       default:
         throw new Error(`Unknown token type: ${tokenType}`);
@@ -111,19 +110,35 @@ class EmporixApiInvoker {
 
     // Add authorization header to the request
     headers = {
-      ...options.headers,
+      ...headers,
       'Authorization': `Bearer ${token}`
     }
     // Make the authenticated request
+    this.outputCurl(url, { ...options, headers });
+
     return fetch(`${this.config.baseUrl}/${url}`, {
       ...options,
       headers
     });
   }
 
+  outputCurl(url: string, options: RequestInit): void {
+    if (this.debugCurl) {
+      // Build curl command for debugging
+      const headerString = Object.entries(options.headers || {})
+        .map(([key, value]) => `-H '${key}: ${value}'`)
+        .join(' ');
+
+      const methodString = options.method ? `-X ${options.method}` : '';
+      const bodyString = options.body ? `-d '${options.body}'` : '';
+      
+      console.log(`curl -v ${methodString} ${headerString} ${bodyString} '${this.config.baseUrl}/${url}'`);
+    }
+  }
+
   /**
    * Clear all stored tokens
-   */
+ */
   async clearTokens(): Promise<void> {
     this.tokenManager.clearTokens();
   }

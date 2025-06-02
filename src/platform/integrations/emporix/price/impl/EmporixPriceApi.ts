@@ -36,7 +36,7 @@ class EmporixPriceApi implements PriceApi {
           'Accept': 'application/json'
         },
         body: JSON.stringify(request)
-      }
+      }, 'public'
     );
 
     if (!response.ok) {
@@ -62,7 +62,7 @@ class EmporixPriceApi implements PriceApi {
           'Accept': 'application/json'
         },
         body: JSON.stringify(request)
-      }
+      }, 'session'
     );
 
     if (!response.ok) {

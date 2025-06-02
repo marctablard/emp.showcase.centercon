@@ -1,8 +1,9 @@
+import { EmporixAccessTokenResponse, EmporixAnonymousTokenResponse, EmporixCustomerTokenResponse } from "../model/oauth";
+
 /**
  * OAuth API Interface for Emporix
  * Based on the OAuth Service OpenAPI specification
  */
-
 export interface OAuthApi {
   /**
    * Get an anonymous token
@@ -13,8 +14,8 @@ export interface OAuthApi {
    * @param tenant The tenant ID
    * @param clientId Client ID for anonymous access
    * @returns Promise with the anonymous token response
-   */
-  getAnonymousToken(tenant: string, clientId: string): Promise<AnonymousTokenResponse>;
+ */
+  getAnonymousToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse>;
 
   /**
    * Refresh an anonymous token
@@ -25,11 +26,11 @@ export interface OAuthApi {
    * @param clientId Client ID for anonymous access
    * @returns Promise with the refreshed anonymous token response
    */
-  refreshAnonymousToken(tenant: string, refreshToken: string, clientId: string): Promise<AnonymousTokenResponse>;
-
+  refreshAnonymousToken(tenant: string, refreshToken: string, clientId: string): Promise<EmporixAnonymousTokenResponse>;
+  
   /**
    * Get a customer token (SaaS token)
-   * A JSON Web Token (JWT) which contains encrypted customer data.
+ * A JSON Web Token (JWT) which contains encrypted customer data.
    * The SaaS token works similarly to the anonymous token, but it is associated with a specific customer.
    * 
    * @param tenant The tenant ID
@@ -38,19 +39,19 @@ export interface OAuthApi {
    * @param password Customer password
    * @returns Promise with the customer token response
    */
-  getCustomerToken(tenant: string, anonymousToken: string, username: string, password: string): Promise<CustomerTokenResponse>;
+  getCustomerToken(tenant: string, anonymousToken: string, username: string, password: string): Promise<EmporixCustomerTokenResponse>;
 
   /**
    * Refresh a customer token
-   * Sends an authentication request and returns a refreshed customer token.
-   * 
+ * Sends an authentication request and returns a refreshed customer token.
+ * 
    * @param tenant The tenant ID
    * @param accessToken Current access token
    * @param refreshToken Refresh token from the original customer token response
    * @param legalEntityId Optional legal entity ID
    * @returns Promise with the refreshed customer token response
    */
-  refreshCustomerToken(tenant: string, accessToken: string, refreshToken: string, legalEntityId?: string): Promise<CustomerTokenResponse>;
+  refreshCustomerToken(tenant: string, accessToken: string, refreshToken: string, legalEntityId?: string): Promise<EmporixCustomerTokenResponse>;
 
   /**
    * Get a service access token
@@ -61,42 +62,5 @@ export interface OAuthApi {
    * @param clientSecret Client secret for service access
    * @returns Promise with the service access token response
    */
-  getServiceAccessToken(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): Promise<ServiceAccessTokenResponse>;
-}
-
-/**
- * Response type for anonymous token requests
- */
-export interface AnonymousTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  scope: string;
-  refresh_token?: string;
-  refresh_token_expires_in?: number;
-  sessionId: string;
-}
-
-/**
- * Response type for customer token requests
- */
-export interface CustomerTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  scope: string;
-  saas_token: string;
-  refreshToken?: string; // mismatching casing from original spec
-  refreshTokenExpiresIn?: number;
-  sessionId: string;
-}
-
-/**
- * Response type for service access token requests
- */
-export interface ServiceAccessTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  scope: string;
+  getServiceAccessToken(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): Promise<EmporixAccessTokenResponse>;
 }

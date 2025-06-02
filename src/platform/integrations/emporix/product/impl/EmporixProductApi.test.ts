@@ -2,12 +2,10 @@ import EmporixProductApi from './EmporixProductApi';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { Product, SearchParams } from '../../model';
 import { EmporixConfig } from '../../config';
-import { Container, inject } from 'inversify';
+import { Container } from 'inversify';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
-import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
-import { StoredToken } from '@/platform/integrations/types/auth';
 import { TokenManager } from '../../common/TokenManager';
-import type { OAuthApi } from '../../oauth/OAuthApi';
+import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 
 // Create a test config implementation
 class TestEmporixConfig implements EmporixConfig {
@@ -16,31 +14,6 @@ class TestEmporixConfig implements EmporixConfig {
   clientId: string = process.env.NEXT_EMPORIX_TEST_CLIENT_ID || '';
   clientSecret: string = process.env.NEXT_EMPORIX_TEST_CLIENT_SECRET || '';
 }
-
-class TestTokenManager extends EmporixTokenManagerAbstract {
-
-  constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
-    super(oauthApi);
-  }
-  protected readTokens(): Promise<TokenStore> {
-    throw new Error('Method not implemented.');
-  }
-  protected writeTokens(tokens: TokenStore): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  private tokenStore: Map<string, StoredToken<any>> = new Map();
-  protected async readToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service'): Promise<T | undefined> {
-    return this.tokenStore.get(type) as T | undefined;
-  }
-  protected writeToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service', token: T): Promise<void> {
-    this.tokenStore.set(type, token);
-    return Promise.resolve();
-  }
-  public clearTokens(): void {
-    this.tokenStore.clear();
-  }
-}
-
 
 
 const sampleSingleProduct: Product = {
@@ -77,7 +50,7 @@ describe('EmporixProductApi', () => {
     const test = new TestEmporixConfig();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<TokenManager>('EmporixTokenManager').to(TestTokenManager);
+    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
     container.bind<EmporixProductApi>('EmporixProductApi').to(EmporixProductApi);
     
@@ -96,23 +69,24 @@ describe('EmporixProductApi', () => {
       // Execute
       const result = await productApi.getProducts();
       
-      expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
-        `/product/showcasetest/products?${mockQuery}`,
-        { method: 'GET' }
-      );
+      expect(result).toBeDefined();
+      expect(result.items).toBeDefined();
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.total).toBeDefined();
+      expect(result.total).toBeGreaterThan(0);
     });
     
     it('should fetch products with custom pagination parameters', async () => {
-      // Setup mocks
-      const mockQuery = 'pageNumber=2&pageSize=10';
-
       // Execute
-      const result = await productApi.getProducts(2, 10);
+      const result = await productApi.getProducts(2, 1);
       
-      expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
-        `/product/showcasetest/products?${mockQuery}`,
-        { method: 'GET' }
-      );
+      expect(result).toBeDefined();
+      expect(result.items).toBeDefined();
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.page).toBe(2);
+      expect(result.size).toBe(1);
+      expect(result.total).toBeDefined();
+      expect(result.total).toBeGreaterThan(0);
     });
   });
   
@@ -120,28 +94,23 @@ describe('EmporixProductApi', () => {
     it('should search products with provided search parameters', async () => {
       // Setup mocks
       const searchParams: SearchParams<Product> = {
-        query: 'test',
-        page: 0,
+        page: 1,
         size: 20,
         criteria: {
-          name: 'Test'
+          name: '~Test'
         }
       };
-      
-      const mockQuery = 'pageSize=20';
-      const mockBody = 'name:Test';
       
       // Execute
       const result = await productApi.searchProducts(searchParams);
       
-      expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
-        `/product/showcasetest/products?${mockQuery}`,
-        {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'X-Total-Count': 'true' },
-          body: JSON.stringify({ 'q': mockBody })
-        }
-      );
+      expect(result).toBeDefined();
+      expect(result.items).toBeDefined();
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.page).toBe(1);
+      expect(result.size).toBe(20);
+      expect(result.total).toBeDefined();
+      expect(result.total).toBeGreaterThan(0);
     });
   });
   
@@ -155,11 +124,6 @@ describe('EmporixProductApi', () => {
       if (!result) {
         fail('Product not found');
       }
-      // Assert
-      expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
-        `/product/showcasetest/products/${productId}`,
-        { method: 'GET' }
-      );
       
       expect(result.id).toEqual(sampleSingleProduct.id);
       expect(result.code).toEqual(sampleSingleProduct.code);
@@ -171,12 +135,8 @@ describe('EmporixProductApi', () => {
       // Setup mocks
       const productId = 'non-existent-product';
       const result = await productApi.getProduct(productId);
-      expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
-        `/product/showcasetest/products/${productId}`,
-        { method: 'GET' }
-      );
       // Execute and assert
-      await expect(result).toBeUndefined();
+      expect(result).toBeUndefined();
       
     });
   });

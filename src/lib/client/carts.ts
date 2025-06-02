@@ -125,3 +125,23 @@ export async function deleteCart(cartId: string): Promise<void> {
   }
 }
 
+/**
+ * Update Shipping Info
+ */
+export async function updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
+  const response = await fetch(`/api/cart/${cartId}/shipping`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      countryCode,
+      zipCode,
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to update shipping info: ${response.statusText}`);
+  }
+}
+

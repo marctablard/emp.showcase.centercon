@@ -1,6 +1,6 @@
 'use server';
 import { cookies } from 'next/headers';
-import { CartCookie } from '../../types/cart';
+import { CartCookie, CartCookieEntry } from '../cart';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { NextResponse } from 'next/server';
 
@@ -21,13 +21,17 @@ async function readCartCookie() : Promise<CartCookie> {
  * @returns cartId : string or undefined
  */
 export async function getCartIdFromCookie(siteCode: string, currency: string, channel: string = 'storefront', legalEntityId?: string) : Promise<string | undefined> {
+  const cart = await getCartCookie(siteCode, currency, channel, legalEntityId);
+  return cart?.cartId;
+}
+
+export async function getCartCookie(siteCode: string, currency: string, channel: string = 'storefront', legalEntityId?: string) : Promise<CartCookieEntry | undefined> {
   const cartCookie : CartCookie = await readCartCookie();
-  const cart = cartCookie[siteCode]?.find((cart) => 
+  return cartCookie[siteCode]?.find((cart) => 
     cart.currency === currency && 
     cart.legalEntityId === legalEntityId && 
     cart.channel === channel
   );
-  return cart?.cartId;
 }
 
 export async function addCartToCookie(cart : Cart, response : NextResponse) : Promise<void> {
@@ -39,7 +43,11 @@ export async function addCartToCookie(cart : Cart, response : NextResponse) : Pr
     cartId: cart.id,
     currency: cart.currency,
     legalEntityId: cart.legalEntity,
-    channel: cart.channel
+    channel: cart.channel,
+    items: cart.items.filter((item) => item.product?.id).map((item) => ({
+      pId: item.product!.id!,
+      qty: item.quantity
+    }))
   });
   
   response.cookies.set({

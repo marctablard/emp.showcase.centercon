@@ -1,10 +1,10 @@
-import { buildSearchParams, buildPaginatedResponse } from './common';
-import { SearchParams } from '../../model';
+import { buildSearchParams } from './common';
+import { BatteryIncludedSearchParams } from '../../model';
 
 describe('Common Utilities', () => {
   describe('buildSearchParams', () => {
     it('should build search parameters with all options', () => {
-      const params: SearchParams<any> = {
+      const params: BatteryIncludedSearchParams<any> = {
         query: 'phone',
         page: 2,
         size: 15,
@@ -36,92 +36,24 @@ describe('Common Utilities', () => {
     });
 
     it('should handle minimal parameters', () => {
-      const params: SearchParams<any> = {
+      const params: BatteryIncludedSearchParams<any> = {
         query: 'phone'
       };
       
       const result = buildSearchParams(params);
       
-      // Check that only the query parameter is included
-      expect(result).toBe('q=phone');
+      // Check that query parameter and default pagination is included
+      expect(result).toBe('q=phone&page=1&per_page=10');
     });
 
     it('should handle empty parameters', () => {
-      const params: SearchParams<any> = {};
+      const params: BatteryIncludedSearchParams<any> = {};
       
       const result = buildSearchParams(params);
       
-      // Check that no parameters are included
-      expect(result).toBe('');
+      // Check that default pagination is included
+      expect(result).toBe('page=1&per_page=10');
     });
   });
 
-  describe('buildPaginatedResponse', () => {
-    it('should build paginated response from API response', async () => {
-      const params: SearchParams<any> = {
-        page: 2,
-        size: 15
-      };
-      
-      const response = {
-        json: jest.fn().mockResolvedValue({
-          hits: [{ document: { id: 'product1' } }, { document: { id: 'product2' } }],
-          page: 2,
-          per_page: 15,
-          total: 100
-        })
-      } as unknown as Response;
-      
-      const result = await buildPaginatedResponse(params, response);
-      
-      // Check that the response is correctly formatted
-      expect(result).toEqual({
-        items: [{ id: 'product1' }, { id: 'product2' }],
-        page: 2,
-        size: 15,
-        total: 100
-      });
-    });
-
-    it('should use default values if not provided in response', async () => {
-      const params: SearchParams<any> = {
-        page: 2,
-        size: 15
-      };
-      
-      const response = {
-        json: jest.fn().mockResolvedValue({
-          hits: [{document: { id: 'product1' }}, {document: { id: 'product2' }}]
-        })
-      } as unknown as Response;
-      
-      const result = await buildPaginatedResponse(params, response);
-      
-      // Check that default values are used
-      expect(result).toEqual({
-        items: [{ id: 'product1' }, { id: 'product2' }],
-        page: 2,
-        size: 15,
-        total: 0
-      });
-    });
-
-    it('should handle empty results', async () => {
-      const params: SearchParams<any> = {};
-      
-      const response = {
-        json: jest.fn().mockResolvedValue({})
-      } as unknown as Response;
-      
-      const result = await buildPaginatedResponse(params, response);
-      
-      // Check that empty results are handled correctly
-      expect(result).toEqual({
-        items: [],
-        page: 0,
-        size: 20,
-        total: 0
-      });
-    });
-  });
 });

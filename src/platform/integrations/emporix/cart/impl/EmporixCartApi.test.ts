@@ -1,6 +1,6 @@
 import EmporixCartApi from './EmporixCartApi';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
-import { Cart, CartItem, AddCartItemRequest, CreateCartRequest, UpdateCartItemRequest } from '../../model';
+import { EmporixCart, EmporixCartItem, AddCartItemRequest, CreateCartRequest, UpdateCartItemRequest } from '../../model';
 import { EmporixConfig } from '../../config';
 import { Container, inject } from 'inversify';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
@@ -32,8 +32,12 @@ class TestTokenManager extends EmporixTokenManagerAbstract {
   protected async readToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service'): Promise<T | undefined> {
     return this.tokenStore.get(type) as T | undefined;
   }
-  protected writeToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service', token: T): Promise<void> {
-    this.tokenStore.set(type, token);
+  protected writeToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service', token: T | undefined): Promise<void> {
+    if (token) {
+      this.tokenStore.set(type, token);
+    } else {
+      this.tokenStore.delete(type);
+    }
     return Promise.resolve();
   }
   public clearTokens(): void {
@@ -113,9 +117,10 @@ describe('EmporixCartApi', () => {
       expect(typeof createdCartId).toBe('string');
     }, 10000);
     
+    let cart: EmporixCart | undefined;
     it('should get a cart by ID', async () => {
       // Get the cart we just created
-      const cart = await cartApi.getCart(createdCartId);
+      cart = await cartApi.getCart(createdCartId);
       
       // Verify the cart details
       expect(cart).toBeDefined();
@@ -127,17 +132,18 @@ describe('EmporixCartApi', () => {
     
     it('should get a cart by criteria', async () => {
       // Get the cart by site code
-      const cart = await cartApi.getCartByCriteria(
+      const foundCart = await cartApi.getCartByCriteria(
         sampleCreateCartRequest.siteCode,
-        undefined, // sessionId
+        cart?.sessionId, // sessionId
         undefined, // customerId
         sampleCreateCartRequest.type
       );
       
       // Verify the cart details
-      expect(cart).toBeDefined();
-      expect(cart?.currency).toBe(sampleCreateCartRequest.currency);
-      expect(cart?.siteCode).toBe(sampleCreateCartRequest.siteCode);
+      expect(foundCart).toBeDefined();
+      expect(foundCart?.currency).toBe(sampleCreateCartRequest.currency);
+      expect(foundCart?.siteCode).toBe(sampleCreateCartRequest.siteCode);
+      expect(foundCart?.sessionId).toBe(cart?.sessionId);
     }, 10000);
   });
   

@@ -61,7 +61,7 @@ class EmporixCheckoutApi implements CheckoutApi {
         },
         body: JSON.stringify(request)
       },
-      'anonymous' // Guest checkout uses anonymous authentication
+      'session'
     );
 
     if (!response.ok) {

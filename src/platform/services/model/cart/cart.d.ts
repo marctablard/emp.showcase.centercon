@@ -16,6 +16,7 @@ export interface Cart {
     amount: number;
     currency: string;
   };
+  tax: Tax;
 }
 
 export interface CartItem {

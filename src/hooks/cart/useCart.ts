@@ -8,7 +8,8 @@ import {
   addItemToCart as apiAddItemToCart,
   updateCartItemQuantity as apiUpdateCartItemQuantity,
   removeCartItem as apiRemoveCartItem,
-  createCart as apiCreateCart
+  createCart as apiCreateCart,
+  updateShippingInfo as apiUpdateShippingInfo
 } from '@/lib/client/carts';
 import { useCartStore } from '@/providers/StoreProvider';
 
@@ -26,6 +27,7 @@ interface UseCart {
   addItem: (productId: string, quantity: number) => Promise<void>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
+  updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
 
   // Utility
   refetch: () => Promise<void>;
@@ -180,6 +182,29 @@ export const useCart = (initialCart? : Cart): UseCart => {
     }
   }, [cart, fetchCart]);
   
+  /**
+   * Update shipping info
+   */
+  const updateShippingInfo = useCallback(async (countryCode?: string, zipCode?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      if (!cart) {
+        await fetchCart();
+        if (!cart) throw new Error('No cart available');
+      }
+      // Call API to update shipping info
+      await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
+      
+      // Refetch cart to get updated state
+      await fetchCart();
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to update shipping info'));
+      console.error('Error updating shipping info:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [cart, fetchCart]);
 
   return {
     cart,
@@ -190,6 +215,7 @@ export const useCart = (initialCart? : Cart): UseCart => {
     addItem,
     updateItemQuantity,
     removeItem,
+    updateShippingInfo,
     refetch: async () => { await fetchCart(false); return; }
   };
 };
