@@ -2,6 +2,18 @@ import { StoryblokStory, ISbStoriesParams, StoryblokClient } from '@storyblok/re
 import { getStoryblokApi } from '@/lib/storyblok';
 
 /**
+ * Fetch data from Storyblok
+ */
+async function fetchData() {
+  let sbParams: ISbStoriesParams = { 
+    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft'
+  };
+
+  const storyblokApi: StoryblokClient = getStoryblokApi();
+  return storyblokApi.get('cdn/stories/home', sbParams);
+}
+
+/**
  * Storyblok Demo Page
  * Fetches and displays content from Storyblok using server components
  */
@@ -31,14 +43,3 @@ export default async function StoryblokPage() {
   );
 }
 
-/**
- * Fetch data from Storyblok
- */
-export async function fetchData() {
-  let sbParams: ISbStoriesParams = { 
-    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft'
-  };
-
-  const storyblokApi: StoryblokClient = getStoryblokApi();
-  return storyblokApi.get('cdn/stories/home', sbParams);
-}
