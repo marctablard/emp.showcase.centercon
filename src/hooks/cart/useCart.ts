@@ -40,6 +40,7 @@ interface UseCart {
 export const useCart = (initialCart?: Cart): UseCart => {
   const { setCurrentCart, getCurrentCart, currentCart: storeCart } = useCartStore();
   // Local state
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [cart, setCart] = useState<Cart | null>(initialCart || null);
@@ -76,7 +77,7 @@ export const useCart = (initialCart?: Cart): UseCart => {
   // Initialize cart on first render if not already initialized
   useEffect(() => {
     console.log('useCart effect');
-    if (!cart && !loading) {
+    if (!cart && !loading && firstLoad) {
       // first try to grab the cart from the store
       const storeCart = getCurrentCart();
       if (storeCart) {
@@ -85,8 +86,9 @@ export const useCart = (initialCart?: Cart): UseCart => {
       }
       // Otherwise fetch current cart
       fetchCart();
+      setFirstLoad(false);
     }
-  }, [cart, fetchCart, getCurrentCart, loading]);
+  }, [cart, fetchCart, getCurrentCart, loading, firstLoad]);
 
   useEffect(() => {
     // listen to changes on storeCart to update local state
