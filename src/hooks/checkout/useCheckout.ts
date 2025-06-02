@@ -11,7 +11,7 @@ import type {
   PaymentMethod,
   Shipping,
 } from '@/platform/services/model/checkout';
-import { useCartStore, useCheckoutStore } from '@/providers/StoreProvider';
+import { useCheckoutStore } from '@/providers/StoreProvider';
 import { useCart } from '../cart/useCart';
 
 interface UseCheckout {
@@ -19,7 +19,7 @@ interface UseCheckout {
   loading: boolean;
   error: Error | null;
   // Data
-  checkoutCart: Cart | null;
+  checkoutCart: Cart | null | undefined;
   contactData: ContactData | null;
   billingAddress: CheckoutAddress | null;
   shippingAddress: CheckoutAddress | null;
@@ -51,7 +51,6 @@ export const useCheckout = (): UseCheckout => {
     shippingAddress: storeShippingAddress,
     paymentMethod: storePaymentMethod,
     shippingMethod: storeShippingMethod,
-    setCart,
     setContactData: setStoreContactData,
     setBillingAddress: setStoreBillingAddress,
     setShippingAddress: setStoreShippingAddress,
@@ -60,10 +59,7 @@ export const useCheckout = (): UseCheckout => {
   } = useCheckoutStore();
 
   // Get cart from cart store
-  const { currentCart: storeCart } = useCartStore();
-
-  const [checkoutCart, setCheckoutCart] = useState<Cart | null>(storeCart);
-  const { updateShippingInfo } = useCart(storeCart || undefined);
+  const { cart: checkoutCart, updateShippingInfo } = useCart();
   const [loading, setLoading] = useState<boolean>(false);
   const [contactData, setContactData] = useState<ContactData | null>(storeContactData);
   const [billingAddress, setBillingAddress] = useState<CheckoutAddress | null>(storeBillingAddress);
@@ -72,15 +68,6 @@ export const useCheckout = (): UseCheckout => {
   const [shippingMethod, setShippingMethod] = useState<Shipping | null>(storeShippingMethod);
   const [error, setError] = useState<Error | null>(null);
   const [orderResponse, setOrderResponse] = useState<CheckoutResponse | null>(null);
-
-  // Store sync (propagates States to other hook-users)
-  // Sync with cart store
-  useEffect(() => {
-    setCheckoutCart(storeCart);
-    if (storeCart) {
-      setCart(storeCart);
-    }
-  }, [storeCart, setCart]);
 
   // Sync with checkout store
   useEffect(() => {
@@ -152,9 +139,29 @@ export const useCheckout = (): UseCheckout => {
       setError(new Error('No cart available for checkout'));
       return null;
     }
-    // TODO proper validation
-    if (!shippingMethod || !billingAddress || !shippingAddress || !contactData || !paymentMethod) {
-      setError(new Error('Missing required checkout data'));
+    // Validate each required checkout component individually
+    if (!shippingMethod) {
+      setError(new Error('Missing shipping method'));
+      return null;
+    }
+    
+    if (!billingAddress) {
+      setError(new Error('Missing billing address'));
+      return null;
+    }
+    
+    if (!shippingAddress) {
+      setError(new Error('Missing shipping address'));
+      return null;
+    }
+    
+    if (!contactData) {
+      setError(new Error('Missing contact information'));
+      return null;
+    }
+    
+    if (!paymentMethod) {
+      setError(new Error('Missing payment method'));
       return null;
     }
 

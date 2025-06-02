@@ -13,7 +13,7 @@ import { useCartStore } from '@/providers/StoreProvider';
 
 interface UseCart {
   // Cart data
-  cart: Cart | null;
+  cart: Cart | null | undefined;
   cartId: string | null;
   totalItems: number;
 
