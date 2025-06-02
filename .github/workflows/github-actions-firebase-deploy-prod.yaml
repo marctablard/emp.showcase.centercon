@@ -25,14 +25,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: 'yarn'
-          cache-dependency-path: yarn.lock
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
 
-      - run: yarn install
+      - run: npm install
 
-      - run: yarn build
+      - run: npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         id: firebase-hosting-deploy
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
         with:
           firebaseToolsVersion: "12.9.1"
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
