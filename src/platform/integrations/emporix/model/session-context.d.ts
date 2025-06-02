@@ -1,4 +1,4 @@
-import type { Metadata } from "./common";
+import type { Metadata } from './common';
 
 export interface EmporixSessionContext {
   sessionId: string;
@@ -10,7 +10,6 @@ export interface EmporixSessionContext {
   context?: Record<string, any>;
   metadata?: Metadata;
 }
-
 
 export interface EmporixContextAttribute {
   key: string;

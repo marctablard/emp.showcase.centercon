@@ -1,7 +1,7 @@
 import { Product } from '@/platform/services/model/product';
 import { ProductMapper } from '../ProductMapper';
 import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
-import { LocalizedString, Media } from '@/platform/services/model/common';
+import { LocalizedString } from '@/platform/services/model/common';
 import { injectable } from '@/platform/core/di/injectable';
 
 /**
@@ -12,66 +12,66 @@ import { injectable } from '@/platform/core/di/injectable';
 export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
   /**
    * Maps an Emporix product to the internal Product model.
-   * 
+   *
    * @param source - The Emporix product data
    * @returns The internal Product model
    */
   mapToService(source: EmporixProduct): Product {
     // Extract images from media array
-    const images = source.media ? 
-      source.media.map(media => ({
-        url: media.url,
-        altText: source.name,
-        contentType: media.contentType,
-      })) : 
-      [];
-      
+    const images = source.media
+      ? source.media.map((media) => ({
+          url: media.url,
+          altText: source.name,
+          contentType: media.contentType,
+        }))
+      : [];
+
     const primaryImage = source.media ? source.media[0] : undefined;
     // Extract localized name and description
     const name = this.extractLocalizedText(source.name);
-    const description = source.description ? 
-      this.extractLocalizedText(source.description) : 
-      '';
-    
+    const description = source.description ? this.extractLocalizedText(source.description) : '';
+
     return {
       id: source.id || source.code,
       name,
       description,
       primaryImage,
-      images
+      images,
     };
   }
 
   /**
    * Maps an internal Product model back to Emporix product format.
-   * 
+   *
    * @param service - The internal Product model
    * @returns The Emporix product data
    */
   mapToSource(service: Product): EmporixProduct {
     // Convert images array to media objects
-    const media = service.images ? service.images.map((image, ix) => ({
-      id : service.id + '-' + ix,
-      url : image.url,
-      altText: image.altText,
-      tags: [],
-      contentType: 'image/jpeg', // Assuming JPEG format, adjust as needed
-    })) : [];
-    
+    const media = service.images
+      ? service.images.map((image, ix) => ({
+          id: service.id + '-' + ix,
+          url: image.url,
+          altText: image.altText,
+          tags: [],
+          contentType: 'image/jpeg', // Assuming JPEG format, adjust as needed
+        }))
+      : [];
+
     return {
       id: service.id,
       code: service.id, // Using id as code since it's required
       name: service.name,
       description: service.description,
       media: media,
-      published: true
+      published: true,
     };
   }
 
   /**
    * Helper method to extract text from a localized string object.
    * Tries to get the English text first, then falls back to any available language.
-   * 
+   *
    * @param localizedText - The localized text object
    * @returns The extracted text string
    */
@@ -82,19 +82,19 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
     if (typeof localizedText === 'string') {
       return localizedText;
     }
-    
+
     // Try to get English text first
     if (localizedText.en) {
       return localizedText.en;
     }
-    
+
     // Fall back to any available language
     const availableLanguages = Object.keys(localizedText) as Array<keyof LocalizedString>;
     if (availableLanguages.length > 0) {
       const firstKey = availableLanguages[0];
       return localizedText[firstKey];
     }
-    
+
     return '';
   }
 }

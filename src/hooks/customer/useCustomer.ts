@@ -1,6 +1,7 @@
 'use client';
-import { Customer } from '@/platform/services/model/customer/customer';
+
 import { useState } from 'react';
+import { Customer } from '@/platform/services/model/customer/customer';
 
 interface CustomerHook {
   customer: Customer | null;
@@ -19,7 +20,7 @@ export const useCustomer = (): CustomerHook => {
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@example.com',
-    contactPhone: '+1 (555) 123-4567'
+    contactPhone: '+1 (555) 123-4567',
   };
 
   const [customer] = useState<Customer | null>(mockCustomer);
@@ -29,7 +30,7 @@ export const useCustomer = (): CustomerHook => {
   return {
     customer,
     loading,
-    error
+    error,
   };
 };
 

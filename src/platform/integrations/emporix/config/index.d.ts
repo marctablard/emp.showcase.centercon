@@ -7,17 +7,17 @@ export interface EmporixConfig {
    * Default: https://api.emporix.io
    */
   baseUrl: string;
-  
+
   /**
    * Tenant ID for the Emporix API
    */
   tenant: string;
-  
+
   /**
    * Client ID for service access
    */
   clientId: string;
-  
+
   /**
    * Client secret for service access
    */
@@ -27,7 +27,7 @@ export interface EmporixConfig {
    * Client ID for service access (for server-side)
    */
   serverClientId?: string;
-  
+
   /**
    * Client secret for service access (for server-side)
    */

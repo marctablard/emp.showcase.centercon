@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useProductStore } from '@/providers/StoreProvider';
-import { Product } from '@/platform/services/model/product';
 import { useCallback, useEffect, useState } from 'react';
 import { fetchProductById } from '@/lib/client/products';
+import { Product } from '@/platform/services/model/product';
+import { useProductStore } from '@/providers/StoreProvider';
 
 interface UseProductResult {
   product: Product | null;
@@ -15,7 +15,7 @@ interface UseProductResult {
 
 export const useProduct = (productOrId?: string | Product): UseProductResult => {
   const { getProduct, setCurrentProduct, addProduct } = useProductStore();
-  let id : string | undefined;
+  let id: string | undefined;
   if ((productOrId as Product).id) {
     addProduct(productOrId as Product);
     id = (productOrId as Product).id;
@@ -26,36 +26,39 @@ export const useProduct = (productOrId?: string | Product): UseProductResult => 
   const [error, setError] = useState<Error | null>(null);
   const [product, setProduct] = useState<Product | null>(id ? getProduct(id) : null);
 
-  const fetchProduct = useCallback(async (forceRefresh = false) => {
-    if (!id) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Check if product exists in store first (unless forceRefresh is true)
-      if (!forceRefresh) {
-        const cachedProduct = getProduct(id);
-        if (cachedProduct) {
-          setProduct(cachedProduct);
-          setLoading(false);
-          return;
+  const fetchProduct = useCallback(
+    async (forceRefresh = false) => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Check if product exists in store first (unless forceRefresh is true)
+        if (!forceRefresh) {
+          const cachedProduct = getProduct(id);
+          if (cachedProduct) {
+            setProduct(cachedProduct);
+            setLoading(false);
+            return;
+          }
         }
+
+        // Fetch from API if not in store using our shared API layer
+        const data = await fetchProductById(id);
+
+        // Add to store
+        addProduct(data);
+        setProduct(data);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+        console.error('Error fetching product:', err);
+      } finally {
+        setLoading(false);
       }
-      
-      // Fetch from API if not in store using our shared API layer
-      const data = await fetchProductById(id);
-      
-      // Add to store
-      addProduct(data);
-      setProduct(data);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('An unknown error occurred'));
-      console.error('Error fetching product:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [id, getProduct, addProduct]);
+    },
+    [id, getProduct, addProduct],
+  );
 
   const refetch = () => fetchProduct(true);
 
@@ -76,6 +79,6 @@ export const useProduct = (productOrId?: string | Product): UseProductResult => 
     loading,
     error,
     refetch,
-    setAsCurrent
+    setAsCurrent,
   };
 };

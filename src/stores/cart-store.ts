@@ -1,6 +1,7 @@
 'use client';
-import { Cart } from '@/platform/services/model/cart/cart';
+
 import { create } from 'zustand';
+import { Cart } from '@/platform/services/model/cart/cart';
 
 export interface CartState {
   // Cart data
@@ -13,21 +14,18 @@ interface CartActions {
   getCurrentCart: () => Cart | null;
 }
 
-
-export type CartStore = CartState & CartActions
+export type CartStore = CartState & CartActions;
 
 const defaultState: CartState = {
-  currentCart: null
-}
+  currentCart: null,
+};
 
-export const createCartStore = (
-  initState: CartState = defaultState
-) => {
+export const createCartStore = (initState: CartState = defaultState) => {
   return create<CartStore>()((set, get) => ({
     ...initState,
     setCurrentCart: (cart: Cart | null) => {
-      set({ currentCart: cart })
+      set({ currentCart: cart });
     },
-    getCurrentCart: () => get().currentCart
-  }))
-}
+    getCurrentCart: () => get().currentCart,
+  }));
+};

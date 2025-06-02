@@ -15,7 +15,7 @@ export async function login(credentials: Credentials): Promise<Session> {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(credentials)
+    body: JSON.stringify(credentials),
   });
 
   if (!response.ok) {
@@ -32,7 +32,7 @@ export async function login(credentials: Credentials): Promise<Session> {
  */
 export async function logout(): Promise<{ success: boolean }> {
   const response = await fetch(`${API_BASE_URL}/logout`, {
-    method: 'POST'
+    method: 'POST',
   });
 
   if (!response.ok) {
@@ -49,7 +49,7 @@ export async function logout(): Promise<{ success: boolean }> {
  */
 export async function getCurrentSession(): Promise<Session | null> {
   const response = await fetch(`${API_BASE_URL}/session`, {
-    method: 'GET'
+    method: 'GET',
   });
 
   if (response.status === 204) {
@@ -95,7 +95,7 @@ export async function isAuthenticated(): Promise<boolean> {
   try {
     const session = await getCurrentSession();
     return !!session && !!session.customerId;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

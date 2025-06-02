@@ -1,4 +1,4 @@
-import type { EmporixSessionContext, EmporixContextAttribute } from "../model/session-context";
+import type { EmporixContextAttribute, EmporixSessionContext } from '../model/session-context';
 
 export interface SessionContextApi {
   /**
@@ -13,7 +13,11 @@ export interface SessionContextApi {
    * @param sessionContext Session context to update
    * @param upsert If true and the session doesn't exist, it will be created
    */
-  updateSessionContext(sessionId : string, sessionContext: Partial<EmporixSessionContext>, upsert?: boolean): Promise<void>;
+  updateSessionContext(
+    sessionId: string,
+    sessionContext: Partial<EmporixSessionContext>,
+    upsert?: boolean,
+  ): Promise<void>;
 
   /**
    * Adds an attribute to a session context.

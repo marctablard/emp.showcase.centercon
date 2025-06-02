@@ -36,9 +36,9 @@ const products = await shopApi.browse({
   size: 20,
   locale: 'en',
   filters: {
-    'attributes.brand': ['Samsung', 'Apple']
+    'attributes.brand': ['Samsung', 'Apple'],
   },
-  sort: 'price:desc'
+  sort: 'price:desc',
 });
 
 // Get suggestions

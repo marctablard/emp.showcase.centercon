@@ -1,20 +1,17 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Cart } from '@/platform/services/model/cart/cart';
 // Import types only, we'll use fetch directly
 // This ensures we're not accidentally importing server-side code
-import type { 
-  CheckoutRequest, 
-  CheckoutResponse, 
-  QuoteCheckoutRequest, 
-  CheckoutAddress, 
-  PaymentMethod, 
-  Shipping, 
-  Customer, 
-  ContactData
+import type {
+  CheckoutAddress,
+  CheckoutResponse,
+  ContactData,
+  PaymentMethod,
+  Shipping,
 } from '@/platform/services/model/checkout';
 import { useCartStore, useCheckoutStore } from '@/providers/StoreProvider';
-import { Cart } from '@/platform/services/model/cart/cart';
 import { useCart } from '../cart/useCart';
 
 interface UseCheckout {
@@ -41,28 +38,25 @@ interface UseCheckout {
   reset: () => void;
 }
 
-
-
 /**
  * Hook for processing checkout operations
- * 
+ *
  * @returns Checkout operations and state
  */
 export const useCheckout = (): UseCheckout => {
-
   // Get checkout store data
-  const { 
-    contactData: storeContactData, 
-    billingAddress: storeBillingAddress, 
-    shippingAddress: storeShippingAddress, 
+  const {
+    contactData: storeContactData,
+    billingAddress: storeBillingAddress,
+    shippingAddress: storeShippingAddress,
     paymentMethod: storePaymentMethod,
-    shippingMethod: storeShippingMethod, 
-    setCart, 
+    shippingMethod: storeShippingMethod,
+    setCart,
     setContactData: setStoreContactData,
     setBillingAddress: setStoreBillingAddress,
     setShippingAddress: setStoreShippingAddress,
     setPaymentMethod: setStorePaymentMethod,
-    setShippingMethod: setStoreShippingMethod 
+    setShippingMethod: setStoreShippingMethod,
   } = useCheckoutStore();
 
   // Get cart from cart store
@@ -78,8 +72,6 @@ export const useCheckout = (): UseCheckout => {
   const [shippingMethod, setShippingMethod] = useState<Shipping | null>(storeShippingMethod);
   const [error, setError] = useState<Error | null>(null);
   const [orderResponse, setOrderResponse] = useState<CheckoutResponse | null>(null);
-  
-  
 
   // Store sync (propagates States to other hook-users)
   // Sync with cart store
@@ -89,7 +81,7 @@ export const useCheckout = (): UseCheckout => {
       setCart(storeCart);
     }
   }, [storeCart, setCart]);
-  
+
   // Sync with checkout store
   useEffect(() => {
     setContactData(storeContactData);
@@ -102,41 +94,55 @@ export const useCheckout = (): UseCheckout => {
   useEffect(() => {
     setShippingAddress(storeShippingAddress);
   }, [storeShippingAddress]);
-  
+
   useEffect(() => {
     setPaymentMethod(storePaymentMethod);
   }, [storePaymentMethod]);
-  
+
   useEffect(() => {
     setShippingMethod(storeShippingMethod);
   }, [storeShippingMethod]);
-  
-  
-  const submitContactData = useCallback((contactData: ContactData) => {
-    // TODO validation!
-    setStoreContactData(contactData);
-  }, []);
 
-  const submitShippingAddress = useCallback((address: CheckoutAddress) => {
-    // TODO validation!
-    if (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode) {
-      updateShippingInfo(address.country, address.zipCode);
-    }
-    setStoreShippingAddress(address);
-  }, []);
+  const submitContactData = useCallback(
+    (contactData: ContactData) => {
+      // TODO validation!
+      setStoreContactData(contactData);
+    },
+    [setStoreContactData],
+  );
 
-  const submitBillingAddress = useCallback((address: CheckoutAddress) => {
-    // TODO validation!
-    setStoreBillingAddress(address);
-  }, []);
-  
-  const submitPaymentMethod = useCallback((method: PaymentMethod) => {
-    setStorePaymentMethod(method);
-  }, [setStorePaymentMethod]);
-  
-  const submitShippingMethod = useCallback((method: Shipping) => {
-    setStoreShippingMethod(method);
-  }, [setStoreShippingMethod]);
+  const submitShippingAddress = useCallback(
+    (address: CheckoutAddress) => {
+      // TODO validation!
+      if (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode) {
+        updateShippingInfo(address.country, address.zipCode);
+      }
+      setStoreShippingAddress(address);
+    },
+    [setStoreShippingAddress, shippingAddress?.country, shippingAddress?.zipCode, updateShippingInfo],
+  );
+
+  const submitBillingAddress = useCallback(
+    (address: CheckoutAddress) => {
+      // TODO validation!
+      setStoreBillingAddress(address);
+    },
+    [setStoreBillingAddress],
+  );
+
+  const submitPaymentMethod = useCallback(
+    (method: PaymentMethod) => {
+      setStorePaymentMethod(method);
+    },
+    [setStorePaymentMethod],
+  );
+
+  const submitShippingMethod = useCallback(
+    (method: Shipping) => {
+      setStoreShippingMethod(method);
+    },
+    [setStoreShippingMethod],
+  );
 
   /**
    * Process a checkout for the current cart
@@ -161,9 +167,9 @@ export const useCheckout = (): UseCheckout => {
         shipping: shippingMethod,
         addresses: [billingAddress, shippingAddress],
         customer: contactData,
-        paymentMethod: paymentMethod
+        paymentMethod: paymentMethod,
       };
-      
+
       const fetchResponse = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -171,12 +177,12 @@ export const useCheckout = (): UseCheckout => {
         },
         body: JSON.stringify(checkoutData),
       });
-      
+
       if (!fetchResponse.ok) {
         const errorData = await fetchResponse.json();
         throw new Error(errorData.details || 'Failed to process checkout');
       }
-      
+
       const response = await fetchResponse.json();
       setOrderResponse(response);
       return response;
@@ -188,15 +194,18 @@ export const useCheckout = (): UseCheckout => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   /**
    * Process a checkout from a quote
    */
   const processQuoteCheckout = async (
-    quoteId: string, 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    quoteId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     paymentMethod: PaymentMethod,
-    deliveryWindowId?: string
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    deliveryWindowId?: string,
   ): Promise<CheckoutResponse | null> => {
     try {
       setLoading(true);
@@ -211,7 +220,7 @@ export const useCheckout = (): UseCheckout => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   /**
    * Reset the checkout state
@@ -219,7 +228,7 @@ export const useCheckout = (): UseCheckout => {
   const reset = () => {
     setError(null);
     setOrderResponse(null);
-  }
+  };
 
   return {
     loading,
@@ -238,6 +247,6 @@ export const useCheckout = (): UseCheckout => {
     submitShippingMethod,
     processCheckout,
     processQuoteCheckout,
-    reset
+    reset,
   };
 };

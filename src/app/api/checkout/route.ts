@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkout as processCheckout } from '@/lib/client/checkout';
-import type { CheckoutRequest } from '@/platform/services/model/checkout';
 import { CheckoutService } from '@/platform/services/checkout/CheckoutService';
+import type { CheckoutRequest } from '@/platform/services/model/checkout';
 
 /**
  * API route for processing a cart checkout
@@ -9,38 +8,25 @@ import { CheckoutService } from '@/platform/services/checkout/CheckoutService';
  */
 export async function POST(request: NextRequest) {
   try {
-
     const checkoutService = globalThis.EMP.platform.server.get<CheckoutService>('CheckoutService');
     // Parse the request body
     const checkoutData: CheckoutRequest = await request.json();
 
     // Validate required fields
     if (!checkoutData.cartId) {
-      return NextResponse.json(
-        { error: 'Missing required field: cartId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required field: cartId' }, { status: 400 });
     }
 
     if (!checkoutData.addresses || checkoutData.addresses.length < 2) {
-      return NextResponse.json(
-        { error: 'Both shipping and billing addresses are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Both shipping and billing addresses are required' }, { status: 400 });
     }
 
     if (!checkoutData.shipping) {
-      return NextResponse.json(
-        { error: 'Missing required field: shipping' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required field: shipping' }, { status: 400 });
     }
 
     if (!checkoutData.paymentMethod) {
-      return NextResponse.json(
-        { error: 'Missing required field: paymentMethod' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required field: paymentMethod' }, { status: 400 });
     }
 
     // Process the checkout
@@ -53,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { error: 'Failed to process checkout', details: (error as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

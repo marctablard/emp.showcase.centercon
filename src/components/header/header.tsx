@@ -1,20 +1,18 @@
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { Button } from "@/components/ui/button";
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger
-} from "@/components/ui/navigation-menu"
-import { Menu } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
 import HeaderAccount from './header-account';
 
 export default async function Header() {
-
   const t = await getTranslations('header');
   return (
     <header className="bg-white shadow-md">
@@ -48,7 +46,6 @@ export default async function Header() {
               <Menu />
             </Button>
           </div>
-          
         </div>
       </div>
     </header>

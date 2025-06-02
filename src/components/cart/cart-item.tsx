@@ -1,15 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { TableCell, TableRow } from '@/components/ui/table';
-import { formatCurrency } from '@/lib/utils';
+import Image from 'next/image';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
-import { CartItem, Cart } from '@/platform/services/model/cart/cart.d';
-import { useTranslations } from 'next-intl';
+import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
-import { Badge } from '../ui/badge';
 import { useL10n } from '@/hooks/useL10n';
+import { formatCurrency } from '@/lib/utils';
+import { Cart, CartItem } from '@/platform/services/model/cart/cart.d';
+import { Badge } from '../ui/badge';
 
 interface CartItemProps {
   cart: Cart;
@@ -17,16 +16,14 @@ interface CartItemProps {
 }
 
 export function CartItemRow({ cart, item }: CartItemProps) {
-  const t = useTranslations('cart');
   const { l10n } = useL10n();
-  const { loading, updateItemQuantity, removeItem } = useCart(cart);
+  const { updateItemQuantity, removeItem } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
-  const itemTotal = item.price.amount * item.quantity;
 
   // Handle quantity update
   const handleUpdateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1 || isProcessing) return;
-    
+
     setIsProcessing(true);
     try {
       updateItemQuantity(item.id, newQuantity);
@@ -38,7 +35,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   // Handle item removal
   const handleRemoveItem = async () => {
     if (isProcessing) return;
-    
+
     setIsProcessing(true);
     try {
       removeItem(item.id);
@@ -51,7 +48,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
     <div className="flex justify-between my-4 border-t first:border-none">
       <div className="flex gap-2">
         {item.product && item.product.images?.length ? (
-          <img
+          <Image
             src={String(item.product.images[0].url)}
             alt={String(item.product.name || 'Product')}
             className="w-40 h-full object-cover"
@@ -63,15 +60,11 @@ export function CartItemRow({ cart, item }: CartItemProps) {
         )}
         <div className="flex flex-col gap-2 p-4">
           <p className="font-bold text-xl">{l10n(item.product?.name || 'Product')}</p>
-          <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">
-            In Stock
-          </Badge>
+          <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">In Stock</Badge>
         </div>
       </div>
       <div className="flex flex-col gap-4 items-end py-4">
-        <div className="font-bold">
-          {formatCurrency(item.price.amount, item.price.currency)}
-        </div>
+        <div className="font-bold">{formatCurrency(item.price.amount, item.price.currency)}</div>
         <div className="flex items-center justify-center">
           <Button
             variant="outline"
@@ -83,11 +76,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
             <Minus className="h-4 w-4" />
           </Button>
           <span className="mx-3 w-8 text-center">
-            {isProcessing ? (
-              <div className="animate-pulse h-4 w-4 mx-auto bg-muted rounded-full"></div>
-            ) : (
-              item.quantity
-            )}
+            {isProcessing ? <div className="animate-pulse h-4 w-4 mx-auto bg-muted rounded-full"></div> : item.quantity}
           </span>
           <Button
             variant="outline"

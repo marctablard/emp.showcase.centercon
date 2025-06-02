@@ -1,14 +1,13 @@
+import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import ProductActions from '@/components/product/product-actions';
+import { ProductCarousel } from '@/components/product/product-carousel';
 import { ProductPriceComponent } from '@/components/product/product-price';
 import { ProductTabsComponent } from '@/components/product/product-tabs';
-import { getTranslations } from 'next-intl/server';
-import { getProductById } from '@/lib/ssr/products';
-import { ProductCarousel } from '@/components/product/product-carousel';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { useL10n } from '@/hooks/useL10n';
-import ProductActions from '@/components/product/product-actions';
-
+import { getProductById } from '@/lib/ssr/products';
 
 const priceTiers = [
   { quantity: 1, price: 110.45 },
@@ -24,17 +23,17 @@ interface ProductPageProps {
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
-
   const productId = (await params).id;
   const locale = (await params).locale;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { l10n } = useL10n(locale);
 
   // Get translations for the current locale
   const t = await getTranslations({ locale, namespace: 'product' });
-    
+
   // Fetch product data server-side using our shared API layer
   const product = await getProductById(productId);
-  
+
   // If product not found, show 404 page
   if (!product) {
     notFound();
@@ -48,24 +47,19 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
             {/* Product Image Carousel */}
             <div className="overflow-hidden">
               {product.images && product.images.length > 0 ? (
-               
-                  <ProductCarousel images={product.images} />
+                <ProductCarousel images={product.images} />
               ) : (
                 <div className="bg-gray-200 h-96 flex items-center justify-center">
                   <span className="text-gray-500">{t('noImage')}</span>
                 </div>
               )}
-              
-            
             </div>
-            
+
             {/* Product Details */}
             <div className="p-8">
-              <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">
-                In Stock
-              </Badge>
+              <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">In Stock</Badge>
               <h1 className="text-4xl font-bold tracking-tight text-gray-900">{l10n(product.name)}</h1>
-              
+
               <ProductPriceComponent price={110.45} tiers={priceTiers} />
 
               <div className="mt-6 flex space-x-4">
@@ -74,14 +68,14 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
 
               <div className="mt-6">
                 <div className="text-sm text-gray-500">
-                  <p>SKU: {product.id }</p>
+                  <p>SKU: {product.id}</p>
                 </div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Frequently Bought Together - Moved outside the main card */}
       {/*
       <Card className="border-0 shadow-none">

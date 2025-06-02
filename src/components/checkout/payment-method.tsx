@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { PaymentMethod as PaymentMethodType } from '@/platform/services/model/checkout';
-import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import React, { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { PaymentMethod as PaymentMethodType } from '@/platform/services/model/checkout';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 interface PaymentMethodProps {
   initialMethod?: Partial<PaymentMethodType>;
@@ -17,10 +17,7 @@ interface PaymentMethodProps {
 /**
  * Payment method selection component for checkout
  */
-const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
-  isReadOnly = false,
-  form
-}) => {
+const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false, form }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
   // Available payment methods
   const paymentOptions = [
@@ -32,14 +29,14 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>({
     provider: 'payment-gateway',
     method: 'credit-card',
-    ...paymentMethod
+    ...paymentMethod,
   });
 
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',
     cardHolder: '',
     expiryDate: '',
-    cvv: ''
+    cvv: '',
   });
 
   const t = useTranslations('Checkout');
@@ -49,13 +46,13 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
   }, [selectedMethod, submitPaymentMethod]);
 
   const handleMethodChange = (value: string) => {
-    const method = paymentOptions.find(option => option.id === value);
+    const method = paymentOptions.find((option) => option.id === value);
 
     if (method) {
       setSelectedMethod({
         provider: method.provider,
         method: method.method,
-        customAttributes: selectedMethod.customAttributes
+        customAttributes: selectedMethod.customAttributes,
       });
     }
   };
@@ -64,7 +61,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
     const { name, value } = e.target;
     setCardDetails({
       ...cardDetails,
-      [name]: value
+      [name]: value,
     });
 
     // Update the payment method with card details
@@ -73,8 +70,8 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
         ...selectedMethod,
         customAttributes: {
           ...selectedMethod.customAttributes,
-          [name]: value
-        }
+          [name]: value,
+        },
       });
     }
   };
@@ -91,19 +88,27 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
               <FormControl>
                 <RadioGroup
                   value={field.value}
-                  onValueChange={(value) => { field.onChange(value); handleMethodChange(value); }}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    handleMethodChange(value);
+                  }}
                   className="flex flex-col space-y-1"
                 >
-
                   <div className="space-y-6">
                     <div className="space-y-4">
-                      {paymentOptions.map(option => (
+                      {paymentOptions.map((option) => (
                         <div key={option.id}>
                           <FormItem className="flex items-center">
                             <FormControl>
                               <RadioGroupItem value={option.id} id={option.id} />
                             </FormControl>
-                            <FormLabel htmlFor={option.id} className="w-full ml-3 block text-sm font-medium text-gray-700"> {option.name}</FormLabel>
+                            <FormLabel
+                              htmlFor={option.id}
+                              className="w-full ml-3 block text-sm font-medium text-gray-700"
+                            >
+                              {' '}
+                              {option.name}
+                            </FormLabel>
                           </FormItem>
                         </div>
                       ))}
@@ -179,35 +184,29 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({
                     {/* PayPal Form */}
                     {selectedMethod.method === 'paypal' && (
                       <div className="mt-6 border-t pt-4">
-                        <p className="text-sm text-gray-600">
-                          {t('paypalRedirect')}
-                        </p>
+                        <p className="text-sm text-gray-600">{t('paypalRedirect')}</p>
                       </div>
                     )}
 
                     {/* Invoice Form */}
                     {selectedMethod.method === 'invoice' && (
                       <div className="mt-6 border-t pt-4">
-                        <p className="text-sm text-gray-600">
-                          {t('invoiceTerms')}
-                        </p>
+                        <p className="text-sm text-gray-600">{t('invoiceTerms')}</p>
                       </div>
                     )}
                   </div>
-
-
                 </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
       ) : (
         // Read-only view
         <div className="text-gray-700">
           <p className="font-medium">
-            {paymentOptions.find(option => option.method === selectedMethod.method)?.name || 'Selected payment method'}
+            {paymentOptions.find((option) => option.method === selectedMethod.method)?.name ||
+              'Selected payment method'}
           </p>
 
           {selectedMethod.method === 'credit-card' && selectedMethod.customAttributes?.cardNumber && (

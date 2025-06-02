@@ -1,11 +1,11 @@
+import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
+import { ShoppingCart } from 'lucide-react';
+import { CartItemRow } from '@/components/cart/cart-item';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/utils';
-import { ShoppingCart } from 'lucide-react';
-import Link from 'next/link';
-import { CartItemRow } from '@/components/cart/cart-item';
-import { getTranslations } from 'next-intl/server';
 import { getCurrentCart } from '@/lib/ssr/carts';
+import { formatCurrency } from '@/lib/utils';
 
 export default async function CartPage() {
   const t = await getTranslations('cart');
@@ -38,11 +38,7 @@ export default async function CartPage() {
           <Card className="py-0">
             <CardContent className="px-4">
               {cart.items.map((item) => (
-                <CartItemRow
-                  key={item.id}
-                  cart={cart}
-                  item={item}
-                />
+                <CartItemRow key={item.id} cart={cart} item={item} />
               ))}
             </CardContent>
           </Card>
@@ -69,7 +65,10 @@ export default async function CartPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Link href={'/checkout'} className="bg-primary rounded-md text-sm font-medium  no-underline text-white p-3">
+              <Link
+                href={'/checkout'}
+                className="bg-primary rounded-md text-sm font-medium  no-underline text-white p-3"
+              >
                 {t('checkout')}
               </Link>
             </CardFooter>

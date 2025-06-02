@@ -1,11 +1,11 @@
 import CMSPageComponent from '@/components/cms/cms-page';
 
 interface DynamicPageParams {
-    slug: string[];
-    locale: string;
+  slug: string[];
+  locale: string;
 }
 
-export default async function DynamicPage({ params }: { params: Promise<DynamicPageParams>}) {
+export default async function DynamicPage({ params }: { params: Promise<DynamicPageParams> }) {
   const { slug, locale } = await params;
 
   return (

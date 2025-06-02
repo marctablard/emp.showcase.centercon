@@ -9,9 +9,7 @@ import type { EmporixConfig } from '../../config';
 class EmporixCommonUtil {
   private config: EmporixConfig;
 
-  constructor(
-    @inject('EmporixConfig') config: EmporixConfig
-  ) {
+  constructor(@inject('EmporixConfig') config: EmporixConfig) {
     this.config = config;
   }
 

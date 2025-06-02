@@ -1,7 +1,6 @@
-import { Container, inject } from 'inversify';
+import { inject } from 'inversify';
 import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 import { StoredToken } from '@/platform/integrations/types/auth';
-import { TokenManager } from '../TokenManager';
 import type { OAuthApi } from '../../oauth/OAuthApi';
 
 /**
@@ -20,15 +19,20 @@ export class EmporixTestTokenManager extends EmporixTokenManagerAbstract {
     return {
       anonymousToken: this.tokenStore.get('anonymous'),
       customerToken: this.tokenStore.get('customer'),
-      serviceToken: this.tokenStore.get('service')
+      serviceToken: this.tokenStore.get('service'),
     };
   }
 
-  protected async readToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service'): Promise<T | undefined> {
+  protected async readToken<T extends StoredToken<K>, K>(
+    type: 'anonymous' | 'customer' | 'service',
+  ): Promise<T | undefined> {
     return this.tokenStore.get(type) as T | undefined;
   }
 
-  protected async writeToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service', token: T | undefined): Promise<void> {
+  protected async writeToken<T extends StoredToken<K>, K>(
+    type: 'anonymous' | 'customer' | 'service',
+    token: T | undefined,
+  ): Promise<void> {
     this.tokenStore.set(type, token);
   }
 
@@ -43,4 +47,3 @@ export class EmporixTestTokenManager extends EmporixTokenManagerAbstract {
     this.tokenStore.clear();
   }
 }
-

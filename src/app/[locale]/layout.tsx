@@ -1,17 +1,17 @@
-import { notFound } from 'next/navigation';
-import { Locale, hasLocale, NextIntlClientProvider } from 'next-intl';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ReactNode } from 'react';
-import { routing } from '@/i18n/routing';
-import '../globals.css';
-import Header from '@/components/header';
-import { StoreProvider } from '@/providers/StoreProvider';
-import Searchbar from '@/components/searchbar';
+import { getServerSession } from 'next-auth';
+import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 import Footer from '@/components/footer';
+import Header from '@/components/header';
+import Searchbar from '@/components/searchbar';
 import { Toaster } from '@/components/ui/sonner';
-import { getServerSession } from "next-auth";
-import CustomerSessionProvider from "@/providers/CustomerSessionProvider";
+import { routing } from '@/i18n/routing';
+import CustomerSessionProvider from '@/providers/CustomerSessionProvider';
+import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
+import '../globals.css';
 
 type Props = {
   children: ReactNode;
@@ -28,7 +28,7 @@ export async function generateMetadata(props: Omit<Props, 'children'>) {
   const t = await getTranslations({ locale, namespace: 'hello' });
 
   return {
-    title: t('world')
+    title: t('world'),
   };
 }
 
@@ -50,9 +50,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               <StoryblokProvider>
                 <Header />
                 <Searchbar />
-                <main className="flex-grow">
-                  {children}
-                </main>
+                <main className="flex-grow">{children}</main>
                 <Footer />
                 <Toaster />
               </StoryblokProvider>

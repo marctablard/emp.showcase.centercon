@@ -22,13 +22,15 @@ export class PriceMapper {
       totalValue: emporixPrice.totalValue,
       quantity: this.mapQuantityToService(emporixPrice.quantity),
       includesTax: emporixPrice.includesTax,
-      tax: emporixPrice.tax ? {
-        taxClass: emporixPrice.tax.taxClass,
-        taxRate: emporixPrice.tax.taxRate,
-        netValue: emporixPrice.tax.prices.effectiveValue.netValue,
-        grossValue: emporixPrice.tax.prices.effectiveValue.grossValue,
-        taxValue: emporixPrice.tax.prices.effectiveValue.taxValue
-      } : undefined
+      tax: emporixPrice.tax
+        ? {
+            taxClass: emporixPrice.tax.taxClass,
+            taxRate: emporixPrice.tax.taxRate,
+            netValue: emporixPrice.tax.prices.effectiveValue.netValue,
+            grossValue: emporixPrice.tax.prices.effectiveValue.grossValue,
+            taxValue: emporixPrice.tax.prices.effectiveValue.taxValue,
+          }
+        : undefined,
     };
   }
 
@@ -40,7 +42,7 @@ export class PriceMapper {
   mapQuantityToService(emporixQuantity: EmporixQuantity): ServiceQuantity {
     return {
       quantity: emporixQuantity.quantity,
-      unitCode: emporixQuantity.unitCode
+      unitCode: emporixQuantity.unitCode,
     };
   }
 
@@ -52,7 +54,7 @@ export class PriceMapper {
   mapQuantityToEmporix(serviceQuantity: ServiceQuantity): EmporixQuantity {
     return {
       quantity: serviceQuantity.quantity,
-      unitCode: serviceQuantity.unitCode
+      unitCode: serviceQuantity.unitCode,
     };
   }
 }

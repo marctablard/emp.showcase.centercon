@@ -1,6 +1,6 @@
 'use client';
 
-import { storyblokEditable, StoryblokServerComponent } from '@storyblok/react/rsc';
+import { StoryblokServerComponent, storyblokEditable } from '@storyblok/react/rsc';
 
 /**
  * Segment component for Storyblok
@@ -18,14 +18,10 @@ interface SegmentProps {
 const Segment = ({ blok }: SegmentProps) => {
   return (
     <section {...storyblokEditable(blok)} className="segment-container my-8">
-      {blok.segment_name && (
-        <h2 className="text-xl font-semibold mb-4">{blok.segment_name}</h2>
-      )}
-      
+      {blok.segment_name && <h2 className="text-xl font-semibold mb-4">{blok.segment_name}</h2>}
+
       <div className="space-y-6">
-        {blok.content_blocks?.map((block) => (
-          <StoryblokServerComponent blok={block} key={block._uid} />
-        ))}
+        {blok.content_blocks?.map((block) => <StoryblokServerComponent blok={block} key={block._uid} />)}
       </div>
     </section>
   );

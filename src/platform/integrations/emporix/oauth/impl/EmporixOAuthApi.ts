@@ -1,6 +1,10 @@
 import { injectable } from '@/platform/core/di/injectable';
 import { OAuthApi } from '../OAuthApi';
-import { EmporixAnonymousTokenResponse, EmporixCustomerTokenResponse, EmporixAccessTokenResponse } from '../../model/oauth'
+import {
+  EmporixAccessTokenResponse,
+  EmporixAnonymousTokenResponse,
+  EmporixCustomerTokenResponse,
+} from '../../model/oauth';
 
 /**
  * Implementation of the Emporix OAuth API
@@ -17,12 +21,12 @@ class EmporixOAuthApi implements OAuthApi {
    */
   async getAnonymousToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
     const url = `${this.baseUrl}/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -30,9 +34,9 @@ class EmporixOAuthApi implements OAuthApi {
       throw new Error(`Failed to get anonymous token: ${response.statusText} - ${message}`);
     }
 
-    return await response.json() as EmporixAnonymousTokenResponse;
+    return (await response.json()) as EmporixAnonymousTokenResponse;
   }
-  
+
   /**
    * Refresh an anonymous token
    * @param tenant The tenant ID
@@ -40,14 +44,18 @@ class EmporixOAuthApi implements OAuthApi {
    * @param clientId Client ID for anonymous access
    * @returns Promise with the refreshed anonymous token response
    */
-  async refreshAnonymousToken(tenant: string, refreshToken: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
+  async refreshAnonymousToken(
+    tenant: string,
+    refreshToken: string,
+    clientId: string,
+  ): Promise<EmporixAnonymousTokenResponse> {
     const url = `${this.baseUrl}/customerlogin/auth/anonymous/refresh?tenant=${tenant}&refresh_token=${refreshToken}&client_id=${clientId}`;
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -55,10 +63,9 @@ class EmporixOAuthApi implements OAuthApi {
       throw new Error(`Failed to refresh anonymous token: ${response.statusText} - ${message}`);
     }
 
-    return await response.json() as EmporixAnonymousTokenResponse;
+    return (await response.json()) as EmporixAnonymousTokenResponse;
   }
 
- 
   /**
    * Get a customer token (and SaaS token)
    * @param tenant The tenant ID
@@ -66,18 +73,23 @@ class EmporixOAuthApi implements OAuthApi {
    * @param password Customer password
    * @returns Promise with the customer token response
    */
-  async getCustomerToken(tenant: string, accessToken: string, username: string, password: string): Promise<EmporixCustomerTokenResponse> {
+  async getCustomerToken(
+    tenant: string,
+    accessToken: string,
+    username: string,
+    password: string,
+  ): Promise<EmporixCustomerTokenResponse> {
     const url = `${this.baseUrl}/customer/${tenant}/login`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         email: username,
-        password: password
-      })
+        password: password,
+      }),
     });
 
     if (!response.ok) {
@@ -85,10 +97,9 @@ class EmporixOAuthApi implements OAuthApi {
       throw new Error(`Failed to get customer token: ${response.statusText} - ${message}`);
     }
 
-    return await response.json() as EmporixCustomerTokenResponse;
+    return (await response.json()) as EmporixCustomerTokenResponse;
   }
 
-  
   /**
    * Refresh a customer token
    * @param tenant The tenant ID
@@ -97,20 +108,20 @@ class EmporixOAuthApi implements OAuthApi {
    */
   async refreshCustomerToken(tenant: string, refreshToken: string): Promise<EmporixCustomerTokenResponse> {
     const url = `${this.baseUrl}/customer/${tenant}/refreshauthtoken/refresh?refresh_token=${refreshToken}`;
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
       const message = await response.text();
       throw new Error(`Failed to refresh customer token: ${response.statusText} - ${message}`);
     }
-    
-    return await response.json() as EmporixCustomerTokenResponse;
+
+    return (await response.json()) as EmporixCustomerTokenResponse;
   }
 
   /**
@@ -120,29 +131,34 @@ class EmporixOAuthApi implements OAuthApi {
    * @param clientSecret Client secret for service access
    * @returns Promise with the service access token response
    */
-  async getServiceAccessToken(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): Promise<EmporixAccessTokenResponse> {
+  async getServiceAccessToken(
+    tenant: string,
+    clientId: string,
+    clientSecret: string,
+    scopes?: string[],
+  ): Promise<EmporixAccessTokenResponse> {
     const url = `${this.baseUrl}/oauth/token`;
-    
+
     // Create URL-encoded form data for OAuth token request
     const formData = new URLSearchParams();
     formData.append('grant_type', 'client_credentials');
     formData.append('client_id', clientId);
     formData.append('client_secret', clientSecret);
     formData.append('scope', `tenant=${tenant}` + (scopes ? ` ${scopes.join(' ')}` : ''));
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      body: formData
+      body: formData,
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get service access token: ${response.statusText}`);
     }
-    return await response.json() as EmporixAccessTokenResponse;
+    return (await response.json()) as EmporixAccessTokenResponse;
   }
 }
 

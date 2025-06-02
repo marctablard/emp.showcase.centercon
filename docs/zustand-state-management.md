@@ -20,21 +20,22 @@ The product store is implemented in `src/stores/product/products-store.ts` and p
 
 ```typescript
 export type ProductState = {
-  currentProductId: string | null,
+  currentProductId: string | null;
   products: {
-    [id: string]: Product
-  }
-}
+    [id: string]: Product;
+  };
+};
 
 export type ProductActions = {
-  getProduct: (id: string) => Product | null
-  getCurrentProduct: () => Product | null
-  setCurrentProduct: (product: Product) => void
-  addProduct: (product: Product) => void
-}
+  getProduct: (id: string) => Product | null;
+  getCurrentProduct: () => Product | null;
+  setCurrentProduct: (product: Product) => void;
+  addProduct: (product: Product) => void;
+};
 ```
 
 The store maintains:
+
 - A cache of products indexed by their IDs
 - A reference to the currently selected product
 - Actions to get, add, and set products
@@ -52,7 +53,7 @@ export const StoreProvider = ({
     const initState = initProductStore();
     productStoreRef.current = createProductStore(initState);
   }
-  
+
   return (
     <ProductStoreContext.Provider value={productStoreRef.current}>
       {children}
@@ -62,6 +63,7 @@ export const StoreProvider = ({
 ```
 
 This implementation:
+
 - Uses `useRef` to ensure the store is only created once
 - Provides the store through React Context
 - Exposes a `useProductStore` hook for components to access the store
@@ -75,13 +77,13 @@ export const fetchProductById = cache(async (id: string): Promise<Product> => {
   try {
     const response = await fetch(`${baseUrl}/api/products/${id}`, {
       cache: 'no-store',
-      next: { tags: [`product-${id}`] }
+      next: { tags: [`product-${id}`] },
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch product: ${response.statusText}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error(`Error fetching product ${id}:`, error);
@@ -91,6 +93,7 @@ export const fetchProductById = cache(async (id: string): Promise<Product> => {
 ```
 
 Key features:
+
 - Uses React's `cache()` function to deduplicate requests within the same render cycle on serverside
 - Works in both client and server environments
 - Includes proper error handling
@@ -104,13 +107,14 @@ The `src/providers/hydrator/ProductHydrator.tsx` component is responsible for hy
 
 ```typescript
 export default function ProductHydrator({ product, isCurrent }: ProductHydratorProps) {
-    useProductHydrator({ product, isCurrent })
-    
-    return null
+  useProductHydrator({ product, isCurrent });
+
+  return null;
 }
 ```
 
 The `useProductHydrator` hook:
+
 - Takes a product object and an optional `isCurrent` flag
 - Adds the product to the store
 - Optionally sets it as the current product
@@ -138,12 +142,13 @@ export const useProduct = (id?: string): UseProductResult => {
     loading,
     error,
     refetch: fetchProduct,
-    setAsCurrent
+    setAsCurrent,
   };
 };
 ```
 
 This hook:
+
 - Checks the store first for cached data
 - Falls back to API fetching if the product isn't in the store
 - Handles loading and error states
@@ -159,7 +164,7 @@ In `src/app/[locale]/product/[id]/page.tsx`, the server component:
 ```typescript
 export default async function ProductPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
   const productId = (await params).id;
-  
+
   // Fetch product data server-side using our shared API layer
   const product = await fetchProductById(productId);
 
@@ -172,9 +177,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     <div className="container mx-auto py-10 px-4 md:px-6">
       {/* Hydrator component to populate the store with prefetched data */}
       <ProductHydrator product={product} isCurrent />
-      
+
       {/* Rest of the component... */}
-      
+
       <CardFooter>
         {/* Client component that consumes the product signal */}
         <ProductActions id={productId} />
@@ -185,6 +190,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 ```
 
 This component:
+
 1. Fetches the product data on the server
 2. Uses `ProductHydrator` to hydrate the data into the client-side store
 3. Passes only the product ID to the client component (`ProductActions`)
@@ -194,40 +200,40 @@ This component:
 In `src/components/product/ProductActions.tsx`, the client component:
 
 ```typescript
-export default function ProductActions({id}: {id: string}) {
+export default function ProductActions({ id }: { id: string }) {
   const t = useTranslations('product');
   const { product, loading, error, setAsCurrent } = useProduct(id);
   const [quantity, setQuantity] = useState(1);
 
-
   // If product is not available yet, show loading
   if (loading) {
-    return (
-      {/* Product Loading Template... */}
-    );
+    return {
+      /* Product Loading Template... */
+    };
   }
-  
+
   // If there's an error, show error message
   if (error) {
-    return (
-      {/* Product Error Template... */}
-    );
+    return {
+      /* Product Error Template... */
+    };
   }
-  
+
   // If no product, show not found
   if (!product) {
-    return (
-      {/* Product Not Found Template... */}
-    );
+    return {
+      /* Product Not Found Template... */
+    };
   }
-  
-  return (
-      {/* Regular Product Template... */}
-  );
+
+  return {
+    /* Regular Product Template... */
+  };
 }
 ```
 
 This component:
+
 1. Uses the `useProduct` hook to access the product data
 2. Handles loading and error states
 3. Renders UI based on the product data
@@ -247,6 +253,7 @@ This component:
 The Zustand implementation in the Emporix Showcase project demonstrates a clean and efficient approach to state management in a Next.js application. By combining server-side data fetching with client-side state management, the application achieves optimal performance while maintaining a great developer experience.
 
 ## TODO
+
 - Store Limitation (Threshold to reduce memory-usage)
 - Improved handling for multiple Stores
 - Store-Invalidation after TTL

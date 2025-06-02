@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import type { EmporixConfig } from '../../config';
-import type { TokenManager } from '../TokenManager'
+import type { TokenManager } from '../TokenManager';
 import { injectable } from '@/platform/core/di/injectable';
 
 /**
@@ -28,10 +28,9 @@ class EmporixApiInvoker {
    * Get an anonymous token for accessing public resources
    * @returns Promise with the token string
    */
-  async getAnonymousToken(): Promise<{ accessToken: string, sessionId: string }> {
+  async getAnonymousToken(): Promise<{ accessToken: string; sessionId: string }> {
     return this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
   }
-
 
   /**
    * Get a service access token for administrative operations
@@ -40,9 +39,14 @@ class EmporixApiInvoker {
    */
   async getServiceAccessToken(scopes?: string[]): Promise<string> {
     if (!this.config.serverClientId || !this.config.serverClientSecret) {
-      throw new Error("Service Credentials not available");
+      throw new Error('Service Credentials not available');
     }
-    return this.tokenManager.getServiceAccessToken(this.config.tenant, this.config.serverClientId, this.config.serverClientSecret, scopes);
+    return this.tokenManager.getServiceAccessToken(
+      this.config.tenant,
+      this.config.serverClientId,
+      this.config.serverClientSecret,
+      scopes,
+    );
   }
 
   /**
@@ -65,9 +69,9 @@ class EmporixApiInvoker {
     options: RequestInit = {},
     tokenType: 'public' | 'session' | 'customer-saas' | 'service' = 'public',
     authOptions?: {
-      credentials?: { username: string; password: string },
-      scopes?: string[]
-    }
+      credentials?: { username: string; password: string };
+      scopes?: string[];
+    },
   ): Promise<Response> {
     let token: string;
 
@@ -83,26 +87,35 @@ class EmporixApiInvoker {
         break;
       case 'customer-saas':
       case 'session':
-        const sessionToken = await this.tokenManager.getSessionToken(this.config.tenant, this.config.clientId, authOptions?.credentials);
+        const sessionToken = await this.tokenManager.getSessionToken(
+          this.config.tenant,
+          this.config.clientId,
+          authOptions?.credentials,
+        );
         token = sessionToken.accessToken;
         if (tokenType === 'customer-saas') {
           if (sessionToken.saasToken) {
             headers = {
               ...headers,
-              'saas-token': `Bearer ${sessionToken.saasToken}`
-            }
+              'saas-token': `Bearer ${sessionToken.saasToken}`,
+            };
           } else {
             throw new Error('No SaaS token available');
           }
         } else {
           headers = {
             ...headers,
-            'session-id': `${sessionToken.sessionId}`
-          }
+            'session-id': `${sessionToken.sessionId}`,
+          };
         }
         break;
       case 'service':
-        token = await this.tokenManager.getServiceAccessToken(this.config.tenant, this.config.clientId, this.config.clientSecret, authOptions?.scopes);
+        token = await this.tokenManager.getServiceAccessToken(
+          this.config.tenant,
+          this.config.clientId,
+          this.config.clientSecret,
+          authOptions?.scopes,
+        );
         break;
       default:
         throw new Error(`Unknown token type: ${tokenType}`);
@@ -111,14 +124,14 @@ class EmporixApiInvoker {
     // Add authorization header to the request
     headers = {
       ...headers,
-      'Authorization': `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    };
     // Make the authenticated request
     this.outputCurl(url, { ...options, headers });
 
     return fetch(`${this.config.baseUrl}/${url}`, {
       ...options,
-      headers
+      headers,
     });
   }
 
@@ -131,14 +144,14 @@ class EmporixApiInvoker {
 
       const methodString = options.method ? `-X ${options.method}` : '';
       const bodyString = options.body ? `-d '${options.body}'` : '';
-      
+
       console.log(`curl -v ${methodString} ${headerString} ${bodyString} '${this.config.baseUrl}/${url}'`);
     }
   }
 
   /**
    * Clear all stored tokens
- */
+   */
   async clearTokens(): Promise<void> {
     this.tokenManager.clearTokens();
   }

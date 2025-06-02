@@ -1,19 +1,19 @@
 export interface RegionSettings {
-    region: string,
-    currency: Currency,
-    language: string
+  region: string;
+  currency: Currency;
+  language: string;
 }
-  
+
 export interface Currency {
-    id: string;
-    symbol: string;
+  id: string;
+  symbol: string;
 }
-  
+
 export interface Tax {
   amount: number;
   currency: string;
-  netValue : number;
-  grossValue : number;
+  netValue: number;
+  grossValue: number;
 }
 
 export interface TaxType {
@@ -22,47 +22,47 @@ export interface TaxType {
 }
 
 export interface Price {
+  amount: number;
+  originalAmount?: number;
+  tiers?: {
     amount: number;
-    originalAmount?: number;
-    tiers?: {
-      amount: number;
-      quantity: number;
-    }[],
-    currency: string;
-    tax?: Tax & TaxType;
+    quantity: number;
+  }[];
+  currency: string;
+  tax?: Tax & TaxType;
 }
 
 export interface FilterValue {
-    id: string;
-    name?: string;
-    count?: number;
-    active: boolean;
+  id: string;
+  name?: string;
+  count?: number;
+  active: boolean;
 }
 
 export interface Filter {
-    id: string;
-    name?: string;
-    values: FilterValue[];
+  id: string;
+  name?: string;
+  values: FilterValue[];
 }
 
 export interface Paginated<T> {
-    items: T[];
-    total: number;
-    page: number;
-    pageSize: number;
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface SearchResult<T> extends Paginated<T> {
-    availableFilters: Filter[];
+  availableFilters: Filter[];
 }
 
 export interface SearchParams<T> {
-    query?: string;
-    page?: number;
-    size?: number;
-    sort?: string;
-    criteria?: Partial<T>;
-    filters?: Record<string, string | string[]>;
+  query?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+  criteria?: Partial<T>;
+  filters?: Record<string, string | string[]>;
 }
 
 export interface LocalizedString {

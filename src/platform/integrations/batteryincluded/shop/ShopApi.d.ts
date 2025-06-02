@@ -1,4 +1,4 @@
-import { Product, BatteryIncludedSearchResponse, SearchParams, Preset, Highlight, Suggestion } from "../model";
+import { BatteryIncludedSearchResponse, Highlight, Preset, Product, SearchParams, Suggestion } from '../model';
 
 export interface ShopApi {
   /**
@@ -12,7 +12,7 @@ export interface ShopApi {
    * @param preset Optional preset ID to use
    */
   browse(params: SearchParams<Product>): Promise<BatteryIncludedSearchResponse<Product>>;
-  
+
   /**
    * Get product suggestions based on a search query
    * @param query Search query

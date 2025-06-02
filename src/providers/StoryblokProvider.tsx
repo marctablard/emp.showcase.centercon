@@ -5,7 +5,7 @@ import { getStoryblokApi } from '@/lib/storyblok';
 
 const StoryblokProvider = ({ children }: { children: ReactNode }) => {
   getStoryblokApi();
-  
+
   return children;
 };
 

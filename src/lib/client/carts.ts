@@ -1,6 +1,5 @@
 import { Cart } from '@/platform/services/model/cart/cart';
 
-
 /**
  * Fetch the current cart
  * If no cart ID is found in cookies, a new cart will be created
@@ -9,17 +8,17 @@ import { Cart } from '@/platform/services/model/cart/cart';
  */
 export async function fetchCurrentCart(createIfNotExist: boolean = false): Promise<Cart | null> {
   const response = await fetch(`/api/cart?create=${createIfNotExist}`);
-  
+
   // If we get a 204, it means no cart exists yet
   if (response.status === 204) {
     return null;
   }
-  
+
   // For other error codes, throw an error
   if (!response.ok) {
     throw new Error(`Failed to fetch cart: ${response.statusText}`);
   }
-  
+
   const cart = await response.json();
   return cart;
 }
@@ -29,11 +28,11 @@ export async function fetchCurrentCart(createIfNotExist: boolean = false): Promi
  */
 export async function fetchCartById(cartId: string): Promise<Cart> {
   const response = await fetch(`/api/cart/${cartId}`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch cart: ${response.statusText}`);
   }
-  
+
   const cart = await response.json();
   return cart;
 }
@@ -48,11 +47,11 @@ export async function createCart(): Promise<Cart> {
       'Content-Type': 'application/json',
     },
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to create cart: ${response.statusText}`);
   }
-  
+
   return await response.json();
 }
 
@@ -70,11 +69,11 @@ export async function addItemToCart(cartId: string, productId: string, quantity:
       quantity,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to add item to cart: ${response.statusText}`);
   }
-  
+
   const data = await response.json();
   return data.itemId;
 }
@@ -93,7 +92,7 @@ export async function updateCartItemQuantity(cartId: string, itemId: string, qua
       quantity,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to update cart item: ${response.statusText}`);
   }
@@ -106,7 +105,7 @@ export async function removeCartItem(cartId: string, itemId: string): Promise<vo
   const response = await fetch(`/api/cart/${cartId}/items/${itemId}`, {
     method: 'DELETE',
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to remove cart item: ${response.statusText}`);
   }
@@ -119,7 +118,7 @@ export async function deleteCart(cartId: string): Promise<void> {
   const response = await fetch(`/api/cart/${cartId}`, {
     method: 'DELETE',
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to delete cart: ${response.statusText}`);
   }
@@ -139,9 +138,8 @@ export async function updateShippingInfo(cartId: string, countryCode?: string, z
       zipCode,
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to update shipping info: ${response.statusText}`);
   }
 }
-

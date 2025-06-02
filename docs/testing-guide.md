@@ -17,14 +17,14 @@
    - [Handling Asynchronous Operations](#handling-asynchronous-operations)
    - [Testing State Management](#testing-state-management)
    - [Mocking Dependencies](#mocking-dependencies)
-6. [Sample Tests](#sample-tests)
+7. [Sample Tests](#sample-tests)
    - [Jest Example: Testing a Hook](#jest-example-testing-a-hook)
    - [Playwright Example: Testing Locale Redirects](#playwright-example-testing-locale-redirects)
-7. [Running Tests](#running-tests)
-8. [Best Practices](#best-practices)
-9. [Continuous Integration](#continuous-integration)
-10. [Troubleshooting Common Issues](#troubleshooting-common-issues)
-11. [Conclusion](#conclusion)
+8. [Running Tests](#running-tests)
+9. [Best Practices](#best-practices)
+10. [Continuous Integration](#continuous-integration)
+11. [Troubleshooting Common Issues](#troubleshooting-common-issues)
+12. [Conclusion](#conclusion)
 
 ## Overview
 
@@ -77,8 +77,8 @@ When testing services that have dependencies, you can create test-specific imple
 ```typescript
 // Example of mocking dependencies in a test
 import { Container } from 'inversify';
-import { MyService } from './MyService';
 import { MyDependency } from './MyDependency';
+import { MyService } from './MyService';
 
 // Create a mock implementation
 class MockDependency implements MyDependency {
@@ -107,9 +107,9 @@ For platform testing, it's recommended to create a dedicated test container with
 ```typescript
 // test-utils/test-container.ts
 import { Container } from 'inversify';
-import { TYPES } from '@/platform/types';
-import { ProductApi } from '@/platform/api/ProductApi';
 import { CartApi } from '@/platform/api/CartApi';
+import { ProductApi } from '@/platform/api/ProductApi';
+import { TYPES } from '@/platform/types';
 
 // Mock implementations
 class MockProductApi implements ProductApi {
@@ -124,11 +124,11 @@ class MockCartApi implements CartApi {
 
 export function createTestContainer() {
   const container = new Container();
-  
+
   // Bind mock implementations
   container.bind<ProductApi>(TYPES.ProductApi).to(MockProductApi).inSingletonScope();
   container.bind<CartApi>(TYPES.CartApi).to(MockCartApi).inSingletonScope();
-  
+
   return container;
 }
 ```
@@ -139,43 +139,45 @@ With the test container in place, you can easily test services that depend on pl
 
 ```typescript
 // services/ProductService.test.ts
+import { ProductApi } from '@/platform/api/ProductApi';
+import { TYPES } from '@/platform/types';
 import { createTestContainer } from '../test-utils/test-container';
 import { ProductService } from './ProductService';
-import { TYPES } from '@/platform/types';
-import { ProductApi } from '@/platform/api/ProductApi';
 
 describe('ProductService', () => {
   let container;
   let productService;
   let mockProductApi;
-  
+
   beforeEach(() => {
     // Create a fresh container for each test
     container = createTestContainer();
-    
+
     // Get the service and its dependencies
     productService = container.get<ProductService>(TYPES.ProductService);
     mockProductApi = container.get<ProductApi>(TYPES.ProductApi);
   });
-  
+
   test('getProductDetails should return enhanced product data', async () => {
     // Setup mock response
     mockProductApi.getProduct.mockResolvedValueOnce({
       id: 'test-123',
       name: 'Test Product',
-      price: { value: 99.99, currencyCode: 'USD' }
+      price: { value: 99.99, currencyCode: 'USD' },
     });
-    
+
     // Call the service method
     const result = await productService.getProductDetails('test-123');
-    
+
     // Verify the result
-    expect(result).toEqual(expect.objectContaining({
-      id: 'test-123',
-      name: 'Test Product',
-      formattedPrice: '$99.99'
-    }));
-    
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'test-123',
+        name: 'Test Product',
+        formattedPrice: '$99.99',
+      }),
+    );
+
     // Verify the dependency was called correctly
     expect(mockProductApi.getProduct).toHaveBeenCalledWith('test-123');
   });
@@ -189,35 +191,35 @@ You can also test API implementations by mocking their HTTP client dependencies:
 ```typescript
 // platform/integrations/emporix/product/impl/EmporixProductApi.test.ts
 import { Container } from 'inversify';
-import { TYPES } from '@/platform/types';
 import { HttpClient } from '@/platform/http/HttpClient';
+import { TYPES } from '@/platform/types';
 import { EmporixProductApi } from './EmporixProductApi';
 
 describe('EmporixProductApi', () => {
   let container;
   let productApi;
   let mockHttpClient;
-  
+
   beforeEach(() => {
     // Create a container
     container = new Container();
-    
+
     // Create mock HTTP client
     mockHttpClient = {
       get: jest.fn(),
       post: jest.fn(),
       put: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
     };
-    
+
     // Bind dependencies
     container.bind<HttpClient>(TYPES.HttpClient).toConstantValue(mockHttpClient);
     container.bind<EmporixProductApi>(TYPES.ProductApi).to(EmporixProductApi);
-    
+
     // Get the API implementation
     productApi = container.get<EmporixProductApi>(TYPES.ProductApi);
   });
-  
+
   test('getProduct should call correct endpoint and transform response', async () => {
     // Setup mock response
     const mockResponse = {
@@ -225,28 +227,25 @@ describe('EmporixProductApi', () => {
       name: 'Test Product',
       attributes: [
         { name: 'color', value: 'red' },
-        { name: 'size', value: 'medium' }
-      ]
+        { name: 'size', value: 'medium' },
+      ],
     };
     mockHttpClient.get.mockResolvedValueOnce({ data: mockResponse });
-    
+
     // Call the API method
     const result = await productApi.getProduct('prod123');
-    
+
     // Verify the HTTP client was called correctly
-    expect(mockHttpClient.get).toHaveBeenCalledWith(
-      expect.stringContaining('/products/prod123'),
-      expect.any(Object)
-    );
-    
+    expect(mockHttpClient.get).toHaveBeenCalledWith(expect.stringContaining('/products/prod123'), expect.any(Object));
+
     // Verify the response was transformed correctly
     expect(result).toEqual({
       id: 'prod123',
       name: 'Test Product',
       attributes: {
         color: 'red',
-        size: 'medium'
-      }
+        size: 'medium',
+      },
     });
   });
 });
@@ -282,11 +281,7 @@ Create a shared store/context instance and use it in a custom wrapper for all re
 ```tsx
 // ✅ GOOD: Create a shared store
 const sharedStore = createStore();
-const customWrapper = ({ children }) => (
-  <StoreContext.Provider value={sharedStore}>
-    {children}
-  </StoreContext.Provider>
-);
+const customWrapper = ({ children }) => <StoreContext.Provider value={sharedStore}>{children}</StoreContext.Provider>;
 
 // Both renders use the same store instance
 const { result: hookResult } = renderHook(() => useMyHook(), { wrapper: customWrapper });
@@ -399,25 +394,23 @@ Create a testable store factory and use it consistently:
 const createTestStore = (initialState = {}) => {
   return createStore({
     ...defaultState,
-    ...initialState
+    ...initialState,
   });
 };
 
 test('should update state', async () => {
   // Create store with test data
   const store = createTestStore({ user: { name: 'Test' } });
-  const wrapper = ({ children }) => (
-    <StoreProvider store={store}>{children}</StoreProvider>
-  );
-  
+  const wrapper = ({ children }) => <StoreProvider store={store}>{children}</StoreProvider>;
+
   const { result } = renderHook(() => useUser(), { wrapper });
   expect(result.current.name).toBe('Test');
-  
+
   // Update store
   await act(async () => {
     store.getState().updateUser({ name: 'Updated' });
   });
-  
+
   expect(result.current.name).toBe('Updated');
 });
 ```
@@ -450,16 +443,16 @@ Mock dependencies at the module level:
 ```tsx
 // ✅ GOOD: Mock API module
 jest.mock('@/lib/api', () => ({
-  fetchProduct: jest.fn().mockResolvedValue({ id: '123', name: 'Test Product' })
+  fetchProduct: jest.fn().mockResolvedValue({ id: '123', name: 'Test Product' }),
 }));
 
 test('should fetch product', async () => {
   const { result } = renderHook(() => useProductApi());
-  
+
   await act(async () => {
     await result.current.fetchProduct('123');
   });
-  
+
   expect(result.current.product).toEqual({ id: '123', name: 'Test Product' });
 });
 ```
@@ -502,7 +495,7 @@ describe('useProduct hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  
+
   test('should fetch and store product', async () => {
     // Setup shared store
     const sharedStore = createProductStore();
@@ -511,24 +504,24 @@ describe('useProduct hook', () => {
         {children}
       </ProductStoreContext.Provider>
     );
-    
+
     // Setup mock
     (fetchProductById).mockResolvedValue(mockProduct);
-    
+
     // Render hook
     const { result } = renderHook(() => useProduct('123'), { wrapper });
-    
+
     // Initial state
     expect(result.current.loading).toBe(true);
-    
+
     // Wait for loading to complete
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
-    
+
     // Verify final state
     expect(result.current.product).toEqual(mockProduct);
-    
+
     // Verify store was updated
     expect(sharedStore.getState().products['123']).toEqual(mockProduct);
   });
@@ -541,7 +534,7 @@ The project includes a sample E2E test that verifies locale handling:
 
 ```typescript
 // e2e/homepage.spec.ts
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('German homepage (/de) loads correctly', async ({ page }) => {
   // Navigate to the German homepage
@@ -677,9 +670,7 @@ This typically happens when context is not properly shared between renders. To f
 ```tsx
 // ✅ GOOD: Shared store between renders
 const sharedStore = createStore();
-const wrapper = ({ children }) => (
-  <StoreContext.Provider value={sharedStore}>{children}</StoreContext.Provider>
-);
+const wrapper = ({ children }) => <StoreContext.Provider value={sharedStore}>{children}</StoreContext.Provider>;
 
 const { result: hook1 } = renderHook(() => useHook1(), { wrapper });
 const { result: hook2 } = renderHook(() => useHook2(), { wrapper });

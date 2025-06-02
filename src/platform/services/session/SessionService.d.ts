@@ -1,4 +1,4 @@
-import { Session, SessionAttribute } from "@/platform/services/model/session/session";
+import { Session, SessionAttribute } from '@/platform/services/model/session/session';
 
 /**
  * Service for managing the current user's session context

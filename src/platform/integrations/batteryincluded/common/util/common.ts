@@ -1,4 +1,4 @@
-import { BatteryIncludedSearchParams } from "../../model";
+import { BatteryIncludedSearchParams } from '../../model';
 
 /**
  * Builds search parameters for Battery Included API
@@ -43,7 +43,7 @@ export function buildSearchParams<T>(params: BatteryIncludedSearchParams<T>): st
   if (params.filters) {
     Object.entries(params.filters).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        value.forEach(v => {
+        value.forEach((v) => {
           queryParams.append(`f[${key}][]`, v);
         });
       } else {
@@ -54,4 +54,3 @@ export function buildSearchParams<T>(params: BatteryIncludedSearchParams<T>): st
 
   return queryParams.toString();
 }
-

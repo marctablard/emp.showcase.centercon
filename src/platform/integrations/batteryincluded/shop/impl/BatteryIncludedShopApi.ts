@@ -1,16 +1,23 @@
-import { BatteryIncludedProduct, BatteryIncludedSearchResponse, BatteryIncludedSearchParams, BatteryIncludedPreset, BatteryIncludedHighlight, BatteryIncludedSuggestion } from "../../model";
-import { ShopApi } from "../ShopApi";
-import { buildSearchParams } from "../../common/util/common";
-import { inject } from "inversify";
-import type { BatteryIncludedConfig } from "../../config";
-import type BatteryIncludedApiInvoker from "../../common/impl/BatteryIncludedApiInvoker";
-import { injectable } from "@/platform/core/di/injectable";
+import {
+  BatteryIncludedHighlight,
+  BatteryIncludedPreset,
+  BatteryIncludedProduct,
+  BatteryIncludedSearchParams,
+  BatteryIncludedSearchResponse,
+  BatteryIncludedSuggestion,
+} from '../../model';
+import { ShopApi } from '../ShopApi';
+import { buildSearchParams } from '../../common/util/common';
+import { inject } from 'inversify';
+import type { BatteryIncludedConfig } from '../../config';
+import type BatteryIncludedApiInvoker from '../../common/impl/BatteryIncludedApiInvoker';
+import { injectable } from '@/platform/core/di/injectable';
 
 @injectable('BatteryIncludedShopApi', 'Singleton')
 class BatteryIncludedShopApi implements ShopApi {
   constructor(
     @inject('BatteryIncludedApiInvoker') private apiClient: BatteryIncludedApiInvoker,
-    @inject('BatteryIncludedConfig') private config: BatteryIncludedConfig
+    @inject('BatteryIncludedConfig') private config: BatteryIncludedConfig,
   ) {}
 
   /**
@@ -19,10 +26,10 @@ class BatteryIncludedShopApi implements ShopApi {
   async browse<T>(params: BatteryIncludedSearchParams<T>): Promise<BatteryIncludedSearchResponse<T>> {
     const queryString = buildSearchParams(params);
     const url = `/api/v1/collections/${this.config.collection}/documents/browse?${queryString}`;
-    
+
     const response = await this.apiClient.apiFetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
 
     if (!response.ok) {
@@ -34,21 +41,21 @@ class BatteryIncludedShopApi implements ShopApi {
   }
 
   /**
- * Get product suggestions based on a search query
- */
-async suggest(query: string, locale?: string): Promise<BatteryIncludedSuggestion[]> {
+   * Get product suggestions based on a search query
+   */
+  async suggest(query: string, locale?: string): Promise<BatteryIncludedSuggestion[]> {
     const params = new URLSearchParams();
     params.append('q', query);
-    
+
     if (locale) {
       params.append('v[locale]', locale);
     }
-    
+
     const url = `/api/v1/collections/${this.config.collection}/documents/suggest?${params.toString()}`;
-    
+
     const response = await this.apiClient.apiFetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
 
     const data = await response.json();
@@ -56,14 +63,14 @@ async suggest(query: string, locale?: string): Promise<BatteryIncludedSuggestion
   }
 
   /**
- * Get highlighted products
- */
-async getHighlights(): Promise<BatteryIncludedHighlight[]> {
+   * Get highlighted products
+   */
+  async getHighlights(): Promise<BatteryIncludedHighlight[]> {
     const url = `/api/v1/collections/${this.config.collection}/documents/highlights`;
-    
+
     const response = await this.apiClient.apiFetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
 
     const data = await response.json();
@@ -76,12 +83,12 @@ async getHighlights(): Promise<BatteryIncludedHighlight[]> {
   async getRecommendations(id: string): Promise<BatteryIncludedProduct[]> {
     const params = new URLSearchParams();
     params.append('id', id);
-    
+
     const url = `/api/v1/collections/${this.config.collection}/documents/recommendations?${params.toString()}`;
-    
+
     const response = await this.apiClient.apiFetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
 
     const data = await response.json();
@@ -93,10 +100,10 @@ async getHighlights(): Promise<BatteryIncludedHighlight[]> {
    */
   async getPresets(): Promise<BatteryIncludedPreset[]> {
     const url = `/api/v1/collections/${this.config.collection}/documents/presets`;
-    
+
     const response = await this.apiClient.apiFetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
 
     const data = await response.json();

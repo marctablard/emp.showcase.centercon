@@ -3,7 +3,7 @@
  * @template T The type of the token
  */
 export interface StoredToken<T> {
-    token: T;
-    expiryAt: number;
-    refreshExpiryAt?: number;
+  token: T;
+  expiryAt: number;
+  refreshExpiryAt?: number;
 }

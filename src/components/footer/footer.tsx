@@ -1,9 +1,7 @@
 'use client';
 
-import { Linkedin } from 'lucide-react';
-import { Youtube } from 'lucide-react';
-import { Instagram } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Instagram, Linkedin, Youtube } from 'lucide-react';
 
 export default function Footer() {
   const t = useTranslations('footer');

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { UseFormReturn } from 'react-hook-form';
+import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import AddressForm from './address-form';
-import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { UseFormReturn } from 'react-hook-form';
 
 interface AddressesProps {
   initialShippingAddress?: Partial<Omit<CheckoutAddress, 'type'>>;
@@ -17,30 +17,45 @@ interface AddressesProps {
  * Addresses component for checkout
  * Manages both shipping and billing addresses with option to use same address for both
  */
-const Addresses: React.FC<AddressesProps> = ({
-  isReadOnly = false,
-  form
-}) => {
-  const { submitShippingAddress, submitBillingAddress, shippingAddress: storeShippingAddress, billingAddress: storeBillingAddress } = useCheckout();
+const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false, form }) => {
+  const {
+    submitShippingAddress,
+    submitBillingAddress,
+    shippingAddress: storeShippingAddress,
+    billingAddress: storeBillingAddress,
+  } = useCheckout();
 
-  const [shippingAddress, setShippingAddress] = useState<Omit<CheckoutAddress, 'type'>>(
-    { contactName: '', street: '', zipCode: '', city: '', country: '', ...storeShippingAddress }
-  );
-  
-  const [billingAddress, setBillingAddress] = useState<Omit<CheckoutAddress, 'type'>>(
-    { contactName: '', street: '', zipCode: '', city: '', country: '', ...storeBillingAddress }
-  );
-  
+  const [shippingAddress, setShippingAddress] = useState<Omit<CheckoutAddress, 'type'>>({
+    contactName: '',
+    street: '',
+    zipCode: '',
+    city: '',
+    country: '',
+    ...storeShippingAddress,
+  });
+
+  const [billingAddress, setBillingAddress] = useState<Omit<CheckoutAddress, 'type'>>({
+    contactName: '',
+    street: '',
+    zipCode: '',
+    city: '',
+    country: '',
+    ...storeBillingAddress,
+  });
+
   // Helper function to check if addresses are the same
-  const areAddressesEqual = (addr1?: Partial<Omit<CheckoutAddress, 'type'>>, addr2?: Partial<Omit<CheckoutAddress, 'type'>>): boolean => {
+  const areAddressesEqual = (
+    addr1?: Partial<Omit<CheckoutAddress, 'type'>>,
+    addr2?: Partial<Omit<CheckoutAddress, 'type'>>,
+  ): boolean => {
     if (!addr1 || !addr2) return false;
     if (Object.keys(addr1).length === 0 || Object.keys(addr2).length === 0) return false;
-    
+
     // Get all keys from both objects and create a Set to avoid duplicates
     const allKeys = new Set<string>([...Object.keys(addr1), ...Object.keys(addr2)]);
-    
+
     // Compare each key's value in both objects
-    return Array.from(allKeys).every(key => {
+    return Array.from(allKeys).every((key) => {
       // Skip the 'type' field as we're comparing Omit<CheckoutAddress, 'type'>
       if (key === 'type') return true;
       return addr1[key as keyof typeof addr1] === addr2[key as keyof typeof addr2];
@@ -53,7 +68,7 @@ const Addresses: React.FC<AddressesProps> = ({
     if (!storeBillingAddress || Object.keys(storeBillingAddress || {}).length === 0) return true;
     // If shipping address is empty, we can't compare (and the billing address is not empty, so we must show it)
     if (!storeShippingAddress) return false;
-    
+
     // Compare the addresses
     return areAddressesEqual(storeShippingAddress, storeBillingAddress);
   }, [storeShippingAddress, storeBillingAddress]);
@@ -63,7 +78,7 @@ const Addresses: React.FC<AddressesProps> = ({
   const handleShippingAddressChange = (data: Omit<CheckoutAddress, 'type'>) => {
     setShippingAddress(data);
     submitShippingAddress({ ...data, type: 'SHIPPING' });
-    
+
     // If same as shipping is checked, also update billing address
     if (sameAsShipping) {
       submitBillingAddress({ ...data, type: 'BILLING' });
@@ -78,7 +93,7 @@ const Addresses: React.FC<AddressesProps> = ({
   const handleSameAddressToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     setSameAsShipping(isChecked);
-    
+
     // If checked, update billing address to match shipping
     if (isChecked) {
       submitBillingAddress({ ...shippingAddress, type: 'BILLING' });
@@ -133,8 +148,12 @@ const Addresses: React.FC<AddressesProps> = ({
           <h3 className="text-lg font-medium text-gray-800 mb-2">Billing Address</h3>
           <div className="text-gray-600">
             <p>{billingAddress.contactName}</p>
-            <p>{billingAddress.street} {billingAddress.streetNumber}</p>
-            <p>{billingAddress.zipCode} {billingAddress.city}</p>
+            <p>
+              {billingAddress.street} {billingAddress.streetNumber}
+            </p>
+            <p>
+              {billingAddress.zipCode} {billingAddress.city}
+            </p>
             <p>{billingAddress.country}</p>
           </div>
         </div>

@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
+import { UseFormReturn } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
-import { UseFormReturn } from "react-hook-form";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
-import { useTranslations } from 'next-intl';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface AddressFormProps {
@@ -19,11 +19,7 @@ interface AddressFormProps {
  * Reusable address form component for checkout
  * Can be used for both shipping and billing addresses
  */
-const AddressForm: React.FC<AddressFormProps> = ({
-  isReadOnly = false,
-  form
-}) => {
-
+const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, form }) => {
   const t = useTranslations('Checkout');
 
   // Common countries list - can be expanded or fetched from an API
@@ -129,7 +125,6 @@ const AddressForm: React.FC<AddressFormProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-
           <FormField
             control={form.control}
             name="country"
@@ -143,7 +138,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {countries.map((country) => (
-                        <SelectItem key={country.code} value={country.code}>{country.name}</SelectItem>
+                        <SelectItem key={country.code} value={country.code}>
+                          {country.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

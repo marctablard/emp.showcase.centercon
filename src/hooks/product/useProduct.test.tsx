@@ -1,10 +1,10 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useProduct } from './useProduct';
-import { fetchProductById } from '@/lib/client/products';
-import { StoreProvider, useProductStore, ProductStoreContext } from '@/providers/StoreProvider';
-import { createProductStore } from '@/stores/products-store';
 import { ReactNode } from 'react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { fetchProductById } from '@/lib/client/products';
+import { ProductStoreContext, StoreProvider, useProductStore } from '@/providers/StoreProvider';
 import { createCartStore } from '@/stores/cart-store';
+import { createProductStore } from '@/stores/products-store';
+import { useProduct } from './useProduct';
 
 // Mock the API module
 jest.mock('@/lib/client/products', () => ({
@@ -18,15 +18,13 @@ const mockProduct = {
   description: 'This is a test product',
   price: {
     amount: 99.99,
-    currency: 'USD'
+    currency: 'USD',
   },
-  images: [{ url:'https://example.com/image.jpg'}]
+  images: [{ url: 'https://example.com/image.jpg' }],
 };
 
 // Wrapper component to provide the store context
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <StoreProvider>{children}</StoreProvider>
-);
+const wrapper = ({ children }: { children: ReactNode }) => <StoreProvider>{children}</StoreProvider>;
 
 describe('useProduct hook', () => {
   beforeEach(() => {
@@ -36,15 +34,15 @@ describe('useProduct hook', () => {
 
   /**
    * Test 1: Dispatch product fetch → Store shows loaded state
-   * 
+   *
    * This test verifies that when a product is fetched successfully,
    * the loading state transitions correctly and the product is stored.
    */
   test('should fetch product and update store with loaded state', async () => {
     // Mock the API response
     (fetchProductById as jest.Mock).mockResolvedValue(mockProduct);
-    const {result} = renderHook(() => useProduct('test-product-123'), { wrapper });
-   
+    const { result } = renderHook(() => useProduct('test-product-123'), { wrapper });
+
     // Initially, loading should be true
     expect(result.current.loading).toBe(true);
     expect(result.current.product).toBe(null);
@@ -52,7 +50,7 @@ describe('useProduct hook', () => {
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
-    
+
     // After loading, product should be available and loading should be false
     expect(result.current.product).toEqual(mockProduct);
     expect(result.current.loading).toBe(false);
@@ -64,7 +62,7 @@ describe('useProduct hook', () => {
 
   /**
    * Test 2: Simulate error during product fetch → Store shows error status
-   * 
+   *
    * This test verifies that when a product fetch fails,
    * the error state is properly set and loading is completed.
    */
@@ -72,7 +70,7 @@ describe('useProduct hook', () => {
     // Mock console.error to suppress expected error messages
     const originalConsoleError = console.error;
     console.error = jest.fn();
-    
+
     try {
       // Mock the API to throw an error
       const mockError = new Error('Failed to fetch product');
@@ -89,7 +87,7 @@ describe('useProduct hook', () => {
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
-      
+
       // After error, error state should be set and loading should be false
       expect(result.current.product).toBe(null);
       expect(result.current.error).toBe(mockError);
@@ -104,10 +102,10 @@ describe('useProduct hook', () => {
 
   /**
    * Test 3: Other components correctly read state from the store
-   * 
+   *
    * This test verifies that after using the useProduct hook,
    * the product is correctly stored in the Zustand store and
-   * can be accessed by other components using useProductStore 
+   * can be accessed by other components using useProductStore
    * directly.
    */
   test('should populate the store so other components can access the product', async () => {
@@ -115,17 +113,15 @@ describe('useProduct hook', () => {
     const sharedStore = createProductStore();
     const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>
-        {children}
-      </ProductStoreContext.Provider>
+      <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
     );
-    
+
     // Mock the API response
     (fetchProductById as jest.Mock).mockResolvedValue(mockProduct);
 
     // Render the product hook with the shared store
     const { result: hookResult } = renderHook(() => useProduct('test-product-123'), { wrapper: customWrapper });
-    
+
     expect(hookResult.current.loading).toBe(true);
     await waitFor(() => {
       expect(hookResult.current.loading).toBe(false);
@@ -151,11 +147,9 @@ describe('useProduct hook', () => {
     const sharedStore = createProductStore();
     const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>
-        {children}
-      </ProductStoreContext.Provider>
+      <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
     );
-    
+
     // First, add a product to the store
     const { result: storeResult } = renderHook(() => useProductStore(), { wrapper: customWrapper });
 
@@ -175,18 +169,16 @@ describe('useProduct hook', () => {
     const sharedStore = createProductStore();
     const cartStore = createCartStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>
-        {children}
-      </ProductStoreContext.Provider>
+      <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
     );
-    
+
     // Mock the API response
     const updatedProduct = { ...mockProduct, name: 'Updated Product' };
     (fetchProductById as jest.Mock).mockResolvedValueOnce(mockProduct);
-    
+
     // Render the hook with the shared store
     const { result } = renderHook(() => useProduct('test-product-123'), { wrapper: customWrapper });
-    
+
     // Update the mock to return a different product
     (fetchProductById as jest.Mock).mockResolvedValueOnce(updatedProduct);
 
@@ -199,7 +191,6 @@ describe('useProduct hook', () => {
     expect(result.current.product).toEqual(updatedProduct);
     expect(result.current.loading).toBe(false);
 
-    
     // Update the mock to return a third product
     const thirdProduct = { ...mockProduct, name: 'Third Product' };
     (fetchProductById as jest.Mock).mockResolvedValueOnce(thirdProduct);

@@ -1,7 +1,4 @@
-import { ShopApi } from "./shop/ShopApi";
-import { BatteryIncludedConfig } from "./config";
+import { BatteryIncludedConfig } from './config';
+import { ShopApi } from './shop/ShopApi';
 
-export {
-  ShopApi,
-  BatteryIncludedConfig
-};
+export { ShopApi, BatteryIncludedConfig };

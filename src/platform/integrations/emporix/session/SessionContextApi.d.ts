@@ -1,4 +1,4 @@
-import { EmporixSessionContext, EmporixContextAttribute } from '../model/session-context.d';
+import { EmporixContextAttribute, EmporixSessionContext } from '../model/session-context.d';
 
 /**
  * Session Context API Interface for Emporix
@@ -46,7 +46,11 @@ export interface SessionContextApi {
    * @param upsert Whether to create the session context if it doesn't exist
    * @returns Promise that resolves when the update is complete
    */
-  updateSessionContext(sessionId: string, sessionContext: Partial<EmporixSessionContext>, upsert?: boolean): Promise<void>;
+  updateSessionContext(
+    sessionId: string,
+    sessionContext: Partial<EmporixSessionContext>,
+    upsert?: boolean,
+  ): Promise<void>;
 
   /**
    * Adds a new attribute to a session context
@@ -64,4 +68,3 @@ export interface SessionContextApi {
    */
   removeSessionContextAttribute(sessionId: string, attributeName: string): Promise<void>;
 }
-

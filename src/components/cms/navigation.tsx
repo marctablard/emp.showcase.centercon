@@ -1,7 +1,7 @@
 'use client';
 
-import { storyblokEditable } from '@storyblok/react/rsc';
 import Link from 'next/link';
+import { storyblokEditable } from '@storyblok/react/rsc';
 
 /**
  * Navigation component for Storyblok
@@ -30,23 +30,20 @@ const Navigation = ({ blok }: NavigationProps) => {
         {blok.items?.map((item) => {
           const isExternal = item.is_external || (item.link && item.link.startsWith('http'));
           const href = item.link || (item.slug ? `/${item.slug}` : '#');
-          
+
           return (
             <li key={item._uid} className="text-base font-medium">
               {isExternal ? (
-                <a 
-                  href={href} 
-                  target="_blank" 
+                <a
+                  href={href}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors"
                 >
                   {item.title}
                 </a>
               ) : (
-                <Link 
-                  href={href}
-                  className="hover:text-primary transition-colors"
-                >
+                <Link href={href} className="hover:text-primary transition-colors">
                   {item.title}
                 </Link>
               )}

@@ -1,5 +1,5 @@
-import type { MatchPricesRequest, MatchPricesByContextRequest, MatchedPrice } from '../model/price';
 import type { EmporixConfig } from '../config';
+import type { MatchPricesByContextRequest, MatchPricesRequest, MatchedPrice } from '../model/price';
 
 /**
  * Interface for Emporix Price API

@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { z } from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import ContactData from './customer-data';
+import { Form } from '../ui/form';
 import Addresses from './checkout-addresses';
+import ContactData from './customer-data';
+import OrderSummary from './order-summary';
 import PaymentMethodComponent from './payment-method';
 import ShippingMethod from './shipping-method';
-import OrderSummary from './order-summary';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { z } from 'zod';
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from 'sonner';
-import { Form } from '../ui/form';
 
 interface CheckoutProps {
   onComplete?: (orderId: string) => void;
@@ -24,7 +24,6 @@ interface CheckoutProps {
  * Combines all checkout steps into a single form
  */
 const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
-
   const { processCheckout, loading, error, orderResponse, checkoutCart } = useCheckout();
   const router = useRouter();
   const t = useTranslations('Checkout');
@@ -33,63 +32,72 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const CheckoutFormSchema = z.object({
-    email: z.string().min(1, { message: t('validation.emailRequired') }).email({ message: t('validation.invalidEmail') }),
-    phone: z.string().min(1, { message: t('validation.phoneRequired') }),
-    firstName: z.string().min(1, { message: t('validation.firstNameRequired') }),
-    lastName: z.string().min(1, { message: t('validation.lastNameRequired') }),
-    company: z.string().min(1, { message: t('validation.companyNameRequired') }),
-    fullName: z.string().min(1, { message: t('validation.fullNameRequired') }),
-    street: z.string().min(1, { message: t('validation.streetRequired') }),
-    streetNumber: z.string().min(1, { message: t('validation.houseNumberRequired') }),
-    zipCode: z.string().min(1, { message: t('validation.postalCodeRequired') }),
-    city: z.string().min(1, { message: t('validation.cityRequired') }),
-    country: z.string().min(1, { message: t('validation.countryRequired') }),
-    state: z.string().min(1, { message: t('validation.stateRequired') }),
-    phoneNumber: z.string().min(1, { message: t('validation.phoneRequired') }),
-    companyName: z.string().min(1, { message: t('validation.companyNameRequired') }),
-    shippingMethod: z.enum(["de-standard", "express", "overnight"], { errorMap: () => ({ message: t('validation.shippingMethodRequired') }) }),
-    paymentMethod: z.enum(["credit-card", "paypal", "invoice"], { errorMap: () => ({ message: t('validation.paymentMethodRequired') }) }),
-  }).required({
-    email: true,
-    phone: true,
-    firstName: true,
-    lastName: true,
-    company: true,
-    fullName: true,
-    street: true,
-    streetNumber: true,
-    zipCode: true,
-    city: true,
-    country: true,
-    state: true,
-    phoneNumber: true,
-    companyName: true,
-    shippingMethod: true,
-    paymentMethod: true
-  })
+  const CheckoutFormSchema = z
+    .object({
+      email: z
+        .string()
+        .min(1, { message: t('validation.emailRequired') })
+        .email({ message: t('validation.invalidEmail') }),
+      phone: z.string().min(1, { message: t('validation.phoneRequired') }),
+      firstName: z.string().min(1, { message: t('validation.firstNameRequired') }),
+      lastName: z.string().min(1, { message: t('validation.lastNameRequired') }),
+      company: z.string().min(1, { message: t('validation.companyNameRequired') }),
+      fullName: z.string().min(1, { message: t('validation.fullNameRequired') }),
+      street: z.string().min(1, { message: t('validation.streetRequired') }),
+      streetNumber: z.string().min(1, { message: t('validation.houseNumberRequired') }),
+      zipCode: z.string().min(1, { message: t('validation.postalCodeRequired') }),
+      city: z.string().min(1, { message: t('validation.cityRequired') }),
+      country: z.string().min(1, { message: t('validation.countryRequired') }),
+      state: z.string().min(1, { message: t('validation.stateRequired') }),
+      phoneNumber: z.string().min(1, { message: t('validation.phoneRequired') }),
+      companyName: z.string().min(1, { message: t('validation.companyNameRequired') }),
+      shippingMethod: z.enum(['de-standard', 'express', 'overnight'], {
+        errorMap: () => ({ message: t('validation.shippingMethodRequired') }),
+      }),
+      paymentMethod: z.enum(['credit-card', 'paypal', 'invoice'], {
+        errorMap: () => ({ message: t('validation.paymentMethodRequired') }),
+      }),
+    })
+    .required({
+      email: true,
+      phone: true,
+      firstName: true,
+      lastName: true,
+      company: true,
+      fullName: true,
+      street: true,
+      streetNumber: true,
+      zipCode: true,
+      city: true,
+      country: true,
+      state: true,
+      phoneNumber: true,
+      companyName: true,
+      shippingMethod: true,
+      paymentMethod: true,
+    });
 
   const form = useForm<z.infer<typeof CheckoutFormSchema>>({
     resolver: zodResolver(CheckoutFormSchema),
     defaultValues: {
-      email: "",
-      phone: "",
-      firstName: "",
-      lastName: "",
-      company: "",
-      fullName: "",
-      street: "",
-      streetNumber: "",
-      zipCode: "",
-      city: "",
-      country: "",
-      state: "",
-      phoneNumber: "",
-      companyName: "",
-      shippingMethod: "de-standard",
-      paymentMethod: "credit-card"
+      email: '',
+      phone: '',
+      firstName: '',
+      lastName: '',
+      company: '',
+      fullName: '',
+      street: '',
+      streetNumber: '',
+      zipCode: '',
+      city: '',
+      country: '',
+      state: '',
+      phoneNumber: '',
+      companyName: '',
+      shippingMethod: 'de-standard',
+      paymentMethod: 'credit-card',
     },
-  })
+  });
 
   // Handle successful checkout
   useEffect(() => {
@@ -103,8 +111,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
     }
   }, [orderResponse, onComplete, router]);
 
-
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -116,7 +123,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
     } catch (err) {
       console.error('Checkout error:', err);
       setFormErrors({
-        submit: err instanceof Error ? err.message : 'An error occurred during checkout'
+        submit: err instanceof Error ? err.message : 'An error occurred during checkout',
       });
     } finally {
       setIsSubmitting(false);
@@ -124,7 +131,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   };
 
   function onSubmit(values: z.infer<typeof CheckoutFormSchema>) {
-    toast("You submitted the following values:\n\n" + JSON.stringify(values, null, 2));
+    toast('You submitted the following values:\n\n' + JSON.stringify(values, null, 2));
     console.log(values);
   }
 
@@ -152,7 +159,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-
             {/* Customer Information */}
             <ContactData form={form} />
 

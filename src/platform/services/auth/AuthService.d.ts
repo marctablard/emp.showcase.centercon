@@ -1,4 +1,4 @@
-import { Credentials , Registration, Session} from '../model/auth';
+import { Credentials, Registration, Session } from '../model/auth';
 
 /**
  * Service for authentication-related operations
@@ -17,18 +17,17 @@ export interface AuthService {
    * @returns Promise that resolves when logout is complete
    */
   logout(): Promise<void>;
-  
+
   /**
    * Register a new customer
    * @param register Registration data containing credentials and customer details
    * @returns Promise with the authentication session
    */
   register(register: Registration): Promise<Session>;
-  
+
   /**
    * Get the current session information
- * @returns Promise with the current session or null if not logged in
+   * @returns Promise with the current session or null if not logged in
    */
   getCurrentSession(): Promise<Session | null>;
-  
 }

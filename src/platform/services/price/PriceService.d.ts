@@ -1,4 +1,4 @@
-import type { Price, PriceMatchRequest, Quantity } from '../model/price/price';
+import type { Price } from '../model/price/price';
 
 /**
  * Interface for price service.

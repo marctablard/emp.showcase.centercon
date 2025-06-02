@@ -13,7 +13,7 @@ const handler = NextAuth({
       name: 'Credentials',
       credentials: {
         username: { label: 'Username', type: 'text' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
@@ -23,17 +23,17 @@ const handler = NextAuth({
         try {
           // Get the AuthService from the container
           const authService = globalThis.EMP.platform.server.get<AuthService>('AuthService');
-          
+
           // Call the login method with the provided credentials
           const session = await authService.login({
             username: credentials.username,
-            password: credentials.password
+            password: credentials.password,
           });
-          
+
           if (!session || !session.customerId) {
             return null;
           }
-          
+
           // Return a user object that NextAuth can use
           return {
             id: session.customerId || '',
@@ -41,14 +41,14 @@ const handler = NextAuth({
             email: session.customer?.email || '',
             image: null,
             // Include the full Emporix session for use in callbacks
-            shopSession: session
+            shopSession: session,
           };
         } catch (error) {
           console.error('NextAuth authorize error:', error);
           return null;
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     // Customize the JWT token to include our Emporix session data
@@ -61,11 +61,11 @@ const handler = NextAuth({
       return token;
     },
     // Customize the session object that gets sent to the client
-    async session({ session, token }: { session: any, token: any }) {
+    async session({ session, token }: { session: any; token: any }) {
       // Add Emporix session data to the session
       session.shopSession = token.emporixSession as ShopSession;
       session.roles = token.roles as string[];
-      
+
       // Make sure user info is populated from our Emporix session
       if (token.emporixSession) {
         const shopSession = token.emporixSession as ShopSession;
@@ -74,22 +74,22 @@ const handler = NextAuth({
             ...session.user,
             id: shopSession.customerId || '',
             name: shopSession.customer.firstName || '',
-            email: shopSession.customer.email || ''
+            email: shopSession.customer.email || '',
           };
         }
       }
-      
+
       return session;
-    }
+    },
   },
   pages: {
     signIn: '/login',
-    error: '/login'
+    error: '/login',
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60 // 30 days
-  }
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
 });
 
 export { handler as GET, handler as POST };

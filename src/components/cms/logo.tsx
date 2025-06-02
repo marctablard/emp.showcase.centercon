@@ -1,7 +1,7 @@
 'use client';
 
-import { storyblokEditable } from '@storyblok/react/rsc';
 import Image from 'next/image';
+import { storyblokEditable } from '@storyblok/react/rsc';
 
 /**
  * Logo component for Storyblok
@@ -25,9 +25,9 @@ const Logo = ({ blok }: LogoProps) => {
 
   return (
     <div {...storyblokEditable(blok)} className="logo">
-      <Image 
-        src={blok.image.filename} 
-        alt={blok.alt_text || blok.image.alt || 'Logo'} 
+      <Image
+        src={blok.image.filename}
+        alt={blok.alt_text || blok.image.alt || 'Logo'}
         width={150}
         height={50}
         className="object-contain"

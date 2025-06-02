@@ -1,8 +1,9 @@
 'use client';
-import { Cart } from '@/platform/services/model/cart/cart';
-import { CheckoutAddress, ContactData, PaymentMethod, Shipping } from '@/platform/services/model/checkout/checkout';
+
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { Cart } from '@/platform/services/model/cart/cart';
+import { CheckoutAddress, ContactData, PaymentMethod, Shipping } from '@/platform/services/model/checkout/checkout';
 
 export interface CheckoutState {
   // Cart data
@@ -26,7 +27,7 @@ interface CheckoutActions {
   setShippingMethod: (shippingMethod: Shipping) => void;
 }
 
-export type CheckoutStore = CheckoutState & CheckoutActions
+export type CheckoutStore = CheckoutState & CheckoutActions;
 
 const defaultState: CheckoutState = {
   cart: null,
@@ -35,40 +36,47 @@ const defaultState: CheckoutState = {
   billingAddress: null,
   paymentMethod: null,
   shippingMethod: null,
-}
+};
 
-export const createCheckoutStore = (
-  initState: CheckoutState = defaultState
-) => {
+export const createCheckoutStore = (initState: CheckoutState = defaultState) => {
   return create<CheckoutStore>()(
-    persist((set, get) => ({
-      ...initState,
-      setCart: (cart: Cart) => {
-        set({ cart })
-      },
-      getCart: () => get().cart,
-      reset: () => {
-        set({ cart: null, contactData: null, shippingAddress: null, billingAddress: null, paymentMethod: null, shippingMethod: null })
-      },
-      setContactData: (contactData: ContactData) => {
-        set({ contactData })
-      },
-      setShippingAddress: (address: CheckoutAddress) => {
-        set({ shippingAddress: address })
-      },
-      setBillingAddress: (address: CheckoutAddress) => {
-        set({ billingAddress: address })
-      },
-      setPaymentMethod: (paymentMethod: PaymentMethod) => {
-        set({ paymentMethod })
-      },
-      setShippingMethod: (shippingMethod: Shipping) => {
-        set({ shippingMethod })
-      },
-    }),
+    persist(
+      (set, get) => ({
+        ...initState,
+        setCart: (cart: Cart) => {
+          set({ cart });
+        },
+        getCart: () => get().cart,
+        reset: () => {
+          set({
+            cart: null,
+            contactData: null,
+            shippingAddress: null,
+            billingAddress: null,
+            paymentMethod: null,
+            shippingMethod: null,
+          });
+        },
+        setContactData: (contactData: ContactData) => {
+          set({ contactData });
+        },
+        setShippingAddress: (address: CheckoutAddress) => {
+          set({ shippingAddress: address });
+        },
+        setBillingAddress: (address: CheckoutAddress) => {
+          set({ billingAddress: address });
+        },
+        setPaymentMethod: (paymentMethod: PaymentMethod) => {
+          set({ paymentMethod });
+        },
+        setShippingMethod: (shippingMethod: Shipping) => {
+          set({ shippingMethod });
+        },
+      }),
       {
         name: 'emp-checkout',
         storage: createJSONStorage(() => localStorage),
-      }
-    ))
-}
+      },
+    ),
+  );
+};

@@ -1,6 +1,6 @@
 'use client';
 
-import { storyblokEditable, StoryblokServerComponent } from '@storyblok/react/rsc';
+import { StoryblokServerComponent, storyblokEditable } from '@storyblok/react/rsc';
 
 /**
  * Page component for Storyblok
@@ -20,14 +20,10 @@ interface PageProps {
 const Page = ({ blok }: PageProps) => {
   return (
     <main {...storyblokEditable(blok)} className="container mx-auto py-8">
-      {blok.title && (
-        <h1 className="text-3xl font-bold mb-6">{blok.title}</h1>
-      )}
-      
+      {blok.title && <h1 className="text-3xl font-bold mb-6">{blok.title}</h1>}
+
       <div className="space-y-8">
-        {blok.body?.map((nestedBlok) => (
-          <StoryblokServerComponent blok={nestedBlok} key={nestedBlok._uid} />
-        ))}
+        {blok.body?.map((nestedBlok) => <StoryblokServerComponent blok={nestedBlok} key={nestedBlok._uid} />)}
       </div>
     </main>
   );

@@ -1,4 +1,4 @@
 export interface AvailableBinding<T> {
-    identifier: string;
-    injectable: T  
+  identifier: string;
+  injectable: T;
 }

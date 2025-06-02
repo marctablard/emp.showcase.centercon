@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Customer } from '@/platform/services/model/checkout';
+import { UseFormReturn } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { Customer } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
-import { UseFormReturn } from 'react-hook-form';
 
 interface CustomerDataProps {
   initialData?: Partial<Customer>;
@@ -17,11 +17,7 @@ interface CustomerDataProps {
  * Customer data form component for checkout
  * Collects basic customer information (email, name)
  */
-const ContactDataComponent: React.FC<CustomerDataProps> = ({
-  isReadOnly = false,
-  form
-}) => {
-  
+const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false, form }) => {
   const t = useTranslations('Checkout');
 
   return (
@@ -35,13 +31,13 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({
             <FormItem>
               <FormLabel htmlFor="email">{t('emailAddress')}*</FormLabel>
               <FormControl>
-                <Input id="email" type="text" {...field}  />
+                <Input id="email" type="text" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-         <FormField
+        <FormField
           control={form.control}
           name="phone"
           render={({ field }) => (
@@ -92,7 +88,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({
               <FormMessage />
             </FormItem>
           )}
-        /> 
+        />
       </div>
 
       {isReadOnly && (
@@ -100,7 +96,9 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({
           <button
             type="button"
             className="text-indigo-600 hover:text-indigo-800"
-            onClick={() => {/* Add edit functionality here */ }}
+            onClick={() => {
+              /* Add edit functionality here */
+            }}
           >
             Edit
           </button>

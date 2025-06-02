@@ -1,12 +1,12 @@
-import EmporixCommonUtil from './EmporixCommonUtil';
 import { EmporixConfig } from '../../config';
+import EmporixCommonUtil from './EmporixCommonUtil';
 
 describe('EmporixCommonUtil', () => {
   const mockConfig: EmporixConfig = {
     tenant: 'test-tenant',
     baseUrl: 'https://api.emporix.io',
     clientId: 'test-client-id',
-    clientSecret: 'test-client-secret'
+    clientSecret: 'test-client-secret',
   };
 
   let commonUtil: EmporixCommonUtil;
@@ -19,9 +19,9 @@ describe('EmporixCommonUtil', () => {
     it('should generate a valid product YRN', () => {
       const productId = 'product-123';
       const expectedYrn = `urn:yaas:saasag:caasproduct:product:${mockConfig.tenant};${productId}`;
-      
+
       const result = commonUtil.generateProductYrn(productId);
-      
+
       expect(result).toEqual(expectedYrn);
     });
   });
@@ -30,9 +30,9 @@ describe('EmporixCommonUtil', () => {
     it('should generate a valid cart YRN', () => {
       const cartId = 'cart-123';
       const expectedYrn = `urn:yaas:hybris:cart:cart:${mockConfig.tenant};${cartId}`;
-      
+
       const result = commonUtil.generateCartYrn(cartId);
-      
+
       expect(result).toEqual(expectedYrn);
     });
   });
@@ -42,9 +42,9 @@ describe('EmporixCommonUtil', () => {
       const cartId = 'cart-123';
       const itemId = 'item-456';
       const expectedYrn = `urn:yaas:hybris:cart:cart-item:${mockConfig.tenant};${cartId}:${itemId}`;
-      
+
       const result = commonUtil.generateCartItemYrn(cartId, itemId);
-      
+
       expect(result).toEqual(expectedYrn);
     });
   });
@@ -53,9 +53,9 @@ describe('EmporixCommonUtil', () => {
     it('should extract the ID from a YRN', () => {
       const productId = 'product-123';
       const yrn = `urn:yaas:saasag:caasproduct:product:${mockConfig.tenant};${productId}`;
-      
+
       const result = commonUtil.extractIdFromYrn(yrn);
-      
+
       expect(result).toEqual(productId);
     });
   });

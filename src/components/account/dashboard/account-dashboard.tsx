@@ -2,13 +2,13 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { DollarSign, ShoppingBag, RotateCcw, CheckSquare } from 'lucide-react';
-import { useCustomer } from '@/hooks/customer/useCustomer';
-import { useCompany } from '@/hooks/company/useCompany';
-import { StatCard } from '@/components/account/dashboard/stat-card';
-import { InboxCard } from '@/components/account/dashboard/inbox-card';
+import { CheckSquare, DollarSign, RotateCcw, ShoppingBag } from 'lucide-react';
 import { ApprovalsCard } from '@/components/account/dashboard/approvals-card';
 import { BudgetProgress } from '@/components/account/dashboard/budget-progress';
+import { InboxCard } from '@/components/account/dashboard/inbox-card';
+import { StatCard } from '@/components/account/dashboard/stat-card';
+import { useCompany } from '@/hooks/company/useCompany';
+import { useCustomer } from '@/hooks/customer/useCustomer';
 import useCustomerMessages from '@/hooks/customer/useCustomerMessages';
 
 export default function AccountDashboard() {
@@ -24,7 +24,7 @@ export default function AccountDashboard() {
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard 
+        <StatCard
           title={t('revenue')}
           value={new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -32,22 +32,22 @@ export default function AccountDashboard() {
           }).format(company.financials.revenue)}
           icon={<DollarSign className="h-4 w-4" />}
         />
-        
-        <StatCard 
+
+        <StatCard
           title={t('orders')}
           value={orderSummary.total}
           description={t('ordersInProgress', { count: orderSummary.inProgress })}
           icon={<ShoppingBag className="h-4 w-4" />}
         />
-        
-        <StatCard 
+
+        <StatCard
           title={t('returns')}
           value={returnSummary.total}
           description={t('returnsOpen', { count: returnSummary.open })}
           icon={<RotateCcw className="h-4 w-4" />}
         />
-        
-        <StatCard 
+
+        <StatCard
           title={t('approvals')}
           value={pendingApprovals}
           description={t('approvalsDescription')}
@@ -56,20 +56,11 @@ export default function AccountDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <BudgetProgress 
-          financials={company.financials}
-          className="lg:col-span-1"
-        />
-        
-        <InboxCard 
-          messages={messages}
-          className="lg:col-span-1"
-        />
-        
-        <ApprovalsCard 
-          approvals={company.approvals}
-          className="lg:col-span-1"
-        />
+        <BudgetProgress financials={company.financials} className="lg:col-span-1" />
+
+        <InboxCard messages={messages} className="lg:col-span-1" />
+
+        <ApprovalsCard approvals={company.approvals} className="lg:col-span-1" />
       </div>
     </>
   );

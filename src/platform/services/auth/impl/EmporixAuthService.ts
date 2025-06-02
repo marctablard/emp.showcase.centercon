@@ -4,7 +4,7 @@ import { Credentials, Registration, Session } from '@/platform/services/model/au
 import { inject } from 'inversify';
 import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
 import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
-import { EmporixCustomer, EmporixCustomerAddress } from '@/platform/integrations/emporix/model/customer';
+import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
 import { EmporixAddress } from '@/platform/integrations/emporix';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 
@@ -25,7 +25,7 @@ export class EmporixAuthService implements AuthService {
     @inject('EmporixCustomerApi')
     private readonly emporixCustomerApi: EmporixCustomerApi,
     @inject('EmporixAddressMapper')
-    private readonly emporixAddressMapper: EmporixAddressMapper
+    private readonly emporixAddressMapper: EmporixAddressMapper,
   ) {}
 
   async login(credentials: Credentials): Promise<Session> {
@@ -40,7 +40,7 @@ export class EmporixAuthService implements AuthService {
         siteCode: session.siteCode,
         currency: session.currency,
         cartId: session.cartId,
-        country: session.targetLocation
+        country: session.targetLocation,
       };
     } catch (error) {
       console.error('Login failed:', error);
@@ -53,19 +53,21 @@ export class EmporixAuthService implements AuthService {
   }
 
   async register(registration: Registration): Promise<Session> {
-    const customer : Omit<EmporixCustomer, 'id' | 'customerNumber'> = {
+    const customer: Omit<EmporixCustomer, 'id' | 'customerNumber'> = {
       contactEmail: registration.credentials.username,
       firstName: registration.customer?.firstName,
-      lastName: registration.customer?.lastName
-    }
-    const address : EmporixAddress | undefined = registration.address ?  this.emporixAddressMapper.mapToSource(registration.address) : undefined; 
+      lastName: registration.customer?.lastName,
+    };
+    const address: EmporixAddress | undefined = registration.address
+      ? this.emporixAddressMapper.mapToSource(registration.address)
+      : undefined;
     const session = await this.emporixCustomerApi.signup({
       email: registration.credentials.username,
       password: registration.credentials.password,
       customerDetails: customer,
-      customerAddress: address
+      customerAddress: address,
     });
-    
+
     if (!session) {
       throw new Error('Failed to register User');
     }
@@ -74,7 +76,7 @@ export class EmporixAuthService implements AuthService {
 
   async getCurrentSession(): Promise<Session | null> {
     const session = await this.emporixSessionContextApi.getOwnSessionContext();
-    
+
     if (!session) {
       throw new Error('Failed to get session context');
     }
@@ -84,7 +86,7 @@ export class EmporixAuthService implements AuthService {
       siteCode: session.siteCode,
       currency: session.currency,
       cartId: session.cartId,
-      country: session.targetLocation
+      country: session.targetLocation,
     };
   }
 }

@@ -1,3 +1,3 @@
 export interface HelloService {
-    sayHello() : Promise<string>;
+  sayHello(): Promise<string>;
 }

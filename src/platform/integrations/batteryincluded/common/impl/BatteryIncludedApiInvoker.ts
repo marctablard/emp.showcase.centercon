@@ -10,9 +10,7 @@ import { injectable } from '@/platform/core/di/injectable';
 class BatteryIncludedApiInvoker {
   private config: BatteryIncludedConfig;
 
-  constructor(
-    @inject('BatteryIncludedConfig') config: BatteryIncludedConfig
-  ) {
+  constructor(@inject('BatteryIncludedConfig') config: BatteryIncludedConfig) {
     this.config = config;
   }
 
@@ -22,21 +20,18 @@ class BatteryIncludedApiInvoker {
    * @param options Fetch options
    * @returns Promise with the fetch response
    */
-  async apiFetch(
-    url: string, 
-    options: RequestInit = {}
-  ): Promise<Response> {
+  async apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
     // Add authorization header to the request
     const headers = {
       ...options.headers,
-      'X-BI-API-KEY': this.config.apiKey
+      'X-BI-API-KEY': this.config.apiKey,
     };
-    
+
     // Make the authenticated request
     const fullUrl = `${this.config.baseUrl}${url}`;
     return fetch(fullUrl, {
       ...options,
-      headers
+      headers,
     });
   }
 }

@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -19,6 +19,6 @@ export function formatCurrency(amount: number, currencyCode: string = 'USD'): st
     maximumFractionDigits: 2,
   }).format(amount);
 }
-  
+
 // TODO fill with correct sizes
-export const imageSizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+export const imageSizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';

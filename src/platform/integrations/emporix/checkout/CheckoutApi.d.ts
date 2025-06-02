@@ -1,4 +1,4 @@
-import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from "../model/checkout";
+import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from '../model/checkout';
 
 /**
  * Interface for Checkout API operations

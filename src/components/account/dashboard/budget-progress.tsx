@@ -1,7 +1,7 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CompanyFinancials } from '@/hooks/company/useCompany';
-import { useTranslations } from 'next-intl';
 
 interface BudgetProgressProps {
   financials: CompanyFinancials;
@@ -10,13 +10,13 @@ interface BudgetProgressProps {
 
 export function BudgetProgress({ financials, className }: BudgetProgressProps) {
   const t = useTranslations('Account');
-  
+
   // Calculate percentage of budget used
   const budgetUsedPercentage = Math.min(
-    100, 
-    Math.round(((financials.budget - financials.remainingBudget) / financials.budget) * 100)
+    100,
+    Math.round(((financials.budget - financials.remainingBudget) / financials.budget) * 100),
   );
-  
+
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -24,7 +24,7 @@ export function BudgetProgress({ financials, className }: BudgetProgressProps) {
       currency: financials.currency,
     }).format(amount);
   };
-  
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -45,17 +45,14 @@ export function BudgetProgress({ financials, className }: BudgetProgressProps) {
             <span className="text-sm font-medium">{formatCurrency(financials.remainingBudget)}</span>
           </div>
         </div>
-        
+
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs">
             <span>{t('budgetUsed')}</span>
             <span>{budgetUsedPercentage}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary"
-              style={{ width: `${budgetUsedPercentage}%` }}
-            />
+            <div className="h-full bg-primary" style={{ width: `${budgetUsedPercentage}%` }} />
           </div>
         </div>
       </CardContent>

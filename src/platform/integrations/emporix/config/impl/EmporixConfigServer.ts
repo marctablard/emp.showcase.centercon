@@ -1,8 +1,7 @@
-import { injectable } from "@/platform/core/di/injectable";
-import type { EmporixConfig as IEmporixConfig} from "..";
+import { injectable } from '@/platform/core/di/injectable';
+import type { EmporixConfig as IEmporixConfig } from '..';
 
 @injectable('EmporixConfig', 'Singleton')
-
 class EmporixConfigServer implements IEmporixConfig {
   baseUrl: string = process.env.NEXT_PUBLIC_EMPORIX_BASE_URL || 'https://api.emporix.io';
   tenant: string = process.env.NEXT_PUBLIC_EMPORIX_TENANT || '';
@@ -12,4 +11,4 @@ class EmporixConfigServer implements IEmporixConfig {
   serverClientSecret?: string = process.env.NEXT_EMPORIX_CLIENT_SECRET;
 }
 
-export default EmporixConfigServer
+export default EmporixConfigServer;

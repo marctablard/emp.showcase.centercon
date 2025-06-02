@@ -1,18 +1,16 @@
-
-
-import {withAuth} from 'next-auth/middleware';
+import { withAuth } from 'next-auth/middleware';
 import createIntlMiddleware from 'next-intl/middleware';
-import {NextRequest} from 'next/server';
- 
+import { NextRequest } from 'next/server';
+
 const locales = ['en', 'de'];
 const securedPages = ['/account'];
- 
+
 const intlMiddleware = createIntlMiddleware({
   locales,
   defaultLocale: 'en',
-  localePrefix: 'as-needed'
+  localePrefix: 'as-needed',
 });
- 
+
 const authMiddleware = withAuth(
   // Note that this callback is only invoked if
   // the `authorized` callback has returned `true`
@@ -22,14 +20,14 @@ const authMiddleware = withAuth(
   },
   {
     callbacks: {
-      authorized: ({token}) => token != null
+      authorized: ({ token }) => token != null,
     },
     pages: {
-      signIn: '/login'
-    }
-  }
+      signIn: '/login',
+    },
+  },
 );
- 
+
 export default function middleware(req: NextRequest) {
   /**
    * RegExplanation:
@@ -39,10 +37,7 @@ export default function middleware(req: NextRequest) {
    * - `(\/.*)?` : Optional path parameters after secured page
    * - `/?$` : Optional trailing slash
    */
-  const securedPathnameRegex = RegExp(
-    `^(/(${locales.join('|')}))?(${securedPages.join('|')})(\/.*)?/?$`,
-    'i'
-  );
+  const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(\/.*)?/?$`, 'i');
   const isSecuredPage = securedPathnameRegex.test(req.nextUrl.pathname);
   if (!isSecuredPage) {
     return intlMiddleware(req);
@@ -50,8 +45,7 @@ export default function middleware(req: NextRequest) {
     return (authMiddleware as any)(req);
   }
 }
- 
-export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
-};
 
+export const config = {
+  matcher: ['/((?!api|_next|.*\\..*).*)'],
+};

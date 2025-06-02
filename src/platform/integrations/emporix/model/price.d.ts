@@ -10,7 +10,7 @@ export interface ItemId {
    * Type of the item (PRODUCT or SKU)
    */
   itemType: 'PRODUCT' | 'SKU';
-  
+
   /**
    * ID of the item
    */
@@ -25,7 +25,7 @@ export interface Quantity {
    * Numeric quantity value
    */
   quantity: number;
-  
+
   /**
    * Unit code (e.g., 'pc', 'kg', 'g')
    */
@@ -50,7 +50,7 @@ export interface PriceMatchItem {
    * Item identifier
    */
   itemId: ItemId;
-  
+
   /**
    * Quantity information
    */
@@ -65,17 +65,17 @@ export interface MatchPricesRequest {
    * Target currency for price matching
    */
   targetCurrency: string;
-  
+
   /**
    * Site code for price matching
    */
   siteCode: string;
-  
+
   /**
    * Target location for price matching
    */
   targetLocation: Location;
-  
+
   /**
    * Items to match prices for
    */
@@ -100,12 +100,12 @@ export interface TaxValues {
    * Net value (without tax)
    */
   netValue: number;
-  
+
   /**
    * Gross value (with tax)
    */
   grossValue: number;
-  
+
   /**
    * Tax value
    */
@@ -120,12 +120,12 @@ export interface PriceTax {
    * Tax class (e.g., 'STANDARD')
    */
   taxClass: string;
-  
+
   /**
    * Tax rate percentage
    */
   taxRate: number;
-  
+
   /**
    * Price values with tax breakdown
    */
@@ -144,7 +144,7 @@ export interface TierDefinition {
    * Type of tier (BASIC, TIERED, VOLUME)
    */
   tierType: 'BASIC' | 'TIERED' | 'VOLUME';
-  
+
   /**
    * Tier thresholds
    */
@@ -164,34 +164,34 @@ export interface PriceModel {
    * ID of the price model
    */
   id: string;
-  
+
   /**
    * Name of the price model (localized)
    */
   name: {
     [locale: string]: string;
   };
-  
+
   /**
    * Whether the price includes tax
    */
   includesTax: boolean;
-  
+
   /**
    * Whether the price includes markup
    */
   includesMarkup: boolean;
-  
+
   /**
    * Measurement unit for the price
    */
   measurementUnit: Quantity;
-  
+
   /**
    * Tier definition for the price model
    */
   tierDefinition: TierDefinition;
-  
+
   /**
    * Metadata for the price model
    */
@@ -200,12 +200,12 @@ export interface PriceModel {
      * Version of the price model
      */
     version: number;
-    
+
     /**
      * Creation timestamp
      */
     createdAt: string;
-    
+
     /**
      * Last modification timestamp
      */
@@ -221,7 +221,7 @@ export interface TierValue {
    * ID of the tier value
    */
   id: string;
-  
+
   /**
    * Price value for the tier
    */
@@ -246,67 +246,67 @@ export interface MatchedPrice {
    * ID of the price
    */
   priceId: string;
-  
+
   /**
    * Item identifier
    */
   itemId: ItemId;
-  
+
   /**
    * Site information
    */
   site: Site;
-  
+
   /**
    * Currency of the price
    */
   currency: string;
-  
+
   /**
    * Location information
    */
   location: Location;
-  
+
   /**
    * Original price value
    */
   originalValue: number;
-  
+
   /**
    * Effective price value (after discounts)
    */
   effectiveValue: number;
-  
+
   /**
    * Total price value (quantity * effectiveValue)
    */
   totalValue: number;
-  
+
   /**
    * Quantity information
    */
   quantity: Quantity;
-  
+
   /**
    * Whether the price includes tax
    */
   includesTax: boolean;
-  
+
   /**
    * Price model information
    */
   priceModel: PriceModel;
-  
+
   /**
    * Tax information
    */
   tax: PriceTax;
-  
+
   /**
    * Tier values for the price
    */
   tierValues: TierValue[];
-  
+
   /**
    * Metadata for the price
    */
@@ -315,12 +315,12 @@ export interface MatchedPrice {
      * Version of the price
      */
     version: string;
-    
+
     /**
      * Creation timestamp
      */
     createdAt: string;
-    
+
     /**
      * Last modification timestamp
      */

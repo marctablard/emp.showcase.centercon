@@ -12,30 +12,27 @@ export async function POST(request: NextRequest) {
   try {
     // Get the auth service from the global registry
     const authService = globalThis.EMP.platform.server.get<AuthService>('AuthService');
-    
+
     // Get registration data from request body
     const registrationData: Registration = await request.json();
-    
+
     // Validate registration data
     if (!registrationData.credentials?.username || !registrationData.credentials?.password) {
-      return NextResponse.json(
-        { error: 'Username and password are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
     }
-    
+
     // Register the new customer
     const session = await authService.register(registrationData);
-    
+
     // Create response with session data
     const response = NextResponse.json(session);
-    
+
     // Set session cookie
     response.cookies.set({
       name: AUTH_COOKIE_NAME,
       value: JSON.stringify({
         sessionId: session.sessionId,
-        customerId: session.customerId
+        customerId: session.customerId,
       }),
       path: '/',
       maxAge: 60 * 60 * 24, // 24 hours
@@ -43,15 +40,15 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
     });
-    
+
     return response;
   } catch (error) {
     console.error('Registration error:', error);
-    
+
     // Determine appropriate status code based on error
     let status = 500;
     let message = 'An unexpected error occurred during registration';
-    
+
     if (error instanceof Error) {
       if (error.message.includes('already exists') || error.message.includes('already registered')) {
         status = 409; // Conflict
@@ -61,10 +58,7 @@ export async function POST(request: NextRequest) {
         message = error.message;
       }
     }
-    
-    return NextResponse.json(
-      { error: message },
-      { status }
-    );
+
+    return NextResponse.json({ error: message }, { status });
   }
 }

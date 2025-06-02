@@ -1,8 +1,4 @@
-import type { 
-  CheckoutRequest, 
-  CheckoutResponse, 
-  QuoteCheckoutRequest 
-} from '@/platform/services/model/checkout';
+import type { CheckoutRequest, CheckoutResponse, QuoteCheckoutRequest } from '@/platform/services/model/checkout';
 
 /**
  * Process a checkout for a cart

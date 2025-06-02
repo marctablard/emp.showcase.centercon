@@ -1,7 +1,7 @@
 'use client';
 
-import { storyblokEditable, renderRichText } from '@storyblok/react/rsc';
 import Link from 'next/link';
+import { renderRichText, storyblokEditable } from '@storyblok/react/rsc';
 
 /**
  * Article component for Storyblok
@@ -29,15 +29,11 @@ const Article = ({ blok }: ArticleProps) => {
     <article {...storyblokEditable(blok)} className="article max-w-4xl mx-auto py-8">
       {/* Article header */}
       <header className="mb-8">
-        {blok.title && (
-          <h1 className="text-3xl font-bold mb-4">{blok.title}</h1>
-        )}
-        
-        {blok.introduction && (
-          <div className="text-xl text-gray-600 mb-6">{blok.introduction}</div>
-        )}
+        {blok.title && <h1 className="text-3xl font-bold mb-4">{blok.title}</h1>}
+
+        {blok.introduction && <div className="text-xl text-gray-600 mb-6">{blok.introduction}</div>}
       </header>
-      
+
       {/* Video */}
       {blok.video?.url && (
         <div className="mb-8">
@@ -49,14 +45,10 @@ const Article = ({ blok }: ArticleProps) => {
           ></iframe>
         </div>
       )}
-      
+
       {/* Rich text content */}
-      {blok.content && (
-        <div className="prose max-w-none mb-8">
-          {renderRichText(blok.content)}
-        </div>
-      )}
-      
+      {blok.content && <div className="prose max-w-none mb-8">{renderRichText(blok.content)}</div>}
+
       {/* Linked products */}
       {blok.linked_products && blok.linked_products.length > 0 && (
         <div className="mt-12">
@@ -66,10 +58,7 @@ const Article = ({ blok }: ArticleProps) => {
               <div key={product._uid} className="border rounded-lg p-4">
                 <h3 className="font-medium mb-2">{product.name}</h3>
                 {product.product_id && (
-                  <Link 
-                    href={`/product/${product.product_id}`}
-                    className="text-primary hover:underline"
-                  >
+                  <Link href={`/product/${product.product_id}`} className="text-primary hover:underline">
                     View Product
                   </Link>
                 )}

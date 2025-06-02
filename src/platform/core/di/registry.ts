@@ -5,11 +5,10 @@ import { AvailableBinding, Layer } from './types';
 const registry = new Map<string, AvailableBinding>();
 const containers = new Map<string, Container>();
 
-
 /**
  * Adds a module to a container using our custom injectable annotation
- * @param module 
- * @param container 
+ * @param module
+ * @param container
  */
 export function addInjectableModule(module: any, container: Container): void {
   // Check if it's a class and has injectable metadata
@@ -27,14 +26,11 @@ export function addInjectableModule(module: any, container: Container): void {
 
 /**
  * Dynamically imports a module and registers any injectable classes with the container
-* @param container The container to register classes with
-* @param modulePath Path to the module
-* @param basePath Base path for calculating relative paths
+ * @param container The container to register classes with
+ * @param modulePath Path to the module
+ * @param basePath Base path for calculating relative paths
  */
-export function registerModule(
-  module: any,
-  layer: Layer
-): void {
+export function registerModule(module: any, layer: Layer): void {
   // Check if it's a class and has injectable metadata
   const metadataKeys = Reflect.getMetadataKeys(module);
   if (typeof module === 'function' && metadataKeys.includes(ID_KEY)) {
@@ -51,13 +47,13 @@ export function registerModule(
  */
 function createContainer(layer: Layer): Container {
   // Create a new inversify container
-  const container = new Container({ defaultScope: "Singleton" });
+  const container = new Container({ defaultScope: 'Singleton' });
   registry.forEach((value, _key) => {
     if (value.layer === layer) {
       container.bind(value.identifier).to(value.injectable);
     }
   });
-  containers.set(layer, container)
+  containers.set(layer, container);
   return container;
 }
 

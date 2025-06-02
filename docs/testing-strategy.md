@@ -51,8 +51,8 @@ When testing services that have dependencies, you can create test-specific imple
 ```typescript
 // Example of mocking dependencies in a test
 import { Container } from 'inversify';
-import { MyService } from './MyService';
 import { MyDependency } from './MyDependency';
+import { MyService } from './MyService';
 
 // Create a mock implementation
 class MockDependency implements MyDependency {
@@ -83,10 +83,10 @@ The project includes a sample test for the `useProduct` hook that demonstrates:
 
 ```typescript
 // src/hooks/product/useProduct.test.tsx
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useProduct } from './useProduct';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { fetchProductById } from '@/lib/api/products';
 import { StoreProvider } from '@/providers/StoreProvider';
+import { useProduct } from './useProduct';
 
 // Mock the API module
 jest.mock('@/lib/api/products', () => ({
@@ -119,7 +119,7 @@ The project includes a sample E2E test that verifies locale handling:
 
 ```typescript
 // e2e/homepage.spec.ts
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('German homepage (/de) loads correctly', async ({ page }) => {
   // Navigate to the German homepage

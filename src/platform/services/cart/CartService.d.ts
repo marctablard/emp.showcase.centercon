@@ -1,5 +1,4 @@
-import type { Cart, CartItem } from '../model/cart/cart';
-import type { Paginated } from '../model/common';
+import type { Cart } from '../model/cart/cart';
 
 /**
  * Interface for cart service.
@@ -26,7 +25,7 @@ export interface CartService {
    * @returns The cart if found, otherwise undefined.
    */
   getCartById(id: string): Promise<Cart | undefined>;
-  
+
   /**
    * Adds an item to a cart
    * @param cartId The ID of the cart
@@ -35,7 +34,7 @@ export interface CartService {
    * @returns The ID of the added item
    */
   addItemToCart(cartId: string, productId: string, quantity: number): Promise<string>;
-  
+
   /**
    * Updates the quantity of an item in the cart
    * @param cartId The ID of the cart
@@ -43,14 +42,14 @@ export interface CartService {
    * @param quantity The new quantity
    */
   updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<void>;
-  
+
   /**
    * Removes an item from the cart
    * @param cartId The ID of the cart
    * @param itemId The ID of the item to remove
    */
   removeCartItem(cartId: string, itemId: string): Promise<void>;
-  
+
   /**
    * Deletes a cart
    * @param cartId The ID of the cart to delete
@@ -64,5 +63,4 @@ export interface CartService {
    * @param zipCode The zip code for the shipping address
    */
   updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void>;
-  
 }

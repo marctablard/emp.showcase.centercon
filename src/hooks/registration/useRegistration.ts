@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { register as apiRegister } from '@/lib/client/auth';
 import { Registration } from '@/platform/services/model/auth/auth';
 
-
 interface RegistrationResult {
   success: boolean;
   userId?: string;
@@ -35,25 +34,25 @@ export const useRegistration = (): RegistrationHook => {
     setLoading(true);
     setError(null);
     setIsSuccess(false);
-    
+
     try {
       // Call the registration API
       const session = await apiRegister(data);
-      
+
       setIsSuccess(true);
       setLoading(false);
-      
+
       return {
         success: true,
-        userId: session.customerId
+        userId: session.customerId,
       };
     } catch (error) {
       setLoading(false);
       setError(error instanceof Error ? error.message : 'Unknown error');
-      
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   };
@@ -62,7 +61,7 @@ export const useRegistration = (): RegistrationHook => {
     loading,
     register,
     error,
-    isSuccess
+    isSuccess,
   };
 };
 

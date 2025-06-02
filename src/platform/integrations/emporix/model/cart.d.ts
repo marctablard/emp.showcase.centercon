@@ -15,7 +15,7 @@ export interface EmporixCartItem {
       calculationType: 'ApplyDiscountBeforeTax' | 'ApplyDiscountAfterTax';
       value: number;
       appliedDiscounts: EmporixCalculatedAppliedDiscount[];
-    }
+    };
   };
   product?: {
     id: string;
@@ -35,7 +35,7 @@ export interface EmporixCartItem {
 }
 
 export interface EmporixCalculatedAppliedDiscount {
-  id : string;
+  id: string;
   value: number;
   discountType: 'PERCENT' | 'ABSOLUTE' | 'FREE_SHIPPING';
   origin: 'INTERNAL' | 'EXTERNAL';
@@ -78,7 +78,7 @@ export interface EmporixCart {
       calculationType: 'ApplyDiscountBeforeTax' | 'ApplyDiscountAfterTax';
       value: number;
       appliedDiscounts: EmporixCalculatedAppliedDiscount[];
-    }
+    };
   };
   totalUnitsCount?: number;
   metadata?: {

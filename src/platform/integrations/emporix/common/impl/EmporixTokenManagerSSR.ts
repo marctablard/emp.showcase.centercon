@@ -22,13 +22,13 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     }
 
     public async getSessionToken(tenant: string, clientId: string): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
-        let customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>('customer');
+        const customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>('customer');
         // first check client's customer token
         if (this.checkAccessToken(customerToken)) {
             return { accessToken: customerToken!.token.access_token, sessionId: customerToken!.token.session_id };
         }
         // otherwise check their anonymous token
-        let anonymousToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>('anonymous');
+        const anonymousToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>('anonymous');
         if (this.checkAccessToken(anonymousToken)) {
             return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
         }
@@ -45,7 +45,7 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
         throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
     }
     
-    protected fetchCustomerToken(_customerToken: StoredToken<EmporixCustomerTokenResponse> | undefined, _tenant: string, _username: string | undefined, password: string | undefined, clientId: string): Promise<StoredToken<EmporixCustomerTokenResponse>> {
+    protected fetchCustomerToken(_customerToken: StoredToken<EmporixCustomerTokenResponse> | undefined, _tenant: string, _username: string | undefined, _password: string | undefined, _clientId: string): Promise<StoredToken<EmporixCustomerTokenResponse>> {
         throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
     }
     

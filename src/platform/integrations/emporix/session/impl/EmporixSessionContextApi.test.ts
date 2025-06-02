@@ -1,11 +1,11 @@
-import EmporixSessionContextApi from './EmporixSessionContextApi';
-import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
-import { EmporixSessionContext, EmporixContextAttribute } from '../../model/session-context';
-import { EmporixConfig } from '../../config';
 import { Container } from 'inversify';
-import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import { TokenManager } from '../../common/TokenManager';
+import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
+import { EmporixConfig } from '../../config';
+import { EmporixContextAttribute, EmporixSessionContext } from '../../model/session-context';
+import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
+import EmporixSessionContextApi from './EmporixSessionContextApi';
 
 // Create a test config implementation
 class TestEmporixConfig implements EmporixConfig {
@@ -17,7 +17,6 @@ class TestEmporixConfig implements EmporixConfig {
   serverClientSecret: string = process.env.NEXT_EMPORIX_TEST_SERVER_CLIENT_SECRET || '';
 }
 
-
 // Generate a timestamp to make test data unique
 const timestamp = Date.now();
 
@@ -26,13 +25,13 @@ const createTestSessionContext = (sessionId: string): EmporixSessionContext => (
   sessionId,
   siteCode: 'test',
   currency: 'EUR',
-  targetLocation: 'DE'
+  targetLocation: 'DE',
 });
 
 // Function to create a test context attribute
 const createTestAttribute = (key: string): EmporixContextAttribute => ({
   key,
-  value: `test-value-${timestamp}`
+  value: `test-value-${timestamp}`,
 });
 
 describe('EmporixSessionContextApi', () => {
@@ -58,7 +57,6 @@ describe('EmporixSessionContextApi', () => {
     // enable for debug output as curl
     // container.bind<boolean>('debugCurl').toConstantValue(true);
 
-
     // Get instances from the container
     apiInvoker = container.get<EmporixApiInvoker>('EmporixApiInvoker');
     sessionContextApi = container.get<EmporixSessionContextApi>('EmporixSessionContextApi');
@@ -70,7 +68,7 @@ describe('EmporixSessionContextApi', () => {
 
   describe('getSessionContext', () => {
     it.skip('should fetch a session context by ID', async () => {
-      const tokenManager = container.get<TokenManager>("EmporixTokenManager");
+      const tokenManager = container.get<TokenManager>('EmporixTokenManager');
       const { accessToken: _token, sessionId } = await tokenManager.getAnonymousToken(config.tenant, config.clientId);
 
       // Now fetch it
@@ -78,7 +76,7 @@ describe('EmporixSessionContextApi', () => {
 
       expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
         `/session-context/${config.tenant}/context/${sessionId}`,
-        { method: 'GET' }
+        { method: 'GET' },
       );
 
       expect(result).toBeDefined();
@@ -92,7 +90,7 @@ describe('EmporixSessionContextApi', () => {
 
       expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
         `/session-context/${config.tenant}/context/${nonExistentSessionId}`,
-        { method: 'GET' }
+        { method: 'GET' },
       );
 
       expect(result).toBeUndefined();
@@ -103,7 +101,7 @@ describe('EmporixSessionContextApi', () => {
     it.skip('should update a session context with upsert=true', async () => {
       // Create a session context to update
 
-      const tokenManager = container.get<TokenManager>("EmporixTokenManager");
+      const tokenManager = container.get<TokenManager>('EmporixTokenManager');
       const { accessToken: _token, sessionId } = await tokenManager.getAnonymousToken(config.tenant, config.clientId);
 
       const sessionToUpdate = createTestSessionContext(sessionId);
@@ -116,8 +114,8 @@ describe('EmporixSessionContextApi', () => {
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(sessionToUpdate)
-        }
+          body: JSON.stringify(sessionToUpdate),
+        },
       );
 
       // Verify the update by fetching the session
@@ -138,8 +136,8 @@ describe('EmporixSessionContextApi', () => {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(attributeToAdd)
-        }
+          body: JSON.stringify(attributeToAdd),
+        },
       );
 
       // Verify the attribute was added by fetching the session
@@ -161,7 +159,7 @@ describe('EmporixSessionContextApi', () => {
 
       expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
         `/session-context/showcasetest/context/${testSessionId}/attributes/${attributeKey}`,
-        { method: 'DELETE' }
+        { method: 'DELETE' },
       );
 
       // Verify the attribute was removed by fetching the session
@@ -173,7 +171,7 @@ describe('EmporixSessionContextApi', () => {
   describe('getOwnSessionContext', () => {
     it('should fetch the current session context', async () => {
       const result = await sessionContextApi.getOwnSessionContext();
-      
+
       expect(result).toBeDefined();
     });
   });
@@ -184,7 +182,7 @@ describe('EmporixSessionContextApi', () => {
       const partialContext: Partial<EmporixSessionContext> = {
         siteCode: 'test-site',
         currency: 'USD',
-        targetLocation: 'US'
+        targetLocation: 'US',
       };
 
       await sessionContextApi.updateOwnSessionContext(partialContext);
@@ -193,20 +191,18 @@ describe('EmporixSessionContextApi', () => {
       expect(context?.siteCode).toEqual(partialContext.siteCode);
       expect(context?.currency).toEqual(partialContext.currency);
       expect(context?.targetLocation).toEqual(partialContext.targetLocation);
-     
     });
   });
 
   const testAttribute = createTestAttribute(`own-context-attribute-${timestamp}`);
   describe('addOwnSessionContextAttribute', () => {
     it('should add an attribute to the current session context', async () => {
-        await sessionContextApi.addOwnSessionContextAttribute(testAttribute);
+      await sessionContextApi.addOwnSessionContextAttribute(testAttribute);
 
-        const response = await sessionContextApi.getOwnSessionContext();
-        expect(response).toBeDefined();
-        expect(response?.context).toHaveProperty(testAttribute.key, testAttribute.value);
-      }
-    );
+      const response = await sessionContextApi.getOwnSessionContext();
+      expect(response).toBeDefined();
+      expect(response?.context).toHaveProperty(testAttribute.key, testAttribute.value);
+    });
 
     describe('removeOwnSessionContextAttribute', () => {
       it('should remove an attribute from the current session context', async () => {
@@ -215,8 +211,7 @@ describe('EmporixSessionContextApi', () => {
         const response = await sessionContextApi.getOwnSessionContext();
         expect(response).toBeDefined();
         expect(response?.context).not.toBeDefined();
-
       });
     });
-  })
+  });
 });

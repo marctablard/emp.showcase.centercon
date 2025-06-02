@@ -1,5 +1,5 @@
-import { CustomerAddress, EmporixCustomer } from "../model/customer";
-import { EmporixSessionContext } from "../model/session-context";
+import { EmporixCustomer } from '../model/customer';
+import { EmporixSessionContext } from '../model/session-context';
 
 /**
  * Customer API Interface for Emporix
@@ -84,12 +84,11 @@ export interface CustomerApi {
    * @returns the Customer's Session Context
    */
   login(username: string, password: string): Promise<EmporixSessionContext>;
-  
+
   /**
    * Registers a new customer
    * @param customerData The customer data for registration
    * @returns Promise with the created customer Id
    */
-  signup(customerData: EmporixSignupRequest): Promise<{id: string}>;
+  signup(customerData: EmporixSignupRequest): Promise<{ id: string }>;
 }
-

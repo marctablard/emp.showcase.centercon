@@ -11,7 +11,7 @@ import { injectable } from '@/platform/core/di/injectable';
 export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
   /**
    * Maps an Emporix address to the internal Address model.
-   * 
+   *
    * @param source - The Emporix address data
    * @returns The internal Address model
    */
@@ -26,13 +26,13 @@ export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
       city: source.city,
       country: source.country,
       state: source.state,
-      contactPhone: source.contactPhone
+      contactPhone: source.contactPhone,
     };
   }
 
   /**
    * Maps an internal Address model back to Emporix address format.
-   * 
+   *
    * @param service - The internal Address model
    * @returns The Emporix address data
    */
@@ -47,7 +47,7 @@ export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
       city: service.city,
       country: service.country,
       state: service.state,
-      contactPhone: service.contactPhone
+      contactPhone: service.contactPhone,
     };
   }
 }

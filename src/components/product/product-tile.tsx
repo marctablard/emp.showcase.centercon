@@ -1,9 +1,9 @@
-import { Product } from '@/platform/services/model/product';
 import Image from 'next/image';
 import Link from 'next/link';
-import { imageSizes } from '@/lib/utils';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useL10n } from '@/hooks/useL10n';
+import { imageSizes } from '@/lib/utils';
+import { Product } from '@/platform/services/model/product';
 
 interface ProductTileProps {
   product: Product;
@@ -11,7 +11,7 @@ interface ProductTileProps {
   locale?: string;
 }
 
-export function ProductTile({ product, locale = 'en' }: ProductTileProps ) {  
+export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
   const { l10n } = useL10n(locale);
 
   return (
@@ -41,10 +41,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps ) {
           </p>
         </CardContent>
         <CardFooter className="flex-shrink-0 pt-4">
-          <p className="text-sm text-gray-500 line-clamp-3">
-            {l10n(product.description)}
-          </p>
-         
+          <p className="text-sm text-gray-500 line-clamp-3">{l10n(product.description)}</p>
         </CardFooter>
       </Card>
     </Link>

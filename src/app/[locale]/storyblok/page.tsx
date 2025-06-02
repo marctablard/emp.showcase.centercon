@@ -1,12 +1,12 @@
-import { StoryblokStory, ISbStoriesParams, StoryblokClient } from '@storyblok/react/rsc';
+import { ISbStoriesParams, StoryblokClient, StoryblokStory } from '@storyblok/react/rsc';
 import { getStoryblokApi } from '@/lib/storyblok';
 
 /**
  * Fetch data from Storyblok
  */
 async function fetchData() {
-  let sbParams: ISbStoriesParams = { 
-    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft'
+  const sbParams: ISbStoriesParams = {
+    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft',
   };
 
   const storyblokApi: StoryblokClient = getStoryblokApi();
@@ -19,11 +19,11 @@ async function fetchData() {
  */
 export default async function StoryblokPage() {
   const { data } = await fetchData();
-  
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Storyblok Demo</h1>
-      
+
       {/* If a story was found, display the content */}
       {data?.story ? (
         <div>
@@ -34,12 +34,11 @@ export default async function StoryblokPage() {
           <p>No content found. Please make sure that:</p>
           <ul className="list-disc ml-6 mt-2">
             <li>You have a valid Storyblok Access Token in your .env file</li>
-            <li>You have created a "home" story in your Storyblok Space</li>
-            <li>The story is published (or in draft mode if you're in development environment)</li>
+            <li>You have created a &quot;home&quot; story in your Storyblok Space</li>
+            <li>The story is published (or in draft mode if you&apos;re in development environment)</li>
           </ul>
         </div>
       )}
     </div>
   );
 }
-

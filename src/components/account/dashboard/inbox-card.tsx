@@ -1,10 +1,12 @@
-'use client'
+'use client';
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CustomerMessage } from '@/hooks/customer/useCustomerMessages';
-import { formatDistanceToNow } from 'date-fns';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CustomerMessage } from '@/hooks/customer/useCustomerMessages';
 
 interface InboxCardProps {
   messages: CustomerMessage[];
@@ -13,7 +15,7 @@ interface InboxCardProps {
 
 export function InboxCard({ messages, className }: InboxCardProps) {
   const t = useTranslations('Account');
-  
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -32,13 +34,9 @@ export function InboxCard({ messages, className }: InboxCardProps) {
                 <div className="flex-1">
                   <h4 className="text-sm font-medium flex items-center">
                     {message.title}
-                    {!message.read && (
-                      <Badge variant="default" className="ml-2 h-1.5 w-1.5 rounded-full p-0" />
-                    )}
+                    {!message.read && <Badge variant="default" className="ml-2 h-1.5 w-1.5 rounded-full p-0" />}
                   </h4>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {message.content}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{message.content}</p>
                 </div>
                 <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                   {formatDistanceToNow(new Date(message.date), { addSuffix: true })}
@@ -49,9 +47,9 @@ export function InboxCard({ messages, className }: InboxCardProps) {
         )}
         {messages.length > 3 && (
           <div className="text-center">
-            <a href="/account/inbox" className="text-xs text-primary hover:underline">
+            <Link href="/account/inbox" className="text-xs text-primary hover:underline">
               {t('viewAllMessages')}
-            </a>
+            </Link>
           </div>
         )}
       </CardContent>

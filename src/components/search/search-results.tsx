@@ -1,22 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearch } from '@/hooks/useSearch';
-import { Product } from '@/platform/services/model/product';
 import { useTranslations } from 'next-intl';
-import { Input } from '@/components/ui/input';
+import { ProductTile, ProductTileSkeleton } from '@/components/product/product-tile';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { ProductTile, ProductTileSkeleton } from '@/components/product/product-tile';
+import { useSearch } from '@/hooks/useSearch';
 import { SearchParams, SearchResult } from '@/platform/services/model/common';
+import { Product } from '@/platform/services/model/product';
 
 interface SearchClientWrapperProps {
   initialSearch?: SearchParams<Product>;
@@ -46,12 +45,12 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     search({
       query: queryInput,
       page: currentPage,
-      size: pageSize
+      size: pageSize,
     });
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQueryInput(e.target.value)
+    setQueryInput(e.target.value);
     /*
     TODO would be a nice Live-Search Feature, but needs debugging
     if (inputTimeout) {
@@ -65,7 +64,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
       });
     }, 500));
     */
-  }
+  };
 
   useEffect(() => {
     const totalPages = Math.ceil(total / pageSize);
@@ -108,9 +107,9 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
                 <div className="mb-4">
                   <p className="text-sm text-gray-500">
                     {t('searchResults.showing', {
-                      start: (currentPage * pageSize) + 1,
-                      end: (currentPage * pageSize) + products.length,
-                      total: total
+                      start: currentPage * pageSize + 1,
+                      end: currentPage * pageSize + products.length,
+                      total: total,
                     })}
                   </p>
                 </div>
@@ -144,9 +143,12 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
                   />
                 </PaginationItem>
 
-                {visiblePagination.map((pageNumber) =>
+                {visiblePagination.map((pageNumber) => (
                   <PaginationItem key={pageNumber}>
-                    <PaginationLink href="#" isActive={true} className={currentPage === pageNumber ? 'bg-primary text-white' : ' '}
+                    <PaginationLink
+                      href="#"
+                      isActive={true}
+                      className={currentPage === pageNumber ? 'bg-primary text-white' : ' '}
                       onClick={(e) => {
                         e.preventDefault();
                         changePage(pageNumber);
@@ -155,7 +157,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
                       {pageNumber + 1}
                     </PaginationLink>
                   </PaginationItem>
-                )}
+                ))}
                 {/**/}
 
                 <PaginationItem>

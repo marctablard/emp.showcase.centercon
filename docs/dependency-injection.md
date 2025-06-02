@@ -48,7 +48,7 @@ First, define an interface that describes the service's contract:
 ```typescript
 // src/platform/services/hello/UserAgentService.d.ts
 export interface UserAgentService {
-    getUserAgent() : Promise<string> 
+  getUserAgent(): Promise<string>;
 }
 ```
 
@@ -60,18 +60,18 @@ Implement the interface with one or more concrete classes:
 
 ```typescript
 // src/platform/services/hello/impl/UserAgentServiceServer.ts
-import { headers } from "next/headers";
-import type { UserAgentService } from "../UserAgentService";
-import { injectable } from "@/integration/common/di/injectable";
+import { headers } from 'next/headers';
+import type { UserAgentService } from '../UserAgentService';
+import { injectable } from '@/integration/common/di/injectable';
 
 @injectable('UserAgentService', 'Singleton')
 class UserAgentServiceServer implements UserAgentService {
-    async getUserAgent() : Promise<string> {
-        const headersList = await headers()
-        return headersList.get('user-agent') || 'No UserAgent supplied on Request'
-    }
+  async getUserAgent(): Promise<string> {
+    const headersList = await headers();
+    return headersList.get('user-agent') || 'No UserAgent supplied on Request';
+  }
 }
-    
+
 export default UserAgentServiceServer;
 ```
 
@@ -79,14 +79,14 @@ export default UserAgentServiceServer;
 
 ```typescript
 // src/platform/services/hello/impl/UserAgentServiceClient.ts
-import type { UserAgentService } from "../UserAgentService";
-import { injectable } from "@/integration/common/di/injectable";
+import type { UserAgentService } from '../UserAgentService';
+import { injectable } from '@/integration/common/di/injectable';
 
 @injectable('UserAgentService', 'Singleton')
 export class UserAgentServiceClient implements UserAgentService {
-    getUserAgent() : Promise<string> {
-        return Promise.resolve(window.navigator.userAgent)
-    }
+  getUserAgent(): Promise<string> {
+    return Promise.resolve(window.navigator.userAgent);
+  }
 }
 ```
 
@@ -107,28 +107,25 @@ Services can be consumed by other services through constructor injection:
 
 ```typescript
 // src/platform/services/hello/impl/HelloAgentService.ts
-import type { HelloService } from "../HelloService";
-import { injectable } from "@/integration/common/di/injectable";
-import type { UserAgentService } from "../UserAgentService";
-import { inject } from "inversify";
+import type { HelloService } from '../HelloService';
+import { injectable } from '@/integration/common/di/injectable';
+import type { UserAgentService } from '../UserAgentService';
+import { inject } from 'inversify';
 
 @injectable('HelloService', 'Singleton')
 class HelloAgentService implements HelloService {
+  constructor(@inject('UserAgentService') private userAgentService: UserAgentService) {}
 
-    constructor(
-        @inject('UserAgentService') private userAgentService: UserAgentService
-    ) {}
+  async sayHello(): Promise<string> {
+    try {
+      const userAgent = await this.userAgentService.getUserAgent();
 
-    async sayHello(): Promise<string> {
-        try {   
-            const userAgent = await this.userAgentService.getUserAgent()
-            
-            return `Hello Agent! Your browser agent is: ${userAgent}`;
-        } catch (error) {
-            console.error('Error reading server-only file:', error);
-            return 'Hello Server Error (file could not be read)';
-        }
+      return `Hello Agent! Your browser agent is: ${userAgent}`;
+    } catch (error) {
+      console.error('Error reading server-only file:', error);
+      return 'Hello Server Error (file could not be read)';
     }
+  }
 }
 
 export default HelloAgentService;
@@ -250,20 +247,20 @@ The SSR container is used in server components that render pages. It's accessed 
 **Example from `src/lib/ssr/products.ts`:**
 
 ```typescript
-import { ProductService } from "@/platform/services/product";
-import { Product } from "@/platform/services/model/product";
-import { cache } from "react";
+import { cache } from 'react';
+import { Product } from '@/platform/services/model/product';
+import { ProductService } from '@/platform/services/product';
 
 // Access the ProductService from the SSR container
-const getProductService = () => globalThis.EMP.platform.ssr.get<ProductService>("ProductService");
+const getProductService = () => globalThis.EMP.platform.ssr.get<ProductService>('ProductService');
 
 // Use React's cache to memoize product fetching
-const _getProduct = cache(async (id: string) : Promise<Product | null> => {
-    const product = await getProductService().getProductById(id)
-    return product || null;
+const _getProduct = cache(async (id: string): Promise<Product | null> => {
+  const product = await getProductService().getProductById(id);
+  return product || null;
 });
 
-export function getProductById(id: string) : Promise<Product | null> {
+export function getProductById(id: string): Promise<Product | null> {
   return _getProduct(id);
 }
 ```
@@ -290,42 +287,33 @@ The Server container is used in API routes and other server-only code that doesn
 import { NextRequest, NextResponse } from 'next/server';
 import { ProductService } from '@/platform/services/product/ProductService';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: productId } = await params;
-    
+
     // Access the ProductService directly from the server container
     const productService = EMP.platform.server.get<ProductService>('ProductService');
     const product = await productService.getProductById(productId);
-    
+
     if (!product) {
-      return NextResponse.json(
-        { error: `Product with ID ${productId} not found` },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: `Product with ID ${productId} not found` }, { status: 404 });
     }
-    
+
     return NextResponse.json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }
 ```
 
 ### When to Use Which Container
 
-| Container | Use Case | Access Pattern | Example Scenarios |
-|-----------|----------|----------------|-------------------|
-| **SSR** | Server Components, RSC data fetching | `globalThis.EMP.platform.ssr.get<T>(id)` | Product pages, category listings, server-rendered content |
-| **Server** | API routes, middleware, server utilities | `EMP.platform.server.get<T>(id)` | REST endpoints, authentication, server-only operations |
-| **Client** | Client Components, browser-only code | Injected via context providers | Interactive UI elements, client-side state management |
+| Container  | Use Case                                 | Access Pattern                           | Example Scenarios                                         |
+| ---------- | ---------------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
+| **SSR**    | Server Components, RSC data fetching     | `globalThis.EMP.platform.ssr.get<T>(id)` | Product pages, category listings, server-rendered content |
+| **Server** | API routes, middleware, server utilities | `EMP.platform.server.get<T>(id)`         | REST endpoints, authentication, server-only operations    |
+| **Client** | Client Components, browser-only code     | Injected via context providers           | Interactive UI elements, client-side state management     |
 
 ## Conclusion
 

@@ -39,6 +39,7 @@ The Storyblok integration is set up with the following key files:
 To use Storyblok in your application, you need to:
 
 1. Set the Storyblok access token in your `.env` file:
+
    ```
    NEXT_PUBLIC_STORYBLOK_ACCESS_TOKEN=your_access_token
    ```
@@ -56,6 +57,7 @@ The following components are available for use in Storyblok:
 A container component that renders child components in a page layout.
 
 **Fields:**
+
 - `title` (Text) - The page title (for navigation)
 - `slug` (Text) - URL slug
 - `url` (Text) - Full URL
@@ -70,6 +72,7 @@ Use this component as the main container for your pages. Add other components to
 Displays a logo image with alt text.
 
 **Fields:**
+
 - `site` (Text) - The site identifier
 - `image` (Asset) - The logo image
 - `alt_text` (Text) - Alternative text for the image
@@ -82,6 +85,7 @@ Use this component to display your site's logo in headers or footers.
 Displays a navigation menu with links.
 
 **Fields:**
+
 - `items` (Blocks) - Navigation items with title, slug, and link
 - `site` (Text) - The site identifier
 
@@ -93,6 +97,7 @@ Use this component to create navigation menus for your site.
 A multi-purpose content item that can be placed on various pages.
 
 **Fields:**
+
 - `title` (Text) - The content block title
 - `description` (Text) - The content description
 - `images` (Assets) - Images to display in the content block
@@ -108,6 +113,7 @@ Use this versatile component to create various content sections on your pages.
 Displays a product category with title, description, and banner.
 
 **Fields:**
+
 - `title` (Text) - The category title
 - `description` (Text) - The category description
 - `emporix_category_id` (Text) - The Emporix category ID
@@ -123,6 +129,7 @@ Use this component to showcase product categories on your site.
 Displays content specific to a customer segment.
 
 **Fields:**
+
 - `segment_name` (Text) - The segment name
 - `emporix_segment_id` (Text) - The Emporix segment ID
 - `content_blocks` (Blocks) - Content blocks to display for this segment
@@ -136,6 +143,7 @@ Use this component to display segment-specific content.
 Displays an article with title, introduction, video, rich text, and linked products.
 
 **Fields:**
+
 - `title` (Text) - The article title
 - `introduction` (Text) - The article introduction
 - `video` (Object) - Video URL and title
@@ -150,6 +158,7 @@ Use this component to create blog posts or articles with rich content.
 Displays a feature with name and description.
 
 **Fields:**
+
 - `name` (Text) - The feature name
 - `description` (Text) - The feature description
 
@@ -161,6 +170,7 @@ Use this component to highlight features of your products or services.
 A container component that renders child components in a grid layout.
 
 **Fields:**
+
 - `columns` (Blocks) - The components to display in the grid
 
 **Usage:**
@@ -171,6 +181,7 @@ Use this component to create responsive grid layouts.
 Renders a flexible column layout with nested components.
 
 **Fields:**
+
 - `columns` (Blocks) - The components to display in columns
 
 **Usage:**
@@ -181,6 +192,7 @@ Use this component to create multi-column layouts.
 Displays a simple teaser with headline.
 
 **Fields:**
+
 - `headline` (Text) - The teaser headline
 
 **Usage:**
@@ -191,7 +203,7 @@ Use this component to create attention-grabbing teasers.
 To display Storyblok content in your Next.js application, use the `StoryblokStory` component as implemented in the demo page:
 
 ```tsx
-import { StoryblokStory, ISbStoriesParams, StoryblokClient } from '@storyblok/react/rsc';
+import { ISbStoriesParams, StoryblokClient, StoryblokStory } from '@storyblok/react/rsc';
 import { getStoryblokApi } from '@/lib/storyblok';
 
 /**
@@ -200,11 +212,11 @@ import { getStoryblokApi } from '@/lib/storyblok';
  */
 export default async function StoryblokPage() {
   const { data } = await fetchData();
-  
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Storyblok Demo</h1>
-      
+
       {data?.story ? (
         <div>
           <StoryblokStory story={data.story} />
@@ -227,8 +239,8 @@ export default async function StoryblokPage() {
  * Fetch data from Storyblok
  */
 export async function fetchData() {
-  let sbParams: ISbStoriesParams = { 
-    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft'
+  let sbParams: ISbStoriesParams = {
+    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft',
   };
 
   const storyblokApi: StoryblokClient = getStoryblokApi();
@@ -258,6 +270,7 @@ The Visual Editor also works in deployed applications (development, staging, or 
 3. The correct Storyblok Access Token is configured in the environment variables
 
 To configure the domain in Storyblok:
+
 1. Go to your Storyblok Space
 2. Navigate to Settings > Visual Editor
 3. Add the domain of your development system to the list of allowed domains

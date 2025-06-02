@@ -1,11 +1,11 @@
 import type { PriceService } from '../PriceService';
-import type { Price, PriceMatchRequest, Quantity } from '../../model/price/price';
+import type { Price } from '../../model/price/price';
 import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
-import type { MatchPricesRequest, MatchPricesByContextRequest, PriceMatchItem, MatchedPrice } from '@/platform/integrations/emporix/model/price';
+import type { MatchedPrice, MatchPricesRequest, PriceMatchItem } from '@/platform/integrations/emporix/model/price';
 import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import { PriceMapper } from '../../model/price/PriceMapper';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
+import PriceMapper from '@/platform/services/model/price/PriceMapper';
 
 /**
  * Implementation of PriceService for Emporix price data.
@@ -20,29 +20,33 @@ class EmporixPriceService implements PriceService {
   constructor(
     @inject('EmporixPriceApi') priceApi: PriceApi,
     @inject('EmporixPriceMapper') mapper: PriceMapper,
-    @inject('EmporixCommonUtil') commonUtil: EmporixCommonUtil
+    @inject('EmporixCommonUtil') commonUtil: EmporixCommonUtil,
   ) {
     this.priceApi = priceApi;
     this.mapper = mapper;
     this.commonUtil = commonUtil;
   }
 
-
-  async getProductPrice(productId: string, unitCode: string, quantity: number, params?: { currency?: string; country?: string; siteCode?: string }): Promise<Price | null> {
+  async getProductPrice(
+    productId: string,
+    unitCode: string,
+    quantity: number,
+    params?: { currency?: string; country?: string; siteCode?: string },
+  ): Promise<Price | null> {
     const items = [this.mapToMatchPriceItem(productId, unitCode, quantity)];
     let matchedPrices: MatchedPrice[];
     if (!params) {
       matchedPrices = await this.priceApi.matchPricesByContext({
-        items
-      })
+        items,
+      });
     } else {
       const matchRequest: MatchPricesRequest = {
         targetCurrency: params.currency || 'EUR',
         siteCode: params.siteCode || 'main',
         targetLocation: {
-          countryCode: params.country || 'DE'
+          countryCode: params.country || 'DE',
         },
-        items: [this.mapToMatchPriceItem(productId, unitCode, quantity)]
+        items: [this.mapToMatchPriceItem(productId, unitCode, quantity)],
       };
       matchedPrices = await this.priceApi.matchPrices(matchRequest);
     }
@@ -60,9 +64,9 @@ class EmporixPriceService implements PriceService {
     return {
       itemId: {
         itemType: 'PRODUCT',
-        id: productId
+        id: productId,
       },
-      quantity: this.mapper.mapQuantityToEmporix({ quantity, unitCode })
+      quantity: this.mapper.mapQuantityToEmporix({ quantity, unitCode }),
     };
   }
 }

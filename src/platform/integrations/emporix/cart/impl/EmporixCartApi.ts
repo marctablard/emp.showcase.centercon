@@ -1,9 +1,17 @@
-import { EmporixCart, EmporixCartItem, AddCartItemRequest, CreateCartRequest, CreatedCart, CreatedCartItem, UpdateCartItemRequest } from "../../model";
-import type { CartApi } from "../CartApi";
-import { inject } from "inversify";
-import type { EmporixConfig } from "../../config";
-import type EmporixApiClient from "../../common/impl/EmporixApiInvoker";
-import { injectable } from "@/platform/core/di/injectable";
+import {
+  AddCartItemRequest,
+  CreateCartRequest,
+  CreatedCart,
+  CreatedCartItem,
+  EmporixCart,
+  EmporixCartItem,
+  UpdateCartItemRequest,
+} from '../../model';
+import type { CartApi } from '../CartApi';
+import { inject } from 'inversify';
+import type { EmporixConfig } from '../../config';
+import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
+import { injectable } from '@/platform/core/di/injectable';
 
 @injectable('EmporixCartApi', 'Singleton')
 class EmporixCartApi implements CartApi {
@@ -12,7 +20,7 @@ class EmporixCartApi implements CartApi {
 
   constructor(
     @inject('EmporixApiInvoker') apiClient: EmporixApiClient,
-    @inject('EmporixConfig') config: EmporixConfig
+    @inject('EmporixConfig') config: EmporixConfig,
   ) {
     this.apiClient = apiClient;
     this.config = config;
@@ -25,12 +33,12 @@ class EmporixCartApi implements CartApi {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(createCartRequest)
+        body: JSON.stringify(createCartRequest),
       },
       // differentiate between customer and anonymous
-      createCartRequest.customerId ? 'customer-saas' : 'session'
+      createCartRequest.customerId ? 'customer-saas' : 'session',
     );
 
     if (!response.ok) {
@@ -45,7 +53,8 @@ class EmporixCartApi implements CartApi {
   async getCart(cartId: string): Promise<EmporixCart | undefined> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}`,
-      { method: 'GET' }, 'session'
+      { method: 'GET' },
+      'session',
     );
 
     if (!response.ok) {
@@ -63,26 +72,27 @@ class EmporixCartApi implements CartApi {
     siteCode: string,
     sessionId?: string,
     customerId?: string,
-    type?: string
+    type?: string,
   ): Promise<EmporixCart | undefined> {
     const queryParams = new URLSearchParams();
     queryParams.append('siteCode', siteCode);
-    
+
     if (sessionId) {
       queryParams.append('sessionId', sessionId);
     }
-    
+
     if (customerId) {
       queryParams.append('customerId', customerId);
     }
-    
+
     if (type) {
       queryParams.append('type', type);
     }
 
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts?${queryParams.toString()}`,
-      { method: 'GET' }, 'session'
+      { method: 'GET' },
+      'session',
     );
 
     if (!response.ok) {
@@ -103,10 +113,11 @@ class EmporixCartApi implements CartApi {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(item)
-      }, 'session'
+        body: JSON.stringify(item),
+      },
+      'session',
     );
 
     if (!response.ok) {
@@ -115,13 +126,14 @@ class EmporixCartApi implements CartApi {
     }
 
     const createdItem: CreatedCartItem = await response.json();
-  return createdItem.itemId;
+    return createdItem.itemId;
   }
 
   async getCartItems(cartId: string): Promise<EmporixCartItem[]> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}/items`,
-      { method: 'GET' }, 'session'
+      { method: 'GET' },
+      'session',
     );
 
     if (!response.ok) {
@@ -135,21 +147,22 @@ class EmporixCartApi implements CartApi {
   async updateCartItemQuantity(cartId: string, itemId: string, updateRequest: UpdateCartItemRequest): Promise<void> {
     const queryParams = new URLSearchParams();
     queryParams.append('partial', 'true');
-    
+
     const url = `/cart/${this.config.tenant}/carts/${cartId}/items/${itemId}${
       queryParams.toString() ? `?${queryParams.toString()}` : ''
     }`;
-    
+
     const response = await this.apiClient.authenticatedFetch(
       url,
       {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(updateRequest)
-      }, 'session'
+        body: JSON.stringify(updateRequest),
+      },
+      'session',
     );
 
     if (!response.ok) {
@@ -161,7 +174,8 @@ class EmporixCartApi implements CartApi {
   async removeCartItem(cartId: string, itemId: string): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}/items/${itemId}`,
-      { method: 'DELETE' }, 'session'
+      { method: 'DELETE' },
+      'session',
     );
 
     if (!response.ok) {
@@ -173,7 +187,8 @@ class EmporixCartApi implements CartApi {
   async deleteCart(cartId: string): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}`,
-      { method: 'DELETE' }, 'session'
+      { method: 'DELETE' },
+      'session',
     );
 
     if (!response.ok) {
@@ -189,10 +204,11 @@ class EmporixCartApi implements CartApi {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(cart)
-      }, 'session'
+        body: JSON.stringify(cart),
+      },
+      'session',
     );
 
     if (!response.ok) {

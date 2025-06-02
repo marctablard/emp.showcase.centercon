@@ -1,3 +1,3 @@
 export interface UserAgentService {
-    getUserAgent() : Promise<string> 
+  getUserAgent(): Promise<string>;
 }

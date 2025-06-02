@@ -1,10 +1,12 @@
-'use client'
+'use client';
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Approval } from '@/hooks/company/useCompany';
-import { formatDistanceToNow } from 'date-fns';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Approval } from '@/hooks/company/useCompany';
 
 interface ApprovalsCardProps {
   approvals: Approval[];
@@ -13,9 +15,9 @@ interface ApprovalsCardProps {
 
 export function ApprovalsCard({ approvals, className }: ApprovalsCardProps) {
   const t = useTranslations('Account');
-  
-  const pendingApprovals = approvals.filter(approval => approval.status === 'pending');
-  
+
+  const pendingApprovals = approvals.filter((approval) => approval.status === 'pending');
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -35,8 +37,7 @@ export function ApprovalsCard({ approvals, className }: ApprovalsCardProps) {
                   <h4 className="text-sm font-medium">
                     {approval.type === 'order' && t('orderApproval')}
                     {approval.type === 'quote' && t('quoteApproval')}
-                    {approval.type === 'return' && t('returnApproval')}
-                    {' '}
+                    {approval.type === 'return' && t('returnApproval')}{' '}
                     <span className="font-normal">#{approval.referenceId}</span>
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -52,9 +53,9 @@ export function ApprovalsCard({ approvals, className }: ApprovalsCardProps) {
         )}
         {pendingApprovals.length > 3 && (
           <div className="text-center">
-            <a href="/account/approvals" className="text-xs text-primary hover:underline">
+            <Link href="/account/approvals" className="text-xs text-primary hover:underline">
               {t('viewAllApprovals')}
-            </a>
+            </Link>
           </div>
         )}
       </CardContent>

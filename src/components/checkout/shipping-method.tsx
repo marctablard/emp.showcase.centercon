@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Shipping } from '@/platform/services/model/checkout';
+import React, { useEffect, useState } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { Shipping } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { UseFormReturn } from 'react-hook-form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 interface ShippingOption {
@@ -27,13 +27,10 @@ interface ShippingMethodProps {
  * Shipping method selection component
  * Allows users to select their preferred shipping method
  */
-const ShippingMethod: React.FC<ShippingMethodProps> = ({
-  isReadOnly = false,
-  form
-}) => {
+const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false, form }) => {
   // Get the submitShippingMethod function from useCheckout
   // Note: This doesn't exist yet, we'll need to add it to the useCheckout hook
-  const { shippingMethod, submitShippingMethod } = useCheckout();
+  const { shippingMethod } = useCheckout();
   const t = useTranslations('Checkout');
 
   // Mock shipping options - in a real app, these would come from an API
@@ -44,7 +41,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({
       description: '3-5 business days',
       price: 4.95,
       estimatedDelivery: '3-5 business days',
-      zoneId: 'de-default'
+      zoneId: 'de-default',
     },
     {
       id: 'express',
@@ -52,7 +49,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({
       description: '1-2 business days',
       price: 9.99,
       estimatedDelivery: '1-2 business days',
-      zoneId: 'de-default'
+      zoneId: 'de-default',
     },
     {
       id: 'overnight',
@@ -60,13 +57,11 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({
       description: 'Next business day',
       price: 19.99,
       estimatedDelivery: 'Next business day',
-      zoneId: 'de-default'
-    }
+      zoneId: 'de-default',
+    },
   ];
 
-  const [selectedMethod, setSelectedMethod] = useState<string>(
-    shippingMethod?.methodId || 'standard'
-  );
+  const [selectedMethod, setSelectedMethod] = useState<string>(shippingMethod?.methodId || 'standard');
 
   useEffect(() => {
     if (shippingMethod?.methodId) {
@@ -90,20 +85,25 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({
                 className="flex flex-col space-y-1"
               >
                 {shippingOptions.map((option) => (
-                  <FormItem className="flex items-center space-x-3 space-y-0 w-full">
-                    <div className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${selectedMethod === option.id
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-indigo-300'
+                  <FormItem className="flex items-center space-x-3 space-y-0 w-full" key={option.id}>
+                    <div
+                      className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${
+                        selectedMethod === option.id
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:border-indigo-300'
                       } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
                     >
-                      <FormControl >
+                      <FormControl>
                         <RadioGroupItem value={option.id} id={option.id} />
                       </FormControl>
                       <FormLabel className="w-full" htmlFor={option.id}>
                         <div className="flex items-start justify-between w-full">
                           <div className="flex items-center space-x-3">
-                            <div className={`flex items-center justify-center ${selectedMethod === option.id ? 'border-indigo-600' : 'border-gray-300'
-                              }`}>
+                            <div
+                              className={`flex items-center justify-center ${
+                                selectedMethod === option.id ? 'border-indigo-600' : 'border-gray-300'
+                              }`}
+                            >
                               {selectedMethod === option.id && (
                                 <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
                               )}
@@ -118,15 +118,13 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({
                               {option.price === 0
                                 ? t('freeShipping')
                                 : new Intl.NumberFormat('en-US', {
-                                  style: 'currency',
-                                  currency: 'USD'
-                                }).format(option.price)
-                              }
+                                    style: 'currency',
+                                    currency: 'USD',
+                                  }).format(option.price)}
                             </span>
                             <p className="text-xs text-gray-500">{option.estimatedDelivery}</p>
                           </div>
                         </div>
-
                       </FormLabel>
                     </div>
                   </FormItem>

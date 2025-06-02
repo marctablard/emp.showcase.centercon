@@ -10,26 +10,20 @@ export async function GET(request: NextRequest) {
     const searchService = await globalThis.EMP.platform.server.get<SearchService>('SearchService');
 
     const url = new URL(request.url);
-    
+
     // Extract query and locale parameters
     const query = url.searchParams.get('query');
     const locale = url.searchParams.get('locale') || undefined;
-    
+
     if (!query) {
-      return NextResponse.json(
-        { error: 'Query parameter is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
     }
-    
+
     const suggestions = await searchService.getSuggestions(query, locale);
-    
+
     return NextResponse.json({ suggestions });
   } catch (error) {
     console.error('Error fetching suggestions:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch suggestions' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch suggestions' }, { status: 500 });
   }
 }

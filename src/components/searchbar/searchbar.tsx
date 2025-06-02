@@ -1,15 +1,15 @@
+import { getTranslations } from 'next-intl/server';
+import MiniCart from '@/components/cart/mini-cart';
+import { Input } from '@/components/ui/input';
 import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger
-} from "@/components/ui/navigation-menu"
-import { Input } from "@/components/ui/input"
-import MiniCart from '@/components/cart/mini-cart';
-import { getCurrentCart } from "@/lib/ssr/carts";
-import { getTranslations } from "next-intl/server";
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
+import { getCurrentCart } from '@/lib/ssr/carts';
 
 export default async function Searchbar() {
   // TODO move initial fetch of cart to a more appropriate Place

@@ -1,7 +1,7 @@
 import type { PriceApi } from '../PriceApi';
 import type { EmporixConfig } from '../../config';
 import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
-import type { MatchPricesRequest, MatchPricesByContextRequest, MatchedPrice } from '../../model/price';
+import type { MatchedPrice, MatchPricesByContextRequest, MatchPricesRequest } from '../../model/price';
 import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
 
@@ -15,7 +15,7 @@ class EmporixPriceApi implements PriceApi {
 
   constructor(
     @inject('EmporixConfig') config: EmporixConfig,
-    @inject('EmporixApiInvoker') apiClient: EmporixApiInvoker
+    @inject('EmporixApiInvoker') apiClient: EmporixApiInvoker,
   ) {
     this.config = config;
     this.apiClient = apiClient;
@@ -33,10 +33,11 @@ class EmporixPriceApi implements PriceApi {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(request)
-      }, 'public'
+        body: JSON.stringify(request),
+      },
+      'public',
     );
 
     if (!response.ok) {
@@ -59,10 +60,11 @@ class EmporixPriceApi implements PriceApi {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(request)
-      }, 'session'
+        body: JSON.stringify(request),
+      },
+      'session',
     );
 
     if (!response.ok) {

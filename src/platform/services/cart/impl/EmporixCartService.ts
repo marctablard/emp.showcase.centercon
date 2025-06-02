@@ -1,22 +1,22 @@
-import type { Cart } from "@/platform/services/model/cart/cart";
-import type { CartService } from "@/platform/services/cart/CartService";
-import type { SessionService } from "@/platform/services/session/SessionService";
-import type { CartApi } from "@/platform/integrations/emporix/cart/CartApi";
-import { AddCartItemRequest, UpdateCartItemRequest } from "@/platform/integrations/emporix/model";
-import { injectable } from "@/platform/core/di/injectable";
+import type { Cart } from '@/platform/services/model/cart/cart';
+import type { CartService } from '@/platform/services/cart/CartService';
+import type { SessionService } from '@/platform/services/session/SessionService';
+import type { CartApi } from '@/platform/integrations/emporix/cart/CartApi';
+import { AddCartItemRequest, UpdateCartItemRequest } from '@/platform/integrations/emporix/model';
+import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import type { CartMapper } from "../../model/cart/CartMapper";
-import type EmporixCommonUtil from "@/platform/integrations/emporix/common/util/EmporixCommonUtil";
-import type { PriceService } from "@/platform/services/price/PriceService";
-import type { ProductService } from "@/platform/services/product/ProductService";
+import type { CartMapper } from '../../model/cart/CartMapper';
+import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
+import type { PriceService } from '@/platform/services/price/PriceService';
+import type { ProductService } from '@/platform/services/product/ProductService';
 import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
-import { Media } from "../../model/common";
+import { Media } from '../../model/common';
 
 /**
  * Implementation of CartService for Emporix cart data.
  * Maps between Emporix API cart format and internal Cart model.
  */
-@injectable('CartService', "Singleton")
+@injectable('CartService', 'Singleton')
 class EmporixCartService implements CartService {
   private commonUtil: EmporixCommonUtil;
   private cartApi: CartApi;
@@ -31,7 +31,7 @@ class EmporixCartService implements CartService {
     @inject('EmporixCartMapper') mapper: CartMapper<EmporixCart, EmporixCartItem>,
     @inject('SessionService') sessionService: SessionService,
     @inject('PriceService') priceService: PriceService,
-    @inject('ProductService') productService: ProductService
+    @inject('ProductService') productService: ProductService,
   ) {
     this.commonUtil = commonUtil;
     this.cartApi = cartApi;
@@ -49,9 +49,9 @@ class EmporixCartService implements CartService {
       type: 'shopping',
       channel: {
         name: 'storefront',
-        source: 'https://emporix-showcase.com/'
+        source: 'https://emporix-showcase.com/',
       },
-      sessionValidated: true
+      sessionValidated: true,
     };
     try {
       const cartId = await this.cartApi.createCart(createCartRequest);
@@ -73,7 +73,6 @@ class EmporixCartService implements CartService {
     }
   }
 
-
   async getCart(): Promise<Cart | undefined> {
     const session = await this.sessionService.getCurrentSession();
     if (!session) {
@@ -82,7 +81,7 @@ class EmporixCartService implements CartService {
     const cart = await this.cartApi.getCartByCriteria(session.siteCode || 'main', session.id, undefined, 'shopping');
     return cart ? this.mapper.mapToService(cart) : undefined;
   }
-  
+
   async getCartById(id: string): Promise<Cart | undefined> {
     const cart = await this.cartApi.getCart(id);
     return cart ? this.mapper.mapToService(cart) : undefined;
@@ -91,12 +90,12 @@ class EmporixCartService implements CartService {
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<string> {
     const product = await this.productService.getProductById(productId);
     if (!product) {
-      throw new Error("Product missing");
+      throw new Error('Product missing');
     }
     // TODO find existing cartItem and merge if desired
     const price = await this.priceService.getProductPrice(productId, 'pc', quantity);
     if (!price) {
-      throw new Error("Price missing");
+      throw new Error('Price missing');
     }
     const addItemRequest: AddCartItemRequest = {
       siteCode: 'main',
@@ -107,17 +106,17 @@ class EmporixCartService implements CartService {
         name: product.name,
         description: product.description,
         sku: product.sku,
-        images: product.images?.map((img : Media) => ({
+        images: product.images?.map((img: Media) => ({
           id: img.url,
-          url: img.url
-        }))
+          url: img.url,
+        })),
       },
       price: {
         priceId: price.id,
         effectiveAmount: price.effectiveValue,
         originalAmount: price.originalValue,
-        currency: price.currency
-      }
+        currency: price.currency,
+      },
     };
 
     return await this.cartApi.addItemToCart(cartId, addItemRequest);
@@ -125,21 +124,21 @@ class EmporixCartService implements CartService {
 
   async updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<void> {
     const cart = await this.getCartById(cartId);
-    const cartItem = cart?.items.find(item => item.id === itemId);
+    const cartItem = cart?.items.find((item) => item.id === itemId);
     if (!cartItem || !cartItem.product?.id) {
       throw new Error('Cart item not found');
     }
     const price = await this.priceService.getProductPrice(cartItem.product?.id, 'pc', quantity);
     if (!price) {
-      throw new Error("Price missing");
+      throw new Error('Price missing');
     }
     const updateRequest: UpdateCartItemRequest = {
       quantity,
       price: {
         effectiveAmount: price.effectiveValue,
         originalAmount: price.originalValue,
-        currency: price.currency
-      }
+        currency: price.currency,
+      },
     };
 
     await this.cartApi.updateCartItemQuantity(cartId, itemId, updateRequest);
@@ -156,10 +155,9 @@ class EmporixCartService implements CartService {
   async updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
     await this.cartApi.updateCart(cartId, {
       countryCode,
-      zipCode
+      zipCode,
     });
   }
 }
-
 
 export default EmporixCartService;

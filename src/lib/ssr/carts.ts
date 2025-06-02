@@ -1,13 +1,12 @@
-import { CartService } from "@/platform/services/cart";
-import { Cart } from "@/platform/services/model/cart/cart";
-import { cache } from "react";
-import { getCartIdFromCookie } from "../server/utils";
+import { cache } from 'react';
+import { CartService } from '@/platform/services/cart';
+import { Cart } from '@/platform/services/model/cart/cart';
+import { getCartIdFromCookie } from '../server/utils';
 
 /**
  * Get the cart service instance from the platform container
  */
-const getCartService = () => globalThis.EMP.platform.ssr.get<CartService>("CartService");
-
+const getCartService = () => globalThis.EMP.platform.ssr.get<CartService>('CartService');
 
 /**
  * Get the current cart by ID from cookie
@@ -15,7 +14,6 @@ const getCartService = () => globalThis.EMP.platform.ssr.get<CartService>("CartS
  */
 const getCartById = cache(async (cartId: string): Promise<Cart | null> => {
   try {
-
     const cart = await getCartService().getCartById(cartId);
 
     if (!cart) {
@@ -23,7 +21,7 @@ const getCartById = cache(async (cartId: string): Promise<Cart | null> => {
     }
 
     return cart;
-  } catch (error) {
+  } catch (_error) {
     // on SSR we fail gracefully, since the customer's token might just be expired
     return null;
   }

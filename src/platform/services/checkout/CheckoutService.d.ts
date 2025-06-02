@@ -1,8 +1,4 @@
-import { 
-  CheckoutRequest, 
-  CheckoutResponse, 
-  QuoteCheckoutRequest 
-} from '../model/checkout';
+import { CheckoutRequest, CheckoutResponse, QuoteCheckoutRequest } from '../model/checkout';
 
 /**
  * Interface for checkout service.

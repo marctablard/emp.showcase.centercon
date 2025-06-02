@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { addCartToCookie, getCartCookie } from '@/lib/server/utils';
 import { CartService } from '@/platform/services/cart';
-import { getCartIdFromCookie, addCartToCookie, getCartCookie } from '@/lib/server/utils';
 
 const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE_ID || 'emp-cart';
 const DEFAULT_CURRENCY = 'EUR';
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     /**
      * THIS WHOLE LOGIC
-     * needs reworking, once it's cleared why the Session ID in the Token 
+     * needs reworking, once it's cleared why the Session ID in the Token
      * doesn't match the one received by getOwnSessionContext
      * @see DCPS-16482
      */
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         if (cart) {
           return NextResponse.json(cart);
         }
-      } catch (error) {
+      } catch (_error) {
         const currentCart = await cartService.getCart();
         if (currentCart) {
           return NextResponse.json(currentCart);
@@ -49,14 +49,12 @@ export async function GET(request: NextRequest) {
           const newCartId = await cartService.createCart(cartCookie.currency, DEFAULT_SITE_CODE);
           if (newCartId) {
             for (const item of cartCookie.items) {
-              await cartService
-                .addItemToCart(newCartId, item.pId, item.qty);
+              await cartService.addItemToCart(newCartId, item.pId, item.qty);
             }
             const newCart = await cartService.getCartById(newCartId);
             return NextResponse.json(newCart);
           }
         }
-
       }
       // If cart not found and shouldCreate is true, we'll create a new one
     }
@@ -71,10 +69,7 @@ export async function GET(request: NextRequest) {
     const newCart = await cartService.getCartById(newCartId);
 
     if (!newCart) {
-      return NextResponse.json(
-        { error: 'Failed to create cart' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to create cart' }, { status: 500 });
     }
 
     // Set cookie for the new cart
@@ -84,10 +79,7 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Error handling cart request:', error);
-    return NextResponse.json(
-      { error: 'Failed to process cart request' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process cart request' }, { status: 500 });
   }
 }
 
@@ -121,9 +113,6 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Error creating cart:', error);
-    return NextResponse.json(
-      { error: 'Failed to create cart' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create cart' }, { status: 500 });
   }
 }

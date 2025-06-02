@@ -1,6 +1,5 @@
-import { Session as ShopSession } from '@/platform/services/model/auth';
 import 'next-auth';
-import { JWT } from 'next-auth/jwt';
+import { Session as ShopSession } from '@/platform/services/model/auth';
 
 declare module 'next-auth' {
   /**

@@ -1,5 +1,5 @@
-import { BatteryIncludedConfig } from "..";
-import { injectable } from "@/platform/core/di/injectable";
+import { BatteryIncludedConfig } from '..';
+import { injectable } from '@/platform/core/di/injectable';
 
 @injectable('BatteryIncludedConfig', 'Singleton')
 class BatteryIncludedConfigImpl implements BatteryIncludedConfig {

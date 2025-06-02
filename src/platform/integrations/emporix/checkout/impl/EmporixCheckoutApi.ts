@@ -1,22 +1,18 @@
-import { 
-  EmporixCartCheckoutRequest,
-  EmporixCheckoutResponse, 
-  EmporixQuoteCheckoutRequest 
-} from "../../model/checkout";
-import type { CheckoutApi } from "../CheckoutApi";
-import { inject } from "inversify";
-import type { EmporixConfig } from "../../config";
-import type EmporixApiClient from "../../common/impl/EmporixApiInvoker";
-import { injectable } from "@/platform/core/di/injectable";
+import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from '../../model/checkout';
+import type { CheckoutApi } from '../CheckoutApi';
+import { inject } from 'inversify';
+import type { EmporixConfig } from '../../config';
+import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
+import { injectable } from '@/platform/core/di/injectable';
 
 @injectable('EmporixCheckoutApi', 'Singleton')
 class EmporixCheckoutApi implements CheckoutApi {
   private apiClient: EmporixApiClient;
   private config: EmporixConfig;
 
-  constructor(  
+  constructor(
     @inject('EmporixApiInvoker') apiClient: EmporixApiClient,
-    @inject('EmporixConfig') config: EmporixConfig
+    @inject('EmporixConfig') config: EmporixConfig,
   ) {
     this.apiClient = apiClient;
     this.config = config;
@@ -32,11 +28,11 @@ class EmporixCheckoutApi implements CheckoutApi {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
       },
-      'customer-saas' // Customer checkout requires customer authentication
+      'customer-saas', // Customer checkout requires customer authentication
     );
 
     if (!response.ok) {
@@ -57,11 +53,11 @@ class EmporixCheckoutApi implements CheckoutApi {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
       },
-      'session'
+      'session',
     );
 
     if (!response.ok) {
@@ -79,11 +75,11 @@ class EmporixCheckoutApi implements CheckoutApi {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
       },
-      'customer-saas' // Quote checkout requires customer authentication
+      'customer-saas', // Quote checkout requires customer authentication
     );
 
     if (!response.ok) {

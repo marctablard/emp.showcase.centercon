@@ -1,6 +1,6 @@
 'use client';
 
-import { storyblokEditable, StoryblokServerComponent } from '@storyblok/react/rsc';
+import { StoryblokServerComponent, storyblokEditable } from '@storyblok/react/rsc';
 
 /**
  * Columns component for Storyblok

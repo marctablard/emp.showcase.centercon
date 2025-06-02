@@ -1,5 +1,5 @@
-import { Tax, Price } from "../common";
-import { Product } from "../product";
+import { Price, Tax } from '../common';
+import { Product } from '../product';
 
 export interface Cart {
   id: string;
@@ -20,9 +20,9 @@ export interface Cart {
 }
 
 export interface CartItem {
-    id: string;
-    quantity: number;
-    price: Price;
-    product?: Partial<Product>;
-    tax?: Tax;
+  id: string;
+  quantity: number;
+  price: Price;
+  product?: Partial<Product>;
+  tax?: Tax;
 }

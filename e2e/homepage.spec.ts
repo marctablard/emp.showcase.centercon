@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 /**
  * Test suite for the Emporix Showcase homepage
@@ -20,8 +20,8 @@ test.describe('Homepage Tests', () => {
 
     // Check that we're on the German version by looking for German Locale
     const htmlLang = await page.getAttribute('html', 'lang');
-    expect(htmlLang).toBe('de'); // German 
-    
+    expect(htmlLang).toBe('de'); // German
+
     // Check the URL is correct
     expect(page.url()).toContain('/de');
   });
@@ -38,7 +38,7 @@ test.describe('Homepage Tests', () => {
 
     // Check that we're on the English version by looking for English Locale
     const htmlLang = await page.getAttribute('html', 'lang');
-    expect(htmlLang).toBe('en'); // English 
+    expect(htmlLang).toBe('en'); // English
   });
 
   test('Root URL (/) loads the default English locale', async ({ page }) => {
@@ -50,13 +50,12 @@ test.describe('Homepage Tests', () => {
 
     // Verify the page has loaded
     await expect(page.locator('header')).toBeVisible();
-    
+
     // Check the URL is correct
     expect(page.url()).toContain('/');
 
     // Check that we're on the English version by looking for English Locale
     const htmlLang = await page.getAttribute('html', 'lang');
-    expect(htmlLang).toBe('en'); // English 
+    expect(htmlLang).toBe('en'); // English
   });
-
 });

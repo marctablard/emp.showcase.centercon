@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import { useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 
@@ -20,7 +21,7 @@ export const useAuthentication = (): AuthenticationHook => {
     onUnauthenticated: () => {
       setIsAuthenticated(false);
       setLoading(false);
-    }
+    },
   });
 
   // State for authentication status and user data

@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 
 export interface Order {
@@ -75,36 +76,36 @@ export const useCompany = (): CompanyHook => {
         date: '2025-05-20T10:30:00',
         total: 1250.99,
         status: 'delivered',
-        items: 5
+        items: 5,
       },
       {
         id: 'ord-002',
         date: '2025-05-22T14:45:00',
-        total: 799.50,
+        total: 799.5,
         status: 'processing',
-        items: 3
+        items: 3,
       },
       {
         id: 'ord-003',
         date: '2025-05-24T09:15:00',
         total: 349.99,
         status: 'pending',
-        items: 2
+        items: 2,
       },
       {
         id: 'ord-004',
         date: '2025-05-25T16:20:00',
         total: 1599.95,
         status: 'processing',
-        items: 7
+        items: 7,
       },
       {
         id: 'ord-005',
         date: '2025-05-27T11:10:00',
         total: 499.99,
         status: 'processing',
-        items: 1
-      }
+        items: 1,
+      },
     ],
     returns: [
       {
@@ -112,15 +113,15 @@ export const useCompany = (): CompanyHook => {
         orderId: 'ord-001',
         date: '2025-05-26T13:40:00',
         status: 'completed',
-        items: 1
+        items: 1,
       },
       {
         id: 'ret-002',
         orderId: 'ord-002',
         date: '2025-05-27T15:30:00',
         status: 'pending',
-        items: 1
-      }
+        items: 1,
+      },
     ],
     quotes: [
       {
@@ -128,22 +129,22 @@ export const useCompany = (): CompanyHook => {
         date: '2025-05-15T10:00:00',
         total: 2499.99,
         status: 'approved',
-        expiresAt: '2025-06-15T10:00:00'
+        expiresAt: '2025-06-15T10:00:00',
       },
       {
         id: 'quo-002',
         date: '2025-05-20T14:30:00',
         total: 1899.95,
         status: 'pending',
-        expiresAt: '2025-06-20T14:30:00'
+        expiresAt: '2025-06-20T14:30:00',
       },
       {
         id: 'quo-003',
         date: '2025-05-25T09:45:00',
         total: 3299.99,
         status: 'pending',
-        expiresAt: '2025-06-25T09:45:00'
-      }
+        expiresAt: '2025-06-25T09:45:00',
+      },
     ],
     approvals: [
       {
@@ -152,7 +153,7 @@ export const useCompany = (): CompanyHook => {
         referenceId: 'ord-003',
         requestedBy: 'Jane Smith',
         date: '2025-05-24T09:30:00',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'apr-002',
@@ -160,7 +161,7 @@ export const useCompany = (): CompanyHook => {
         referenceId: 'quo-002',
         requestedBy: 'Bob Johnson',
         date: '2025-05-20T15:00:00',
-        status: 'pending'
+        status: 'pending',
       },
       {
         id: 'apr-003',
@@ -168,15 +169,15 @@ export const useCompany = (): CompanyHook => {
         referenceId: 'quo-003',
         requestedBy: 'Alice Williams',
         date: '2025-05-25T10:15:00',
-        status: 'pending'
-      }
+        status: 'pending',
+      },
     ],
     financials: {
-      revenue: 25000.00,
-      budget: 50000.00,
-      remainingBudget: 25000.00,
-      currency: 'USD'
-    }
+      revenue: 25000.0,
+      budget: 50000.0,
+      remainingBudget: 25000.0,
+      currency: 'USD',
+    },
   };
 
   const [company] = useState<Company | null>(mockCompany);
@@ -186,23 +187,20 @@ export const useCompany = (): CompanyHook => {
   // Calculate order summary
   const orderSummary = {
     total: company?.orders.length || 0,
-    inProgress: company?.orders.filter(order => 
-      order.status === 'pending' || order.status === 'processing'
-    ).length || 0
+    inProgress:
+      company?.orders.filter((order) => order.status === 'pending' || order.status === 'processing').length || 0,
   };
 
   // Calculate return summary
   const returnSummary = {
     total: company?.returns.length || 0,
-    open: company?.returns.filter(returnItem => 
-      returnItem.status === 'pending' || returnItem.status === 'processing'
-    ).length || 0
+    open:
+      company?.returns.filter((returnItem) => returnItem.status === 'pending' || returnItem.status === 'processing')
+        .length || 0,
   };
 
   // Calculate pending approvals
-  const pendingApprovals = company?.approvals.filter(
-    approval => approval.status === 'pending'
-  ).length || 0;
+  const pendingApprovals = company?.approvals.filter((approval) => approval.status === 'pending').length || 0;
 
   return {
     company,
@@ -210,7 +208,7 @@ export const useCompany = (): CompanyHook => {
     error,
     orderSummary,
     returnSummary,
-    pendingApprovals
+    pendingApprovals,
   };
 };
 

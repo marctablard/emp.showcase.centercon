@@ -1,12 +1,12 @@
-import { Product, PaginatedResponse } from "./model";
-export interface ProductApi {
+import { PaginatedResponse, Product } from './model';
 
+export interface ProductApi {
   /**
    * Retrieves a specified product's details.
    * @link https://developer.emporix.io/docs/openapi/product/#operation/GET-product-retrieve-product
-   * @param id 
+   * @param id
    */
-  getProduct(id: string): Promise<Product | undefined>
+  getProduct(id: string): Promise<Product | undefined>;
 
   /**
    * Retrieves a list of products.
@@ -14,5 +14,5 @@ export interface ProductApi {
    * @param page number
    * @param pageSize number
    */
-  getProducts(page?: number, pageSize?: number): Promise<PaginatedResponse<Product>>
+  getProducts(page?: number, pageSize?: number): Promise<PaginatedResponse<Product>>;
 }

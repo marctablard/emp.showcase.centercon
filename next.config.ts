@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
- 
+
 let nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -11,7 +11,7 @@ let nextConfig: NextConfig = {
       },
     ],
   },
-  
+
   reactStrictMode: true,
   webpack: (config, { dev, isServer }) => {
     // Exclude test files from being compiled by Next.js
@@ -23,7 +23,7 @@ let nextConfig: NextConfig = {
     return config;
   },
 };
- 
+
 // add i18n Logic to Next-Configuration
 const withNextIntl = createNextIntlPlugin();
 
