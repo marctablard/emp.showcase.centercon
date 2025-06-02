@@ -23,18 +23,22 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
 
     public async getSessionToken(tenant: string, clientId: string): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
         let customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>('customer');
-        // if the Token (from Client Cookie) is valid we use that to get the session-bound data
+        // first check client's customer token
         if (this.checkAccessToken(customerToken)) {
             return { accessToken: customerToken!.token.access_token, sessionId: customerToken!.token.session_id };
-        } else {
-            // otherwise we use our own token
-            if (!this.checkAccessToken(this.ssrToken.anonymousToken)) {
-                const freshSsrAnonymousToken = await this.fetchAnonymousToken(this.ssrToken.anonymousToken, tenant, clientId);
-                // ...and store it globally, so it can be reused
-                this.ssrToken.anonymousToken = freshSsrAnonymousToken;
-            }
-            return { accessToken: this.ssrToken.anonymousToken!.token.access_token, sessionId: this.ssrToken.anonymousToken!.token.session_id };
         }
+        // otherwise check their anonymous token
+        let anonymousToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>('anonymous');
+        if (this.checkAccessToken(anonymousToken)) {
+            return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
+        }
+        // otherwise we use our own token
+        if (!this.checkAccessToken(this.ssrToken.anonymousToken)) {
+            const freshSsrAnonymousToken = await this.fetchAnonymousToken(this.ssrToken.anonymousToken, tenant, clientId);
+            // ...and store it globally, so it can be reused
+            this.ssrToken.anonymousToken = freshSsrAnonymousToken;
+        }
+        return { accessToken: this.ssrToken.anonymousToken!.token.access_token, sessionId: this.ssrToken.anonymousToken!.token.session_id };
     }
 
     protected createCustomerToken(_tenant: string, _clientId: string, _credentials: { username: string; password: string; }): Promise<{ token: { sessionId: string; saas_token: string; session_id: string; access_token: string; token_type: string; expires_in: number; scope: string; refresh_token?: string; refresh_token_expires_in?: number; }; expiryAt: number; refreshExpiryAt: number | undefined; }> {
@@ -46,9 +50,8 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     }
     
     protected async writeTokens(tokens: TokenStore): Promise<void> {
-        if (tokens.customerToken) {
-            throw new Error("SSR Context tried to store CustomerToken, check your application since this is clearly prohibited!")
-        }
+        // strip customer Token, since that will be from the the SSR Clients cookie
+        tokens.customerToken = undefined;
         this.ssrToken = tokens;
     }
 
