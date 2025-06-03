@@ -65,6 +65,8 @@ export default function MiniCart({ initialCart }: MiniCartProps) {
                     <div className="w-12 h-12 bg-muted flex-shrink-0 rounded overflow-hidden">
                       {item.product && item.product.images?.length ? (
                         <Image
+                          width={64}
+                          height={64}
                           src={String(item.product.images[0].url)}
                           alt={String(item.product.name || 'Product')}
                           className="w-full h-full object-cover"

@@ -5,19 +5,17 @@ import { UseFormReturn } from 'react-hook-form';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import AddressForm from './address-form';
+import { toast } from 'sonner';
 
 interface AddressesProps {
-  initialShippingAddress?: Partial<Omit<CheckoutAddress, 'type'>>;
-  initialBillingAddress?: Partial<Omit<CheckoutAddress, 'type'>>;
   isReadOnly?: boolean;
-  form: UseFormReturn<any>;
 }
 
 /**
  * Addresses component for checkout
  * Manages both shipping and billing addresses with option to use same address for both
  */
-const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false, form }) => {
+const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
   const {
     submitShippingAddress,
     submitBillingAddress,
@@ -78,7 +76,6 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false, form }) => {
   const handleShippingAddressChange = (data: Omit<CheckoutAddress, 'type'>) => {
     setShippingAddress(data);
     submitShippingAddress({ ...data, type: 'SHIPPING' });
-
     // If same as shipping is checked, also update billing address
     if (sameAsShipping) {
       submitBillingAddress({ ...data, type: 'BILLING' });
@@ -109,7 +106,6 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false, form }) => {
           initialData={shippingAddress}
           onDataChange={handleShippingAddressChange}
           isReadOnly={isReadOnly}
-          form={form}
         />
       </div>
 
@@ -137,7 +133,6 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false, form }) => {
             initialData={billingAddress}
             onDataChange={handleBillingAddressChange}
             isReadOnly={isReadOnly}
-            form={form}
           />
         </div>
       )}

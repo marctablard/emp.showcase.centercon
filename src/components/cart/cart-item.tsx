@@ -49,6 +49,8 @@ export function CartItemRow({ cart, item }: CartItemProps) {
       <div className="flex gap-2">
         {item.product && item.product.images?.length ? (
           <Image
+            width={128}
+            height={128}
             src={String(item.product.images[0].url)}
             alt={String(item.product.name || 'Product')}
             className="w-40 h-full object-cover"

@@ -20,7 +20,6 @@ const OrderSummaryComponent: React.FC<OrderSummaryProps> = ({ isReadOnly = false
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">{t('summaryTitle')}</h2>
-        <p className="text-gray-500">{t('noItems')}</p>
       </div>
     );
   }
