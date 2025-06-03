@@ -97,7 +97,7 @@ class EmporixApiInvoker {
           if (sessionToken.saasToken) {
             headers = {
               ...headers,
-              'saas-token': `Bearer ${sessionToken.saasToken}`,
+              'saas-token': `${sessionToken.saasToken}`,
             };
           } else {
             throw new Error('No SaaS token available');
