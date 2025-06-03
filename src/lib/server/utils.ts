@@ -47,18 +47,21 @@ export async function addCartToCookie(cart: Cart, response: NextResponse): Promi
   if (!cartCookie[cart.site]) {
     cartCookie[cart.site] = [];
   }
-  cartCookie[cart.site].push({
-    cartId: cart.id,
-    currency: cart.currency,
-    legalEntityId: cart.legalEntity,
-    channel: cart.channel,
-    items: cart.items
-      .filter((item) => item.product?.id)
-      .map((item) => ({
-        pId: item.product!.id!,
-        qty: item.quantity,
-      })),
-  });
+  // TODO Multi-Cart support, currently only one supported!
+  cartCookie[cart.site] = [
+    {
+      cartId: cart.id,
+      currency: cart.currency,
+      legalEntityId: cart.legalEntity,
+      channel: cart.channel,
+      items: cart.items
+        .filter((item) => item.product?.id)
+        .map((item) => ({
+          pId: item.product!.id!,
+          qty: item.quantity,
+        })),
+    },
+  ];
 
   response.cookies.set({
     name: CART_COOKIE_ID,
