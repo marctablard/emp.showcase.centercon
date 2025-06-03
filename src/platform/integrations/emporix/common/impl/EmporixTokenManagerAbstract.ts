@@ -115,7 +115,8 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
       token: {
         ...response,
         // transfer sessionId from anonymous Session to keep SessionContext
-        sessionId: anonymousToken.sessionId,
+        // we use sessionId instead of session_id to be compatible with original token response
+        session_id: anonymousToken.sessionId,
       },
       expiryAt: now + response.expires_in * 1000,
       refreshExpiryAt: response.refresh_token_expires_in ? now + response.refresh_token_expires_in * 1000 : undefined,
