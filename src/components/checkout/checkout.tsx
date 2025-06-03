@@ -43,8 +43,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
     }
   }, [orderResponse, onComplete, router]);
 
-  
-
   // If no cart is available, show a message
   if (!checkoutCart) {
     return (

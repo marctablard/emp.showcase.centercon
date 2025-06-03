@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
+import { FormProvider, UseFormReturn, useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { zodResolver } from '@hookform/resolvers/zod';
+import z from 'zod';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 
 interface AddressFormProps {
   initialData?: Partial<Omit<CheckoutAddress, 'type'>>;
@@ -31,22 +31,22 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
     country: z.string().min(1, { message: t('validation.countryRequired') }),
     state: z.string().optional(),
     phoneNumber: z.string().optional(),
-    companyName: z.string().optional()
+    companyName: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof AddressFormSchema>>({
     resolver: zodResolver(AddressFormSchema),
     defaultValues: initialData,
   });
-  
+
   // Watch form state to detect when all fields are valid
   const formState = form.formState;
 
-  const onBlur = (e : React.FocusEvent<HTMLInputElement>) => {
+  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     if (formState.isValid) {
       form.handleSubmit(onSubmit)(e);
     }
-  }
+  };
 
   const onSubmit = (data: z.infer<typeof AddressFormSchema>) => {
     onDataChange(data);

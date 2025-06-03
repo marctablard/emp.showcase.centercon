@@ -144,22 +144,22 @@ export const useCheckout = (): UseCheckout => {
       setError(new Error('Missing shipping method'));
       return null;
     }
-    
+
     if (!billingAddress) {
       setError(new Error('Missing billing address'));
       return null;
     }
-    
+
     if (!shippingAddress) {
       setError(new Error('Missing shipping address'));
       return null;
     }
-    
+
     if (!contactData) {
       setError(new Error('Missing contact information'));
       return null;
     }
-    
+
     if (!paymentMethod) {
       setError(new Error('Missing payment method'));
       return null;

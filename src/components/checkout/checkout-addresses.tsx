@@ -2,10 +2,10 @@
 
 import React, { useMemo, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { toast } from 'sonner';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import AddressForm from './address-form';
-import { toast } from 'sonner';
 
 interface AddressesProps {
   isReadOnly?: boolean;
@@ -102,11 +102,7 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
       {/* Shipping Address */}
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Shipping Address</h2>
-        <AddressForm
-          initialData={shippingAddress}
-          onDataChange={handleShippingAddressChange}
-          isReadOnly={isReadOnly}
-        />
+        <AddressForm initialData={shippingAddress} onDataChange={handleShippingAddressChange} isReadOnly={isReadOnly} />
       </div>
 
       {/* Same as shipping checkbox */}
@@ -129,11 +125,7 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
       {!sameAsShipping && (
         <div>
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Billing Address</h2>
-          <AddressForm
-            initialData={billingAddress}
-            onDataChange={handleBillingAddressChange}
-            isReadOnly={isReadOnly}
-          />
+          <AddressForm initialData={billingAddress} onDataChange={handleBillingAddressChange} isReadOnly={isReadOnly} />
         </div>
       )}
 

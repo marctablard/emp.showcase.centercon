@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { FormProvider, useForm, useWatch, UseFormReturn } from 'react-hook-form';
+import { FormProvider, UseFormReturn, useForm, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { Customer, ContactData } from '@/platform/services/model/checkout';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 import z, { isValid } from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { toast } from 'sonner';
+import { ContactData, Customer } from '@/platform/services/model/checkout';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
 
 interface CustomerDataProps {
   initialData?: Partial<Customer>;
@@ -25,7 +25,10 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
   const { submitContactData, contactData } = useCheckout();
 
   const ContactDataFormSchema = z.object({
-    email: z.string().min(1, { message: t('validation.emailRequired') }).email({ message: t('validation.invalidEmail') }),
+    email: z
+      .string()
+      .min(1, { message: t('validation.emailRequired') })
+      .email({ message: t('validation.invalidEmail') }),
     phone: z.string().min(1, { message: t('validation.phoneRequired') }),
     firstName: z.string().min(1, { message: t('validation.firstNameRequired') }),
     lastName: z.string().min(1, { message: t('validation.lastNameRequired') }),
@@ -38,27 +41,27 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
       phone: contactData?.phone || initialData?.phone,
       firstName: contactData?.firstName || initialData?.firstName,
       lastName: contactData?.lastName || initialData?.lastName,
-      company: contactData?.company || initialData?.company
+      company: contactData?.company || initialData?.company,
     },
-    mode: 'onBlur'
+    mode: 'onBlur',
   });
 
   // Watch form state to detect when all fields are valid
   const formState = form.formState;
 
-  const onBlur = (e : React.FocusEvent<HTMLInputElement>) => {
+  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     if (formState.isValid) {
       form.handleSubmit(onSubmit)(e);
     }
-  }
-  
+  };
+
   const onSubmit = (data: z.infer<typeof ContactDataFormSchema>) => {
     const contactData: ContactData = {
       email: data.email,
       phone: data.phone,
       firstName: data.firstName,
       lastName: data.lastName,
-      company: data.company
+      company: data.company,
     };
     toast(JSON.stringify(contactData));
     submitContactData(contactData);

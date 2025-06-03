@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import z from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { PaymentMethod as PaymentMethodType } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import z from 'zod';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
 
 interface PaymentMethodProps {
   isReadOnly?: boolean;
@@ -27,7 +27,6 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     { id: 'invoice', name: 'Pay by Invoice', provider: 'none', method: 'invoice' },
   ];
 
-
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',
     cardHolder: '',
@@ -36,7 +35,6 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
   });
 
   const t = useTranslations('Checkout');
-
 
   const PaymentModeFormSchema = z.object({
     paymentMethod: z.string().min(1, { message: t('validation.paymentMethodRequired') }),
@@ -47,7 +45,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     defaultValues: {
       paymentMethod: paymentMethod?.method,
     },
-    mode: 'onChange'
+    mode: 'onChange',
   });
 
   // Effect to auto-submit when all fields are valid and touched
@@ -68,7 +66,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     });
   }, [form]);
 
-  form.register
+  form.register;
 
   return (
     <FormProvider {...form}>
@@ -81,11 +79,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="flex flex-col space-y-1"
-                  >
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="flex flex-col space-y-1">
                     <div className="space-y-6">
                       <div className="space-y-4">
                         {paymentOptions.map((option) => (

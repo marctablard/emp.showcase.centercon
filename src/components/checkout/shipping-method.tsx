@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
+import { FormProvider, UseFormReturn, useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import z from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { Shipping } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
 
 interface ShippingOption {
   id: string;
@@ -40,7 +40,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
       id: 'de-standard',
       name: 'Standard Shipping',
       description: '3-5 business days',
-      price: 5.00,
+      price: 5.0,
       estimatedDelivery: '3-5 business days',
       zoneId: 'de-default',
     },
@@ -73,12 +73,11 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
     },
   });
 
-
   const formState = form.formState;
   useEffect(() => {
-    form.watch(data => {
+    form.watch((data) => {
       if (formState.isValid) {
-        const option = shippingOptions.find(o => o.id == data.shippingMethod);
+        const option = shippingOptions.find((o) => o.id == data.shippingMethod);
         if (option) {
           submitShippingMethod({
             methodId: option.id,
@@ -88,8 +87,8 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
           });
         }
       }
-    })
-  })
+    });
+  });
 
   return (
     <FormProvider {...form}>
@@ -110,10 +109,11 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                   {shippingOptions.map((option) => (
                     <FormItem className="flex items-center space-x-3 space-y-0 w-full" key={option.id}>
                       <div
-                        className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${shippingMethod?.methodId === option.id
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-gray-200 hover:border-indigo-300'
-                          } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
+                        className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${
+                          shippingMethod?.methodId === option.id
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-gray-200 hover:border-indigo-300'
+                        } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
                       >
                         <FormControl>
                           <RadioGroupItem value={option.id} id={option.id} />
@@ -122,8 +122,9 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                           <div className="flex items-start justify-between w-full">
                             <div className="flex items-center space-x-3">
                               <div
-                                className={`flex items-center justify-center ${shippingMethod?.methodId === option.id ? 'border-indigo-600' : 'border-gray-300'
-                                  }`}
+                                className={`flex items-center justify-center ${
+                                  shippingMethod?.methodId === option.id ? 'border-indigo-600' : 'border-gray-300'
+                                }`}
                               >
                                 {shippingMethod?.methodId === option.id && (
                                   <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
@@ -139,9 +140,9 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                                 {option.price === 0
                                   ? t('freeShipping')
                                   : new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                  }).format(option.price)}
+                                      style: 'currency',
+                                      currency: 'USD',
+                                    }).format(option.price)}
                               </span>
                               <p className="text-xs text-gray-500">{option.estimatedDelivery}</p>
                             </div>
