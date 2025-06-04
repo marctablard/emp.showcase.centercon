@@ -4,7 +4,84 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-inter: Inter, sans-serif;
+  --font-body: Ubuntu, sans-serif;
+  --font-sans: Open-Sans, sans-serif;
+
+  /* colors */
+  --color-indigo-50: #e7f1fb;
+  --color-indigo-100: #cfe4f7;
+  --color-indigo-200: #9fc9f0;
+  --color-indigo-300: #6fade8;
+  --color-indigo-400: #3f92e1;
+  --color-indigo-500: #0f77d9;
+  --color-indigo-600: #0c5fae;
+  --color-indigo-700: #094782;
+  --color-indigo-800: #063057;
+  --color-indigo-900: #03182b;
+
+  --color-teal-100: #e7fdf0;
+  --color-teal-200: #cffbe1;
+  --color-teal-300: #b7f8d3;
+  --color-teal-400: #9ff6c4;
+  --color-teal-500: #87f4b5;
+  --color-teal-600: #6cc391;
+  --color-teal-700: #51926d;
+  --color-teal-800: #366248;
+  --color-teal-900: #1b3124;
+
+  --color-sky-100: #e6f3ff;
+  --color-sky-200: #cce6ff;
+  --color-sky-300: #b3daff;
+  --color-sky-400: #99cdff;
+  --color-sky-500: #80c1ff;
+  --color-sky-600: #669acc;
+  --color-sky-700: #4d7499;
+  --color-sky-800: #334d66;
+  --color-sky-900: #1a2733;
+
+  --color-green-100: #cee8d2;
+  --color-green-200: #9dd1a6;
+  --color-green-300: #6cba79;
+  --color-green-400: #3ba34d;
+  --color-green-500: #0a8c20;
+  --color-green-600: #08701a;
+  --color-green-700: #065413;
+  --color-green-800: #04380d;
+  --color-green-900: #021c06;
+
+  --color-orange-100: #f7decf;
+  --color-orange-200: #f0bd9f;
+  --color-orange-300: #e89b6f;
+  --color-orange-400: #e17a3f;
+  --color-orange-500: #d9590f;
+  --color-orange-600: #ae470c;
+  --color-orange-700: #823509;
+  --color-orange-800: #572406;
+  --color-orange-900: #2b1203;
+
+  --color-red-100: #f2cfcf;
+  --color-red-200: #e59e9e;
+  --color-red-300: #d96e6e;
+  --color-red-400: #cc3d3d;
+  --color-red-500: #bf0d0d;
+  --color-red-600: #990a0a;
+  --color-red-700: #730808;
+  --color-red-800: #4c0505;
+  --color-red-900: #260303;
+
+  --color-gray-50: #f3f3f5;
+  --color-gray-100: #e7e7ea;
+  --color-gray-200: #cfd0d6;
+  --color-gray-300: #b6b8c1;
+  --color-gray-400: #9ea1ad;
+  --color-gray-500: #868998;
+  --color-gray-600: #6b6e79;
+  --color-gray-700: #50525b;
+  --color-gray-800: #36373d;
+  --color-gray-900: #1b1b1e;
+
+  --spacing: 0.25rem;
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -55,7 +132,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #0f172a;
+  --primary: var(--color-indigo-500);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -118,8 +195,9 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50 font-inter;
+    @apply border-border outline-ring/50 font-body;
   }
+
   body {
     @apply bg-background text-foreground;
   }
