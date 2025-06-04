@@ -45,7 +45,7 @@ export default async function Searchbar() {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <MiniCart initialCart={cart || undefined} />
+            <MiniCart initialCart={cart} />
           </div>
         </div>
       </div>
