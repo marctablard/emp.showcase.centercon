@@ -37,13 +37,13 @@ interface UseCart {
  * @param initialCart Optional initial cart state
  * @returns Cart data and operations
  */
-export const useCart = (initialCart?: Cart): UseCart => {
+export const useCart = (initialCart?: Cart | null): UseCart => {
   const { setCurrentCart, getCurrentCart, currentCart: storeCart } = useCartStore();
   // Local state
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   // Local cart state, either set, or null (no cart available) or undefined (unknown)
-  const [cart, setCart] = useState<Cart | null | undefined>(initialCart || undefined);
+  const [cart, setCart] = useState<Cart | null | undefined>(initialCart);
 
   /**
    * Fetch the current cart
@@ -77,10 +77,12 @@ export const useCart = (initialCart?: Cart): UseCart => {
   // Initialize cart on first render if not already initialized
   useEffect(() => {
     if (cart === undefined && !loading) {
+      setLoading(true);
       // first try to grab the cart from the store
       const storeCart = getCurrentCart();
       if (storeCart !== undefined) {
         setCart(storeCart);
+        setLoading(false);
         return;
       }
       // Otherwise fetch current cart

@@ -24,7 +24,7 @@ export interface CartService {
    * @param id The ID of the cart to retrieve.
    * @returns The cart if found, otherwise undefined.
    */
-  getCartById(id: string): Promise<Cart | undefined>;
+  getCartById(id: string): Promise<Cart | null>;
 
   /**
    * Adds an item to a cart

@@ -16,7 +16,7 @@ export interface CartApi {
    * @param cartId Cart ID
    * @returns Promise with the cart details
    */
-  getCart(cartId: string): Promise<EmporixCart | undefined>;
+  getCart(cartId: string): Promise<EmporixCart | null>;
 
   /**
    * Get cart by criteria (sessionId, customerId, siteCode)
