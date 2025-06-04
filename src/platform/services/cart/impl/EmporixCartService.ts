@@ -82,9 +82,9 @@ class EmporixCartService implements CartService {
     return cart ? this.mapper.mapToService(cart) : undefined;
   }
 
-  async getCartById(id: string): Promise<Cart | undefined> {
+  async getCartById(id: string): Promise<Cart | null> {
     const cart = await this.cartApi.getCart(id);
-    return cart ? this.mapper.mapToService(cart) : undefined;
+    return cart ? this.mapper.mapToService(cart) : null;
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<string> {

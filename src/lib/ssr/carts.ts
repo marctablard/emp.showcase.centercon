@@ -12,7 +12,7 @@ const getCartService = () => globalThis.EMP.platform.ssr.get<CartService>('CartS
  * Get the current cart by ID from cookie
  * This function is cached to prevent multiple cart fetches in a single request
  */
-const getCartById = cache(async (cartId: string): Promise<Cart | null> => {
+const getCartById = cache(async (cartId: string): Promise<Cart | null | undefined> => {
   try {
     const cart = await getCartService().getCartById(cartId);
 
@@ -22,8 +22,8 @@ const getCartById = cache(async (cartId: string): Promise<Cart | null> => {
 
     return cart;
   } catch (_error) {
-    // on SSR we fail gracefully, since the customer's token might just be expired
-    return null;
+    // on SSR we fail with undefined, so the Client can refetch if necessary
+    return undefined;
   }
 });
 
@@ -31,7 +31,7 @@ const getCartById = cache(async (cartId: string): Promise<Cart | null> => {
  * Get the current cart
  * This should be used in server components to get the current cart
  */
-export async function getCurrentCart(): Promise<Cart | null> {
+export async function getCurrentCart(): Promise<Cart | null | undefined> {
   const cartId = await getCartIdFromCookie('main', 'EUR');
   if (!cartId) {
     return null;

@@ -13,7 +13,7 @@ import { Cart } from '@/platform/services/model/cart/cart';
 import { useCartHydrator } from '@/providers/hydrator/cart-hydrator';
 
 interface MiniCartProps {
-  initialCart?: Cart;
+  initialCart?: Cart | null;
 }
 
 export default function MiniCart({ initialCart }: MiniCartProps) {
