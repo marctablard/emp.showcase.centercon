@@ -57,15 +57,14 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         // Try to fetch existing cart
         try {
           const cartData = await apiFetchCurrentCart(createCurrent);
-          if (cartData) {
-            setCurrentCart(cartData);
-          }
+          setCurrentCart(cartData);
           return cartData;
         } catch (_err) {
           // TODO clarify error handling when cart is gone
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch cart'));
+        setCurrentCart(undefined);
         console.error('Error fetching cart:', err);
       } finally {
         setLoading(false);
