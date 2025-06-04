@@ -6,7 +6,7 @@ import { Cart } from '@/platform/services/model/cart/cart';
  * @param {boolean} [createIfNotExist=false] - Whether to create a new cart if one doesn't exist
  * @returns {Promise<Cart|null>} The cart or null if no cart exists and createIfNotExist is false
  */
-export async function fetchCurrentCart(createIfNotExist: boolean = false): Promise<Cart | null> {
+export async function fetchCurrentCart(createIfNotExist: boolean = false): Promise<Cart | null | undefined> {
   const response = await fetch(`/api/cart?create=${createIfNotExist}`);
 
   // If we get a 204, it means no cart exists yet

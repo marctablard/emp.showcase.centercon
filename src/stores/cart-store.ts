@@ -16,8 +16,9 @@ interface CartActions {
 
 export type CartStore = CartState & CartActions;
 
+// default state explicitely 'undefined' since it means, we don't know the cart's state 
 const defaultState: CartState = {
-  currentCart: null,
+  currentCart: undefined,
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {

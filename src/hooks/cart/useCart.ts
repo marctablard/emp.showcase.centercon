@@ -37,13 +37,13 @@ interface UseCart {
  * @param initialCart Optional initial cart state
  * @returns Cart data and operations
  */
-export const useCart = (initialCart?: Cart): UseCart => {
+export const useCart = (initialCart?: Cart | null): UseCart => {
   const { setCurrentCart, getCurrentCart, currentCart: storeCart } = useCartStore();
   // Local state
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   // Local cart state, either set, or null (no cart available) or undefined (unknown)
-  const [cart, setCart] = useState<Cart | null | undefined>(initialCart || undefined);
+  const [cart, setCart] = useState<Cart | null | undefined>(initialCart);
 
   /**
    * Fetch the current cart
@@ -57,15 +57,14 @@ export const useCart = (initialCart?: Cart): UseCart => {
         // Try to fetch existing cart
         try {
           const cartData = await apiFetchCurrentCart(createCurrent);
-          if (cartData) {
-            setCurrentCart(cartData);
-          }
+          setCurrentCart(cartData);
           return cartData;
         } catch (_err) {
           // TODO clarify error handling when cart is gone
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch cart'));
+        setCurrentCart(undefined);
         console.error('Error fetching cart:', err);
       } finally {
         setLoading(false);
@@ -77,10 +76,12 @@ export const useCart = (initialCart?: Cart): UseCart => {
   // Initialize cart on first render if not already initialized
   useEffect(() => {
     if (cart === undefined && !loading) {
+      setLoading(true);
       // first try to grab the cart from the store
       const storeCart = getCurrentCart();
       if (storeCart !== undefined) {
         setCart(storeCart);
+        setLoading(false);
         return;
       }
       // Otherwise fetch current cart

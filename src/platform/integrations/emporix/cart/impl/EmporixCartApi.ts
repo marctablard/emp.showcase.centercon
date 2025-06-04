@@ -50,7 +50,7 @@ class EmporixCartApi implements CartApi {
     return createdCart.cartId;
   }
 
-  async getCart(cartId: string): Promise<EmporixCart | undefined> {
+  async getCart(cartId: string): Promise<EmporixCart | null> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}`,
       { method: 'GET' },
@@ -59,7 +59,7 @@ class EmporixCartApi implements CartApi {
 
     if (!response.ok) {
       if (response.status === 404) {
-        return undefined;
+        return null;
       }
       const errorDetails = await response.text();
       throw new Error(`Failed to get cart: ${response.statusText} ${errorDetails}`);
