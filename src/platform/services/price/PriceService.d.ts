@@ -11,5 +11,10 @@ export interface PriceService {
    * @param params Optional parameters for price matching
    * @returns Array of matched prices
    */
-  async getProductPrice(productId: string, unitCode: string, quantity: number, params?: { currency?: string; country?: string; siteCode?: string }): Promise<Price | null>;
+  getProductPrice(
+    productId: string,
+    unitCode: string,
+    quantity: number,
+    params?: { currency?: string; country?: string; siteCode?: string },
+  ): Promise<Price | null>;
 }

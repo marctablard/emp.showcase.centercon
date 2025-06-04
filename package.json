@@ -25,7 +25,7 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,css,scss,md,json}": "prettier --write"
+    "*.{js,jsx,ts,tsx,css,scss,json}": "prettier --write"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
