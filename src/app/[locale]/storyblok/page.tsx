@@ -1,4 +1,8 @@
 import { ISbStoriesParams, StoryblokClient, StoryblokStory } from '@storyblok/react/rsc';
+import { User } from 'lucide-react';
+import { Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { getStoryblokApi } from '@/lib/storyblok';
 
 /**
@@ -39,6 +43,42 @@ export default async function StoryblokPage() {
           </ul>
         </div>
       )}
+
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-6">
+          <h4>Label</h4>
+          <div className="flex gap-10">
+            <div className="flex flex-col gap-2">
+              <Label>Label</Label>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label isOptional>Label</Label>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h4>Field</h4>
+          <div className="flex gap-10">
+            <div className="flex flex-col gap-2">
+              <h5>Default</h5>
+              <Input startIcon={User} endIcon={Eye} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h5>Error</h5>
+              <Input startIcon={User} endIcon={Eye} hasError />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h5>Success</h5>
+              <Input startIcon={User} endIcon={Eye} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h5>Disabled</h5>
+              <Input startIcon={User} endIcon={Eye} isDisabled disabled />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
