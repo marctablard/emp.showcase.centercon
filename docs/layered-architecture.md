@@ -196,6 +196,10 @@ class MockProductApi implements ProductApi {
 ### 2. Environment-Specific Code
 
 Different layers may need different implementations based on the environment:
+We can supply different implementations for each environment by Naming convention.
+- ...Client : used in Client/Browser-Context
+- ...Server : used in Server-Side-Context
+- ...SSR : used in Server-Side-Rendering-Context
 
 ```typescript
 // Service Layer with client/server variants
@@ -206,6 +210,11 @@ class UserServiceServer implements UserService {
 
 @injectable('UserService')
 class UserServiceClient implements UserService {
+  /* ... */
+}
+
+@injectable('UserService')
+class UserServiceSSR implements UserService {
   /* ... */
 }
 ```
