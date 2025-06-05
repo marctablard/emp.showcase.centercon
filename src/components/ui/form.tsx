@@ -12,6 +12,7 @@ import {
 } from 'react-hook-form';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
+import { Eye, LucideIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
@@ -62,6 +63,11 @@ const useFormField = () => {
   };
 };
 
+export interface IconProps extends React.ComponentProps<typeof Slot> {
+  startIcon?: LucideIcon;
+  endIcon?: LucideIcon;
+}
+
 type FormItemContextValue = {
   id: string;
 };
@@ -92,8 +98,10 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
   );
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
+function FormControl({ endIcon, startIcon, ...props }: IconProps) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+  const StartIcon = startIcon;
+  const EndIcon = endIcon;
 
   return (
     <Slot
@@ -102,7 +110,21 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
       aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
       aria-invalid={!!error}
       {...props}
-    />
+    >
+      <div className={cn('w-full relative text-gray-900', error && 'text-red-500')}>
+        {StartIcon && (
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <StartIcon size={20} />
+          </div>
+        )}
+        {props.children}
+        {EndIcon && (
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <EndIcon size={20} />
+          </div>
+        )}
+      </div>
+    </Slot>
   );
 }
 
@@ -128,7 +150,12 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
   }
 
   return (
-    <p data-slot="form-message" id={formMessageId} className={cn('text-destructive text-sm', className)} {...props}>
+    <p
+      data-slot="form-message"
+      id={formMessageId}
+      className={cn('text-destructive text-sm text-red-500', className)}
+      {...props}
+    >
       {body}
     </p>
   );

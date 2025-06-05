@@ -25,7 +25,7 @@ const Label = React.forwardRef<HTMLInputElement, LabelProps>(({ className, isOpt
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Info className="text-blue-500" />
+          <Info className="text-indigo-500" />
         </TooltipTrigger>
         <TooltipContent>
           <p>Test</p>
