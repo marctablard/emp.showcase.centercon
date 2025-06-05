@@ -6,7 +6,7 @@ export default function StyleGuide() {
     notFound();
   }
   return (
-    <main className="max-w-7xl mx-auto px-4 grid gap-x-4 lg:px-9 md:gap-x-6">
+    <main className="max-w-6xl mx-auto px-4 grid gap-x-4 lg:px-9 md:gap-x-6">
       <h1>Hallo Styleguide</h1>
       <ButtonStyleGuide />
     </main>

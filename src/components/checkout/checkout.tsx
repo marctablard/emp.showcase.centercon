@@ -46,7 +46,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   // If no cart is available, show a message
   if (!checkoutCart) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-900 mb-4">{t('title')}</h1>
           <p className="text-neutral-600">{t('emptyCart')}</p>
@@ -56,7 +56,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-neutral-900 mb-6">{t('title')}</h1>
       {error && (
         <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-md">

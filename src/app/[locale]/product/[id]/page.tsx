@@ -40,7 +40,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Card className="overflow-hidden border-0 shadow-none mb-8">
         <CardContent className="p-0">
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">

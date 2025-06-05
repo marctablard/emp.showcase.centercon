@@ -16,7 +16,7 @@ export default async function Header() {
   const t = await getTranslations('header');
   return (
     <header className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-12">
+      <div className="max-w-6xl mx-auto px-12">
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="font-bold text-xl text-neutral-800">
