@@ -1,16 +1,22 @@
 import { Container, inject } from 'inversify';
-import EmporixOrderApi from './EmporixOrderApi';
-import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import EmporixCartApi from '../../cart/impl/EmporixCartApi';
-import { CreateOrderRequest, UpdateOrderRequest } from '../../model/order';
-import { EmporixConfig } from '../../config';
-import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
-import { TokenManager } from '../../common/TokenManager';
-import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
-import EmporixCustomerApi from '../../customer/impl/EmporixCustomerApi';
 import EmporixCheckoutApi from '../../checkout/impl/EmporixCheckoutApi';
-import { EmporixCartCheckoutRequest, EmporixCheckoutAddress, EmporixCheckoutCustomer, EmporixPaymentMethod, EmporixShipping } from '../../model/checkout';
-import { CreateCartRequest, AddCartItemRequest } from '../../model';
+import { TokenManager } from '../../common/TokenManager';
+import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
+import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
+import { EmporixConfig } from '../../config';
+import EmporixCustomerApi from '../../customer/impl/EmporixCustomerApi';
+import { AddCartItemRequest, CreateCartRequest } from '../../model';
+import {
+  EmporixCartCheckoutRequest,
+  EmporixCheckoutAddress,
+  EmporixCheckoutCustomer,
+  EmporixPaymentMethod,
+  EmporixShipping,
+} from '../../model/checkout';
+import { CreateOrderRequest, UpdateOrderRequest } from '../../model/order';
+import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
+import EmporixOrderApi from './EmporixOrderApi';
 
 // Using EmporixTestTokenManager from the imported file
 
@@ -85,7 +91,11 @@ const sampleUpdateOrderRequest: UpdateOrderRequest = {
 };
 
 // Helper function to create a checkout request
-const createCheckoutRequest = (cartId: string, isGuest: boolean = true, email: string = 'guest@example.com'): EmporixCartCheckoutRequest => {
+const createCheckoutRequest = (
+  cartId: string,
+  isGuest: boolean = true,
+  email: string = 'guest@example.com',
+): EmporixCartCheckoutRequest => {
   // Sample customer
   const customer: EmporixCheckoutCustomer = {
     email: email,
@@ -211,7 +221,7 @@ describe('EmporixOrderApi', () => {
       expect(orderResponse).toBeDefined();
       expect(orderResponse.orderId).toBeDefined();
       expect(typeof orderResponse.orderId).toBe('string');
-      
+
       // Save the order ID for later tests
       createdOrderId = orderResponse.orderId;
     }, 10000);
@@ -234,9 +244,9 @@ describe('EmporixOrderApi', () => {
       // Verify we got some orders
       expect(orders).toBeDefined();
       expect(Array.isArray(orders)).toBe(true);
-      
+
       // Find our created order
-      const createdOrder = orders.find(order => order.id === createdOrderId);
+      const createdOrder = orders.find((order) => order.id === createdOrderId);
       expect(createdOrder).toBeDefined();
     }, 10000);
 
@@ -271,7 +281,7 @@ describe('EmporixOrderApi', () => {
 
       // Verify the order was deleted
       expect(deletedOrder).toBeNull();
-      
+
       // Reset the created order ID since it's been deleted
       createdOrderId = '';
     }, 10000);
@@ -280,7 +290,7 @@ describe('EmporixOrderApi', () => {
   describe('Customer Order Operations', () => {
     const username = 'forrest.gump@alaba.ma';
     const password = 'Test1234';
-    
+
     // Login with test customer credentials before all customer order tests
     beforeAll(async () => {
       try {
@@ -292,7 +302,7 @@ describe('EmporixOrderApi', () => {
         throw error;
       }
     }, 15000);
-    
+
     // Create a cart and add items before testing customer order creation
     beforeEach(async () => {
       // Create a cart
@@ -305,7 +315,7 @@ describe('EmporixOrderApi', () => {
 
       // Update the order request with the actual cart ID
       sampleCreateOrderRequest.cartId = createdCartId;
-      
+
       // Update customer email to match test user
       sampleCreateOrderRequest.customerEmail = username;
     }, 15000);
@@ -322,7 +332,7 @@ describe('EmporixOrderApi', () => {
         console.warn('Error during cart cleanup:', error);
       }
     }, 10000);
-    
+
     // Logout after all customer order tests
     afterAll(async () => {
       try {
@@ -332,7 +342,7 @@ describe('EmporixOrderApi', () => {
         console.warn('Error during customer logout:', error);
       }
     }, 10000);
-    
+
     it('should create a new customer order', async () => {
       // Create an order from the real cart we created
       const orderResponse = await orderApi.createCustomerOrder(sampleCreateOrderRequest);
@@ -341,7 +351,7 @@ describe('EmporixOrderApi', () => {
       expect(orderResponse).toBeDefined();
       expect(orderResponse.orderId).toBeDefined();
       expect(typeof orderResponse.orderId).toBe('string');
-      
+
       // Save the order ID for later tests
       createdOrderId = orderResponse.orderId;
     }, 10000);
@@ -365,12 +375,12 @@ describe('EmporixOrderApi', () => {
       // Verify we got some orders
       expect(orders).toBeDefined();
       expect(Array.isArray(orders)).toBe(true);
-      
+
       // Find our created order
-      const createdOrder = orders.find(order => order.id === createdOrderId);
+      const createdOrder = orders.find((order) => order.id === createdOrderId);
       expect(createdOrder).toBeDefined();
     }, 10000);
-    
+
     it('should update a customer order', async () => {
       // Update the order
       await orderApi.updateCustomerOrder(createdOrderId, sampleUpdateOrderRequest);
@@ -392,37 +402,23 @@ describe('EmporixOrderApi', () => {
       expect(transitions).toBeDefined();
       expect(Array.isArray(transitions)).toBe(true);
     }, 10000);
-
-    it('should delete a customer order', async () => {
-      // Delete the order
-      await orderApi.deleteCustomerOrder(createdOrderId);
-
-      // Try to get the deleted order
-      const deletedOrder = await orderApi.getCustomerOrder(createdOrderId);
-
-      // Verify the order was deleted
-      expect(deletedOrder).toBeNull();
-      
-      // Reset the created order ID since it's been deleted
-      createdOrderId = '';
-    }, 10000);
   });
-  
+
   describe('Guest Checkout and Order Retrieval', () => {
     let guestOrderId: string;
     let guestCartId: string;
     const guestEmail = 'guest.test@example.com';
-    let tokenManager: EmporixTestTokenManager;
-    
+    let tokenManager: TokenManager;
+
     // Get token manager and clear tokens before all tests
     beforeAll(async () => {
       // Get the token manager from the container
-      tokenManager = container.get<EmporixTestTokenManager>('EmporixTokenManager');
-      
+      tokenManager = container.get<TokenManager>('EmporixTokenManager');
+
       // Clear all tokens to ensure we start with a fresh session
       tokenManager.clearTokens();
     }, 10000);
-    
+
     // Create a cart and add items before testing guest checkout
     beforeEach(async () => {
       // Create a cart
@@ -445,45 +441,44 @@ describe('EmporixOrderApi', () => {
       } catch (error) {
         console.warn('Error during cart cleanup:', error);
       }
-      
+
       // Reset the order ID
       guestOrderId = '';
     }, 10000);
-    
+
     it('should create an order via guest checkout and retrieve it in the same session', async () => {
       try {
-        
         // Create a checkout request with guest = true
         const checkoutRequest = createCheckoutRequest(guestCartId, true, guestEmail);
         const checkoutResponse = await checkoutApi.guestCheckout(checkoutRequest);
-        
+
         // Verify checkout was successful
         expect(checkoutResponse).toBeDefined();
         expect(checkoutResponse.orderId).toBeDefined();
-        
+
         // Save the order ID
         guestOrderId = checkoutResponse.orderId;
-        
+
         // Now try to retrieve the order using the customer order endpoint
         // This should work because we're in the same session
         console.log('Retrieving order with ID:', guestOrderId);
         const retrievedOrder = await orderApi.getCustomerOrder(guestOrderId);
-        
+
         // Verify we can retrieve the order
         expect(retrievedOrder).not.toBeNull();
         expect(retrievedOrder).toBeDefined();
         expect(retrievedOrder?.id).toBe(guestOrderId);
         expect(retrievedOrder?.customer.email).toBe(guestEmail);
         expect(retrievedOrder?.customer.id).toBe('ANONYMOUS');
-        
+
         // Try to get all customer orders and verify our order is in the list
         console.log('Getting all customer orders...');
         const customerOrders = await orderApi.getCustomerOrders(10, 0);
         expect(customerOrders).toBeDefined();
         expect(Array.isArray(customerOrders)).toBe(true);
-        
+
         // Find our created order in the list
-        const foundOrder = customerOrders.find(order => order.id === guestOrderId);
+        const foundOrder = customerOrders.find((order) => order.id === guestOrderId);
         expect(foundOrder).toBeDefined();
       } catch (error) {
         console.error('Error in guest checkout test:', error);

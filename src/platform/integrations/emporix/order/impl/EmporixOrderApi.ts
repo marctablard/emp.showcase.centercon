@@ -1,9 +1,9 @@
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import type { EmporixConfig } from '../../config';
+import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
-import type OrderApi from '../OrderApi';
+import type { EmporixConfig } from '../../config';
 import { CreateOrderRequest, EmporixOrder, OrderCreationResponse, UpdateOrderRequest } from '../../model/order';
+import type OrderApi from '../OrderApi';
 
 // Customer-managed endpoints use '/orders' while tenant-managed endpoints use '/salesorders'
 
@@ -48,7 +48,7 @@ class EmporixOrderApi implements OrderApi {
 
     return await response.json();
   }
-  
+
   /**
    * Create a new order from a cart (customer-managed endpoint)
    * @param createOrderRequest Order creation request
@@ -98,7 +98,7 @@ class EmporixOrderApi implements OrderApi {
 
     return await response.json();
   }
-  
+
   /**
    * Get customer order by ID (customer-managed endpoint)
    * @param orderId Order ID
@@ -132,25 +132,25 @@ class EmporixOrderApi implements OrderApi {
    */
   async getOrders(pageSize?: number, pageNumber?: number, sort?: string, query?: string): Promise<EmporixOrder[]> {
     const queryParams = new URLSearchParams();
-    
+
     if (pageSize !== undefined) {
       queryParams.append('pageSize', pageSize.toString());
     }
-    
+
     if (pageNumber !== undefined) {
       queryParams.append('pageNumber', pageNumber.toString());
     }
-    
+
     if (sort) {
       queryParams.append('sort', sort);
     }
-    
+
     if (query) {
       queryParams.append('q', query);
     }
 
     const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
-    
+
     const response = await this.apiClient.authenticatedFetch(
       `/order-v2/${this.config.tenant}/salesorders${queryString}`,
       { method: 'GET' },
@@ -164,7 +164,7 @@ class EmporixOrderApi implements OrderApi {
 
     return await response.json();
   }
-  
+
   /**
    * Get customer orders with optional filtering (customer-managed endpoint)
    * @param pageSize Optional page size
@@ -173,27 +173,32 @@ class EmporixOrderApi implements OrderApi {
    * @param query Optional query filter
    * @returns Promise with array of orders
    */
-  async getCustomerOrders(pageSize?: number, pageNumber?: number, sort?: string, query?: string): Promise<EmporixOrder[]> {
+  async getCustomerOrders(
+    pageSize?: number,
+    pageNumber?: number,
+    sort?: string,
+    query?: string,
+  ): Promise<EmporixOrder[]> {
     const queryParams = new URLSearchParams();
-    
+
     if (pageSize !== undefined) {
       queryParams.append('pageSize', pageSize.toString());
     }
-    
+
     if (pageNumber !== undefined) {
       queryParams.append('pageNumber', pageNumber.toString());
     }
-    
+
     if (sort) {
       queryParams.append('sort', sort);
     }
-    
+
     if (query) {
       queryParams.append('q', query);
     }
 
     const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
-    
+
     const response = await this.apiClient.authenticatedFetch(
       `/order-v2/${this.config.tenant}/orders${queryString}`,
       { method: 'GET' },
@@ -233,7 +238,7 @@ class EmporixOrderApi implements OrderApi {
       throw new Error(`Failed to update order: ${response.statusText} ${errorDetails}`);
     }
   }
-  
+
   /**
    * Update a customer order (customer-managed endpoint)
    * @param orderId Order ID
@@ -277,24 +282,6 @@ class EmporixOrderApi implements OrderApi {
       throw new Error(`Failed to delete order: ${response.statusText} ${errorDetails}`);
     }
   }
-  
-  /**
-   * Delete a customer order (customer-managed endpoint)
-   * @param orderId Order ID
-   * @returns Promise resolving when deletion is complete
-   */
-  async deleteCustomerOrder(orderId: string): Promise<void> {
-    const response = await this.apiClient.authenticatedFetch(
-      `/order-v2/${this.config.tenant}/orders/${orderId}`,
-      { method: 'DELETE' },
-      'session',
-    );
-
-    if (!response.ok) {
-      const errorDetails = await response.text();
-      throw new Error(`Failed to delete customer order: ${response.statusText} ${errorDetails}`);
-    }
-  }
 
   /**
    * Get order status transitions (tenant-managed endpoint)
@@ -316,7 +303,7 @@ class EmporixOrderApi implements OrderApi {
     const transitions = await response.json();
     return transitions;
   }
-  
+
   /**
    * Get customer order status transitions (customer-managed endpoint)
    * @param orderId Order ID

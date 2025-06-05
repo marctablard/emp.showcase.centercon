@@ -1,11 +1,11 @@
-import { EmporixOrder, CreateOrderRequest, OrderCreationResponse, UpdateOrderRequest } from '../model/order';
+import { CreateOrderRequest, EmporixOrder, OrderCreationResponse, UpdateOrderRequest } from '../model/order';
 
 /**
  * Interface for Order API operations
  */
 export default interface OrderApi {
   // Tenant-managed endpoints (using service token)
-  
+
   /**
    * Create a new order from a cart (tenant-managed endpoint)
    * @param createOrderRequest Order creation request
@@ -44,16 +44,16 @@ export default interface OrderApi {
    * @returns Promise resolving when deletion is complete
    */
   deleteOrder(orderId: string): Promise<void>;
-  
+
   /**
    * Get order status transitions (tenant-managed endpoint)
    * @param orderId Order ID
    * @returns Promise with available status transitions
    */
   getOrderStatusTransitions(orderId: string): Promise<string[]>;
-  
+
   // Customer-managed endpoints (using session token)
-  
+
   /**
    * Create a new customer order from a cart (customer-managed endpoint)
    * @param createOrderRequest Order creation request
@@ -86,13 +86,6 @@ export default interface OrderApi {
    */
   updateCustomerOrder(orderId: string, updateRequest: UpdateOrderRequest): Promise<void>;
 
-  /**
-   * Delete a customer order (customer-managed endpoint)
-   * @param orderId Order ID
-   * @returns Promise resolving when deletion is complete
-   */
-  deleteCustomerOrder(orderId: string): Promise<void>;
-  
   /**
    * Get customer order status transitions (customer-managed endpoint)
    * @param orderId Order ID
