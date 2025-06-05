@@ -56,6 +56,7 @@ const useFormField = () => {
   return {
     id,
     name: fieldContext.name,
+    disabled: formState.disabled,
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
@@ -66,6 +67,11 @@ const useFormField = () => {
 export interface IconProps extends React.ComponentProps<typeof Slot> {
   startIcon?: LucideIcon;
   endIcon?: LucideIcon;
+}
+
+export interface LabelProps extends React.ComponentProps<typeof LabelPrimitive.Root> {
+  isOptional?: boolean;
+  hasTooltip?: boolean;
 }
 
 type FormItemContextValue = {
@@ -84,22 +90,24 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, isOptional, hasTooltip, ...props }: LabelProps) {
   const { error, formItemId } = useFormField();
 
   return (
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn('data-[error=true]:text-destructive', className)}
+      className={cn('', className)}
       htmlFor={formItemId}
+      isOptional={isOptional}
+      hasTooltip={hasTooltip}
       {...props}
     />
   );
 }
 
 function FormControl({ endIcon, startIcon, ...props }: IconProps) {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+  const { error, formItemId, formDescriptionId, formMessageId, isTouched, isDirty } = useFormField();
   const StartIcon = startIcon;
   const EndIcon = endIcon;
 
@@ -111,7 +119,18 @@ function FormControl({ endIcon, startIcon, ...props }: IconProps) {
       aria-invalid={!!error}
       {...props}
     >
-      <div className={cn('w-full relative text-gray-900', error && 'text-red-500')}>
+      <div
+        className={cn(
+          'w-full relative text-neutral-900 border border-neutral-200 rounded-sm',
+          'transition duration-150 ease-in-out hover:border-primary-500 hover:text-primary-700 hover:bg-white',
+          error && 'text-warning-500 border-warning-500',
+          error && 'hover:border-warning-500 hover:text-warning-500',
+          isTouched && !error && 'text-success-500 border-success-500',
+          isDirty && !error && 'bg-success-100',
+          isDirty && error && 'bg-warning-100',
+          isDirty && error && 'hover:bg-warning-100',
+        )}
+      >
         {StartIcon && (
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
             <StartIcon size={20} />
@@ -135,7 +154,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn('text-muted-foreground text-sm', className)}
+      className={cn('text-muted-foreground text-xs', className)}
       {...props}
     />
   );

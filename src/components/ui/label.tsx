@@ -6,12 +6,14 @@ import { Info, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 
-export interface LabelProps extends React.ComponentProps<'label'> {
+export interface LabelProps extends React.ComponentProps<typeof LabelPrimitive.Root> {
   isOptional?: boolean;
+  hasTooltip?: boolean;
 }
-
-const Label = React.forwardRef<HTMLInputElement, LabelProps>(({ className, isOptional, ...props }, ref) => {
+function Label({ className, isOptional, hasTooltip, ...props }: LabelProps) {
   const IsOptional = isOptional;
+  const HasTooltip = hasTooltip;
+
   return (
     <LabelPrimitive.Root
       data-slot="label"
@@ -22,18 +24,19 @@ const Label = React.forwardRef<HTMLInputElement, LabelProps>(({ className, isOpt
       {...props}
     >
       <div>{props.children}</div>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Info className="text-indigo-500" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Test</p>
-        </TooltipContent>
-      </Tooltip>
+      {HasTooltip && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Info className="text-indigo-500" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Test</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
       {IsOptional && <p className="text-xs font-normal text-gray-500">(optional)</p>}
     </LabelPrimitive.Root>
   );
-});
+}
 
 export { Label };

@@ -1,10 +1,7 @@
 import { ISbStoriesParams, StoryblokClient, StoryblokStory } from '@storyblok/react/rsc';
-import { User } from 'lucide-react';
-import { Eye } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { getStoryblokApi } from '@/lib/storyblok';
-import FormFieldsSytelguideComponent from '../styleguide/ui/form-fields';
+import ButtonStyleGuide from '../styleguide/ui/button';
+import FormFieldStyleGuide from '../styleguide/ui/form-fields';
 
 /**
  * Fetch data from Storyblok
@@ -44,8 +41,8 @@ export default async function StoryblokPage() {
           </ul>
         </div>
       )}
-
-      <FormFieldsSytelguideComponent />
+      <ButtonStyleGuide />
+      <FormFieldStyleGuide />
     </div>
   );
 }

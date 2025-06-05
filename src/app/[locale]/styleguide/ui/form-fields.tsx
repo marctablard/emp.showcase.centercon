@@ -3,39 +3,51 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, User } from 'lucide-react';
+import { text } from 'stream/consumers';
 import z from 'zod';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
-const FormSchema = z.object({
-  noIcon: z.string().min(2, {
-    message: 'Username must be at least 2 characters.',
-  }),
-  leftIcon: z.string().min(2, {
-    message: 'Username must be at least 2 characters.',
-  }),
-  rightIcon: z.string().min(2, {
-    message: 'Username must be at least 2 characters.',
-  }),
-  bothIcon: z.string().min(2, {
-    message: 'Username must be at least 2 characters.',
-  }),
-  disabled: z.string(),
+const FormSchemaInput = z.object({
+  noIcon: z.string().optional(),
+  leftIcon: z.string().optional(),
+  rightIcon: z.string().optional(),
+  bothIcon: z.string().optional(),
+  disabled: z.string().optional(),
+});
+
+const FormSchemaValidate = z.object({
+  input: z.string().min(3, { message: 'Error' }),
+  textarea: z.string().optional(),
+  select: z.string().optional(),
 });
 
 export default function FormFieldsSytelguideComponent() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<z.infer<typeof FormSchemaInput>>({
+    resolver: zodResolver(FormSchemaInput),
     defaultValues: {
       noIcon: '',
       leftIcon: '',
       rightIcon: '',
       bothIcon: '',
+      disabled: '',
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  const formVal = useForm<z.infer<typeof FormSchemaValidate>>({
+    resolver: zodResolver(FormSchemaValidate),
+    defaultValues: {
+      input: '',
+      textarea: '',
+      select: '',
+    },
+    mode: 'all',
+  });
+
+  function onSubmit(data: z.infer<typeof FormSchemaValidate>) {
     console.log(JSON.stringify(data, null, 2));
   }
 
@@ -45,83 +57,112 @@ export default function FormFieldsSytelguideComponent() {
         <h4>Label</h4>
         <div className="flex gap-10">
           <div className="flex flex-col gap-2">
-            <Label>Label</Label>
+            <Label hasTooltip>Label</Label>
           </div>
           <div className="flex flex-col gap-2">
-            <Label isOptional>Label</Label>
+            <Label isOptional hasTooltip>
+              Label
+            </Label>
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-4">
-        <h4>Default Input Field</h4>
-        <div className="flex gap-10">
-          <div className="flex flex-col gap-2">
-            <h5>No Icon</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="noIcon"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input placeholder="Username" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
+        <h4>Default Input Fields</h4>
+        <Form {...form}>
+          <div className="flex gap-10">
+            <div className="flex flex-col gap-2">
+              <h5>No Icon</h5>
+              <FormField
+                control={form.control}
+                name="noIcon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Username" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h5>Icon right</h5>
+              <FormField
+                control={form.control}
+                name="rightIcon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl endIcon={Eye}>
+                      <Input placeholder="Username" spaceEnd {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h5>Icon left</h5>
+              <FormField
+                control={form.control}
+                name="leftIcon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl startIcon={User}>
+                      <Input placeholder="Username" spaceStart {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h5>Icon left and right</h5>
+              <FormField
+                control={form.control}
+                name="bothIcon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl startIcon={User} endIcon={Eye}>
+                      <Input placeholder="Username" spaceStart spaceEnd {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h5>Disabled</h5>
+              <FormField
+                control={form.control}
+                name="disabled"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl startIcon={User} endIcon={Eye}>
+                      <Input placeholder="Username" spaceStart spaceEnd disabled {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <h5>Icon right</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+        </Form>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        <h4>Live Exmaple Input Fields</h4>
+        <div className="flex">
+          <Form {...formVal}>
+            <form onSubmit={formVal.handleSubmit(onSubmit)} className="flex flex-col gap-10">
+              <div className="flex flex-col gap-2">
                 <FormField
-                  control={form.control}
-                  name="rightIcon"
+                  control={formVal.control}
+                  name="input"
                   render={({ field }) => (
                     <FormItem>
-                      <FormControl endIcon={Eye}>
-                        <Input placeholder="Username" spaceEnd {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h5>Icon left</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="leftIcon"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl startIcon={User}>
-                        <Input placeholder="Username" spaceStart {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h5>Icon left and right</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="bothIcon"
-                  render={({ field }) => (
-                    <FormItem>
+                      <FormLabel>Input Field</FormLabel>
+                      <FormDescription>Username must be at least 3 characters.</FormDescription>
                       <FormControl startIcon={User} endIcon={Eye}>
                         <Input placeholder="Username" spaceStart spaceEnd {...field} />
                       </FormControl>
@@ -129,90 +170,50 @@ export default function FormFieldsSytelguideComponent() {
                     </FormItem>
                   )}
                 />
-              </form>
-            </Form>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-col gap-4">
-        <h4>Diabled Input Field</h4>
-        <div className="flex gap-10">
-          <div className="flex flex-col gap-2">
-            <h5>No Icon</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              </div>
+              <div className="flex flex-col gap-2">
                 <FormField
-                  control={form.control}
-                  name="disabled"
+                  control={formVal.control}
+                  name="textarea"
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel>Textarea</FormLabel>
+                      <FormDescription>Hint Text</FormDescription>
                       <FormControl>
-                        <Input placeholder="Username" disabled {...field} />
+                        <Textarea placeholder="Placeholder" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </form>
-            </Form>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h5>Icon right</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              </div>
+              <div className="flex flex-col gap-2">
                 <FormField
-                  control={form.control}
-                  name="disabled"
+                  control={formVal.control}
+                  name="select"
                   render={({ field }) => (
                     <FormItem>
-                      <FormControl endIcon={Eye}>
-                        <Input placeholder="Username" spaceEnd disabled {...field} />
-                      </FormControl>
+                      <FormLabel>Select Field</FormLabel>
+                      <FormDescription>Username must be at least 3 characters.</FormDescription>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl startIcon={User} endIcon={Eye}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a verified email to display" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="m@example.com">m@example.com</SelectItem>
+                          <SelectItem value="m@google.com">m@google.com</SelectItem>
+                          <SelectItem value="m@support.com">m@support.com</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </form>
-            </Form>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h5>Icon left</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="disabled"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl startIcon={User}>
-                        <Input placeholder="Username" spaceStart disabled {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h5>Icon left and right</h5>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="disabled"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl startIcon={User} endIcon={Eye}>
-                        <Input placeholder="Username" spaceStart spaceEnd disabled {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-          </div>
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
     </div>
