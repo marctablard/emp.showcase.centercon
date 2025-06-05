@@ -1,14 +1,14 @@
-import { notFound } from "next/navigation";
+import { notFound } from 'next/navigation';
+import ButtonStyleGuide from '@/app/[locale]/styleguide/ui/button';
 
 export default function StyleGuide() {
   if (!process.env.NEXT_PUBLIC_STYLEGUIDE_PAGE) {
     notFound();
   }
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <h1>Hallo Styleguide</h1>
-      </main>
-    </div>
+    <main className="max-w-7xl mx-auto px-4 grid gap-x-4 lg:px-9 md:gap-x-6">
+      <h1>Hallo Styleguide</h1>
+      <ButtonStyleGuide />
+    </main>
   );
 }

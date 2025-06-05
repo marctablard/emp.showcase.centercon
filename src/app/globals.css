@@ -5,6 +5,7 @@
 
 @theme {
   --font-inter: Inter, sans-serif;
+  --container-7xl: 120rem;
 }
 
 @theme inline {
