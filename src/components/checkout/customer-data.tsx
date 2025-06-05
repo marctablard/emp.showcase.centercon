@@ -70,7 +70,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
   return (
     <FormProvider {...form}>
       <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-800">{t('contactInformation')}</h2>
+        <h2 className="text-xl font-semibold text-neutral-800">{t('contactInformation')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -143,7 +143,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
           <div className="mt-4 text-right">
             <button
               type="button"
-              className="text-indigo-600 hover:text-indigo-800"
+              className="text-primary-600 hover:text-primary-800"
               onClick={() => {
                 /* Add edit functionality here */
               }}

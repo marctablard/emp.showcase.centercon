@@ -101,7 +101,7 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
     <div className="space-y-8 bg-white p-6 rounded-lg shadow-sm">
       {/* Shipping Address */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Shipping Address</h2>
+        <h2 className="text-xl font-semibold text-neutral-800 mb-4">Shipping Address</h2>
         <AddressForm initialData={shippingAddress} onDataChange={handleShippingAddressChange} isReadOnly={isReadOnly} />
       </div>
 
@@ -113,9 +113,9 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
             id="sameAsShipping"
             checked={sameAsShipping}
             onChange={handleSameAddressToggle}
-            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
           />
-          <label htmlFor="sameAsShipping" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor="sameAsShipping" className="ml-2 block text-sm text-neutral-700">
             Billing address is the same as shipping address
           </label>
         </div>
@@ -124,7 +124,7 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
       {/* Billing Address (only shown if not same as shipping) */}
       {!sameAsShipping && (
         <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Billing Address</h2>
+          <h2 className="text-xl font-semibold text-neutral-800 mb-4">Billing Address</h2>
           <AddressForm initialData={billingAddress} onDataChange={handleBillingAddressChange} isReadOnly={isReadOnly} />
         </div>
       )}
@@ -132,8 +132,8 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
       {/* Read-only mode: Show summary of both addresses */}
       {isReadOnly && !sameAsShipping && (
         <div className="mt-4 border-t pt-4">
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Billing Address</h3>
-          <div className="text-gray-600">
+          <h3 className="text-lg font-medium text-neutral-800 mb-2">Billing Address</h3>
+          <div className="text-neutral-600">
             <p>{billingAddress.contactName}</p>
             <p>
               {billingAddress.street} {billingAddress.streetNumber}

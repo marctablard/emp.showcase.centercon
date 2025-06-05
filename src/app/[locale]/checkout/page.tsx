@@ -16,7 +16,7 @@ export default async function CheckoutPage({ params }: { params: Promise<Checkou
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8">
+    <main className="min-h-screen bg-neutral-50 py-8">
       <Checkout />
     </main>
   );

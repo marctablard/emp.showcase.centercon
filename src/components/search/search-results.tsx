@@ -100,12 +100,12 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
             {products.length === 0 ? (
               <div className="text-center py-12">
                 <h2 className="text-xl font-medium mb-2">{t('searchResults.noProductsFound')}</h2>
-                <p className="text-gray-500">{t('searchResults.tryAdjusting')}</p>
+                <p className="text-neutral-500">{t('searchResults.tryAdjusting')}</p>
               </div>
             ) : (
               <>
                 <div className="mb-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-neutral-500">
                     {t('searchResults.showing', {
                       start: currentPage * pageSize + 1,
                       end: currentPage * pageSize + products.length,
