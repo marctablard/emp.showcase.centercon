@@ -19,7 +19,7 @@ export default async function Header() {
       <div className="max-w-7xl mx-auto px-12">
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="font-bold text-xl text-gray-800">
+            <Link href="/" className="font-bold text-xl text-neutral-800">
               Emporix Showcase
             </Link>
           </div>

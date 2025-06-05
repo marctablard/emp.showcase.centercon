@@ -93,7 +93,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
   return (
     <FormProvider {...form}>
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('shippingMethod')}</h2>
+        <h2 className="text-lg font-semibold text-neutral-900 mb-4">{t('shippingMethod')}</h2>
         <FormField
           control={form.control}
           name="shippingMethod"
@@ -111,8 +111,8 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                       <div
                         className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${
                           shippingMethod?.methodId === option.id
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-indigo-300'
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-neutral-200 hover:border-primary-300'
                         } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
                       >
                         <FormControl>
@@ -123,16 +123,16 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                             <div className="flex items-center space-x-3">
                               <div
                                 className={`flex items-center justify-center ${
-                                  shippingMethod?.methodId === option.id ? 'border-indigo-600' : 'border-gray-300'
+                                  shippingMethod?.methodId === option.id ? 'border-primary-600' : 'border-neutral-300'
                                 }`}
                               >
                                 {shippingMethod?.methodId === option.id && (
-                                  <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
+                                  <div className="w-3 h-3 rounded-full bg-primary-600"></div>
                                 )}
                               </div>
                               <div>
-                                <h3 className="font-medium text-gray-900">{option.name}</h3>
-                                <p className="text-sm text-gray-500">{option.description}</p>
+                                <h3 className="font-medium text-neutral-900">{option.name}</h3>
+                                <p className="text-sm text-neutral-500">{option.description}</p>
                               </div>
                             </div>
                             <div className="text-right">
@@ -144,7 +144,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                                       currency: 'USD',
                                     }).format(option.price)}
                               </span>
-                              <p className="text-xs text-gray-500">{option.estimatedDelivery}</p>
+                              <p className="text-xs text-neutral-500">{option.estimatedDelivery}</p>
                             </div>
                           </div>
                         </FormLabel>

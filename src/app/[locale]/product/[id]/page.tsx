@@ -49,8 +49,8 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
               {product.images && product.images.length > 0 ? (
                 <ProductCarousel images={product.images} />
               ) : (
-                <div className="bg-gray-200 h-96 flex items-center justify-center">
-                  <span className="text-gray-500">{t('noImage')}</span>
+                <div className="bg-neutral-200 h-96 flex items-center justify-center">
+                  <span className="text-neutral-500">{t('noImage')}</span>
                 </div>
               )}
             </div>
@@ -58,7 +58,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
             {/* Product Details */}
             <div className="p-8">
               <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">In Stock</Badge>
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900">{l10n(product.name)}</h1>
+              <h1 className="text-4xl font-bold tracking-tight text-neutral-900">{l10n(product.name)}</h1>
 
               <ProductPriceComponent price={110.45} tiers={priceTiers} />
 
@@ -67,7 +67,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
               </div>
 
               <div className="mt-6">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-neutral-500">
                   <p>SKU: {product.id}</p>
                 </div>
               </div>
@@ -116,7 +116,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-sm text-gray-700">
+            <div className="text-sm text-neutral-700">
               <span className="font-medium">Single Solar, Twin Solar, 5m Connector</span>
             </div>
           </div>
