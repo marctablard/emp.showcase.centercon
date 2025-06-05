@@ -1,13 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { Form } from '../ui/form';
 import Addresses from './checkout-addresses';
 import ContactData from './customer-data';
 import OrderSummary from './order-summary';
@@ -28,8 +24,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   const t = useTranslations('Checkout');
 
   // We don't need local state anymore as we're using the checkout store via useCheckout
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors] = useState<Record<string, string>>({});
+  const [isSubmitting] = useState(false);
 
   // Handle successful checkout
   useEffect(() => {

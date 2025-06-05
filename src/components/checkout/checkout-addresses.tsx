@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { toast } from 'sonner';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import AddressForm from './address-form';
