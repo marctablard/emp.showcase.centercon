@@ -17,7 +17,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
   return (
     <Link href={`/product/${product.id}`}>
       <Card>
-        <div className="relative aspect-square bg-gray-100 rounded-sm no-underline">
+        <div className="relative aspect-square bg-neutral-100 rounded-sm no-underline">
           {product.primaryImage ? (
             <Image
               src={product.primaryImage.url}
@@ -27,8 +27,8 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
               className="object-contain object-center"
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-gray-200">
-              <span className="text-gray-400">No image</span>
+            <div className="flex items-center justify-center h-full bg-neutral-200">
+              <span className="text-neutral-400">No image</span>
             </div>
           )}
         </div>
@@ -41,7 +41,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
           </p>
         </CardContent>
         <CardFooter className="flex-shrink-0 pt-4">
-          <p className="text-sm text-gray-500 line-clamp-3">{l10n(product.description)}</p>
+          <p className="text-sm text-neutral-500 line-clamp-3">{l10n(product.description)}</p>
         </CardFooter>
       </Card>
     </Link>
@@ -51,19 +51,19 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
 export function ProductTileSkeleton() {
   return (
     <Card className="overflow-hidden h-full w-full flex flex-col">
-      <div className="relative aspect-square bg-gray-100">
-        <div className="animate-pulse bg-gray-200 h-full w-full" />
+      <div className="relative aspect-square bg-neutral-100">
+        <div className="animate-pulse bg-neutral-200 h-full w-full" />
       </div>
       <CardHeader className="flex-shrink-0">
-        <div className="animate-pulse bg-gray-200 h-6 w-3/4 mb-2" />
+        <div className="animate-pulse bg-neutral-200 h-6 w-3/4 mb-2" />
       </CardHeader>
       <CardContent className="flex-grow">
-        <div className="animate-pulse bg-gray-200 h-4 w-full mb-2" />
-        <div className="animate-pulse bg-gray-200 h-4 w-3/4 mb-2" />
-        <div className="animate-pulse bg-gray-200 h-4 w-1/2" />
+        <div className="animate-pulse bg-neutral-200 h-4 w-full mb-2" />
+        <div className="animate-pulse bg-neutral-200 h-4 w-3/4 mb-2" />
+        <div className="animate-pulse bg-neutral-200 h-4 w-1/2" />
       </CardContent>
       <CardFooter className="flex-shrink-0 border-t pt-4">
-        <div className="animate-pulse bg-gray-200 h-5 w-1/4" />
+        <div className="animate-pulse bg-neutral-200 h-5 w-1/4" />
       </CardFooter>
     </Card>
   );

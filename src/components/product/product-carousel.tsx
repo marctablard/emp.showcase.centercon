@@ -43,8 +43,8 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
 
   if (!images || images.length === 0) {
     return (
-      <div className="bg-gray-200 h-96 flex items-center justify-center">
-        <span className="text-gray-500"></span>
+      <div className="bg-neutral-200 h-96 flex items-center justify-center">
+        <span className="text-neutral-500"></span>
       </div>
     );
   }
