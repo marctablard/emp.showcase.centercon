@@ -47,7 +47,7 @@ const Category = ({ blok }: CategoryProps) => {
       <div className="p-4">
         {blok.title && <h3 className="text-xl font-bold mb-2">{blok.title}</h3>}
 
-        {blok.description && <p className="text-gray-600 mb-4 line-clamp-2">{blok.description}</p>}
+        {blok.description && <p className="text-neutral-600 mb-4 line-clamp-2">{blok.description}</p>}
 
         <Link href={categoryUrl} className="text-primary hover:underline font-medium">
           View Products

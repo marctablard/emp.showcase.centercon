@@ -31,7 +31,7 @@ const Article = ({ blok }: ArticleProps) => {
       <header className="mb-8">
         {blok.title && <h1 className="text-3xl font-bold mb-4">{blok.title}</h1>}
 
-        {blok.introduction && <div className="text-xl text-gray-600 mb-6">{blok.introduction}</div>}
+        {blok.introduction && <div className="text-xl text-neutral-600 mb-6">{blok.introduction}</div>}
       </header>
 
       {/* Video */}

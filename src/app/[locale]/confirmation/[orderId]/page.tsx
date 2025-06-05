@@ -46,7 +46,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<Con
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8">
+    <main className="min-h-screen bg-neutral-50 py-8">
       {/*
       <OrderConfirmation 
         orderId={orderId}
