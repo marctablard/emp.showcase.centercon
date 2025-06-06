@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -21,13 +21,16 @@ interface PaymentMethodProps {
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
   // Available payment methods
-  const paymentOptions = [
-    { id: 'credit-card', name: 'Credit Card', provider: 'payment-gateway', method: 'credit-card' },
-    { id: 'paypal', name: 'PayPal', provider: 'payment-gateway', method: 'paypal' },
-    { id: 'invoice', name: 'Pay by Invoice', provider: 'none', method: 'invoice' },
-  ];
+  const paymentOptions = useMemo(
+    () => [
+      { id: 'credit-card', name: 'Credit Card', provider: 'payment-gateway', method: 'credit-card' },
+      { id: 'paypal', name: 'PayPal', provider: 'payment-gateway', method: 'paypal' },
+      { id: 'invoice', name: 'Pay by Invoice', provider: 'none', method: 'invoice' },
+    ],
+    [],
+  );
 
-  const [cardDetails, setCardDetails] = useState({
+  const [cardDetails] = useState({
     cardNumber: '',
     cardHolder: '',
     expiryDate: '',
@@ -64,14 +67,12 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
         submitPaymentMethod(paymentMethodData);
       }
     });
-  }, [form]);
-
-  form.register;
+  }, [form, paymentMethod?.customAttributes, submitPaymentMethod, paymentOptions, paymentMethod?.method]);
 
   return (
     <FormProvider {...form}>
       <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-800">Payment Method</h2>
+        <h2 className="text-xl font-semibold text-neutral-800">Payment Method</h2>
         {!isReadOnly ? (
           <FormField
             control={form.control}
@@ -90,7 +91,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                               </FormControl>
                               <FormLabel
                                 htmlFor={option.id}
-                                className="w-full ml-3 block text-sm font-medium text-gray-700"
+                                className="w-full ml-3 block text-sm font-medium text-neutral-700"
                               >
                                 {' '}
                                 {option.name}
@@ -104,7 +105,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                       {paymentMethod?.method === 'credit-card' && (
                         <div className="mt-6 space-y-4 border-t pt-4">
                           <div>
-                            <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="cardNumber" className="block text-sm font-medium text-neutral-700 mb-1">
                               {t('cardNumber')}
                             </label>
                             <input
@@ -112,13 +113,13 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                               id="cardNumber"
                               name="cardNumber"
                               value={cardDetails.cardNumber}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                              className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                               placeholder="1234 5678 9012 3456"
                             />
                           </div>
 
                           <div>
-                            <label htmlFor="cardHolder" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="cardHolder" className="block text-sm font-medium text-neutral-700 mb-1">
                               {t('cardHolder')}
                             </label>
                             <input
@@ -126,14 +127,14 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                               id="cardHolder"
                               name="cardHolder"
                               value={cardDetails.cardHolder}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                              className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                               placeholder="John Doe"
                             />
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">
+                              <label htmlFor="expiryDate" className="block text-sm font-medium text-neutral-700 mb-1">
                                 {t('expiryDate')}
                               </label>
                               <input
@@ -141,13 +142,13 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                                 id="expiryDate"
                                 name="expiryDate"
                                 value={cardDetails.expiryDate}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                 placeholder="MM/YY"
                               />
                             </div>
 
                             <div>
-                              <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
+                              <label htmlFor="cvv" className="block text-sm font-medium text-neutral-700 mb-1">
                                 {t('cvv')}
                               </label>
                               <input
@@ -155,7 +156,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                                 id="cvv"
                                 name="cvv"
                                 value={cardDetails.cvv}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                                 placeholder="123"
                               />
                             </div>
@@ -166,14 +167,14 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                       {/* PayPal Form */}
                       {paymentMethod?.method === 'paypal' && (
                         <div className="mt-6 border-t pt-4">
-                          <p className="text-sm text-gray-600">{t('paypalRedirect')}</p>
+                          <p className="text-sm text-neutral-600">{t('paypalRedirect')}</p>
                         </div>
                       )}
 
                       {/* Invoice Form */}
                       {paymentMethod?.method === 'invoice' && (
                         <div className="mt-6 border-t pt-4">
-                          <p className="text-sm text-gray-600">{t('invoiceTerms')}</p>
+                          <p className="text-sm text-neutral-600">{t('invoiceTerms')}</p>
                         </div>
                       )}
                     </div>
@@ -185,14 +186,14 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
           />
         ) : (
           // Read-only view
-          <div className="text-gray-700">
+          <div className="text-neutral-700">
             <p className="font-medium">
               {paymentOptions.find((option) => option.method === paymentMethod?.method)?.name ||
                 'Selected payment method'}
             </p>
 
             {paymentMethod?.method === 'credit-card' && paymentMethod?.customAttributes?.cardNumber && (
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-neutral-600 mt-1">
                 Card ending in {paymentMethod.customAttributes.cardNumber.slice(-4)}
               </p>
             )}

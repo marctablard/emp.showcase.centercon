@@ -4,7 +4,87 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-inter: Inter, sans-serif;
+  /* fonts */
+  --font-body: Ubuntu, sans-serif;
+  --font-sans: Open-Sans, sans-serif;
+
+  /* colors */
+  --color-primary-50: oklch(0.9536 0.0172 248.01);
+  --color-primary-100: oklch(0.9092 0.0344 245.48);
+  --color-primary-200: oklch(0.8194 0.071 246.79);
+  --color-primary-300: oklch(0.7292 0.1076 248.34);
+  --color-primary-400: oklch(0.6459 0.1431 250.1);
+  --color-primary-500: oklch(0.5701 0.1725 253.49);
+  --color-primary-600: oklch(0.4856 0.1451 253.36);
+  --color-primary-700: oklch(0.3965 0.1149 252.87);
+  --color-primary-800: oklch(0.3055 0.0828 251.46);
+  --color-primary-900: oklch(0.2034 0.0473 247.65);
+
+  --color-secondary-100: oklch(0.9744 0.0287 159.96);
+  --color-secondary-200: oklch(0.9502 0.0571 159.18);
+  --color-secondary-300: oklch(0.9256 0.0825 159.32);
+  --color-secondary-400: oklch(0.9045 0.1093 158.08);
+  --color-secondary-600: oklch(0.8852 0.1348 156.84);
+  --color-secondary-700: oklch(0.6058 0.0883 157.43);
+  --color-secondary-800: oklch(0.4562 0.0654 156.66);
+  --color-secondary-900: oklch(0.2902 0.037 157.2);
+
+  --color-tertiary-100: oklch(0.958 0.0213 245.85);
+  --color-tertiary-200: oklch(0.9138 0.044 247.26);
+  --color-tertiary-300: oklch(0.8729 0.0659 247.21);
+  --color-tertiary-400: oklch(0.8301 0.0891 247.96);
+  --color-tertiary-500: oklch(0.7912 0.111 248.26);
+  --color-tertiary-600: oklch(0.6698 0.0931 248.44);
+  --color-tertiary-700: oklch(0.5455 0.073 248.03);
+  --color-tertiary-800: oklch(0.4104 0.0528 248.27);
+  --color-tertiary-900: oklch(0.2665 0.0288 246.94);
+
+  --color-success-100: oklch(0.9059 0.0404 149.77);
+  --color-success-200: oklch(0.8128 0.0809 149.55);
+  --color-success-300: oklch(0.7216 0.1217 148.15);
+  --color-success-400: oklch(0.6353 0.1564 146.6);
+  --color-success-500: oklch(0.5569 0.176 144.2);
+  --color-success-600: oklch(0.4747 0.1482 144.42);
+  --color-success-700: oklch(0.3887 0.1195 144.63);
+  --color-success-800: oklch(0.2978 0.088 145.41);
+  --color-success-900: oklch(0.199 0.0544 146.95);
+
+  --color-warning-100: oklch(0.917 0.0343 53.05);
+  --color-warning-200: oklch(0.8366 0.0716 51.9);
+  --color-warning-300: oklch(0.7564 0.1097 50.21);
+  --color-warning-400: oklch(0.6848 0.147 48.23);
+  --color-warning-500: oklch(0.6209 0.1766 43.59);
+  --color-warning-600: oklch(0.5283 0.1485 43.85);
+  --color-warning-700: oklch(0.4298 0.1178 44.49);
+  --color-warning-800: oklch(0.3289 0.0852 46.38);
+  --color-warning-900: oklch(0.2162 0.049 51.39);
+
+  --color-danger-100: oklch(0.8841 0.0394 17.92);
+  --color-danger-200: oklch(0.7683 0.0852 19.2);
+  --color-danger-300: oklch(0.6626 0.1345 21.36);
+  --color-danger-400: oklch(0.5703 0.18 24.92);
+  --color-danger-500: oklch(0.5093 0.2032 28.63);
+  --color-danger-600: oklch(0.4331 0.1717 28.49);
+  --color-danger-700: oklch(0.3539 0.138 28.16);
+  --color-danger-800: oklch(0.2672 0.1017 27.7);
+  --color-danger-900: oklch(0.1765 0.0615 26.24);
+
+  --color-neutral-50: oklch(0.9647 0.0027 286.35);
+  --color-neutral-100: oklch(0.9288 0.004 286.32);
+  --color-neutral-200: oklch(0.8586 0.0083 278.62);
+  --color-neutral-300: oklch(0.7837 0.0129 276.05);
+  --color-neutral-400: oklch(0.7104 0.0177 274.72);
+  --color-neutral-500: oklch(0.6326 0.0227 276.74);
+  --color-neutral-600: oklch(0.5394 0.0175 273.64);
+  --color-neutral-700: oklch(0.44 0.0149 275.8);
+  --color-neutral-800: oklch(0.3381 0.0105 278.28);
+  --color-neutral-900: oklch(0.2234 0.0058 285.92);
+
+  /* spacing */
+  --spacing: 0.25rem;
+
+  /* radius */
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -48,14 +128,13 @@
 }
 
 :root {
-  --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #0f172a;
+  --primary: var(--color-primary-500);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -118,8 +197,9 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50 font-inter;
+    @apply border-border outline-ring/50 font-body;
   }
+
   body {
     @apply bg-background text-foreground;
   }

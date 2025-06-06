@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FormProvider, UseFormReturn, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import z from 'zod';
