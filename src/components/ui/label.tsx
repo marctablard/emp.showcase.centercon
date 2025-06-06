@@ -27,10 +27,13 @@ function Label({ className, isOptional, hasTooltip, ...props }: LabelProps) {
       {HasTooltip && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info className="text-indigo-500" />
+            <Info className="text-primary-500" />
           </TooltipTrigger>
           <TooltipContent>
-            <p>Test</p>
+            <p>
+              Message - Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
+              ut labore et dolore magna aliquyam erat, sed diam voluptua.
+            </p>
           </TooltipContent>
         </Tooltip>
       )}

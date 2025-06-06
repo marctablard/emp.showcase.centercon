@@ -41,7 +41,7 @@ export default async function StoryblokPage() {
           </ul>
         </div>
       )}
-      <ButtonStyleGuide />
+
       <FormFieldStyleGuide />
     </div>
   );

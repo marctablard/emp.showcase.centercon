@@ -1,11 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, User } from 'lucide-react';
-import { text } from 'stream/consumers';
 import z from 'zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormIcon,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,10 +31,15 @@ const FormSchemaInput = z.object({
 const FormSchemaValidate = z.object({
   input: z.string().min(3, { message: 'Error' }),
   textarea: z.string().optional(),
-  select: z.string().optional(),
+  select: z.string({ message: 'Error' }).email(),
+  checkboxes: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: 'You have to select at least one item.',
+  }),
 });
 
 export default function FormFieldsSytelguideComponent() {
+  const [disabled, setDisabled] = useState(false);
+
   const form = useForm<z.infer<typeof FormSchemaInput>>({
     resolver: zodResolver(FormSchemaInput),
     defaultValues: {
@@ -43,6 +57,7 @@ export default function FormFieldsSytelguideComponent() {
       input: '',
       textarea: '',
       select: '',
+      checkboxes: ['recents'],
     },
     mode: 'all',
   });
@@ -78,7 +93,7 @@ export default function FormFieldsSytelguideComponent() {
                 name="noIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl>
+                    <FormControl validate>
                       <Input placeholder="Username" {...field} />
                     </FormControl>
                     <FormMessage />
@@ -93,8 +108,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="rightIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl endIcon={Eye}>
-                      <Input placeholder="Username" spaceEnd {...field} />
+                    <FormControl validate endIcon={Eye}>
+                      <Input placeholder="Username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -108,8 +123,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="leftIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl startIcon={User}>
-                      <Input placeholder="Username" spaceStart {...field} />
+                    <FormControl validate startIcon={User}>
+                      <Input placeholder="Username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,8 +138,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="bothIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl startIcon={User} endIcon={Eye}>
-                      <Input placeholder="Username" spaceStart spaceEnd {...field} />
+                    <FormControl validate startIcon={User} endIcon={Eye}>
+                      <Input placeholder="Username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,8 +153,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="disabled"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl startIcon={User} endIcon={Eye}>
-                      <Input placeholder="Username" spaceStart spaceEnd disabled {...field} />
+                    <FormControl validate startIcon={User} endIcon={Eye}>
+                      <Input placeholder="Username" disabled {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,7 +166,7 @@ export default function FormFieldsSytelguideComponent() {
       </div>
 
       <div className="flex flex-col gap-6">
-        <h4>Live Exmaple Input Fields</h4>
+        <h4>Validate Input Fields</h4>
         <div className="flex">
           <Form {...formVal}>
             <form onSubmit={formVal.handleSubmit(onSubmit)} className="flex flex-col gap-10">
@@ -163,8 +178,8 @@ export default function FormFieldsSytelguideComponent() {
                     <FormItem>
                       <FormLabel>Input Field</FormLabel>
                       <FormDescription>Username must be at least 3 characters.</FormDescription>
-                      <FormControl startIcon={User} endIcon={Eye}>
-                        <Input placeholder="Username" spaceStart spaceEnd {...field} />
+                      <FormControl validate startIcon={User} endIcon={Eye}>
+                        <Input placeholder="Username" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -196,15 +211,18 @@ export default function FormFieldsSytelguideComponent() {
                       <FormLabel>Select Field</FormLabel>
                       <FormDescription>Username must be at least 3 characters.</FormDescription>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl startIcon={User} endIcon={Eye}>
+                        <FormControl isDropdown>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a verified email to display" />
+                            <SelectValue placeholder="Placeholder" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="m@example.com">m@example.com</SelectItem>
-                          <SelectItem value="m@google.com">m@google.com</SelectItem>
-                          <SelectItem value="m@support.com">m@support.com</SelectItem>
+                          <FormIcon startIcon={User}>
+                            {' '}
+                            <SelectItem value="mexample.com">No email</SelectItem>
+                          </FormIcon>
+                          <SelectItem value="m@google.com">m@email.com</SelectItem>
+                          <SelectItem value="m@support.com">m@email.com</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -212,6 +230,38 @@ export default function FormFieldsSytelguideComponent() {
                   )}
                 />
               </div>
+              {/*   <div className="flex flex-col gap-2">
+                                <FormField
+                                    control={formVal.control}
+                                    name="checkboxes"
+                                    render={() => (
+                                        <FormItem>
+                                            <FormLabel>Checkbox</FormLabel>
+                                            <FormDescription>Select the items you want</FormDescription>
+
+                                            <FormField
+                                                key="house"
+                                                control={form.control}
+                                                name="checkboxes"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem
+                                                            key="house"
+                                                            className="flex flex-row items-center gap-2"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox checked />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )
+                                                }
+                                            }
+                                                        />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div> */}
             </form>
           </Form>
         </div>
