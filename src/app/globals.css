@@ -5,8 +5,28 @@
 
 @theme {
   /* fonts */
-  --font-body: Ubuntu, sans-serif;
-  --font-sans: Open-Sans, sans-serif;
+  --font-headlines: Ubuntu, sans-serif;
+  --font-body: Open-Sans, sans-serif;
+  --text-8xl: 3rem; /* 48px */
+  --text-8xl--line-height: 1.08;
+  --text-7xl: 2.75rem; /* 44px */
+  --text-7xl--line-height: 1.09;
+  --text-6xl: 2.25rem; /* 36px */
+  --text-6xl--line-height: 1.11;
+  --text-5xl: 2rem; /* 32px */
+  --text-5xl--line-height: 1.12;
+  --text-4xl: 1.75rem; /* 28px */
+  --text-4xl--line-height: 1.28;
+  --text-3xl: 1.25rem; /* 20px */
+  --text-3xl--line-height: 1.2;
+  --text-2xl: 1rem; /* 16px */
+  --text-2xl--line-height: 1.25;
+  --text-xl: 1.25rem; /* 20px */
+  --text-xl--line-height: 1.6;
+  --text-base: 1rem; /* 16px */
+  --text-base--line-height: 1.5;
+  --text-sm: 0.75rem; /* 12px */
+  --text-sm--line-height: 1.66;
 
   /* colors */
   --color-primary-50: oklch(0.9536 0.0172 248.01);
@@ -135,7 +155,6 @@
 }
 
 :root {
-  /*color*/
   --background: oklch(1 0 0);
   --foreground: var(--color-neutral-800);
   --headlines: var(--color-neutral-900);
@@ -171,21 +190,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  /* fonts */
-  --text-8xl: 3rem; /* 48px */
-  --text-8xl--line-height: 1.08;
-  --text-7xl: 2.75rem; /* 44px */
-  --text-7xl--line-height: 1.09;
-  --text-6xl: 2.25rem; /* 36px */
-  --text-6xl--line-height: 1.11;
-  --text-5xl: 2rem; /* 32px */
-  --text-5xl--line-height: 1.12;
-  --text-4xl: 1.75rem; /* 28px */
-  --text-4xl--line-height: 1.28;
-  --text-3xl: 1.25rem; /* 20px */
-  --text-3xl--line-height: 1.2;
-  --text-2xl: 1rem; /* 16px */
-  --text-2xl--line-height: 1.25;
 }
 
 .dark {

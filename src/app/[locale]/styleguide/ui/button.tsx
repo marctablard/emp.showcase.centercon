@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 export default function ButtonStyleGuide() {
   return (
     <div className="py-12">
-      <h3 className="mb-4">Buttons</h3>
+      <h4 className="text-3xl/5 md:text-4xl font-bold text-headlines font-headlines mb-3">Buttons</h4>
       <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr] gap-6 mb-2">
         <div className="flex flex-wrap gap-3 flex-col items-start">
           <Button>

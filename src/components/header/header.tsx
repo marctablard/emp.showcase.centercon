@@ -42,7 +42,7 @@ export default async function Header() {
             <div className="hidden md:flex items-center gap-2">
               <HeaderAccount />
             </div>
-            <Button className="md:hidden flex py-4 bg-white text-primary" size="icon">
+            <Button className="md:hidden flex py-4" variant="primary" size="icon">
               <Menu />
             </Button>
           </div>
