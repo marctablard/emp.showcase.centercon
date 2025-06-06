@@ -32,7 +32,7 @@ export default function MiniCart({ initialCart }: MiniCartProps) {
     <>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative m-1">
+          <Button variant="link" size="icon" className="relative m-1">
             <ShoppingCart className="h-6 w-6" />
             {totalItems > 0 && (
               <span className="absolute -top-1 -right-1 bg-warning-600 text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">

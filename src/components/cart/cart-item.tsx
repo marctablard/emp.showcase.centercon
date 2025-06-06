@@ -69,7 +69,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
         <div className="font-bold">{formatCurrency(item.price.amount, item.price.currency)}</div>
         <div className="flex items-center justify-center">
           <Button
-            variant="outline"
+            variant="secondary"
             size="icon"
             className="h-8 w-8"
             disabled={isProcessing || item.quantity <= 1}
@@ -81,7 +81,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
             {isProcessing ? <div className="animate-pulse h-4 w-4 mx-auto bg-muted rounded-full"></div> : item.quantity}
           </span>
           <Button
-            variant="outline"
+            variant="secondary"
             size="icon"
             className="h-8 w-8"
             disabled={isProcessing}
@@ -92,7 +92,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
         </div>
         <div>
           <Button
-            variant="ghost"
+            variant="link"
             size="icon"
             className="h-8 w-8 text-destructive hover:text-destructive/90"
             disabled={isProcessing}
