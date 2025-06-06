@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import ButtonStyleGuide from '@/app/[locale]/styleguide/ui/button';
 import TextStyleGuide from './atoms/text';
+import BreadcrumbStyleGuide from './ui/breadcrumb';
 import LinkStyleGuide from './ui/link';
 
 export default function StyleGuide() {
@@ -24,6 +25,7 @@ export default function StyleGuide() {
       <TextStyleGuide />
       <ButtonStyleGuide />
       <LinkStyleGuide />
+      <BreadcrumbStyleGuide />
     </main>
   );
 }

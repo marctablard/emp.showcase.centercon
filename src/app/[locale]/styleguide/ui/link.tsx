@@ -9,7 +9,7 @@ export default function LinkStyleGuide() {
         There is no ui-component for links. You can either use the Link from next.js or HTML a-Tag and also button-Tag
         is possible. Just use all tailwindcss classes used below:
       </p>
-      <div className="p-4 grid grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
+      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <div>
           <Link
             href="#"
