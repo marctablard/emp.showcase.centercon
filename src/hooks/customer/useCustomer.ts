@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Customer } from '@/platform/services/model/customer/customer';
+import { fetchCurrentCustomer } from '@/lib/client/customer';
 
 interface CustomerHook {
   customer: Customer | null;
   loading: boolean;
-  error: Error | null;
+  error: Error | null
 }
 
 /**
@@ -14,23 +15,32 @@ interface CustomerHook {
  * @returns Customer data and state
  */
 export const useCustomer = (): CustomerHook => {
-  // Mock data for customer
-  const mockCustomer: Customer = {
-    id: 'cust-123456',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    contactPhone: '+1 (555) 123-4567',
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchCustomer = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchCurrentCustomer();
+      setCustomer(data);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch customer'));
+      console.error('Error fetching customer:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const [customer] = useState<Customer | null>(mockCustomer);
-  const [loading] = useState<boolean>(false);
-  const [error] = useState<Error | null>(null);
+  useEffect(() => {
+    fetchCustomer();
+  }, []);
 
   return {
     customer,
     loading,
-    error,
+    error
   };
 };
 

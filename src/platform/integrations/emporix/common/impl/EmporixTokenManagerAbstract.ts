@@ -112,12 +112,7 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
     );
     const now = Date.now();
     return {
-      token: {
-        ...response,
-        // transfer sessionId from anonymous Session to keep SessionContext
-        // we use sessionId instead of session_id to be compatible with original token response
-        session_id: anonymousToken.sessionId,
-      },
+      token: response,
       expiryAt: now + response.expires_in * 1000,
       refreshExpiryAt: response.refresh_token_expires_in ? now + response.refresh_token_expires_in * 1000 : undefined,
     };

@@ -26,7 +26,7 @@ export default async function Header() {
           <div className="overflow-hidden flex items-center gap-10">
             <div className="hidden md:flex items-center">
               <NavigationMenu className="flex gap-4 no-underline">
-                <NavigationMenuLink href="/product/10637590" className="no-underline px-4">
+                <NavigationMenuLink href="/product/victron-bluesolar-55w" className="no-underline px-4">
                   {t('featuredProduct')}
                 </NavigationMenuLink>
                 <NavigationMenuList>
