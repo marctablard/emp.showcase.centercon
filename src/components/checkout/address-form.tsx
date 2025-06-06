@@ -1,14 +1,13 @@
 'use client';
 
-import React from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import z from 'zod';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useValidator } from '@/hooks/validation/useValidator';
 
 interface AddressFormProps {
   initialData?: Partial<Omit<CheckoutAddress, 'type'>>;
@@ -21,36 +20,22 @@ interface AddressFormProps {
  * Can be used for both shipping and billing addresses
  */
 const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialData, onDataChange }) => {
-  const t = useTranslations('Checkout');
-  const AddressFormSchema = z.object({
-    contactName: z.string().min(1, { message: t('validation.fullNameRequired') }),
-    street: z.string().min(1, { message: t('validation.streetRequired') }),
-    streetNumber: z.string().min(1, { message: t('validation.houseNumberRequired') }),
-    zipCode: z.string().min(1, { message: t('validation.postalCodeRequired') }),
-    city: z.string().min(1, { message: t('validation.cityRequired') }),
-    country: z.string().min(1, { message: t('validation.countryRequired') }),
-    state: z.string().optional(),
-    phoneNumber: z.string().optional(),
-    companyName: z.string().optional(),
-  });
+    const t = useTranslations('Checkout');
 
-  const form = useForm<z.infer<typeof AddressFormSchema>>({
-    resolver: zodResolver(AddressFormSchema),
-    defaultValues: initialData,
-  });
-
-  // Watch form state to detect when all fields are valid
-  const formState = form.formState;
-
-  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (formState.isValid) {
-      form.handleSubmit(onSubmit)(e);
-    }
-  };
-
-  const onSubmit = (data: z.infer<typeof AddressFormSchema>) => {
-    onDataChange(data);
-  };
+    const { form } = useValidator(
+      'AddressValidationService',
+      initialData,
+      'onBlur'
+    );
+  
+    // Watch form state to detect when all fields are valid
+    const formState = form.formState;
+    useEffect(() => {
+      if (!formState.isValidating && formState.isValid) {
+        onDataChange(form.getValues());
+      }
+    }, [formState.isValidating, formState.isValid]);
+  
 
   // Common countries list - can be expanded or fetched from an API
   const countries = [
@@ -74,9 +59,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             name="contactName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="fullName">{t('fullName')}*</FormLabel>
-                <FormControl onBlur={onBlur}>
-                  <Input id="fullName" type="text" {...field} disabled={isReadOnly} />
+                <FormLabel htmlFor="contactName">{t('fullName')}*</FormLabel>
+                <FormControl>
+                  <Input id="contactName" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -92,7 +77,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="street">{t('street')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="street" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -109,7 +94,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel htmlFor="streetNumber">{t('streetNumber')}</FormLabel>
-                    <FormControl onBlur={onBlur}>
+                    <FormControl>
                       <Input id="streetNumber" type="text" {...field} disabled={isReadOnly} />
                     </FormControl>
                     <FormMessage />
@@ -128,7 +113,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="zipCode">{t('zipCode')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="zipCode" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -144,7 +129,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="city">{t('city')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="city" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -162,10 +147,11 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('country')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
-                    <Select onValueChange={field.onChange}>
+                  <FormControl>
+                    {/*trigger field change AND form validation */}
+                    <Select onValueChange={(e) => {field.onChange(e); field.onBlur()}} defaultValue={field.value}>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Theme" />
+                        <SelectValue placeholder={t('country')} />
                       </SelectTrigger>
                       <SelectContent>
                         {countries.map((country) => (
@@ -189,7 +175,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="state">{t('state')}</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="state" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -206,7 +192,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="phoneNumber">{t('phoneNumber')}</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="phoneNumber" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
                 <FormMessage />
@@ -222,7 +208,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="companyName">{t('companyName')}</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="companyName" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
                 <FormMessage />

@@ -5,10 +5,11 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import Addresses from './checkout-addresses';
-import ContactData from './customer-data';
+import ContactData from './contact-data';
 import OrderSummary from './order-summary';
 import PaymentMethodComponent from './payment-method';
 import ShippingMethod from './shipping-method';
+import { useCustomer } from '@/hooks/customer/useCustomer';
 
 interface CheckoutProps {
   onComplete?: (orderId: string) => void;
@@ -20,6 +21,7 @@ interface CheckoutProps {
  */
 const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   const { processCheckout, loading, error, orderResponse, checkoutCart } = useCheckout();
+  const { customer, loading: customerLoading, error: customerError } = useCustomer();
   const router = useRouter();
   const t = useTranslations('Checkout');
 
@@ -39,7 +41,18 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
     }
   }, [orderResponse, onComplete, router]);
 
-  // If no cart is available, show a message
+
+  if (customerLoading || loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-neutral-900 mb-4">{t('title')}</h1>
+          <p className="text-neutral-600">{t('loading')}</p>
+        </div>
+      </div>
+    );
+  }
+  // If no customer is available, show a message
   if (!checkoutCart) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -59,11 +72,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
           <p className="text-danger-700">{error.message}</p>
         </div>
       )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          {/* Customer Information */}
-          <ContactData />
+        {/* Customer Information */}
+          {!customer && (
+            <ContactData />
+          )}
 
           {/* Addresses */}
           <Addresses />

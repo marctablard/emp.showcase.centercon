@@ -10,6 +10,8 @@ import {
   EmporixPaymentMethod,
   EmporixShipping,
 } from '@/platform/integrations/emporix/model';
+import type { CheckoutValidator } from '../validation/CheckoutValidator';
+import { Customer } from '../../model/customer/customer';
 
 /**
  * Implementation of CheckoutService for Emporix checkout.
@@ -19,35 +21,63 @@ import {
 class EmporixCheckoutService implements CheckoutService {
   private checkoutApi: CheckoutApi;
   private customerService: CustomerService;
+  private checkoutValidator: CheckoutValidator;
 
   constructor(
     @inject('EmporixCheckoutApi') checkoutApi: CheckoutApi,
     @inject('CustomerService') customerService: CustomerService,
+    @inject('CheckoutValidator') checkoutValidator: CheckoutValidator,
   ) {
     this.checkoutApi = checkoutApi;
     this.customerService = customerService;
+    this.checkoutValidator = checkoutValidator;
   }
 
   async checkout(request: CheckoutRequest): Promise<CheckoutResponse> {
-    const isGuest: boolean = !request.customer.id;
     const customer = await this.customerService.getCurrentCustomer();
-    if (isGuest && customer && request.customer.id != customer.id) {
+    if (customer && request.customer?.email != customer.email) {
       throw new Error('Mismatching Customer on Checkout!');
     }
+
+    // First do the basic validation
+    let emporixCustomer: EmporixCheckoutCustomer;
+    if (!customer) {
+      const result = this.checkoutValidator.validateGuestCheckoutRequest(request);
+      if (!result.success) {
+        throw new Error('Checkout Validation Failed!', {
+          cause: result.errors,
+        });
+      }
+      emporixCustomer = {
+        email: request.customer.email,
+        firstName: request.customer.firstName,
+        lastName: request.customer.lastName,
+        company: request.customer.company,
+        guest: true,
+      }
+    } else {
+      const result = this.checkoutValidator.validateCheckoutRequest(request);
+      if (!result.success) {
+        throw new Error('Checkout Validation Failed!', {
+          cause: result.errors,
+        });
+      }
+      emporixCustomer = {
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        company: customer.company,
+        guest: false,
+      }
+    }
+    
     const addresses = request.addresses.map((address) => ({
       ...address,
       contactName: address.contactName || request.customer.firstName + ' ' + request.customer.lastName,
       contactPhone: address.contactPhone || request.customer.phone,
       type: address.type || 'SHIPPING',
     }));
-    const emporixCustomer: EmporixCheckoutCustomer = {
-      id: request.customer.id,
-      firstName: request.customer.firstName,
-      lastName: request.customer.lastName,
-      email: request.customer.email,
-      company: request.customer.company,
-      guest: isGuest,
-    };
     const paymentMethods: EmporixPaymentMethod[] = [request.paymentMethod];
     const shipping: EmporixShipping = {
       methodId: request.shipping.methodId,
@@ -62,22 +92,11 @@ class EmporixCheckoutService implements CheckoutService {
       shipping: shipping,
       paymentMethods: paymentMethods,
     };
-    const response = await (isGuest
-      ? this.checkoutApi.guestCheckout(checkoutRequest)
-      : this.checkoutApi.checkout(checkoutRequest));
-    return response;
-    /*
-    // Call the appropriate API method based on whether it's a guest checkout or not
-    let apiResponse;
-    if ('guest' in apiRequest.customer && apiRequest.customer.guest) {
-      apiResponse = await this.checkoutApi.guestCheckout(apiRequest);
+    if (emporixCustomer.guest) {
+      return this.checkoutApi.guestCheckout(checkoutRequest);
     } else {
-      apiResponse = await this.checkoutApi.checkout(apiRequest);
+      return this.checkoutApi.checkout(checkoutRequest);
     }
-    
-    // Map API response to service model
-    return this.mapper.mapToService(apiResponse);
-    */
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

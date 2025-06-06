@@ -1,15 +1,12 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import z from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { PaymentMethod as PaymentMethodType } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { useValidator } from '@/hooks/validation/useValidator';
+import { FormProvider } from 'react-hook-form';
 
 interface PaymentMethodProps {
   isReadOnly?: boolean;
@@ -20,6 +17,11 @@ interface PaymentMethodProps {
  */
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
+  const { form } = useValidator(
+    'PaymentValidationService',
+    paymentMethod,
+    'onChange'
+  );
   // Available payment methods
   const paymentOptions = useMemo(
     () => [
@@ -39,35 +41,13 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
 
   const t = useTranslations('Checkout');
 
-  const PaymentModeFormSchema = z.object({
-    paymentMethod: z.string().min(1, { message: t('validation.paymentMethodRequired') }),
-  });
-
-  const form = useForm<z.infer<typeof PaymentModeFormSchema>>({
-    resolver: zodResolver(PaymentModeFormSchema),
-    defaultValues: {
-      paymentMethod: paymentMethod?.method,
-    },
-    mode: 'onChange',
-  });
-
+  const formState = form.formState;
   // Effect to auto-submit when all fields are valid and touched
   useEffect(() => {
-    form.watch((data) => {
-      const method = paymentOptions.find((option) => option.id === data.paymentMethod);
-
-      toast.success('Payment method updated');
-      if (method) {
-        const paymentMethodData: PaymentMethodType = {
-          provider: method.provider,
-          method: method.method,
-          customAttributes: paymentMethod?.customAttributes,
-        };
-
-        submitPaymentMethod(paymentMethodData);
-      }
-    });
-  }, [form, paymentMethod?.customAttributes, submitPaymentMethod, paymentOptions, paymentMethod?.method]);
+    if (!formState.isValidating && formState.isValid) {
+      submitPaymentMethod(form.getValues());
+    }
+  }, [formState.isValidating, formState.isValid]);
 
   return (
     <FormProvider {...form}>
@@ -76,11 +56,11 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
         {!isReadOnly ? (
           <FormField
             control={form.control}
-            name="paymentMethod"
+            name="method"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <RadioGroup value={field.value} onValueChange={field.onChange} className="flex flex-col space-y-1">
+                  <RadioGroup defaultValue={field.value} onValueChange={field.onChange} className="flex flex-col space-y-1">
                     <div className="space-y-6">
                       <div className="space-y-4">
                         {paymentOptions.map((option) => (

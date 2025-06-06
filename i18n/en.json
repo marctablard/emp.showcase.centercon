@@ -123,6 +123,7 @@
     },
     "Checkout": {
         "title": "Checkout",
+        "loading": "Loading...",
         "description": "Complete your purchase",
         "contactInformation": "Contact Information",
         "emailAddress": "EMail Address",
@@ -203,6 +204,7 @@
         "tryAdjusting": "Try adjusting your search or filters"
     },
     "Account": {
+        "loading": "Dashboard loading...",
         "welcomeBack": "Welcome back, {name}",
         "accountDashboardDescription": "Manage your account, orders, and company information",
         "accountDetails": "Account Details",
@@ -240,5 +242,52 @@
         "quotesPagePlaceholder": "Quotes will be displayed here",
         "shoppingListsPageDescription": "View and manage your shopping lists",
         "shoppingListsPagePlaceholder": "Shopping lists will be displayed here"
+    },
+    "Validation": {
+        "contactData": {
+            "email": {
+                "required": "Email is required",
+                "invalid": "Please enter a valid email address"
+            },
+            "firstName": {
+                "required": "First name is required"
+            },
+            "lastName": {
+                "required": "Last name is required"
+            }
+        },
+        "address": {
+            "contactName": {
+                "required": "Contact Name is required"
+            },
+            "street": {
+                "required": "Street is required"
+            },
+            "streetNumber": {
+                "required": "Street Number is required"
+            },
+            "zipCode": {
+                "required": "Zip Code is required"
+            },
+            "city": {
+                "required": "City is required"
+            },
+            "country": {
+                "required": "Country is required"
+            },
+            "state": {
+                "required": "State/Province is required"
+            }
+        },
+        "shipping": {
+            "method": {
+                "required": "Shipping method is required"
+            }
+        },
+        "payment": {
+            "method": {
+                "required": "Payment method is required"
+            }
+        }
     }
 }

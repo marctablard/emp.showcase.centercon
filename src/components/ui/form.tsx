@@ -14,6 +14,7 @@ import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 const Form = FormProvider;
 
@@ -120,8 +121,9 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
 }
 
 function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
+  const t = useTranslations('Validation');
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? '') : props.children;
+  const body = error ? String(error?.message ? t(error.message) : '') : props.children;
 
   if (!body) {
     return null;

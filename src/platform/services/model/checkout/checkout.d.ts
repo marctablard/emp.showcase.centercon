@@ -7,7 +7,7 @@ import { Address } from '@/platform/services/model/common';
  * Common properties for all checkout requests
  */
 export interface BaseCheckoutRequest {
-  customer: Customer;
+  customer: ContactData;
   paymentMethod: PaymentMethod;
   currency?: string;
 }
@@ -31,8 +31,7 @@ export interface CheckoutAddress extends Address {
 /**
  * Customer information for checkout
  */
-export interface Customer {
-  id?: string;
+export interface ContactData {
   firstName: string;
   lastName: string;
   email: string;
@@ -68,7 +67,6 @@ export interface CheckoutRequest extends BaseCheckoutRequest {
   cartId: string;
   shipping: Shipping;
   addresses: CheckoutAddress[];
-  customer: Customer;
 }
 
 /**

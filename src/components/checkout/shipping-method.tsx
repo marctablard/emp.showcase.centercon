@@ -8,6 +8,8 @@ import z from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { useValidator } from '@/hooks/validation/useValidator';
+import { Shipping } from '@/platform/services/model/checkout';
 
 interface ShippingOption {
   id: string;
@@ -27,9 +29,12 @@ interface ShippingMethodProps {
  * Allows users to select their preferred shipping method
  */
 const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) => {
-  // Get the submitShippingMethod function from useCheckout
-  // Note: This doesn't exist yet, we'll need to add it to the useCheckout hook
   const { shippingMethod, submitShippingMethod } = useCheckout();
+  const { form } = useValidator(
+    'ShippingValidationService',
+    shippingMethod,
+    'onChange'
+  );
   const t = useTranslations('Checkout');
 
   // Mock shipping options - in a real app, these would come from an API
@@ -60,33 +65,22 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
     },
   ];
 
-  const ShippingMethodFormSchema = z.object({
-    shippingMethod: z.string().min(1, { message: t('validation.shippingMethodRequired') }),
-  });
-
-  const form = useForm<z.infer<typeof ShippingMethodFormSchema>>({
-    resolver: zodResolver(ShippingMethodFormSchema),
-    defaultValues: {
-      shippingMethod: shippingMethod?.methodId,
-    },
-  });
-
   const formState = form.formState;
+  // Effect to auto-submit when all fields are valid and touched
   useEffect(() => {
-    form.watch((data) => {
-      if (formState.isValid) {
-        const option = shippingOptions.find((o) => o.id == data.shippingMethod);
-        if (option) {
-          submitShippingMethod({
-            methodId: option.id,
-            methodName: option.name,
-            amount: option.price,
-            zoneId: option.zoneId,
-          });
-        }
+    if (!formState.isValidating && formState.isValid) {
+      const values = form.getValues() as Shipping;
+      const option = shippingOptions.find((option) => option.id === values.methodId);
+      if (option) {
+        submitShippingMethod({
+          methodId: option.id,
+          methodName: option.name,
+          amount: option.price,
+          zoneId: option.zoneId,
+        });
       }
-    });
-  });
+    }
+  }, [formState.isValidating, formState.isValid]);
 
   return (
     <FormProvider {...form}>
@@ -94,12 +88,11 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
         <h2 className="text-lg font-semibold text-neutral-900 mb-4">{t('shippingMethod')}</h2>
         <FormField
           control={form.control}
-          name="shippingMethod"
+          name="methodId"
           render={({ field }) => (
             <FormItem>
               <FormControl>
                 <RadioGroup
-                  value={field.value}
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                   className="flex flex-col space-y-1"
@@ -107,11 +100,10 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                   {shippingOptions.map((option) => (
                     <FormItem className="flex items-center space-x-3 space-y-0 w-full" key={option.id}>
                       <div
-                        className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${
-                          shippingMethod?.methodId === option.id
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-neutral-200 hover:border-primary-300'
-                        } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
+                        className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${shippingMethod?.methodId === option.id
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-neutral-200 hover:border-primary-300'
+                          } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
                       >
                         <FormControl>
                           <RadioGroupItem value={option.id} id={option.id} />
@@ -120,9 +112,8 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                           <div className="flex items-start justify-between w-full">
                             <div className="flex items-center space-x-3">
                               <div
-                                className={`flex items-center justify-center ${
-                                  shippingMethod?.methodId === option.id ? 'border-primary-600' : 'border-neutral-300'
-                                }`}
+                                className={`flex items-center justify-center ${shippingMethod?.methodId === option.id ? 'border-primary-600' : 'border-neutral-300'
+                                  }`}
                               >
                                 {shippingMethod?.methodId === option.id && (
                                   <div className="w-3 h-3 rounded-full bg-primary-600"></div>
@@ -138,9 +129,9 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                                 {option.price === 0
                                   ? t('freeShipping')
                                   : new Intl.NumberFormat('en-US', {
-                                      style: 'currency',
-                                      currency: 'USD',
-                                    }).format(option.price)}
+                                    style: 'currency',
+                                    currency: 'USD',
+                                  }).format(option.price)}
                               </span>
                               <p className="text-xs text-neutral-500">{option.estimatedDelivery}</p>
                             </div>

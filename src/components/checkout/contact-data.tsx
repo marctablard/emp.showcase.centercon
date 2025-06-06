@@ -1,18 +1,16 @@
 'use client';
 
-import React from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import z from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { ContactData, Customer } from '@/platform/services/model/checkout';
+import { ContactData } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
+import { useValidator } from '@/hooks/validation/useValidator';
 
-interface CustomerDataProps {
-  initialData?: Partial<Customer>;
+interface ContactDataProps {
+  initialData?: Partial<ContactData>;
   isReadOnly?: boolean;
 }
 
@@ -20,52 +18,23 @@ interface CustomerDataProps {
  * Customer data form component for checkout
  * Collects basic customer information (email, name)
  */
-const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false, initialData = undefined }) => {
+const ContactDataComponent: React.FC<ContactDataProps> = ({ isReadOnly = false, initialData = undefined }) => {
   const t = useTranslations('Checkout');
   const { submitContactData, contactData } = useCheckout();
 
-  const ContactDataFormSchema = z.object({
-    email: z
-      .string()
-      .min(1, { message: t('validation.emailRequired') })
-      .email({ message: t('validation.invalidEmail') }),
-    phone: z.string().min(1, { message: t('validation.phoneRequired') }),
-    firstName: z.string().min(1, { message: t('validation.firstNameRequired') }),
-    lastName: z.string().min(1, { message: t('validation.lastNameRequired') }),
-    company: z.string().optional(),
-  });
-  const form = useForm<z.infer<typeof ContactDataFormSchema>>({
-    resolver: zodResolver(ContactDataFormSchema),
-    defaultValues: {
-      email: contactData?.email || initialData?.email,
-      phone: contactData?.phone || initialData?.phone,
-      firstName: contactData?.firstName || initialData?.firstName,
-      lastName: contactData?.lastName || initialData?.lastName,
-      company: contactData?.company || initialData?.company,
-    },
-    mode: 'onBlur',
-  });
+  const { form } = useValidator(
+    'ContactDataValidationService',
+    initialData || contactData,
+    'onBlur'
+  );
 
   // Watch form state to detect when all fields are valid
   const formState = form.formState;
-
-  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (formState.isValid) {
-      form.handleSubmit(onSubmit)(e);
+  useEffect(() => {
+    if (!formState.isValidating && formState.isValid) {
+      submitContactData(form.getValues());
     }
-  };
-
-  const onSubmit = (data: z.infer<typeof ContactDataFormSchema>) => {
-    const contactData: ContactData = {
-      email: data.email,
-      phone: data.phone,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      company: data.company,
-    };
-    toast(JSON.stringify(contactData));
-    submitContactData(contactData);
-  };
+  }, [formState.isValidating, formState.isValid]);
 
   return (
     <FormProvider {...form}>
@@ -78,7 +47,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="email">{t('emailAddress')}*</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="email" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
@@ -91,7 +60,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="phone">{t('phoneNumber')}</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="phone" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
@@ -104,7 +73,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="firstName">{t('firstName')}*</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="firstName" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
@@ -117,7 +86,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="lastName">{t('lastName')}*</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="lastName" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
@@ -130,7 +99,7 @@ const ContactDataComponent: React.FC<CustomerDataProps> = ({ isReadOnly = false,
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="email">{t('companyName')}</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="company" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
