@@ -82,7 +82,7 @@ export default function ProductActions({ product: initialProduct }: { product?: 
       <div className="flex items-center space-x-2">
         <div className="flex items-center">
           <Button
-            variant="outline"
+            variant="secondary"
             size="icon"
             className="h-9 w-9 rounded-r-none"
             onClick={decrementQuantity}
@@ -99,17 +99,17 @@ export default function ProductActions({ product: initialProduct }: { product?: 
             value={quantity}
             onChange={handleQuantityChange}
           />
-          <Button variant="outline" size="icon" className="h-9 w-9 rounded-l-none" onClick={incrementQuantity}>
+          <Button variant="secondary" size="icon" className="h-9 w-9 rounded-l-none" onClick={incrementQuantity}>
             +
           </Button>
         </div>
       </div>
 
-      <Button className="w-half" onClick={handleAddToCart} variant="default" size="lg" disabled={cartLoading}>
+      <Button className="w-half" onClick={handleAddToCart} disabled={cartLoading}>
         {t('addToCart')}
       </Button>
 
-      <Button className="w-half" onClick={handleBuyNow} variant="outline" size="lg" disabled={cartLoading}>
+      <Button className="w-half" onClick={handleBuyNow} variant="secondary" disabled={cartLoading}>
         {t('buyNow')}
       </Button>
 

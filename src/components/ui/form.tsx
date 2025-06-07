@@ -69,6 +69,7 @@ export interface ControlProps extends React.ComponentProps<typeof Slot> {
   startIcon?: LucideIcon;
   endIcon?: LucideIcon;
   isDropdown?: boolean;
+  isSelectItem?: boolean;
   validate?: boolean;
 }
 
@@ -88,7 +89,7 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot="form-item" className={cn('grid gap-2', className)} {...props} />
+      <div data-slot="form-item" className={cn('grid gap-2 leading-0', className)} {...props} />
     </FormItemContext.Provider>
   );
 }
@@ -128,7 +129,7 @@ function FormControl({ endIcon, startIcon, validate, isDropdown, ...props }: Con
         onFocus={() => ref.current?.classList.add('outline-2', 'outline-offset-2', 'outline-primary-500')}
         onBlur={() => ref.current?.classList.remove('outline-2', 'outline-offset-2', 'outline-primary-500')}
         className={cn(
-          'w-full relative text-neutral-900 border border-neutral-200 rounded-sm',
+          'relative text-neutral-900 border border-neutral-200 rounded-sm',
           'transition duration-150 ease-in-out hover:border-primary-500 hover:text-primary-700 hover:bg-white',
           error && 'text-danger-500 border-danger-500',
           error && 'hover:border-danger-500 hover:text-danger-500',
@@ -138,15 +139,19 @@ function FormControl({ endIcon, startIcon, validate, isDropdown, ...props }: Con
           isDirty && error && 'hover:bg-danger-100',
         )}
       >
-        <FormIcon startIcon={StartIcon} endIcon={EndIcon} isDropdown={isDropdown}>
-          {props.children}
-        </FormIcon>
+        {!isDropdown && (startIcon || endIcon) ? (
+          <FormIcon startIcon={StartIcon} endIcon={EndIcon}>
+            {props.children}
+          </FormIcon>
+        ) : (
+          <div>{props.children} </div>
+        )}
       </div>
     </Slot>
   );
 }
 
-function FormIcon({ endIcon, startIcon, isDropdown, ...props }: ControlProps) {
+function FormIcon({ endIcon, startIcon, isDropdown, isSelectItem, ...props }: ControlProps) {
   const StartIcon = startIcon;
   const EndIcon = endIcon;
 
@@ -155,9 +160,12 @@ function FormIcon({ endIcon, startIcon, isDropdown, ...props }: ControlProps) {
       <div
         className={cn(
           'w-full relative px-3 outline-none',
+          isDropdown && 'text-left',
+          isSelectItem && ' hover:bg-primary-500 hover:text-white',
           startIcon && !isDropdown && 'pl-10',
           endIcon && !isDropdown && 'pr-10',
-          isDropdown && 'p-1',
+          isDropdown && startIcon && 'pl-10',
+          isDropdown && endIcon && 'pr-10',
         )}
       >
         {StartIcon && (

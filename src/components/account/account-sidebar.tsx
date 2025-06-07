@@ -28,7 +28,7 @@ export function AccountSidebar({ className, items, ...props }: SidebarNavProps) 
           return (
             <Button
               key={item.href}
-              variant="ghost"
+              variant="secondary"
               className={cn(
                 'justify-start px-4 py-2 text-sm font-medium text-left',
                 isActive ? 'bg-muted' : 'hover:bg-muted',

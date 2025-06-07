@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, User } from 'lucide-react';
+import { ChevronDown, Eye, User } from 'lucide-react';
 import z from 'zod';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -57,7 +58,7 @@ export default function FormFieldsSytelguideComponent() {
       input: '',
       textarea: '',
       select: '',
-      checkboxes: ['recents'],
+      checkboxes: ['home'],
     },
     mode: 'all',
   });
@@ -67,7 +68,7 @@ export default function FormFieldsSytelguideComponent() {
   }
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 mb-50">
       <div className="flex flex-col gap-6">
         <h4>Label</h4>
         <div className="flex gap-10">
@@ -213,16 +214,21 @@ export default function FormFieldsSytelguideComponent() {
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl isDropdown>
                           <SelectTrigger>
-                            <SelectValue placeholder="Placeholder" />
+                            <FormIcon startIcon={User} endIcon={ChevronDown} isDropdown>
+                              <SelectValue placeholder="Placeholder" />
+                            </FormIcon>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <FormIcon startIcon={User}>
-                            {' '}
+                          <FormIcon startIcon={User} endIcon={Eye} isSelectItem>
                             <SelectItem value="mexample.com">No email</SelectItem>
                           </FormIcon>
-                          <SelectItem value="m@google.com">m@email.com</SelectItem>
-                          <SelectItem value="m@support.com">m@email.com</SelectItem>
+                          <FormIcon startIcon={User} endIcon={Eye} isSelectItem>
+                            <SelectItem value="m@google.com">m@email.com</SelectItem>
+                          </FormIcon>
+                          <FormIcon startIcon={User} endIcon={Eye} isSelectItem>
+                            <SelectItem value="m@support.com">m@email.com</SelectItem>
+                          </FormIcon>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -230,38 +236,49 @@ export default function FormFieldsSytelguideComponent() {
                   )}
                 />
               </div>
-              {/*   <div className="flex flex-col gap-2">
-                                <FormField
-                                    control={formVal.control}
-                                    name="checkboxes"
-                                    render={() => (
-                                        <FormItem>
-                                            <FormLabel>Checkbox</FormLabel>
-                                            <FormDescription>Select the items you want</FormDescription>
-
-                                            <FormField
-                                                key="house"
-                                                control={form.control}
-                                                name="checkboxes"
-                                                render={({ field }) => {
-                                                    return (
-                                                        <FormItem
-                                                            key="house"
-                                                            className="flex flex-row items-center gap-2"
-                                                        >
-                                                            <FormControl>
-                                                                <Checkbox checked />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )
-                                                }
-                                            }
-                                                        />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div> */}
+              <div className="flex flex-col gap-2">
+                <FormField
+                  control={formVal.control}
+                  name="checkboxes"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>Checkbox</FormLabel>
+                      <FormDescription>Select the items you want</FormDescription>
+                      <FormField
+                        key="home"
+                        control={formVal.control}
+                        name="checkboxes"
+                        render={({ field }) => {
+                          return (
+                            <FormItem key="home" className="flex flex-row items-center gap-2">
+                              <FormControl>
+                                <Checkbox checked={field.value?.includes('home')} />
+                              </FormControl>
+                              <FormLabel htmlFor="home">Home</FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                      <FormField
+                        key="desktop"
+                        control={formVal.control}
+                        name="checkboxes"
+                        render={({ field }) => {
+                          return (
+                            <FormItem key="desktop" className="flex flex-row items-center gap-2">
+                              <FormControl>
+                                <Checkbox checked={field.value?.includes('desktop')} />
+                              </FormControl>
+                              <FormLabel htmlFor="desktop">Desktop</FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </form>
           </Form>
         </div>
