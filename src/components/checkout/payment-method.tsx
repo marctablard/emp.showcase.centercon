@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { FormProvider } from 'react-hook-form';
+import { usePaymentModes } from '@/hooks/payment/usePaymentModes';
+import { Loader2 } from 'lucide-react';
 
 interface PaymentMethodProps {
   isReadOnly?: boolean;
@@ -22,15 +24,18 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     paymentMethod,
     'onChange'
   );
-  // Available payment methods
-  const paymentOptions = useMemo(
-    () => [
-      { id: 'credit-card', name: 'Credit Card', provider: 'payment-gateway', method: 'credit-card' },
-      { id: 'paypal', name: 'PayPal', provider: 'payment-gateway', method: 'paypal' },
-      { id: 'invoice', name: 'Pay by Invoice', provider: 'none', method: 'invoice' },
-    ],
-    [],
-  );
+  const { paymentModes, loading, error, fetchPaymentModes } = usePaymentModes();
+  
+  // Transform API payment modes to UI payment options
+  const paymentOptions = paymentModes
+    .filter(mode => mode.active)
+    .map(mode => ({
+      id: mode.code, // Use code as ID since it's more reliable
+      code: mode.code,
+      name: mode.name || mode.code,
+      provider: mode.provider,
+      method: mode.code
+    }));
 
   const [cardDetails] = useState({
     cardNumber: '',
@@ -40,6 +45,11 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
   });
 
   const t = useTranslations('Checkout');
+  
+  // Fetch payment modes when component mounts
+  useEffect(() => {
+    fetchPaymentModes();
+  }, [fetchPaymentModes]);
 
   const formState = form.formState;
   // Effect to auto-submit when all fields are valid and touched
@@ -47,13 +57,33 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     if (!formState.isValidating && formState.isValid) {
       submitPaymentMethod(form.getValues());
     }
-  }, [formState.isValidating, formState.isValid]);
+  }, [formState.isValidating, formState.isValid, submitPaymentMethod, form]);
 
   return (
     <FormProvider {...form}>
       <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold text-neutral-800">Payment Method</h2>
-        {!isReadOnly ? (
+        <h2 className="text-xl font-semibold text-neutral-800">{t('paymentMethod')}</h2>
+        
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+            <span className="ml-2 text-neutral-600">{t('loadingPaymentMethods')}</span>
+          </div>
+        )}
+        
+        {error && (
+          <div className="py-4 text-center text-red-500">
+            {t('errorLoadingPaymentMethods')}
+          </div>
+        )}
+        
+        {!loading && !error && paymentOptions.length === 0 && (
+          <div className="py-4 text-center text-neutral-600">
+            {t('noPaymentMethodsAvailable')}
+          </div>
+        )}
+        
+        {!loading && !error && paymentOptions.length > 0 && !isReadOnly ? (
           <FormField
             control={form.control}
             name="method"
@@ -73,7 +103,6 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                                 htmlFor={option.id}
                                 className="w-full ml-3 block text-sm font-medium text-neutral-700"
                               >
-                                {' '}
                                 {option.name}
                               </FormLabel>
                             </FormItem>
@@ -169,12 +198,12 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
           <div className="text-neutral-700">
             <p className="font-medium">
               {paymentOptions.find((option) => option.method === paymentMethod?.method)?.name ||
-                'Selected payment method'}
+                t('selectedPaymentMethod')}
             </p>
 
             {paymentMethod?.method === 'credit-card' && paymentMethod?.customAttributes?.cardNumber && (
               <p className="text-sm text-neutral-600 mt-1">
-                Card ending in {paymentMethod.customAttributes.cardNumber.slice(-4)}
+                {t('cardEndingIn')} {paymentMethod.customAttributes.cardNumber.slice(-4)}
               </p>
             )}
           </div>

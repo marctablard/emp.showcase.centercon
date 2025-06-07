@@ -1,0 +1,28 @@
+import { EmporixShippingMethod, EmporixSite, EmporixFindSiteRequest } from '../model/shipping';
+
+
+/**
+ * Interface for shipping API operations
+ */
+export interface ShippingApi {
+  /**
+   * Get a shipping method by ID
+   * @param siteId - The site ID
+   * @param zoneId - The zone ID
+   * @param methodId - The method ID
+   */
+  getShippingMethod(siteId: string, zoneId: string, methodId: string): Promise<EmporixShippingMethod | null>;
+
+  /**
+   * Get all shipping methods for a zone
+   * @param siteId - The site ID
+   * @param zoneId - The zone ID
+   */
+  getShippingMethods(siteId: string, zoneId: string): Promise<EmporixShippingMethod[]>;
+
+  /**
+   * Find shipping sites based on location
+   * @param request - The find site request containing postal code and country
+   */
+  findSite(request: EmporixFindSiteRequest): Promise<EmporixSite[]>;
+}

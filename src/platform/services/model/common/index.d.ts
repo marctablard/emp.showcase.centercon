@@ -1,4 +1,4 @@
-export interface RegionSettings {
+export interface Region {
   region: string;
   currency: Currency;
   language: string;
