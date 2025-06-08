@@ -1,6 +1,6 @@
-import { Price as ServicePrice, Quantity as ServiceQuantity } from './price';
-import { MatchedPrice, Quantity as EmporixQuantity } from '@/platform/integrations/emporix/model/price';
 import { injectable } from '@/platform/core/di/injectable';
+import { Quantity as EmporixQuantity, MatchedPrice } from '@/platform/integrations/emporix/model/price';
+import { ProductPrice as ServicePrice, Quantity as ServiceQuantity } from './price';
 
 /**
  * Maps between Emporix Price model and Service Price model
@@ -31,6 +31,10 @@ export class PriceMapper {
             taxValue: emporixPrice.tax.prices.effectiveValue.taxValue,
           }
         : undefined,
+      tierValues: emporixPrice.tierValues.map((tier) => ({
+        id: tier.id,
+        price: tier.priceValue,
+      })),
     };
   }
 
@@ -40,10 +44,15 @@ export class PriceMapper {
    * @returns A Service Quantity
    */
   mapQuantityToService(emporixQuantity: EmporixQuantity): ServiceQuantity {
-    return {
+    const result: ServiceQuantity = {
       quantity: emporixQuantity.quantity,
-      unitCode: emporixQuantity.unitCode,
     };
+
+    if (emporixQuantity.unitCode) {
+      result.unitCode = emporixQuantity.unitCode;
+    }
+
+    return result;
   }
 
   /**
@@ -52,10 +61,15 @@ export class PriceMapper {
    * @returns An Emporix Quantity
    */
   mapQuantityToEmporix(serviceQuantity: ServiceQuantity): EmporixQuantity {
-    return {
+    const result: EmporixQuantity = {
       quantity: serviceQuantity.quantity,
-      unitCode: serviceQuantity.unitCode,
     };
+
+    if (serviceQuantity.unitCode) {
+      result.unitCode = serviceQuantity.unitCode;
+    }
+
+    return result;
   }
 }
 

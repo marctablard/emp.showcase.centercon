@@ -7,6 +7,7 @@ import { ProductTabsComponent } from '@/components/product/product-tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useL10n } from '@/hooks/useL10n';
+import { getProductPrice } from '@/lib/ssr/price';
 import { getProductById } from '@/lib/ssr/products';
 
 const priceTiers = [
@@ -28,11 +29,12 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { l10n } = useL10n(locale);
 
-  // Get translations for the current locale
-  const t = await getTranslations({ locale, namespace: 'product' });
-
-  // Fetch product data server-side using our shared API layer
-  const product = await getProductById(productId);
+  // Fetch translations, product data and price in parallel
+  const [t, product, price] = await Promise.all([
+    getTranslations({ locale, namespace: 'product' }),
+    getProductById(productId),
+    getProductPrice(productId),
+  ]);
 
   // If product not found, show 404 page
   if (!product) {
@@ -59,12 +61,15 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
             <div className="p-8">
               <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">In Stock</Badge>
               <h1 className="text-4xl font-bold tracking-tight text-neutral-900">{l10n(product.name)}</h1>
+              {price?.effectiveValue && (
+                <>
+                  <ProductPriceComponent price={price} />
 
-              <ProductPriceComponent price={110.45} tiers={priceTiers} />
-
-              <div className="mt-6 flex space-x-4">
-                <ProductActions product={product} />
-              </div>
+                  <div className="mt-6 flex space-x-4">
+                    <ProductActions product={product} />
+                  </div>
+                </>
+              )}
 
               <div className="mt-6">
                 <div className="text-sm text-neutral-500">

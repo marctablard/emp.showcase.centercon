@@ -14,13 +14,13 @@ export interface Quantity {
   /**
    * Unit code (e.g., 'pc', 'kg', 'g')
    */
-  unitCode: string;
+  unitCode?: string;
 }
 
 /**
  * Price information
  */
-export interface Price {
+export interface ProductPrice {
   /**
    * ID of the price
    */
@@ -39,7 +39,7 @@ export interface Price {
   /**
    * Original price value
    */
-  originalValue: number;
+  originalValue?: number;
 
   /**
    * Effective price value (after discounts)
@@ -90,6 +90,11 @@ export interface Price {
      */
     taxValue: number;
   };
+
+  tierValues: {
+    id: string;
+    price: number;
+  }[];
 }
 
 /**

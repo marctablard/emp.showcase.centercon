@@ -29,7 +29,7 @@ export interface Quantity {
   /**
    * Unit code (e.g., 'pc', 'kg', 'g')
    */
-  unitCode: string;
+  unitCode?: string;
 }
 
 /**

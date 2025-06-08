@@ -1,11 +1,10 @@
-import type { PriceService } from '../PriceService';
-import type { Price } from '../../model/price/price';
-import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
-import type { MatchedPrice, MatchPricesRequest, PriceMatchItem } from '@/platform/integrations/emporix/model/price';
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
+import { injectable } from '@/platform/core/di/injectable';
+import type { MatchPricesRequest, MatchedPrice, PriceMatchItem } from '@/platform/integrations/emporix/model/price';
+import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
 import PriceMapper from '@/platform/services/model/price/PriceMapper';
+import type { ProductPrice } from '../../model/price/price';
+import type { PriceService } from '../PriceService';
 
 /**
  * Implementation of PriceService for Emporix price data.
@@ -15,24 +14,18 @@ import PriceMapper from '@/platform/services/model/price/PriceMapper';
 class EmporixPriceService implements PriceService {
   private priceApi: PriceApi;
   private mapper: PriceMapper;
-  private commonUtil: EmporixCommonUtil;
 
-  constructor(
-    @inject('EmporixPriceApi') priceApi: PriceApi,
-    @inject('EmporixPriceMapper') mapper: PriceMapper,
-    @inject('EmporixCommonUtil') commonUtil: EmporixCommonUtil,
-  ) {
+  constructor(@inject('EmporixPriceApi') priceApi: PriceApi, @inject('EmporixPriceMapper') mapper: PriceMapper) {
     this.priceApi = priceApi;
     this.mapper = mapper;
-    this.commonUtil = commonUtil;
   }
 
   async getProductPrice(
     productId: string,
-    unitCode: string,
-    quantity: number,
+    unitCode?: string,
+    quantity: number = 1,
     params?: { currency?: string; country?: string; siteCode?: string },
-  ): Promise<Price | null> {
+  ): Promise<ProductPrice | null> {
     const items = [this.mapToMatchPriceItem(productId, unitCode, quantity)];
     let matchedPrices: MatchedPrice[];
     if (!params) {
@@ -60,7 +53,7 @@ class EmporixPriceService implements PriceService {
    * @param quantity The quantity information
    * @returns A PriceMatchItem
    */
-  private mapToMatchPriceItem(productId: string, unitCode: string, quantity: number): PriceMatchItem {
+  private mapToMatchPriceItem(productId: string, unitCode?: string, quantity: number = 1): PriceMatchItem {
     return {
       itemId: {
         itemType: 'PRODUCT',

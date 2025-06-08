@@ -1,32 +1,29 @@
 'use client';
 
 import React from 'react';
-
-interface PriceTier {
-  quantity: number;
-  price: number;
-}
+import { ProductPrice } from '@/platform/services/model/price/price';
 
 interface ProductPriceProps {
-  price: number;
-  tiers: PriceTier[];
+  price: ProductPrice;
 }
 
-export function ProductPriceComponent({ price, tiers }: ProductPriceProps) {
+export function ProductPriceComponent({ price }: ProductPriceProps) {
   return (
     <div className="mt-4">
       <h2 className="text-3xl font-bold text-neutral-900">
-        ${Math.floor(price)}
-        <span className="text-lg align-top">.{(price % 1).toFixed(2).substring(2)}</span>
+        ${Math.floor(price.effectiveValue)}
+        <span className="text-lg align-top">.{(price.effectiveValue % 1).toFixed(2).substring(2)}</span>
       </h2>
-      <div className="mt-2 space-y-2">
-        {tiers.map((tier, index) => (
-          <div key={index} className="flex items-center text-sm text-neutral-500">
-            <span className="font-medium mr-2">{tier.quantity}+</span>
-            <span>${tier.price.toFixed(2)}</span>
-          </div>
-        ))}
-      </div>
+      {price.tierValues?.length > 0 && (
+        <div className="mt-2 space-y-2">
+          {price.tierValues.map((tier, index) => (
+            <div key={index} className="flex items-center text-sm text-neutral-500">
+              <span className="font-medium mr-2">{tier.id}+</span>
+              <span>${tier.price.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
