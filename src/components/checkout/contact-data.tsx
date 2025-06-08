@@ -4,10 +4,10 @@ import React, { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { useValidator } from '@/hooks/validation/useValidator';
 import { ContactData } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
-import { useValidator } from '@/hooks/validation/useValidator';
 
 interface ContactDataProps {
   initialData?: Partial<ContactData>;
@@ -22,11 +22,7 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ isReadOnly = false, 
   const t = useTranslations('Checkout');
   const { submitContactData, contactData } = useCheckout();
 
-  const { form } = useValidator(
-    'ContactDataValidationService',
-    initialData || contactData,
-    'onBlur'
-  );
+  const { form } = useValidator('ContactDataValidationService', initialData || contactData, 'onBlur');
 
   // Watch form state to detect when all fields are valid
   const formState = form.formState;
@@ -34,7 +30,7 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ isReadOnly = false, 
     if (!formState.isValidating && formState.isValid) {
       submitContactData(form.getValues());
     }
-  }, [formState.isValidating, formState.isValid]);
+  });
 
   return (
     <FormProvider {...form}>

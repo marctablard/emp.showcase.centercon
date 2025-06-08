@@ -1,4 +1,4 @@
-import { ShippingMethod, FindSiteRequest } from '../model/shipping';
+import { EmporixShippingMethod } from '../model/shipping';
 
 /**
  * Service for shipping operations
@@ -9,12 +9,12 @@ export interface ShippingService {
    * @param countryCode The country code
    * @param postalCode The postal code
    */
-  getShippingMethods(countryCode: string, postalCode: string): Promise<ShippingMethod[]>;
-  
+  getShippingMethods(countryCode: string, postalCode: string): Promise<EmporixShippingMethod[]>;
+
   /**
    * Get a shipping method by ID
    * @param methodId The method ID
    * @param zoneId The zone ID
    */
-  getShippingMethod(methodId: string, zoneId: string): Promise<ShippingMethod | undefined>;
+  getShippingMethod(methodId: string, zoneId: string): Promise<EmporixShippingMethod | null>;
 }

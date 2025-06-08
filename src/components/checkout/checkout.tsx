@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { useCustomer } from '@/hooks/customer/useCustomer';
 import Addresses from './checkout-addresses';
 import ContactData from './contact-data';
 import OrderSummary from './order-summary';
 import PaymentMethodComponent from './payment-method';
 import ShippingMethod from './shipping-method';
-import { useCustomer } from '@/hooks/customer/useCustomer';
 
 interface CheckoutProps {
   onComplete?: (orderId: string) => void;
@@ -21,7 +21,7 @@ interface CheckoutProps {
  */
 const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   const { processCheckout, loading, error, orderResponse, checkoutCart } = useCheckout();
-  const { customer, loading: customerLoading, error: customerError } = useCustomer();
+  const { customer, loading: customerLoading } = useCustomer();
   const router = useRouter();
   const t = useTranslations('Checkout');
 
@@ -40,7 +40,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
       }
     }
   }, [orderResponse, onComplete, router]);
-
 
   if (customerLoading || loading) {
     return (
@@ -74,10 +73,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
       )}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-        {/* Customer Information */}
-          {!customer && (
-            <ContactData />
-          )}
+          {/* Customer Information */}
+          {!customer && <ContactData />}
 
           {/* Addresses */}
           <Addresses />

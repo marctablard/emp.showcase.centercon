@@ -1,10 +1,9 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { ShippingService } from '../ShippingService';
-import { ShippingMethod } from '../../model/shipping';
+import { EmporixShippingMethod } from '@/platform/integrations/emporix/model/shipping';
 import type { ShippingApi } from '@/platform/integrations/emporix/shipping/ShippingApi';
 import type { ShippingMapper } from '../../model/shipping/ShippingMapper';
-import { ShippingMethod as EmporixShippingMethod } from '@/platform/integrations/emporix/model/shipping';
+import { ShippingService } from '../ShippingService';
 
 /**
  * Implementation of ShippingService for Emporix shipping data
@@ -13,7 +12,7 @@ import { ShippingMethod as EmporixShippingMethod } from '@/platform/integrations
 class EmporixShippingService implements ShippingService {
   private shippingApi: ShippingApi;
   private shippingMapper: ShippingMapper;
-  
+
   // Default site ID - in a real application, this might be configurable
   private defaultSiteId = 'main';
 
@@ -25,7 +24,7 @@ class EmporixShippingService implements ShippingService {
     this.shippingMapper = shippingMapper;
   }
 
-  async getShippingMethods(countryCode: string, postalCode: string): Promise<ShippingMethod[]> {
+  async getShippingMethods(countryCode: string, postalCode: string): Promise<EmporixShippingMethod[]> {
     try {
       // Find site based on location
       const sites = await this.shippingApi.findSite({
@@ -39,7 +38,7 @@ class EmporixShippingService implements ShippingService {
 
       // Get the first site
       const site = sites[0];
-      const methods: ShippingMethod[] = [];
+      const methods: EmporixShippingMethod[] = [];
 
       // Collect all shipping methods from all zones
       for (const zone of site.zones) {
@@ -57,10 +56,10 @@ class EmporixShippingService implements ShippingService {
     }
   }
 
-  async getShippingMethod(methodId: string, zoneId: string): Promise<ShippingMethod | undefined> {
+  async getShippingMethod(methodId: string, zoneId: string): Promise<EmporixShippingMethod | undefined> {
     try {
       const emporixMethod = await this.shippingApi.getShippingMethod(this.defaultSiteId, zoneId, methodId);
-      
+
       if (!emporixMethod) {
         return undefined;
       }

@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Order } from '@/platform/services/model/order/order';
 import { useOrder } from '@/hooks/order';
 import { formatCurrency } from '@/lib/utils';
+import { Order } from '@/platform/services/model/order/order';
 
 interface OrderConfirmationProps {
   orderId: string;
@@ -20,7 +21,7 @@ interface OrderConfirmationProps {
 const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialOrder, customerEmail }) => {
   const t = useTranslations('Confirmation');
   const { order, loading, error } = useOrder({ orderId, initialOrder });
-  
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="text-center mb-8">
@@ -65,7 +66,9 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
 
               <div>
                 <p className="text-sm text-gray-600 mb-1">{t('orderDate')}</p>
-                <p className="font-medium">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</p>
+                <p className="font-medium">
+                  {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
+                </p>
               </div>
 
               {customerEmail && (
@@ -82,13 +85,15 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
 
               <div>
                 <p className="text-sm text-gray-600 mb-1">{t('paymentMethod')}</p>
-                <p className="font-medium">{order.payments && order.payments[0]?.method || 'Credit Card'}</p>
+                <p className="font-medium">{(order.payments && order.payments[0]?.method) || 'Credit Card'}</p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600 mb-1">{t('total')}</p>
                 <p className="font-medium">
-                  {order.price?.total?.gross ? formatCurrency(order.price.total.gross, order.price.total.currency || order.currency || 'EUR') : ''}
+                  {order.price?.total?.gross
+                    ? formatCurrency(order.price.total.gross, order.price.total.currency || order.currency || 'EUR')
+                    : ''}
                 </p>
               </div>
             </div>
@@ -98,22 +103,26 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
           {order.items && order.items.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">{t('orderItems')}</h2>
-              
+
               <div className="divide-y divide-gray-200">
                 {order.items.map((item) => (
                   <div key={item.id} className="py-4 flex flex-wrap md:flex-nowrap">
                     <div className="md:w-16 md:h-16 w-full h-24 bg-gray-100 rounded mb-4 md:mb-0 md:mr-4 flex-shrink-0">
                       {item.images && item.images[0] && (
-                        <img 
-                          src={item.images[0]} 
-                          alt={item.name || ''} 
+                        <Image
+                          src={item.images[0]}
+                          alt={item.name || ''}
+                          width={150}
+                          height={150}
                           className="w-full h-full object-cover rounded"
                         />
                       )}
                     </div>
                     <div className="flex-grow">
                       <h3 className="font-medium">{item.name || `Product ${item.productId}`}</h3>
-                      <p className="text-sm text-gray-500">{t('quantity')}: {item.quantity}</p>
+                      <p className="text-sm text-gray-500">
+                        {t('quantity')}: {item.quantity}
+                      </p>
                       <p className="text-sm font-medium">
                         {item.price?.value ? formatCurrency(item.price.value, item.price.currency) : ''}
                       </p>
@@ -127,19 +136,26 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">{t('subtotal')}</span>
                   <span className="font-medium">
-                    {order.price?.subtotal?.gross ? formatCurrency(order.price.subtotal.gross, order.currency || 'EUR') : ''}
+                    {order.price?.subtotal?.gross
+                      ? formatCurrency(order.price.subtotal.gross, order.currency || 'EUR')
+                      : ''}
                   </span>
                 </div>
-                
+
                 {order.shipping && (
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">{t('shipping')}</span>
                     <span className="font-medium">
-                      {order.shipping.total?.value ? formatCurrency(order.shipping.total.value, order.shipping.total.currency || order.currency || 'EUR') : t('free')}
+                      {order.shipping.total?.value
+                        ? formatCurrency(
+                            order.shipping.total.value,
+                            order.shipping.total.currency || order.currency || 'EUR',
+                          )
+                        : t('free')}
                     </span>
                   </div>
                 )}
-                
+
                 {order.discounts && order.discounts.length > 0 && (
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">{t('discount')}</span>
@@ -148,7 +164,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                     </span>
                   </div>
                 )}
-                
+
                 <div className="flex justify-between pt-2 border-t border-gray-200">
                   <span className="font-medium">{t('total')}</span>
                   <span className="font-bold">
@@ -158,7 +174,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
               </div>
             </div>
           )}
-          
+
           {/* Shipping Address */}
           {order.shippingAddress && (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
@@ -167,7 +183,9 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                 <p>{order.shippingAddress.contactName}</p>
                 <p>{order.shippingAddress.street}</p>
                 {order.shippingAddress.streetNumber && <p>{order.shippingAddress.streetNumber}</p>}
-                <p>{order.shippingAddress.zipCode} {order.shippingAddress.city}</p>
+                <p>
+                  {order.shippingAddress.zipCode} {order.shippingAddress.city}
+                </p>
                 <p>{order.shippingAddress.country}</p>
               </address>
             </div>

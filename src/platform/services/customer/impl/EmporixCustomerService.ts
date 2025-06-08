@@ -1,9 +1,9 @@
-import { CustomerService } from '../CustomerService';
-import { Customer } from '../../model/customer/customer';
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type { CustomerApi } from '@/platform/integrations/emporix/customer/CustomerApi';
 import type { SessionContextApi } from '@/platform/integrations/emporix/session/SessionContextApi';
+import { Customer } from '../../model/customer/customer';
+import { CustomerService } from '../CustomerService';
 
 /**
  * Emporix implementation of the CustomerService
@@ -11,8 +11,10 @@ import type { SessionContextApi } from '@/platform/integrations/emporix/session/
  */
 @injectable('CustomerService', 'Singleton')
 export class EmporixCustomerService implements CustomerService {
-  constructor(@inject('EmporixCustomerApi') private customerApi: CustomerApi, 
-  @inject('EmporixSessionContextApi') private sessionContextApi: SessionContextApi) {
+  constructor(
+    @inject('EmporixCustomerApi') private customerApi: CustomerApi,
+    @inject('EmporixSessionContextApi') private sessionContextApi: SessionContextApi,
+  ) {
     this.customerApi = customerApi;
     this.sessionContextApi = sessionContextApi;
   }
@@ -23,7 +25,6 @@ export class EmporixCustomerService implements CustomerService {
    */
   async getCurrentCustomer(): Promise<Customer | null> {
     try {
-      const session = await this.sessionContextApi.getOwnSessionContext();
       const response = await this.customerApi.getCustomerProfile();
       return {
         id: response.id,

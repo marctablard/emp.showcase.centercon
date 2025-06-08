@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { useSiteStore } from '@/stores/site-store';
 
@@ -9,7 +9,7 @@ interface UseShippingMethods {
   shippingMethods: ShippingMethod[];
   loading: boolean;
   error: Error | null;
-  
+
   // Actions
   fetchShippingMethods: (countryCode: string, postalCode: string) => Promise<void>;
   clearShippingMethods: () => void;
@@ -28,9 +28,9 @@ export const useShippingMethods = (): UseShippingMethods => {
     setShippingMethods,
     setShippingMethodsLoading,
   } = useSiteStore();
-  
+
   const [error, setError] = useState<Error | null>(null);
-  
+
   /**
    * Fetch shipping methods for a given country and postal code
    */
@@ -39,10 +39,10 @@ export const useShippingMethods = (): UseShippingMethods => {
       if (!countryCode || !postalCode) {
         return;
       }
-      
+
       setError(null);
       setShippingMethodsLoading(true);
-      
+
       try {
         const { getShippingMethods } = await import('@/lib/client/shipping');
         const methods = await getShippingMethods(countryCode, postalCode);
@@ -54,16 +54,16 @@ export const useShippingMethods = (): UseShippingMethods => {
         setShippingMethodsLoading(false);
       }
     },
-    [setShippingMethods, setShippingMethodsLoading]
+    [setShippingMethods, setShippingMethodsLoading],
   );
-  
+
   /**
    * Clear shipping methods from the store
    */
   const clearShippingMethods = useCallback(() => {
     setShippingMethods([]);
   }, [setShippingMethods]);
-  
+
   /**
    * Get a shipping method by its ID
    */
@@ -71,9 +71,9 @@ export const useShippingMethods = (): UseShippingMethods => {
     (id: string): ShippingMethod | undefined => {
       return storeMethods.find((method) => method.id === id);
     },
-    [storeMethods]
+    [storeMethods],
   );
-  
+
   return {
     shippingMethods: storeMethods,
     loading: storeLoading,

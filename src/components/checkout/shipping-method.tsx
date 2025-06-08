@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { Loader2 } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { useShippingMethods } from '@/hooks/shipping/useShippingMethods';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { Shipping } from '@/platform/services/model/checkout';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
-import { useShippingMethods } from '@/hooks/shipping/useShippingMethods';
-import { Loader2 } from 'lucide-react';
-import { FormProvider } from 'react-hook-form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 interface ShippingMethodProps {
   isReadOnly?: boolean;
@@ -25,14 +25,14 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
   const { shippingMethods, loading, fetchShippingMethods } = useShippingMethods();
   const { form } = useValidator('ShippingValidationService', shippingMethod, 'onChange');
   const t = useTranslations('Checkout');
-  
+
   // Fetch shipping methods when the component mounts if we have an address
   useEffect(() => {
     if (shippingAddress?.country && shippingAddress?.zipCode) {
       fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode);
     }
   }, [shippingAddress, fetchShippingMethods]);
-  
+
   // If we have methods and none is selected yet, select the first one
   useEffect(() => {
     if (shippingMethods.length > 0 && !shippingMethod) {
@@ -61,7 +61,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
         });
       }
     }
-  }, [formState.isValidating, formState.isValid]);
+  });
 
   return (
     <FormProvider {...form}>
@@ -92,10 +92,11 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                   {shippingMethods.map((method) => (
                     <FormItem className="flex items-center space-x-3 space-y-0 w-full" key={method.id}>
                       <div
-                        className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${shippingMethod?.methodId === method.id
-                          ? 'border-primary-500 bg-primary-50'
-                          : 'border-neutral-200 hover:border-primary-300'
-                          } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
+                        className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${
+                          shippingMethod?.methodId === method.id
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-neutral-200 hover:border-primary-300'
+                        } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
                       >
                         <FormControl>
                           <RadioGroupItem value={method.id} id={method.id} />
@@ -104,8 +105,9 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                           <div className="flex items-start justify-between w-full">
                             <div className="flex items-center space-x-3">
                               <div
-                                className={`flex items-center justify-center ${shippingMethod?.methodId === method.id ? 'border-primary-600' : 'border-neutral-300'
-                                  }`}
+                                className={`flex items-center justify-center ${
+                                  shippingMethod?.methodId === method.id ? 'border-primary-600' : 'border-neutral-300'
+                                }`}
                               >
                                 {shippingMethod?.methodId === method.id && (
                                   <div className="w-3 h-3 rounded-full bg-primary-600"></div>
@@ -121,11 +123,13 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                                 {method.cost === 0
                                   ? t('freeShipping')
                                   : new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: method.currency || 'USD',
-                                  }).format(method.cost)}
+                                      style: 'currency',
+                                      currency: method.currency || 'USD',
+                                    }).format(method.cost)}
                               </span>
-                              <p className="text-xs text-neutral-500">{method.estimatedDelivery || t('estimatedDelivery')}</p>
+                              <p className="text-xs text-neutral-500">
+                                {method.estimatedDelivery || t('estimatedDelivery')}
+                              </p>
                             </div>
                           </div>
                         </FormLabel>

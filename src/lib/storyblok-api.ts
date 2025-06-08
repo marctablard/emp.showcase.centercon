@@ -5,9 +5,9 @@ import { getStoryblokApi } from '@/lib/storyblok';
 /**
  * Fetch data from Storyblok
  */
-export async function fetchStoryblokData(slug: string = 'home') : Promise<{ data: ISbResult }> {
-  let sbParams: ISbStoriesParams = { 
-    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft'
+export async function fetchStoryblokData(slug: string = 'home'): Promise<{ data: ISbResult }> {
+  const sbParams: ISbStoriesParams = {
+    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft',
   };
 
   const storyblokApi: StoryblokClient = getStoryblokApi();

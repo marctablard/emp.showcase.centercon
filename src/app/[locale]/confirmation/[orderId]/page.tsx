@@ -23,17 +23,12 @@ export async function generateMetadata({ params }: { params: Promise<Confirmatio
 export default async function ConfirmationPage({ params }: { params: Promise<ConfirmationPageProps> }) {
   // In a real application, we would fetch the order details from the API
   // For now, we'll use a placeholder cart
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { orderId } = await params;
   const order = await getOrderById(orderId);
 
   return (
     <main className="min-h-screen bg-gray-50 py-8">
-      <OrderConfirmation 
-        orderId={orderId}
-        initialOrder={order}
-        customerEmail="customer@example.com"
-      />
+      <OrderConfirmation orderId={orderId} initialOrder={order} customerEmail="customer@example.com" />
     </main>
   );
 }

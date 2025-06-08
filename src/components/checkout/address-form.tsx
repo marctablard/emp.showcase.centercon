@@ -3,11 +3,11 @@
 import React, { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { useValidator } from '@/hooks/validation/useValidator';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { useValidator } from '@/hooks/validation/useValidator';
 
 interface AddressFormProps {
   initialData?: Partial<Omit<CheckoutAddress, 'type'>>;
@@ -20,22 +20,17 @@ interface AddressFormProps {
  * Can be used for both shipping and billing addresses
  */
 const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialData, onDataChange }) => {
-    const t = useTranslations('Checkout');
+  const t = useTranslations('Checkout');
 
-    const { form } = useValidator(
-      'AddressValidationService',
-      initialData,
-      'onBlur'
-    );
-  
-    // Watch form state to detect when all fields are valid
-    const formState = form.formState;
-    useEffect(() => {
-      if (!formState.isValidating && formState.isValid) {
-        onDataChange(form.getValues());
-      }
-    }, [formState.isValidating, formState.isValid]);
-  
+  const { form } = useValidator('AddressValidationService', initialData, 'onBlur');
+
+  // Watch form state to detect when all fields are valid
+  const formState = form.formState;
+  useEffect(() => {
+    if (!formState.isValidating && formState.isValid) {
+      onDataChange(form.getValues());
+    }
+  });
 
   // Common countries list - can be expanded or fetched from an API
   const countries = [
@@ -149,7 +144,13 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
                   <FormLabel>{t('country')}*</FormLabel>
                   <FormControl>
                     {/*trigger field change AND form validation */}
-                    <Select onValueChange={(e) => {field.onChange(e); field.onBlur()}} defaultValue={field.value}>
+                    <Select
+                      onValueChange={(e) => {
+                        field.onChange(e);
+                        field.onBlur();
+                      }}
+                      defaultValue={field.value}
+                    >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder={t('country')} />
                       </SelectTrigger>
