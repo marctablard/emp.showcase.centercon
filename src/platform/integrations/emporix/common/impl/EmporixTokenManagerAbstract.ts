@@ -1,13 +1,16 @@
 import { StoredToken } from '@platform/integrations/types/auth';
+import { inject } from 'inversify';
 import type {
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
-import { checkTokenValidity } from '../util/common';
 import type { OAuthApi } from '../../oauth/OAuthApi';
 import { TokenManager } from '../TokenManager';
-import { inject } from 'inversify';
+import { checkTokenValidity } from '../util/common';
+
+// TODO configurable
+const STORAGE_PREFIX = 'emporix-token';
 
 export interface TokenStore {
   anonymousToken?: StoredToken<EmporixAnonymousTokenResponse>;
@@ -18,17 +21,20 @@ export interface TokenStore {
 export abstract class EmporixTokenManagerAbstract implements TokenManager {
   constructor(@inject('EmporixOAuthApi') private oauthApi: OAuthApi) {}
 
+  abstract clearTokens(tenant: string): void;
+
   async getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string; sessionId: string }> {
     let anonymousToken = await this.readToken<
       StoredToken<EmporixAnonymousTokenResponse>,
       EmporixAnonymousTokenResponse
-    >('anonymous');
+    >('anonymous', tenant);
     // Check if token is expired or about to expire (within 5 minutes)
     if (!this.checkAccessToken(anonymousToken)) {
       anonymousToken = await this.fetchAnonymousToken(anonymousToken, tenant, clientId);
       await this.writeToken<StoredToken<EmporixAnonymousTokenResponse>, EmporixAnonymousTokenResponse>(
         'anonymous',
         anonymousToken,
+        tenant,
       );
     }
     return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
@@ -73,10 +79,12 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
       await this.writeToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
         'customer',
         customerToken,
+        tenant,
       );
     } else {
       customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
         'customer',
+        tenant,
       );
       // Check if token is expired or about to expire (within 5 minutes)
       if (!this.checkAccessToken(customerToken)) {
@@ -84,6 +92,7 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
         await this.writeToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
           'customer',
           customerToken,
+          tenant,
         );
       }
     }
@@ -155,6 +164,7 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
   ): Promise<string> {
     let serviceToken = await this.readToken<StoredToken<EmporixAccessTokenResponse>, EmporixAccessTokenResponse>(
       'service',
+      tenant,
     );
     // Check if token is expired or about to expire (within 5 minutes)
     if (!this.checkAccessToken(serviceToken)) {
@@ -166,16 +176,17 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
       await this.writeToken<StoredToken<EmporixAccessTokenResponse>, EmporixAccessTokenResponse>(
         'service',
         serviceToken,
+        tenant,
       );
     }
     return serviceToken!.token.access_token;
   }
-  public abstract clearTokens(): void;
 
   protected async readToken<T extends StoredToken<K>, K>(
     type: 'anonymous' | 'customer' | 'service',
+    tenant: string,
   ): Promise<T | undefined> {
-    const tokens = await this.readTokens();
+    const tokens = await this.readTokens(tenant);
     switch (type) {
       case 'anonymous':
         return tokens.anonymousToken as T;
@@ -189,8 +200,9 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
   protected async writeToken<T extends StoredToken<K>, K>(
     type: 'anonymous' | 'customer' | 'service',
     token: T | undefined,
+    tenant: string,
   ): Promise<void> {
-    const tokenStore: TokenStore = await this.readTokens();
+    const tokenStore: TokenStore = await this.readTokens(tenant);
     switch (type) {
       case 'anonymous':
         tokenStore.anonymousToken = token as StoredToken<EmporixAnonymousTokenResponse>;
@@ -202,7 +214,7 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
         tokenStore.serviceToken = token as StoredToken<EmporixAccessTokenResponse>;
         break;
     }
-    return this.writeTokens(tokenStore);
+    return this.writeTokens(tokenStore, tenant);
   }
 
   protected checkAccessToken(storedToken?: StoredToken<EmporixAccessTokenResponse> | undefined): boolean {
@@ -212,6 +224,10 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
     return storedToken.token && checkTokenValidity(storedToken.token.access_token, storedToken.expiryAt);
   }
 
-  protected abstract readTokens(): Promise<TokenStore>;
-  protected abstract writeTokens(tokens: TokenStore): Promise<void>;
+  buildStorageKey(tenant: string): string {
+    return `${STORAGE_PREFIX}_${tenant}`;
+  }
+
+  protected abstract readTokens(tenant: string): Promise<TokenStore>;
+  protected abstract writeTokens(tokens: TokenStore, tenant: string): Promise<void>;
 }

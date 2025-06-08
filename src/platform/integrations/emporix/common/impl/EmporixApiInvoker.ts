@@ -135,7 +135,7 @@ class EmporixApiInvoker {
    * Clear all stored tokens
    */
   async clearTokens(): Promise<void> {
-    this.tokenManager.clearTokens();
+    this.tokenManager.clearTokens(this.config.tenant);
   }
 }
 export default EmporixApiInvoker;
