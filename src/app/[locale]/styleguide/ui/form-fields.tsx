@@ -7,6 +7,7 @@ import { Eye, User } from 'lucide-react';
 import z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ColorFilter } from '@/components/ui/color-filter';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -396,6 +397,11 @@ export default function FormFieldsSytelguideComponent() {
               </div>
               <div className="flex flex-col gap-2">
                 <FormLabel>Color Filter</FormLabel>
+                <ColorFilter className="bg-orange-700" color="Color 1" />
+                <ColorFilter className="bg-green-900" color="Color 2" />
+                <ColorFilter className="bg-red-400" color="Color 3" />
+                <ColorFilter className="bg-purple-400" color="Color 4" />
+                <ColorFilter className="bg-primary-500" color="Color 5" />
               </div>
             </form>
           </Form>

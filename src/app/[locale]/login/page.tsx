@@ -7,7 +7,6 @@ export default async function Login({ params }: { params: Promise<{ locale: stri
   return (
     <div className="flex flex-col items-center">
       <LoginCard callbackUrl={callbackUrl} />
-      <ButtonStyleGuide />
       <FormFieldStyleGuide />
     </div>
   );
