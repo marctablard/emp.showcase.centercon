@@ -1,24 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronDown, Eye, User } from 'lucide-react';
+import { Eye, User } from 'lucide-react';
 import z from 'zod';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormIcon,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Rating } from '@/components/ui/rating';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 
 const FormSchemaInput = z.object({
@@ -36,11 +31,12 @@ const FormSchemaValidate = z.object({
   checkboxes: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one item.',
   }),
+  radio: z.enum(['all', 'mentions', 'none'], {
+    required_error: 'You need to select a notification type.',
+  }),
 });
 
 export default function FormFieldsSytelguideComponent() {
-  const [disabled, setDisabled] = useState(false);
-
   const form = useForm<z.infer<typeof FormSchemaInput>>({
     resolver: zodResolver(FormSchemaInput),
     defaultValues: {
@@ -62,6 +58,28 @@ export default function FormFieldsSytelguideComponent() {
     },
     mode: 'all',
   });
+
+  const checkboxItems = [
+    {
+      id: 'recents',
+      label: 'Recents',
+    },
+    {
+      id: 'home',
+      label: 'Home',
+    },
+    {
+      id: 'applications',
+      label: 'Applications',
+    },
+    {
+      id: 'desktop',
+      label: 'Desktop',
+    },
+  ] as const;
+
+  const [value, setValue] = React.useState([30, 80]);
+  const [valueDis, setValueDis] = React.useState([10, 90]);
 
   function onSubmit(data: z.infer<typeof FormSchemaValidate>) {
     console.log(JSON.stringify(data, null, 2));
@@ -94,7 +112,7 @@ export default function FormFieldsSytelguideComponent() {
                 name="noIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl validate>
+                    <FormControl>
                       <Input placeholder="Username" {...field} />
                     </FormControl>
                     <FormMessage />
@@ -109,8 +127,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="rightIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl validate endIcon={Eye}>
-                      <Input placeholder="Username" {...field} />
+                    <FormControl>
+                      <Input placeholder="Username" endIcon={Eye} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -124,8 +142,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="leftIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl validate startIcon={User}>
-                      <Input placeholder="Username" {...field} />
+                    <FormControl>
+                      <Input placeholder="Username" startIcon={User} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,8 +157,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="bothIcon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl validate startIcon={User} endIcon={Eye}>
-                      <Input placeholder="Username" {...field} />
+                    <FormControl>
+                      <Input placeholder="Username" startIcon={User} endIcon={Eye} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -154,8 +172,8 @@ export default function FormFieldsSytelguideComponent() {
                 name="disabled"
                 render={({ field }) => (
                   <FormItem>
-                    <FormControl validate startIcon={User} endIcon={Eye}>
-                      <Input placeholder="Username" disabled {...field} />
+                    <FormControl>
+                      <Input placeholder="Username" startIcon={User} endIcon={Eye} disabled {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -179,8 +197,8 @@ export default function FormFieldsSytelguideComponent() {
                     <FormItem>
                       <FormLabel>Input Field</FormLabel>
                       <FormDescription>Username must be at least 3 characters.</FormDescription>
-                      <FormControl validate startIcon={User} endIcon={Eye}>
-                        <Input placeholder="Username" {...field} />
+                      <FormControl>
+                        <Input placeholder="Username" startIcon={User} endIcon={Eye} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -212,23 +230,27 @@ export default function FormFieldsSytelguideComponent() {
                       <FormLabel>Select Field</FormLabel>
                       <FormDescription>Username must be at least 3 characters.</FormDescription>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl isDropdown>
-                          <SelectTrigger>
-                            <FormIcon startIcon={User} endIcon={ChevronDown} isDropdown>
-                              <SelectValue placeholder="Placeholder" />
-                            </FormIcon>
+                        <FormControl>
+                          <SelectTrigger startIcon={User}>
+                            <SelectValue placeholder="Placeholder" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <FormIcon startIcon={User} endIcon={Eye} isSelectItem>
-                            <SelectItem value="mexample.com">No email</SelectItem>
-                          </FormIcon>
-                          <FormIcon startIcon={User} endIcon={Eye} isSelectItem>
-                            <SelectItem value="m@google.com">m@email.com</SelectItem>
-                          </FormIcon>
-                          <FormIcon startIcon={User} endIcon={Eye} isSelectItem>
-                            <SelectItem value="m@support.com">m@email.com</SelectItem>
-                          </FormIcon>
+                          <SelectItem value="nomail" startIcon={User} endIcon={Eye}>
+                            No email
+                          </SelectItem>
+                          <SelectItem value="abc@google.com" startIcon={User} endIcon={Eye}>
+                            abc@email.com
+                          </SelectItem>
+                          <SelectItem value="def@google.com" startIcon={User} endIcon={Eye}>
+                            def@email.com
+                          </SelectItem>
+                          <SelectItem value="ghi@google.com" startIcon={User} endIcon={Eye}>
+                            ghi@email.com
+                          </SelectItem>
+                          <SelectItem value="jkl@support.com" startIcon={User} endIcon={Eye}>
+                            jkl@email.com
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -244,40 +266,136 @@ export default function FormFieldsSytelguideComponent() {
                     <FormItem>
                       <FormLabel>Checkbox</FormLabel>
                       <FormDescription>Select the items you want</FormDescription>
+
+                      {checkboxItems.map((item) => (
+                        <FormField
+                          key={item.id}
+                          control={formVal.control}
+                          name="checkboxes"
+                          render={({ field }) => {
+                            return (
+                              <FormItem key={item.id} className="flex flex-row items-center gap-2">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, item.id])
+                                        : field.onChange(field.value?.filter((value) => value !== item.id));
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">{item.label}</FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+
                       <FormField
-                        key="home"
+                        key="indeterminate"
                         control={formVal.control}
                         name="checkboxes"
                         render={({ field }) => {
                           return (
-                            <FormItem key="home" className="flex flex-row items-center gap-2">
+                            <FormItem key="indeterminate" className="flex flex-row items-center gap-2">
                               <FormControl>
-                                <Checkbox checked={field.value?.includes('home')} />
+                                <Checkbox checked={'indeterminate'} />
                               </FormControl>
-                              <FormLabel htmlFor="home">Home</FormLabel>
+                              <FormLabel className="font-normal">Indeterminate</FormLabel>
                             </FormItem>
                           );
                         }}
                       />
+
                       <FormField
-                        key="desktop"
+                        key="disabled"
                         control={formVal.control}
                         name="checkboxes"
-                        render={({ field }) => {
+                        render={({}) => {
                           return (
-                            <FormItem key="desktop" className="flex flex-row items-center gap-2">
+                            <FormItem key="disabled" className="flex flex-row items-center gap-2">
                               <FormControl>
-                                <Checkbox checked={field.value?.includes('desktop')} />
+                                <Checkbox disabled />
                               </FormControl>
-                              <FormLabel htmlFor="desktop">Desktop</FormLabel>
+                              <FormLabel className="font-normal">Disabled</FormLabel>
                             </FormItem>
                           );
                         }}
                       />
+
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
+              <div className="flex flex-col gap-2">
+                <FormField
+                  control={formVal.control}
+                  name="radio"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Radio Buttons</FormLabel>
+                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col">
+                        <FormItem className="flex items-center gap-3">
+                          <FormControl>
+                            <RadioGroupItem value="all" />
+                          </FormControl>
+                          <FormLabel className="font-normal">All new messages</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center gap-3">
+                          <FormControl>
+                            <RadioGroupItem value="mentions" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Direct messages and mentions</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center gap-3">
+                          <FormControl>
+                            <RadioGroupItem value="none" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Nothing</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center gap-3">
+                          <FormControl>
+                            <RadioGroupItem value="wrong" checked />
+                          </FormControl>
+                          <FormLabel className="font-normal">Wrong One</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center gap-3">
+                          <FormControl>
+                            <RadioGroupItem value="disabled" disabled />
+                          </FormControl>
+                          <FormLabel className="font-normal">Disabled</FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                      <FormMessage />
+                      <Button type="submit">Submit</Button>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <FormLabel>Slider</FormLabel>
+                <div className="w-full max-w-sm mx-auto">
+                  <div className="w-full flex items-center justify-between gap-2">
+                    <Slider value={value} onValueChange={setValue} max={100} step={1} />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <FormLabel>Slider Disabled</FormLabel>
+                <div className="w-full max-w-sm mx-auto">
+                  <div className="w-full flex items-center justify-between gap-2">
+                    <Slider value={valueDis} onValueChange={setValueDis} max={100} step={1} disabled />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <FormLabel>Rating</FormLabel>
+                <Rating count={1}></Rating>
+              </div>
+              <div className="flex flex-col gap-2">
+                <FormLabel>Color Filter</FormLabel>
               </div>
             </form>
           </Form>
