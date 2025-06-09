@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { useSite } from '@/hooks/site/useSite';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Spinner } from '../ui/spinner';
 
 interface AddressFormProps {
   initialData?: Partial<Omit<CheckoutAddress, 'type'>>;
@@ -20,30 +22,16 @@ interface AddressFormProps {
  * Can be used for both shipping and billing addresses
  */
 const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialData, onDataChange }) => {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('Address');
+  const { form } = useValidator('AddressValidationService', initialData, 'onBlur', onDataChange);
+  const { countries, loading, fetchSiteData } = useSite();
 
-  const { form } = useValidator('AddressValidationService', initialData, 'onBlur');
-
-  // Watch form state to detect when all fields are valid
-  const formState = form.formState;
+  // Fetch countries when component mounts
   useEffect(() => {
-    if (!formState.isValidating && formState.isValid) {
-      onDataChange(form.getValues());
+    if (countries === undefined) {
+      fetchSiteData();
     }
-  });
-
-  // Common countries list - can be expanded or fetched from an API
-  const countries = [
-    { code: 'US', name: 'United States' },
-    { code: 'CA', name: 'Canada' },
-    { code: 'GB', name: 'United Kingdom' },
-    { code: 'DE', name: 'Germany' },
-    { code: 'FR', name: 'France' },
-    { code: 'ES', name: 'Spain' },
-    { code: 'IT', name: 'Italy' },
-    { code: 'JP', name: 'Japan' },
-    { code: 'AU', name: 'Australia' },
-  ];
+  }, [fetchSiteData, countries]);
 
   return (
     <FormProvider {...form}>
@@ -136,37 +124,47 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('country')}*</FormLabel>
-                  <FormControl>
-                    {/*trigger field change AND form validation */}
-                    <Select
-                      onValueChange={(e) => {
-                        field.onChange(e);
-                        field.onBlur();
-                      }}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder={t('country')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {loading ? (
+              <div className="flex justify-center p-2">
+                <Spinner variant="sm" />
+              </div>
+            ) : countries && countries.length > 0 ? (
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('country')}*</FormLabel>
+                    <FormControl>
+                      {/*trigger field change AND form validation */}
+                      <Select
+                        onValueChange={(e) => {
+                          field.onChange(e);
+                          field.onBlur();
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder={t('country')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {typeof country.name === 'string'
+                                ? country.name
+                                : country.name.en || Object.values(country.name)[0]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <p>{t('noCountriesAvailable')}</p>
+            )}
           </div>
 
           <div>

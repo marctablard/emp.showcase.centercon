@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { Loader2 } from 'lucide-react';
+import { sub } from 'date-fns';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useShippingMethods } from '@/hooks/shipping/useShippingMethods';
+import { useSite } from '@/hooks/site/useSite';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { Shipping } from '@/platform/services/model/checkout';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Spinner } from '../ui/spinner';
 
 interface ShippingMethodProps {
   isReadOnly?: boolean;
@@ -22,46 +24,34 @@ interface ShippingMethodProps {
  */
 const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) => {
   const { shippingMethod, submitShippingMethod, shippingAddress } = useCheckout();
-  const { shippingMethods, loading, fetchShippingMethods } = useShippingMethods();
-  const { form } = useValidator('ShippingValidationService', shippingMethod, 'onChange');
-  const t = useTranslations('Checkout');
+  const { shippingMethods, loading: loading, fetchShippingMethods } = useShippingMethods();
+  const { form } = useValidator('ShippingValidationService', shippingMethod, 'onChange', (data) => {
+    const option = shippingMethods.find((option) => option.id === data.methodId);
+    if (option) {
+      submitShippingMethod({
+        methodId: option.id,
+        methodName: option.name,
+        amount: option.cost,
+        zoneId: option.zoneId,
+      });
+    }
+  });
+  const t = useTranslations('Checkout.shipping');
 
   // Fetch shipping methods when the component mounts if we have an address
   useEffect(() => {
-    if (shippingAddress?.country && shippingAddress?.zipCode) {
-      fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode);
-    }
-  }, [shippingAddress, fetchShippingMethods]);
-
-  // If we have methods and none is selected yet, select the first one
-  useEffect(() => {
-    if (shippingMethods.length > 0 && !shippingMethod) {
-      const defaultMethod = shippingMethods[0];
-      submitShippingMethod({
-        methodId: defaultMethod.id,
-        methodName: defaultMethod.name,
-        amount: defaultMethod.cost,
-        zoneId: defaultMethod.zoneId,
-      });
-    }
-  }, [shippingMethods, shippingMethod, submitShippingMethod]);
-
-  const formState = form.formState;
-  // Effect to auto-submit when all fields are valid and touched
-  useEffect(() => {
-    if (!formState.isValidating && formState.isValid) {
-      const values = form.getValues() as Shipping;
-      const option = shippingMethods.find((option) => option.id === values.methodId);
-      if (option) {
-        submitShippingMethod({
-          methodId: option.id,
-          methodName: option.name,
-          amount: option.cost,
-          zoneId: option.zoneId,
-        });
+    const fetchMethods = async () => {
+      if (shippingAddress?.country && shippingAddress?.zipCode) {
+        try {
+          await fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode);
+        } catch (error) {
+          console.error('Error fetching shipping methods:', error);
+        }
       }
-    }
-  });
+    };
+
+    fetchMethods();
+  }, [shippingAddress, fetchShippingMethods]);
 
   return (
     <FormProvider {...form}>
@@ -69,8 +59,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
         <h2 className="text-lg font-semibold text-neutral-900 mb-4">{t('shippingMethod')}</h2>
         {loading && (
           <div className="flex justify-center items-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-            <span className="ml-2 text-neutral-600">{t('loadingShippingMethods')}</span>
+            <Spinner variant="md" loadingText={t('loading')} />
           </div>
         )}
         {!loading && shippingMethods.length === 0 && (

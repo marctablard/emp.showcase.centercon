@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { Loader2 } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { usePaymentModes } from '@/hooks/payment/usePaymentModes';
+import { useValidator } from '@/hooks/validation/useValidator';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { useValidator } from '@/hooks/validation/useValidator';
-import { FormProvider } from 'react-hook-form';
-import { usePaymentModes } from '@/hooks/payment/usePaymentModes';
-import { Loader2 } from 'lucide-react';
+import { Spinner } from '../ui/spinner';
 
 interface PaymentMethodProps {
   isReadOnly?: boolean;
@@ -19,23 +20,8 @@ interface PaymentMethodProps {
  */
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
-  const { form } = useValidator(
-    'PaymentValidationService',
-    paymentMethod,
-    'onChange'
-  );
+  const { form } = useValidator('PaymentValidationService', paymentMethod, 'onChange', submitPaymentMethod);
   const { paymentModes, loading, error, fetchPaymentModes } = usePaymentModes();
-  
-  // Transform API payment modes to UI payment options
-  const paymentOptions = paymentModes
-    .filter(mode => mode.active)
-    .map(mode => ({
-      id: mode.code, // Use code as ID since it's more reliable
-      code: mode.code,
-      name: mode.name || mode.code,
-      provider: mode.provider,
-      method: mode.code
-    }));
 
   const [cardDetails] = useState({
     cardNumber: '',
@@ -44,13 +30,15 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     cvv: '',
   });
 
-  const t = useTranslations('Checkout');
-  
+  const t = useTranslations('Checkout.payment');
   // Fetch payment modes when component mounts
   useEffect(() => {
-    fetchPaymentModes();
-  }, [fetchPaymentModes]);
+    if (!loading && !paymentModes) {
+      fetchPaymentModes();
+    }
+  }, [fetchPaymentModes, paymentModes, loading]);
 
+  /*
   const formState = form.formState;
   // Effect to auto-submit when all fields are valid and touched
   useEffect(() => {
@@ -58,46 +46,39 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
       submitPaymentMethod(form.getValues());
     }
   }, [formState.isValidating, formState.isValid, submitPaymentMethod, form]);
-
+*/
   return (
     <FormProvider {...form}>
       <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-xl font-semibold text-neutral-800">{t('paymentMethod')}</h2>
-        
-        {loading && (
-          <div className="flex justify-center items-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-            <span className="ml-2 text-neutral-600">{t('loadingPaymentMethods')}</span>
-          </div>
+
+        {loading && <Spinner variant="md" loadingText={t('loading')} />}
+
+        {error && <div className="py-4 text-center text-red-500">{t('errorLoadingPaymentMethods')}</div>}
+
+        {!loading && !error && paymentModes?.length === 0 && (
+          <div className="py-4 text-center text-neutral-600">{t('noPaymentMethodsAvailable')}</div>
         )}
-        
-        {error && (
-          <div className="py-4 text-center text-red-500">
-            {t('errorLoadingPaymentMethods')}
-          </div>
-        )}
-        
-        {!loading && !error && paymentOptions.length === 0 && (
-          <div className="py-4 text-center text-neutral-600">
-            {t('noPaymentMethodsAvailable')}
-          </div>
-        )}
-        
-        {!loading && !error && paymentOptions.length > 0 && !isReadOnly ? (
+
+        {!loading && !error && !isReadOnly ? (
           <FormField
             control={form.control}
             name="method"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <RadioGroup defaultValue={field.value} onValueChange={field.onChange} className="flex flex-col space-y-1">
+                  <RadioGroup
+                    defaultValue={field.value}
+                    onValueChange={field.onChange}
+                    className="flex flex-col space-y-1"
+                  >
                     <div className="space-y-6">
                       <div className="space-y-4">
-                        {paymentOptions.map((option) => (
-                          <div key={option.id}>
+                        {paymentModes?.map((option) => (
+                          <div key={option.code}>
                             <FormItem className="flex items-center">
                               <FormControl>
-                                <RadioGroupItem value={option.id} id={option.id} />
+                                <RadioGroupItem value={option.code} id={option.code} />
                               </FormControl>
                               <FormLabel
                                 htmlFor={option.id}
@@ -197,8 +178,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
           // Read-only view
           <div className="text-neutral-700">
             <p className="font-medium">
-              {paymentOptions.find((option) => option.method === paymentMethod?.method)?.name ||
-                t('selectedPaymentMethod')}
+              {paymentModes?.find((mode) => mode.code === paymentMethod?.method)?.name || t('selectedPaymentMethod')}
             </p>
 
             {paymentMethod?.method === 'credit-card' && paymentMethod?.customAttributes?.cardNumber && (

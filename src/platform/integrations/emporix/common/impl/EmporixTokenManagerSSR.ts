@@ -41,12 +41,9 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
       return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
     }
     // otherwise we use our own token
-    if (!this.checkAccessToken(this.ssrToken[tenant].anonymousToken)) {
-      const freshSsrAnonymousToken = await this.fetchAnonymousToken(
-        this.ssrToken[tenant].anonymousToken,
-        tenant,
-        clientId,
-      );
+    const ssrAnonymousToken = this.ssrToken[tenant]?.anonymousToken;
+    if (!this.checkAccessToken(ssrAnonymousToken)) {
+      const freshSsrAnonymousToken = await this.fetchAnonymousToken(ssrAnonymousToken, tenant, clientId);
       // ...and store it globally, so it can be reused
       this.ssrToken[tenant].anonymousToken = freshSsrAnonymousToken;
     }

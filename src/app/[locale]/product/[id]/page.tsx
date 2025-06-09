@@ -10,14 +10,6 @@ import { useL10n } from '@/hooks/useL10n';
 import { getProductPrice } from '@/lib/ssr/price';
 import { getProductById } from '@/lib/ssr/products';
 
-const priceTiers = [
-  { quantity: 1, price: 110.45 },
-  { quantity: 5, price: 95.45 },
-  { quantity: 10, price: 85.45 },
-  { quantity: 20, price: 82.45 },
-  { quantity: 50, price: 79.45 },
-];
-
 interface ProductPageProps {
   id: string;
   locale: string;

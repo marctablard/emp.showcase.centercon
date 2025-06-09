@@ -24,11 +24,11 @@ class EmporixShippingService implements ShippingService {
     this.shippingMapper = shippingMapper;
   }
 
-  async getShippingMethods(countryCode: string, postalCode: string): Promise<EmporixShippingMethod[]> {
+  async getShippingMethods(country: string, postalCode: string): Promise<EmporixShippingMethod[]> {
     try {
       // Find site based on location
       const sites = await this.shippingApi.findSite({
-        countryCode,
+        country,
         postalCode,
       });
 

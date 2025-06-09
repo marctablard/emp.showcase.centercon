@@ -6,10 +6,10 @@ import { useSiteStore } from '@/stores/site-store';
 
 interface UsePaymentModes {
   // Data
-  paymentModes: PaymentMode[];
+  paymentModes: PaymentMode[] | undefined;
   loading: boolean;
   error: Error | null;
-  
+
   // Actions
   fetchPaymentModes: () => Promise<void>;
   getPaymentModeById: (id: string) => PaymentMode | null;
@@ -28,51 +28,48 @@ export const usePaymentModes = (): UsePaymentModes => {
     setPaymentModes,
     setPaymentModesLoading,
   } = useSiteStore();
-  
+
   const [error, setError] = useState<Error | null>(null);
-  
+
   /**
    * Fetch payment modes
    */
-  const fetchPaymentModes = useCallback(
-    async (): Promise<void> => {
-      setError(null);
-      setPaymentModesLoading(true);
-      
-      try {
-        const { getPaymentModes } = await import('@/lib/client/payment');
-        const modes = await getPaymentModes();
-        setPaymentModes(modes);
-      } catch (err) {
-        console.error('Error fetching payment modes:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch payment modes'));
-      } finally {
-        setPaymentModesLoading(false);
-      }
-    },
-    [setPaymentModes, setPaymentModesLoading]
-  );
-  
+  const fetchPaymentModes = useCallback(async (): Promise<void> => {
+    setError(null);
+    setPaymentModesLoading(true);
+
+    try {
+      const { getPaymentModes } = await import('@/lib/client/payment');
+      const modes = await getPaymentModes();
+      setPaymentModes(modes);
+    } catch (err) {
+      console.error('Error fetching payment modes:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch payment modes'));
+    } finally {
+      setPaymentModesLoading(false);
+    }
+  }, [setPaymentModes, setPaymentModesLoading]);
+
   /**
    * Get a payment mode by its ID
    */
   const getPaymentModeById = useCallback(
     (id: string): PaymentMode | null => {
-      return storeModes.find((mode) => mode.id === id) || null;
+      return storeModes?.find((mode) => mode.id === id) || null;
     },
-    [storeModes]
+    [storeModes],
   );
-  
+
   /**
    * Get a payment mode by its code
    */
   const getPaymentModeByCode = useCallback(
     (code: string): PaymentMode | null => {
-      return storeModes.find((mode) => mode.code === code) || null;
+      return storeModes?.find((mode) => mode.code === code) || null;
     },
-    [storeModes]
+    [storeModes],
   );
-  
+
   return {
     paymentModes: storeModes,
     loading: storeLoading,

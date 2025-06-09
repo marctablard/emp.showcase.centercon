@@ -1,16 +1,9 @@
-import { z } from 'zod';
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import { 
-  CheckoutRequest, 
-  QuoteCheckoutRequest
-} from '../../../model/checkout';
-import { CheckoutValidator, CheckoutStep } from '../CheckoutValidator';
+import { injectable } from '@/platform/core/di/injectable';
 import { ValidationResult } from '@/platform/services/validation';
 import type { ValidationService } from '@/platform/services/validation';
-import { errors } from '@playwright/test';
-
-
+import { CheckoutRequest, QuoteCheckoutRequest } from '../../../model/checkout';
+import { CheckoutStep, CheckoutValidator } from '../CheckoutValidator';
 
 /**
  * Implementation of CheckoutValidator for Emporix checkout
@@ -21,15 +14,16 @@ class EmporixCheckoutValidator implements CheckoutValidator {
     @inject('ContactDataValidationService') private contactDataValidator: ValidationService,
     @inject('AddressValidationService') private addressValidator: ValidationService,
     @inject('ShippingValidationService') private shippingValidator: ValidationService,
-    @inject('PaymentValidationService') private paymentValidator: ValidationService
+    @inject('PaymentValidationService') private paymentValidator: ValidationService,
   ) {}
-  
+
   /**
    * Validate the complete checkout request
    * @param request The checkout request to validate
    * @returns Validation result with success flag and errors if any
    */
-  validateCheckoutRequest(request: CheckoutRequest): ValidationResult<CheckoutRequest> {    const errors: Record<string, string> = {};
+  validateCheckoutRequest(request: CheckoutRequest): ValidationResult<CheckoutRequest> {
+    const errors: Record<string, string> = {};
     if (!request.customer) {
       errors.customer = 'required';
     }
@@ -42,7 +36,7 @@ class EmporixCheckoutValidator implements CheckoutValidator {
     if (Object.keys(errors).length > 0) {
       return { success: false, errors: errors };
     }
-    
+
     return { success: true, data: request };
   }
 
@@ -56,7 +50,7 @@ class EmporixCheckoutValidator implements CheckoutValidator {
     if (!request.customer) {
       errors.customer = 'required';
     }
-    
+
     const stepsResult = this.validateSteps(request, ['customer', 'addresses', 'shipping', 'payment']);
     if (stepsResult.errors) {
       this.mergeErrors(stepsResult.errors, errors);
@@ -65,7 +59,7 @@ class EmporixCheckoutValidator implements CheckoutValidator {
     if (Object.keys(errors).length > 0) {
       return { success: false, errors: errors };
     }
-    
+
     return { success: true, data: request };
   }
 
@@ -74,14 +68,14 @@ class EmporixCheckoutValidator implements CheckoutValidator {
    * @param request The quote checkout request to validate
    * @returns Validation result with success flag and errors if any
    */
-  validateQuoteCheckoutRequest(request: QuoteCheckoutRequest): ValidationResult<QuoteCheckoutRequest> {
+  validateQuoteCheckoutRequest(_request: QuoteCheckoutRequest): ValidationResult<QuoteCheckoutRequest> {
     throw new Error('Not implemented');
   }
 
   protected validateSteps(request: CheckoutRequest, steps: CheckoutStep[]): ValidationResult<CheckoutRequest> {
     const errors: Record<string, string> = {};
-    
-    steps.forEach(step => {
+
+    steps.forEach((step) => {
       let result: ValidationResult<any>;
       switch (step) {
         case 'customer':
@@ -101,11 +95,11 @@ class EmporixCheckoutValidator implements CheckoutValidator {
         this.mergeErrors(result.errors, errors, step);
       }
     });
-      
+
     if (Object.keys(errors).length > 0) {
       return { success: false, errors: errors };
     }
-    
+
     return { success: true, data: request };
   }
 
@@ -150,7 +144,7 @@ class EmporixCheckoutValidator implements CheckoutValidator {
       // Validate each address and collect errors
       const errors: Record<string, string> = {};
       let isValid = true;
-      
+
       data.forEach((address, index) => {
         const result = this.addressValidator.validate(address);
         if (!result.success) {
@@ -161,14 +155,14 @@ class EmporixCheckoutValidator implements CheckoutValidator {
           });
         }
       });
-      
+
       return {
         success: isValid,
         errors: isValid ? undefined : errors,
-        data: isValid ? data as T : undefined
+        data: isValid ? (data as T) : undefined,
       };
     }
-    
+
     // Single address validation
     return this.addressValidator.validate(data);
   }
@@ -200,7 +194,6 @@ class EmporixCheckoutValidator implements CheckoutValidator {
       }
     });
   }
-
 }
 
 export default EmporixCheckoutValidator;

@@ -32,5 +32,5 @@ export interface EmporixSites {
 
 export interface EmporixFindSiteRequest {
   postalCode: string;
-  countryCode: string;
+  country: string;
 }

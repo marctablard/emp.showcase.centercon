@@ -152,16 +152,28 @@
         "creditCard": "Kreditkarte",
         "paypal": "PayPal",
         "invoice": "Auf Rechnung",
-        "cardNumber": "Kartennummer",
-        "cardHolder": "Karteninhaber",
-        "expiryDate": "Ablaufdatum",
-        "cvv": "Prüfnummer",
-        "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
-        "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig.",
-        "freeShipping": "Kostenlos",
-        "standardShipping": "Standardversand",
-        "expressShipping": "Expressversand",
-        "overnightShipping": "Übernachtversand",
+        "payment": {
+            "paymentMethod": "Zahlungsmethode",
+            "loading": "Zahlungsmethoden werden geladen...",
+            "errorLoadingPaymentMethods": "Fehler beim Laden der Zahlungsmethoden. Bitte versuchen Sie es erneut.",
+            "noPaymentMethodsAvailable": "Derzeit sind keine Zahlungsmethoden verfügbar.",
+            "cardEndingIn": "Karte endend auf",
+            "selectedPaymentMethod": "Ausgewählte Zahlungsmethode",
+            "cardNumber": "Kartennummer",
+            "cardHolder": "Karteninhaber",
+            "expiryDate": "Ablaufdatum",
+            "cvv": "Prüfnummer",
+            "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
+            "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig."
+        },
+        "shipping": {
+            "shippingMethod": "Versandart",
+            "loading": "Versandarten werden geladen...",
+            "noShippingMethodsAvailable": "Keine Versandarten für Ihren Standort verfügbar",
+            "enterShippingAddressFirst": "Bitte geben Sie zuerst Ihre Lieferadresse ein",
+            "freeShipping": "Kostenloser Versand",
+            "estimatedDelivery": "Voraussichtliche Lieferung: 3-5 Werktage"
+        },
         "summaryTitle": "Bestellzusammenfassung",
         "notItems": "Keine Artikel im Warenkorb", 
         "subtotal": "Zwischensumme",
@@ -289,5 +301,23 @@
                 "required": "Zahlungsmethode ist erforderlich"
             }
         }
+    },
+    "ui": {
+        "spinner": {
+            "loading": "Wird geladen..."
+        }
+    },
+    "Address": {
+        "fullName": "Vollständiger Name",
+        "street": "Straße",
+        "streetNumber": "Hausnummer",
+        "zipCode": "Postleitzahl",
+        "city": "Stadt",
+        "country": "Land",
+        "state": "Bundesland/Region",
+        "phoneNumber": "Telefonnummer",
+        "companyName": "Firmenname",
+        "noCountriesAvailable": "Keine Länder verfügbar",
+        "loading": "Adressdaten werden geladen..."
     }
 }

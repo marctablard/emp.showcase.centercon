@@ -75,7 +75,7 @@ export const createCheckoutStore = (initState: CheckoutState = defaultState) => 
       }),
       {
         name: 'emp-checkout',
-        storage: createJSONStorage(() => localStorage),
+        storage: createJSONStorage(() => sessionStorage),
       },
     ),
   );

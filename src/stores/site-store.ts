@@ -2,16 +2,16 @@
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import type { ShippingMethod } from '@/platform/services/model/shipping';
-import type { PaymentMode } from '@/platform/services/model/payment';
 import type { Currency } from '@/platform/services/model/common';
 import type { Region } from '@/platform/services/model/common';
+import type { PaymentMode } from '@/platform/services/model/payment';
+import type { ShippingMethod } from '@/platform/services/model/shipping';
 
 export interface SiteState {
   // Site data
   shippingMethods: ShippingMethod[];
   shippingMethodsLoading: boolean;
-  paymentModes: PaymentMode[];
+  paymentModes: PaymentMode[] | undefined;
   paymentModesLoading: boolean;
   availableCurrencies: Currency[];
   currenciesLoading: boolean;
@@ -24,22 +24,22 @@ interface SiteActions {
   setShippingMethods: (methods: ShippingMethod[]) => void;
   getShippingMethods: () => ShippingMethod[];
   setShippingMethodsLoading: (loading: boolean) => void;
-  
+
   // Payment modes
   setPaymentModes: (modes: PaymentMode[]) => void;
   getPaymentModes: () => PaymentMode[];
   setPaymentModesLoading: (loading: boolean) => void;
-  
+
   // Currencies
   setCurrencies: (currencies: Currency[]) => void;
   getCurrencies: () => Currency[];
   setCurrenciesLoading: (loading: boolean) => void;
-  
+
   // Regions
   setRegions: (regions: Region[]) => void;
   getRegions: () => Region[];
   setRegionsLoading: (loading: boolean) => void;
-  
+
   // Global actions
   reset: () => void;
 }
@@ -49,7 +49,7 @@ export type SiteStore = SiteState & SiteActions;
 const defaultState: SiteState = {
   shippingMethods: [],
   shippingMethodsLoading: false,
-  paymentModes: [],
+  paymentModes: undefined,
   paymentModesLoading: false,
   availableCurrencies: [],
   currenciesLoading: false,
@@ -62,7 +62,7 @@ export const createSiteStore = (initState: SiteState = defaultState) => {
     persist(
       (set, get) => ({
         ...initState,
-        
+
         // Shipping methods
         setShippingMethods: (methods: ShippingMethod[]) => {
           set({ shippingMethods: methods });
@@ -71,7 +71,7 @@ export const createSiteStore = (initState: SiteState = defaultState) => {
         setShippingMethodsLoading: (loading: boolean) => {
           set({ shippingMethodsLoading: loading });
         },
-        
+
         // Payment modes
         setPaymentModes: (modes: PaymentMode[]) => {
           set({ paymentModes: modes });
@@ -80,7 +80,7 @@ export const createSiteStore = (initState: SiteState = defaultState) => {
         setPaymentModesLoading: (loading: boolean) => {
           set({ paymentModesLoading: loading });
         },
-        
+
         // Currencies
         setCurrencies: (currencies: Currency[]) => {
           set({ availableCurrencies: currencies });
@@ -89,7 +89,7 @@ export const createSiteStore = (initState: SiteState = defaultState) => {
         setCurrenciesLoading: (loading: boolean) => {
           set({ currenciesLoading: loading });
         },
-        
+
         // Regions
         setRegions: (regions: Region[]) => {
           set({ availableRegions: regions });
@@ -98,13 +98,13 @@ export const createSiteStore = (initState: SiteState = defaultState) => {
         setRegionsLoading: (loading: boolean) => {
           set({ regionsLoading: loading });
         },
-        
+
         // Global actions
         reset: () => {
           set({
             shippingMethods: [],
             shippingMethodsLoading: false,
-            paymentModes: [],
+            paymentModes: undefined,
             paymentModesLoading: false,
             availableCurrencies: [],
             currenciesLoading: false,
@@ -116,8 +116,8 @@ export const createSiteStore = (initState: SiteState = defaultState) => {
       {
         name: 'emp-site',
         storage: createJSONStorage(() => sessionStorage),
-      }
-    )
+      },
+    ),
   );
 };
 

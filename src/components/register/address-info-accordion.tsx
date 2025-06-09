@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Control } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -7,15 +8,30 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import useSiteConfig from '@/hooks/site/useSiteConfig';
+import { useSite } from '@/hooks/site/useSite';
+import { useL10n } from '@/hooks/useL10n';
+import { Spinner } from '../ui/spinner';
+
+import { useEffect } from 'react';
 
 interface AddressInfoAccordionProps {
   control: Control<any>;
 }
 
 export function AddressInfoAccordion({ control }: AddressInfoAccordionProps) {
-  const { billingCountries } = useSiteConfig('main');
+  const { loading, countries, fetchSiteData } = useSite();
+  const { l10n } = useL10n();
   const t = useTranslations('register');
+
+  useEffect(() => {
+    if (!countries) {
+      fetchSiteData();
+    }
+  }, [fetchSiteData, countries]);
+
+  if (loading) {
+    return <Spinner />;
+  }
 
   return (
     <AccordionItem value="address-info">
@@ -120,9 +136,9 @@ export function AddressInfoAccordion({ control }: AddressInfoAccordionProps) {
                       <SelectValue placeholder={t('country')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {billingCountries.map((country) => (
+                      {countries?.map((country) => (
                         <SelectItem key={country.code} value={country.code}>
-                          {country.name}
+                          {l10n(country.name)}
                         </SelectItem>
                       ))}
                     </SelectContent>
