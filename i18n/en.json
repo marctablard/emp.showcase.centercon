@@ -307,7 +307,7 @@
         "noCountriesAvailable": "No countries available",
         "loading": "Loading address data..."
     },
-    "ui": {
+    "UI": {
         "spinner": {
             "loading": "Loading..."
         }
