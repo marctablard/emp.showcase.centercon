@@ -240,5 +240,10 @@
         "quotesPagePlaceholder": "Angebote werden hier angezeigt",
         "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
         "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt"
+    },
+    "UI": {
+        "spinner": {
+            "loading": "Wird geladen..."
+        }
     }
 }

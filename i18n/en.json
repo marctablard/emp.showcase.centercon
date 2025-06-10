@@ -240,5 +240,10 @@
         "quotesPagePlaceholder": "Quotes will be displayed here",
         "shoppingListsPageDescription": "View and manage your shopping lists",
         "shoppingListsPagePlaceholder": "Shopping lists will be displayed here"
+    },
+    "UI": {
+        "spinner": {
+            "loading": "Loading..."
+        }
     }
 }
