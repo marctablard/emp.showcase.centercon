@@ -38,12 +38,12 @@ interface UseCart {
  * @returns Cart data and operations
  */
 export const useCart = (initialCart?: Cart | null): UseCart => {
-  const { setCurrentCart, getCurrentCart, currentCart: storeCart } = useCartStore();
-  // Local state
-  const [loading, setLoading] = useState<boolean>(false);
+  const { setCurrentCart, getCurrentCart, getLoading, setLoading, loading, currentCart: storeCart } = useCartStore();
+  if (getCurrentCart() === undefined && initialCart !== undefined) {
+    setCurrentCart(initialCart);
+  }
   const [error, setError] = useState<Error | null>(null);
-  // Local cart state, either set, or null (no cart available) or undefined (unknown)
-  const [cart, setCart] = useState<Cart | null | undefined>(initialCart);
+  const [cart, setCart] = useState<Cart | null | undefined>(getCurrentCart());
 
   /**
    * Fetch the current cart
@@ -75,26 +75,26 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
 
   // Initialize cart on first render if not already initialized
   useEffect(() => {
-    if (cart === undefined && !loading) {
+    if (cart === undefined && !getLoading()) {
       setLoading(true);
       // first try to grab the cart from the store
-      const storeCart = getCurrentCart();
-      if (storeCart !== undefined) {
-        setCart(storeCart);
+      const currentCart = getCurrentCart();
+      if (currentCart !== undefined) {
+        setCart(currentCart);
         setLoading(false);
         return;
       }
       // Otherwise fetch current cart
       fetchCart();
     }
-  }, [cart, fetchCart, getCurrentCart, loading]);
+  }, [cart, getCurrentCart, fetchCart, getLoading]);
 
   useEffect(() => {
     // listen to changes on storeCart to update local state
     // this reflects changes to the store into all components
     // that use the Hook
-    setCart(storeCart);
-  }, [storeCart]);
+    setCart(getCurrentCart());
+  }, [getCurrentCart]);
 
   /**
    * Add an item to the cart
