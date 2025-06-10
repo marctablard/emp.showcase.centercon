@@ -45,6 +45,9 @@ export async function GET(request: NextRequest) {
           }
         }
       }
+    } else {
+      // no coookie, no cart, that's ok
+      cart = null;
     }
 
     // If we don't have a cart and shouldCreate is false, return 204 (intentionally empty)
