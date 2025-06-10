@@ -37,9 +37,6 @@ class EmporixCheckoutService implements CheckoutService {
 
   async checkout(request: CheckoutRequest): Promise<CheckoutResponse> {
     const customer = await this.customerService.getCurrentCustomer();
-    if (customer && request.customer?.email != customer.email) {
-      throw new Error('Mismatching Customer on Checkout!');
-    }
 
     // First do the basic validation
     let emporixCustomer: EmporixCheckoutCustomer;
@@ -76,8 +73,8 @@ class EmporixCheckoutService implements CheckoutService {
 
     const addresses = request.addresses.map((address) => ({
       ...address,
-      contactName: address.contactName || request.customer.firstName + ' ' + request.customer.lastName,
-      contactPhone: address.contactPhone || request.customer.phone,
+      contactName: address.contactName || emporixCustomer.firstName + ' ' + emporixCustomer.lastName,
+      contactPhone: address.contactPhone || '',
       type: address.type || 'SHIPPING',
     }));
     // TODO implement support for multiple paymentMethods in Frontend

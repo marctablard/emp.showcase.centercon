@@ -1,12 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { useShippingMethodsStore } from '@/providers/StoreProvider';
 
 interface UseShippingMethods {
   // Data
-  shippingMethods: ShippingMethod[] | null;
+  shippingMethods: ShippingMethod[];
   loading: boolean;
   error: Error | null;
 

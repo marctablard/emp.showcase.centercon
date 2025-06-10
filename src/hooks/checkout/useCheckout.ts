@@ -14,6 +14,7 @@ import type {
 import { ShippingMethod } from '@/platform/services/model/shipping';
 import { useCheckoutStore } from '@/providers/StoreProvider';
 import { useCart } from '../cart/useCart';
+import useCustomer from '../customer/useCustomer';
 import { useShippingMethods } from '../shipping/useShippingMethods';
 
 interface UseCheckout {
@@ -65,6 +66,7 @@ export const useCheckout = (): UseCheckout => {
 
   // Get cart from cart store
   const { cart: checkoutCart, updateShippingInfo } = useCart();
+  const { customer } = useCustomer();
   const [loading, setLoading] = useState<boolean>(false);
   const [contactData, setContactData] = useState<ContactData | null>(storeContactData);
   const [billingAddress, setBillingAddress] = useState<CheckoutAddress | null>(storeBillingAddress);
@@ -186,7 +188,7 @@ export const useCheckout = (): UseCheckout => {
       return null;
     }
 
-    if (!contactData) {
+    if (!customer && !contactData) {
       setError(new Error('Missing contact information'));
       return null;
     }

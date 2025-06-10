@@ -24,11 +24,8 @@ class EmporixCheckoutValidator implements CheckoutValidator {
    */
   validateCheckoutRequest(request: CheckoutRequest): ValidationResult<CheckoutRequest> {
     const errors: Record<string, string> = {};
-    if (!request.customer) {
-      errors.customer = 'required';
-    }
 
-    const stepsResult = this.validateSteps(request, ['shipping', 'payment']);
+    const stepsResult = this.validateSteps(request, ['addresses', 'shipping', 'payment']);
     if (stepsResult.errors) {
       this.mergeErrors(stepsResult.errors, errors);
     }
