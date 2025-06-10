@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Customer } from '@/platform/services/model/customer/customer';
+import { useEffect, useState } from 'react';
 import { fetchCurrentCustomer } from '@/lib/client/customer';
+import { Customer } from '@/platform/services/model/customer/customer';
+import { useCustomerStore } from '@/providers/StoreProvider';
 
 interface CustomerHook {
-  customer: Customer | null;
+  customer: Customer | null | undefined;
   loading: boolean;
-  error: Error | null
+  error: Error | null;
 }
 
 /**
@@ -15,8 +16,7 @@ interface CustomerHook {
  * @returns Customer data and state
  */
 export const useCustomer = (): CustomerHook => {
-  const [customer, setCustomer] = useState<Customer | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { customer, loading, getLoading, setLoading, setCustomer } = useCustomerStore();
   const [error, setError] = useState<Error | null>(null);
 
   const fetchCustomer = async () => {
@@ -34,13 +34,15 @@ export const useCustomer = (): CustomerHook => {
   };
 
   useEffect(() => {
-    fetchCustomer();
-  }, []);
+    if (!getLoading() && customer === undefined) {
+      fetchCustomer();
+    }
+  }, [getLoading, customer]);
 
   return {
     customer,
     loading,
-    error
+    error,
   };
 };
 
