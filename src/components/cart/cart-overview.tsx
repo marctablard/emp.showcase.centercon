@@ -91,7 +91,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
           <p className="text-xl text-muted-foreground mb-6">{t('emptyCart')}</p>
           <Link href="/">
-            <Button size="lg">{t('continueShopping')}</Button>
+            <Button>{t('continueShopping')}</Button>
           </Link>
         </CardContent>
       </Card>

@@ -4,14 +4,24 @@ import { ChevronLeftIcon, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
-  return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
+  return (
+    <nav
+      aria-label="breadcrumb"
+      data-slot="breadcrumb"
+      className="relative [@media_screen]:after:content-[''] after:absolute after:top-0 after:right-0 after:w-8 after:h-full after:bg-gradient-to-r after:from-transparent after:to-white"
+      {...props}
+    />
+  );
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   return (
     <ol
       data-slot="breadcrumb-list"
-      className={cn('text-sm lg:text-base text-foreground flex flex-wrap items-center gap-1 break-words', className)}
+      className={cn(
+        'text-sm lg:text-base text-foreground flex items-center gap-1 p-1 overflow-x-auto overflow-y-scroll max-w-[calc(100vw-2rem)] scroll-smooth hide-scrollbar',
+        className,
+      )}
       {...props}
     />
   );
@@ -26,7 +36,7 @@ function BreadcrumbLink({ className, children, ...props }: React.ComponentProps<
     <a
       data-slot="breadcrumb-link"
       className={cn(
-        'inline-flex items-center gap-1 text-primary [&>svg]:size-4 lg:[&>svg]:size-6 font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+        'inline-flex items-center gap-1 whitespace-nowrap text-primary [&>svg]:size-4 lg:[&>svg]:size-6 font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
         className,
       )}
       {...props}
@@ -44,7 +54,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn(className)}
+      className={cn('whitespace-nowrap', className)}
       {...props}
     />
   );

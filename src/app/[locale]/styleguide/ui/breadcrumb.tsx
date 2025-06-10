@@ -11,20 +11,23 @@ export default function BreadcrumbStyleGuide() {
   return (
     <div className="py-12">
       <h4 className="text-3xl/5 lg:text-4xl font-bold text-headlines font-headlines mb-3">Breadcrumb</h4>
-      <div className="p-4 grid grid-cols-[1fr] gap-6 mb-2">
+      <div className="py-4 grid grid-cols-[1fr] gap-6 mb-2">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbBackLink href="/" />
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/">This is Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">Link</BreadcrumbLink>
+              <BreadcrumbLink href="#">Link Name</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">Link</BreadcrumbLink>
+              <BreadcrumbLink href="#">Longer Link Name</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#">Another Link Name</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbPage>Current Page</BreadcrumbPage>

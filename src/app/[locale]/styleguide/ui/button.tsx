@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { BackToTopButton, Button } from '@/components/ui/button';
 
 export default function ButtonStyleGuide() {
   return (
@@ -12,6 +12,7 @@ export default function ButtonStyleGuide() {
             Default button
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button disabled>
             <ArrowRight />
             Default button
@@ -24,6 +25,7 @@ export default function ButtonStyleGuide() {
             Secondary button
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button variant="secondary" disabled>
             <ArrowRight />
             Secondary button
@@ -36,6 +38,7 @@ export default function ButtonStyleGuide() {
             Link button
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button variant="link" disabled>
             <ArrowRight />
             Link button
@@ -48,6 +51,7 @@ export default function ButtonStyleGuide() {
             Neutral button
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button variant="neutral" disabled>
             <ArrowRight />
             Neutral button
@@ -60,6 +64,7 @@ export default function ButtonStyleGuide() {
           <Button size="icon">
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button size="icon" disabled>
             <ArrowRight />
           </Button>
@@ -68,6 +73,7 @@ export default function ButtonStyleGuide() {
           <Button variant="secondary" size="icon">
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button variant="secondary" size="icon" disabled>
             <ArrowRight />
           </Button>
@@ -76,6 +82,7 @@ export default function ButtonStyleGuide() {
           <Button variant="link" size="icon">
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button variant="link" size="icon" disabled>
             <ArrowRight />
           </Button>
@@ -84,9 +91,18 @@ export default function ButtonStyleGuide() {
           <Button variant="neutral" size="icon">
             <ArrowRight />
           </Button>
+          <p>disabled:</p>
           <Button variant="neutral" size="icon" disabled>
             <ArrowRight />
           </Button>
+        </div>
+      </div>
+      <h5 className="text-xs/3 lg:text-2xl font-bold text-headlines font-headlines mt-8 mb-3">Back to top</h5>
+      <div className="p-4 flex flex-wrap items-center gap-6">
+        <BackToTopButton />
+        <div className="flex items-end gap-3">
+          <p>disabled:</p>
+          <BackToTopButton disabled />
         </div>
       </div>
     </div>

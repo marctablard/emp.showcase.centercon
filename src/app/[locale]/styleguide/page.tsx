@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import ColorStyleGuide from './atoms/color';
 import TextStyleGuide from './atoms/text';
 import BreadcrumbStyleGuide from './ui/breadcrumb';
 import ButtonStyleGuide from './ui/button';
@@ -24,6 +25,7 @@ export default function StyleGuide() {
         Here you can find some common styles and the ui-components documented.
       </p>
       <TextStyleGuide />
+      <ColorStyleGuide />
       <ButtonStyleGuide />
       <LinkStyleGuide />
       <BreadcrumbStyleGuide />

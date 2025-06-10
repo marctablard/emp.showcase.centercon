@@ -42,7 +42,7 @@ export default function LinkStyleGuide() {
         </div>
       </div>
       <p className="text-base">If you use buttons they can be also disabled:</p>
-      <div className="p-4 grid grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
+      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <button
           disabled
           className="text-sm inline-flex items-center gap-1 text-primary font-bold underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600 hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"

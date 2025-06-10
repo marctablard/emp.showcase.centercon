@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { type VariantProps, cva } from 'class-variance-authority';
+import { ChevronsUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
@@ -42,4 +43,18 @@ function Button({
   return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
 }
 
-export { Button, buttonVariants };
+function BackToTopButton({ className, ...props }: React.ComponentProps<'button'>) {
+  return (
+    <button
+      className={cn(
+        'cursor-pointer text-white [&>svg]:size-8 p-2 rounded-full bg-linear-to-t from-primary-700 to-primary-500 hover:to-primary-700 transition-all disabled:bg-none disabled:bg-neutral-400 disabled:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+        className,
+      )}
+      {...props}
+    >
+      <ChevronsUp />
+    </button>
+  );
+}
+
+export { Button, buttonVariants, BackToTopButton };
