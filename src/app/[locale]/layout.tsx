@@ -49,7 +49,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <StoreProvider>
               <StoryblokProvider>
                 <Header />
-                <Searchbar />
+                {/*<Searchbar />*/}
                 <main className="flex-grow">{children}</main>
                 <Footer />
                 <Toaster />
