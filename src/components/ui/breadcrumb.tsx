@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
@@ -11,7 +11,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   return (
     <ol
       data-slot="breadcrumb-list"
-      className={cn('text-sm md:text-base text-foreground flex flex-wrap items-center gap-1 break-words', className)}
+      className={cn('text-sm lg:text-base text-foreground flex flex-wrap items-center gap-1 break-words', className)}
       {...props}
     />
   );
@@ -61,7 +61,7 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn('[&>svg]:size-4 md:[&>svg]:size-6 text-primary', className)}
+      className={cn('[&>svg]:size-4 lg:[&>svg]:size-6 text-primary', className)}
       {...props}
     >
       {children ?? <ChevronRight />}
@@ -69,20 +69,20 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
   );
 }
 
-// function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
-//   return (
-//     <span
-//       data-slot="breadcrumb-ellipsis"
-//       role="presentation"
-//       aria-hidden="true"
-//       className={cn('flex size-9 items-center justify-center', className)}
-//       {...props}
-//     >
-//       <MoreHorizontal className="size-4" />
-//       <span className="sr-only">More</span>
-//     </span>
-//   );
-// }
+function BreadcrumbBackLink({ className, ...props }: React.ComponentProps<'a'>) {
+  return (
+    <a
+      data-slot="breadcrumb-back-link"
+      aria-label="Go back to the previous page"
+      className={cn('flex size-9 items-center justify-center', className)}
+      {...props}
+    >
+      <ChevronLeftIcon className="size-4" />
+      <span className="sr-only">Back</span>
+      <span aria-hidden="true">Back</span>
+    </a>
+  );
+}
 
 export {
   Breadcrumb,
@@ -91,5 +91,5 @@ export {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  // BreadcrumbEllipsis,
+  BreadcrumbBackLink,
 };

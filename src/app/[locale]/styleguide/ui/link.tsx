@@ -4,7 +4,7 @@ import { ArrowRight, Trash2 } from 'lucide-react';
 export default function LinkStyleGuide() {
   return (
     <div className="py-12">
-      <h4 className="text-3xl/5 md:text-4xl font-bold text-headlines font-headlines mb-3">Links</h4>
+      <h4 className="text-3xl/5 lg:text-4xl font-bold text-headlines font-headlines mb-3">Links</h4>
       <p className="text-base">
         There is no ui-component for links. You can either use the Link from next.js or HTML a-Tag and also button-Tag
         is possible. Just use all tailwindcss classes used below:
