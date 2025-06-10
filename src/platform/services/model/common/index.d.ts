@@ -109,3 +109,14 @@ export interface Media {
   altText?: string | LocalizedString;
   contentType?: string;
 }
+
+export interface Availability {
+  status: string;
+  reason?: string;
+  amount?: number;
+  futureAvailability: {
+    date: string;
+    status: string;
+    amount?: number;
+  }[];
+}

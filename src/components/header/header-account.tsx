@@ -14,11 +14,11 @@ export default function HeaderAccount() {
   return (
     <div>
       {isAuthenticated ? (
-        <Button className="py-4" variant="outline">
+        <Button className="py-4" variant="secondary">
           <Link href="/account">{t('account')}</Link>
         </Button>
       ) : (
-        <Button className="py-4" variant="outline">
+        <Button className="py-4" variant="secondary">
           <Link href="/login">{t('signIn')}</Link>
         </Button>
       )}

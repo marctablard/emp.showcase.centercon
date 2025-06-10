@@ -28,7 +28,7 @@ type PaginationLinkProps = {
 } & Pick<React.ComponentProps<typeof Button>, 'size'> &
   React.ComponentProps<'a'>;
 
-function PaginationLink({ className, isActive, size = 'icon', ...props }: PaginationLinkProps) {
+function PaginationLink({ className, isActive, size = 'default', ...props }: PaginationLinkProps) {
   return (
     <a
       aria-current={isActive ? 'page' : undefined}
@@ -36,8 +36,10 @@ function PaginationLink({ className, isActive, size = 'icon', ...props }: Pagina
       data-active={isActive}
       className={cn(
         buttonVariants({
-          variant: isActive ? 'outline' : 'ghost',
+          variant: isActive ? 'secondary' : 'link',
           size,
+          className:
+            'font-normal p-0 w-8 h-8 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
         }),
         className,
       )}
@@ -51,11 +53,13 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn('gap-1 px-2.5 sm:pl-2.5', className)}
+      className={cn(
+        'gap-1 px-2.5 sm:pl-2.5 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
+        className,
+      )}
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="hidden sm:block">Previous</span>
     </PaginationLink>
   );
 }
@@ -65,10 +69,12 @@ function PaginationNext({ className, ...props }: React.ComponentProps<typeof Pag
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn('gap-1 px-2.5 sm:pr-2.5', className)}
+      className={cn(
+        'gap-1 px-2.5 sm:pr-2.5 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
+        className,
+      )}
       {...props}
     >
-      <span className="hidden sm:block">Next</span>
       <ChevronRightIcon />
     </PaginationLink>
   );
@@ -79,7 +85,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn('flex size-9 items-center justify-center', className)}
+      className={cn('flex size-9 items-center justify-center text-primary', className)}
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />

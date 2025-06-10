@@ -1,5 +1,9 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { LocalizedString } from '@/platform/services/model/common';
+
+const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://emporix-showcase.com';
+const defaultEmptyLocale = 'en';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,6 +22,37 @@ export function formatCurrency(amount: number, currencyCode: string = 'USD'): st
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+/**
+ * Build a canonical URL for a product page
+ * @param locale The locale code (e.g., 'en', 'fr')
+ * @param id The product ID
+ * @returns Canonical URL for the product page
+ */
+export function buildCanonicalUrl(locale: string, path: string): string {
+  return `${baseUrl}/${locale === defaultEmptyLocale ? '' : locale}/${path}`;
+}
+/**
+ * Extract the localized value from a LocalizedString or return the string directly
+ * @param input The string or LocalizedString to localize
+ * @param fallbackLocale Optional fallback locale if the current locale is not available (defaults to 'en')
+ * @returns The localized string
+ */
+export function l10n(input: string | LocalizedString, locale: string): string {
+  // If input is a simple string, return it directly
+  if (typeof input === 'string') {
+    return input;
+  }
+
+  // Try to get the value for the current locale
+  if (input[locale]) {
+    return input[locale];
+  }
+
+  // If all else fails, return the first available value or an empty string
+  const firstAvailableLocale = Object.keys(input)[0];
+  return firstAvailableLocale ? input[firstAvailableLocale] : '';
 }
 
 // TODO fill with correct sizes

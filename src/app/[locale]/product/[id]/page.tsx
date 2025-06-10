@@ -1,3 +1,5 @@
+import { cache } from 'react';
+import { Metadata, ResolvingMetadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import ProductActions from '@/components/product/product-actions';
@@ -9,10 +11,45 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useL10n } from '@/hooks/useL10n';
 import { getProductPrice } from '@/lib/ssr/price';
 import { getProductById } from '@/lib/ssr/products';
+import { generateProductMetadata } from '@/lib/ssr/seo';
 
 interface ProductPageProps {
   id: string;
   locale: string;
+}
+
+const getProductWithPrices = cache(async (id: string) => {
+  const product = await getProductById(id);
+  if (product) {
+    product.price = {
+      amount: 110.45,
+      currency: 'EUR',
+      tiers: [
+        { quantity: 1, amount: 110.45 },
+        { quantity: 5, amount: 95.45 },
+        { quantity: 10, amount: 85.45 },
+        { quantity: 20, amount: 82.45 },
+        { quantity: 50, amount: 79.45 },
+      ],
+    };
+  }
+  return product;
+});
+
+// Generate metadata for the product page
+export async function generateMetadata(
+  { params }: { params: Promise<ProductPageProps> },
+  _parent: ResolvingMetadata,
+): Promise<Metadata> {
+  // Get the product ID and locale from params
+  const productId = (await params).id;
+  const locale = (await params).locale;
+
+  // Fetch product data
+  const product = await getProductWithPrices(productId);
+
+  // Use the extracted SEO utility function to generate metadata
+  return generateProductMetadata(product, locale);
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
@@ -34,7 +71,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Card className="overflow-hidden border-0 shadow-none mb-8">
         <CardContent className="p-0">
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">
@@ -65,7 +102,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
 
               <div className="mt-6">
                 <div className="text-sm text-neutral-500">
-                  <p>SKU: {product.id}</p>
+                  <p>SKU: {product.sku}</p>
                 </div>
               </div>
             </div>

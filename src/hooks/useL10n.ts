@@ -1,4 +1,5 @@
 import { useLocale } from 'next-intl';
+import { l10n as utill10n } from '@/lib/utils';
 import { LocalizedString } from '@/platform/services/model/common';
 
 /**
@@ -11,27 +12,7 @@ export function useL10n(locale?: string) {
     locale = useLocale();
   }
 
-  /**
-   * Extract the localized value from a LocalizedString or return the string directly
-   * @param input The string or LocalizedString to localize
-   * @param fallbackLocale Optional fallback locale if the current locale is not available (defaults to 'en')
-   * @returns The localized string
-   */
-  const l10n = (input: string | LocalizedString): string => {
-    // If input is a simple string, return it directly
-    if (typeof input === 'string') {
-      return input;
-    }
-
-    // Try to get the value for the current locale
-    if (input[locale]) {
-      return input[locale];
-    }
-
-    // If all else fails, return the first available value or an empty string
-    const firstAvailableLocale = Object.keys(input)[0];
-    return firstAvailableLocale ? input[firstAvailableLocale] : '';
-  };
+  const l10n = (input: string | LocalizedString) => utill10n(input, locale);
 
   return {
     l10n,

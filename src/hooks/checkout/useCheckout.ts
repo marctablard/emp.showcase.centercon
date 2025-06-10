@@ -55,6 +55,7 @@ export const useCheckout = (): UseCheckout => {
     shippingAddress: storeShippingAddress,
     paymentMethod: storePaymentMethod,
     shippingMethod: storeShippingMethod,
+
     setContactData: setStoreContactData,
     setBillingAddress: setStoreBillingAddress,
     setShippingAddress: setStoreShippingAddress,

@@ -14,7 +14,7 @@ export default async function Searchbar() {
   const t = await getTranslations('searchBar');
   return (
     <div className="bg-primary py-8">
-      <div className="max-w-7xl mx-auto px-12">
+      <div className="max-w-6xl mx-auto px-12">
         <div className="flex justify-between overflow-hidden">
           <div className="flex-shrink-0 flex items-center gap-10">
             <NavigationMenu className="hidden md:block">

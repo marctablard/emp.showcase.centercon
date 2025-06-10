@@ -7,7 +7,7 @@ export default function Footer() {
   const t = useTranslations('footer');
   return (
     <footer className="bg-primary h-112 shadow-md">
-      <div className="flex flex-col md:flex-row max-w-7xl mx-auto px-12 py-6 gap-6 text-white">
+      <div className="flex flex-col md:flex-row max-w-6xl mx-auto px-12 py-6 gap-6 text-white">
         <div className="flex gap-2">
           <Linkedin />
           <Youtube />

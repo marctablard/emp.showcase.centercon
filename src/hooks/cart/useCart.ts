@@ -70,7 +70,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [setCurrentCart, setError, setLoading],
+    [setCurrentCart, setLoading],
   );
 
   // Initialize cart on first render if not already initialized

@@ -1,3 +1,7 @@
+import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
+import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
+import type { EmporixConfig } from '../../config';
 import {
   AddCartItemRequest,
   CreateCartRequest,
@@ -8,10 +12,6 @@ import {
   UpdateCartItemRequest,
 } from '../../model';
 import type { CartApi } from '../CartApi';
-import { inject } from 'inversify';
-import type { EmporixConfig } from '../../config';
-import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
-import { injectable } from '@/platform/core/di/injectable';
 
 @injectable('EmporixCartApi', 'Singleton')
 class EmporixCartApi implements CartApi {
