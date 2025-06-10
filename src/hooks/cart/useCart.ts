@@ -93,8 +93,10 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     // listen to changes on storeCart to update local state
     // this reflects changes to the store into all components
     // that use the Hook
-    setCart(getCurrentCart());
-  }, [getCurrentCart]);
+    if (storeCart !== undefined) {
+      setCart(storeCart);
+    }
+  }, [storeCart]);
 
   /**
    * Add an item to the cart
