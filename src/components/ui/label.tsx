@@ -9,11 +9,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 export interface LabelProps extends React.ComponentProps<typeof LabelPrimitive.Root> {
   isOptional?: boolean;
   hasTooltip?: boolean;
+  tooltipText?: string;
 }
-function Label({ className, isOptional, hasTooltip, ...props }: LabelProps) {
-  const IsOptional = isOptional;
-  const HasTooltip = hasTooltip;
-
+function Label({ className, isOptional, hasTooltip, tooltipText, ...props }: LabelProps) {
   return (
     <LabelPrimitive.Root
       data-slot="label"
@@ -24,20 +22,17 @@ function Label({ className, isOptional, hasTooltip, ...props }: LabelProps) {
       {...props}
     >
       <div>{props.children}</div>
-      {HasTooltip && (
+      {hasTooltip && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Info className="text-primary-500" />
           </TooltipTrigger>
           <TooltipContent>
-            <p>
-              Message - Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
-              ut labore et dolore magna aliquyam erat, sed diam voluptua.
-            </p>
+            <p className="w-full">{tooltipText}</p>
           </TooltipContent>
         </Tooltip>
       )}
-      {IsOptional && <p className="text-xs font-normal text-gray-500">(optional)</p>}
+      {isOptional && <p className="text-xs font-normal text-gray-500">(optional)</p>}
     </LabelPrimitive.Root>
   );
 }

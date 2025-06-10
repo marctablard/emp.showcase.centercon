@@ -90,7 +90,7 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot="form-item" className={cn('grid gap-2 leading-0', className)} {...props} />
+      <div data-slot="form-item" className={cn('grid gap-2', className)} {...props} />
     </FormItemContext.Provider>
   );
 }
@@ -114,11 +114,6 @@ function FormLabel({ className, isOptional, hasTooltip, ...props }: LabelProps) 
 function FormControl({ ...props }: ControlProps) {
   const { error, formItemId, formDescriptionId, formMessageId, isTouched, disabled, isDirty } = useFormField();
 
-  if ('data-state' in props) {
-    const dataState = props['data-state'];
-    console.log(dataState);
-    // Use the dataState variable as needed
-  }
   return (
     <Slot
       data-slot="form-control"
@@ -141,7 +136,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn('text-muted-foreground text-xs', className)}
+      className={cn('text-muted-foreground text-xs text-neutral-300', className)}
       {...props}
     />
   );

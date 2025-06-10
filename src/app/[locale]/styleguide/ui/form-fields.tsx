@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorFilter } from '@/components/ui/color-filter';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Input, InputButton } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Rating } from '@/components/ui/rating';
@@ -23,6 +23,7 @@ const FormSchemaInput = z.object({
   rightIcon: z.string().optional(),
   bothIcon: z.string().optional(),
   disabled: z.string().optional(),
+  button: z.string().optional(),
 });
 
 const FormSchemaValidate = z.object({
@@ -50,6 +51,7 @@ export default function FormFieldsSytelguideComponent() {
       rightIcon: '',
       bothIcon: '',
       disabled: '',
+      button: '',
     },
   });
 
@@ -68,6 +70,9 @@ export default function FormFieldsSytelguideComponent() {
     resolver: zodResolver(FormSchemaRadio),
     mode: 'all',
   });
+
+  const tooltipText =
+    'Message - Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua';
 
   const checkboxItems = [
     {
@@ -103,10 +108,12 @@ export default function FormFieldsSytelguideComponent() {
           <h4>Label</h4>
           <div className="flex gap-10">
             <div className="flex flex-col gap-2">
-              <Label hasTooltip>Label</Label>
+              <Label hasTooltip tooltipText={tooltipText}>
+                Label
+              </Label>
             </div>
             <div className="flex flex-col gap-2">
-              <Label isOptional hasTooltip>
+              <Label isOptional hasTooltip tooltipText={tooltipText}>
                 Label
               </Label>
             </div>
@@ -116,7 +123,7 @@ export default function FormFieldsSytelguideComponent() {
         <div className="flex flex-col gap-4">
           <h4>Default Input Fields</h4>
           <Form {...form}>
-            <div className="flex gap-10">
+            <div className="flex flex-wrap gap-10">
               <div className="flex flex-col gap-2">
                 <h5>No Icon</h5>
                 <FormField
@@ -192,6 +199,21 @@ export default function FormFieldsSytelguideComponent() {
                   )}
                 />
               </div>
+              <div className="flex flex-col gap-2">
+                <h5>Input Button</h5>
+                <FormField
+                  control={form.control}
+                  name="button"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <InputButton placeholder="Username" startIcon={User} endIcon={Eye} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </Form>
         </div>
@@ -226,9 +248,8 @@ export default function FormFieldsSytelguideComponent() {
                         <FormLabel>Textarea</FormLabel>
                         <FormDescription>Hint Text</FormDescription>
                         <FormControl>
-                          <Textarea placeholder="Placeholder" {...field} />
+                          <Textarea placeholder="Placeholder" maxLength={500} {...field} />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -276,8 +297,7 @@ export default function FormFieldsSytelguideComponent() {
                     name="selectDisabled"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Field</FormLabel>
-                        <FormDescription>Username must be at least 3 characters.</FormDescription>
+                        <FormLabel>Select Field Disabled</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger startIcon={User} disabled>

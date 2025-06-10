@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { ArrowRight, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from './button';
 
 export interface InputProps extends React.ComponentProps<'input'> {
   startIcon?: LucideIcon;
   endIcon?: LucideIcon;
+  isButton?: boolean;
 }
 
-function Input({ className, type, startIcon, endIcon, ...props }: InputProps) {
+function Input({ className, type, startIcon, endIcon, isButton, ...props }: InputProps) {
   const StartIcon = startIcon;
   const EndIcon = endIcon;
   const dataSuccess = 'data-success' in props ? (props['data-success'] as boolean) : false;
@@ -33,7 +35,8 @@ function Input({ className, type, startIcon, endIcon, ...props }: InputProps) {
         type={type}
         data-slot="input"
         className={cn(
-          'text-neutral-900 flex w-full min-w-0 px-3 border border-neutral-200 rounded-sm',
+          'text-neutral-900 flex w-full min-w-0 px-3 border border-neutral-200 rounded-l-lg',
+          !isButton && 'rounded-sm',
           startIcon && 'pl-10',
           endIcon && 'pr-10',
           'placeholder:text-neutral-300 py-3 text-base md:text-base',
@@ -58,4 +61,17 @@ function Input({ className, type, startIcon, endIcon, ...props }: InputProps) {
   );
 }
 
-export { Input };
+function InputButton({ className, type, startIcon, endIcon, ...props }: InputProps) {
+  return (
+    <div className={cn('flex items-center')}>
+      <Input startIcon={startIcon} endIcon={endIcon} isButton {...props} />
+      <Button variant="input">
+        <ArrowRight />
+        Button
+        <ArrowRight />
+      </Button>
+    </div>
+  );
+}
+
+export { Input, InputButton };
