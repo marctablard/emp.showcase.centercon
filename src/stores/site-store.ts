@@ -1,7 +1,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 import { SiteData } from '@/lib/client/site';
 
 export interface SiteState {
@@ -28,20 +27,12 @@ const defaultState: SiteState = {
 };
 
 export const createSiteStore = (initState: SiteState = defaultState) => {
-  return create<SiteStore>()(
-    persist(
-      (set, get) => ({
-        ...initState,
-        setSite: (site: SiteData | null | undefined) => set({ site }),
-        getSite: () => get().site,
-        setLoading: (loading: boolean) => set({ loading }),
-        getLoading: () => get().loading,
-        reset: () => set(defaultState),
-      }),
-      {
-        name: 'emp-site',
-        storage: createJSONStorage(() => sessionStorage),
-      },
-    ),
-  );
+  return create<SiteStore>()((set, get) => ({
+    ...initState,
+    setSite: (site: SiteData | null | undefined) => set({ site }),
+    getSite: () => get().site,
+    setLoading: (loading: boolean) => set({ loading }),
+    getLoading: () => get().loading,
+    reset: () => set(defaultState),
+  }));
 };
