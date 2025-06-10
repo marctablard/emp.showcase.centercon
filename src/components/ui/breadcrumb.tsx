@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
+import { useTranslations } from 'next-intl';
 import { ChevronLeftIcon, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,27 +18,22 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
 }
 
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
-  return <li data-slot="breadcrumb-item" className={cn('inline-flex items-center gap-1.5', className)} {...props} />;
+  return <li data-slot="breadcrumb-item" className={cn('inline-flex items-center gap-1', className)} {...props} />;
 }
 
-function BreadcrumbLink({
-  asChild,
-  className,
-  ...props
-}: React.ComponentProps<'a'> & {
-  asChild?: boolean;
-}) {
-  const Comp = asChild ? Slot : 'a';
-
+function BreadcrumbLink({ className, children, ...props }: React.ComponentProps<'a'>) {
   return (
-    <Comp
+    <a
       data-slot="breadcrumb-link"
       className={cn(
-        'inline-flex items-center gap-1 text-primary font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+        'inline-flex items-center gap-1 text-primary [&>svg]:size-4 lg:[&>svg]:size-6 font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+      <ChevronRight />
+    </a>
   );
 }
 
@@ -55,41 +50,23 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   );
 }
 
-function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<'li'>) {
-  return (
-    <li
-      data-slot="breadcrumb-separator"
-      role="presentation"
-      aria-hidden="true"
-      className={cn('[&>svg]:size-4 lg:[&>svg]:size-6 text-primary', className)}
-      {...props}
-    >
-      {children ?? <ChevronRight />}
-    </li>
-  );
-}
-
 function BreadcrumbBackLink({ className, ...props }: React.ComponentProps<'a'>) {
+  const t = useTranslations('breadcrumb');
   return (
     <a
       data-slot="breadcrumb-back-link"
-      aria-label="Go back to the previous page"
-      className={cn('flex size-9 items-center justify-center', className)}
+      aria-label={t('backLinkAriaLabel')}
+      className={cn(
+        'flex items-center justify-center gap-1 pr-4 underline cursor-pointer [&>svg]:size-4 lg:[&>svg]:size-6 hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+        className,
+      )}
       {...props}
     >
       <ChevronLeftIcon className="size-4" />
-      <span className="sr-only">Back</span>
-      <span aria-hidden="true">Back</span>
+      <span className="sr-only">{t('backLink')}</span>
+      <span aria-hidden="true">{t('backLink')}</span>
     </a>
   );
 }
 
-export {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbBackLink,
-};
+export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbBackLink };
