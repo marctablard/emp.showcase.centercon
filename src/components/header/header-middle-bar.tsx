@@ -19,18 +19,18 @@ export default async function HeaderMiddleBar() {
         <Input placeholder={t('search')} />
       </div>
       <div className="flex justify-end items-center gap-6">
-        <div className="flex flex-col items-center min-w-12 max-w-[90px]">
+        <Link href="/login" className="flex flex-col items-center min-w-12 max-w-[90px]">
           <User className="w-8 h-8 text-primary" />
           <p className="text-sm text-primary font-bold -mt-1">Login</p>
-        </div>
-        <div className="flex flex-col items-center min-w-12 max-w-[90px]">
+        </Link>
+        <Link href="/#" className="flex flex-col items-center min-w-12 max-w-[90px]">
           <Gauge className="w-8 h-8 text-primary" />
           <p className="text-sm text-primary font-bold -mt-1">Quick Order</p>
-        </div>
-        <div className="flex flex-col items-center min-w-12 max-w-[90px]">
+        </Link>
+        <Link href="/#" className="flex flex-col items-center min-w-12 max-w-[90px]">
           <Pin className="w-8 h-8 text-primary" />
           <p className="text-sm text-primary font-bold -mt-1">Whishlists</p>
-        </div>
+        </Link>
       </div>
     </div>
   );
