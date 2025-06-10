@@ -18,7 +18,7 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
         <div className="mt-2 space-y-2">
           {price.tierValues.map((tier, index) => (
             <div key={index} className="flex items-center text-sm text-neutral-500">
-              <span className="font-medium mr-2">{tier.id}+</span>
+              <span className="font-medium mr-2">{tier.minQuantity}+</span>
               <span>${tier.price.toFixed(2)}</span>
             </div>
           ))}

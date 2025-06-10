@@ -93,6 +93,8 @@ export interface ProductPrice {
 
   tierValues: {
     id: string;
+    minQuantity: number;
+    unit?: string;
     price: number;
   }[];
 }

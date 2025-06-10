@@ -1,6 +1,6 @@
 import { injectable } from '@/platform/core/di/injectable';
 import { Quantity as EmporixQuantity, MatchedPrice } from '@/platform/integrations/emporix/model/price';
-import { ProductPrice as ServicePrice, Quantity as ServiceQuantity } from './price';
+import { Quantity, ProductPrice as ServicePrice, Quantity as ServiceQuantity } from './price';
 
 /**
  * Maps between Emporix Price model and Service Price model
@@ -13,6 +13,10 @@ export class PriceMapper {
    * @returns A Service Price
    */
   mapToService(emporixPrice: MatchedPrice): ServicePrice {
+    const tierDefinitions: Record<string, { id: string; minQuantity: Quantity }> = {};
+    emporixPrice.priceModel.tierDefinition.tiers.forEach((tierDef) => {
+      tierDefinitions[tierDef.id] = { id: tierDef.id, minQuantity: tierDef.minQuantity };
+    });
     return {
       id: emporixPrice.priceId,
       productId: emporixPrice.itemId.id,
@@ -33,6 +37,8 @@ export class PriceMapper {
         : undefined,
       tierValues: emporixPrice.tierValues.map((tier) => ({
         id: tier.id,
+        minQuantity: tierDefinitions[tier.id].minQuantity.quantity,
+        unit: tierDefinitions[tier.id].minQuantity.unitCode,
         price: tier.priceValue,
       })),
     };
