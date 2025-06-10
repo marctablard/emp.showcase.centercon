@@ -43,6 +43,7 @@
         "city": "Manchester"
     },
     "cart": {
+        "title": "Warenkorb",
         "yourCart": "Meine Produkte",
         "items": "Artikel",
         "emptyCart": "Ihr Warenkorb ist leer",
@@ -206,7 +207,18 @@
         "noProductsFound": "Keine Produkte gefunden",
         "tryAdjusting": "Versuchen Sie, Ihre Suche oder Filter anzupassen"
     },
+    "seo": {
+        "defaultProductName": "Produkt",
+        "defaultProductDescription": "{productName} - Hochwertiges Produkt aus unserem Katalog",
+        "productTitle": "{productName} | Emporix Showcase",
+        "productNotFoundTitle": "Produkt nicht gefunden | Emporix Showcase",
+        "productNotFoundDescription": "Das angeforderte Produkt konnte nicht gefunden werden. Bitte schauen Sie in unserem Katalog nach anderen Produkten.",
+        "brandName": "Emporix",
+        "currency": "EUR",
+        "storeName": "Emporix Showcase Store"
+    },
     "Account": {
+        "title" : "Service Portal",
         "welcomeBack": "Willkommen zurück, {name}",
         "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
         "accountDetails": "Kontodaten",
