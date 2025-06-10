@@ -302,11 +302,6 @@
             }
         }
     },
-    "UI": {
-        "spinner": {
-            "loading": "Wird geladen..."
-        }
-    },
     "Address": {
         "fullName": "Vollständiger Name",
         "street": "Straße",
@@ -319,5 +314,10 @@
         "companyName": "Firmenname",
         "noCountriesAvailable": "Keine Länder verfügbar",
         "loading": "Adressdaten werden geladen..."
+    },
+    "UI": {
+        "spinner": {
+            "loading": "Wird geladen..."
+        }
     }
 }
