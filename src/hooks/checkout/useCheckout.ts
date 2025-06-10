@@ -109,7 +109,7 @@ export const useCheckout = (): UseCheckout => {
     } else {
       clearShippingMethods();
     }
-  }, [shippingAddress, checkoutCart]);
+  }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
 
   const submitContactData = useCallback(
     (contactData: ContactData) => {

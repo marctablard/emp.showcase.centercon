@@ -37,7 +37,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
     if (!shippingMethods || !shippingMethods.find((option) => option.id === shippingMethod?.methodId)) {
       form.reset();
     }
-  }, [shippingMethods, shippingMethod]);
+  }, [shippingMethods, shippingMethod, form]);
   return (
     <FormProvider {...form}>
       <div className="bg-white rounded-lg shadow-sm p-6">

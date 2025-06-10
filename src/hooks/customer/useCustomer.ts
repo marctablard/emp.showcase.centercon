@@ -37,7 +37,7 @@ export const useCustomer = (): CustomerHook => {
     if (!getLoading() && customer === undefined) {
       fetchCustomer();
     }
-  }, [getLoading, customer]);
+  }, [getLoading, customer, fetchCustomer]);
 
   return {
     customer,

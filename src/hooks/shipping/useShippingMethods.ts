@@ -55,7 +55,7 @@ export const useShippingMethods = (): UseShippingMethods => {
         setLoading(false);
       }
     },
-    [setShippingMethods, setLoading],
+    [setShippingMethods, setLoading, getLoading],
   );
 
   /**
