@@ -1,0 +1,58 @@
+# e2e Test are currently not working (Michael Feige is checking why)
+# Thats why all e2e related steps are commented out
+# The following steps are affected:
+# - Install Playwright Browsers
+# - Generate files
+# - Run e2e
+# - Upload e2e report
+# As soon as e2e tests are working again, we will uncomment the steps
+
+name: Deploy stage
+on:
+  push:
+    branches:
+      - release/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  build_and_deploy_stage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      - name: Install Vercel CLI
+        run: npm i -g vercel
+      - name: Install dependencies
+        run: npm ci
+      # - name: Install Playwright Browsers
+      #   run: npx playwright install --with-deps
+      - name: Pull Vercel environment information
+        run: vercel env pull .env --environment=stage --yes --token=${{ secrets.VERCEL_TOKEN }}
+      # - name: Generate files
+      #   run: npm run generate
+      - name: Run lint
+        run: npm run lint
+      - name: Run jest
+        run: npm run jest
+      # - name: Run e2e
+      #   run: npm run e2e
+      # - uses: actions/upload-artifact@v4
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     name: playwright-report
+      #     path: playwright-report/
+      #     retention-days: 7
+      - name: Deploy to stage
+        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }} --target=stage

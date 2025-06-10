@@ -32,6 +32,17 @@ let nextConfig: NextConfig = {
 
     return config;
   },
+  headers: async () => [
+    {
+      source: '/:path*',
+      headers: [
+        {
+          key: 'X-Robots-Tag',
+          value: 'noindex',
+        },
+      ],
+    },
+  ],
 };
 
 // add i18n Logic to Next-Configuration
