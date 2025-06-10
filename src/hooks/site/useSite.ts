@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { getSite as apiGetSite } from '@/lib/client/site';
 import { Country, Currency, Region } from '@/platform/services/model/common';
 import { PaymentMode } from '@/platform/services/model/payment';
-import { useSiteStore } from '@/stores/site-store';
+import { useSiteStore } from '@/providers/StoreProvider';
 
 /**
  * Hook for accessing site data like countries, regions, and currencies

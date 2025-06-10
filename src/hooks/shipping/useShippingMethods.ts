@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
+import { useShippingMethodsStore } from '@/providers/StoreProvider';
 
 interface UseShippingMethods {
   // Data
-  shippingMethods: ShippingMethod[];
+  shippingMethods: ShippingMethod[] | null;
   loading: boolean;
   error: Error | null;
 
@@ -23,10 +24,8 @@ interface UseShippingMethods {
  * @returns Shipping methods data and operations
  */
 export const useShippingMethods = (): UseShippingMethods => {
-  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const { shippingMethods, loading, getLoading, setLoading, setShippingMethods } = useShippingMethodsStore();
   const [error, setError] = useState<Error | null>(null);
-
   /**
    * Fetch shipping methods for a given country and postal code
    */
@@ -39,7 +38,9 @@ export const useShippingMethods = (): UseShippingMethods => {
       if (!countryCode || !postalCode) {
         return;
       }
-
+      if (getLoading()) {
+        return;
+      }
       setError(null);
       setLoading(true);
 

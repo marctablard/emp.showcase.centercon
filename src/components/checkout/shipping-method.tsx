@@ -27,14 +27,14 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
   } = useCheckout();
 
   const { form } = useValidator('ShippingValidationService', shippingMethod, 'onChange', (data) => {
-    const option = shippingMethods.find((option) => option.id === data.methodId);
+    const option = shippingMethods?.find((option) => option.id === data.methodId);
     if (option) {
       submitShippingMethod(option);
     }
   });
   const t = useTranslations('Checkout.shipping');
   useEffect(() => {
-    if (!shippingMethods.find((option) => option.id === shippingMethod?.methodId)) {
+    if (!shippingMethods || !shippingMethods.find((option) => option.id === shippingMethod?.methodId)) {
       form.reset();
     }
   }, [shippingMethods, shippingMethod]);
@@ -47,9 +47,10 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
             <Spinner variant="md" loadingText={t('loading')} />
           </div>
         )}
-        {!loading && shippingMethods.length === 0 && (
+        {!loading && (!shippingMethods || shippingMethods.length === 0) && (
           <div className="py-4 text-center text-neutral-600">{t('noShippingMethodsAvailable')}</div>
         )}
+
         <FormField
           control={form.control}
           name="methodId"
@@ -61,7 +62,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                   defaultValue={field.value}
                   className="flex flex-col space-y-1"
                 >
-                  {shippingMethods.map((method) => (
+                  {shippingMethods!.map((method) => (
                     <FormItem className="flex items-center space-x-3 space-y-0 w-full" key={method.id}>
                       <div
                         className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${

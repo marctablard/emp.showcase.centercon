@@ -91,11 +91,6 @@ export const useCheckout = (): UseCheckout => {
 
   useEffect(() => {
     setShippingAddress(storeShippingAddress);
-    if (storeShippingAddress?.country && storeShippingAddress?.zipCode) {
-      fetchShippingMethods(storeShippingAddress?.country, storeShippingAddress?.zipCode, checkoutCart?.totalPrice);
-    } else {
-      clearShippingMethods();
-    }
   }, [storeShippingAddress]);
 
   useEffect(() => {
@@ -105,6 +100,14 @@ export const useCheckout = (): UseCheckout => {
   useEffect(() => {
     setShippingMethod(storeShippingMethod);
   }, [storeShippingMethod]);
+
+  useEffect(() => {
+    if (checkoutCart && shippingAddress?.country && shippingAddress?.zipCode) {
+      fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode, checkoutCart.totalPrice);
+    } else {
+      clearShippingMethods();
+    }
+  }, [shippingAddress, checkoutCart]);
 
   const submitContactData = useCallback(
     (contactData: ContactData) => {

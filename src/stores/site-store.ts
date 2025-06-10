@@ -14,6 +14,7 @@ export interface SiteState {
 interface SiteActions {
   setSite: (site: SiteData | null) => void;
   getSite: () => SiteData | null | undefined;
+
   setLoading: (loading: boolean) => void;
   getLoading: () => boolean;
   reset: () => void;
@@ -44,6 +45,3 @@ export const createSiteStore = (initState: SiteState = defaultState) => {
     ),
   );
 };
-
-// Default store instance
-export const useSiteStore = createSiteStore();
