@@ -7,7 +7,6 @@ export interface ShippingMethodsState {
   // Site data
   shippingMethods: ShippingMethod[];
   loading: boolean;
-  error: Error | null;
 }
 
 interface ShippingMethodsActions {
@@ -23,7 +22,6 @@ export type ShippingMethodsStore = ShippingMethodsState & ShippingMethodsActions
 const defaultState: ShippingMethodsState = {
   shippingMethods: [],
   loading: false,
-  error: null,
 };
 
 export const createShippingMethodsStore = (initState: ShippingMethodsState = defaultState) => {
