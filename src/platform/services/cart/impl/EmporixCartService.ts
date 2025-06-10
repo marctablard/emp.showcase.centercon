@@ -1,15 +1,15 @@
-import type { Cart } from '@/platform/services/model/cart/cart';
-import type { CartService } from '@/platform/services/cart/CartService';
-import type { SessionService } from '@/platform/services/session/SessionService';
-import type { CartApi } from '@/platform/integrations/emporix/cart/CartApi';
-import { AddCartItemRequest, UpdateCartItemRequest } from '@/platform/integrations/emporix/model';
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import type { CartMapper } from '../../model/cart/CartMapper';
+import { injectable } from '@/platform/core/di/injectable';
+import type { CartApi } from '@/platform/integrations/emporix/cart/CartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
+import { AddCartItemRequest, UpdateCartItemRequest } from '@/platform/integrations/emporix/model';
+import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
+import type { CartService } from '@/platform/services/cart/CartService';
+import type { Cart } from '@/platform/services/model/cart/cart';
 import type { PriceService } from '@/platform/services/price/PriceService';
 import type { ProductService } from '@/platform/services/product/ProductService';
-import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
+import type { SessionService } from '@/platform/services/session/SessionService';
+import type { CartMapper } from '../../model/cart/CartMapper';
 import { Media } from '../../model/common';
 
 /**

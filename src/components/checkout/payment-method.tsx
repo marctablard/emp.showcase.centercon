@@ -20,7 +20,8 @@ interface PaymentMethodProps {
  */
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
-  // Available payment methods
+
+  // Available payment methods - wrapped in useMemo to prevent unnecessary re-renders
   const paymentOptions = useMemo(
     () => [
       { id: 'credit-card', name: 'Credit Card', provider: 'payment-gateway', method: 'credit-card' },

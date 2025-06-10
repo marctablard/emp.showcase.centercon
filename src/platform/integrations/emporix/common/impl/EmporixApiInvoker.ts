@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixConfig } from '../../config';
 import type { TokenManager } from '../TokenManager';
-import { injectable } from '@/platform/core/di/injectable';
 
 /**
  * Main client for interacting with Emporix APIs

@@ -1,13 +1,13 @@
-import EmporixCartApi from './EmporixCartApi';
-import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
-import { AddCartItemRequest, CreateCartRequest, EmporixCart, UpdateCartItemRequest } from '../../model';
-import { EmporixConfig } from '../../config';
 import { Container, inject } from 'inversify';
-import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
-import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import { TokenManager } from '../../common/TokenManager';
+import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
+import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
+import { EmporixConfig } from '../../config';
+import { AddCartItemRequest, CreateCartRequest, EmporixCart, UpdateCartItemRequest } from '../../model';
 import type { OAuthApi } from '../../oauth/OAuthApi';
+import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
+import EmporixCartApi from './EmporixCartApi';
 
 // Create a test config implementation
 class TestEmporixConfig implements EmporixConfig {
@@ -121,7 +121,7 @@ describe('EmporixCartApi', () => {
       expect(typeof createdCartId).toBe('string');
     }, 10000);
 
-    let cart: EmporixCart | undefined;
+    let cart: EmporixCart | undefined | null;
     it('should get a cart by ID', async () => {
       // Get the cart we just created
       cart = await cartApi.getCart(createdCartId);
@@ -207,8 +207,8 @@ describe('EmporixCartApi', () => {
       const nonExistentCartId = 'non-existent-cart-id';
       const cart = await cartApi.getCart(nonExistentCartId);
 
-      // Verify the cart is undefined
-      expect(cart).toBeUndefined();
+      // Verify the cart is null
+      expect(cart).toBeNull();
     }, 10000);
 
     it('should throw error when adding item to non-existent cart', async () => {
@@ -227,7 +227,7 @@ describe('EmporixCartApi', () => {
 
       // Verify the cart was deleted
       const cart = await cartApi.getCart(createdCartId);
-      expect(cart).toBeUndefined();
+      expect(cart).toBeNull();
     }, 10000);
   });
 });
