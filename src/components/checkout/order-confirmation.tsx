@@ -20,6 +20,8 @@ interface OrderConfirmationProps {
  */
 const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialOrder, customerEmail }) => {
   const t = useTranslations('Confirmation');
+  const tOrderStatus = useTranslations('OrderStatus');
+  const tPayment = useTranslations('PaymentModes');
   const { order, loading, error } = useOrder({ orderId, initialOrder });
 
   return (
@@ -80,12 +82,12 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
 
               <div>
                 <p className="text-sm text-gray-600 mb-1">{t('status')}</p>
-                <p className="font-medium capitalize">{order.status}</p>
+                <p className="font-medium capitalize">{tOrderStatus(order.status)}</p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600 mb-1">{t('paymentMethod')}</p>
-                <p className="font-medium">{(order.payments && order.payments[0]?.method) || 'Credit Card'}</p>
+                <p className="font-medium">{tPayment((order.payments && order.payments[0]?.method) || 'none')}</p>
               </div>
 
               <div>

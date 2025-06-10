@@ -36,6 +36,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
   });
 
   const t = useTranslations('Checkout.payment');
+  const tPayment = useTranslations('PaymentModes');
 
   return (
     <FormProvider {...form}>
@@ -74,7 +75,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                                 htmlFor={option.code}
                                 className="w-full ml-3 block text-sm font-medium text-neutral-700"
                               >
-                                {t('modes.' + option.code)}
+                                {tPayment(option.code)}
                               </FormLabel>
                             </FormItem>
                           </div>
@@ -167,7 +168,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
         ) : (
           // Read-only view
           <div className="text-neutral-700">
-            <p className="font-medium">{t('modes.' + paymentMethod?.code)}</p>
+            <p className="font-medium">{tPayment(paymentMethod?.code ?? 'none')}</p>
 
             {paymentMethod?.code === 'credit-card' && paymentMethod?.customAttributes?.cardNumber && (
               <p className="text-sm text-neutral-600 mt-1">

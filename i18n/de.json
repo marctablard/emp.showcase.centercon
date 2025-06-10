@@ -169,12 +169,7 @@
             "expiryDate": "Ablaufdatum",
             "cvv": "Prüfnummer",
             "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
-            "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig.",
-            "modes": {
-                "creditCard": "Kreditkarte",
-                "paypal": "PayPal",
-                "invoice": "Rechnung"
-            }
+            "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig."
         },
         "shipping": {
             "shippingMethod": "Versandart",
@@ -215,7 +210,17 @@
         "orderNumber": "Bestellnummer",
         "orderDate": "Bestelldatum",
         "email": "E-Mail",
+        "status": "Status",
         "paymentMethod": "Zahlungsmethode",
+        "orderItems": "Bestellte Artikel",
+        "quantity": "Menge",
+        "total": "Gesamtsumme",
+        "subtotal": "Zwischensumme",
+        "shipping": "Versand",
+        "discount": "Rabatt",
+        "free": "Kostenlos",
+        "shippingAddress": "Lieferadresse",
+        "errorFetchingOrder": "Fehler beim Abrufen der Bestelldetails",
         "emailConfirmation": "Eine Bestätigungs-E-Mail wurde gesendet an",
         "continueShopping": "Weiter einkaufen",
         "viewOrders": "Meine Bestellungen anzeigen"
@@ -335,6 +340,20 @@
         "companyName": "Firmenname",
         "noCountriesAvailable": "Keine Länder verfügbar",
         "loading": "Adressdaten werden geladen..."
+    },
+    "PaymentModes": {
+        "creditCard": "Kreditkarte",
+        "paypal": "PayPal",
+        "invoice": "Rechnung",
+        "none": "Keine Zahlart"
+    },
+    "OrderStatus": {
+        "IN_CHECKOUT": "Wird Bearbeitet",
+        "CREATED": "Erstellt",
+        "CONFIRMED": "Bestätigt",
+        "SHIPPED": "Versandt",
+        "COMPLETED": "Abgeschlossen",
+        "DECLINED": "Storniert"
     },
     "UI": {
         "spinner": {

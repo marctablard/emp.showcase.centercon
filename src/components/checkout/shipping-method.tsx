@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
@@ -25,6 +25,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
     shippingMethod,
     submitShippingMethod,
   } = useCheckout();
+
   const { form } = useValidator('ShippingValidationService', shippingMethod, 'onChange', (data) => {
     const option = shippingMethods.find((option) => option.id === data.methodId);
     if (option) {
@@ -32,7 +33,11 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
     }
   });
   const t = useTranslations('Checkout.shipping');
-
+  useEffect(() => {
+    if (!shippingMethods.find((option) => option.id === shippingMethod?.methodId)) {
+      form.reset();
+    }
+  }, [shippingMethods, shippingMethod]);
   return (
     <FormProvider {...form}>
       <div className="bg-white rounded-lg shadow-sm p-6">

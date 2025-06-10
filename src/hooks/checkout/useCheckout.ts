@@ -75,6 +75,7 @@ export const useCheckout = (): UseCheckout => {
   const [orderResponse, setOrderResponse] = useState<CheckoutResponse | null>(null);
   const {
     shippingMethods: availableShippingMethods,
+    clearShippingMethods,
     fetchShippingMethods,
     loading: shippingMethodsLoading,
   } = useShippingMethods();
@@ -90,6 +91,11 @@ export const useCheckout = (): UseCheckout => {
 
   useEffect(() => {
     setShippingAddress(storeShippingAddress);
+    if (storeShippingAddress?.country && storeShippingAddress?.zipCode) {
+      fetchShippingMethods(storeShippingAddress?.country, storeShippingAddress?.zipCode, checkoutCart?.totalPrice);
+    } else {
+      clearShippingMethods();
+    }
   }, [storeShippingAddress]);
 
   useEffect(() => {
@@ -114,7 +120,6 @@ export const useCheckout = (): UseCheckout => {
       if (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode) {
         updateShippingInfo(address.country, address.zipCode);
       }
-      fetchShippingMethods(address.country, address.zipCode, checkoutCart?.totalPrice);
       setStoreShippingAddress(address);
     },
     [

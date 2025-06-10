@@ -54,7 +54,7 @@ class EmporixShippingService implements ShippingService {
               const fee = method.fees
                 .filter((fee) => fee.minOrderValue.currency == orderValue.currency)
                 .filter((fee) => fee.minOrderValue.amount <= orderValue.amount)
-                .sort((a, b) => b.minOrderValue.amount - a.minOrderValue.amount)
+                .sort((a, b) => a.minOrderValue.amount - b.minOrderValue.amount)
                 .findLast((fee) => fee.cost.currency == orderValue.currency);
               if (fee) {
                 cost = fee.cost;

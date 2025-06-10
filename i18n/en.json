@@ -161,12 +161,7 @@
             "expiryDate": "Expiry Date",
             "cvv": "CVV",
             "paypalRedirect": "You will be redirected to PayPal to complete your payment after reviewing your order.",
-            "invoiceTerms": "You will receive an invoice for this order. Payment is due within 30 days.",
-         "modes": {
-                "creditCard": "Kreditkarte",
-                "paypal": "PayPal",
-                "invoice": "Rechnung"
-            }
+            "invoiceTerms": "You will receive an invoice for this order. Payment is due within 30 days."
         },
         "shipping": {
             "shippingMethod": "Shipping Method",
@@ -207,7 +202,17 @@
         "orderNumber": "Order Number",
         "orderDate": "Order Date",
         "email": "Email",
+        "status": "Status",
         "paymentMethod": "Payment Method",
+        "orderItems": "Order Items",
+        "quantity": "Quantity",
+        "total": "Total",
+        "subtotal": "Subtotal",
+        "shipping": "Shipping",
+        "discount": "Discount",
+        "free": "Free",
+        "shippingAddress": "Shipping Address",
+        "errorFetchingOrder": "Error fetching order details",
         "emailConfirmation": "A confirmation email has been sent to",
         "continueShopping": "Continue Shopping",
         "viewOrders": "View My Orders"
@@ -327,6 +332,20 @@
         "companyName": "Company Name",
         "noCountriesAvailable": "No countries available",
         "loading": "Loading address data..."
+    },
+    "PaymentModes": {
+        "creditCard": "Credit Card",
+        "paypal": "PayPal",
+        "invoice": "Invoice",
+        "none": "None"
+    },
+    "OrderStatus": {
+        "IN_CHECKOUT": "In Checkout",
+        "CREATED": "Created",
+        "CONFIRMED": "Confirmed",
+        "SHIPPED": "Shipped",
+        "COMPLETED": "Completed",
+        "DECLINED": "Cancelled"
     },
     "UI": {
         "spinner": {
