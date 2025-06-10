@@ -13,6 +13,8 @@ function ColorFilter({ className, color, ...props }: ColorFilterProps) {
         className={cn(
           className,
           'group peer h-6 w-6 shrink-0 rounded-sm border hover:opacity-80 data-[state=checked]:text-white',
+          'focus:outline-2 focus:outline-offset-2 focus:outline-primary-500',
+          'disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-neutral-300 disabled:bg-neutral-300 aria-invalid:disabled:border-neutral-300',
           '[state=checked]:' + className,
         )}
         {...props}

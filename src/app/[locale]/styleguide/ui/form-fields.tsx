@@ -29,6 +29,7 @@ const FormSchemaValidate = z.object({
   input: z.string().min(3, { message: 'Error' }),
   textarea: z.string().optional(),
   select: z.string({ message: 'Error' }).email(),
+  selectDisabled: z.string().optional(),
   checkboxes: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one item.',
   }),
@@ -259,8 +260,33 @@ export default function FormFieldsSytelguideComponent() {
                             <SelectItem value="ghi@google.com" startIcon={User} endIcon={Eye}>
                               ghi@email.com
                             </SelectItem>
-                            <SelectItem value="jkl@support.com" startIcon={User} endIcon={Eye}>
+                            <SelectItem value="jkl@support.com" startIcon={User} endIcon={Eye} disabled>
                               jkl@email.com
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FormField
+                    control={formVal.control}
+                    name="selectDisabled"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select Field</FormLabel>
+                        <FormDescription>Username must be at least 3 characters.</FormDescription>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger startIcon={User} disabled>
+                              <SelectValue placeholder="Placeholder" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="nomailDis" startIcon={User} endIcon={Eye}>
+                              No email
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -302,7 +328,6 @@ export default function FormFieldsSytelguideComponent() {
                             }}
                           />
                         ))}
-
                         <FormField
                           key="indeterminate"
                           control={formVal.control}
@@ -318,7 +343,6 @@ export default function FormFieldsSytelguideComponent() {
                             );
                           }}
                         />
-
                         <FormField
                           key="disabled"
                           control={formVal.control}
@@ -334,7 +358,6 @@ export default function FormFieldsSytelguideComponent() {
                             );
                           }}
                         />
-
                         <FormMessage />
                       </FormItem>
                     )}
@@ -412,7 +435,11 @@ export default function FormFieldsSytelguideComponent() {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-base font-bold">Rating</div>
-                <Rating count={1}></Rating>
+                <Rating starsCount={5}></Rating>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="text-base font-bold">Rating Disabled</div>
+                <Rating starsCount={5} disabled></Rating>
               </div>
             </div>
             <div className="flex flex-col gap-10 w-3/12">
@@ -423,6 +450,8 @@ export default function FormFieldsSytelguideComponent() {
                 <ColorFilter className="bg-red-400" color="Color 3" />
                 <ColorFilter className="bg-purple-400" color="Color 4" />
                 <ColorFilter className="bg-primary-500" color="Color 5" />
+                <ColorFilter className="bg-primary-500" color="Disabled" disabled />
+                <ColorFilter className="bg-primary-500" color="Disabled Checked" disabled checked />
               </div>
             </div>
           </div>

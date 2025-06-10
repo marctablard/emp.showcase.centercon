@@ -114,6 +114,11 @@ function FormLabel({ className, isOptional, hasTooltip, ...props }: LabelProps) 
 function FormControl({ ...props }: ControlProps) {
   const { error, formItemId, formDescriptionId, formMessageId, isTouched, disabled, isDirty } = useFormField();
 
+  if ('data-state' in props) {
+    const dataState = props['data-state'];
+    console.log(dataState);
+    // Use the dataState variable as needed
+  }
   return (
     <Slot
       data-slot="form-control"
