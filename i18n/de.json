@@ -28,13 +28,8 @@
         "featuredProduct": "Ausgewähltes Produkt",
         "signIn": "Einloggen",
         "register": "Registrieren",
-        "account": "Konto"
-    },
-    "searchBar": {
-        "allProducts": "Alle Produkte",
-        "search": "Schlüsselwort, Artikel oder Teilnummer eingeben",
-        "bulkOrder": "Großbestellung",
-        "myAccount": "Mein Account"
+        "account": "Konto",
+        "search": "Schlüsselwort, Artikel oder Teilnummer eingeben"
     },
     "footer": {
         "companyName": "Company Name",

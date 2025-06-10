@@ -28,13 +28,8 @@
         "featuredProduct": "Featured Product",
         "signIn": "Sign In",
         "register": "Register",
-        "account": "Account"
-    },
-    "searchBar": {
-        "allProducts": "All Products",
-        "search": "Enter keyword, item, model or part number",
-        "bulkOrder": "Bulk Order",
-        "myAccount": "My Account"
+        "account": "Account",
+        "search": "Enter keyword, item, model or part number"
     },
     "footer": {
         "companyName": "Company Name",
