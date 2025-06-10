@@ -13,7 +13,7 @@ import { OAuthApi } from '../OAuthApi';
 @injectable('EmporixOAuthApi', 'Singleton')
 class EmporixOAuthApi implements OAuthApi {
   private readonly baseUrl: string = 'https://api.emporix.io';
-  private debugCurl: boolean = false;
+  private debugCurl: boolean = true;
 
   /**
    * Get an anonymous token
@@ -144,8 +144,9 @@ class EmporixOAuthApi implements OAuthApi {
     formData.append('grant_type', 'client_credentials');
     formData.append('client_id', clientId);
     formData.append('client_secret', clientSecret);
-    formData.append('scope', `tenant=${tenant}` + (scopes ? ` ${scopes.join(' ')}` : ''));
-
+    if (scopes) {
+      formData.append('scope', `tenant=${tenant}` + (scopes ? ` ${scopes.join(' ')}` : ''));
+    }
     const response = await this.fetch('/oauth/token', {
       method: 'POST',
       headers: {

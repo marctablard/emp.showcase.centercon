@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from 'react';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
-import { useSiteStore } from '@/stores/site-store';
 
 interface UseShippingMethods {
   // Data
@@ -11,9 +10,12 @@ interface UseShippingMethods {
   error: Error | null;
 
   // Actions
-  fetchShippingMethods: (countryCode: string, postalCode: string) => Promise<void>;
+  fetchShippingMethods: (
+    countryCode: string,
+    postalCode: string,
+    orderValue?: { amount: number; currency: string },
+  ) => Promise<void>;
   clearShippingMethods: () => void;
-  getShippingMethodById: (id: string) => ShippingMethod | undefined;
 }
 
 /**
@@ -21,40 +23,38 @@ interface UseShippingMethods {
  * @returns Shipping methods data and operations
  */
 export const useShippingMethods = (): UseShippingMethods => {
-  // Get site store data
-  const {
-    shippingMethods: storeMethods,
-    shippingMethodsLoading: storeLoading,
-    setShippingMethods,
-    setShippingMethodsLoading,
-  } = useSiteStore();
-
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
   /**
    * Fetch shipping methods for a given country and postal code
    */
   const fetchShippingMethods = useCallback(
-    async (countryCode: string, postalCode: string): Promise<void> => {
+    async (
+      countryCode: string,
+      postalCode: string,
+      orderValue?: { amount: number; currency: string },
+    ): Promise<void> => {
       if (!countryCode || !postalCode) {
         return;
       }
 
       setError(null);
-      setShippingMethodsLoading(true);
+      setLoading(true);
 
       try {
         const { getShippingMethods } = await import('@/lib/client/shipping');
-        const methods = await getShippingMethods(countryCode, postalCode);
+        const methods = await getShippingMethods(countryCode, postalCode, orderValue);
         setShippingMethods(methods);
       } catch (err) {
         console.error('Error fetching shipping methods:', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch shipping methods'));
       } finally {
-        setShippingMethodsLoading(false);
+        setLoading(false);
       }
     },
-    [setShippingMethods, setShippingMethodsLoading],
+    [setShippingMethods, setLoading],
   );
 
   /**
@@ -64,22 +64,11 @@ export const useShippingMethods = (): UseShippingMethods => {
     setShippingMethods([]);
   }, [setShippingMethods]);
 
-  /**
-   * Get a shipping method by its ID
-   */
-  const getShippingMethodById = useCallback(
-    (id: string): ShippingMethod | undefined => {
-      return storeMethods.find((method) => method.id === id);
-    },
-    [storeMethods],
-  );
-
   return {
-    shippingMethods: storeMethods,
-    loading: storeLoading,
+    shippingMethods,
+    loading,
     error,
     fetchShippingMethods,
     clearShippingMethods,
-    getShippingMethodById,
   };
 };

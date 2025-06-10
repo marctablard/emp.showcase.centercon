@@ -1,11 +1,13 @@
 'use client';
 
 import type { Country, Currency, Region } from '@/platform/services/model/common';
+import type { PaymentMode } from '@/platform/services/model/payment';
 
 export type SiteData = {
   countries: Country[];
   regions: Region[];
   currencies: Currency[];
+  paymentModes: PaymentMode[];
 };
 
 /**

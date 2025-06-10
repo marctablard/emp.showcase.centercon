@@ -1,14 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { sub } from 'date-fns';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { useShippingMethods } from '@/hooks/shipping/useShippingMethods';
-import { useSite } from '@/hooks/site/useSite';
 import { useValidator } from '@/hooks/validation/useValidator';
-import { Shipping } from '@/platform/services/model/checkout';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
@@ -23,35 +19,19 @@ interface ShippingMethodProps {
  * Allows users to select their preferred shipping method
  */
 const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) => {
-  const { shippingMethod, submitShippingMethod, shippingAddress } = useCheckout();
-  const { shippingMethods, loading: loading, fetchShippingMethods } = useShippingMethods();
+  const {
+    availableShippingMethods: shippingMethods,
+    shippingMethodsLoading: loading,
+    shippingMethod,
+    submitShippingMethod,
+  } = useCheckout();
   const { form } = useValidator('ShippingValidationService', shippingMethod, 'onChange', (data) => {
     const option = shippingMethods.find((option) => option.id === data.methodId);
     if (option) {
-      submitShippingMethod({
-        methodId: option.id,
-        methodName: option.name,
-        amount: option.cost,
-        zoneId: option.zoneId,
-      });
+      submitShippingMethod(option);
     }
   });
   const t = useTranslations('Checkout.shipping');
-
-  // Fetch shipping methods when the component mounts if we have an address
-  useEffect(() => {
-    const fetchMethods = async () => {
-      if (shippingAddress?.country && shippingAddress?.zipCode) {
-        try {
-          await fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode);
-        } catch (error) {
-          console.error('Error fetching shipping methods:', error);
-        }
-      }
-    };
-
-    fetchMethods();
-  }, [shippingAddress, fetchShippingMethods]);
 
   return (
     <FormProvider {...form}>
@@ -63,9 +43,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
           </div>
         )}
         {!loading && shippingMethods.length === 0 && (
-          <div className="py-4 text-center text-neutral-600">
-            {shippingAddress ? t('noShippingMethodsAvailable') : t('enterShippingAddressFirst')}
-          </div>
+          <div className="py-4 text-center text-neutral-600">{t('noShippingMethodsAvailable')}</div>
         )}
         <FormField
           control={form.control}
@@ -109,16 +87,13 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) =
                             </div>
                             <div className="text-right">
                               <span className="font-medium">
-                                {method.cost === 0
+                                {!method.cost
                                   ? t('freeShipping')
                                   : new Intl.NumberFormat('en-US', {
                                       style: 'currency',
-                                      currency: method.currency || 'USD',
-                                    }).format(method.cost)}
+                                      currency: method.cost.currency,
+                                    }).format(method.cost.amount)}
                               </span>
-                              <p className="text-xs text-neutral-500">
-                                {method.estimatedDelivery || t('estimatedDelivery')}
-                              </p>
                             </div>
                           </div>
                         </FormLabel>

@@ -156,7 +156,12 @@
             "expiryDate": "Expiry Date",
             "cvv": "CVV",
             "paypalRedirect": "You will be redirected to PayPal to complete your payment after reviewing your order.",
-            "invoiceTerms": "You will receive an invoice for this order. Payment is due within 30 days."
+            "invoiceTerms": "You will receive an invoice for this order. Payment is due within 30 days.",
+         "modes": {
+                "creditCard": "Kreditkarte",
+                "paypal": "PayPal",
+                "invoice": "Rechnung"
+            }
         },
         "shipping": {
             "shippingMethod": "Shipping Method",

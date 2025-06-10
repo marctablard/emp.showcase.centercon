@@ -1,6 +1,7 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { ShippingMethod } from '..';
+import { EmporixMonetaryAmount } from '@/platform/integrations/emporix';
 import { EmporixShippingMethod } from '@/platform/integrations/emporix/model/shipping';
+import { ShippingMethod } from '..';
 import { ShippingMapper } from '../ShippingMapper';
 
 /**
@@ -13,13 +14,12 @@ class EmporixShippingMapper implements ShippingMapper {
    * @param emporixMethod The Emporix shipping method
    * @param zoneId The zone ID
    */
-  mapToService(emporixMethod: EmporixShippingMethod, zoneId: string): ShippingMethod {
+  mapToService(emporixMethod: EmporixShippingMethod, zoneId: string, cost?: EmporixMonetaryAmount): ShippingMethod {
     return {
       id: emporixMethod.id,
       name: emporixMethod.name.en || Object.values(emporixMethod.name)[0] || emporixMethod.id,
       description: '',
-      cost: emporixMethod.cost?.value || 0,
-      currency: emporixMethod.cost?.currency || 'USD',
+      cost: cost,
       zoneId: zoneId,
     };
   }
@@ -28,15 +28,8 @@ class EmporixShippingMapper implements ShippingMapper {
    * Map from service shipping method to Emporix shipping method
    * @param serviceMethod The service shipping method
    */
-  mapToEmporix(serviceMethod: ShippingMethod): EmporixShippingMethod {
-    return {
-      id: serviceMethod.id,
-      name: { en: serviceMethod.name },
-      cost: {
-        value: serviceMethod.cost,
-        currency: serviceMethod.currency,
-      },
-    };
+  mapToEmporix(_serviceMethod: ShippingMethod): EmporixShippingMethod {
+    throw new Error('Not implemented');
   }
 }
 

@@ -1,5 +1,4 @@
-import { EmporixShippingMethod, EmporixSite, EmporixFindSiteRequest } from '../model/shipping';
-
+import { EmporixFindSiteRequest, EmporixShippingMethod, EmporixSite } from '../model/shipping';
 
 /**
  * Interface for shipping API operations

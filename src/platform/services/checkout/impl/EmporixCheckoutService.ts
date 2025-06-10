@@ -4,11 +4,12 @@ import type { CheckoutApi } from '@/platform/integrations/emporix/checkout/Check
 import {
   EmporixCartCheckoutRequest,
   EmporixCheckoutCustomer,
-  EmporixPaymentMethod,
+  EmporixCheckoutPaymentMethod,
   EmporixShipping,
 } from '@/platform/integrations/emporix/model';
+import EmporixPaymentGatewayApi from '@/platform/integrations/emporix/payment/impl/EmporixPaymentGatewayApi';
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
-import { CheckoutRequest, CheckoutResponse, QuoteCheckoutRequest } from '../../model/checkout';
+import { CheckoutPaymentMethod, CheckoutRequest, CheckoutResponse, QuoteCheckoutRequest } from '../../model/checkout';
 import { CheckoutService } from '../CheckoutService';
 import type { CheckoutValidator } from '../validation/CheckoutValidator';
 
@@ -21,15 +22,17 @@ class EmporixCheckoutService implements CheckoutService {
   private checkoutApi: CheckoutApi;
   private customerService: CustomerService;
   private checkoutValidator: CheckoutValidator;
-
+  private paymentGatewayApi: EmporixPaymentGatewayApi;
   constructor(
     @inject('EmporixCheckoutApi') checkoutApi: CheckoutApi,
+    @inject('EmporixPaymentGatewayApi') paymentGatewayApi: EmporixPaymentGatewayApi,
     @inject('CustomerService') customerService: CustomerService,
     @inject('CheckoutValidator') checkoutValidator: CheckoutValidator,
   ) {
     this.checkoutApi = checkoutApi;
     this.customerService = customerService;
     this.checkoutValidator = checkoutValidator;
+    this.paymentGatewayApi = paymentGatewayApi;
   }
 
   async checkout(request: CheckoutRequest): Promise<CheckoutResponse> {
@@ -77,7 +80,9 @@ class EmporixCheckoutService implements CheckoutService {
       contactPhone: address.contactPhone || request.customer.phone,
       type: address.type || 'SHIPPING',
     }));
-    const paymentMethods: EmporixPaymentMethod[] = [request.paymentMethod];
+    // TODO implement support for multiple paymentMethods in Frontend
+    const paymentMethods: CheckoutPaymentMethod[] = [request.paymentMethod];
+
     const shipping: EmporixShipping = {
       methodId: request.shipping.methodId,
       methodName: request.shipping.methodName,
@@ -89,7 +94,7 @@ class EmporixCheckoutService implements CheckoutService {
       customer: emporixCustomer,
       addresses: addresses,
       shipping: shipping,
-      paymentMethods: paymentMethods,
+      paymentMethods: await Promise.all(paymentMethods.map((pm) => this.getCheckoutPaymentMethod(pm))),
     };
     if (emporixCustomer.guest) {
       return this.checkoutApi.guestCheckout(checkoutRequest);
@@ -111,6 +116,19 @@ class EmporixCheckoutService implements CheckoutService {
     // Map API response to service model
     return this.mapper.mapToService(apiResponse);
     */
+  }
+
+  private async getCheckoutPaymentMethod(paymentMethod: CheckoutPaymentMethod): Promise<EmporixCheckoutPaymentMethod> {
+    const emporixPaymentMode = await this.paymentGatewayApi.getPaymentMode(paymentMethod.id);
+    if (!emporixPaymentMode) {
+      throw new Error('Failed to get payment mode');
+    }
+    return {
+      provider: emporixPaymentMode.provider,
+      method: emporixPaymentMode.code,
+      amount: paymentMethod.amount,
+      customAttributes: paymentMethod.customAttributes,
+    };
   }
 }
 

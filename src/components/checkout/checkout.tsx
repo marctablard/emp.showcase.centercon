@@ -74,7 +74,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           {/* Customer Information */}
-          {!customer && <ContactData />}
+          {customer === null && <ContactData />}
 
           {/* Addresses */}
           <Addresses />

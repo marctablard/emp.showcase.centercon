@@ -5,10 +5,12 @@ export interface ShippingMethod {
   id: string;
   name: string;
   description?: string;
-  cost: number;
-  currency: string;
-  estimatedDelivery?: string;
   zoneId: string;
+  cost?: {
+    amount: number;
+    currency: string;
+  };
+  taxCode?: string;
 }
 
 /**

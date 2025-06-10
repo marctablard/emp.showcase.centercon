@@ -12,7 +12,7 @@ import type { TokenManager } from '../TokenManager';
 class EmporixApiInvoker {
   private config: EmporixConfig;
   private tokenManager: TokenManager;
-  private debugCurl: boolean = false;
+  private debugCurl: boolean = true;
 
   constructor(
     @inject('EmporixConfig') config: EmporixConfig,
@@ -101,11 +101,13 @@ class EmporixApiInvoker {
         }
         break;
       case 'service':
+        if (!this.config.serverClientId || !this.config.serverClientSecret) {
+          throw new Error('Service Credentials not available');
+        }
         token = await this.tokenManager.getServiceAccessToken(
           this.config.tenant,
-          this.config.clientId,
-          this.config.clientSecret,
-          authOptions?.scopes,
+          this.config.serverClientId,
+          this.config.serverClientSecret,
         );
         break;
       default:

@@ -12,8 +12,6 @@ import { useSite } from '@/hooks/site/useSite';
 import { useL10n } from '@/hooks/useL10n';
 import { Spinner } from '../ui/spinner';
 
-import { useEffect } from 'react';
-
 interface AddressInfoAccordionProps {
   control: Control<any>;
 }

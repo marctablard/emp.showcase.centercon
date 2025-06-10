@@ -1,15 +1,15 @@
-import type { PaymentMode } from '@/platform/services/model';
+import { PaymentMode } from '../model/payment';
 
 /**
- * Interface for the Emporix Payment Gateway API
+ * Service for payment operations
  */
-export interface PaymentGatewayApi {
+export interface PaymentService {
   /**
    * Get all payment modes configured for the tenant
    * @returns Promise with array of payment modes
    */
   getPaymentModes(): Promise<PaymentMode[]>;
-  
+
   /**
    * Get a specific payment mode by ID
    * @param id Payment mode ID

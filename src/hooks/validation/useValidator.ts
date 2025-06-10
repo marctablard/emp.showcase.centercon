@@ -28,9 +28,9 @@ export function useValidator(
     mode: mode,
   });
 
-  if (onValidated) {
-    // Set up subscription once and clean it up properly
-    useEffect(() => {
+  // Set up subscription once and clean it up properly
+  useEffect(() => {
+    if (onValidated) {
       const unsubscribe = form.subscribe({
         formState: { isValid: true, isValidating: true },
         callback: (formState) => {
@@ -44,8 +44,8 @@ export function useValidator(
 
       // Clean up subscription when component unmounts
       return () => unsubscribe();
-    }, [form, onValidated]);
-  }
+    }
+  }, [form, onValidated, values]);
   return {
     form,
     validator,

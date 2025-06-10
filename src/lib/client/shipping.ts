@@ -8,15 +8,21 @@ import { ShippingMethod } from '@/platform/services/model/shipping';
  */
 export async function getShippingMethods(
   countryCode: string,
-  postalCode: string
+  postalCode: string,
+  orderValue?: { amount: number; currency: string },
 ): Promise<ShippingMethod[]> {
   try {
-    const response = await fetch(
-      `/api/shipping?countryCode=${encodeURIComponent(countryCode)}&postalCode=${encodeURIComponent(postalCode)}`,
-      {
-        cache: 'no-store',
-      }
-    );
+    // Build URL with required parameters
+    let url = `/api/shipping?countryCode=${encodeURIComponent(countryCode)}&postalCode=${encodeURIComponent(postalCode)}`;
+
+    // Add optional order value parameters if provided
+    if (orderValue) {
+      url += `&amount=${encodeURIComponent(orderValue.amount)}&currency=${encodeURIComponent(orderValue.currency)}`;
+    }
+
+    const response = await fetch(url, {
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch shipping methods: ${response.statusText}`);
@@ -35,10 +41,7 @@ export async function getShippingMethods(
  * @param zoneId The zone ID
  * @returns The shipping method if found
  */
-export async function getShippingMethod(
-  methodId: string,
-  zoneId: string
-): Promise<ShippingMethod | undefined> {
+export async function getShippingMethod(methodId: string, zoneId: string): Promise<ShippingMethod | undefined> {
   try {
     const response = await fetch(`/api/shipping`, {
       method: 'POST',

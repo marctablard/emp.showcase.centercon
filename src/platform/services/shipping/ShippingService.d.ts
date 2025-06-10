@@ -9,7 +9,11 @@ export interface ShippingService {
    * @param countryCode The country code
    * @param postalCode The postal code
    */
-  getShippingMethods(countryCode: string, postalCode: string): Promise<EmporixShippingMethod[]>;
+  getShippingMethods(
+    countryCode: string,
+    postalCode: string,
+    orderValue?: { amount: number; currency: string },
+  ): Promise<ShippingMethod[]>;
 
   /**
    * Get a shipping method by ID

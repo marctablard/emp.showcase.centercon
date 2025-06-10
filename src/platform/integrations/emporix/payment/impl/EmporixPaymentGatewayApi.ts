@@ -1,8 +1,8 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { PaymentMode } from '@/platform/services/model';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
+import { EmporixPaymentMode, EmporixPaymentModeFrontend } from '../../model/payment';
 import { PaymentGatewayApi } from '../PaymentGatewayApi';
 
 @injectable('EmporixPaymentGatewayApi', 'Singleton')
@@ -15,7 +15,7 @@ class EmporixPaymentGatewayApi implements PaymentGatewayApi {
     this.config = config;
   }
 
-  async getPaymentModes(): Promise<PaymentMode[]> {
+  async getPaymentModesFrontend(): Promise<EmporixPaymentModeFrontend[]> {
     const response = await this.apiClient.authenticatedFetch(
       `/payment-gateway/${this.config.tenant}/paymentmodes/frontend`,
       { method: 'GET' },
@@ -29,11 +29,11 @@ class EmporixPaymentGatewayApi implements PaymentGatewayApi {
     return await response.json();
   }
 
-  async getPaymentMode(id: string): Promise<PaymentMode | null> {
+  async getPaymentMode(id: string): Promise<EmporixPaymentMode | null> {
     const response = await this.apiClient.authenticatedFetch(
-      `/payment-gateway/${this.config.tenant}/paymentmodes/frontend/${id}`,
+      `/payment-gateway/${this.config.tenant}/paymentmodes/config/${id}`,
       { method: 'GET' },
-      'public',
+      'service',
     );
 
     if (!response.ok) {

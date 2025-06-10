@@ -1,12 +1,17 @@
 import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { cookies } from 'next/headers';
 import { inject } from 'inversify';
+import { omit } from 'lodash';
 import { injectable } from '@/platform/core/di/injectable';
+import { StoredToken } from '@/platform/integrations/types/auth';
+import { EmporixAccessTokenResponse } from '../../model/oauth';
 import type { OAuthApi } from '../../oauth/OAuthApi';
 import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 
 @injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
+  private serviceToken: StoredToken<EmporixAccessTokenResponse> | undefined;
+
   constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
     super(oauthApi);
   }
@@ -23,11 +28,13 @@ class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
     }
     const b64Token = tokenCookie.value;
     const tokens: TokenStore = JSON.parse(Buffer.from(b64Token, 'base64').toString('utf-8'));
+    tokens.serviceToken = this.serviceToken;
     return tokens;
   }
 
   protected async writeTokens(tokens: TokenStore, tenant: string): Promise<void> {
-    const b64Token = Buffer.from(JSON.stringify(tokens)).toString('base64');
+    const clientTokens = omit(tokens, ['serviceToken']);
+    const b64Token = Buffer.from(JSON.stringify(clientTokens)).toString('base64');
     const cookieStore = await cookies();
     cookieStore.set(this.buildStorageKey(tenant), b64Token, {
       httpOnly: true,
@@ -36,6 +43,7 @@ class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
       path: '/',
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
+    this.serviceToken = tokens.serviceToken;
   }
 }
 

@@ -5,6 +5,8 @@ import type { SessionContextApi } from '@/platform/integrations/emporix/session/
 import { Customer } from '../../model/customer/customer';
 import { CustomerService } from '../CustomerService';
 
+const ANONYMOUS_CUSTOMER_ID = '00000000';
+
 /**
  * Emporix implementation of the CustomerService
  * Currently returns null for getCurrentCustomer as requested
@@ -26,6 +28,10 @@ export class EmporixCustomerService implements CustomerService {
   async getCurrentCustomer(): Promise<Customer | null> {
     try {
       const response = await this.customerApi.getCustomerProfile();
+      // return null for Anonymous for clear differentiation
+      if (!response || response.id == ANONYMOUS_CUSTOMER_ID) {
+        return null;
+      }
       return {
         id: response.id,
         email: response.contactEmail || '',

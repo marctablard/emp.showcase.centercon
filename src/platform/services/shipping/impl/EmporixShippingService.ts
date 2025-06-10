@@ -1,7 +1,8 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixShippingMethod } from '@/platform/integrations/emporix/model/shipping';
+import { EmporixMonetaryAmount } from '@/platform/integrations/emporix';
 import type { ShippingApi } from '@/platform/integrations/emporix/shipping/ShippingApi';
+import { ShippingMethod } from '../../model/shipping';
 import type { ShippingMapper } from '../../model/shipping/ShippingMapper';
 import { ShippingService } from '../ShippingService';
 
@@ -24,7 +25,11 @@ class EmporixShippingService implements ShippingService {
     this.shippingMapper = shippingMapper;
   }
 
-  async getShippingMethods(country: string, postalCode: string): Promise<EmporixShippingMethod[]> {
+  async getShippingMethods(
+    country: string,
+    postalCode: string,
+    orderValue?: { amount: number; currency: string },
+  ): Promise<ShippingMethod[]> {
     try {
       // Find site based on location
       const sites = await this.shippingApi.findSite({
@@ -38,13 +43,24 @@ class EmporixShippingService implements ShippingService {
 
       // Get the first site
       const site = sites[0];
-      const methods: EmporixShippingMethod[] = [];
+      const methods: ShippingMethod[] = [];
 
       // Collect all shipping methods from all zones
       for (const zone of site.zones) {
         if (zone.methods && zone.methods.length > 0) {
           for (const method of zone.methods) {
-            methods.push(this.shippingMapper.mapToService(method, zone.id));
+            let cost: EmporixMonetaryAmount | undefined = undefined;
+            if (orderValue) {
+              const fee = method.fees
+                .filter((fee) => fee.minOrderValue.currency == orderValue.currency)
+                .filter((fee) => fee.minOrderValue.amount <= orderValue.amount)
+                .sort((a, b) => b.minOrderValue.amount - a.minOrderValue.amount)
+                .findLast((fee) => fee.cost.currency == orderValue.currency);
+              if (fee) {
+                cost = fee.cost;
+              }
+            }
+            methods.push(this.shippingMapper.mapToService(method, zone.id, cost));
           }
         }
       }
@@ -56,18 +72,18 @@ class EmporixShippingService implements ShippingService {
     }
   }
 
-  async getShippingMethod(methodId: string, zoneId: string): Promise<EmporixShippingMethod | undefined> {
+  async getShippingMethod(methodId: string, zoneId: string): Promise<ShippingMethod | null> {
     try {
       const emporixMethod = await this.shippingApi.getShippingMethod(this.defaultSiteId, zoneId, methodId);
 
       if (!emporixMethod) {
-        return undefined;
+        return null;
       }
 
       return this.shippingMapper.mapToService(emporixMethod, zoneId);
     } catch (error) {
       console.error('Error getting shipping method:', error);
-      return undefined;
+      return null;
     }
   }
 }

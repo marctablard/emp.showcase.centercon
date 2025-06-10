@@ -22,25 +22,21 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
     billingAddress: storeBillingAddress,
   } = useCheckout();
 
-  const emptyAddress = {
+  const [shippingAddress, setShippingAddress] = useState<Omit<CheckoutAddress, 'type'>>({
     contactName: '',
     street: '',
-    streetNumber: '',
-    streetAppendix: '',
     zipCode: '',
     city: '',
     country: '',
-    state: '',
-    companyName: '',
-    contactPhone: '',
-  };
-  const [shippingAddress, setShippingAddress] = useState<Omit<CheckoutAddress, 'type'>>({
-    ...emptyAddress,
     ...storeShippingAddress,
   });
 
   const [billingAddress, setBillingAddress] = useState<Omit<CheckoutAddress, 'type'>>({
-    ...emptyAddress,
+    contactName: '',
+    street: '',
+    zipCode: '',
+    city: '',
+    country: '',
     ...storeBillingAddress,
   });
 

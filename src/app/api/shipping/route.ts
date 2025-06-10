@@ -10,14 +10,19 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const countryCode = searchParams.get('countryCode');
     const postalCode = searchParams.get('postalCode');
+    const amount = searchParams.get('amount');
+    const currency = searchParams.get('currency');
 
     if (!countryCode || !postalCode) {
       return NextResponse.json({ error: 'Missing required parameters: countryCode and postalCode' }, { status: 400 });
     }
 
     const shippingService = EMP.platform.server.get<ShippingService>('ShippingService');
-
-    const methods = await shippingService.getShippingMethods(countryCode, postalCode);
+    let orderValue = undefined;
+    if (amount && currency) {
+      orderValue = { amount: Number(amount), currency };
+    }
+    const methods = await shippingService.getShippingMethods(countryCode, postalCode, orderValue);
 
     return NextResponse.json(methods);
   } catch (error) {

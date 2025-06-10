@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
@@ -14,6 +14,14 @@ interface ContactDataProps {
   isReadOnly?: boolean;
 }
 
+const emptyContactData = {
+  email: '',
+  phone: '',
+  firstName: '',
+  lastName: '',
+  company: '',
+};
+
 /**
  * Customer data form component for checkout
  * Collects basic customer information (email, name)
@@ -21,16 +29,12 @@ interface ContactDataProps {
 const ContactDataComponent: React.FC<ContactDataProps> = ({ isReadOnly = false, initialData = undefined }) => {
   const t = useTranslations('Checkout');
   const { submitContactData, contactData } = useCheckout();
-
-  const { form } = useValidator('ContactDataValidationService', initialData || contactData, 'onBlur');
-
-  // Watch form state to detect when all fields are valid
-  const formState = form.formState;
-  useEffect(() => {
-    if (!formState.isValidating && formState.isValid) {
-      submitContactData(form.getValues());
-    }
-  });
+  const { form } = useValidator(
+    'ContactDataValidationService',
+    { ...emptyContactData, ...(initialData || contactData) },
+    'onBlur',
+    submitContactData,
+  );
 
   return (
     <FormProvider {...form}>

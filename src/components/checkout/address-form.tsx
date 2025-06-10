@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useSite } from '@/hooks/site/useSite';
@@ -17,13 +17,31 @@ interface AddressFormProps {
   isReadOnly?: boolean;
 }
 
+const emptyAddress = {
+  contactName: '',
+  street: '',
+  streetNumber: '',
+  streetAppendix: '',
+  zipCode: '',
+  city: '',
+  country: '',
+  state: '',
+  companyName: '',
+  contactPhone: '',
+};
+
 /**
  * Reusable address form component for checkout
  * Can be used for both shipping and billing addresses
  */
 const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialData, onDataChange }) => {
   const t = useTranslations('Address');
-  const { form } = useValidator('AddressValidationService', initialData, 'onBlur', onDataChange);
+  const { form } = useValidator(
+    'AddressValidationService',
+    { ...emptyAddress, ...initialData },
+    'onBlur',
+    onDataChange,
+  );
   const { countries, loading, fetchSiteData } = useSite();
 
   // Fetch countries when component mounts

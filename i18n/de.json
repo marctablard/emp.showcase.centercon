@@ -164,7 +164,12 @@
             "expiryDate": "Ablaufdatum",
             "cvv": "Prüfnummer",
             "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
-            "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig."
+            "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig.",
+            "modes": {
+                "creditCard": "Kreditkarte",
+                "paypal": "PayPal",
+                "invoice": "Rechnung"
+            }
         },
         "shipping": {
             "shippingMethod": "Versandart",
