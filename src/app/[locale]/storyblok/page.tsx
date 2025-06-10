@@ -1,7 +1,5 @@
 import { ISbStoriesParams, StoryblokClient, StoryblokStory } from '@storyblok/react/rsc';
 import { getStoryblokApi } from '@/lib/storyblok';
-import ButtonStyleGuide from '../styleguide/ui/button';
-import FormFieldStyleGuide from '../styleguide/ui/form-fields';
 
 /**
  * Fetch data from Storyblok
@@ -41,8 +39,6 @@ export default async function StoryblokPage() {
           </ul>
         </div>
       )}
-
-      <FormFieldStyleGuide />
     </div>
   );
 }
