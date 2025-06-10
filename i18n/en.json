@@ -3,6 +3,10 @@
         "world": "Hello World",
         "friend": "Hey Friend"
     },
+    "breadcrumb": {
+        "backLink": "Back",
+        "backLinkAriaLabel": "Go back to the previous page"
+    },
     "product": {
         "addToCart": "Add to cart",
         "noImage": "No image available",
