@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import ButtonStyleGuide from '@/app/[locale]/styleguide/ui/button';
 import TextStyleGuide from './atoms/text';
-import FormFieldStyleGuide from './ui/form-fields';
+import FormFieldStyleGuide from './ui/form-field';
 import LinkStyleGuide from './ui/link';
 
 export default function StyleGuide() {
