@@ -14,6 +14,7 @@ export default function NotificationSytelguide() {
       <div className="flex gap-4">
         <Button
           variant="secondary"
+          className="text-success-500 border-success-500"
           onClick={() =>
             toast({
               title: title,
@@ -27,6 +28,7 @@ export default function NotificationSytelguide() {
         </Button>
         <Button
           variant="secondary"
+          className="text-warning-500 border-warning-500"
           onClick={() =>
             toast({
               title: title,
@@ -40,6 +42,7 @@ export default function NotificationSytelguide() {
         </Button>
         <Button
           variant="secondary"
+          className="text-danger-500 border-danger-500"
           onClick={() =>
             toast({
               title: title,
@@ -53,6 +56,7 @@ export default function NotificationSytelguide() {
         </Button>
         <Button
           variant="secondary"
+          className="text-tertiary-500 border-tertiary-500"
           onClick={() =>
             toast({
               title: title,
