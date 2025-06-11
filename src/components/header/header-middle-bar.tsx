@@ -29,7 +29,7 @@ export default async function HeaderMiddleBar() {
         </Link>
         <Link href="/#" className="flex flex-col items-center min-w-12 max-w-[90px]">
           <Pin className="w-8 h-8 text-primary" />
-          <p className="text-sm text-primary font-bold -mt-1">Whishlists</p>
+          <p className="text-sm text-primary font-bold -mt-1">Wishlists</p>
         </Link>
       </div>
     </div>
