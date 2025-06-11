@@ -5,7 +5,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
-import Searchbar from '@/components/searchbar';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import CustomerSessionProvider from '@/providers/CustomerSessionProvider';
