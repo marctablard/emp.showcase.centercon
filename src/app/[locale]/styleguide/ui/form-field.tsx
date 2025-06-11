@@ -103,7 +103,7 @@ export default function FormFieldSytelguide() {
   return (
     <div className="py-12">
       <h4 className="text-3xl/5 md:text-4xl font-bold text-headlines font-headlines mb-3">Form Elements</h4>
-      <div className="flex flex-col gap-10 mb-50">
+      <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-6">
           <h4>Label</h4>
           <div className="flex gap-10">
