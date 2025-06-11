@@ -1,3 +1,5 @@
+import { cache } from 'react';
+import { Metadata, ResolvingMetadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import ProductActions from '@/components/product/product-actions';
@@ -8,18 +10,45 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useL10n } from '@/hooks/useL10n';
 import { getProductById } from '@/lib/ssr/products';
-
-const priceTiers = [
-  { quantity: 1, price: 110.45 },
-  { quantity: 5, price: 95.45 },
-  { quantity: 10, price: 85.45 },
-  { quantity: 20, price: 82.45 },
-  { quantity: 50, price: 79.45 },
-];
+import { generateProductMetadata } from '@/lib/ssr/seo';
 
 interface ProductPageProps {
   id: string;
   locale: string;
+}
+
+const getProductWithPrices = cache(async (id: string) => {
+  const product = await getProductById(id);
+  if (product) {
+    product.price = {
+      amount: 110.45,
+      currency: 'EUR',
+      tiers: [
+        { quantity: 1, amount: 110.45 },
+        { quantity: 5, amount: 95.45 },
+        { quantity: 10, amount: 85.45 },
+        { quantity: 20, amount: 82.45 },
+        { quantity: 50, amount: 79.45 },
+      ],
+    };
+  }
+  return product;
+});
+
+// Generate metadata for the product page
+export async function generateMetadata(
+  { params }: { params: Promise<ProductPageProps> },
+  _parent: ResolvingMetadata,
+): Promise<Metadata> {
+  // Get the product ID and locale from params
+  const productId = (await params).id;
+  const locale = (await params).locale;
+
+  // Fetch product data
+  const product = await getProductWithPrices(productId);
+
+  // Use the extracted SEO utility function to generate metadata
+  return generateProductMetadata(product, locale);
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
@@ -32,7 +61,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
   const t = await getTranslations({ locale, namespace: 'product' });
 
   // Fetch product data server-side using our shared API layer
-  const product = await getProductById(productId);
+  const product = await getProductWithPrices(productId);
 
   // If product not found, show 404 page
   if (!product) {
@@ -60,7 +89,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
               <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">In Stock</Badge>
               <h1 className="text-4xl font-bold tracking-tight text-neutral-900">{l10n(product.name)}</h1>
 
-              <ProductPriceComponent price={110.45} tiers={priceTiers} />
+              {product.price && <ProductPriceComponent price={product.price} />}
 
               <div className="mt-6 flex space-x-4">
                 <ProductActions product={product} />

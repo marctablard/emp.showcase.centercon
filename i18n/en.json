@@ -3,6 +3,10 @@
         "world": "Hello World",
         "friend": "Hey Friend"
     },
+    "breadcrumb": {
+        "backLink": "Back",
+        "backLinkAriaLabel": "Go back to the previous page"
+    },
     "product": {
         "addToCart": "Add to cart",
         "noImage": "No image available",
@@ -39,6 +43,7 @@
         "city": "Manchester"
     },
     "cart": {
+        "title": "Cart",
         "yourCart": "My Products",
         "items": "items",
         "emptyCart": "Your cart is empty",
@@ -202,7 +207,18 @@
         "noProductsFound": "No products found",
         "tryAdjusting": "Try adjusting your search or filters"
     },
+    "seo": {
+        "defaultProductName": "Product",
+        "defaultProductDescription": "{productName} - High-quality product from our catalog",
+        "productTitle": "{productName} | Emporix Showcase",
+        "productNotFoundTitle": "Product Not Found | Emporix Showcase",
+        "productNotFoundDescription": "The requested product could not be found. Please check our catalog for other products.",
+        "brandName": "Emporix",
+        "currency": "EUR",
+        "storeName": "Emporix Showcase Store"
+    },
     "Account": {
+        "title" : "Service Portal",
         "welcomeBack": "Welcome back, {name}",
         "accountDashboardDescription": "Manage your account, orders, and company information",
         "accountDetails": "Account Details",
@@ -240,5 +256,10 @@
         "quotesPagePlaceholder": "Quotes will be displayed here",
         "shoppingListsPageDescription": "View and manage your shopping lists",
         "shoppingListsPagePlaceholder": "Shopping lists will be displayed here"
+    },
+    "UI": {
+        "spinner": {
+            "loading": "Loading..."
+        }
     }
 }

@@ -1,0 +1,7 @@
+.github
+.husky
+.idea
+certificats
+docs
+playwright-report
+test-results

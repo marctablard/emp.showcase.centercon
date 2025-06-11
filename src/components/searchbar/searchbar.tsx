@@ -9,11 +9,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import { getCurrentCart } from '@/lib/ssr/carts';
 
 export default async function Searchbar() {
-  // TODO move initial fetch of cart to a more appropriate Place
-  const cart = await getCurrentCart();
   const t = await getTranslations('searchBar');
   return (
     <div className="bg-primary py-8">
@@ -45,7 +42,7 @@ export default async function Searchbar() {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <MiniCart initialCart={cart} />
+            <MiniCart />
           </div>
         </div>
       </div>

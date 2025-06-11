@@ -1,13 +1,13 @@
 import { StoredToken } from '@platform/integrations/types/auth';
+import { inject } from 'inversify';
 import type {
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
-import { checkTokenValidity } from '../util/common';
 import type { OAuthApi } from '../../oauth/OAuthApi';
 import { TokenManager } from '../TokenManager';
-import { inject } from 'inversify';
+import { checkTokenValidity } from '../util/common';
 
 export interface TokenStore {
   anonymousToken?: StoredToken<EmporixAnonymousTokenResponse>;

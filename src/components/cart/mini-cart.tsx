@@ -10,7 +10,6 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useL10n } from '@/hooks/useL10n';
 import { formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart/cart';
-import { useCartHydrator } from '@/providers/hydrator/cart-hydrator';
 
 interface MiniCartProps {
   initialCart?: Cart | null;
@@ -19,11 +18,6 @@ interface MiniCartProps {
 export default function MiniCart({ initialCart }: MiniCartProps) {
   const t = useTranslations('cart');
   const { l10n } = useL10n();
-
-  if (initialCart) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useCartHydrator({ cart: initialCart });
-  }
 
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading, totalItems } = useCart(initialCart);

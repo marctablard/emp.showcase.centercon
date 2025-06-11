@@ -5,8 +5,18 @@ let nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: 'http',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.storyblok.com',
         pathname: '/**',
       },
     ],
@@ -22,6 +32,17 @@ let nextConfig: NextConfig = {
 
     return config;
   },
+  headers: async () => [
+    {
+      source: '/:path*',
+      headers: [
+        {
+          key: 'X-Robots-Tag',
+          value: 'noindex',
+        },
+      ],
+    },
+  ],
 };
 
 // add i18n Logic to Next-Configuration

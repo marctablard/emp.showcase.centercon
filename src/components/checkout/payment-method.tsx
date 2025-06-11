@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -20,14 +20,18 @@ interface PaymentMethodProps {
  */
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
-  // Available payment methods
-  const paymentOptions = [
-    { id: 'credit-card', name: 'Credit Card', provider: 'payment-gateway', method: 'credit-card' },
-    { id: 'paypal', name: 'PayPal', provider: 'payment-gateway', method: 'paypal' },
-    { id: 'invoice', name: 'Pay by Invoice', provider: 'none', method: 'invoice' },
-  ];
 
-  const [cardDetails, setCardDetails] = useState({
+  // Available payment methods - wrapped in useMemo to prevent unnecessary re-renders
+  const paymentOptions = useMemo(
+    () => [
+      { id: 'credit-card', name: 'Credit Card', provider: 'payment-gateway', method: 'credit-card' },
+      { id: 'paypal', name: 'PayPal', provider: 'payment-gateway', method: 'paypal' },
+      { id: 'invoice', name: 'Pay by Invoice', provider: 'none', method: 'invoice' },
+    ],
+    [],
+  );
+
+  const [cardDetails] = useState({
     cardNumber: '',
     cardHolder: '',
     expiryDate: '',
@@ -64,9 +68,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
         submitPaymentMethod(paymentMethodData);
       }
     });
-  }, [form]);
-
-  form.register;
+  }, [form, paymentMethod?.customAttributes, submitPaymentMethod, paymentOptions, paymentMethod?.method]);
 
   return (
     <FormProvider {...form}>
