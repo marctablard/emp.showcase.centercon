@@ -1,12 +1,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ToastType, toast } from '@/components/ui/toast-notification';
+import { ToastType, notify, toast } from '@/components/ui/toast-notification';
 
 export default function NotificationSytelguide() {
-  const message =
+  const description =
     'Message - Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
   const title = 'Title';
+  const message = 'Message';
 
   return (
     <div className="py-12">
@@ -14,15 +15,15 @@ export default function NotificationSytelguide() {
       <div className="flex flex-col gap-10">
         <div className="flex flex-col">
           <h5 className="text-2xl/5 md:text-3xl font-bold text-headlines font-headlines mb-3">Toasts</h5>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <Button
               variant="secondary"
               className="text-success-500 border-success-500"
               onClick={() =>
                 toast({
                   title: title,
-                  description: message,
-                  button: { label: 'Undo', onClick: () => console.log('Button clicked') },
+                  description: description,
+                  button: { label: 'BUTTON', onClick: () => console.log('Button clicked') },
                   type: ToastType.Success,
                 })
               }
@@ -35,8 +36,8 @@ export default function NotificationSytelguide() {
               onClick={() =>
                 toast({
                   title: title,
-                  description: message,
-                  button: { label: 'Undo', onClick: () => console.log('Button clicked') },
+                  description: description,
+                  button: { label: 'BUTTON', onClick: () => console.log('Button clicked') },
                   type: ToastType.Warning,
                 })
               }
@@ -49,8 +50,8 @@ export default function NotificationSytelguide() {
               onClick={() =>
                 toast({
                   title: title,
-                  description: message,
-                  button: { label: 'Undo', onClick: () => console.log('Button clicked') },
+                  description: description,
+                  button: { label: 'BUTTON', onClick: () => console.log('Button clicked') },
                   type: ToastType.Error,
                 })
               }
@@ -63,8 +64,8 @@ export default function NotificationSytelguide() {
               onClick={() =>
                 toast({
                   title: title,
-                  description: message,
-                  button: { label: 'Undo', onClick: () => console.log('Button clicked') },
+                  description: description,
+                  button: { label: 'BUTTON', onClick: () => console.log('Button clicked') },
                   type: ToastType.Info,
                 })
               }
@@ -75,14 +76,13 @@ export default function NotificationSytelguide() {
         </div>
         <div className="flex flex-col">
           <h5 className="text-2xl/5 md:text-3xl font-bold text-headlines font-headlines mb-3">Globals</h5>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <Button
               variant="secondary"
               className="text-success-500 border-success-500"
               onClick={() =>
-                toast({
-                  title: title,
-                  description: message,
+                notify({
+                  title: message,
                   button: { label: 'Undo', onClick: () => console.log('Button clicked') },
                   type: ToastType.Success,
                 })
@@ -94,9 +94,8 @@ export default function NotificationSytelguide() {
               variant="secondary"
               className="text-warning-500 border-warning-500"
               onClick={() =>
-                toast({
-                  title: title,
-                  description: message,
+                notify({
+                  title: message,
                   button: { label: 'Undo', onClick: () => console.log('Button clicked') },
                   type: ToastType.Warning,
                 })
@@ -108,9 +107,8 @@ export default function NotificationSytelguide() {
               variant="secondary"
               className="text-danger-500 border-danger-500"
               onClick={() =>
-                toast({
-                  title: title,
-                  description: message,
+                notify({
+                  title: message,
                   button: { label: 'Undo', onClick: () => console.log('Button clicked') },
                   type: ToastType.Error,
                 })
@@ -122,9 +120,8 @@ export default function NotificationSytelguide() {
               variant="secondary"
               className="text-tertiary-500 border-tertiary-500"
               onClick={() =>
-                toast({
-                  title: title,
-                  description: message,
+                notify({
+                  title: message,
                   button: { label: 'Undo', onClick: () => console.log('Button clicked') },
                   type: ToastType.Info,
                 })

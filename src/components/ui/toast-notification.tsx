@@ -22,19 +22,56 @@ export interface ToastProps {
   type: ToastType;
 }
 
+export interface NotificationProps {
+  id: string | number;
+  title: string;
+  button: {
+    label: string;
+    onClick: () => void;
+  };
+  type: ToastType;
+}
+
 function toast(toast: Omit<ToastProps, 'id'>) {
-  return sonnerToast.custom((id) => (
-    <Toast
-      id={id}
-      title={toast.title}
-      description={toast.description}
-      button={{
-        label: toast.button.label,
-        onClick: toast.button.onClick,
-      }}
-      type={toast.type}
-    />
-  ));
+  return sonnerToast.custom(
+    (id) => (
+      <Toast
+        id={id}
+        title={toast.title}
+        description={toast.description}
+        button={{
+          label: toast.button.label,
+          onClick: toast.button.onClick,
+        }}
+        type={toast.type}
+      />
+    ),
+    {
+      duration: 4000,
+      className: 'w-full sm:max-w-[300px]',
+    },
+  );
+}
+
+function notify(toast: Omit<NotificationProps, 'id'>) {
+  return sonnerToast.custom(
+    (id) => (
+      <Notification
+        id={id}
+        title={toast.title}
+        button={{
+          label: toast.button.label,
+          onClick: toast.button.onClick,
+        }}
+        type={toast.type}
+      />
+    ),
+    {
+      position: 'top-center',
+      duration: 4000,
+      className: 'w-full px-2',
+    },
+  );
 }
 
 function Toast(props: ToastProps) {
@@ -56,7 +93,8 @@ function Toast(props: ToastProps) {
   return (
     <div
       className={cn(
-        'flex rounded-t-lg border border-b-0 shadow-2xl w-full md:max-w-[300px] items-center p-3',
+        'rounded-t-lg border border-b-0 shadow-2xl w-full items-center p-3',
+        'top-right',
         'bg-' + className[type] + '-100 border-' + className[type] + '-500 ',
       )}
     >
@@ -95,4 +133,49 @@ function Toast(props: ToastProps) {
   );
 }
 
-export { Toast, toast };
+function Notification(props: NotificationProps) {
+  const { title, button, id, type } = props;
+
+  const icon = {
+    success: <CircleCheck />,
+    info: <Info />,
+    warning: <TriangleAlert />,
+    error: <CircleX />,
+  };
+
+  const className = {
+    success: 'success',
+    info: 'tertiary',
+    warning: 'warning',
+    error: 'danger',
+  };
+  return (
+    <div
+      className={cn(
+        'flex rounded border shadow-2xl w-full items-center md:p-3 p-1',
+        'top-right',
+        'bg-' + className[type] + '-100 border-' + className[type] + '-500 ',
+      )}
+    >
+      <div className="flex gap-2 w-full">
+        <div className="flex w-full justify-center items-center">
+          <div className={cn('flex items-center gap-2', 'text-' + className[type] + '-500')}>
+            {icon[type]}
+            <p className="text-base font-bold text-neutral-900 m-0">{title}</p>
+          </div>
+        </div>
+        <div
+          className="flex justify-end items-center"
+          onClick={() => {
+            button.onClick();
+            sonnerToast.dismiss(id);
+          }}
+        >
+          <X className="h-6 w-6" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export { Toast, toast, Notification, notify };
