@@ -3,7 +3,7 @@ import { addCartToCookie, getCartCookie } from '@/lib/server/utils';
 import { CartService } from '@/platform/services/cart';
 import type { Cart } from '@/platform/services/model/cart';
 
-const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE_ID || 'emp-cart';
+const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE || 'emp-cart';
 const DEFAULT_CURRENCY = 'EUR';
 const DEFAULT_SITE_CODE = 'main';
 
