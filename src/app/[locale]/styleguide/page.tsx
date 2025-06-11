@@ -3,6 +3,7 @@ import ButtonStyleGuide from '@/app/[locale]/styleguide/ui/button';
 import TextStyleGuide from './atoms/text';
 import FormFieldStyleGuide from './ui/form-field';
 import LinkStyleGuide from './ui/link';
+import NotificationSytelguide from './ui/notification';
 
 export default function StyleGuide() {
   if (!process.env.NEXT_PUBLIC_STYLEGUIDE_PAGE) {
@@ -26,6 +27,7 @@ export default function StyleGuide() {
       <ButtonStyleGuide />
       <LinkStyleGuide />
       <FormFieldStyleGuide />
+      <NotificationSytelguide />
     </main>
   );
 }
