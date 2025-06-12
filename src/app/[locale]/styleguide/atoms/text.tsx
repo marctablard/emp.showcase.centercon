@@ -29,11 +29,10 @@ export default function TextStyleGuide() {
       </div>
       <div className="p-4 grid grid-cols-[1fr] gap-6 mb-2">
         <p className="text-xl">
-          Body L <br /> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
-          ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
-          rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+          Body L <br /> For the <b>text links</b> you can use the UiLink component with variant=&quot;text&quot;. You
+          dont need to add a size, because the link will inherit the text size.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -43,7 +42,7 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -53,7 +52,7 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -62,7 +61,7 @@ export default function TextStyleGuide() {
           ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -72,7 +71,7 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -82,7 +81,7 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -91,7 +90,7 @@ export default function TextStyleGuide() {
           ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -101,7 +100,7 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
@@ -111,7 +110,7 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <UiLink type="A" href="#" variant="text">
+          <UiLink type="Link" href="#" variant="text">
             text link
           </UiLink>
         </p>
