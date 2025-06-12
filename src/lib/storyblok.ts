@@ -6,6 +6,7 @@ import Columns from '@/components/cms/columns';
 import ContentBlock from '@/components/cms/content-block';
 import Feature from '@/components/cms/feature';
 import Grid from '@/components/cms/grid';
+import Hero from '@/components/cms/hero';
 import Logo from '@/components/cms/logo';
 import Navigation from '@/components/cms/navigation';
 import Page from '@/components/cms/page';
@@ -33,5 +34,6 @@ export const getStoryblokApi = storyblokInit({
     segment: Segment,
     article: Article,
     button: Button,
+    hero: Hero,
   },
 });
