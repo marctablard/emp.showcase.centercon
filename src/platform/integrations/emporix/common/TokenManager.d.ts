@@ -11,6 +11,12 @@ export interface TokenManager {
   getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string; sessionId: string }>;
 
   /**
+   * Clear the anonymous token for the given tenant
+   * @param tenant The tenant ID
+   */
+  clearAnonymousToken(tenant: string): Promise<void>;
+
+  /**
    * Get a valid anonymous token, refreshing if necessary
    * @param tenant The tenant ID
    * @returns Promise with the token
@@ -19,7 +25,13 @@ export interface TokenManager {
     tenant: string,
     clientId: string,
     credentials?: { username: string; password: string },
-  ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }>;
+  ): Promise<{ accessToken: string; saasToken?: string; sessionId: string } | null>;
+
+  /**
+   * Clear the customer token for the given tenant
+   * @param tenant The tenant ID
+   */
+  clearCustomerToken(tenant: string): Promise<void>;
 
   /**
    * Get a Session Token, either the current Anonymous Token or a Customer Token

@@ -1,12 +1,13 @@
-import { injectable } from '@/platform/core/di/injectable';
-import { AuthService } from '../AuthService';
-import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import { inject } from 'inversify';
-import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
-import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
-import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
+import { injectable } from '@/platform/core/di/injectable';
 import { EmporixAddress } from '@/platform/integrations/emporix';
+import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
+import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
+import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
+import CartMigrationService from '@/platform/services/cart/impl/EmporixCartMigrationService';
+import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
+import { AuthService } from '../AuthService';
 
 /**
  * Emporix implementation of the AuthService
@@ -26,6 +27,8 @@ export class EmporixAuthService implements AuthService {
     private readonly emporixCustomerApi: EmporixCustomerApi,
     @inject('EmporixAddressMapper')
     private readonly emporixAddressMapper: EmporixAddressMapper,
+    @inject('CartMigrationService')
+    private readonly cartMigrationService: CartMigrationService,
   ) {}
 
   async login(credentials: Credentials): Promise<Session> {
@@ -34,12 +37,13 @@ export class EmporixAuthService implements AuthService {
       if (!session) {
         throw new Error('Failed to get session context');
       }
+      const cartId = await this.cartMigrationService.migrateSessionCartToCurrentCustomer();
       return {
         sessionId: session.sessionId,
         customerId: session.customerId,
         siteCode: session.siteCode,
         currency: session.currency,
-        cartId: session.cartId,
+        cartId: cartId || undefined,
         country: session.targetLocation,
       };
     } catch (error) {

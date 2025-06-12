@@ -82,6 +82,12 @@ const handler = NextAuth({
       return session;
     },
   },
+  events: {
+    signOut: async () => {
+      const authService = globalThis.EMP.platform.server.get<AuthService>('AuthService');
+      await authService.logout();
+    },
+  },
   pages: {
     signIn: '/login',
     error: '/login',

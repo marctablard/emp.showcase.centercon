@@ -53,36 +53,12 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     };
   }
 
-  protected createCustomerToken(
-    _tenant: string,
-    _clientId: string,
-    _credentials: { username: string; password: string },
-  ): Promise<{
-    token: {
-      sessionId: string;
-      saas_token: string;
-      session_id: string;
-      access_token: string;
-      token_type: string;
-      expires_in: number;
-      scope: string;
-      refresh_token?: string;
-      refresh_token_expires_in?: number;
-    };
-    expiryAt: number;
-    refreshExpiryAt: number | undefined;
-  }> {
-    throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
-  }
-
-  protected fetchCustomerToken(
-    _customerToken: StoredToken<EmporixCustomerTokenResponse> | undefined,
-    _tenant: string,
-    _username: string | undefined,
-    _password: string | undefined,
-    _clientId: string,
-  ): Promise<StoredToken<EmporixCustomerTokenResponse>> {
-    throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
+  public async getCustomerToken(
+    tenant: string,
+    clientId: string,
+    credentials?: { username: string; password: string },
+  ): Promise<{ accessToken: string; saasToken?: string; sessionId: string } | null> {
+    return null;
   }
 
   protected async writeTokens(tokens: TokenStore, tenant: string): Promise<void> {

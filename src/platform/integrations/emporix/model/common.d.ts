@@ -52,9 +52,10 @@ export interface EmporixMonetaryAmount {
 }
 
 export interface Metadata {
-  mixins: {
+  mixins?: {
     [key: string]: string;
   };
+  version?: number;
   [key: string]: string | number | object | Array | null;
 }
 
