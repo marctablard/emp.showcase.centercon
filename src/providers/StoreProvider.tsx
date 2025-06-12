@@ -4,6 +4,7 @@ import { type ReactNode, createContext, useContext, useRef } from 'react';
 import { useStore } from 'zustand/react';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';
+import { createHistoryStore } from '@/stores/history-store';
 import { createProductStore } from '@/stores/products-store';
 
 export type ProductStoreApi = ReturnType<typeof createProductStore>;
@@ -12,6 +13,8 @@ export type CartStoreApi = ReturnType<typeof createCartStore>;
 export const CartStoreContext = createContext<CartStoreApi | null>(null);
 export type CheckoutStoreApi = ReturnType<typeof createCheckoutStore>;
 export const CheckoutStoreContext = createContext<CheckoutStoreApi | null>(null);
+export type HistoryStoreApi = ReturnType<typeof createHistoryStore>;
+export const HistoryStoreContext = createContext<HistoryStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
@@ -30,10 +33,16 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
   if (checkoutStoreRef.current === null) {
     checkoutStoreRef.current = createCheckoutStore();
   }
+  const historyStoreRef = useRef<HistoryStoreApi | null>(null);
+  if (historyStoreRef.current === null) {
+    historyStoreRef.current = createHistoryStore();
+  }
   return (
     <ProductStoreContext.Provider value={productStoreRef.current}>
       <CartStoreContext.Provider value={cartStoreRef.current}>
-        <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>{children}</CheckoutStoreContext.Provider>
+        <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
+          <HistoryStoreContext.Provider value={historyStoreRef.current}>{children}</HistoryStoreContext.Provider>
+        </CheckoutStoreContext.Provider>
       </CartStoreContext.Provider>
     </ProductStoreContext.Provider>
   );
@@ -59,6 +68,14 @@ export const useCheckoutStore = () => {
   const storeContext = useContext(CheckoutStoreContext);
   if (!storeContext) {
     throw new Error('useCheckoutStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useHistoryStore = () => {
+  const storeContext = useContext(HistoryStoreContext);
+  if (!storeContext) {
+    throw new Error('useHistoryStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };
