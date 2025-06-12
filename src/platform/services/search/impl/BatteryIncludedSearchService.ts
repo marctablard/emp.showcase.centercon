@@ -1,12 +1,12 @@
-import type { Product } from '@/platform/services/model/product';
-import type { Filter, SearchParams, SearchResult } from '@/platform/services/model/common';
-import type { SearchService } from '@/platform/services/search/SearchService';
-import type { ShopApi } from '@/platform/integrations/batteryincluded/shop/ShopApi';
-import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import type { ProductMapper } from '../../model/product/ProductMapper';
+import { injectable } from '@/platform/core/di/injectable';
 import type { BatteryIncludedSearchResponse } from '@/platform/integrations/batteryincluded/model';
+import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
+import type { ShopApi } from '@/platform/integrations/batteryincluded/shop/ShopApi';
+import type { Filter, SearchParams, SearchResult } from '@/platform/services/model/common';
+import type { Product } from '@/platform/services/model/product';
+import type { SearchService } from '@/platform/services/search/SearchService';
+import type { ProductMapper } from '../../model/product/ProductMapper';
 
 /**
  * Implementation of SearchService for BatteryIncluded product data.

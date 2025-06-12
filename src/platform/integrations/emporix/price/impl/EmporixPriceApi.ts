@@ -1,9 +1,9 @@
-import type { PriceApi } from '../PriceApi';
-import type { EmporixConfig } from '../../config';
-import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
-import type { MatchedPrice, MatchPricesByContextRequest, MatchPricesRequest } from '../../model/price';
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
+import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
+import type { EmporixConfig } from '../../config';
+import type { MatchPricesByContextRequest, MatchPricesRequest, MatchedPrice } from '../../model/price';
+import type { PriceApi } from '../PriceApi';
 
 /**
  * Implementation of the Emporix Price API

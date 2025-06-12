@@ -1,6 +1,6 @@
-import { Price as ServicePrice, Quantity as ServiceQuantity } from './price';
-import { MatchedPrice, Quantity as EmporixQuantity } from '@/platform/integrations/emporix/model/price';
 import { injectable } from '@/platform/core/di/injectable';
+import { Quantity as EmporixQuantity, MatchedPrice } from '@/platform/integrations/emporix/model/price';
+import { Price as ServicePrice, Quantity as ServiceQuantity } from './price';
 
 /**
  * Maps between Emporix Price model and Service Price model

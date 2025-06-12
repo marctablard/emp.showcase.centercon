@@ -1,5 +1,5 @@
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixConfig } from '../../config';
 
 /**

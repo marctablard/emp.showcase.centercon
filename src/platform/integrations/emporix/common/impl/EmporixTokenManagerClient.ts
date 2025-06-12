@@ -1,5 +1,5 @@
-import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 import { injectable } from '@/platform/core/di/injectable';
+import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 
 const LOCAL_STORAGE_KEY = 'emporix-token';
 
