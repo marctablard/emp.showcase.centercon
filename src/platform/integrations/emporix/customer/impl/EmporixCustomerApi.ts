@@ -1,14 +1,16 @@
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
+import type { TokenManager } from '../../common/TokenManager';
 import type { EmporixConfig } from '../../config';
-import { CustomerApi } from '../CustomerApi';
 import type { EmporixCustomer, EmporixCustomerAddress, EmporixSignupRequest } from '../../model/customer';
 import { EmporixSessionContext } from '../../model/session-context';
+import { CustomerApi } from '../CustomerApi';
 
 @injectable('EmporixCustomerApi', 'Singleton')
 class EmporixCustomerApi implements CustomerApi {
   constructor(
+    @inject('TokenManager') private readonly tokenManager: TokenManager,
     @inject('EmporixApiInvoker') private readonly apiInvoker: EmporixApiInvoker,
     @inject('EmporixConfig') private readonly config: EmporixConfig,
   ) {}
@@ -219,7 +221,7 @@ class EmporixCustomerApi implements CustomerApi {
   }
 
   async logout(): Promise<void> {
-    const url = `customer/${this.config.tenant}/logout`;
+    const url = `customer/${this.config.tenant}/logout?`;
 
     const response = await this.apiInvoker.authenticatedFetch(
       url,

@@ -107,6 +107,46 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
     }
   }
 
+  public async getCustomerToken(
+    tenant: string,
+    clientId: string,
+    credentials?: { username: string; password: string },
+  ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
+    // When recieving credentials we MUST recreate a new Token
+    let customerToken;
+    if (credentials) {
+      customerToken = await this.createCustomerToken(tenant, clientId, credentials);
+      await this.writeToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
+        'customer',
+        customerToken,
+        tenant,
+      );
+    } else {
+      customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
+        'customer',
+        tenant,
+      );
+      // Check if token is expired or about to expire (within 5 minutes)
+      if (!this.checkAccessToken(customerToken)) {
+        customerToken = await this.refreshCustomerToken(customerToken, tenant);
+        await this.writeToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
+          'customer',
+          customerToken,
+          tenant,
+        );
+      }
+    }
+    if (customerToken?.token) {
+      return {
+        accessToken: customerToken.token.access_token,
+        saasToken: customerToken.token.saas_token,
+        sessionId: customerToken.token.session_id,
+      };
+    } else {
+      throw new Error('No customer token found');
+    }
+  }
+
   protected async createCustomerToken(
     tenant: string,
     clientId: string,
