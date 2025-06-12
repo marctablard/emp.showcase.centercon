@@ -1,7 +1,9 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHistory } from '@/hooks/history/useHistory';
 import { Filter, SearchParams, SearchResult } from '@/platform/services/model/common';
 
 export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: SearchResult<T>) {
+  const { addSearchQuery } = useHistory();
   const [data, setData] = useState<T[]>(initialResult?.items || []);
   const [loading, setLoading] = useState(false);
   const [facets, setFacets] = useState<Filter[]>([]);
@@ -167,6 +169,12 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
     },
     [search],
   );
+
+  useEffect(() => {
+    if (currentQuery) {
+      addSearchQuery(currentQuery);
+    }
+  }, [currentQuery, addSearchQuery]);
 
   return {
     // State

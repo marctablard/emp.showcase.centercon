@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { fetchProductById } from '@/lib/client/products';
-import { ProductStoreContext, StoreProvider, useProductStore } from '@/providers/StoreProvider';
-import { createCartStore } from '@/stores/cart-store';
+import { HistoryStoreContext, ProductStoreContext, StoreProvider, useProductStore } from '@/providers/StoreProvider';
+import { createHistoryStore } from '@/stores/history-store';
 import { createProductStore } from '@/stores/products-store';
 import { useProduct } from './useProduct';
 
@@ -111,9 +111,11 @@ describe('useProduct hook', () => {
   test('should populate the store so other components can access the product', async () => {
     // Create a shared store
     const sharedStore = createProductStore();
-    const cartStore = createCartStore();
+    const historyStore = createHistoryStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
+      <HistoryStoreContext.Provider value={historyStore}>
+        <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
+      </HistoryStoreContext.Provider>
     );
 
     // Mock the API response
@@ -145,9 +147,11 @@ describe('useProduct hook', () => {
   test('should use cached product from store if available', async () => {
     // Create a shared store
     const sharedStore = createProductStore();
-    const cartStore = createCartStore();
+    const historyStore = createHistoryStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
+      <HistoryStoreContext.Provider value={historyStore}>
+        <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
+      </HistoryStoreContext.Provider>
     );
 
     // First, add a product to the store
@@ -167,9 +171,11 @@ describe('useProduct hook', () => {
   test('refetch should work correctly', async () => {
     // Create a shared store
     const sharedStore = createProductStore();
-    const cartStore = createCartStore();
+    const historyStore = createHistoryStore();
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
+      <HistoryStoreContext.Provider value={historyStore}>
+        <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
+      </HistoryStoreContext.Provider>
     );
 
     // Mock the API response
