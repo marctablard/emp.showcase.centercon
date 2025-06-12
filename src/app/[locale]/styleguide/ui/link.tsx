@@ -1,134 +1,142 @@
-import Link from 'next/link';
 import { ArrowRight, Trash2 } from 'lucide-react';
+import UiLink from '@/components/ui/link';
 
 export default function LinkStyleGuide() {
   return (
     <div className="py-12">
       <h4 className="text-3xl/5 lg:text-4xl font-bold text-headlines font-headlines mb-3">Links</h4>
       <p className="text-base mb-2">
-        There is no ui-component for links. You can either use the Link from next.js or HTML a-Tag and also button-Tag
-        is possible. Just use all tailwindcss classes used below:
+        Now there is a ui-component for links &quot;UiLink&quot;. You can either use the Link from next.js as type or A
+        for HTML a-Tag and also button-Tag is possible.
       </p>
       <p>primary:</p>
       <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <div>
-          <Link
-            href="#"
-            className="text-sm inline-flex items-center gap-1 text-primary font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            <Trash2 />
+          <UiLink type="Link" href="#" variant="primary" size="s" iconBefore={<Trash2 />} iconAfter={<ArrowRight />}>
             Link S
-            <ArrowRight />
-          </Link>
+          </UiLink>
         </div>
         <div>
-          <Link
-            href="#"
-            className="text-base inline-flex items-center gap-1 text-primary font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            <Trash2 />
+          <UiLink type="Link" href="#" variant="primary" size="m" iconBefore={<Trash2 />} iconAfter={<ArrowRight />}>
             Link M
-            <ArrowRight />
-          </Link>
+          </UiLink>
         </div>
         <div>
-          <Link
-            href="#"
-            className="text-xl inline-flex items-center gap-1 text-primary font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            <Trash2 />
+          <UiLink type="Link" href="#" variant="primary" size="l" iconBefore={<Trash2 />} iconAfter={<ArrowRight />}>
             Link L
-            <ArrowRight />
-          </Link>
+          </UiLink>
         </div>
       </div>
       <p>secondary:</p>
       <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <div>
-          <Link
-            href="#"
-            className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            <Trash2 />
+          <UiLink type="A" href="#" variant="secondary" size="s" iconBefore={<Trash2 />} iconAfter={<ArrowRight />}>
             Link S
-            <ArrowRight />
-          </Link>
+          </UiLink>
         </div>
         <div>
-          <Link
-            href="#"
-            className="text-base inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            <Trash2 />
+          <UiLink type="A" href="#" variant="secondary" size="m" iconBefore={<Trash2 />} iconAfter={<ArrowRight />}>
             Link M
-            <ArrowRight />
-          </Link>
+          </UiLink>
         </div>
         <div>
-          <Link
+          <UiLink
+            type="A"
             href="#"
-            className="text-xl inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            disabled
+            variant="secondary"
+            size="l"
+            iconBefore={<Trash2 />}
+            iconAfter={<ArrowRight />}
           >
-            <Trash2 />
             Link L
-            <ArrowRight />
-          </Link>
+          </UiLink>
         </div>
       </div>
-      <p className="text-base mb-2">If you use buttons they can be also disabled:</p>
+      <p className="text-base mb-2">You can also use as type Button and they can be disabled:</p>
       <p>primary:</p>
       <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
-        <button
-          disabled
-          className="text-sm inline-flex items-center gap-1 text-primary font-bold underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600 hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
-          <Trash2 />
-          Link S
-          <ArrowRight />
-        </button>
-        <button
-          disabled
-          className="text-base inline-flex items-center gap-1 text-primary font-bold underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600 hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
-          <Trash2 />
-          Link M
-          <ArrowRight />
-        </button>
-        <button
-          disabled
-          className="text-xl inline-flex items-center gap-1 text-primary font-bold underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600 hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
-          <Trash2 />
-          Link L
-          <ArrowRight />
-        </button>
+        <div>
+          <UiLink
+            type="Button"
+            disabled
+            href="#"
+            variant="primary"
+            size="s"
+            iconBefore={<Trash2 />}
+            iconAfter={<ArrowRight />}
+          >
+            Link S
+          </UiLink>
+        </div>
+        <div>
+          <UiLink
+            type="Button"
+            disabled
+            href="#"
+            variant="primary"
+            size="m"
+            iconBefore={<Trash2 />}
+            iconAfter={<ArrowRight />}
+          >
+            Link M
+          </UiLink>
+        </div>
+        <div>
+          <UiLink
+            type="Button"
+            disabled
+            href="#"
+            variant="primary"
+            size="l"
+            iconBefore={<Trash2 />}
+            iconAfter={<ArrowRight />}
+          >
+            Link L
+          </UiLink>
+        </div>
       </div>
       <p>secondary:</p>
       <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
-        <button
-          disabled
-          className="text-sm inline-flex items-center gap-1 hover:underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600 hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
-          <Trash2 />
-          Link S
-          <ArrowRight />
-        </button>
-        <button
-          disabled
-          className="text-base inline-flex items-center gap-1 hover:underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600 hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
-          <Trash2 />
-          Link M
-          <ArrowRight />
-        </button>
-        <button
-          disabled
-          className="text-xl inline-flex items-center gap-1 hover:underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600 hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
-          <Trash2 />
-          Link L
-          <ArrowRight />
-        </button>
+        <div>
+          <UiLink
+            type="Button"
+            disabled
+            href="#"
+            variant="secondary"
+            size="s"
+            iconBefore={<Trash2 />}
+            iconAfter={<ArrowRight />}
+          >
+            Link S
+          </UiLink>
+        </div>
+        <div>
+          <UiLink
+            type="Button"
+            disabled
+            href="#"
+            variant="secondary"
+            size="m"
+            iconBefore={<Trash2 />}
+            iconAfter={<ArrowRight />}
+          >
+            Link M
+          </UiLink>
+        </div>
+        <div>
+          <UiLink
+            type="Button"
+            disabled
+            href="#"
+            variant="secondary"
+            size="l"
+            iconBefore={<Trash2 />}
+            iconAfter={<ArrowRight />}
+          >
+            Link L
+          </UiLink>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import UiLink from '@/components/ui/link';
 
 export default function TextStyleGuide() {
   return (
@@ -33,12 +33,9 @@ export default function TextStyleGuide() {
           ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-xl italic">
           Body L Italic
@@ -46,12 +43,9 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-xl font-bold">
           Body L Bold
@@ -59,24 +53,18 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-base">
           Body M <br /> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
           ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-base italic">
           Body M Italic
@@ -84,12 +72,9 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-base font-bold">
           Body M Bold
@@ -97,24 +82,18 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-sm">
           Body S <br /> Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
           ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-sm italic">
           Body S Italic
@@ -122,12 +101,9 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
         <p className="text-sm font-bold">
           Body S Bold
@@ -135,12 +111,9 @@ export default function TextStyleGuide() {
           labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea
           rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
           <br />
-          <Link
-            href="#"
-            className="text-primary underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          <UiLink type="A" href="#" variant="text">
             text link
-          </Link>
+          </UiLink>
         </p>
       </div>
     </div>
