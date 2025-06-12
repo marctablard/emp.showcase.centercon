@@ -112,9 +112,11 @@ export async function generateProductTwitterMetadata(
  * Generate JSON-LD structured data for product pages
  */
 export async function generateProductJsonLd(product: Product, locale: string): Promise<string> {
-  const t = await getTranslations({ locale, namespace: 'seo' });
-  const productName = await getProductName(product, locale);
-  const productDescription = await getProductDescription(product, locale);
+  const [t, productName, productDescription] = await Promise.all([
+    getTranslations({ locale, namespace: 'seo' }),
+    getProductName(product, locale),
+    getProductDescription(product, locale),
+  ]);
   let productPrice;
   let productCurrency;
   if (product?.price?.tiers && product.price.tiers.length > 0) {
@@ -169,15 +171,11 @@ export async function generateProductMetadata(product: Product | null, locale: s
   const basicMetadata = await generateBasicProductMetadata(product, locale);
   const openGraphMetadata = await generateProductOpenGraphMetadata(product, locale);
   const twitterMetadata = await generateProductTwitterMetadata(product, locale);
-  const jsonLdData = await generateProductJsonLd(product, locale);
 
   return {
     ...basicMetadata,
     openGraph: openGraphMetadata,
     twitter: twitterMetadata,
-    other: {
-      'application/ld+json': jsonLdData,
-    },
   };
 }
 

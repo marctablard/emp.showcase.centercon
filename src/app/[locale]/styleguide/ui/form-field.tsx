@@ -103,7 +103,7 @@ export default function FormFieldSytelguide() {
   return (
     <div className="py-12">
       <h4 className="text-3xl/5 md:text-4xl font-bold text-headlines font-headlines mb-3">Form Elements</h4>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-10 mb-50">
         <div className="flex flex-col gap-6">
           <h4>Label</h4>
           <div className="flex gap-10">
@@ -357,7 +357,7 @@ export default function FormFieldSytelguide() {
                               return (
                                 <FormItem key="indeterminate" className="flex flex-row items-center gap-2">
                                   <FormControl>
-                                    <Checkbox checked={'indeterminate'} />
+                                    <Checkbox checked={'indeterminate'} {...field} />
                                   </FormControl>
                                   <FormLabel className="font-normal">Indeterminate</FormLabel>
                                 </FormItem>
@@ -368,11 +368,11 @@ export default function FormFieldSytelguide() {
                             key="disabled"
                             control={formVal.control}
                             name="checkboxes"
-                            render={({}) => {
+                            render={({ field }) => {
                               return (
                                 <FormItem key="disabled" className="flex flex-row items-center gap-2">
                                   <FormControl>
-                                    <Checkbox disabled />
+                                    <Checkbox disabled {...field} />
                                   </FormControl>
                                   <FormLabel className="font-normal">Disabled</FormLabel>
                                 </FormItem>

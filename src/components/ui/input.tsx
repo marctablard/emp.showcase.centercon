@@ -61,7 +61,7 @@ function Input({ className, type, startIcon, endIcon, isButton, ...props }: Inpu
   );
 }
 
-function InputButton({ className, type, startIcon, endIcon, ...props }: InputProps) {
+function InputButton({ startIcon, endIcon, ...props }: InputProps) {
   return (
     <div className={cn('flex items-center')}>
       <Input startIcon={startIcon} endIcon={endIcon} isButton {...props} />

@@ -22,8 +22,7 @@ type StarProps = {
 };
 
 function Rating({ className, starsCount, disabled, ...props }: React.ComponentProps<'div'> & RatingContextProps) {
-  starsCount ? starsCount++ : 0;
-  const rowsCount = starsCount ? starsCount-- : 0;
+  const rowsCount = starsCount ? starsCount + 1 : 0;
   return (
     <div data-slot="rating" className={cn('flex flex-col gap-4', className)} {...props}>
       {[...Array(rowsCount).keys()].map((item, i) => {
@@ -41,7 +40,6 @@ function RatingStarRow({
   ...props
 }: React.ComponentProps<'div'> & StarRowProps) {
   let filled = false;
-
   return (
     <div
       data-slot="rating"
@@ -75,4 +73,4 @@ function RatingStar({ className, filled }: React.ComponentProps<'div'> & StarPro
   return <Star className={cn('w-6 h-6', filled && 'fill-current', className)} />;
 }
 
-export { Rating };
+export { Rating, RatingStar, RatingStarRow };

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { CheckIcon, ChevronDownIcon, LucideIcon } from 'lucide-react';
+import { ChevronDownIcon, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface SelectProps extends React.ComponentProps<typeof SelectPrimitive.Trigger> {

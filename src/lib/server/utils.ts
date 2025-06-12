@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { CartCookie, CartCookieEntry } from '../cart';
 
-const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE_ID || 'emp-cart';
+const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE || 'emp-cart';
 
 async function readCartCookie(): Promise<CartCookie> {
   const cookieStore = await cookies();

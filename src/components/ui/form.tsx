@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { useRef } from 'react';
 import {
   Controller,
   type ControllerProps,
