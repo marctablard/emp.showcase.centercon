@@ -1,5 +1,6 @@
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import Article from '@/components/cms/article';
+import Button from '@/components/cms/button';
 import Category from '@/components/cms/category';
 import Columns from '@/components/cms/columns';
 import ContentBlock from '@/components/cms/content-block';
@@ -31,5 +32,6 @@ export const getStoryblokApi = storyblokInit({
     category: Category,
     segment: Segment,
     article: Article,
+    button: Button,
   },
 });
