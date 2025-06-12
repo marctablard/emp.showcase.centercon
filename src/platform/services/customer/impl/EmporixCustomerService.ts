@@ -1,6 +1,6 @@
-import { CustomerService } from '../CustomerService';
-import { Customer } from '../../model/customer/customer';
 import { injectable } from '@/platform/core/di/injectable';
+import { Customer } from '../../model/customer/customer';
+import { CustomerService } from '../CustomerService';
 
 /**
  * Emporix implementation of the CustomerService

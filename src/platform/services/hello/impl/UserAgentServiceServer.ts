@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
-import type { UserAgentService } from '../UserAgentService';
 import { injectable } from '@/platform/core/di/injectable';
+import type { UserAgentService } from '../UserAgentService';
 
 @injectable('UserAgentService', 'Singleton')
 class UserAgentServiceServer implements UserAgentService {

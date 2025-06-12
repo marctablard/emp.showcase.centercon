@@ -1,11 +1,11 @@
-import type { PriceService } from '../PriceService';
-import type { Price } from '../../model/price/price';
-import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
-import type { MatchedPrice, MatchPricesRequest, PriceMatchItem } from '@/platform/integrations/emporix/model/price';
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
+import type { MatchPricesRequest, MatchedPrice, PriceMatchItem } from '@/platform/integrations/emporix/model/price';
+import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
 import PriceMapper from '@/platform/services/model/price/PriceMapper';
+import type { Price } from '../../model/price/price';
+import type { PriceService } from '../PriceService';
 
 /**
  * Implementation of PriceService for Emporix price data.

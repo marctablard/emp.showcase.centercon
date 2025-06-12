@@ -1,15 +1,15 @@
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import { CheckoutService } from '../CheckoutService';
-import { CheckoutRequest, CheckoutResponse, QuoteCheckoutRequest } from '../../model/checkout';
+import { injectable } from '@/platform/core/di/injectable';
 import type { CheckoutApi } from '@/platform/integrations/emporix/checkout/CheckoutApi';
-import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import {
   EmporixCartCheckoutRequest,
   EmporixCheckoutCustomer,
   EmporixPaymentMethod,
   EmporixShipping,
 } from '@/platform/integrations/emporix/model';
+import type { CustomerService } from '@/platform/services/customer/CustomerService';
+import { CheckoutRequest, CheckoutResponse, QuoteCheckoutRequest } from '../../model/checkout';
+import { CheckoutService } from '../CheckoutService';
 
 /**
  * Implementation of CheckoutService for Emporix checkout.
