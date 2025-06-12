@@ -37,10 +37,10 @@
         "myAccount": "Mein Account"
     },
     "footer": {
-        "companyName": "Company Name",
-        "street": "123. Line street",
-        "additionalAddress": "Sunrise Business Park",
-        "city": "Manchester"
+        "companyName": "Emporix AG",
+        "street": "Bundesplatz 16",
+        "city": "6300 Zug",
+        "country": "Schweiz"
     },
     "cart": {
         "title": "Warenkorb",
