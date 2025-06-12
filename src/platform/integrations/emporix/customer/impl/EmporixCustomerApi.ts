@@ -221,6 +221,9 @@ class EmporixCustomerApi implements CustomerApi {
   }
 
   async logout(): Promise<void> {
+    const token = this.tokenManager.getSessionToken(this.config.tenant, this.config.clientId);
+    if (!token) {
+    }
     const url = `customer/${this.config.tenant}/logout?`;
 
     const response = await this.apiInvoker.authenticatedFetch(
