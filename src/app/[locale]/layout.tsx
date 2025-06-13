@@ -4,6 +4,7 @@ import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import Footer from '@/components/footer';
+import { FooterLinks, FooterWrapper, LegalFooter } from '@/components/footer/footer';
 import Header from '@/components/header';
 import Searchbar from '@/components/searchbar';
 import { Toaster } from '@/components/ui/sonner';
@@ -51,7 +52,11 @@ export default async function LocaleLayout({ children, params }: Props) {
                 <Header />
                 <Searchbar />
                 <main className="flex-grow">{children}</main>
-                <Footer />
+                <FooterWrapper>
+                  <FooterLinks />
+                  <Footer />
+                </FooterWrapper>
+                <LegalFooter />
                 <Toaster />
               </StoryblokProvider>
             </StoreProvider>
