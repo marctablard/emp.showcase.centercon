@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useHistory } from '@/hooks/history/useHistory';
 import { fetchProductById } from '@/lib/client/products';
 import { Product } from '@/platform/services/model/product';
 import { useProductStore } from '@/providers/StoreProvider';
@@ -14,7 +15,7 @@ interface UseProductResult {
 }
 
 export const useProduct = (productOrId?: string | Product): UseProductResult => {
-  const { getProduct, setCurrentProduct, addProduct } = useProductStore();
+  const { getProduct, setCurrentProduct, addProduct, currentProductId } = useProductStore();
   let id: string | undefined;
   if ((productOrId as Product).id) {
     addProduct(productOrId as Product);
@@ -62,11 +63,23 @@ export const useProduct = (productOrId?: string | Product): UseProductResult => 
 
   const refetch = () => fetchProduct(true);
 
+  const { addLastSeenProduct } = useHistory();
+
   const setAsCurrent = useCallback(() => {
     if (product) {
       setCurrentProduct(product);
     }
   }, [product, setCurrentProduct]);
+
+  useEffect(() => {
+    if (currentProductId) {
+      const product = getProduct(currentProductId);
+      if (product) {
+        // Add to last seen products when setting as current
+        addLastSeenProduct(product);
+      }
+    }
+  }, [currentProductId, addLastSeenProduct, getProduct]);
 
   useEffect(() => {
     if (id) {

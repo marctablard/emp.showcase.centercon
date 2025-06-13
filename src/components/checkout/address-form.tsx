@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import z from 'zod';
+import { useSite } from '@/hooks/site/useSite';
+import { useValidator } from '@/hooks/validation/useValidator';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Spinner } from '../ui/spinner';
 
 interface AddressFormProps {
   initialData?: Partial<Omit<CheckoutAddress, 'type'>>;
@@ -16,54 +17,39 @@ interface AddressFormProps {
   isReadOnly?: boolean;
 }
 
+const emptyAddress = {
+  contactName: '',
+  street: '',
+  streetNumber: '',
+  streetAppendix: '',
+  zipCode: '',
+  city: '',
+  country: '',
+  state: '',
+  companyName: '',
+  contactPhone: '',
+};
+
 /**
  * Reusable address form component for checkout
  * Can be used for both shipping and billing addresses
  */
 const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialData, onDataChange }) => {
-  const t = useTranslations('Checkout');
-  const AddressFormSchema = z.object({
-    contactName: z.string().min(1, { message: t('validation.fullNameRequired') }),
-    street: z.string().min(1, { message: t('validation.streetRequired') }),
-    streetNumber: z.string().min(1, { message: t('validation.houseNumberRequired') }),
-    zipCode: z.string().min(1, { message: t('validation.postalCodeRequired') }),
-    city: z.string().min(1, { message: t('validation.cityRequired') }),
-    country: z.string().min(1, { message: t('validation.countryRequired') }),
-    state: z.string().optional(),
-    phoneNumber: z.string().optional(),
-    companyName: z.string().optional(),
-  });
+  const t = useTranslations('Address');
+  const { form } = useValidator(
+    'AddressValidationService',
+    { ...emptyAddress, ...initialData },
+    'onBlur',
+    onDataChange,
+  );
+  const { countries, loading, fetchSiteData } = useSite();
 
-  const form = useForm<z.infer<typeof AddressFormSchema>>({
-    resolver: zodResolver(AddressFormSchema),
-    defaultValues: initialData,
-  });
-
-  // Watch form state to detect when all fields are valid
-  const formState = form.formState;
-
-  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (formState.isValid) {
-      form.handleSubmit(onSubmit)(e);
+  // Fetch countries when component mounts
+  useEffect(() => {
+    if (countries === undefined) {
+      fetchSiteData();
     }
-  };
-
-  const onSubmit = (data: z.infer<typeof AddressFormSchema>) => {
-    onDataChange(data);
-  };
-
-  // Common countries list - can be expanded or fetched from an API
-  const countries = [
-    { code: 'US', name: 'United States' },
-    { code: 'CA', name: 'Canada' },
-    { code: 'GB', name: 'United Kingdom' },
-    { code: 'DE', name: 'Germany' },
-    { code: 'FR', name: 'France' },
-    { code: 'ES', name: 'Spain' },
-    { code: 'IT', name: 'Italy' },
-    { code: 'JP', name: 'Japan' },
-    { code: 'AU', name: 'Australia' },
-  ];
+  }, [fetchSiteData, countries]);
 
   return (
     <FormProvider {...form}>
@@ -74,9 +60,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             name="contactName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="fullName">{t('fullName')}*</FormLabel>
-                <FormControl onBlur={onBlur}>
-                  <Input id="fullName" type="text" {...field} disabled={isReadOnly} />
+                <FormLabel htmlFor="contactName">{t('fullName')}*</FormLabel>
+                <FormControl>
+                  <Input id="contactName" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -92,7 +78,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="street">{t('street')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="street" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -109,7 +95,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel htmlFor="streetNumber">{t('streetNumber')}</FormLabel>
-                    <FormControl onBlur={onBlur}>
+                    <FormControl>
                       <Input id="streetNumber" type="text" {...field} disabled={isReadOnly} />
                     </FormControl>
                     <FormMessage />
@@ -128,7 +114,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="zipCode">{t('zipCode')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="zipCode" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -144,7 +130,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="city">{t('city')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="city" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -156,30 +142,47 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('country')}*</FormLabel>
-                  <FormControl onBlur={onBlur}>
-                    <Select onValueChange={field.onChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Theme" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {loading ? (
+              <div className="flex justify-center p-2">
+                <Spinner variant="sm" />
+              </div>
+            ) : countries && countries.length > 0 ? (
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('country')}*</FormLabel>
+                    <FormControl>
+                      {/*trigger field change AND form validation */}
+                      <Select
+                        onValueChange={(e) => {
+                          field.onChange(e);
+                          field.onBlur();
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder={t('country')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {typeof country.name === 'string'
+                                ? country.name
+                                : country.name.en || Object.values(country.name)[0]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <p>{t('noCountriesAvailable')}</p>
+            )}
           </div>
 
           <div>
@@ -189,7 +192,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="state">{t('state')}</FormLabel>
-                  <FormControl onBlur={onBlur}>
+                  <FormControl>
                     <Input id="state" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
@@ -206,7 +209,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="phoneNumber">{t('phoneNumber')}</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="phoneNumber" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
                 <FormMessage />
@@ -222,7 +225,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="companyName">{t('companyName')}</FormLabel>
-                <FormControl onBlur={onBlur}>
+                <FormControl>
                   <Input id="companyName" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
                 <FormMessage />

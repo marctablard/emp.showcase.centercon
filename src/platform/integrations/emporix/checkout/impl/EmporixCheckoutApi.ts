@@ -1,9 +1,9 @@
+import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
+import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
+import type { EmporixConfig } from '../../config';
 import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from '../../model/checkout';
 import type { CheckoutApi } from '../CheckoutApi';
-import { inject } from 'inversify';
-import type { EmporixConfig } from '../../config';
-import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
-import { injectable } from '@/platform/core/di/injectable';
 
 @injectable('EmporixCheckoutApi', 'Singleton')
 class EmporixCheckoutApi implements CheckoutApi {
@@ -19,7 +19,7 @@ class EmporixCheckoutApi implements CheckoutApi {
   }
 
   async checkout(request: EmporixCartCheckoutRequest): Promise<EmporixCheckoutResponse> {
-    if (request.customer.guest) {
+    if (request.customer.guest || !request.customer.id) {
       throw new Error('Customer checkout requires logged-in customer');
     }
     const response = await this.apiClient.authenticatedFetch(

@@ -1,22 +1,14 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import z from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
+import { useValidator } from '@/hooks/validation/useValidator';
+import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-
-interface ShippingOption {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  estimatedDelivery: string;
-  zoneId: string;
-}
+import { Spinner } from '../ui/spinner';
 
 interface ShippingMethodProps {
   isReadOnly?: boolean;
@@ -27,122 +19,87 @@ interface ShippingMethodProps {
  * Allows users to select their preferred shipping method
  */
 const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false }) => {
-  // Get the submitShippingMethod function from useCheckout
-  // Note: This doesn't exist yet, we'll need to add it to the useCheckout hook
-  const { shippingMethod, submitShippingMethod } = useCheckout();
-  const t = useTranslations('Checkout');
+  const {
+    availableShippingMethods: shippingMethods,
+    shippingMethodsLoading: loading,
+    shippingMethod,
+    submitShippingMethod,
+  } = useCheckout();
 
-  // Mock shipping options - in a real app, these would come from an API
-  const shippingOptions: ShippingOption[] = [
-    {
-      id: 'de-standard',
-      name: 'Standard Shipping',
-      description: '3-5 business days',
-      price: 5.0,
-      estimatedDelivery: '3-5 business days',
-      zoneId: 'de-default',
-    },
-    {
-      id: 'express',
-      name: 'Express Shipping',
-      description: '1-2 business days',
-      price: 9.99,
-      estimatedDelivery: '1-2 business days',
-      zoneId: 'de-default',
-    },
-    {
-      id: 'overnight',
-      name: 'Overnight Shipping',
-      description: 'Next business day',
-      price: 19.99,
-      estimatedDelivery: 'Next business day',
-      zoneId: 'de-default',
-    },
-  ];
-
-  const ShippingMethodFormSchema = z.object({
-    shippingMethod: z.string().min(1, { message: t('validation.shippingMethodRequired') }),
+  const { form } = useValidator('ShippingValidationService', shippingMethod, 'onChange', (data) => {
+    const option = shippingMethods?.find((option) => option.id === data.methodId);
+    if (option) {
+      submitShippingMethod(option);
+    }
   });
-
-  const form = useForm<z.infer<typeof ShippingMethodFormSchema>>({
-    resolver: zodResolver(ShippingMethodFormSchema),
-    defaultValues: {
-      shippingMethod: shippingMethod?.methodId,
-    },
-  });
-
-  const formState = form.formState;
+  const t = useTranslations('Checkout.shipping');
   useEffect(() => {
-    form.watch((data) => {
-      if (formState.isValid) {
-        const option = shippingOptions.find((o) => o.id == data.shippingMethod);
-        if (option) {
-          submitShippingMethod({
-            methodId: option.id,
-            methodName: option.name,
-            amount: option.price,
-            zoneId: option.zoneId,
-          });
-        }
-      }
-    });
-  });
-
+    if (!shippingMethods || !shippingMethods.find((option) => option.id === shippingMethod?.methodId)) {
+      form.reset();
+    }
+  }, [shippingMethods, shippingMethod, form]);
   return (
     <FormProvider {...form}>
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-semibold text-neutral-900 mb-4">{t('shippingMethod')}</h2>
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <Spinner variant="md" loadingText={t('loading')} />
+          </div>
+        )}
+        {!loading && (!shippingMethods || shippingMethods.length === 0) && (
+          <div className="py-4 text-center text-neutral-600">{t('noShippingMethodsAvailable')}</div>
+        )}
+
         <FormField
           control={form.control}
-          name="shippingMethod"
+          name="methodId"
           render={({ field }) => (
             <FormItem>
               <FormControl>
                 <RadioGroup
-                  value={field.value}
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                   className="flex flex-col space-y-1"
                 >
-                  {shippingOptions.map((option) => (
-                    <FormItem className="flex items-center space-x-3 space-y-0 w-full" key={option.id}>
+                  {shippingMethods!.map((method) => (
+                    <FormItem className="flex items-center space-x-3 space-y-0 w-full" key={method.id}>
                       <div
                         className={`flex items-center w-full border rounded-md p-4 cursor-pointer transition-colors ${
-                          shippingMethod?.methodId === option.id
+                          shippingMethod?.methodId === method.id
                             ? 'border-primary-500 bg-primary-50'
                             : 'border-neutral-200 hover:border-primary-300'
                         } ${isReadOnly ? 'opacity-75 pointer-events-none' : ''}`}
                       >
                         <FormControl>
-                          <RadioGroupItem value={option.id} id={option.id} />
+                          <RadioGroupItem value={method.id} id={method.id} />
                         </FormControl>
-                        <FormLabel className="w-full" htmlFor={option.id}>
+                        <FormLabel className="w-full" htmlFor={method.id}>
                           <div className="flex items-start justify-between w-full">
                             <div className="flex items-center space-x-3">
                               <div
                                 className={`flex items-center justify-center ${
-                                  shippingMethod?.methodId === option.id ? 'border-primary-600' : 'border-neutral-300'
+                                  shippingMethod?.methodId === method.id ? 'border-primary-600' : 'border-neutral-300'
                                 }`}
                               >
-                                {shippingMethod?.methodId === option.id && (
+                                {shippingMethod?.methodId === method.id && (
                                   <div className="w-3 h-3 rounded-full bg-primary-600"></div>
                                 )}
                               </div>
                               <div>
-                                <h3 className="font-medium text-neutral-900">{option.name}</h3>
-                                <p className="text-sm text-neutral-500">{option.description}</p>
+                                <h3 className="font-medium text-neutral-900">{method.name}</h3>
+                                <p className="text-sm text-neutral-500">{method.description}</p>
                               </div>
                             </div>
                             <div className="text-right">
                               <span className="font-medium">
-                                {option.price === 0
+                                {!method.cost
                                   ? t('freeShipping')
                                   : new Intl.NumberFormat('en-US', {
                                       style: 'currency',
-                                      currency: 'USD',
-                                    }).format(option.price)}
+                                      currency: method.cost.currency,
+                                    }).format(method.cost.amount)}
                               </span>
-                              <p className="text-xs text-neutral-500">{option.estimatedDelivery}</p>
                             </div>
                           </div>
                         </FormLabel>

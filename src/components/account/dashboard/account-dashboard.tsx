@@ -18,7 +18,7 @@ export default function AccountDashboard() {
   const { company, orderSummary, returnSummary, pendingApprovals, loading: isCompanyLoading } = useCompany();
 
   if (isCustomerLoading || isMessagesLoading || isCompanyLoading || !customer || !company) {
-    return <div className="flex justify-center items-center h-full">Loading...</div>;
+    return <div className="flex justify-center items-center h-full">{t('loading')}</div>;
   }
 
   return (

@@ -1,23 +1,25 @@
 'use client';
 
 import React from 'react';
-import { formatCurrency } from '@/lib/utils';
-import { Price } from '@/platform/services/model/common';
+import { ProductPrice } from '@/platform/services/model/price';
 
 interface ProductPriceProps {
-  price: Price;
+  price: ProductPrice;
 }
 
 export function ProductPriceComponent({ price }: ProductPriceProps) {
   return (
     <div className="mt-4">
-      <h2 className="text-3xl font-bold text-neutral-900">{formatCurrency(price.amount, price.currency)}</h2>
-      {price.tiers && (
+      <h2 className="text-3xl font-bold text-neutral-900">
+        ${Math.floor(price.effectiveValue)}
+        <span className="text-lg align-top">.{(price.effectiveValue % 1).toFixed(2).substring(2)}</span>
+      </h2>
+      {price.tierValues?.length > 0 && (
         <div className="mt-2 space-y-2">
-          {price.tiers.map((tier, index) => (
+          {price.tierValues.map((tier, index) => (
             <div key={index} className="flex items-center text-sm text-neutral-500">
-              <span className="font-medium mr-2">{tier.quantity}+</span>
-              <span>{formatCurrency(tier.amount, price.currency)}</span>
+              <span className="font-medium mr-2">{tier.minQuantity}+</span>
+              <span>${tier.price.toFixed(2)}</span>
             </div>
           ))}
         </div>
