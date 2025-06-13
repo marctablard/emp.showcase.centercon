@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { Gauge, Pin, User } from 'lucide-react';
 import HeaderIconLink from '@/components/header/header-icon-link';
-import { Input } from '@/components/ui/input';
+import HeaderSearch from '@/components/header/header-search';
 import { Link } from '@/i18n/navigation';
 
 export default async function HeaderMiddleBar() {
@@ -15,9 +15,7 @@ export default async function HeaderMiddleBar() {
           <Image src="/logo.svg" alt="Logo" width="148" height="24" />
         </Link>
       </div>
-      <div className="w-full max-w-[700px]">
-        <Input placeholder={t('search')} />
-      </div>
+      <HeaderSearch />
       <div className="flex justify-end items-center gap-6">
         <HeaderIconLink icon={User} text="Login" href="/login" />
         <HeaderIconLink icon={Gauge} text="Quick Order" href="/#" />
