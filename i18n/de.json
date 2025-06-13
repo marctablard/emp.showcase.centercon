@@ -134,6 +134,7 @@
     },
     "Checkout": {
         "title": "Zur Kasse",
+        "loading": "Wird geladen...",
         "description": "Schließen Sie Ihren Einkauf ab",
         "contactInformation": "Kontaktinformationen",
         "emailAddress": "E-Mail-Adresse",
@@ -162,16 +163,28 @@
         "creditCard": "Kreditkarte",
         "paypal": "PayPal",
         "invoice": "Auf Rechnung",
-        "cardNumber": "Kartennummer",
-        "cardHolder": "Karteninhaber",
-        "expiryDate": "Ablaufdatum",
-        "cvv": "Prüfnummer",
-        "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
-        "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig.",
-        "freeShipping": "Kostenlos",
-        "standardShipping": "Standardversand",
-        "expressShipping": "Expressversand",
-        "overnightShipping": "Übernachtversand",
+        "payment": {
+            "paymentMethod": "Zahlungsmethode",
+            "loading": "Zahlungsmethoden werden geladen...",
+            "errorLoadingPaymentMethods": "Fehler beim Laden der Zahlungsmethoden. Bitte versuchen Sie es erneut.",
+            "noPaymentMethodsAvailable": "Derzeit sind keine Zahlungsmethoden verfügbar.",
+            "cardEndingIn": "Karte endend auf",
+            "selectedPaymentMethod": "Ausgewählte Zahlungsmethode",
+            "cardNumber": "Kartennummer",
+            "cardHolder": "Karteninhaber",
+            "expiryDate": "Ablaufdatum",
+            "cvv": "Prüfnummer",
+            "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
+            "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig."
+        },
+        "shipping": {
+            "shippingMethod": "Versandart",
+            "loading": "Versandarten werden geladen...",
+            "noShippingMethodsAvailable": "Keine Versandarten für Ihren Standort verfügbar",
+            "enterShippingAddressFirst": "Bitte geben Sie zuerst Ihre Lieferadresse ein",
+            "freeShipping": "Kostenloser Versand",
+            "estimatedDelivery": "Voraussichtliche Lieferung: 3-5 Werktage"
+        },
         "summaryTitle": "Bestellzusammenfassung",
         "notItems": "Keine Artikel im Warenkorb", 
         "subtotal": "Zwischensumme",
@@ -203,7 +216,17 @@
         "orderNumber": "Bestellnummer",
         "orderDate": "Bestelldatum",
         "email": "E-Mail",
+        "status": "Status",
         "paymentMethod": "Zahlungsmethode",
+        "orderItems": "Bestellte Artikel",
+        "quantity": "Menge",
+        "total": "Gesamtsumme",
+        "subtotal": "Zwischensumme",
+        "shipping": "Versand",
+        "discount": "Rabatt",
+        "free": "Kostenlos",
+        "shippingAddress": "Lieferadresse",
+        "errorFetchingOrder": "Fehler beim Abrufen der Bestelldetails",
         "emailConfirmation": "Eine Bestätigungs-E-Mail wurde gesendet an",
         "continueShopping": "Weiter einkaufen",
         "viewOrders": "Meine Bestellungen anzeigen"
@@ -224,6 +247,7 @@
         "storeName": "Emporix Showcase Store"
     },
     "Account": {
+        "loading": "Dashboard wird geladen...",
         "title" : "Service Portal",
         "welcomeBack": "Willkommen zurück, {name}",
         "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
@@ -262,6 +286,80 @@
         "quotesPagePlaceholder": "Angebote werden hier angezeigt",
         "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
         "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt"
+    },
+    "Validation": {
+        "contactData": {
+            "email": {
+                "required": "Die E-Mail-Adresse ist erforderlich",
+                "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+            },
+            "firstName": {
+                "required": "Vorname ist erforderlich"
+            },
+            "lastName": {
+                "required": "Nachname ist erforderlich"
+            }
+        },
+        "address": {
+            "contactName": {
+                "required": "Name ist erforderlich"
+            },
+            "street": {
+                "required": "Straße ist erforderlich"
+            },
+            "streetNumber": {
+                "required": "Hausnummer ist erforderlich"
+            },
+            "zipCode": {
+                "required": "Postleitzahl ist erforderlich"
+            },
+            "city": {
+                "required": "Stadt ist erforderlich"
+            },
+            "country": {
+                "required": "Land ist erforderlich"
+            },
+            "state": {
+                "required": "Bundesland/Region ist erforderlich"
+            }
+        },
+        "shipping": {
+            "method": {
+                "required": "Versandart ist erforderlich"
+            }
+        },
+        "payment": {
+            "method": {
+                "required": "Zahlungsmethode ist erforderlich"
+            }
+        }
+    },
+    "Address": {
+        "fullName": "Vollständiger Name",
+        "street": "Straße",
+        "streetNumber": "Hausnummer",
+        "zipCode": "Postleitzahl",
+        "city": "Stadt",
+        "country": "Land",
+        "state": "Bundesland/Region",
+        "phoneNumber": "Telefonnummer",
+        "companyName": "Firmenname",
+        "noCountriesAvailable": "Keine Länder verfügbar",
+        "loading": "Adressdaten werden geladen..."
+    },
+    "PaymentModes": {
+        "creditCard": "Kreditkarte",
+        "paypal": "PayPal",
+        "invoice": "Rechnung",
+        "none": "Keine Zahlart"
+    },
+    "OrderStatus": {
+        "IN_CHECKOUT": "Wird Bearbeitet",
+        "CREATED": "Erstellt",
+        "CONFIRMED": "Bestätigt",
+        "SHIPPED": "Versandt",
+        "COMPLETED": "Abgeschlossen",
+        "DECLINED": "Storniert"
     },
     "UI": {
         "spinner": {

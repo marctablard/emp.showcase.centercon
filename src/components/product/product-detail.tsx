@@ -6,12 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProduct } from '@/hooks/product/useProduct';
 import { useL10n } from '@/hooks/useL10n';
+import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
 import ProductActions from './product-actions';
 import { ProductPriceComponent } from './product-price';
 import { ProductTabsComponent } from './product-tabs';
 
-export default function ProductDetail({ product: initialProduct }: { product?: Product }) {
+export interface ProductDetailProps {
+  product?: Product;
+  price?: ProductPrice | null;
+}
+
+export default function ProductDetail({ product: initialProduct, price }: ProductDetailProps) {
   const { product, loading, setAsCurrent } = useProduct(initialProduct);
   const locale = useLocale();
   const { l10n } = useL10n(locale);
@@ -47,7 +53,7 @@ export default function ProductDetail({ product: initialProduct }: { product?: P
               <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">In Stock</Badge>
               <h1 className="text-4xl font-bold tracking-tight text-neutral-900">{l10n(product.name)}</h1>
 
-              {product.price && <ProductPriceComponent price={product.price} />}
+              {price && <ProductPriceComponent price={price} />}
 
               <div className="mt-6 flex space-x-4">
                 <ProductActions product={product} />

@@ -1,5 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
+import { buildCurl } from '@/platform/core/utils/curl';
 import type { EmporixConfig } from '../../config';
 import type { TokenManager } from '../TokenManager';
 
@@ -11,7 +12,7 @@ import type { TokenManager } from '../TokenManager';
 class EmporixApiInvoker {
   private config: EmporixConfig;
   private tokenManager: TokenManager;
-  private debugCurl: boolean;
+  private debugCurl: boolean = false;
 
   constructor(
     @inject('EmporixConfig') config: EmporixConfig,
@@ -19,9 +20,6 @@ class EmporixApiInvoker {
   ) {
     this.config = config;
     this.tokenManager = tokenManager;
-    // Set to true for debug output as CURL
-    // TODO build environment variable or config property for this
-    this.debugCurl = false;
   }
 
   /**
@@ -49,13 +47,6 @@ class EmporixApiInvoker {
     );
   }
 
-  /**
-   * Create a fetch request with the appropriate authentication headers
-   * @param url API endpoint URL
-   * @param options Fetch options
-   * @param tokenType Type of token to use for authentication
-   * @returns Promise with the fetch response
-   */
   /**
    * Create a fetch request with the appropriate authentication headers
    * @param url API endpoint URL
@@ -110,11 +101,13 @@ class EmporixApiInvoker {
         }
         break;
       case 'service':
+        if (!this.config.serverClientId || !this.config.serverClientSecret) {
+          throw new Error('Service Credentials not available');
+        }
         token = await this.tokenManager.getServiceAccessToken(
           this.config.tenant,
-          this.config.clientId,
-          this.config.clientSecret,
-          authOptions?.scopes,
+          this.config.serverClientId,
+          this.config.serverClientSecret,
         );
         break;
       default:
@@ -126,34 +119,25 @@ class EmporixApiInvoker {
       ...headers,
       Authorization: `Bearer ${token}`,
     };
-    // Make the authenticated request
-    this.outputCurl(url, { ...options, headers });
 
-    return fetch(`${this.config.baseUrl}/${url}`, {
-      ...options,
-      headers,
-    });
+    return this.fetch(url, { ...options, headers });
   }
 
-  outputCurl(url: string, options: RequestInit): void {
+  async fetch(url: string, options: RequestInit = {}): Promise<Response> {
+    url = `${this.config.baseUrl}/${url}`;
+
     if (this.debugCurl) {
-      // Build curl command for debugging
-      const headerString = Object.entries(options.headers || {})
-        .map(([key, value]) => `-H '${key}: ${value}'`)
-        .join(' ');
-
-      const methodString = options.method ? `-X ${options.method}` : '';
-      const bodyString = options.body ? `-d '${options.body}'` : '';
-
-      console.log(`curl -v ${methodString} ${headerString} ${bodyString} '${this.config.baseUrl}/${url}'`);
+      console.debug(buildCurl(url, options));
     }
+    // no recursion, this is the globals fetch!
+    return fetch(url, options);
   }
 
   /**
    * Clear all stored tokens
    */
   async clearTokens(): Promise<void> {
-    this.tokenManager.clearTokens();
+    this.tokenManager.clearTokens(this.config.tenant);
   }
 }
 export default EmporixApiInvoker;

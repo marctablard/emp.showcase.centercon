@@ -4,7 +4,7 @@ import type {
   EmporixContextAttribute,
   EmporixSessionContext,
 } from '@/platform/integrations/emporix/model/session-context';
-import type { SessionContextApi } from '@/platform/integrations/emporix/session/SessionContextApi';
+import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import type { SessionMapper } from '@/platform/services/model/session/SessionMapper';
 import type { Session, SessionAttribute } from '@/platform/services/model/session/session';
 import { SessionService } from '../SessionService';
@@ -15,11 +15,11 @@ import { SessionService } from '../SessionService';
  */
 @injectable('SessionService', 'Singleton')
 class EmporixSessionService implements SessionService {
-  private sessionContextApi: SessionContextApi;
+  private sessionContextApi: EmporixSessionContextApi;
   private mapper: SessionMapper<EmporixSessionContext, EmporixContextAttribute>;
 
   constructor(
-    @inject('EmporixSessionContextApi') sessionContextApi: SessionContextApi,
+    @inject('EmporixSessionContextApi') sessionContextApi: EmporixSessionContextApi,
     @inject('EmporixSessionMapper') mapper: SessionMapper<EmporixSessionContext, EmporixContextAttribute>,
   ) {
     this.sessionContextApi = sessionContextApi;

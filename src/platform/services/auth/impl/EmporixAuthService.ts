@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixAddress } from '@/platform/integrations/emporix';
 import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
+import { EmporixAddress } from '@/platform/integrations/emporix/model';
 import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
 import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
 import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
