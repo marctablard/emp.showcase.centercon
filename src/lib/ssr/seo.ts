@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
 import { buildCanonicalUrl, l10n } from '../utils';
 
@@ -158,7 +159,11 @@ export async function generateProductJsonLd(product: Product, locale: string): P
 /**
  * Generate complete metadata for product pages
  */
-export async function generateProductMetadata(product: Product | null, locale: string): Promise<Metadata> {
+export async function generateProductMetadata(
+  product: Product,
+  price: ProductPrice | null,
+  locale: string,
+): Promise<Metadata> {
   // If product not found, return basic metadata
   if (!product) {
     const t = await getTranslations({ locale, namespace: 'seo' });
