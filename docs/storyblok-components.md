@@ -208,7 +208,7 @@ For the Article component, your schema might look like:
 }
 ```
 
-For more information on creating components in Storyblok, refer to the [official documentation](https://www.storyblok.com/docs/api/management/components/create-a-component).
+For more information on creating components in Storyblok, refer to the [official documentation](https://www.storyblok.com/docs/guides/nextjs/).
 
 ## Component Registration
 
