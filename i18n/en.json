@@ -3,8 +3,9 @@
         "world": "Hello World",
         "friend": "Hey Friend"
     },
-    "breadcrumb": {
+    "Breadcrumb": {
         "backLink": "Back",
+        "homeLink": "Home",
         "backLinkAriaLabel": "Go back to the previous page"
     },
     "product": {
