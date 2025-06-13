@@ -1,8 +1,7 @@
 import { MetadataRoute } from 'next';
+import { baseUrl } from '@/lib/utils';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://emporix-showcase.com';
-
   // Define static pages
   const staticPages = ['', '/about', '/login', '/register', '/account', '/cart', '/contact'];
 

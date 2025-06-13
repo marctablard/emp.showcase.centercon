@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
-import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import type { OAuthApi } from '../../oauth/OAuthApi';
+import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 
 /**
  * A reusable test implementation of EmporixTokenManager for testing purposes.

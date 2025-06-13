@@ -1,3 +1,10 @@
+import { Metadata } from './common';
+import { EmporixCalculatedPrice } from './price';
+
+export interface EmporixCartPrice extends EmporixCalculatedPrice, EmporixTaxInfo {
+  appliedDiscounts?: EmporixCalculatedAppliedDiscount[];
+}
+
 export interface EmporixCartItem {
   id: string;
   itemYrn: string;
@@ -5,12 +12,12 @@ export interface EmporixCartItem {
   effectiveQuantity?: number;
   type?: string;
   calculatedPrice?: {
-    price: EmporixCalculatedPrice;
-    finalPrice: EmporixCalculatedPrice;
-    upliftValue: EmporixCalculatedPrice;
-    discountedPrice: EmporixCalculatedPrice;
-    totalFee: EmporixCalculatedPrice;
-    totalShipping: EmporixCalculatedPrice;
+    price: EmporixCartPrice;
+    finalPrice: EmporixCartPrice;
+    upliftValue: EmporixCartPrice;
+    discountedPrice: EmporixCartPrice;
+    totalFee: EmporixCartPrice;
+    totalShipping: EmporixCartPrice;
     totalDiscount: {
       calculationType: 'ApplyDiscountBeforeTax' | 'ApplyDiscountAfterTax';
       value: number;
@@ -41,13 +48,9 @@ export interface EmporixCalculatedAppliedDiscount {
   origin: 'INTERNAL' | 'EXTERNAL';
 }
 
-export interface EmporixCalculatedPrice {
-  netValue: number;
-  grossValue: number;
-  taxValue: number; // difference between net and gross
+export interface EmporixTaxInfo {
   taxRate: number;
   taxCode: string;
-  appliedDiscounts?: EmporixCalculatedAppliedDiscount[];
 }
 
 export interface EmporixCart {
@@ -68,12 +71,12 @@ export interface EmporixCart {
   status?: string;
   items?: CartItem[];
   calculatedPrice?: {
-    price: EmporixCalculatedPrice;
-    finalPrice: EmporixCalculatedPrice;
-    upliftValue: EmporixCalculatedPrice;
-    discountedPrice: EmporixCalculatedPrice;
-    totalFee: EmporixCalculatedPrice;
-    totalShipping: EmporixCalculatedPrice;
+    price: EmporixCartPrice;
+    finalPrice: EmporixCartPrice;
+    upliftValue: EmporixCartPrice;
+    discountedPrice: EmporixCartPrice;
+    totalFee: EmporixCartPrice;
+    totalShipping: EmporixCartPrice;
     totalDiscount: {
       calculationType: 'ApplyDiscountBeforeTax' | 'ApplyDiscountAfterTax';
       value: number;
@@ -81,12 +84,8 @@ export interface EmporixCart {
     };
   };
   totalUnitsCount?: number;
-  metadata?: {
-    createdAt: string;
-    modifiedAt: string;
-    calculatedAt?: string;
-    version: number;
-  };
+  metadata?: Metadata;
+  mixins?: Mixins;
   channel?: {
     name: string;
     source: string;

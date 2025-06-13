@@ -1,8 +1,7 @@
 import { MetadataRoute } from 'next';
+import { baseUrl } from '@/lib/utils';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://emporix-showcase.com';
-
   return {
     rules: {
       userAgent: '*',

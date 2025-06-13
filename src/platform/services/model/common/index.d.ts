@@ -1,12 +1,35 @@
-export interface RegionSettings {
-  region: string;
-  currency: Currency;
-  language: string;
+/**
+ * Country information
+ */
+export interface Country {
+  code: string;
+  name: string | LocalizedString;
+  regions?: string[];
+}
+
+/**
+ * Exchange rate information
+ */
+export interface ExchangeRate {
+  sourceCurrency: string;
+  targetCurrency: string;
+  rate: number;
+}
+
+export interface Region {
+  code: string;
+  name: string | LocalizedString;
 }
 
 export interface Currency {
   id: string;
   symbol: string;
+
+  // Enhanced properties for use with SiteService
+  code?: string;
+  name?: string;
+  active?: boolean;
+  exchangeRates?: ExchangeRate[];
 }
 
 export interface Tax {

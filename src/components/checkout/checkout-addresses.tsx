@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { isEqual, omit } from 'lodash';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { CheckoutAddress } from '@/platform/services/model/checkout';
 import AddressForm from './address-form';
@@ -39,34 +40,14 @@ const Addresses: React.FC<AddressesProps> = ({ isReadOnly = false }) => {
     ...storeBillingAddress,
   });
 
-  // Helper function to check if addresses are the same
-  const areAddressesEqual = (
-    addr1?: Partial<Omit<CheckoutAddress, 'type'>>,
-    addr2?: Partial<Omit<CheckoutAddress, 'type'>>,
-  ): boolean => {
-    if (!addr1 || !addr2) return false;
-    if (Object.keys(addr1).length === 0 || Object.keys(addr2).length === 0) return false;
-
-    // Get all keys from both objects and create a Set to avoid duplicates
-    const allKeys = new Set<string>([...Object.keys(addr1), ...Object.keys(addr2)]);
-
-    // Compare each key's value in both objects
-    return Array.from(allKeys).every((key) => {
-      // Skip the 'type' field as we're comparing Omit<CheckoutAddress, 'type'>
-      if (key === 'type') return true;
-      return addr1[key as keyof typeof addr1] === addr2[key as keyof typeof addr2];
-    });
-  };
-
   // Determine if billing is same as shipping based on actual address comparison
   const initialSameAsShipping = useMemo(() => {
     // If billing address is empty, default to true
     if (!storeBillingAddress || Object.keys(storeBillingAddress || {}).length === 0) return true;
     // If shipping address is empty, we can't compare (and the billing address is not empty, so we must show it)
     if (!storeShippingAddress) return false;
-
     // Compare the addresses
-    return areAddressesEqual(storeShippingAddress, storeBillingAddress);
+    return isEqual(omit(storeShippingAddress, 'type'), omit(storeBillingAddress, 'type'));
   }, [storeShippingAddress, storeBillingAddress]);
 
   const [sameAsShipping, setSameAsShipping] = useState<boolean>(initialSameAsShipping);

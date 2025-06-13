@@ -1,6 +1,8 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { OrderConfirmation } from '@/components/checkout';
+import { getOrderById } from '@/lib/ssr/orders';
 
 interface ConfirmationPageProps {
   orderId: string;
@@ -21,39 +23,12 @@ export async function generateMetadata({ params }: { params: Promise<Confirmatio
 export default async function ConfirmationPage({ params }: { params: Promise<ConfirmationPageProps> }) {
   // In a real application, we would fetch the order details from the API
   // For now, we'll use a placeholder cart
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { orderId } = await params;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const placeholderCart = {
-    id: 'cart-123',
-    currency: 'EUR',
-    items: [
-      {
-        id: 'item-1',
-        quantity: 2,
-        price: {
-          value: 29.99,
-          currency: 'EUR',
-        },
-        product: {
-          id: 'product-1',
-          name: 'Sample Product',
-          description: 'This is a sample product',
-          images: ['https://via.placeholder.com/150'],
-        },
-      },
-    ],
-  };
+  const order = await getOrderById(orderId);
 
   return (
-    <main className="min-h-screen bg-neutral-50 py-8">
-      {/*
-      <OrderConfirmation 
-        orderId={orderId}
-        cart={placeholderCart}
-        customerEmail="customer@example.com"
-      />
-      */}
+    <main className="min-h-screen bg-gray-50 py-8">
+      <OrderConfirmation orderId={orderId} initialOrder={order} customerEmail="customer@example.com" />
     </main>
   );
 }

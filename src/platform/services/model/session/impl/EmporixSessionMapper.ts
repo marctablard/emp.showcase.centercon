@@ -1,10 +1,10 @@
+import { injectable } from '@/platform/core/di/injectable';
 import type {
   EmporixContextAttribute,
   EmporixSessionContext,
 } from '@/platform/integrations/emporix/model/session-context';
-import type { Session, SessionAttribute } from '../session';
 import type { SessionMapper } from '../SessionMapper';
-import { injectable } from '@/platform/core/di/injectable';
+import type { Session, SessionAttribute } from '../session';
 
 /**
  * Implementation of SessionMapper for Emporix session context data.

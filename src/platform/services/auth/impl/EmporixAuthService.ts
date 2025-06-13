@@ -1,12 +1,12 @@
-import { injectable } from '@/platform/core/di/injectable';
-import { AuthService } from '../AuthService';
-import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
-import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
 import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
-import { EmporixAddress } from '@/platform/integrations/emporix';
+import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
+import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
+import { AuthService } from '../AuthService';
+import { EmporixAddress } from '@/platform/integrations/emporix/model';
 
 /**
  * Emporix implementation of the AuthService

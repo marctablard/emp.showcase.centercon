@@ -1,10 +1,10 @@
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import { CustomerApi } from '../CustomerApi';
 import type { EmporixCustomer, EmporixCustomerAddress, EmporixSignupRequest } from '../../model/customer';
 import { EmporixSessionContext } from '../../model/session-context';
+import { CustomerApi } from '../CustomerApi';
 
 @injectable('EmporixCustomerApi', 'Singleton')
 class EmporixCustomerApi implements CustomerApi {

@@ -1,10 +1,11 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { OAuthApi } from '../OAuthApi';
+import { buildCurl } from '@/platform/core/utils/curl';
 import {
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
+import { OAuthApi } from '../OAuthApi';
 
 /**
  * Implementation of the Emporix OAuth API
@@ -12,6 +13,7 @@ import {
 @injectable('EmporixOAuthApi', 'Singleton')
 class EmporixOAuthApi implements OAuthApi {
   private readonly baseUrl: string = 'https://api.emporix.io';
+  private debugCurl: boolean = false;
 
   /**
    * Get an anonymous token
@@ -20,9 +22,9 @@ class EmporixOAuthApi implements OAuthApi {
    * @returns Promise with the anonymous token response
    */
   async getAnonymousToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
-    const url = `${this.baseUrl}/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+    const url = `/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
 
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -49,9 +51,9 @@ class EmporixOAuthApi implements OAuthApi {
     refreshToken: string,
     clientId: string,
   ): Promise<EmporixAnonymousTokenResponse> {
-    const url = `${this.baseUrl}/customerlogin/auth/anonymous/refresh?tenant=${tenant}&refresh_token=${refreshToken}&client_id=${clientId}`;
+    const url = `/customerlogin/auth/anonymous/refresh?tenant=${tenant}&refresh_token=${refreshToken}&client_id=${clientId}`;
 
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -79,8 +81,8 @@ class EmporixOAuthApi implements OAuthApi {
     username: string,
     password: string,
   ): Promise<EmporixCustomerTokenResponse> {
-    const url = `${this.baseUrl}/customer/${tenant}/login`;
-    const response = await fetch(url, {
+    const url = `/customer/${tenant}/login`;
+    const response = await this.fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -107,9 +109,9 @@ class EmporixOAuthApi implements OAuthApi {
    * @returns Promise with the refreshed customer token response
    */
   async refreshCustomerToken(tenant: string, refreshToken: string): Promise<EmporixCustomerTokenResponse> {
-    const url = `${this.baseUrl}/customer/${tenant}/refreshauthtoken/refresh?refresh_token=${refreshToken}`;
+    const url = `/customer/${tenant}/refreshauthtoken/refresh?refresh_token=${refreshToken}`;
 
-    const response = await fetch(url, {
+    const response = await this.fetch(url, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -137,16 +139,15 @@ class EmporixOAuthApi implements OAuthApi {
     clientSecret: string,
     scopes?: string[],
   ): Promise<EmporixAccessTokenResponse> {
-    const url = `${this.baseUrl}/oauth/token`;
-
     // Create URL-encoded form data for OAuth token request
     const formData = new URLSearchParams();
     formData.append('grant_type', 'client_credentials');
     formData.append('client_id', clientId);
     formData.append('client_secret', clientSecret);
-    formData.append('scope', `tenant=${tenant}` + (scopes ? ` ${scopes.join(' ')}` : ''));
-
-    const response = await fetch(url, {
+    if (scopes) {
+      formData.append('scope', `tenant=${tenant}` + (scopes ? ` ${scopes.join(' ')}` : ''));
+    }
+    const response = await this.fetch('/oauth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -159,6 +160,20 @@ class EmporixOAuthApi implements OAuthApi {
       throw new Error(`Failed to get service access token: ${response.statusText}`);
     }
     return (await response.json()) as EmporixAccessTokenResponse;
+  }
+
+  /** TODO this is currently a duplicate of EmporixApiInvoker,
+   * but we need to restructure the dependencies, to make it not cyclic when using this
+   * Circular dependency : EmporixTokenManager -> EmporixOAuthApi -> EmporixApiInvoker -> EmporixTokenManager
+   */
+  async fetch(url: string, options: RequestInit = {}): Promise<Response> {
+    url = `${this.baseUrl}/${url}`;
+
+    if (this.debugCurl) {
+      console.debug(buildCurl(url, options));
+    }
+    // no recursion, this is the globals fetch!
+    return fetch(url, options);
   }
 }
 

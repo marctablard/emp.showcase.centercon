@@ -28,8 +28,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
 
     try {
       // Build the URL with query parameters
-      const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || window.location.origin;
-      const url = new URL('/api/search', baseUrl);
+      const url = new URL('/api/search');
 
       // Add basic parameters
       if (params.query) {

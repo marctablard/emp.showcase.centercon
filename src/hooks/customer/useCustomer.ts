@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { fetchCurrentCustomer } from '@/lib/client/customer';
 import { Customer } from '@/platform/services/model/customer/customer';
+import { useCustomerStore } from '@/providers/StoreProvider';
 
 interface CustomerHook {
-  customer: Customer | null;
+  customer: Customer | null | undefined;
   loading: boolean;
   error: Error | null;
 }
@@ -14,18 +16,28 @@ interface CustomerHook {
  * @returns Customer data and state
  */
 export const useCustomer = (): CustomerHook => {
-  // Mock data for customer
-  const mockCustomer: Customer = {
-    id: 'cust-123456',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    contactPhone: '+1 (555) 123-4567',
-  };
+  const { customer, loading, getLoading, setLoading, setCustomer } = useCustomerStore();
+  const [error, setError] = useState<Error | null>(null);
 
-  const [customer] = useState<Customer | null>(mockCustomer);
-  const [loading] = useState<boolean>(false);
-  const [error] = useState<Error | null>(null);
+  const fetchCustomer = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchCurrentCustomer();
+      setCustomer(data);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch customer'));
+      console.error('Error fetching customer:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [setLoading, setCustomer]);
+
+  useEffect(() => {
+    if (!getLoading() && customer === undefined) {
+      fetchCustomer();
+    }
+  }, [getLoading, customer, fetchCustomer]);
 
   return {
     customer,
