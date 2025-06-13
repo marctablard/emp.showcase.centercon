@@ -207,7 +207,15 @@ export default function FormFieldSytelguide() {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <InputButton placeholder="Username" startIcon={User} endIcon={Eye} {...field} />
+                        <InputButton
+                          placeholder="Username"
+                          startIcon={User}
+                          endIcon={Eye}
+                          buttonText="Test"
+                          iconButtonAfter={User}
+                          iconButtonBefore={User}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

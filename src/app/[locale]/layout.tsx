@@ -4,6 +4,7 @@ import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import Footer from '@/components/footer';
+import { FooterLinks, FooterWrapper, LegalFooter } from '@/components/footer/footer';
 import Header from '@/components/header';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
@@ -49,7 +50,11 @@ export default async function LocaleLayout({ children, params }: Props) {
               <StoryblokProvider>
                 <Header />
                 <main className="flex-grow mt-52">{children}</main>
-                <Footer />
+                <FooterWrapper>
+                  <FooterLinks />
+                  <Footer />
+                </FooterWrapper>
+                <LegalFooter />
                 <Toaster />
               </StoryblokProvider>
             </StoreProvider>
