@@ -4,10 +4,12 @@ import HeaderTopBanner from '@/components/header/header-top-banner';
 
 export default async function Header() {
   return (
-    <header className="bg-white opacity-95 shadow-xl rounded-2xl px-6 pb-2 pt-0 mx-9 mt-4">
-      <HeaderTopBanner />
-      <HeaderMiddleBar />
-      <HeaderBottomBar />
-    </header>
+    <div className="sticky top-0 left-0 right-0 pt-4 z-50">
+      <header className="bg-white opacity-95 shadow-xl rounded-2xl px-6 pb-2 mx-9">
+        <HeaderTopBanner />
+        <HeaderMiddleBar />
+        <HeaderBottomBar />
+      </header>
+    </div>
   );
 }
