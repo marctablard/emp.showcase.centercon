@@ -26,23 +26,29 @@ const Hero = ({ blok }: HeroProps) => {
     return null;
   }
 
-  const url = blok.image.filename;
-  console.log(url);
   return (
-    <div {...storyblokEditable(blok)} className={cn('p-6 border rounded-lg shadow-sm h-185 bg-[url(' + url + ')]')}>
-      <div className="flex flex-col rounded-ss-xl rounded-ee-xl border p-4">
-        <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines mt-12 mb-6">{blok.headline}</h1>
-        <p className="text-xl text-neutral-600">{blok.description}</p>
-        {blok.main_button && <Button blok={blok.main_button} />}
+    <div {...storyblokEditable(blok)} className={cn('relative')}>
+      <div className="w-full flex justify-end">
+        <div className="w-full mb-65 sm:mb-0 xl:w-5/6">
+          {blok.image && (
+            <Image
+              src={blok.image.filename}
+              alt={blok.alt_text || blok.image.alt || 'Logo'}
+              width={150}
+              height={50}
+              className="w-full"
+            />
+          )}
+        </div>
       </div>
-
-      <Image
-        src={blok.image.filename}
-        alt={blok.alt_text || blok.image.alt || 'Logo'}
-        width={500}
-        height={500}
-        className="object-contain"
-      />
+      <div className="absolute bottom-0 lg:bottom-20 px-4 xl:p-0">
+        <div className="flex flex-col gap-4 bg-white opacity-85 md:w-1/2 xl:w-4/7 rounded-ss-xl rounded-ee-xl shadow-lg p-6">
+          <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{blok.headline}</h1>
+          <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
+          <p className=" text-base lg:text-xl text-neutral-800">{blok.description}</p>
+          {blok.main_button && <Button blok={blok.main_button} />}
+        </div>
+      </div>
     </div>
   );
 };
