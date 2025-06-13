@@ -60,7 +60,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="bg-primary-50 rounded-tl-2xl p-2 md:p-4">
-          <div className="bg-[url('/map-pinned.svg')] bg-no-repeat bg-right-top">
+          <div className="bg-[url('/images/map-pinned.svg')] bg-no-repeat bg-right-top">
             <p className="font-bold">{t('companyName')}</p>
             <p>{t('street')}</p>
             <p>{t('city')}</p>
@@ -68,7 +68,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="bg-primary-50 rounded-br-2xl p-2 md:p-4">
-          <div className="bg-[url('/headset.svg')] bg-no-repeat bg-right-top flex flex-col gap-2">
+          <div className="bg-[url('/images/headset.svg')] bg-no-repeat bg-right-top flex flex-col gap-2">
             <div>
               <p className="font-bold">{t('ourServiceHours')}</p>
               <p>{t('mondayToThursday')}</p>
@@ -162,11 +162,20 @@ export function FooterLinks() {
 
 export function FooterWrapper({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div
-      data-slot="footer"
-      className={cn('max-w-6xl mx-auto ml-4 mr-4 lg:ml-9 lg:mr-9 shadow-footer', className)}
-      {...props}
-    />
+    <div className="flex-grow">
+      <div className="max-w-6xl mx-auto grid gap-x-4 md:gap-x-6">
+        <div
+          data-slot="footer"
+          className={cn(
+            'md:ml-4 md:mr-4 lg:ml-9 lg:mr-9 shadow-footer rounded-tl-2xl rounded-tr-2xl  bg-[url("/images/footer-bg.svg")] bg-no-repeat bg-right-bottom',
+            className,
+          )}
+          {...props}
+        >
+          {props.children}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -174,31 +183,35 @@ export function LegalFooter() {
   const t = useTranslations('footerLegal');
 
   return (
-    <div
-      data-slot="legal-footer"
-      className="max-w-6xl w-full mx-auto px-4 pb-16 pt-2 md:px-8 md:py-0 md:h-8 bg-primary-500 md:rounded-full"
-    >
-      <div className="flex flex-col md:flex-row gap-2 lg:gap-6 flex-wrap text-sm/8 text-white">
-        <p className="flex-grow text-center md:text-left">{t('copyright')}</p>
-        <div className="flex flex-grow gap-6 justify-between md:justify-end">
-          <Link
-            href="/privacy-policy"
-            className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            {t('privacyPolicy')}
-          </Link>
-          <Link
-            href="/imprint"
-            className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            {t('imprint')}
-          </Link>
-          <Link
-            href="/terms-and-conditions"
-            className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            {t('termsAndConditions')}
-          </Link>
+    <div className="flex-grow">
+      <div className="max-w-6xl mx-auto">
+        <div
+          data-slot="legal-footer"
+          className="px-4 pb-16 pt-2 md:mx-2 md:px-7 md:py-0 md:h-8 bg-primary-500 md:rounded-full"
+        >
+          <div className="flex flex-col md:flex-row gap-2 lg:gap-6 flex-wrap text-sm/8 text-white">
+            <p className="flex-grow text-center md:text-left">{t('copyright')}</p>
+            <div className="flex flex-grow gap-6 justify-between md:justify-end">
+              <Link
+                href="/privacy-policy"
+                className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                {t('privacyPolicy')}
+              </Link>
+              <Link
+                href="/imprint"
+                className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                {t('imprint')}
+              </Link>
+              <Link
+                href="/terms-and-conditions"
+                className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                {t('termsAndConditions')}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

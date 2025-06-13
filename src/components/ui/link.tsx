@@ -13,7 +13,7 @@ const linkVariants = cva(
         text: 'text-primary underline hover:text-primary-700',
       },
       size: {
-        s: 'text-sm',
+        s: 'text-sm [&_svg]:w-4 [&_svg]:h-4',
         m: 'text-base ',
         l: 'text-xl',
       },
