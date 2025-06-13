@@ -30,7 +30,7 @@ export default function Header() {
   return (
     <div className="fixed top-0 left-0 right-0 pt-4 z-50">
       <div
-        className={`transition-all duration-200 ease-in-out ${scrolled ? 'opacity-0 overflow-hidden' : 'opacity-100'}`}
+        className={`transition-all duration-200 ease-in-out ${scrolled ? 'opacity-0 overflow-hidden max-h-0' : 'opacity-100 max-h-[200px]'}`}
       >
         <header className="bg-white opacity-95 shadow-xl rounded-2xl px-6 pb-2 mx-9">
           <HeaderTopBanner />
@@ -40,8 +40,8 @@ export default function Header() {
       </div>
 
       <div
-        className={`transition-all duration-200 ease-in-out absolute w-full top-3 ${
-          scrolled ? 'opacity-100' : 'opacity-0 overflow-hidden'
+        className={`transition-all duration-200 ease-in-out ${
+          scrolled ? 'opacity-100 max-h-[100px]' : 'opacity-0 overflow-hidden max-h-0'
         }`}
       >
         <header className="bg-white opacity-95 shadow-lg rounded-2xl px-6 py-2 mx-9">
