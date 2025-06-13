@@ -30,13 +30,13 @@ export default async function HeaderBottomBar() {
             <NavigationMenuContent></NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <Link href="/#">Online Planer</Link>
+            <NavigationMenuLink href="/#" className={navigationMenuTriggerStyle()}>
+              Online Planer
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <Link href="/#">About us</Link>
+            <NavigationMenuLink href="/#" className={navigationMenuTriggerStyle()}>
+              About us
             </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>

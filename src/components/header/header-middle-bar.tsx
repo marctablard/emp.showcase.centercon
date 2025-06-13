@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { Gauge, Pin, User } from 'lucide-react';
+import HeaderIconLink from '@/components/header/header-icon-link';
 import { Input } from '@/components/ui/input';
 import { Link } from '@/i18n/navigation';
 
@@ -18,18 +19,9 @@ export default async function HeaderMiddleBar() {
         <Input placeholder={t('search')} />
       </div>
       <div className="flex justify-end items-center gap-6">
-        <Link href="/login" className="flex flex-col items-center min-w-12 max-w-[90px]">
-          <User className="w-8 h-8 text-primary" />
-          <p className="text-sm text-primary font-bold -mt-1">Login</p>
-        </Link>
-        <Link href="/#" className="flex flex-col items-center min-w-12 max-w-[90px]">
-          <Gauge className="w-8 h-8 text-primary" />
-          <p className="text-sm text-primary font-bold -mt-1">Quick Order</p>
-        </Link>
-        <Link href="/#" className="flex flex-col items-center min-w-12 max-w-[90px]">
-          <Pin className="w-8 h-8 text-primary" />
-          <p className="text-sm text-primary font-bold -mt-1">Wishlists</p>
-        </Link>
+        <HeaderIconLink icon={User} text="Login" href="/login" />
+        <HeaderIconLink icon={Gauge} text="Quick Order" href="/#" />
+        <HeaderIconLink icon={Pin} text="Wishlists" href="/#" />
       </div>
     </div>
   );
