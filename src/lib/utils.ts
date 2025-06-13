@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { LocalizedString } from '@/platform/services/model/common';
 
-const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://emporix-showcase.com';
+export const baseUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SERVER_URL || 'https://emporix-showcase.com';
 const defaultEmptyLocale = 'en';
 
 export function cn(...inputs: ClassValue[]) {
