@@ -184,7 +184,7 @@ export function LegalFooter() {
 
   return (
     <div className="flex-grow">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto md:mb-4">
         <div
           data-slot="legal-footer"
           className="px-4 pb-16 pt-2 md:mx-2 md:px-7 md:py-0 md:h-8 bg-primary-500 md:rounded-full"
