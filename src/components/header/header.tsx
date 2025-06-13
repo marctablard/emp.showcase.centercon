@@ -1,15 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import HeaderActions from '@/components/header/header-actions';
-import HeaderBottomBar from '@/components/header/header-bottom-bar';
-import HeaderCartButton from '@/components/header/header-cart-button';
-import HeaderMiddleBar from '@/components/header/header-middle-bar';
-import HeaderNavigation from '@/components/header/header-navigation';
-import HeaderSearch from '@/components/header/header-search';
-import HeaderTopBanner from '@/components/header/header-top-banner';
-import { Link } from '@/i18n/navigation';
+import HeaderCollapsed from '@/components/header/collapsed/header-collapsed';
+import HeaderExpanded from '@/components/header/expanded/header-expanded';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -36,11 +29,7 @@ export default function Header() {
       <div
         className={`transition-all duration-200 ease-in-out ${scrolled ? 'opacity-0 overflow-hidden max-h-0' : 'opacity-100 max-h-[200px]'}`}
       >
-        <header className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl px-6 pb-2 mx-9">
-          <HeaderTopBanner />
-          <HeaderMiddleBar />
-          <HeaderBottomBar />
-        </header>
+        <HeaderExpanded />
       </div>
 
       <div
@@ -48,21 +37,7 @@ export default function Header() {
           scrolled ? 'opacity-100 max-h-[100px]' : 'opacity-0 overflow-hidden max-h-0'
         }`}
       >
-        <header className="flex justify-between bg-white/95 backdrop-blur-sm shadow-lg rounded-2xl px-6 py-2 mx-9">
-          <div className="flex gap-8 items-center">
-            <Link href="/">
-              <Image src="/logo_small.svg" alt="Logo" width="25" height="22" />
-            </Link>
-            <HeaderNavigation />
-          </div>
-          <div className="flex gap-8 items-end">
-            <div className="self-center">
-              <HeaderSearch small={true} />
-            </div>
-            <HeaderActions />
-            <HeaderCartButton />
-          </div>
-        </header>
+        <HeaderCollapsed />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { Gauge, Pin, User } from 'lucide-react';
-import HeaderIconLink from '@/components/header/header-icon-link';
+import HeaderIconLink from '@/components/header/common/header-icon-link';
 
 export default function HeaderActions() {
   const t = useTranslations('header');

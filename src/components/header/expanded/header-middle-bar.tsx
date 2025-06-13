@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import HeaderActions from '@/components/header/header-actions';
-import HeaderSearch from '@/components/header/header-search';
+import HeaderActions from '@/components/header/common/header-actions';
+import HeaderSearch from '@/components/header/common/header-search';
 import { Link } from '@/i18n/navigation';
 
 export default function HeaderMiddleBar() {
