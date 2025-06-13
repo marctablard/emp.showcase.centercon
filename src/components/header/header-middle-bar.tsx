@@ -1,13 +1,9 @@
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Gauge, Pin, User } from 'lucide-react';
-import HeaderIconLink from '@/components/header/header-icon-link';
+import HeaderActions from '@/components/header/header-actions';
 import HeaderSearch from '@/components/header/header-search';
 import { Link } from '@/i18n/navigation';
 
 export default function HeaderMiddleBar() {
-  const t = useTranslations('header');
-
   return (
     <div className="flex justify-between items-center self-stretch w-full pt-6">
       <div className="min-w-[223px]">
@@ -15,12 +11,8 @@ export default function HeaderMiddleBar() {
           <Image src="/logo.svg" alt="Logo" width="148" height="24" />
         </Link>
       </div>
-      <HeaderSearch />
-      <div className="flex justify-end items-center gap-6">
-        <HeaderIconLink icon={User} text={t('signIn')} href="/login" />
-        <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
-        <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
-      </div>
+      <HeaderSearch small={false} />
+      <HeaderActions />
     </div>
   );
 }

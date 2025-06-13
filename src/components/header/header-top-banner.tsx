@@ -12,21 +12,21 @@ export default function HeaderTopBanner() {
         <div className="flex grow basis-0 shrink-0 items-center gap-4">
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4" />
-            <p className="text-sm">Germany</p>
+            <p className="text-sm pt-0.5">Germany</p>
           </div>
           <div className="h-6">
             <Separator orientation="vertical" decorative />
           </div>
           <div className="flex items-center gap-2">
             <Languages className="w-4 h-4" />
-            <p className="text-sm">English</p>
+            <p className="text-sm pt-0.5">English</p>
           </div>
           <div className="h-6">
             <Separator orientation="vertical" decorative />
           </div>
           <div className="flex items-center gap-2">
             <Euro className="w-4 h-4" />
-            <p className="text-sm">Euro</p>
+            <p className="text-sm pt-0.5">Euro</p>
           </div>
         </div>
         <div className="flex justify-center items-center">Here is space for you top banner announcements</div>

@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import HeaderActions from '@/components/header/header-actions';
 import HeaderBottomBar from '@/components/header/header-bottom-bar';
+import HeaderCartButton from '@/components/header/header-cart-button';
 import HeaderMiddleBar from '@/components/header/header-middle-bar';
 import HeaderNavigation from '@/components/header/header-navigation';
+import HeaderSearch from '@/components/header/header-search';
 import HeaderTopBanner from '@/components/header/header-top-banner';
 
 export default function Header() {
@@ -44,10 +47,17 @@ export default function Header() {
           scrolled ? 'opacity-100 max-h-[100px]' : 'opacity-0 overflow-hidden max-h-0'
         }`}
       >
-        <header className="bg-white opacity-95 shadow-lg rounded-2xl px-6 py-2 mx-9">
+        <header className="flex justify-between bg-white opacity-95 shadow-lg rounded-2xl px-6 py-2 mx-9">
           <div className="flex gap-8 items-center">
             <Image src="/logo_small.svg" alt="Logo" width="25" height="22" />
             <HeaderNavigation />
+          </div>
+          <div className="flex gap-8 items-end">
+            <div className="self-center">
+              <HeaderSearch small={true} />
+            </div>
+            <HeaderActions />
+            <HeaderCartButton />
           </div>
         </header>
       </div>
