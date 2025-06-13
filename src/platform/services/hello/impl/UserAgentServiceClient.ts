@@ -1,5 +1,5 @@
-import type { UserAgentService } from '../UserAgentService';
 import { injectable } from '@/platform/core/di/injectable';
+import type { UserAgentService } from '../UserAgentService';
 
 @injectable('UserAgentService', 'Singleton')
 export class UserAgentServiceClient implements UserAgentService {

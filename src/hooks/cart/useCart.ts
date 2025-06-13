@@ -70,7 +70,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [setCurrentCart],
+    [setCurrentCart, setLoading],
   );
 
   // Initialize cart on first render if not already initialized
@@ -87,7 +87,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
       // Otherwise fetch current cart
       fetchCart();
     }
-  }, [cart, getCurrentCart, fetchCart, getLoading]);
+  }, [cart, getCurrentCart, fetchCart, getLoading, setLoading]);
 
   useEffect(() => {
     // listen to changes on storeCart to update local state
@@ -131,7 +131,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, fetchCart],
+    [cart, fetchCart, setLoading],
   );
 
   /**
@@ -160,7 +160,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, fetchCart],
+    [cart, fetchCart, setLoading],
   );
 
   /**
@@ -189,7 +189,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, fetchCart],
+    [cart, fetchCart, setLoading],
   );
 
   /**
@@ -216,7 +216,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, fetchCart],
+    [cart, fetchCart, setLoading],
   );
 
   return {

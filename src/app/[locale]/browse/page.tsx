@@ -1,7 +1,25 @@
+import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { SearchResultsComponent } from '@/components/search/search-results';
 import { searchProducts } from '@/lib/ssr/search';
+import { getPageTitle } from '@/lib/ssr/seo';
 import { SearchParams } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'searchResults' });
+
+  return {
+    title: await getPageTitle('Product Browse', locale),
+    description: `Browse our product catalog. ${t('tryAdjusting')}`,
+    // Allow search engines to index this page
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function BrowsePage({
   params,

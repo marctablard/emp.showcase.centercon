@@ -1,9 +1,9 @@
-import { cookies } from 'next/headers';
 import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
-import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
-import { injectable } from '@/platform/core/di/injectable';
+import { cookies } from 'next/headers';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type { OAuthApi } from '../../oauth/OAuthApi';
+import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 
 @injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {

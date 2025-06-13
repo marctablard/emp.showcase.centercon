@@ -1,11 +1,11 @@
-import type { Product } from '@/platform/services/model/product';
-import type { Paginated } from '@/platform/services/model/common';
-import type { ProductService } from '@/platform/services/product/ProductService';
+import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type { ProductApi } from '@/platform/integrations/emporix';
 import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
-import { injectable } from '@/platform/core/di/injectable';
+import type { Paginated } from '@/platform/services/model/common';
+import type { Product } from '@/platform/services/model/product';
+import type { ProductService } from '@/platform/services/product/ProductService';
 import type { ProductMapper } from '../../model/product/ProductMapper';
-import { inject } from 'inversify';
 
 /**
  * Implementation of ProductService for Emporix product data.

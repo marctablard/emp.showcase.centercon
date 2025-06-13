@@ -1,10 +1,10 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { OAuthApi } from '../OAuthApi';
 import {
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
+import { OAuthApi } from '../OAuthApi';
 
 /**
  * Implementation of the Emporix OAuth API

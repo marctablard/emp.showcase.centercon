@@ -24,10 +24,10 @@ export function generateStaticParams() {
 export async function generateMetadata(props: Omit<Props, 'children'>) {
   const { locale } = await props.params;
 
-  const t = await getTranslations({ locale, namespace: 'hello' });
+  const t = await getTranslations({ locale, namespace: 'seo' });
 
   return {
-    title: t('world'),
+    title: t('storeName'),
   };
 }
 

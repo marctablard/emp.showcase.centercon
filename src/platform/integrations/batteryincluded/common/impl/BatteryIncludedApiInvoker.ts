@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
-import type { BatteryIncludedConfig } from '../../config';
 import { injectable } from '@/platform/core/di/injectable';
+import type { BatteryIncludedConfig } from '../../config';
 
 /**
  * Main client for interacting with Battery Included APIs
