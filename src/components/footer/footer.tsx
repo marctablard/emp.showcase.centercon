@@ -3,26 +3,60 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Instagram, Linkedin, Mail, Youtube } from 'lucide-react';
+import { useNewsletterForm } from '@/hooks/newsletter/useNewsletterForm';
 import { cn } from '@/lib/utils';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
+import { InputButton } from '../ui/input';
+import UiLink from '../ui/link';
 
 export default function Footer() {
   const t = useTranslations('footer');
+  const newsletterForm = useNewsletterForm();
+
   return (
     <footer className="w-full">
       <div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6">
         <div>
           <p className="font-bold mb-2">Join Our Newsletter for Exclusive Updates and More!</p>
-          <p>I have acknowledged the privacy policy and read the terms and conditions, and I agree with them.</p>
+          <div className="max-w-[560px]">
+            <Form {...newsletterForm}>
+              <form onSubmit={newsletterForm.handleSubmit(newsletterForm.onSubmit)}>
+                <FormField
+                  control={newsletterForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <InputButton placeholder="Email address" {...field} iconButtonAfter={Mail} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </div>
+          <p className="mt-2">
+            I have acknowledged the{' '}
+            <UiLink type="Link" variant="text" href="/privacy-policy">
+              privacy policy
+            </UiLink>{' '}
+            and read the{' '}
+            <UiLink type="Link" variant="text" href="/terms-and-conditions">
+              terms and conditions
+            </UiLink>
+            , and I agree with them.
+          </p>
         </div>
         <div>
           <p className="font-bold mb-2 md:mb-6">Every purchase easily paid and secured.</p>
           <div className="flex gap-2 justify-between items-center max-w-[400px]">
-            <Image src="mastercard.svg" alt="Mastercard" width="88" height="20" />
-            <Image src="visa.svg" alt="Visa" width="32" height="10" />
-            <Image src="paypal.svg" alt="Paypal" width="60" height="16" />
-            <Image src="pci-dss-compliant.svg" alt="PCI DSS Compliant" width="50" height="20" />
-            <Image src="gdpr.svg" alt="GDPR" width="19" height="24" />
+            <Image src="/images/mastercard.svg" alt="Mastercard" width="88" height="20" />
+            <Image src="/images/visa.svg" alt="Visa" width="32" height="10" />
+            <Image src="/images/paypal.svg" alt="Paypal" width="60" height="16" />
+            <Image src="/images/pci-dss-compliant.svg" alt="PCI DSS Compliant" width="50" height="20" />
+            <Image src="/images/gdpr.svg" alt="GDPR" width={19} height={24} />
           </div>
         </div>
         <div className="bg-primary-50 rounded-tl-2xl p-2 md:p-4">
@@ -63,105 +97,63 @@ export function FooterLinks() {
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 lg:gap-6 ml-4 mr-4 lg:ml-6 lg:mr-6 py-4 lg:py-6 border-b border-b-neutral-200">
       <div className="flex flex-col gap-1">
         <p className="text-xl mb-1">Products</p>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Solar Panels
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Inverters
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Battery Solutions
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Wiring Solutions
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Solar Accessories
-        </Link>
+        </UiLink>
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-xl mb-1">Services</p>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Solar Solutions
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Installations
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Renewable Energy
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Tech Services
-        </Link>
+        </UiLink>
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-xl mb-1">Solutions</p>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Installation planning
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           Regular maintenance
-        </Link>
+        </UiLink>
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-xl mb-1">Online Planner</p>
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-xl mb-1">About us</p>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           <Linkedin />
           Linkedin
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           <Youtube />
           Youtube
-        </Link>
-        <Link
-          href="#"
-          className="text-sm inline-flex items-center gap-1 hover:underline hover:text-primary-500 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        </UiLink>
+        <UiLink type="Link" href="#" variant="secondary" size="s">
           <Instagram />
           Instagram
-        </Link>
+        </UiLink>
       </div>
     </div>
   );
