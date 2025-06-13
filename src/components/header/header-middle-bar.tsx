@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { Gauge, Pin, User } from 'lucide-react';
-import LogoIcon from '@/assets/logo.svg';
 import { Input } from '@/components/ui/input';
 import { Link } from '@/i18n/navigation';
 
@@ -12,7 +11,7 @@ export default async function HeaderMiddleBar() {
     <div className="flex justify-between items-center self-stretch w-full pt-6">
       <div className="min-w-[223px]">
         <Link href="/">
-          <Image src={LogoIcon.src} alt="Logo" width={LogoIcon.width} height={LogoIcon.height} />
+          <Image src="/logo.svg" alt="Logo" width="148" height="24" />
         </Link>
       </div>
       <div className="w-full max-w-[700px]">
