@@ -43,11 +43,9 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     setCurrentCart(initialCart);
   }
   const [error, setError] = useState<Error | null>(null);
+  // we do this, so that the invokers of this hook can immediately use the cart
   const [cart, setCart] = useState<Cart | null | undefined>(getCurrentCart());
 
-  /**
-   * Fetch the current cart
-   */
   const fetchCart = useCallback(
     async (createCurrent?: boolean) => {
       try {

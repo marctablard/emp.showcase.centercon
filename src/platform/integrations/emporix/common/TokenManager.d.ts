@@ -35,5 +35,5 @@ export interface TokenManager {
   /**
    * Clear all stored tokens
    */
-  clearTokens(): void;
+  clearTokens(tenant: string): void;
 }

@@ -1,6 +1,7 @@
 import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { cookies } from 'next/headers';
 import { inject } from 'inversify';
+import { omit } from 'lodash';
 import { injectable } from '@/platform/core/di/injectable';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import { EmporixCustomerTokenResponse } from '../../model/oauth';
@@ -10,14 +11,14 @@ import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
 
 @injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
-  private ssrToken: TokenStore = {};
+  private ssrToken: Record<string, TokenStore> = {};
 
   constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
     super(oauthApi);
   }
 
-  public clearTokens(): void {
-    this.ssrToken = {};
+  public clearTokens(tenant: string): void {
+    this.ssrToken[tenant] = {};
   }
 
   public async getSessionToken(
@@ -26,6 +27,7 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
   ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
     const customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
       'customer',
+      tenant,
     );
     // first check client's customer token
     if (this.checkAccessToken(customerToken)) {
@@ -35,19 +37,23 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     const anonymousToken = await this.readToken<
       StoredToken<EmporixCustomerTokenResponse>,
       EmporixCustomerTokenResponse
-    >('anonymous');
+    >('anonymous', tenant);
     if (this.checkAccessToken(anonymousToken)) {
       return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
     }
     // otherwise we use our own token
-    if (!this.checkAccessToken(this.ssrToken.anonymousToken)) {
-      const freshSsrAnonymousToken = await this.fetchAnonymousToken(this.ssrToken.anonymousToken, tenant, clientId);
+    const ssrAnonymousToken = this.ssrToken[tenant]?.anonymousToken;
+    if (!this.checkAccessToken(ssrAnonymousToken)) {
+      const freshSsrAnonymousToken = await this.fetchAnonymousToken(ssrAnonymousToken, tenant, clientId);
       // ...and store it globally, so it can be reused
-      this.ssrToken.anonymousToken = freshSsrAnonymousToken;
+      if (!this.ssrToken[tenant]) {
+        this.ssrToken[tenant] = {};
+      }
+      this.ssrToken[tenant].anonymousToken = freshSsrAnonymousToken;
     }
     return {
-      accessToken: this.ssrToken.anonymousToken!.token.access_token,
-      sessionId: this.ssrToken.anonymousToken!.token.session_id,
+      accessToken: this.ssrToken[tenant].anonymousToken!.token.access_token,
+      sessionId: this.ssrToken[tenant].anonymousToken!.token.session_id,
     };
   }
 
@@ -83,15 +89,14 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
   }
 
-  protected async writeTokens(tokens: TokenStore): Promise<void> {
+  protected async writeTokens(tokens: TokenStore, tenant: string): Promise<void> {
     // strip customer Token, since that will be from the the SSR Clients cookie
-    tokens.customerToken = undefined;
-    this.ssrToken = tokens;
+    tokens = omit(tokens, ['customerToken']);
+    this.ssrToken[tenant] = tokens;
   }
-
-  protected async readTokens(): Promise<TokenStore> {
+  protected async readTokens(tenant: string): Promise<TokenStore> {
     const cookieStore = await cookies();
-    const tokenCookie: RequestCookie | undefined = cookieStore.get('emporix-token');
+    const tokenCookie: RequestCookie | undefined = cookieStore.get(this.buildStorageKey(tenant));
     if (!tokenCookie) {
       return {};
     }
@@ -100,5 +105,4 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     return tokens;
   }
 }
-
 export default EmporixTokenManagerSSR;

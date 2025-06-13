@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { ProductApi } from '@/platform/integrations/emporix';
 import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
+import type { ProductApi } from '@/platform/integrations/emporix/product/ProductApi';
 import type { Paginated } from '@/platform/services/model/common';
 import type { Product } from '@/platform/services/model/product';
 import type { ProductService } from '@/platform/services/product/ProductService';

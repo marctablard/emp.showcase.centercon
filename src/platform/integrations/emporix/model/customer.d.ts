@@ -60,3 +60,20 @@ export interface LegalEntity {
   name: string;
   contactAssignmentId: string;
 }
+
+export interface EmporixCustomerSignupDto {
+  email: string;
+  password: string;
+  title?: string;
+  firstName?: string;
+  lastName?: string;
+  contactPhone?: string;
+  company?: string;
+  preferredLanguage?: string;
+  preferredCurrency?: string;
+  preferredSite?: string;
+  businessModel?: 'B2B' | 'B2C';
+  b2b?: {
+    companyRegistrationId?: string;
+  };
+}

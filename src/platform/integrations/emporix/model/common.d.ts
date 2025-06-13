@@ -46,7 +46,20 @@ export interface Media {
   createdAt?: string;
 }
 
+export interface EmporixMonetaryAmount {
+  amount: number;
+  currency: string;
+}
+
+export interface Site {
+  code: string;
+}
+
 export interface Metadata {
+  createdAt?: string;
+  modifiedAt?: string;
+  calculatedAt?: string;
+  version?: number;
   mixins: {
     [key: string]: string;
   };

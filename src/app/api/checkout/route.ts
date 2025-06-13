@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { removeCartFromCookie } from '@/lib/server/utils';
 import { CheckoutService } from '@/platform/services/checkout/CheckoutService';
 import type { CheckoutRequest } from '@/platform/services/model/checkout';
 
@@ -31,9 +32,11 @@ export async function POST(request: NextRequest) {
 
     // Process the checkout
     const response = await checkoutService.checkout(checkoutData);
-
+    const nextResponse = NextResponse.json(response);
+    // Remove the cart from the cookie
+    await removeCartFromCookie(checkoutData.cartId, nextResponse);
     // Return the response
-    return NextResponse.json(response);
+    return nextResponse;
   } catch (error) {
     console.error('Checkout error:', error);
 

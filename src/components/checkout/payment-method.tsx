@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import z from 'zod';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { PaymentMethod as PaymentMethodType } from '@/platform/services/model/checkout';
+import { useSite } from '@/hooks/site/useSite';
+import { useValidator } from '@/hooks/validation/useValidator';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Spinner } from '../ui/spinner';
 
 interface PaymentMethodProps {
   isReadOnly?: boolean;
@@ -20,16 +19,14 @@ interface PaymentMethodProps {
  */
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
+  const { form } = useValidator('PaymentValidationService', paymentMethod, 'onChange', (value) => {
+    const mode = paymentModes?.find((mode) => mode.id === value.id);
+    if (mode) {
+      submitPaymentMethod(mode);
+    }
+  });
 
-  // Available payment methods - wrapped in useMemo to prevent unnecessary re-renders
-  const paymentOptions = useMemo(
-    () => [
-      { id: 'credit-card', name: 'Credit Card', provider: 'payment-gateway', method: 'credit-card' },
-      { id: 'paypal', name: 'PayPal', provider: 'payment-gateway', method: 'paypal' },
-      { id: 'invoice', name: 'Pay by Invoice', provider: 'none', method: 'invoice' },
-    ],
-    [],
-  );
+  const { paymentModes, loading, error } = useSite();
 
   const [cardDetails] = useState({
     cardNumber: '',
@@ -38,64 +35,47 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     cvv: '',
   });
 
-  const t = useTranslations('Checkout');
-
-  const PaymentModeFormSchema = z.object({
-    paymentMethod: z.string().min(1, { message: t('validation.paymentMethodRequired') }),
-  });
-
-  const form = useForm<z.infer<typeof PaymentModeFormSchema>>({
-    resolver: zodResolver(PaymentModeFormSchema),
-    defaultValues: {
-      paymentMethod: paymentMethod?.method,
-    },
-    mode: 'onChange',
-  });
-
-  // Effect to auto-submit when all fields are valid and touched
-  useEffect(() => {
-    form.watch((data) => {
-      const method = paymentOptions.find((option) => option.id === data.paymentMethod);
-
-      toast.success('Payment method updated');
-      if (method) {
-        const paymentMethodData: PaymentMethodType = {
-          provider: method.provider,
-          method: method.method,
-          customAttributes: paymentMethod?.customAttributes,
-        };
-
-        submitPaymentMethod(paymentMethodData);
-      }
-    });
-  }, [form, paymentMethod?.customAttributes, submitPaymentMethod, paymentOptions, paymentMethod?.method]);
+  const t = useTranslations('Checkout.payment');
+  const tPayment = useTranslations('PaymentModes');
 
   return (
     <FormProvider {...form}>
       <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold text-neutral-800">Payment Method</h2>
-        {!isReadOnly ? (
+        <h2 className="text-xl font-semibold text-neutral-800">{t('paymentMethod')}</h2>
+
+        {loading && <Spinner variant="md" loadingText={t('loading')} />}
+
+        {error && <div className="py-4 text-center text-red-500">{t('errorLoadingPaymentMethods')}</div>}
+
+        {!loading && !error && paymentModes?.length === 0 && (
+          <div className="py-4 text-center text-neutral-600">{t('noPaymentMethodsAvailable')}</div>
+        )}
+
+        {!loading && !error && !isReadOnly ? (
           <FormField
             control={form.control}
-            name="paymentMethod"
+            name="id"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <RadioGroup value={field.value} onValueChange={field.onChange} className="flex flex-col space-y-1">
+                  <RadioGroup
+                    defaultValue={field.value}
+                    onValueChange={field.onChange}
+                    className="flex flex-col space-y-1"
+                  >
                     <div className="space-y-6">
                       <div className="space-y-4">
-                        {paymentOptions.map((option) => (
+                        {paymentModes?.map((option) => (
                           <div key={option.id}>
                             <FormItem className="flex items-center">
                               <FormControl>
-                                <RadioGroupItem value={option.id} id={option.id} />
+                                <RadioGroupItem value={option.id} id={option.code} />
                               </FormControl>
                               <FormLabel
-                                htmlFor={option.id}
+                                htmlFor={option.code}
                                 className="w-full ml-3 block text-sm font-medium text-neutral-700"
                               >
-                                {' '}
-                                {option.name}
+                                {tPayment(option.code)}
                               </FormLabel>
                             </FormItem>
                           </div>
@@ -103,7 +83,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                       </div>
 
                       {/* Credit Card Form */}
-                      {paymentMethod?.method === 'credit-card' && (
+                      {paymentMethod?.code === 'credit-card' && (
                         <div className="mt-6 space-y-4 border-t pt-4">
                           <div>
                             <label htmlFor="cardNumber" className="block text-sm font-medium text-neutral-700 mb-1">
@@ -166,14 +146,14 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                       )}
 
                       {/* PayPal Form */}
-                      {paymentMethod?.method === 'paypal' && (
+                      {paymentMethod?.code === 'paypal' && (
                         <div className="mt-6 border-t pt-4">
                           <p className="text-sm text-neutral-600">{t('paypalRedirect')}</p>
                         </div>
                       )}
 
                       {/* Invoice Form */}
-                      {paymentMethod?.method === 'invoice' && (
+                      {paymentMethod?.code === 'invoice' && (
                         <div className="mt-6 border-t pt-4">
                           <p className="text-sm text-neutral-600">{t('invoiceTerms')}</p>
                         </div>
@@ -188,14 +168,11 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
         ) : (
           // Read-only view
           <div className="text-neutral-700">
-            <p className="font-medium">
-              {paymentOptions.find((option) => option.method === paymentMethod?.method)?.name ||
-                'Selected payment method'}
-            </p>
+            <p className="font-medium">{tPayment(paymentMethod?.code ?? 'none')}</p>
 
-            {paymentMethod?.method === 'credit-card' && paymentMethod?.customAttributes?.cardNumber && (
+            {paymentMethod?.code === 'credit-card' && paymentMethod?.customAttributes?.cardNumber && (
               <p className="text-sm text-neutral-600 mt-1">
-                Card ending in {paymentMethod.customAttributes.cardNumber.slice(-4)}
+                {t('cardEndingIn')} {paymentMethod.customAttributes.cardNumber.slice(-4)}
               </p>
             )}
           </div>

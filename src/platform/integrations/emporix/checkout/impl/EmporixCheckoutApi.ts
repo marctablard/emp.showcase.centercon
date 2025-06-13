@@ -19,7 +19,7 @@ class EmporixCheckoutApi implements CheckoutApi {
   }
 
   async checkout(request: EmporixCartCheckoutRequest): Promise<EmporixCheckoutResponse> {
-    if (request.customer.guest) {
+    if (request.customer.guest || !request.customer.id) {
       throw new Error('Customer checkout requires logged-in customer');
     }
     const response = await this.apiClient.authenticatedFetch(

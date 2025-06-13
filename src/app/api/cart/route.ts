@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addCartToCookie, getCartCookie } from '@/lib/server/utils';
 import { CartService } from '@/platform/services/cart';
+import type { Cart } from '@/platform/services/model/cart';
 
 const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE || 'emp-cart';
 const DEFAULT_CURRENCY = 'EUR';
@@ -22,28 +23,16 @@ export async function GET(request: NextRequest) {
 
     // Check for cart ID in cookies
     const cartCookie = await getCartCookie(DEFAULT_SITE_CODE, DEFAULT_CURRENCY);
-
-    /**
-     * THIS WHOLE LOGIC
-     * needs reworking, once it's cleared why the Session ID in the Token
-     * doesn't match the one received by getOwnSessionContext
-     * @see DCPS-16482
-     */
+    let cart: Cart | null | undefined;
     if (cartCookie) {
       // Try to get existing cart
       try {
-        const cart = await cartService.getCartById(cartCookie.cartId);
-
-        if (cart) {
-          return NextResponse.json(cart);
-        }
+        cart = await cartService.getCartById(cartCookie.cartId);
       } catch (_error) {
-        const currentCart = await cartService.getCart();
-        if (currentCart) {
-          return NextResponse.json(currentCart);
-        }
+        // this will try fetching for the cart by session-id
+        cart = await cartService.getCart();
         // if cart is missing, try to reconstruct from cookie
-        if (cartCookie.items) {
+        if (!cart && cartCookie.items) {
           // TODO alternative approach re-assign cart with Server-Token
           console.warn('Error getting cart, reconstructing from Cookie');
           const newCartId = await cartService.createCart(cartCookie.currency, DEFAULT_SITE_CODE);
@@ -56,26 +45,33 @@ export async function GET(request: NextRequest) {
           }
         }
       }
-      // If cart not found and shouldCreate is true, we'll create a new one
+    } else {
+      // no coookie, no cart, that's ok
+      cart = null;
     }
 
     // If we don't have a cart and shouldCreate is false, return 204 (intentionally empty)
-    if (!create) {
+    if (!cart && create) {
+      // Create a new cart
+      const newCartId = await cartService.createCart(DEFAULT_CURRENCY, DEFAULT_SITE_CODE);
+      if (!newCartId) {
+        return NextResponse.json({ error: 'Failed to create cart' }, { status: 500 });
+      }
+      cart = await cartService.getCartById(newCartId);
+    }
+    // null found for cart
+    if (cart === null) {
       return new Response(null, { status: 204 });
     }
-
-    // Create a new cart
-    const newCartId = await cartService.createCart(DEFAULT_CURRENCY, DEFAULT_SITE_CODE);
-    const newCart = await cartService.getCartById(newCartId);
-
-    if (!newCart) {
-      return NextResponse.json({ error: 'Failed to create cart' }, { status: 500 });
+    // undefined, so it's an Error
+    if (cart === undefined) {
+      return NextResponse.json({ error: 'Failed to find Cart' }, { status: 404 });
     }
-
     // Set cookie for the new cart
-    const response = NextResponse.json(newCart);
-    await addCartToCookie(newCart, response);
-
+    const response = NextResponse.json(cart);
+    if (cartCookie?.cartId != cart.id) {
+      await addCartToCookie(cart, response);
+    }
     return response;
   } catch (error) {
     console.error('Error handling cart request:', error);

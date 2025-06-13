@@ -114,7 +114,7 @@ class EmporixCartService implements CartService {
       price: {
         priceId: price.id,
         effectiveAmount: price.effectiveValue,
-        originalAmount: price.originalValue,
+        originalAmount: price.originalValue || price.effectiveValue,
         currency: price.currency,
       },
     };
@@ -136,7 +136,7 @@ class EmporixCartService implements CartService {
       quantity,
       price: {
         effectiveAmount: price.effectiveValue,
-        originalAmount: price.originalValue,
+        originalAmount: price.originalValue || price.effectiveValue,
         currency: price.currency,
       },
     };

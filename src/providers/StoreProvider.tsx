@@ -4,8 +4,11 @@ import { type ReactNode, createContext, useContext, useRef } from 'react';
 import { useStore } from 'zustand/react';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';
+import { createCustomerStore } from '@/stores/customer-store';
 import { createHistoryStore } from '@/stores/history-store';
 import { createProductStore } from '@/stores/products-store';
+import { createShippingMethodsStore } from '@/stores/shipping-methods-store';
+import { createSiteStore } from '@/stores/site-store';
 
 export type ProductStoreApi = ReturnType<typeof createProductStore>;
 export const ProductStoreContext = createContext<ProductStoreApi | null>(null);
@@ -13,6 +16,12 @@ export type CartStoreApi = ReturnType<typeof createCartStore>;
 export const CartStoreContext = createContext<CartStoreApi | null>(null);
 export type CheckoutStoreApi = ReturnType<typeof createCheckoutStore>;
 export const CheckoutStoreContext = createContext<CheckoutStoreApi | null>(null);
+export type SiteStoreApi = ReturnType<typeof createSiteStore>;
+export const SiteStoreContext = createContext<SiteStoreApi | null>(null);
+export type ShippingMethodsStoreApi = ReturnType<typeof createShippingMethodsStore>;
+export const ShippingMethodsStoreContext = createContext<ShippingMethodsStoreApi | null>(null);
+export type CustomerStoreApi = ReturnType<typeof createCustomerStore>;
+export const CustomerStoreContext = createContext<CustomerStoreApi | null>(null);
 export type HistoryStoreApi = ReturnType<typeof createHistoryStore>;
 export const HistoryStoreContext = createContext<HistoryStoreApi | null>(null);
 
@@ -33,18 +42,47 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
   if (checkoutStoreRef.current === null) {
     checkoutStoreRef.current = createCheckoutStore();
   }
+  const siteStoreRef = useRef<SiteStoreApi | null>(null);
+  if (siteStoreRef.current === null) {
+    siteStoreRef.current = createSiteStore();
+  }
+  const shippingMethodsStoreRef = useRef<ShippingMethodsStoreApi | null>(null);
+  if (shippingMethodsStoreRef.current === null) {
+    shippingMethodsStoreRef.current = createShippingMethodsStore();
+  }
+  const customerStoreRef = useRef<CustomerStoreApi | null>(null);
+  if (customerStoreRef.current === null) {
+    customerStoreRef.current = createCustomerStore();
+  }
   const historyStoreRef = useRef<HistoryStoreApi | null>(null);
   if (historyStoreRef.current === null) {
     historyStoreRef.current = createHistoryStore();
   }
+  /**
+   * The order is relevant, because store data can only depend on one another,
+   * when nested properly.
+   * 1. Site Data is the root of all stores.
+   * 2. Shipping Methods Data depends on Countries and Currency Data (from Site)
+   * 3. Product Data depends on Currency and their Availability from Country (from Site)
+   * 4. Customer Data depends on Currency for Customer-Preferences
+   * 5. Cart Data depends on Customer Data in logged in State
+   * 6. Checkout Data depends on Cart Data.
+   * 7. History Data may depend on various aspects of customer's Browsing Behaviour
+   */
   return (
-    <ProductStoreContext.Provider value={productStoreRef.current}>
-      <CartStoreContext.Provider value={cartStoreRef.current}>
-        <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
-          <HistoryStoreContext.Provider value={historyStoreRef.current}>{children}</HistoryStoreContext.Provider>
-        </CheckoutStoreContext.Provider>
-      </CartStoreContext.Provider>
-    </ProductStoreContext.Provider>
+    <SiteStoreContext.Provider value={siteStoreRef.current}>
+      <ShippingMethodsStoreContext.Provider value={shippingMethodsStoreRef.current}>
+        <ProductStoreContext.Provider value={productStoreRef.current}>
+          <CustomerStoreContext.Provider value={customerStoreRef.current}>
+            <CartStoreContext.Provider value={cartStoreRef.current}>
+              <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
+                <HistoryStoreContext.Provider value={historyStoreRef.current}>{children}</HistoryStoreContext.Provider>
+              </CheckoutStoreContext.Provider>
+            </CartStoreContext.Provider>
+          </CustomerStoreContext.Provider>
+        </ProductStoreContext.Provider>
+      </ShippingMethodsStoreContext.Provider>
+    </SiteStoreContext.Provider>
   );
 };
 
@@ -68,6 +106,30 @@ export const useCheckoutStore = () => {
   const storeContext = useContext(CheckoutStoreContext);
   if (!storeContext) {
     throw new Error('useCheckoutStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useSiteStore = () => {
+  const storeContext = useContext(SiteStoreContext);
+  if (!storeContext) {
+    throw new Error('useSiteStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useShippingMethodsStore = () => {
+  const storeContext = useContext(ShippingMethodsStoreContext);
+  if (!storeContext) {
+    throw new Error('useShippingMethodsStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useCustomerStore = () => {
+  const storeContext = useContext(CustomerStoreContext);
+  if (!storeContext) {
+    throw new Error('useCustomerStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

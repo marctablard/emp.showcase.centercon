@@ -3,6 +3,7 @@ import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/product/product-detail';
 import { JsonLd } from '@/components/seo/json-ld';
+import { getProductPrice } from '@/lib/ssr/price';
 import { getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
 
@@ -46,10 +47,11 @@ export async function generateMetadata(
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
-  const { id, locale } = await params;
+  const productId = (await params).id;
+  const locale = (await params).locale;
 
-  // Fetch product data server-side using our shared API layer
-  const product = await getProductWithPrices(id);
+  // Fetch translations, product data and price in parallel
+  const [product, price] = await Promise.all([getProductById(productId), getProductPrice(productId)]);
 
   // If product not found, show 404 page
   if (!product) {
@@ -60,7 +62,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
   return (
     <>
       <JsonLd jsonLd={jsonLd} />
-      <ProductDetail product={product} />
+      <ProductDetail product={product} price={price} />
     </>
   );
 }

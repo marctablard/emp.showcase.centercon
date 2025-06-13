@@ -2,7 +2,11 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import type { MatchPricesByContextRequest, MatchPricesRequest, MatchedPrice } from '../../model/price';
+import type {
+  EmporixMatchPricesByContextRequest,
+  EmporixMatchPricesRequest,
+  EmporixMatchedPrice,
+} from '../../model/price';
 import type { PriceApi } from '../PriceApi';
 
 /**
@@ -26,7 +30,7 @@ class EmporixPriceApi implements PriceApi {
    * @param request The price matching request
    * @returns The matched price response
    */
-  async matchPrices(request: MatchPricesRequest): Promise<MatchedPrice[]> {
+  async matchPrices(request: EmporixMatchPricesRequest): Promise<EmporixMatchedPrice[]> {
     const response = await this.apiClient.authenticatedFetch(
       `/price/${this.config.tenant}/match-prices`,
       {
@@ -53,7 +57,7 @@ class EmporixPriceApi implements PriceApi {
    * @param request The price matching by context request
    * @returns The matched price response
    */
-  async matchPricesByContext(request: MatchPricesByContextRequest): Promise<MatchedPrice[]> {
+  async matchPricesByContext(request: EmporixMatchPricesByContextRequest): Promise<EmporixMatchedPrice[]> {
     const response = await this.apiClient.authenticatedFetch(
       `/price/${this.config.tenant}/match-prices-by-context`,
       {
