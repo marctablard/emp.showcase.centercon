@@ -1,12 +1,12 @@
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Gauge, Pin, User } from 'lucide-react';
 import HeaderIconLink from '@/components/header/header-icon-link';
 import HeaderSearch from '@/components/header/header-search';
 import { Link } from '@/i18n/navigation';
 
-export default async function HeaderMiddleBar() {
-  const t = await getTranslations('header');
+export default function HeaderMiddleBar() {
+  const t = useTranslations('header');
 
   return (
     <div className="flex justify-between items-center self-stretch w-full pt-6">

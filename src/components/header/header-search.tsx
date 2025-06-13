@@ -1,9 +1,9 @@
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
-export default async function HeaderSearch() {
-  const t = await getTranslations('header');
+export default function HeaderSearch() {
+  const t = useTranslations('header');
 
   return (
     <div className="w-full max-w-[700px] relative">

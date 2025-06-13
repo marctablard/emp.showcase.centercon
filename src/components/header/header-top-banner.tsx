@@ -1,10 +1,10 @@
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { Euro, Globe, Languages } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Link } from '@/i18n/navigation';
 
-export default async function HeaderTopBanner() {
-  const t = await getTranslations('header');
+export default function HeaderTopBanner() {
+  const t = useTranslations('header');
 
   return (
     <div className="bg-primary text-white shadow-sm rounded-2xl flex items-center -mx-10 -mt-1 h-8 px-10">

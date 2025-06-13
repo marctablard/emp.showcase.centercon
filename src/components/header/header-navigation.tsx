@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,8 +9,8 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 
-export default async function HeaderNavigation() {
-  const t = await getTranslations('header');
+export default function HeaderNavigation() {
+  const t = useTranslations('header');
 
   return (
     <NavigationMenu viewport={false}>
