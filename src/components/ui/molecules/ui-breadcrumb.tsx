@@ -40,7 +40,7 @@ export function UiBreadcrumb({ items, maxItems = 2, className, ...props }: UiBre
   const hiddenItems = items.slice(0, items.length - effectiveMaxItems);
 
   return (
-    <Breadcrumb className={cn('w-full', className)} {...props}>
+    <Breadcrumb className={cn('w-full py-4', className)} {...props}>
       <BreadcrumbList>
         {/* Back button - always present */}
         <BreadcrumbItem>

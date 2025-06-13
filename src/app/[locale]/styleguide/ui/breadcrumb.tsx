@@ -23,7 +23,7 @@ export default function BreadcrumbStyleGuide() {
   return (
     <div className="py-12">
       <h4 className="text-3xl/5 lg:text-4xl font-bold text-headlines font-headlines mb-3">Breadcrumb</h4>
-      <div className="py-4 grid  mb-2">
+      <div className="grid  mb-2">
         <UiBreadcrumb items={breadcrumbs} />
       </div>
     </div>
