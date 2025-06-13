@@ -17,9 +17,9 @@ export default async function HeaderMiddleBar() {
       </div>
       <HeaderSearch />
       <div className="flex justify-end items-center gap-6">
-        <HeaderIconLink icon={User} text="Login" href="/login" />
-        <HeaderIconLink icon={Gauge} text="Quick Order" href="/#" />
-        <HeaderIconLink icon={Pin} text="Wishlists" href="/#" />
+        <HeaderIconLink icon={User} text={t('signIn')} href="/login" />
+        <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
+        <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
       </div>
     </div>
   );

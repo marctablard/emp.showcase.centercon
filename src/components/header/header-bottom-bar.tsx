@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,30 +13,32 @@ import {
 } from '@/components/ui/navigation-menu';
 
 export default async function HeaderBottomBar() {
+  const t = await getTranslations('header');
+
   return (
     <div className="flex justify-between pt-3">
       <NavigationMenu viewport={false}>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>All Products</NavigationMenuTrigger>
+            <NavigationMenuTrigger>{t('allProducts')}</NavigationMenuTrigger>
             <NavigationMenuContent></NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Services</NavigationMenuTrigger>
+            <NavigationMenuTrigger>{t('services')}</NavigationMenuTrigger>
             <NavigationMenuContent></NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
+            <NavigationMenuTrigger>{t('solutions')}</NavigationMenuTrigger>
             <NavigationMenuContent></NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink href="/#" className={navigationMenuTriggerStyle()}>
-              Online Planer
+              {t('onlinePlaner')}
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink href="/#" className={navigationMenuTriggerStyle()}>
-              About us
+              {t('aboutUs')}
             </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>

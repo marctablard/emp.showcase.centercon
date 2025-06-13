@@ -26,10 +26,21 @@
     },
     "header": {
         "featuredProduct": "Ausgewähltes Produkt",
-        "signIn": "Einloggen",
+        "signIn": "Login",
         "register": "Registrieren",
         "account": "Konto",
-        "search": "Schlüsselwort, Artikel oder Teilnummer eingeben"
+        "search": "Schlüsselwort, Artikel oder Teilnummer eingeben",
+        "blog": "Blog",
+        "newsletter": "Newsletter",
+        "offerRequest": "Angebot anfragen",
+        "contact": "Kontakt",
+        "quickOrder": "Expressbestellung",
+        "wishlists": "Wunschlisten",
+        "allProducts": "Alle Produkte",
+        "services": "Services",
+        "solutions": "Lösungen",
+        "onlinePlaner": "Online Planer",
+        "aboutUs": "Über uns"
     },
     "footer": {
         "companyName": "Company Name",
