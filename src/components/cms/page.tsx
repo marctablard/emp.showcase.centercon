@@ -19,7 +19,7 @@ interface PageProps {
 
 const Page = ({ blok }: PageProps) => {
   return (
-    <main {...storyblokEditable(blok)} className="container mx-auto py-8">
+    <main {...storyblokEditable(blok)} className="mx-auto py-8">
       {blok.title && <h1 className="text-3xl font-bold mb-6">{blok.title}</h1>}
 
       <div className="space-y-8">

@@ -251,3 +251,9 @@
     cursor: pointer;
   } */
 }
+
+@layer utilities {
+  .clip-style {
+    clip-path: url('public/Image_mask_desktop.svg');
+  }
+}

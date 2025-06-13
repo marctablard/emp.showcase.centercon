@@ -6,7 +6,7 @@ const IconVariant = {
   ArrowRight: ArrowRight,
   ArrowLeft: ArrowLeft,
 } as const;
-interface ButtonProps {
+export interface ButtonProps {
   blok: {
     title: string;
     link: string;
@@ -16,6 +16,7 @@ interface ButtonProps {
 }
 
 const Button = ({ blok }: ButtonProps) => {
+  console.log(blok);
   const IconLeft = blok.iconLeft && IconVariant[blok.iconLeft as keyof typeof IconVariant];
   const IconRight = blok.iconRight && IconVariant[blok.iconRight as keyof typeof IconVariant];
 
