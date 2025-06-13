@@ -1,5 +1,16 @@
 import { Availability, LocalizedString, Media, Price, TaxType } from '../common';
 
+export interface ProductLabel {
+  id: string;
+  name: string;
+  image?: string;
+  description?: string | LocalizedString;
+  overlay?: {
+    isTrue?: boolean;
+    position: number;
+  };
+}
+
 export interface Product {
   id: string;
   name: string | LocalizedString;
@@ -9,6 +20,7 @@ export interface Product {
     name: string | LocalizedString;
     logo?: Media;
   };
+  labels?: ProductLabel[];
   price?: Price;
   availability?: Availability;
   primaryImage?: Media;

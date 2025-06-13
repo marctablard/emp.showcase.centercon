@@ -18,6 +18,10 @@ export interface EmporixAddress {
   mixins?: Mixins;
 }
 
+export interface EmporixLocalizedString {
+  [key: string]: string;
+}
+
 export interface SearchParams<T> {
   query?: string;
   page?: number;

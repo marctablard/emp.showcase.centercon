@@ -6,8 +6,8 @@ import type {
   EmporixPriceMatchItem,
 } from '@/platform/integrations/emporix/model/price';
 import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
+import type { ProductPrice } from '@/platform/services/model/price';
 import type PriceMapper from '@/platform/services/model/price/impl/EmporixPriceMapper';
-import type { ProductPrice } from '../../model/price';
 import type { PriceService } from '../PriceService';
 
 /**
@@ -16,13 +16,10 @@ import type { PriceService } from '../PriceService';
  */
 @injectable('PriceService', 'Singleton')
 class EmporixPriceService implements PriceService {
-  private priceApi: PriceApi;
-  private mapper: PriceMapper;
-
-  constructor(@inject('EmporixPriceApi') priceApi: PriceApi, @inject('EmporixPriceMapper') mapper: PriceMapper) {
-    this.priceApi = priceApi;
-    this.mapper = mapper;
-  }
+  constructor(
+    @inject('EmporixPriceApi') private priceApi: PriceApi,
+    @inject('EmporixPriceMapper') private mapper: PriceMapper,
+  ) {}
 
   async getProductPrice(
     productId: string,
@@ -47,7 +44,9 @@ class EmporixPriceService implements PriceService {
       };
       matchedPrices = await this.priceApi.matchPrices(matchRequest);
     }
-    return matchedPrices.length > 0 ? this.mapper.mapToService(matchedPrices[0]) : null;
+    const price = matchedPrices.length > 0 ? this.mapper.mapToService(matchedPrices[0]) : null;
+    // TODO clarify, what to do when more prices match?
+    return price;
   }
 
   /**

@@ -16,12 +16,21 @@ export function cn(...inputs: ClassValue[]) {
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en', {
     style: 'currency',
     currency: currencyCode,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+export function formatCurrencyToParts(amount: number, currencyCode: string = 'USD'): NumberFormatPart[] {
+  return new Intl.NumberFormat('de', {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).formatToParts(amount);
 }
 
 /**
