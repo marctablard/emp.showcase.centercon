@@ -10,7 +10,6 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
-import { Link } from '@/i18n/navigation';
 
 export default async function HeaderBottomBar() {
   return (
