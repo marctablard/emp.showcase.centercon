@@ -1,4 +1,4 @@
-import { UiBreadcrumb } from '@/components/ui/molecules/UiBreadcrumb';
+import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
 import { BreadcrumbConent } from '@/lib/breadcrumb';
 
 export default function BreadcrumbStyleGuide() {
