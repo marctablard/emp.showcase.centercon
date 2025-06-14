@@ -52,10 +52,7 @@ export function UiBreadcrumb({ items, maxItems = 2, className, ...props }: UiBre
           <BreadcrumbItem key="dropdown" className="flex items-center md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1">
-                <MoreHorizontal
-                  className="h-4 w-4 text-muted-foreground font-bold text-primary  hover:text-primary-700"
-                  aria-hidden="true"
-                />
+                <MoreHorizontal className="h-4 w-4 font-bold text-primary hover:text-primary-700" aria-hidden="true" />
                 <span className="sr-only">Toggle menu</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
@@ -63,7 +60,7 @@ export function UiBreadcrumb({ items, maxItems = 2, className, ...props }: UiBre
                   <DropdownMenuItem key={index} asChild>
                     <a
                       href={hiddenItem.href}
-                      className="cursor-pointer w-full font-bold underline text-primary   hover:text-primary-700"
+                      className="cursor-pointer w-full font-bold underline text-primary hover:text-primary-700"
                     >
                       {hiddenItem.label}
                     </a>

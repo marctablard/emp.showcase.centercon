@@ -31,7 +31,7 @@ interface LinkProps {
   iconBefore?: React.ReactNode | undefined;
   iconAfter?: React.ReactNode | undefined;
   children?: React.ReactNode | undefined;
-  className: string;
+  className?: string;
 }
 
 export default function UiLink({
