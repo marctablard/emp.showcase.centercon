@@ -1,5 +1,6 @@
 export * from './brand';
 export * from './cart';
+export * from './category';
 export * from './checkout';
 export * from './common';
 export * from './label';

@@ -1,3 +1,4 @@
+import { Category } from '../category';
 import { Availability, LocalizedString, Media, Price, TaxType } from '../common';
 
 export interface ProductLabel {
@@ -20,6 +21,8 @@ export interface Product {
     name: string | LocalizedString;
     logo?: Media;
   };
+  primaryCategory?: Category;
+  categories?: Category[];
   labels?: ProductLabel[];
   price?: Price;
   availability?: Availability;
