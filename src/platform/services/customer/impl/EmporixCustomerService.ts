@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { CustomerApi } from '@/platform/integrations/emporix/customer/CustomerApi';
-import type { SessionContextApi } from '@/platform/integrations/emporix/session/SessionContextApi';
+import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import { Customer } from '../../model/customer/customer';
 import { CustomerService } from '../CustomerService';
 
@@ -15,7 +15,7 @@ const ANONYMOUS_CUSTOMER_ID = '00000000';
 export class EmporixCustomerService implements CustomerService {
   constructor(
     @inject('EmporixCustomerApi') private customerApi: CustomerApi,
-    @inject('EmporixSessionContextApi') private sessionContextApi: SessionContextApi,
+    @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,
   ) {
     this.customerApi = customerApi;
     this.sessionContextApi = sessionContextApi;

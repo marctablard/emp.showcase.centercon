@@ -3,8 +3,9 @@
         "world": "Hallo Welt",
         "friend": "Hey Kumpel"
     },
-    "breadcrumb": {
+    "Breadcrumb": {
         "backLink": "Zurück",
+        "homeLink": "Start",
         "backLinkAriaLabel": "Zurück zur vorherigen Seite"
     },
     "product": {
@@ -37,10 +38,47 @@
         "myAccount": "Mein Account"
     },
     "footer": {
-        "companyName": "Company Name",
-        "street": "123. Line street",
-        "additionalAddress": "Sunrise Business Park",
-        "city": "Manchester"
+        "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",
+        "newsletterInput": "E-Mail Adresse",
+        "beforePrivacyPolicy": "Ich habe die ",
+        "privacyPolicyLink": "Datenschutzerklärung",
+        "beforeTermsAndConditions": " und habe die ",
+        "termsAndConditionsLink": "Geschäftsbedingungen",
+        "afterTermsAndConditions": ", und ich stimme ihnen zu.",
+        "paymentMethodsTitle": "Jede Einkaufsabwicklung ist einfach und sicher.",
+        "companyName": "Emporix AG",
+        "street": "Bundesplatz 16",
+        "city": "6300 Zug",
+        "country": "Schweiz",
+        "ourServiceHours": "Unsere Servicezeiten",
+        "mondayToThursday": "Montag bis Donnerstag: 8:00 AM bis 5:00 PM",
+        "friday": "Freitag: 8:00 AM bis 2:00 PM",
+        "serviceTechnology": "Service & Technology",
+        "sales": "Sales"
+    },
+    "footerLegal": {
+        "copyright": "© 2025 Emporix. Alle Rechte vorbehalten.",
+        "termsAndConditions": "Geschäftsbedingungen",
+        "imprint": "Impressum",
+        "privacyPolicy": "Datenschutz"
+    },
+    "footerLinks": {
+        "products": "Produkte",
+        "solarPanels": "Solarpanele",
+        "inverters": "Wechselrichter",
+        "batterySolutions": "Batterielösungen",
+        "wiringSolutions": "Verkabelungslösungen",
+        "solarAccessories": "Solar Zubehör",
+        "services": "Services",
+        "solarSolutions": "Solar Lösungen",
+        "solutions": "Lösungen",
+        "installations": "Installationsdienstleistungen",
+        "renewableEnergy": "Energiespeicherung",
+        "techServices": "Technische Services",
+        "installationPlanning": "Installationsplanung",
+        "regularMaintenance": "Regelmäßige Wartung",
+        "onlinePlanner": "Online Planer",
+        "aboutUs": "Über uns"
     },
     "cart": {
         "title": "Warenkorb",

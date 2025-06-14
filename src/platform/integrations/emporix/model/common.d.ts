@@ -51,8 +51,16 @@ export interface EmporixMonetaryAmount {
   currency: string;
 }
 
+export interface Site {
+  code: string;
+}
+
 export interface Metadata {
-  mixins?: {
+  createdAt?: string;
+  modifiedAt?: string;
+  calculatedAt?: string;
+  version?: number;
+  mixins: {
     [key: string]: string;
   };
   version?: number;

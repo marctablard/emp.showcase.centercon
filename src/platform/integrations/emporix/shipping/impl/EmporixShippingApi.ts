@@ -1,12 +1,12 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { ShippingApi } from '../ShippingApi';
-import { EmporixFindSiteRequest, EmporixShippingMethod, EmporixSite } from '../../model/shipping';
-import type { EmporixConfig } from '../../config';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
+import type { EmporixConfig } from '../../config';
+import { EmporixFindSiteRequest, EmporixShippingMethod, EmporixSite } from '../../model/shipping';
+import { EmporixShippingApi as IEmporixShippingApi } from '../EmporixShippingApi';
 
 @injectable('EmporixShippingApi', 'Singleton')
-class EmporixShippingApi implements ShippingApi {
+class EmporixShippingApi implements IEmporixShippingApi {
   constructor(
     @inject('EmporixApiInvoker') private apiClient: EmporixApiClient,
     @inject('EmporixConfig') private config: EmporixConfig,
@@ -21,7 +21,6 @@ class EmporixShippingApi implements ShippingApi {
       { method: 'GET' },
       'public',
     );
-    
     if (!response.ok) {
       if (response.status === 404) {
         return null;
@@ -29,7 +28,6 @@ class EmporixShippingApi implements ShippingApi {
         throw new Error(`Failed to get shipping method: ${response.statusText}`);
       }
     }
-    
     return await response.json();
   }
 
@@ -39,11 +37,11 @@ class EmporixShippingApi implements ShippingApi {
       { method: 'GET' },
       'public',
     );
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get shipping methods: ${response.statusText}`);
     }
-    
+
     return await response.json();
   }
 
@@ -59,11 +57,11 @@ class EmporixShippingApi implements ShippingApi {
       },
       'public',
     );
-    
+
     if (!response.ok) {
       throw new Error(`Failed to find site: ${response.statusText}`);
     }
-    
+
     const result = await response.json();
     return Array.isArray(result) ? result : [result];
   }

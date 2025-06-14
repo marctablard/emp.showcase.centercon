@@ -3,12 +3,12 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import { CreateOrderRequest, EmporixOrder, OrderCreationResponse, UpdateOrderRequest } from '../../model/order';
-import type OrderApi from '../OrderApi';
+import { EmporixOrderApi as IEmporixOrderApi } from '../EmporixOrderApi';
 
 // Customer-managed endpoints use '/orders' while tenant-managed endpoints use '/salesorders'
 
 @injectable('EmporixOrderApi', 'Singleton')
-class EmporixOrderApi implements OrderApi {
+class EmporixOrderApi implements IEmporixOrderApi {
   private apiClient: EmporixApiClient;
   private config: EmporixConfig;
 

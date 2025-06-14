@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Cart } from '@/platform/services/model/cart/cart';
-// Import types only, we'll use fetch directly
-// This ensures we're not accidentally importing server-side code
 import type {
   CheckoutAddress,
   CheckoutPaymentMethod,

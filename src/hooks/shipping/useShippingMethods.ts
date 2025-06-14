@@ -26,9 +26,6 @@ interface UseShippingMethods {
 export const useShippingMethods = (): UseShippingMethods => {
   const { shippingMethods, loading, getLoading, setLoading, setShippingMethods } = useShippingMethodsStore();
   const [error, setError] = useState<Error | null>(null);
-  /**
-   * Fetch shipping methods for a given country and postal code
-   */
   const fetchShippingMethods = useCallback(
     async (
       countryCode: string,
@@ -58,9 +55,6 @@ export const useShippingMethods = (): UseShippingMethods => {
     [setShippingMethods, setLoading, getLoading],
   );
 
-  /**
-   * Clear shipping methods from the store
-   */
   const clearShippingMethods = useCallback(() => {
     setShippingMethods([]);
   }, [setShippingMethods]);

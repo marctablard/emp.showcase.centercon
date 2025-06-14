@@ -10,11 +10,12 @@ import {
   useFormContext,
   useFormState,
 } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
+import { LucideIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
 
 const Form = FormProvider;
 
@@ -56,12 +57,27 @@ const useFormField = () => {
   return {
     id,
     name: fieldContext.name,
+    disabled: formState.disabled,
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     ...fieldState,
   };
 };
+
+export interface ControlProps extends React.ComponentProps<typeof Slot> {
+  startIcon?: LucideIcon;
+  endIcon?: LucideIcon;
+  isDropdown?: boolean;
+  isRadio?: boolean;
+  isSelectItem?: boolean;
+  validate?: boolean;
+}
+
+export interface LabelProps extends React.ComponentProps<typeof LabelPrimitive.Root> {
+  isOptional?: boolean;
+  hasTooltip?: boolean;
+}
 
 type FormItemContextValue = {
   id: string;
@@ -79,22 +95,24 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, isOptional, hasTooltip, ...props }: LabelProps) {
   const { error, formItemId } = useFormField();
 
   return (
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn('data-[error=true]:text-destructive', className)}
+      className={cn('', className)}
       htmlFor={formItemId}
+      isOptional={isOptional}
+      hasTooltip={hasTooltip}
       {...props}
     />
   );
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+function FormControl({ ...props }: ControlProps) {
+  const { error, formItemId, formDescriptionId, formMessageId, isTouched, disabled, isDirty } = useFormField();
 
   return (
     <Slot
@@ -102,6 +120,10 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
       id={formItemId}
       aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
       aria-invalid={!!error}
+      data-success={isTouched && !error}
+      data-dirty-error={isDirty && !!error}
+      data-dirty-success={isDirty && !error}
+      data-disabled={disabled}
       {...props}
     />
   );
@@ -114,7 +136,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn('text-muted-foreground text-sm', className)}
+      className={cn('text-xs text-neutral-300', className)}
       {...props}
     />
   );
@@ -130,7 +152,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
   }
 
   return (
-    <p data-slot="form-message" id={formMessageId} className={cn('text-destructive text-sm', className)} {...props}>
+    <p data-slot="form-message" id={formMessageId} className={cn('text-sm text-danger-500', className)} {...props}>
       {body}
     </p>
   );

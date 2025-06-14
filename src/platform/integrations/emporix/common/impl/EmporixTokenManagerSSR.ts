@@ -1,6 +1,7 @@
 import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { cookies } from 'next/headers';
 import { inject } from 'inversify';
+import { omit } from 'lodash';
 import { injectable } from '@/platform/core/di/injectable';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import { EmporixCustomerTokenResponse } from '../../model/oauth';
@@ -45,6 +46,9 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     if (!this.checkAccessToken(ssrAnonymousToken)) {
       const freshSsrAnonymousToken = await this.fetchAnonymousToken(ssrAnonymousToken, tenant, clientId);
       // ...and store it globally, so it can be reused
+      if (!this.ssrToken[tenant]) {
+        this.ssrToken[tenant] = {};
+      }
       this.ssrToken[tenant].anonymousToken = freshSsrAnonymousToken;
     }
     return {
@@ -53,20 +57,43 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     };
   }
 
-  public async getCustomerToken(
-    tenant: string,
-    clientId: string,
-    credentials?: { username: string; password: string },
-  ): Promise<{ accessToken: string; saasToken?: string; sessionId: string } | null> {
-    return null;
+  protected createCustomerToken(
+    _tenant: string,
+    _clientId: string,
+    _credentials: { username: string; password: string },
+  ): Promise<{
+    token: {
+      sessionId: string;
+      saas_token: string;
+      session_id: string;
+      access_token: string;
+      token_type: string;
+      expires_in: number;
+      scope: string;
+      refresh_token?: string;
+      refresh_token_expires_in?: number;
+    };
+    expiryAt: number;
+    refreshExpiryAt: number | undefined;
+  }> {
+    throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
+  }
+
+  protected fetchCustomerToken(
+    _customerToken: StoredToken<EmporixCustomerTokenResponse> | undefined,
+    _tenant: string,
+    _username: string | undefined,
+    _password: string | undefined,
+    _clientId: string,
+  ): Promise<StoredToken<EmporixCustomerTokenResponse>> {
+    throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
   }
 
   protected async writeTokens(tokens: TokenStore, tenant: string): Promise<void> {
     // strip customer Token, since that will be from the the SSR Clients cookie
-    tokens.customerToken = undefined;
+    tokens = omit(tokens, ['customerToken']);
     this.ssrToken[tenant] = tokens;
   }
-
   protected async readTokens(tenant: string): Promise<TokenStore> {
     const cookieStore = await cookies();
     const tokenCookie: RequestCookie | undefined = cookieStore.get(this.buildStorageKey(tenant));
@@ -78,5 +105,4 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     return tokens;
   }
 }
-
 export default EmporixTokenManagerSSR;

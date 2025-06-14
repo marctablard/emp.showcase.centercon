@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixMonetaryAmount } from '@/platform/integrations/emporix';
-import type { ShippingApi } from '@/platform/integrations/emporix/shipping/ShippingApi';
+import { EmporixMonetaryAmount } from '@/platform/integrations/emporix/model/common';
+import type { EmporixShippingApi } from '@/platform/integrations/emporix/shipping/EmporixShippingApi';
 import { ShippingMethod } from '../../model/shipping';
 import type { ShippingMapper } from '../../model/shipping/ShippingMapper';
 import { ShippingService } from '../ShippingService';
@@ -11,14 +11,14 @@ import { ShippingService } from '../ShippingService';
  */
 @injectable('ShippingService', 'Singleton')
 class EmporixShippingService implements ShippingService {
-  private shippingApi: ShippingApi;
+  private shippingApi: EmporixShippingApi;
   private shippingMapper: ShippingMapper;
 
   // Default site ID - in a real application, this might be configurable
   private defaultSiteId = 'main';
 
   constructor(
-    @inject('EmporixShippingApi') shippingApi: ShippingApi,
+    @inject('EmporixShippingApi') shippingApi: EmporixShippingApi,
     @inject('EmporixShippingMapper') shippingMapper: ShippingMapper,
   ) {
     this.shippingApi = shippingApi;

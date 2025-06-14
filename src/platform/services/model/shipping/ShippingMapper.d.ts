@@ -1,4 +1,4 @@
-import { EmporixMonetaryAmount } from '@/platform/integrations/emporix';
+import { EmporixMonetaryAmount } from '@/platform/integrations/emporix/model/common';
 import { EmporixShippingMethod } from '@/platform/integrations/emporix/model/shipping';
 import { ShippingMethod } from '.';
 

@@ -14,7 +14,12 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        'border-input text-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 aspect-square size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+        'bg-white border border-neutral-200 data-[state=checked]bg-primary-500 size-6 shrink-0 rounded-full',
+        'transition-all hover:border-primary-700 hover:bg-primary-50',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
+        'aria-invalid:text-danger-500 aria-invalid:border-danger-500 hover:aria-invalid:border-primary-500 hover:aria-invalid:text-primary-700 aria-invalid:data-[state=checked]:bg-danger-100',
+        'data-[state=checked]:bg-primary-500 hover:data-[state=checked]:bg-primary-700',
+        'disabled:pointer-events-none disabled:cursor-not-allowed disabled:text-neutral-600 disabled:bg-neutral-100 disabled:border-neutral-300 disabled:aria-invalid:border-neutral-300',
         className,
       )}
       {...props}
@@ -23,7 +28,12 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
         data-slot="radio-group-indicator"
         className="relative flex items-center justify-center"
       >
-        <CircleIcon className="fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2" />
+        <CircleIcon
+          className={cn(
+            'fill-white stroke-none absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2',
+            props['aria-invalid'] && props['checked'] && 'fill-danger-500',
+          )}
+        />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   );

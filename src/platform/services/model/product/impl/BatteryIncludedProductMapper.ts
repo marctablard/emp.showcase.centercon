@@ -1,8 +1,8 @@
 // c:\Workspace\emporix-showcase\src\platform\services\model\product\impl\BatteryIncludedProductMapper.ts
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import { Product as ServiceProduct } from '@/platform/services/model/product';
+import { injectable } from '@/platform/core/di/injectable';
 import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
+import { Product as ServiceProduct } from '@/platform/services/model/product';
 import { ProductMapper } from '../ProductMapper';
 import { EmporixProductMapper } from './EmporixProductMapper';
 

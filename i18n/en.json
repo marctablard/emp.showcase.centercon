@@ -3,8 +3,9 @@
         "world": "Hello World",
         "friend": "Hey Friend"
     },
-    "breadcrumb": {
+    "Breadcrumb": {
         "backLink": "Back",
+        "homeLink": "Home",
         "backLinkAriaLabel": "Go back to the previous page"
     },
     "product": {
@@ -37,10 +38,47 @@
         "myAccount": "My Account"
     },
     "footer": {
-        "companyName": "Company Name",
-        "street": "123. Line street",
-        "additionalAddress": "Sunrise Business Park",
-        "city": "Manchester"
+        "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",
+        "newsletterInput": "Email address",
+        "beforePrivacyPolicy": "I have acknowledged the ",
+        "privacyPolicyLink": "privacy policy",
+        "beforeTermsAndConditions": " and read the ",
+        "termsAndConditionsLink": "terms and conditions",
+        "afterTermsAndConditions": ", and I agree with them.",
+        "paymentMethodsTitle": "Every purchase easily paid and secured.",
+        "companyName": "Emporix AG",
+        "street": "Bundesplatz 16",
+        "city": "6300 Zug",
+        "country": "Schweiz",
+        "ourServiceHours": "Our service hours",
+        "mondayToThursday": "Monday to Thursday: 8:00 AM to 5:00 PM",
+        "friday": "Friday: 8:00 AM to 2:00 PM",
+        "serviceTechnology": "Service & Technology",
+        "sales": "Sales"
+    },
+    "footerLegal": {
+        "copyright": "© 2025 Emporix. All Rights Reserved.",
+        "termsAndConditions": "Terms and Conditions",
+        "imprint": "Imprint",
+        "privacyPolicy": "Privacy Policy"
+    },
+    "footerLinks": {
+        "products": "Products",
+        "solarPanels": "Solar Panels",
+        "inverters": "Inverters",
+        "batterySolutions": "Battery Solutions",
+        "wiringSolutions": "Wiring Solutions",
+        "solarAccessories": "Solar Accessories",
+        "services": "Services",
+        "solarSolutions": "Solar Solutions",
+        "solutions": "Solutions",
+        "installations": "Installations",
+        "renewableEnergy": "Renewable Energy",
+        "techServices": "Tech Services",
+        "installationPlanning": "Installation Planning",
+        "regularMaintenance": "Regular Maintenance",
+        "onlinePlanner": "Online Planner",
+        "aboutUs": "About Us"
     },
     "cart": {
         "title": "Cart",

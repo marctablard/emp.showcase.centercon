@@ -3,10 +3,10 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import { EmporixPaymentMode, EmporixPaymentModeFrontend } from '../../model/payment';
-import { PaymentGatewayApi } from '../PaymentGatewayApi';
+import { EmporixPaymentGatewayApi as IEmporixPaymentGatewayApi } from '../EmporixPaymentGatewayApi';
 
 @injectable('EmporixPaymentGatewayApi', 'Singleton')
-class EmporixPaymentGatewayApi implements PaymentGatewayApi {
+class EmporixPaymentGatewayApi implements IEmporixPaymentGatewayApi {
   constructor(
     @inject('EmporixApiInvoker') private apiClient: EmporixApiClient,
     @inject('EmporixConfig') private config: EmporixConfig,

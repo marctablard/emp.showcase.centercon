@@ -3,10 +3,10 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import { EmporixCountry, EmporixRegion } from '../../model/country';
-import { CountryApi } from '../CountryApi';
+import { EmporixCountryApi as IEmporixCountryApi } from '../EmporixCountryApi';
 
 @injectable('EmporixCountryApi', 'Singleton')
-class EmporixCountryApi implements CountryApi {
+class EmporixCountryApi implements IEmporixCountryApi {
   constructor(
     @inject('EmporixApiInvoker') private apiClient: EmporixApiClient,
     @inject('EmporixConfig') private config: EmporixConfig,

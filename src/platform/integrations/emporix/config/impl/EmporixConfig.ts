@@ -1,5 +1,5 @@
-import { injectable } from '../../../../core/di/injectable';
 import type { EmporixConfig as IEmporixConfig } from '..';
+import { injectable } from '../../../../core/di/injectable';
 
 // Using custom injectable decorator with ID parameter
 @injectable('EmporixConfig', 'Singleton')

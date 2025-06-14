@@ -5,6 +5,7 @@ import { useStore } from 'zustand/react';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';
 import { createCustomerStore } from '@/stores/customer-store';
+import { createHistoryStore } from '@/stores/history-store';
 import { createProductStore } from '@/stores/products-store';
 import { createShippingMethodsStore } from '@/stores/shipping-methods-store';
 import { createSiteStore } from '@/stores/site-store';
@@ -21,6 +22,8 @@ export type ShippingMethodsStoreApi = ReturnType<typeof createShippingMethodsSto
 export const ShippingMethodsStoreContext = createContext<ShippingMethodsStoreApi | null>(null);
 export type CustomerStoreApi = ReturnType<typeof createCustomerStore>;
 export const CustomerStoreContext = createContext<CustomerStoreApi | null>(null);
+export type HistoryStoreApi = ReturnType<typeof createHistoryStore>;
+export const HistoryStoreContext = createContext<HistoryStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
@@ -51,13 +54,30 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
   if (customerStoreRef.current === null) {
     customerStoreRef.current = createCustomerStore();
   }
+  const historyStoreRef = useRef<HistoryStoreApi | null>(null);
+  if (historyStoreRef.current === null) {
+    historyStoreRef.current = createHistoryStore();
+  }
+  /**
+   * The order is relevant, because store data can only depend on one another,
+   * when nested properly.
+   * 1. Site Data is the root of all stores.
+   * 2. Shipping Methods Data depends on Countries and Currency Data (from Site)
+   * 3. Product Data depends on Currency and their Availability from Country (from Site)
+   * 4. Customer Data depends on Currency for Customer-Preferences
+   * 5. Cart Data depends on Customer Data in logged in State
+   * 6. Checkout Data depends on Cart Data.
+   * 7. History Data may depend on various aspects of customer's Browsing Behaviour
+   */
   return (
     <SiteStoreContext.Provider value={siteStoreRef.current}>
       <ShippingMethodsStoreContext.Provider value={shippingMethodsStoreRef.current}>
         <ProductStoreContext.Provider value={productStoreRef.current}>
           <CustomerStoreContext.Provider value={customerStoreRef.current}>
             <CartStoreContext.Provider value={cartStoreRef.current}>
-              <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>{children}</CheckoutStoreContext.Provider>
+              <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
+                <HistoryStoreContext.Provider value={historyStoreRef.current}>{children}</HistoryStoreContext.Provider>
+              </CheckoutStoreContext.Provider>
             </CartStoreContext.Provider>
           </CustomerStoreContext.Provider>
         </ProductStoreContext.Provider>
@@ -110,6 +130,14 @@ export const useCustomerStore = () => {
   const storeContext = useContext(CustomerStoreContext);
   if (!storeContext) {
     throw new Error('useCustomerStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useHistoryStore = () => {
+  const storeContext = useContext(HistoryStoreContext);
+  if (!storeContext) {
+    throw new Error('useHistoryStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

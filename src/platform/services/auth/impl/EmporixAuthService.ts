@@ -1,10 +1,9 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixAddress } from '@/platform/integrations/emporix';
 import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
+import { EmporixAddress } from '@/platform/integrations/emporix/model';
 import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
 import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
-import CartMigrationService from '@/platform/services/cart/impl/EmporixCartMigrationService';
 import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { AuthService } from '../AuthService';

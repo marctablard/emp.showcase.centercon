@@ -1,134 +1,87 @@
-/**
- * Price related model definitions for Emporix API
- */
 import { LocalizedString } from '@/platform/services/model/common';
-import { Metadata } from './common';
+import { Site } from './common';
 
-/**
- * Item identifier for a product or SKU
- */
-export interface ItemId {
-  itemType: 'PRODUCT' | 'SKU';
-  id: string;
-}
-
-/**
- * Quantity with unit code
- */
-export interface Quantity {
-  quantity: number;
-  unitCode?: string;
-}
-
-/**
- * Location information
- */
-export interface Location {
-  countryCode: string;
-}
-
-/**
- * Item with quantity for price matching
- */
-export interface PriceMatchItem {
-  itemId: ItemId;
-  quantity: Quantity;
-}
-
-/**
- * Request for matching prices
- */
-export interface MatchPricesRequest {
-  targetCurrency: string;
-  siteCode: string;
-  targetLocation: Location;
-  items: PriceMatchItem[];
-}
-
-/**
- * Request for matching prices by context
- */
-export interface MatchPricesByContextRequest {
-  items: PriceMatchItem[];
-}
-
-/**
- * Tax values for a price
- */
-export interface TaxValues {
+export interface EmporixCalculatedPrice {
   netValue: number;
   grossValue: number;
   taxValue: number;
 }
 
-/**
- * Tax information for a price
- */
-export interface PriceTax {
-  taxClass: string;
-  taxRate: number;
-  prices: {
-    originalValue: TaxValues;
-    effectiveValue: TaxValues;
-    totalValue: TaxValues;
+export interface EmporixQuantity {
+  quantity: number;
+  unitCode?: string;
+}
+
+export interface EmporixPriceMatchItem {
+  itemId: {
+    itemType: 'PRODUCT' | 'SKU';
+    id: string;
   };
+  quantity: EmporixQuantity;
 }
 
 /**
- * Tier definition for a price model
+ * Request for matching prices
  */
-export interface TierDefinition {
+export interface EmporixMatchPricesRequest {
+  targetCurrency: string;
+  siteCode: string;
+  targetLocation: {
+    countryCode: string;
+  };
+  items: EmporixPriceMatchItem[];
+}
+
+export interface EmporixMatchPricesByContextRequest {
+  items: EmporixPriceMatchItem[];
+}
+
+export interface EmporixPriceTax {
+  taxClass: string;
+  taxRate: number;
+  prices: EmporixCalculatedPrice;
+}
+
+export interface EmporixTierDefinition {
   tierType: 'BASIC' | 'TIERED' | 'VOLUME';
+
   tiers: {
     id: string;
-    minQuantity: Quantity;
+    minQuantity: EmporixQuantity;
   }[];
 }
 
-/**
- * Price model information
- */
-export interface PriceModel {
+export interface EmporixPriceModel {
   id: string;
-  name: string | LocalizedString;
+  name: LocalizedString;
   includesTax: boolean;
   includesMarkup: boolean;
-  measurementUnit: Quantity;
-  tierDefinition: TierDefinition;
+  measurementUnit: EmporixQuantity;
+  tierDefinition: EmporixTierDefinition;
   metadata: Metadata;
 }
 
-/**
- * Tier value for a price
- */
-export interface TierValue {
+export interface EmporixTierValue {
   id: string;
   priceValue: number;
 }
 
 /**
- * Site information
- */
-export interface Site {
-  code: string;
-}
-
-/**
  * Matched price response
  */
-export interface MatchedPrice {
+export interface EmporixMatchedPrice {
   priceId: string;
-  itemId: ItemId;
+  itemId: EmporixItemId;
   site: Site;
   currency: string;
-  location: Location;
+  location: EmporixLocation;
   originalValue: number;
   effectiveValue: number;
   totalValue: number;
-  quantity: Quantity;
+  quantity: EmporixQuantity;
   includesTax: boolean;
-  priceModel: PriceModel;
+  priceModel: EmporixPriceModel;
   tax: PriceTax;
-  tierValues: TierValue[];
+  tierValues: EmporixTierValue[];
   metadata: Metadata;
 }

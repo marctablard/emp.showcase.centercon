@@ -8,7 +8,6 @@ import { useSiteStore } from '@/providers/StoreProvider';
 
 /**
  * Hook for accessing site data like countries, regions, and currencies
- * Uses API routes instead of directly accessing services
  */
 export function useSite() {
   const { setLoading, getLoading, setSite, getSite, site, loading } = useSiteStore();
@@ -18,7 +17,6 @@ export function useSite() {
   const [paymentModes, setPaymentModes] = useState<PaymentMode[] | undefined>(getSite()?.paymentModes);
   const [error, setError] = useState<Error | null>(null);
 
-  // Fetch countries
   const fetchSiteData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -50,15 +48,12 @@ export function useSite() {
   }, [site, fetchSiteData, getLoading]);
 
   return {
-    // Data
     countries,
     regions,
     currencies,
     paymentModes,
     loading,
     error,
-
-    // Fetch methods
     fetchSiteData,
   };
 }

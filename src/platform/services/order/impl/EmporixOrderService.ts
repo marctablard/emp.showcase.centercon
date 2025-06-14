@@ -1,11 +1,11 @@
+import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
+import { EmporixOrder } from '@/platform/integrations/emporix/model/order';
+import type { EmporixOrderApi } from '@/platform/integrations/emporix/order/EmporixOrderApi';
 import type { Order } from '@/platform/services/model/order/order';
 import type { OrderService } from '@/platform/services/order/OrderService';
 import type { SessionService } from '@/platform/services/session/SessionService';
-import type OrderApi from '@/platform/integrations/emporix/order/OrderApi';
-import { injectable } from '@/platform/core/di/injectable';
-import { inject } from 'inversify';
 import type { OrderMapper } from '../../model/order/OrderMapper';
-import { EmporixOrder } from '@/platform/integrations/emporix/model/order';
 
 /**
  * Implementation of OrderService for Emporix order data.
@@ -13,12 +13,12 @@ import { EmporixOrder } from '@/platform/integrations/emporix/model/order';
  */
 @injectable('OrderService', 'Singleton')
 class EmporixOrderService implements OrderService {
-  private orderApi: OrderApi;
+  private orderApi: EmporixOrderApi;
   private mapper: OrderMapper<EmporixOrder>;
   private sessionService: SessionService;
 
   constructor(
-    @inject('EmporixOrderApi') orderApi: OrderApi,
+    @inject('EmporixOrderApi') orderApi: EmporixOrderApi,
     @inject('EmporixOrderMapper') mapper: OrderMapper<EmporixOrder>,
     @inject('SessionService') sessionService: SessionService,
   ) {
@@ -62,7 +62,6 @@ class EmporixOrderService implements OrderService {
     }
   }
 
-
   async getOrderById(orderId: string): Promise<Order | null> {
     try {
       const order = await this.orderApi.getOrder(orderId);
@@ -78,7 +77,7 @@ class EmporixOrderService implements OrderService {
   async getCustomerOrders(pageSize?: number, pageNumber?: number): Promise<Order[]> {
     try {
       const orders = await this.orderApi.getCustomerOrders(pageSize, pageNumber);
-      return orders.map(order => this.mapper.mapToService(order));
+      return orders.map((order) => this.mapper.mapToService(order));
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get orders: ${error.message}`);
@@ -87,11 +86,10 @@ class EmporixOrderService implements OrderService {
     }
   }
 
-
   async getOrders(pageSize?: number, pageNumber?: number): Promise<Order[]> {
     try {
       const orders = await this.orderApi.getOrders(pageSize, pageNumber);
-      return orders.map(order => this.mapper.mapToService(order));
+      return orders.map((order) => this.mapper.mapToService(order));
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get orders: ${error.message}`);

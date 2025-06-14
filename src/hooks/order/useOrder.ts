@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
-  fetchOrders as apiFetchOrders,
   fetchOrderById as apiFetchOrderById,
   fetchOrderStatusTransitions as apiFetchOrderStatusTransitions,
+  fetchOrders as apiFetchOrders,
 } from '@/lib/client/orders';
 import { Order } from '@/platform/services/model/order/order';
 
@@ -21,11 +21,11 @@ interface UseOrder {
   order: Order | null | undefined;
   orders: Order[];
   statusTransitions: string[];
-  
+
   // Status
   loading: boolean;
   error: Error | null;
-  
+
   // Utility
   refetchOrder: () => Promise<void>;
   refetchOrders: () => Promise<void>;
@@ -40,8 +40,6 @@ interface UseOrder {
  */
 export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
   const { orderId, initialOrder, initialOrders, pageSize, pageNumber } = options;
-  
-  // Local state
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [order, setOrder] = useState<Order | null | undefined>(initialOrder);
@@ -53,11 +51,11 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
    */
   const fetchOrder = useCallback(async () => {
     if (!orderId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const orderData = await apiFetchOrderById(orderId);
       setOrder(orderData);
     } catch (err) {
@@ -75,7 +73,6 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
     try {
       setLoading(true);
       setError(null);
-      
       const ordersData = await apiFetchOrders(pageSize, pageNumber);
       setOrders(ordersData);
     } catch (err) {
@@ -91,11 +88,11 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
    */
   const fetchStatusTransitions = useCallback(async () => {
     if (!orderId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const transitions = await apiFetchOrderStatusTransitions(orderId);
       setStatusTransitions(transitions);
     } catch (err) {

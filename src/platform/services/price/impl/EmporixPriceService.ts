@@ -1,9 +1,13 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { MatchPricesRequest, MatchedPrice, PriceMatchItem } from '@/platform/integrations/emporix/model/price';
+import type {
+  EmporixMatchPricesRequest,
+  EmporixMatchedPrice,
+  EmporixPriceMatchItem,
+} from '@/platform/integrations/emporix/model/price';
 import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
-import PriceMapper from '@/platform/services/model/price/PriceMapper';
-import type { ProductPrice } from '../../model/price/price';
+import type PriceMapper from '@/platform/services/model/price/impl/EmporixPriceMapper';
+import type { ProductPrice } from '../../model/price';
 import type { PriceService } from '../PriceService';
 
 /**
@@ -26,20 +30,20 @@ class EmporixPriceService implements PriceService {
     quantity: number = 1,
     params?: { currency?: string; country?: string; siteCode?: string },
   ): Promise<ProductPrice | null> {
-    const items = [this.mapToMatchPriceItem(productId, unitCode, quantity)];
-    let matchedPrices: MatchedPrice[];
+    const items = [this.mapToMatchPriceItem(productId, quantity, unitCode)];
+    let matchedPrices: EmporixMatchedPrice[];
     if (!params) {
       matchedPrices = await this.priceApi.matchPricesByContext({
         items,
       });
     } else {
-      const matchRequest: MatchPricesRequest = {
+      const matchRequest: EmporixMatchPricesRequest = {
         targetCurrency: params.currency || 'EUR',
         siteCode: params.siteCode || 'main',
         targetLocation: {
           countryCode: params.country || 'DE',
         },
-        items: [this.mapToMatchPriceItem(productId, unitCode, quantity)],
+        items: [this.mapToMatchPriceItem(productId, quantity, unitCode)],
       };
       matchedPrices = await this.priceApi.matchPrices(matchRequest);
     }
@@ -53,13 +57,16 @@ class EmporixPriceService implements PriceService {
    * @param quantity The quantity information
    * @returns A PriceMatchItem
    */
-  private mapToMatchPriceItem(productId: string, unitCode?: string, quantity: number = 1): PriceMatchItem {
+  private mapToMatchPriceItem(productId: string, quantity: number, unitCode?: string): EmporixPriceMatchItem {
     return {
       itemId: {
         itemType: 'PRODUCT',
         id: productId,
       },
-      quantity: this.mapper.mapQuantityToEmporix({ quantity, unitCode }),
+      quantity: {
+        quantity,
+        unitCode,
+      },
     };
   }
 }

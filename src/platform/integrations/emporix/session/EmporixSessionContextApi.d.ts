@@ -1,6 +1,6 @@
 import type { EmporixContextAttribute, EmporixSessionContext } from '../model/session-context';
 
-export interface SessionContextApi {
+export interface EmporixSessionContextApi {
   /**
    * Retrieves a specified session context.
    * @param sessionId Customer's session ID

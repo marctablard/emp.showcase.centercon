@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { CountryApi } from '@/platform/integrations/emporix/country/CountryApi';
-import type { CurrencyApi } from '@/platform/integrations/emporix/currency/CurrencyApi';
+import type { EmporixCountryApi } from '@/platform/integrations/emporix/country/EmporixCountryApi';
+import type { EmporixCurrencyApi } from '@/platform/integrations/emporix/currency/EmporixCurrencyApi';
 import { EmporixCountry, EmporixRegion } from '@/platform/integrations/emporix/model/country';
 import { EmporixCurrency, EmporixExchangeRate } from '@/platform/integrations/emporix/model/currency';
 import { Country, Currency, ExchangeRate, Region } from '@/platform/services/model/common';
@@ -14,8 +14,8 @@ import { SiteService } from '../SiteService';
 @injectable('SiteService', 'Singleton')
 class EmporixSiteService implements SiteService {
   constructor(
-    @inject('EmporixCountryApi') private countryApi: CountryApi,
-    @inject('EmporixCurrencyApi') private currencyApi: CurrencyApi,
+    @inject('EmporixCountryApi') private countryApi: EmporixCountryApi,
+    @inject('EmporixCurrencyApi') private currencyApi: EmporixCurrencyApi,
   ) {}
 
   // Map EmporixCountry to Country

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ProductPrice } from '@/platform/services/model/price/price';
+import { ProductPrice } from '@/platform/services/model/price';
 
 interface ProductPriceProps {
   price: ProductPrice;

@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useOrder } from '@/hooks/order';
+import { useOrder } from '@/hooks/order/useOrder';
 import { formatCurrency } from '@/lib/utils';
 import { Order } from '@/platform/services/model/order/order';
 

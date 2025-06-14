@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { PaymentGatewayApi } from '@/platform/integrations/emporix/payment/PaymentGatewayApi';
+import type { EmporixPaymentGatewayApi } from '@/platform/integrations/emporix/payment/EmporixPaymentGatewayApi';
 import { PaymentMode } from '@/platform/services/model/payment';
 import { PaymentService } from '../PaymentService';
 
@@ -9,9 +9,9 @@ import { PaymentService } from '../PaymentService';
  */
 @injectable('PaymentService', 'Singleton')
 class EmporixPaymentService implements PaymentService {
-  private paymentGatewayApi: PaymentGatewayApi;
+  private paymentGatewayApi: EmporixPaymentGatewayApi;
 
-  constructor(@inject('EmporixPaymentGatewayApi') paymentGatewayApi: PaymentGatewayApi) {
+  constructor(@inject('EmporixPaymentGatewayApi') paymentGatewayApi: EmporixPaymentGatewayApi) {
     this.paymentGatewayApi = paymentGatewayApi;
   }
 

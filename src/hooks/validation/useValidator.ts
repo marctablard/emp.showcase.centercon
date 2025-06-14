@@ -18,7 +18,6 @@ export function useValidator(
   mode: 'onBlur' | 'onChange' | 'onSubmit' | 'all' = 'onSubmit',
   onValidated?: (data: any) => void,
 ) {
-  // Get the validator service from DI
   const [values, setValues] = useState(initialData);
   const validator = getService<ValidationService>(validatorId);
   const schema = validator.getSchema();

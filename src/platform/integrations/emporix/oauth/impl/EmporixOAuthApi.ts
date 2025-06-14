@@ -13,7 +13,7 @@ import { OAuthApi } from '../OAuthApi';
 @injectable('EmporixOAuthApi', 'Singleton')
 class EmporixOAuthApi implements OAuthApi {
   private readonly baseUrl: string = 'https://api.emporix.io';
-  private debugCurl: boolean = true;
+  private debugCurl: boolean = false;
 
   /**
    * Get an anonymous token

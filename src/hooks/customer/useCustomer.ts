@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchCurrentCustomer } from '@/lib/client/customer';
 import { Customer } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
@@ -19,7 +19,7 @@ export const useCustomer = (): CustomerHook => {
   const { customer, loading, getLoading, setLoading, setCustomer } = useCustomerStore();
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchCustomer = async () => {
+  const fetchCustomer = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -31,7 +31,7 @@ export const useCustomer = (): CustomerHook => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setLoading, setCustomer]);
 
   useEffect(() => {
     if (!getLoading() && customer === undefined) {

@@ -3,7 +3,7 @@ import type {
   EmporixContextAttribute,
   EmporixSessionContext,
 } from '@/platform/integrations/emporix/model/session-context';
-import { SessionContextApi } from '@/platform/integrations/emporix/session/SessionContextApi';
+import { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import type { EmporixSessionMapper } from '@/platform/services/model/session/impl/EmporixSessionMapper';
 import type { Session, SessionAttribute } from '@/platform/services/model/session/session';
 import EmporixSessionService from './EmporixSessionService';
@@ -11,7 +11,7 @@ import EmporixSessionService from './EmporixSessionService';
 describe('EmporixSessionService', () => {
   let container: Container;
   let sessionService: EmporixSessionService;
-  let mockSessionContextApi: jest.Mocked<SessionContextApi>;
+  let mockSessionContextApi: jest.Mocked<EmporixSessionContextApi>;
   let mockSessionMapper: jest.Mocked<EmporixSessionMapper>;
 
   const mockSessionContext: EmporixSessionContext = {
@@ -73,7 +73,7 @@ describe('EmporixSessionService', () => {
     };
 
     // Register mocks
-    container.bind<SessionContextApi>('EmporixSessionContextApi').toConstantValue(mockSessionContextApi);
+    container.bind<EmporixSessionContextApi>('EmporixSessionContextApi').toConstantValue(mockSessionContextApi);
     container.bind<EmporixSessionMapper>('EmporixSessionMapper').toConstantValue(mockSessionMapper);
     container.bind<EmporixSessionService>('SessionService').to(EmporixSessionService);
 
