@@ -208,7 +208,7 @@ class EmporixCartApi implements CartApi {
         },
         body: JSON.stringify(cart),
       },
-      'session',
+      'service',
     );
 
     if (!response.ok) {

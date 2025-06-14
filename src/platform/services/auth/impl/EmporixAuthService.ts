@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import { getCartIdFromCookie } from '@/lib/server/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
 import { EmporixAddress } from '@/platform/integrations/emporix/model';
@@ -37,7 +38,10 @@ export class EmporixAuthService implements AuthService {
       if (!session) {
         throw new Error('Failed to get session context');
       }
-      const cartId = await this.cartMigrationService.migrateSessionCartToCurrentCustomer();
+      const cartId = await getCartIdFromCookie(session.siteCode || 'main', session.currency || 'EUR');
+      if (cartId && session.customerId) {
+        await this.cartMigrationService.migrateCartToCustomer(cartId, session.customerId);
+      }
       return {
         sessionId: session.sessionId,
         customerId: session.customerId,

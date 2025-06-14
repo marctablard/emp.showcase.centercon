@@ -1,8 +1,7 @@
+import { signIn } from 'next-auth/react';
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '@/platform/services/auth/AuthService';
 import { Registration } from '@/platform/services/model/auth/auth';
-
-const AUTH_COOKIE_NAME = process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || 'emp-auth-session';
 
 /**
  * POST /api/auth/register
@@ -23,25 +22,18 @@ export async function POST(request: NextRequest) {
 
     // Register the new customer
     const session = await authService.register(registrationData);
-
-    // Create response with session data
-    const response = NextResponse.json(session);
-
-    // Set session cookie
-    response.cookies.set({
-      name: AUTH_COOKIE_NAME,
-      value: JSON.stringify({
-        sessionId: session.sessionId,
-        customerId: session.customerId,
-      }),
-      path: '/',
-      maxAge: 60 * 60 * 24, // 24 hours
-      sameSite: 'lax',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+    if (!session) {
+      return NextResponse.json({ error: 'Failed to register customer' }, { status: 401 });
+    }
+    const signInResponse = await signIn('credentials', {
+      username: registrationData.credentials?.username,
+      password: registrationData.credentials?.password,
+      redirect: true,
     });
-
-    return response;
+    if (!signInResponse || !signInResponse.url) {
+      return NextResponse.json({ error: 'Failed to sign in' }, { status: 401 });
+    }
+    return NextResponse.redirect(signInResponse.url);
   } catch (error) {
     console.error('Registration error:', error);
 

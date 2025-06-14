@@ -26,6 +26,7 @@ interface UseCart {
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
+  clearCart: () => void;
 
   // Utility
   refetch: () => Promise<void>;
@@ -91,10 +92,10 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     // listen to changes on storeCart to update local state
     // this reflects changes to the store into all components
     // that use the Hook
-    if (storeCart !== undefined) {
+    if (storeCart !== cart) {
       setCart(storeCart);
     }
-  }, [storeCart]);
+  }, [storeCart, cart]);
 
   /**
    * Add an item to the cart
@@ -129,7 +130,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, fetchCart, setLoading],
+    [cart, setLoading, fetchCart],
   );
 
   /**
@@ -217,6 +218,11 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     [cart, fetchCart, setLoading],
   );
 
+  const clearCart = useCallback(() => {
+    setCurrentCart(undefined);
+    setCart(undefined);
+  }, [setCurrentCart]);
+
   return {
     cart,
     cartId: cart?.id || null,
@@ -227,6 +233,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     updateItemQuantity,
     removeItem,
     updateShippingInfo,
+    clearCart,
     refetch: async () => {
       await fetchCart(false);
       return;

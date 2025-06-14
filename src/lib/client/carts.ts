@@ -82,7 +82,6 @@ export async function addItemToCart(cartId: string, productId: string, quantity:
  * Update cart item quantity
  */
 export async function updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<void> {
-  console.log('Updating cart item quantity', cartId, itemId, quantity);
   const response = await fetch(`/api/cart/${cartId}/items/${itemId}`, {
     method: 'PATCH',
     headers: {

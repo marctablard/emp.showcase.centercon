@@ -4,8 +4,6 @@ import type { Cart } from '../model/cart/cart';
  * Interface for handling Cart Migration Operations
  */
 export interface CartMigrationService {
-  migrateSessionCartToCurrentCustomer(): Promise<string | null>;
-
   /**
    * Migrates a cart to the current customer
    * @param cartId The ID of the cart to migrate

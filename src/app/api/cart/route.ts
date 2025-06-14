@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addCartToCookie, getCartCookie } from '@/lib/server/utils';
+import { addCartToCookie, getCartCookie, removeCartFromCookie } from '@/lib/server/utils';
 import { CartService } from '@/platform/services/cart';
 import type { Cart } from '@/platform/services/model/cart';
 
 const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE || 'emp-cart';
 const DEFAULT_CURRENCY = 'EUR';
 const DEFAULT_SITE_CODE = 'main';
-
+export const revalidate = 0;
 /**
  * GET /api/carts
  * Get the current cart or create a new one if none exists
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const create = searchParams.get('create') === 'true'; // Default to false if not specified
 
     const cartService = globalThis.EMP.platform.server.get<CartService>('CartService');
-
+    let removeCartId: string | undefined;
     // Check for cart ID in cookies
     const cartCookie = await getCartCookie(DEFAULT_SITE_CODE, DEFAULT_CURRENCY);
     let cart: Cart | null | undefined;
@@ -29,25 +29,21 @@ export async function GET(request: NextRequest) {
       try {
         cart = await cartService.getCartById(cartCookie.cartId);
       } catch (_error) {
-        // this will try fetching for the cart by session-id
-        cart = await cartService.getCart();
-        // if cart is missing, try to reconstruct from cookie
-        if (!cart && cartCookie.items) {
-          // TODO alternative approach re-assign cart with Server-Token
-          console.warn('Error getting cart, reconstructing from Cookie');
-          const newCartId = await cartService.createCart(cartCookie.currency, DEFAULT_SITE_CODE);
-          if (newCartId) {
-            for (const item of cartCookie.items) {
-              await cartService.addItemToCart(newCartId, item.pId, item.qty);
-            }
-            const newCart = await cartService.getCartById(newCartId);
-            return NextResponse.json(newCart);
-          }
+        if (!create) {
+          const response = NextResponse.json({ error: 'Cart not found' }, { status: 204 });
+          removeCartFromCookie(cartCookie.cartId, response);
+          return response;
+        } else {
+          removeCartId = cartCookie.cartId;
         }
       }
     } else {
       // no coookie, no cart, that's ok
-      cart = null;
+      try {
+        cart = await cartService.getCart();
+      } catch (_error) {
+        cart = undefined;
+      }
     }
 
     // If we don't have a cart and shouldCreate is false, return 204 (intentionally empty)
@@ -71,6 +67,8 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.json(cart);
     if (cartCookie?.cartId != cart.id) {
       await addCartToCookie(cart, response);
+    } else if (removeCartId) {
+      await removeCartFromCookie(removeCartId, response);
     }
     return response;
   } catch (error) {
