@@ -50,7 +50,7 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
     );
   }
   return (
-    <div className="flex gap-4">
+    <div className="flex">
       {/* Main Carousel */}
       <div className="w-4/5 relative">
         <Carousel className="w-full " orientation="horizontal" setApi={setMainApi}>
@@ -68,7 +68,7 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
                   />
                   {image.contentType?.startsWith('video/') && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-white/80 rounded-full p-3">
+                      <div className="bg-white/80 rounded-full">
                         <LucidePlay className="h-8 w-8 text-primary" />
                       </div>
                     </div>
