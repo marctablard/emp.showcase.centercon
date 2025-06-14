@@ -34,7 +34,7 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
         if (part.type === 'integer') {
           return (
             <span key={index} className="text-4xl">
-              {Math.floor(part.value)}
+              {Math.floor(Number(part.value))}
             </span>
           );
         }
