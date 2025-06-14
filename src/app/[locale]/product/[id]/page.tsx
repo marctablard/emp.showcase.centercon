@@ -45,10 +45,12 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
   const jsonLd = await generateProductJsonLd(product, locale);
   const breadcrumbs = generateBreadcrumbForProduct(product, locale);
   return (
-    <div className="container mx-auto">
-      <UiBreadcrumb items={breadcrumbs} />
+    <>
       <JsonLd jsonLd={jsonLd} />
-      <ProductDetail product={product} price={price} />
-    </div>
+      <div className="max-w-6xl mx-auto px-4 grid gap-x-4 lg:px-9 md:gap-x-6">
+        <UiBreadcrumb items={breadcrumbs} />
+        <ProductDetail product={product} price={price} />
+      </div>
+    </>
   );
 }
