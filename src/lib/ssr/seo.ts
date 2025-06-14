@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
+import { generateBreadcrumbForProduct } from '../breadcrumb';
 import { buildCanonicalUrl, l10n } from '../utils';
 
 // create cached callbacks, to make sure we don't do the same work multiple times
@@ -127,6 +128,17 @@ export async function generateProductJsonLd(product: Product, locale: string): P
     productPrice = product.price?.amount || null;
     productCurrency = product.price?.currency || null;
   }
+  const breadcrumb = generateBreadcrumbForProduct(product, locale);
+  breadcrumb.pop(); // remove product part
+  const category =
+    breadcrumb.length > 0 ? breadcrumb.map((item) => buildCanonicalUrl(locale, item.href)).join(' > ') : undefined;
+  const brand = product.brand
+    ? {
+        '@type': 'Brand',
+        name: product.brand.name,
+        logo: product.brand.logo,
+      }
+    : undefined;
   const canonicalUrl = buildCanonicalUrl(locale, `/product/${product.id}`);
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -136,10 +148,9 @@ export async function generateProductJsonLd(product: Product, locale: string): P
     image: product.images && product.images.length > 0 ? product.images[0].url : undefined,
     sku: product.sku || null,
     mpn: product.id,
-    brand: {
-      '@type': 'Brand',
-      name: product.brand?.name || null,
-    },
+    brand,
+    productId: product.id,
+    category,
     offers: {
       '@type': 'Offer',
       url: canonicalUrl,

@@ -20,7 +20,7 @@ interface ProductShippingInfoProps {
 
 export function ProductShippingInfo({
   className,
-  deliveryDays = [3, 5],
+  deliveryDays = [1, 3],
   shippingCost = 9.95,
   currency = 'EUR',
   location = 'London',
@@ -34,7 +34,7 @@ export function ProductShippingInfo({
     <Card variant="gray" className={cn('mt-6', className)}>
       <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <H2 variant="h6" className="font-medium text-neutral-700 mb-2">
+          <H2 variant="h6" className="font-medium text-neutral-700 mb-4">
             {t('deliveryDetails')}
           </H2>
 
@@ -43,27 +43,24 @@ export function ProductShippingInfo({
             <span>{t('deliverable', { min: deliveryDays[0], max: deliveryDays[1] })}</span>
           </div>
 
-          {shippingCost > 0 ? (
-            <div className="flex items-center gap-2 text-sm text-neutral-600 mb-2 ml-6">
+          <div className="flex items-center gap-2 text-sm text-neutral-600 mb-2 ml-8">
+            {shippingCost > 0 ? (
               <span>
                 {t('shipping')}: {shippingCost.toFixed(2)}
                 {currency === 'EUR' ? ' €' : ` ${currency}`}
               </span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-sm text-success-600 font-medium mb-2 ml-6">
-              <span>{t('freeShipping')}</span>
-            </div>
-          )}
-
+            ) : (
+              <span className="ml-4">{t('freeShipping')}</span>
+            )}
+          </div>
           <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <LucideMapPin className="text-primary" />
+            <LucideMapPin className="text-success-500" />
             <span>{t('canBeReserved', { location, postalCode })}</span>
           </div>
         </div>
 
         <div>
-          <H2 variant="h6" className="font-medium text-neutral-700 mb-2">
+          <H2 variant="h6" className="font-medium text-neutral-700 mb-4">
             {t('yourUsps')}
           </H2>
 

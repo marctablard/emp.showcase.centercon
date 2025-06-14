@@ -44,7 +44,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
     notFound();
   }
   const jsonLd = await generateProductJsonLd(product, locale);
-  const breadcrumbs = await generateBreadcrumbForProduct(product, locale);
+  const breadcrumbs = generateBreadcrumbForProduct(product, locale);
   return (
     <div className="container mx-auto">
       <UiBreadcrumb items={breadcrumbs} />
