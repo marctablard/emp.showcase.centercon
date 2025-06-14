@@ -6,7 +6,6 @@ import EmporixSessionContextApi from '@/platform/integrations/emporix/session/im
 import type { CartMigrationService } from '@/platform/services/cart/CartMigrationService';
 import type { CustomerService } from '../../customer/CustomerService';
 import { Cart } from '../../model/cart';
-import { SessionService } from '../../session/SessionService';
 
 /**
  * Implementation of CartService for Emporix cart data.
@@ -63,7 +62,7 @@ class EmporixCartMigrationService implements CartMigrationService {
     });
   }
 
-  async mergeCarts(sourceCartId: string, targetCartId: string): Promise<Cart> {
+  async mergeCarts(_sourceCartId: string, _targetCartId: string): Promise<Cart> {
     // TODO Cart-Merging
     throw new Error('Method not implemented.');
   }

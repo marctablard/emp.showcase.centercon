@@ -5,6 +5,7 @@ import { EmporixAddress } from '@/platform/integrations/emporix/model';
 import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
 import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
 import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
+import type { CartMigrationService } from '../../cart/CartMigrationService';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { AuthService } from '../AuthService';
 

@@ -73,7 +73,7 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
     credentials?: { username: string; password: string },
   ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
     // When recieving credentials we MUST recreate a new Token
-    let customerToken = await this.getCustomerToken(tenant, clientId, credentials);
+    const customerToken = await this.getCustomerToken(tenant, clientId, credentials);
     if (customerToken) {
       return customerToken;
     } else {

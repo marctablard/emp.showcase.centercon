@@ -60,7 +60,7 @@ export interface Metadata {
   modifiedAt?: string;
   calculatedAt?: string;
   version?: number;
-  mixins: {
+  mixins?: {
     [key: string]: string;
   };
   version?: number;

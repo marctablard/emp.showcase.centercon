@@ -125,14 +125,7 @@ export const useCheckout = (): UseCheckout => {
       }
       setStoreShippingAddress(address);
     },
-    [
-      setStoreShippingAddress,
-      shippingAddress?.country,
-      shippingAddress?.zipCode,
-      updateShippingInfo,
-      checkoutCart?.totalPrice,
-      fetchShippingMethods,
-    ],
+    [setStoreShippingAddress, shippingAddress?.country, shippingAddress?.zipCode, updateShippingInfo],
   );
 
   const submitBillingAddress = useCallback(
