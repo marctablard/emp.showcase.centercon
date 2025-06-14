@@ -2,7 +2,16 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { LocalizedString } from '@/platform/services/model/common';
 
-export const baseUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SERVER_URL || 'https://emporix-showcase.com';
+function buildBaseUrl() {
+  const envUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SERVER_URL || 'emporix-showcase.com';
+  if (envUrl.startsWith('http://') || envUrl.startsWith('https://')) {
+    return envUrl;
+  }
+  return 'https://' + envUrl;
+}
+
+export const baseUrl = buildBaseUrl();
+
 const defaultEmptyLocale = 'en';
 
 export function cn(...inputs: ClassValue[]) {
