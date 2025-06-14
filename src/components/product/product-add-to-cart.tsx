@@ -87,7 +87,7 @@ export default function ProductAddToCart({
         <Button
           variant="secondary"
           size="icon"
-          className="rounded-tr-none rounded-br-none"
+          className="hidden md:block rounded-tr-none rounded-br-none"
           onClick={decrementQuantity}
           title={t('decrement')}
           disabled={quantity <= 1}
@@ -99,14 +99,14 @@ export default function ProductAddToCart({
           type="number"
           min="1"
           title={t('quantity')}
-          className="text-center rounded-none w-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="text-center rounded-none w-16 md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
           value={quantity}
           onChange={handleQuantityChange}
         />
         <Button
           variant="secondary"
           size="icon"
-          className="rounded-tl-none rounded-bl-none"
+          className="hidden md:block rounded-tl-none rounded-bl-none"
           title={t('increment')}
           onClick={incrementQuantity}
         >
@@ -117,7 +117,7 @@ export default function ProductAddToCart({
       <Button className="flex-1" onClick={handleAddToCart} disabled={cartLoading}>
         <LucideShoppingCart />
         {t('addToCart')}
-        <LucideShoppingCart />
+        <LucideShoppingCart className="hidden md:inline" />
       </Button>
     </div>
   );

@@ -52,12 +52,12 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
   return (
     <div className="flex">
       {/* Main Carousel */}
-      <div className="w-4/5 relative">
+      <div className="w-full lg:w-4/5 relative">
         <Carousel className="w-full " orientation="horizontal" setApi={setMainApi}>
           <CarouselContent>
             {images.map((image, index) => (
               <CarouselItem key={index}>
-                <div className="relative h-[500px] w-full">
+                <div className="relative lg:h-[500px] h-[300px] w-full">
                   <Image
                     src={image.url}
                     alt={image.altText ? l10n(image.altText) : `Product image ${index + 1}`}
@@ -87,7 +87,7 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
       </div>
 
       {/* Thumbnail Carousel - Vertical on the right */}
-      <div className="w-1/5">
+      <div className="w-1/5 hidden lg:block">
         <div className="h-[500px] overflow-hidden">
           <Carousel className="h-full" orientation="vertical" setApi={setThumbApi}>
             <CarouselContent className="h-full flex-col !-mt-0 gap-2 p-1">

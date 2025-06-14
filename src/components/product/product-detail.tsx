@@ -90,7 +90,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               {product.images && product.images.length > 0 ? (
                 <ProductCarousel images={product.images} />
               ) : (
-                <div className="bg-neutral-200 h-96 flex items-center justify-center">
+                <div className="bg-neutral-200 flex items-center justify-center">
                   <span className="text-neutral-500">{t('noImage')}</span>
                 </div>
               )}
