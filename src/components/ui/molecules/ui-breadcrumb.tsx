@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import {
   Breadcrumb,

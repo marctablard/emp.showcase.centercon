@@ -17,7 +17,6 @@ import UiLink from '../ui/link';
 import ProductAddToCart from './product-add-to-cart';
 import { ProductPriceComponent } from './product-price';
 import { ProductShippingInfo } from './product-shipping-info';
-import { ProductTabsComponent } from './product-tabs';
 
 export interface ProductDetailProps {
   product?: Product;

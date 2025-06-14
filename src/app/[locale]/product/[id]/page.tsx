@@ -1,4 +1,3 @@
-import { cache } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/product/product-detail';

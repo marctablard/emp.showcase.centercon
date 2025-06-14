@@ -158,8 +158,8 @@ function CarouselPrevious({
   size = 'icon',
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollPrev, canScrollPrev } = useCarousel();
-  let classes = cn('absolute size-8 rounded-full', className);
+  const { scrollPrev, canScrollPrev } = useCarousel();
+  const classes = cn('absolute size-8 rounded-full', className);
 
   return (
     <Button
@@ -182,8 +182,8 @@ function CarouselNext({
   size = 'icon',
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollNext, canScrollNext } = useCarousel();
-  let classes = cn('absolute size-8 rounded-full', className);
+  const { scrollNext, canScrollNext } = useCarousel();
+  const classes = cn('absolute size-8 rounded-full', className);
 
   return (
     <Button

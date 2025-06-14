@@ -27,7 +27,7 @@ class EmporixCategoryMapper implements CategoryMapper<EmporixCategory> {
     };
   }
 
-  mapToSource(service: Category): EmporixCategory {
+  mapToSource(_service: Category): EmporixCategory {
     throw new Error('Method not implemented.');
   }
 }

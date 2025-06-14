@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import CMSPageComponent from '@/components/cms/cms-page';
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {

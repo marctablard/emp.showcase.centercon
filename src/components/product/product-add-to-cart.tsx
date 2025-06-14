@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { LucideMinus, LucidePlus, LucideShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input, InputButton } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/cart/useCart';
 import { useProduct } from '@/hooks/product/useProduct';
 import { cn } from '@/lib/utils';
@@ -64,10 +64,6 @@ export default function ProductAddToCart({
         description: error instanceof Error ? error.message : String(error),
       });
     }
-  };
-
-  const handleBuyNow = async () => {
-    return false;
   };
 
   const incrementQuantity = () => {
