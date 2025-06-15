@@ -128,7 +128,7 @@ export default function RegistrationCard() {
           lastName: values.lastName,
           company: values.companyName,
           language: locale, // use current locale
-          currency: currency, // use current currency
+          currency: currency?.code, // use current currency
         },
         address: {
           contactName: values.firstName + ' ' + values.lastName,

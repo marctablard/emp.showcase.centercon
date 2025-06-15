@@ -25,12 +25,21 @@ export function cn(...inputs: ClassValue[]) {
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en', {
     style: 'currency',
     currency: currencyCode,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+export function formatCurrencyToParts(amount: number, currencyCode: string = 'USD'): Intl.NumberFormatPart[] {
+  return new Intl.NumberFormat('de', {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).formatToParts(amount);
 }
 
 /**
@@ -40,7 +49,10 @@ export function formatCurrency(amount: number, currencyCode: string = 'USD'): st
  * @returns Canonical URL for the product page
  */
 export function buildCanonicalUrl(locale: string, path: string): string {
-  return `${baseUrl}/${locale === defaultEmptyLocale ? '' : locale}/${path}`;
+  if (!path.startsWith('/')) {
+    path = `/${path}`;
+  }
+  return `${baseUrl}${locale === defaultEmptyLocale ? '' : `/${locale}`}${path}`;
 }
 /**
  * Extract the localized value from a LocalizedString or return the string directly

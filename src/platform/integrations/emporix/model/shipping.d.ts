@@ -1,8 +1,8 @@
-import { EmporixMonetaryAmount, LocalizedString } from './common';
+import { EmporixLocalizedString, EmporixMonetaryAmount } from './common';
 
 export interface EmporixShippingZone {
   id: string;
-  name: LocalizedString;
+  name: EmporixLocalizedString;
   shipTo: EmporixShipToLocation[];
   methods: EmporixShippingMethod[];
 }
@@ -19,7 +19,7 @@ export interface EmporixShippingFee {
 
 export interface EmporixShippingMethod {
   id: string;
-  name: LocalizedString;
+  name: EmporixLocalizedString;
   maxOrderValue?: EmporixMonetaryAmount;
   fees: EmporixShippingFee[];
 }

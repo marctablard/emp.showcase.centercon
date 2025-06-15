@@ -13,12 +13,16 @@ export class EmporixPriceMapper implements PriceMapper {
     source.priceModel.tierDefinition.tiers.forEach((tierDef) => {
       tierDefinitions[tierDef.id] = { id: tierDef.id, minQuantity: tierDef.minQuantity };
     });
+    const discountValue = source.originalValue - source.effectiveValue;
+    const discountPercentage = (discountValue / source.originalValue) * 100;
     return {
       id: source.priceId,
       productId: source.itemId.id,
       currency: source.currency,
       originalValue: source.originalValue,
       effectiveValue: source.effectiveValue,
+      discountValue,
+      discountPercentage,
       totalValue: source.totalValue,
       quantity: {
         quantity: source.quantity.quantity,

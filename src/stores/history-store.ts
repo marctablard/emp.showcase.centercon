@@ -27,9 +27,36 @@ const defaultState: HistoryState = {
   searchHistory: [],
 };
 
+/**
+ * Generic function to add an item to a history array with a maximum size
+ * @param array The array to add the item to
+ * @param item The item to add
+ * @param maxSize The maximum size of the array
+ * @param compareFn Optional function to compare items for equality (defaults to strict equality)
+ */
+function addToHistoryArray<T>(array: T[], item: T, maxSize: number, compareFn?: (a: T, b: T) => boolean): void {
+  // Check if item already exists in the array
+  const existingIndex = compareFn
+    ? array.findIndex((existing) => compareFn(existing, item))
+    : array.indexOf(item as any);
+
+  // If it exists, remove it
+  if (existingIndex !== -1) {
+    array.splice(existingIndex, 1);
+  }
+
+  // Add the item to the end of the array
+  array.push(item);
+
+  // If the array exceeds the maximum size, remove the oldest item (FIFO)
+  if (array.length > maxSize) {
+    array.shift();
+  }
+}
+
 export const createHistoryStore = (initState: HistoryState = defaultState) => {
   const MAX_SEARCH_HISTORY = parseInt(process.env.NEXT_PUBLIC_MAX_SEARCH_HISTORY || '10', 10);
-  const MAX_LAST_SEEN_PRODUCTS = parseInt(process.env.NEXT_PUBLIC_MAX_LAST_SEEN_PRODUCTS || '12', 10);
+  const MAX_LAST_SEEN_PRODUCTS = parseInt(process.env.NEXT_PUBLIC_MAX_LAST_SEEN_PRODUCTS || '10', 10);
   const HISTORY_STORAGE_NAME = process.env.NEXT_PUBLIC_HISTORY_STORAGE_NAME || 'history-storage';
 
   return create<HistoryStore>()(
@@ -38,35 +65,12 @@ export const createHistoryStore = (initState: HistoryState = defaultState) => {
         ...initState,
         addLastSeenProduct: (product: Product) =>
           set((state) => {
-            // Check if product already exists in the list
-            const existingIndex = state.lastSeenProducts.findIndex((p) => p.id === product.id);
-            if (existingIndex !== -1) {
-              state.lastSeenProducts.splice(existingIndex, 1);
-            }
-            state.lastSeenProducts.push(product);
-
-            // If the list exceeds the maximum size, remove the oldest item (FIFO)
-            if (state.lastSeenProducts.length >= MAX_LAST_SEEN_PRODUCTS) {
-              state.lastSeenProducts.shift();
-            }
+            addToHistoryArray(state.lastSeenProducts, product, MAX_LAST_SEEN_PRODUCTS, (a, b) => a.id === b.id);
           }),
         addSearchQuery: (query: string) =>
           set((state) => {
-            if (!query.trim()) return; // Don't add empty queries
-
-            // Check if query already exists in the list
-            const existingIndex = state.searchHistory.indexOf(query);
-            if (existingIndex !== -1) {
-              state.searchHistory.splice(existingIndex, 1);
-            }
-
-            // Add the query to the end of the list
-            state.searchHistory.push(query);
-
-            // If the list exceeds the maximum size, remove the oldest item (FIFO)
-            if (state.searchHistory.length >= MAX_SEARCH_HISTORY) {
-              state.searchHistory.shift();
-            }
+            if (!query.trim()) return;
+            addToHistoryArray(state.searchHistory, query, MAX_SEARCH_HISTORY);
           }),
         clearLastSeenProducts: () =>
           set((state) => {
