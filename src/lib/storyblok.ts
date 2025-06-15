@@ -8,6 +8,7 @@ import Feature from '@/components/cms/feature';
 import Grid from '@/components/cms/grid';
 import Hero from '@/components/cms/hero';
 import Logo from '@/components/cms/logo';
+import MediaText from '@/components/cms/media-text';
 import Navigation from '@/components/cms/navigation';
 import Page from '@/components/cms/page';
 import QuickEntry from '@/components/cms/quick-entry';
@@ -37,5 +38,6 @@ export const getStoryblokApi = storyblokInit({
     button: Button,
     hero: Hero,
     quick_entry: QuickEntry,
+    media_text: MediaText,
   },
 });

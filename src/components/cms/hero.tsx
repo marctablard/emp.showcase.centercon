@@ -26,6 +26,7 @@ const Hero = ({ blok }: HeroProps) => {
   }
 
   const button = blok.main_button[0];
+  const isVideo = false;
 
   return (
     <div {...storyblokEditable(blok)} className={cn('relative sm:mb-10 lg:mb-0')}>
@@ -42,11 +43,28 @@ const Hero = ({ blok }: HeroProps) => {
                 </clipPath>
               </defs>
 
-              <image
-                clipPath="url(#shape)"
-                xlinkHref={blok.image.filename}
-                className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
-              ></image>
+              {blok.image && !isVideo && (
+                <image
+                  clipPath="url(#shape)"
+                  xlinkHref={blok.image.filename}
+                  className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
+                ></image>
+              )}
+              {isVideo && (
+                <foreignObject
+                  width="100%"
+                  height="100%"
+                  clipPath="url(#shape)"
+                  className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
+                >
+                  <video loop autoPlay width="100%">
+                    <source
+                      src="https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4"
+                      type="video/mp4"
+                    />
+                  </video>
+                </foreignObject>
+              )}
             </svg>
           )}
         </div>
@@ -60,7 +78,7 @@ const Hero = ({ blok }: HeroProps) => {
           {blok.main_button && <Button blok={button} />}
         </div>
       </div>
-      {blok.video && (
+      {isVideo && (
         <div className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 me-6 mb-20 p-3 text-primary-500">
           <CirclePause />
         </div>
