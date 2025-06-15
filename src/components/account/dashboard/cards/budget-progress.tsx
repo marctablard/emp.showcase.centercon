@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CompanyFinancials } from '@/hooks/company/useCompany';
+import { DashboardCard } from './dashboard-card';
 
 interface BudgetProgressProps {
   financials: CompanyFinancials;
@@ -26,11 +26,8 @@ export function BudgetProgress({ financials, className }: BudgetProgressProps) {
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">{t('budgetOverview')}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <DashboardCard title={t('budgetOverview')} className={className}>
+      <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">{t('revenue')}</span>
@@ -52,11 +49,14 @@ export function BudgetProgress({ financials, className }: BudgetProgressProps) {
             <span>{budgetUsedPercentage}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-primary" style={{ width: `${budgetUsedPercentage}%` }} />
+            <div
+              className={`h-full bg-primary transition-all duration-300`}
+              style={{ width: `${budgetUsedPercentage}%` }}
+            />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardCard>
   );
 }
 

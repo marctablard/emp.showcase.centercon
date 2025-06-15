@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Approval } from '@/hooks/company/useCompany';
+import { DashboardCard } from './dashboard-card';
 
 interface ApprovalsCardProps {
   approvals: Approval[];
@@ -19,14 +19,11 @@ export function ApprovalsCard({ approvals, className }: ApprovalsCardProps) {
   const pendingApprovals = approvals.filter((approval) => approval.status === 'pending');
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium flex items-center justify-between">
-          {t('pendingApprovals')}
-          <Badge variant="secondary">{pendingApprovals.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <DashboardCard title={t('pendingApprovals')} className={className}>
+      <div className="flex items-center justify-between mb-4">
+        <Badge variant="secondary">{pendingApprovals.length}</Badge>
+      </div>
+      <div className="space-y-4">
         {pendingApprovals.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t('noApprovals')}</p>
         ) : (
@@ -58,8 +55,8 @@ export function ApprovalsCard({ approvals, className }: ApprovalsCardProps) {
             </Link>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardCard>
   );
 }
 

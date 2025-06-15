@@ -46,9 +46,6 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
   const [orders, setOrders] = useState<Order[]>(initialOrders || []);
   const [statusTransitions, setStatusTransitions] = useState<string[]>([]);
 
-  /**
-   * Fetch a specific order by ID
-   */
   const fetchOrder = useCallback(async () => {
     if (!orderId) return;
 
@@ -66,9 +63,6 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
     }
   }, [orderId]);
 
-  /**
-   * Fetch all orders for the current customer
-   */
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
@@ -83,9 +77,6 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
     }
   }, [pageSize, pageNumber]);
 
-  /**
-   * Fetch available status transitions for an order
-   */
   const fetchStatusTransitions = useCallback(async () => {
     if (!orderId) return;
 

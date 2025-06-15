@@ -14,7 +14,7 @@ const getCustomerService = () => globalThis.EMP.platform.ssr.get<CustomerService
 export const getCurrentCustomer = cache(async (): Promise<Customer | null> => {
   try {
     const customerService = getCustomerService();
-    const customer = await customerService.getCurrentCustomer();
+    const customer = await customerService.getCustomer();
     return customer;
   } catch (error) {
     console.error('Error fetching customer in SSR:', error);

@@ -1,7 +1,7 @@
 /**
  * Service layer model definitions for checkout
  */
-import { Address } from '@/platform/services/model/common';
+import { Address, AddressType } from '@/platform/services/model/common';
 import { PaymentMode } from '@/platform/services/model/payment';
 
 /**
@@ -21,12 +21,8 @@ export interface ContactData {
   company?: string;
 }
 
-/**
- * Address model for checkout
- * Extends the common BaseAddress with a required type field
- */
 export interface CheckoutAddress extends Address {
-  type: 'BILLING' | 'SHIPPING'; // Required and restricted to these values for checkout
+  type: AddressType; // Required for Checkout
 }
 
 /**

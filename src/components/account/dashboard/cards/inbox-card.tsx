@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CustomerMessage } from '@/hooks/customer/useCustomerMessages';
+import { DashboardCard } from './dashboard-card';
 
 interface InboxCardProps {
   messages: CustomerMessage[];
@@ -17,14 +17,11 @@ export function InboxCard({ messages, className }: InboxCardProps) {
   const t = useTranslations('Account');
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium flex items-center justify-between">
-          {t('inbox')}
-          <Badge variant="secondary">{messages.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <DashboardCard title={t('inbox')} className={className}>
+      <div className="items-center justify-between absolute top-4 right-4">
+        <Badge variant="secondary">{messages.length}</Badge>
+      </div>
+      <div className="space-y-4">
         {messages.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t('noMessages')}</p>
         ) : (
@@ -52,8 +49,8 @@ export function InboxCard({ messages, className }: InboxCardProps) {
             </Link>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardCard>
   );
 }
 

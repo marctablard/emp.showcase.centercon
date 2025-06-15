@@ -47,6 +47,7 @@ export async function removeCartFromCookie(cartId: string, response: NextRespons
   for (const siteCode of Object.keys(cartCookie)) {
     cartCookie[siteCode] = cartCookie[siteCode].filter((cart) => cart.cartId !== cartId);
   }
+
   response.cookies.set({
     name: CART_COOKIE_ID,
     value: JSON.stringify(cartCookie),

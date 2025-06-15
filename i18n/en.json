@@ -297,6 +297,7 @@
     },
     "Account": {
         "loading": "Dashboard loading...",
+        "resetLayout": "Reset Layout",
         "title" : "Service Portal",
         "welcomeBack": "Welcome back, {name}",
         "accountDashboardDescription": "Manage your account, orders, and company information",
@@ -414,5 +415,43 @@
         "spinner": {
             "loading": "Loading..."
         }
+    },
+    "Weather": {
+        "loading": "Loading weather data...",
+        "precipitation": "Precipitation",
+        "humidity": "Humidity",
+        "wind": "Wind",
+        "mainLocation": "Your Main Location",
+        "changeLocation": "Change Location",
+        "error": "Failed to load weather data",
+        "clearSky": "Clear Sky",
+        "mainlyClear": "Mainly Clear",
+        "partlyCloudy": "Partly Cloudy",
+        "overcast": "Overcast",
+        "fog": "Fog",
+        "depositingRimeFog": "Freezing Fog",
+        "lightDrizzle": "Light Drizzle",
+        "moderateDrizzle": "Moderate Drizzle",
+        "denseDrizzle": "Heavy Drizzle",
+        "lightFreezingDrizzle": "Light Freezing Drizzle",
+        "denseFreezingDrizzle": "Heavy Freezing Drizzle",
+        "slightRain": "Light Rain",
+        "moderateRain": "Moderate Rain",
+        "heavyRain": "Heavy Rain",
+        "lightFreezingRain": "Light Freezing Rain",
+        "heavyFreezingRain": "Heavy Freezing Rain",
+        "slightSnowFall": "Light Snow",
+        "moderateSnowFall": "Moderate Snow",
+        "heavySnowFall": "Heavy Snow",
+        "snowGrains": "Snow Grains",
+        "slightRainShowers": "Light Rain Showers",
+        "moderateRainShowers": "Moderate Rain Showers",
+        "violentRainShowers": "Heavy Rain Showers",
+        "slightSnowShowers": "Light Snow Showers",
+        "heavySnowShowers": "Heavy Snow Showers",
+        "thunderstorm": "Thunderstorm",
+        "thunderstormWithSlightHail": "Thunderstorm with Light Hail",
+        "thunderstormWithHeavyHail": "Thunderstorm with Heavy Hail",
+        "unknown": "Unknown Weather Condition"
     }
 }

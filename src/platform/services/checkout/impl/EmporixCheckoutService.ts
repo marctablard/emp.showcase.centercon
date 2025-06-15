@@ -36,7 +36,7 @@ class EmporixCheckoutService implements CheckoutService {
   }
 
   async checkout(request: CheckoutRequest): Promise<CheckoutResponse> {
-    const customer = await this.customerService.getCurrentCustomer();
+    const customer = await this.customerService.getCustomer();
 
     // First do the basic validation
     let emporixCustomer: EmporixCheckoutCustomer;

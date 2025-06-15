@@ -1,3 +1,13 @@
+export interface LocationData {
+  city: string;
+  country: Country;
+  state: string;
+  geoLocation?: GeoLocation;
+  postalCode?: string;
+  timezone?: string;
+  error?: string;
+}
+
 /**
  * Country information
  */
@@ -5,6 +15,11 @@ export interface Country {
   code: string;
   name: string | LocalizedString;
   regions?: string[];
+}
+
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
 }
 
 /**
@@ -92,6 +107,8 @@ export interface LocalizedString {
   [key: string]: string;
 }
 
+export type AddressType = 'SHIPPING' | 'BILLING';
+
 export interface Address {
   contactName: string;
   companyName?: string;
@@ -103,6 +120,8 @@ export interface Address {
   country: string;
   state?: string;
   contactPhone?: string;
+  types: AddressType[];
+  geoLocation?: GeoLocation;
 }
 export interface Media {
   url: string;

@@ -14,6 +14,7 @@ export interface EmporixAddress {
   state?: string;
   contactPhone?: string;
   type?: string;
+  tags: string[];
   metadata?: Metadata;
   mixins?: Mixins;
 }
