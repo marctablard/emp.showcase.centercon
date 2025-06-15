@@ -10,6 +10,7 @@ import Hero from '@/components/cms/hero';
 import Logo from '@/components/cms/logo';
 import Navigation from '@/components/cms/navigation';
 import Page from '@/components/cms/page';
+import QuickEntry from '@/components/cms/quick-entry';
 import Segment from '@/components/cms/segment';
 import Teaser from '@/components/cms/teaser';
 
@@ -35,5 +36,6 @@ export const getStoryblokApi = storyblokInit({
     article: Article,
     button: Button,
     hero: Hero,
+    quick_entry: QuickEntry,
   },
 });
