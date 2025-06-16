@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         cart = await cartService.getCartById(cartCookie.cartId);
       } catch (_error) {
         if (!create) {
-          const response = NextResponse.redirect(request.url);
+          const response = NextResponse.json({ error: 'Cart not found' }, { status: 204 });
           removeCartFromCookie(cartCookie.cartId, response);
           return response;
         } else {
