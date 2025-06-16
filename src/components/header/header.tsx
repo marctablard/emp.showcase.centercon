@@ -32,7 +32,7 @@ export default function Header() {
       >
         <div
           className={`transition-all duration-300 ease-in-out absolute top-0 left-0 right-0 w-full ${
-            scrolled ? 'opacity-0 transform -translate-y-4' : 'opacity-100'
+            scrolled ? 'opacity-0 transform -translate-y-4 z-1' : 'opacity-100 z-2'
           }`}
         >
           <HeaderExpanded />
@@ -40,7 +40,7 @@ export default function Header() {
 
         <div
           className={`flex justify-between items-center transition-all duration-300 ease-in-out absolute top-0 left-0 right-0 h-[64px] px-6 ${
-            scrolled ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
+            scrolled ? 'opacity-100 transform translate-y-0 z-2' : 'opacity-0 transform translate-y-4 z-1'
           }`}
         >
           <HeaderCollapsed />
