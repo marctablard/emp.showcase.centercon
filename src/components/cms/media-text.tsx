@@ -1,6 +1,7 @@
+import Image from 'next/image';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { cn } from '@/lib/utils';
-import Button, { ButtonData, ButtonProps } from './button';
+import Button, { ButtonData } from './button';
 import { TextEditorData } from './hero';
 
 export enum ImagePosition {
@@ -28,7 +29,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
   const button = blok.main_button ? blok.main_button[0] : null;
   const text = blok.text.content[0].content[0].text;
 
-  let isVideo = false; /* needs to be removed when video functionality is working */
+  const isVideo = false; /* needs to be removed when video functionality is working */
 
   return (
     <div
@@ -46,7 +47,15 @@ const MediaText = ({ blok }: MediaTextProps) => {
         >
           {blok.image && (
             <div className="h-full m-auto rounded-[inherit]">
-              {!isVideo && <img src={blok.image.filename} className="rounded-[inherit]" />}
+              {!isVideo && (
+                <Image
+                  src={blok.image.filename}
+                  alt={blok.image.alt || ''}
+                  className="w-full h-auto rounded-[inherit]"
+                  width={1000}
+                  height={1000}
+                />
+              )}
               {isVideo && blok.video_url && (
                 <div className="h-full rounded-[inherit]">
                   <iframe src={blok.video_url} className="w-full h-[500px] rounded-[inherit]" />

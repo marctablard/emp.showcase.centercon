@@ -1,8 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
-import { CirclePause, CirclePlay } from 'lucide-react';
+import { CirclePause } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Button, { ButtonData } from './button';
 
@@ -41,7 +40,7 @@ const Hero = ({ blok }: HeroProps) => {
   const button = blok.main_button[0];
   const text = blok.text.content[0].content[0].text;
 
-  let isVideo = false; /* needs to be removed when video functionality is working */
+  const isVideo = false; /* needs to be removed when video functionality is working */
 
   return (
     <div {...storyblokEditable(blok)} className={cn('relative mb-10 sm:mb-20 lg:md:mb-10')}>
