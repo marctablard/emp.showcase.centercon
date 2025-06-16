@@ -47,6 +47,9 @@ class EmporixCheckoutService implements CheckoutService {
           cause: result.errors,
         });
       }
+      if (!request.customer) {
+        throw new Error('Contact Data is required for guest checkout');
+      }
       emporixCustomer = {
         email: request.customer.email,
         firstName: request.customer.firstName,

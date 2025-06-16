@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
+import { Badge } from '@/components/ui/badge';
+import { formatCurrency, formatCurrencyToParts } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 
 interface ProductPriceProps {
@@ -8,12 +11,81 @@ interface ProductPriceProps {
 }
 
 export function ProductPriceComponent({ price }: ProductPriceProps) {
+  const t = useTranslations('product.price');
+  const parts = formatCurrencyToParts(price.effectiveValue, price.currency);
+  let priceFragment: React.ReactNode[];
+  if (parts.length === 0) {
+    priceFragment = [<>{t('notAvailable')}</>];
+  } else {
+    const decimal = parts.find((part) => part.type === 'decimal')?.value || '.';
+
+    priceFragment = [
+      parts.map((part, index) => {
+        if (part.type === 'currency') {
+          return (
+            <span key={index} className="text-4xl">
+              {part.value}
+            </span>
+          );
+        }
+        if (part.type === 'literal') {
+          return <span key={index}>{part.value}</span>;
+        }
+        if (part.type === 'integer') {
+          return (
+            <span key={index} className="text-4xl">
+              {Math.floor(Number(part.value))}
+            </span>
+          );
+        }
+        if (part.type === 'fraction') {
+          return (
+            <span key={index} className="text-md align-top">
+              {decimal}
+              {part.value}
+            </span>
+          );
+        }
+      }),
+    ];
+  }
   return (
     <div className="mt-4">
-      <h2 className="text-3xl font-bold text-neutral-900">
-        ${Math.floor(price.effectiveValue)}
-        <span className="text-lg align-top">.{(price.effectiveValue % 1).toFixed(2).substring(2)}</span>
-      </h2>
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium">{t('yourPrice')}</span>
+        {price.discountPercentage > 0 && (
+          <>
+            <span className="text-sm font-medium ml-[-0.5em]">, {t('including')}</span>
+            <Badge variant="destructive" rounded="default">
+              -{price.discountPercentage}%
+            </Badge>
+          </>
+        )}
+      </div>
+
+      <div className="flex items-baseline gap-4">
+        <div className="font-bold text-neutral-900">{priceFragment}</div>
+
+        {price.originalValue && price.originalValue > price.effectiveValue && (
+          <div className="text-neutral-400 line-through">{price.originalValue.toFixed(2)} €</div>
+        )}
+      </div>
+      {price.tax && (
+        <div className="text-sm text-neutral-500 mb-2">
+          {price.includesTax ? (
+            <>
+              {t('includingTax', { taxRate: price.tax.taxRate })} / {formatCurrency(price.tax.netValue, price.currency)}{' '}
+              {t('net')}
+            </>
+          ) : (
+            <>
+              {t('excludingTax', { taxRate: price.tax.taxRate })} /{' '}
+              {formatCurrency(price.tax.grossValue, price.currency)} {t('gross')}
+            </>
+          )}
+        </div>
+      )}
+      {/* Wait for a proper styling for List Prices
       {price.tierValues?.length > 0 && (
         <div className="mt-2 space-y-2">
           {price.tierValues.map((tier, index) => (
@@ -24,6 +96,7 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
           ))}
         </div>
       )}
+      */}
     </div>
   );
 }

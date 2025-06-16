@@ -1,5 +1,4 @@
-import { LocalizedString } from '@/platform/services/model/common';
-import { Site } from './common';
+import { EmporixLocalizedString, Metadata, Site } from './common';
 
 export interface EmporixCalculatedPrice {
   netValue: number;
@@ -53,7 +52,7 @@ export interface EmporixTierDefinition {
 
 export interface EmporixPriceModel {
   id: string;
-  name: LocalizedString;
+  name: EmporixLocalizedString;
   includesTax: boolean;
   includesMarkup: boolean;
   measurementUnit: EmporixQuantity;

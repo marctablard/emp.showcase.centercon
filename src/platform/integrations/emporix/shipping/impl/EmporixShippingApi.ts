@@ -21,7 +21,6 @@ class EmporixShippingApi implements IEmporixShippingApi {
       { method: 'GET' },
       'public',
     );
-
     if (!response.ok) {
       if (response.status === 404) {
         return null;
@@ -29,7 +28,6 @@ class EmporixShippingApi implements IEmporixShippingApi {
         throw new Error(`Failed to get shipping method: ${response.statusText}`);
       }
     }
-
     return await response.json();
   }
 

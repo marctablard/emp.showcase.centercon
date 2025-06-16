@@ -1,6 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
+import type { TokenManager } from '../../common/TokenManager';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCustomer, EmporixCustomerAddress, EmporixSignupRequest } from '../../model/customer';
 import { EmporixSessionContext } from '../../model/session-context';
@@ -9,6 +10,7 @@ import { CustomerApi } from '../CustomerApi';
 @injectable('EmporixCustomerApi', 'Singleton')
 class EmporixCustomerApi implements CustomerApi {
   constructor(
+    @inject('EmporixTokenManager') private readonly tokenManager: TokenManager,
     @inject('EmporixApiInvoker') private readonly apiInvoker: EmporixApiInvoker,
     @inject('EmporixConfig') private readonly config: EmporixConfig,
   ) {}
@@ -219,8 +221,11 @@ class EmporixCustomerApi implements CustomerApi {
   }
 
   async logout(): Promise<void> {
-    const url = `customer/${this.config.tenant}/logout`;
-
+    const token = await this.tokenManager.getCustomerToken(this.config.tenant, this.config.clientId);
+    if (!token) {
+      throw new Error('Failed to logout, missing customer token.');
+    }
+    const url = `customer/${this.config.tenant}/logout?accessToken=${token.accessToken}`;
     const response = await this.apiInvoker.authenticatedFetch(
       url,
       {
@@ -232,6 +237,8 @@ class EmporixCustomerApi implements CustomerApi {
     if (!response.ok) {
       throw new Error(`Failed to logout: ${response.statusText}`);
     }
+    await this.tokenManager.clearCustomerToken(this.config.tenant);
+    await this.tokenManager.clearAnonymousToken(this.config.tenant);
   }
 
   async login(username: string, password: string): Promise<EmporixSessionContext> {

@@ -66,6 +66,8 @@ export interface CheckoutRequest extends BaseCheckoutRequest {
   cartId: string;
   shipping: CheckoutShipping;
   addresses: CheckoutAddress[];
+  customer: ContactData | null;
+  paymentMethod: CheckoutPaymentMethod;
 }
 
 /**

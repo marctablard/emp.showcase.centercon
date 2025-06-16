@@ -3,7 +3,6 @@ export interface CartCookieEntry {
   cartId: string;
   legalEntityId?: string;
   channel?: string;
-  items: CartCookieItem[];
 }
 
 export interface CartCookieItem {

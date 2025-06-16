@@ -49,7 +49,7 @@ export function UiBreadcrumb({ items, maxItems = 2, className, ...props }: UiBre
           <BreadcrumbLink href={'/'}>{t('homeLink')}</BreadcrumbLink>
         </BreadcrumbItem>
         {hiddenItems.length > 0 && (
-          <BreadcrumbItem key="dropdown" className="flex items-center md:hidden">
+          <BreadcrumbItem key="dropdown" className="flex items-center sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1">
                 <MoreHorizontal className="h-4 w-4 font-bold text-primary hover:text-primary-700" aria-hidden="true" />
@@ -74,7 +74,7 @@ export function UiBreadcrumb({ items, maxItems = 2, className, ...props }: UiBre
         {/* Breadcrumb items */}
         {hiddenItems.map((item, index) => {
           return (
-            <BreadcrumbItem key={index} className="hidden md:block">
+            <BreadcrumbItem key={index} className="hidden sm:block">
               <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
             </BreadcrumbItem>
           );

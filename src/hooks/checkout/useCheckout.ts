@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { checkout } from '@/lib/client/checkout';
 import { Cart } from '@/platform/services/model/cart/cart';
 import type {
   CheckoutAddress,
@@ -63,7 +64,7 @@ export const useCheckout = (): UseCheckout => {
   } = useCheckoutStore();
 
   // Get cart from cart store
-  const { cart: checkoutCart, updateShippingInfo } = useCart();
+  const { cart: checkoutCart, updateShippingInfo, clearCart } = useCart();
   const { customer } = useCustomer();
   const [loading, setLoading] = useState<boolean>(false);
   const [contactData, setContactData] = useState<ContactData | null>(storeContactData);
@@ -192,7 +193,7 @@ export const useCheckout = (): UseCheckout => {
     try {
       setLoading(true);
       setError(null);
-      // Use fetch directly to ensure client-side execution
+
       const checkoutData = {
         cartId: checkoutCart.id,
         shipping: shippingMethod,
@@ -201,22 +202,15 @@ export const useCheckout = (): UseCheckout => {
         paymentMethod: paymentMethod,
       };
 
-      const fetchResponse = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(checkoutData),
-      });
+      const checkoutResponse = await checkout(checkoutData);
 
-      if (!fetchResponse.ok) {
-        const errorData = await fetchResponse.json();
-        throw new Error(errorData.details || 'Failed to process checkout');
+      if (!checkoutResponse) {
+        throw new Error('Failed to process checkout');
       }
 
-      const response = await fetchResponse.json();
-      setOrderResponse(response);
-      return response;
+      clearCart();
+      setOrderResponse(checkoutResponse);
+      return checkoutResponse;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to process checkout');
       setError(error);
