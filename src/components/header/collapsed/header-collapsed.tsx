@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 
 export default function HeaderCollapsed() {
   return (
-    <header className="flex justify-between bg-white/95 backdrop-blur-sm shadow-lg rounded-2xl px-6 py-2 mx-9">
+    <>
       <div className="flex gap-8 items-center">
         <Link href="/">
           <Image src="/logo_small.svg" alt="Logo" width="25" height="22" />
@@ -21,6 +21,6 @@ export default function HeaderCollapsed() {
         <HeaderActions />
         <HeaderCartButton />
       </div>
-    </header>
+    </>
   );
 }
