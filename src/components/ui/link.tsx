@@ -31,6 +31,7 @@ interface LinkProps {
   iconBefore?: React.ReactNode | undefined;
   iconAfter?: React.ReactNode | undefined;
   children?: React.ReactNode | undefined;
+  className?: string;
 }
 
 export default function UiLink({
@@ -40,12 +41,13 @@ export default function UiLink({
   iconBefore,
   iconAfter,
   href = '#',
+  className,
   ...props
 }: LinkProps &
   VariantProps<typeof linkVariants> & {
     asChild?: boolean;
   }) {
-  const classes = linkVariants({ variant, size });
+  const classes = linkVariants({ variant, size, className });
   switch (type) {
     case 'Link':
       return (
