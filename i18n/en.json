@@ -1,4 +1,8 @@
 {
+    "Languages": {
+        "en": "English",
+        "de": "German"
+    },
     "hello": {
         "world": "Hello World",
         "friend": "Hey Friend"
@@ -68,6 +72,20 @@
         "solutions": "Solutions",
         "onlinePlaner": "Online Planer",
         "aboutUs": "About us"
+    },
+    "quickOrder": {
+        "title": "Quick Order",
+        "searchPlaceholder": "Search for products",
+        "quantity": "Quantity",
+        "addRow": "More",
+        "uploadFile": "Upload",
+        "uploadSuccess": "File Uploaded",
+        "uploadError": "Upload Error",
+        "addToCart": "Submit",
+        "productNotFound": "No products found",
+        "selectProduct": "Please select at least one product",
+        "successMessage": "Products added to cart",
+        "errorMessage": "Error adding products to cart"
     },
     "footer": {
         "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",
@@ -289,7 +307,10 @@
         "free": "Free",
         "shippingAddress": "Shipping Address",
         "errorFetchingOrder": "Error fetching order details",
-        "viewOrders": "View My Orders"
+        "viewOrders": "View My Orders",
+        "cancelOrder": "Cancel Order",
+        "returnOrder": "Return Order",
+        "orderActions": "Order Actions"
     },
     "searchResults": {
         "showing": "Showing {start}-{end} of {total} products",
@@ -309,8 +330,11 @@
     "Account": {
         "loading": "Dashboard loading...",
         "resetLayout": "Reset Layout",
+        "settings": "Settings",
+        "dashboardSettings": "Dashboard Settings",
+        "customize": "Customize",
         "title" : "Service Portal",
-        "welcomeBack": "Welcome back, {name}",
+        "welcomeBack": "Welcome, {name}",
         "accountDashboardDescription": "Manage your account, orders, and company information",
         "accountDetails": "Account Details",
         "company": "Company",

@@ -1,4 +1,8 @@
 {
+    "Languages": {
+        "en": "English",
+        "de": "Deutsch"
+    },
     "hello": {
         "world": "Hallo Welt",
         "friend": "Hey Kumpel"
@@ -68,6 +72,20 @@
         "solutions": "Lösungen",
         "onlinePlaner": "Online Planer",
         "aboutUs": "Über uns"
+    },
+    "quickOrder": {
+        "title": "Quick Order",
+        "searchPlaceholder": "Produkte suchen",
+        "quantity": "Menge",
+        "addRow": "Mehr",
+        "uploadFile": "Hochladen",
+        "uploadSuccess": "Datei hochgeladen",
+        "uploadError": "Upload-Fehler",
+        "addToCart": "In den Warenkorb",
+        "productNotFound": "Produkt nicht gefunden",
+        "selectProduct": "Produkt auswählen",
+        "successMessage": "Produkte zum Warenkorb hinzugefügt",
+        "errorMessage": "Fehler beim Hinzufügen der Produkte zum Warenkorb"
     },
     "footer": {
         "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",
@@ -298,7 +316,10 @@
         "free": "Kostenlos",
         "shippingAddress": "Lieferadresse",
         "errorFetchingOrder": "Fehler beim Abrufen der Bestelldetails",
-        "viewOrders": "Meine Bestellungen anzeigen"
+        "viewOrders": "Meine Bestellungen anzeigen",
+        "cancelOrder": "Stornieren",
+        "returnOrder": "Rückgabe",
+        "orderActions": "Bestellaktionen"
     },
     "searchResults": {
         "showing": "Zeige {start}-{end} von {total} Produkten",
@@ -318,8 +339,11 @@
     "Account": {
         "loading": "Dashboard wird geladen...",
         "resetLayout": "Layout zurücksetzen",
+        "settings": "Einstellungen",
+        "dashboardSettings": "Dashboard-Einstellungen",
+        "customize": "Anpassen",
         "title": "Service Portal",
-        "welcomeBack": "Willkommen zurück, {name}",
+        "welcomeBack": "Willkommen, {name}",
         "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
         "accountDetails": "Kontodaten",
         "company": "Unternehmen",
