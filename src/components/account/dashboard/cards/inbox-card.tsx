@@ -5,19 +5,26 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { CustomerMessage } from '@/hooks/customer/useCustomerMessages';
-import { DashboardCard } from './dashboard-card';
+import { Spinner } from '@/components/ui/spinner';
+import { useMessages } from '@/hooks/messages/useMessages';
+import { DashboardCard, DashboardCardProps } from './dashboard-card';
 
-interface InboxCardProps {
-  messages: CustomerMessage[];
-  className?: string;
-}
+interface InboxCardProps extends Omit<DashboardCardProps, 'children'> {}
 
-export function InboxCard({ messages, className }: InboxCardProps) {
+export function InboxCard({ className, title, ...props }: InboxCardProps) {
   const t = useTranslations('Account');
+  const { messages, loading: isMessagesLoading } = useMessages();
+
+  if (isMessagesLoading) {
+    return (
+      <div>
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
-    <DashboardCard title={t('inbox')} className={className}>
+    <DashboardCard title={title || t('inbox')} className={className} {...props}>
       <div className="items-center justify-between absolute top-4 right-4">
         <Badge variant="secondary">{messages.length}</Badge>
       </div>

@@ -1,29 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  Cloud,
-  CloudDrizzle,
-  CloudFog,
-  CloudLightning,
-  CloudRain,
-  CloudSnow,
-  CloudSun,
-  Cloudy,
-  Snowflake,
-  Sun,
-  Wind,
-} from 'lucide-react';
+import { CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, Cloudy, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CardFooter } from '@/components/ui/card';
 import { useWeather } from '@/hooks/weather/useWeather';
+import { findCardLayout, useLocalDashboardStore } from '@/lib/client/dashboard';
 import { LocationData } from '@/platform/services/model/common';
-import { DashboardCard } from './dashboard-card';
+import { DashboardCard, DashboardCardProps } from './dashboard-card';
 
-interface WeatherCardProps {
-  className?: string;
-}
+interface WeatherCardProps extends Omit<DashboardCardProps, 'children'> {}
 
 interface WeatherIconProps {
   description: string;
@@ -92,29 +78,38 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({ description, className = 'h-1
   }
 };
 
-export function WeatherCard({ className }: WeatherCardProps) {
+export function WeatherCard({ className, title, subtitle, ...props }: WeatherCardProps) {
   const t = useTranslations('Weather');
+  const state = useLocalDashboardStore();
+  const [grid, setGrid] = useState({ cols: 1, rows: 1 });
   const { weatherData, loading, changeLocation } = useWeather();
 
+  useEffect(() => {
+    if (state.renderedLayout) {
+      setGrid(findCardLayout('weather', state.renderedLayout));
+    }
+  }, [state.renderedLayout]);
   if (loading || !weatherData) {
     return (
-      <DashboardCard className={className} variant="primary">
+      <DashboardCard className={className} variant="primary" {...props}>
         <div className="flex justify-center items-center h-32">{t('loading')}</div>
       </DashboardCard>
     );
   }
-
   return (
     <DashboardCard
-      title={t(weatherData.weather.description)}
-      subtitle={weatherData.weather.date}
+      title={title || t(weatherData.weather.description)}
+      subtitle={subtitle || weatherData.weather.date}
       className={className}
       variant="primary"
+      {...props}
     >
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div className={`flex-wrap gap-4 w-full`}>
           <div className="flex items-center gap-4">
-            <WeatherIcon description={weatherData.weather.description} />
+            <div className="flex-shrink-0">
+              <WeatherIcon description={weatherData.weather.description} />
+            </div>
             <div>
               <div className="text-3xl font-bold flex items-start">
                 {weatherData.weather.temperature.toFixed(1)}
@@ -123,7 +118,13 @@ export function WeatherCard({ className }: WeatherCardProps) {
               <div className="text-sm">{weatherData.location.city}</div>
             </div>
           </div>
-          <div className="text-sm md:border-l md:border-primary-600 md:pl-4">
+          <div
+            className={`text-sm ${
+              grid?.cols > grid?.rows
+                ? 'border-l border-primary-600 pl-4 flex-shrink-0 flex flex-col justify-center'
+                : 'mt-2'
+            }`}
+          >
             <div className="flex justify-between py-1">
               <span>{t('precipitation')}:</span>
               <span>{weatherData.weather.precipitation}%</span>

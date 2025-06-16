@@ -1,19 +1,16 @@
 'use client';
 
 import React from 'react';
-import { DashboardCard } from './dashboard-card';
+import { DashboardCard, DashboardCardProps } from './dashboard-card';
 
-interface StatCardProps {
-  title: string;
+export interface StatCardProps extends Omit<DashboardCardProps, 'children'> {
   value: string | number;
   description?: string;
-  icon?: React.ReactNode;
-  className?: string;
 }
 
-export function StatCard({ title, value, description, icon, className }: StatCardProps) {
+export function StatCard({ value, description, className, ...props }: StatCardProps) {
   return (
-    <DashboardCard title={title} icon={icon} variant="stat" className={className}>
+    <DashboardCard variant="stat" className={`${className} h-full`} {...props}>
       <div className="text-2xl font-bold">{value}</div>
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
     </DashboardCard>

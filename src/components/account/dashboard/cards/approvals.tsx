@@ -4,22 +4,37 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { CheckSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Approval } from '@/hooks/company/useCompany';
-import { DashboardCard } from './dashboard-card';
+import { useCompany } from '@/hooks/company/useCompany';
+import { DashboardCard, DashboardCardProps } from './dashboard-card';
+import { StatCard } from './stat-card';
 
-interface ApprovalsCardProps {
-  approvals: Approval[];
-  className?: string;
-}
-
-export function ApprovalsCard({ approvals, className }: ApprovalsCardProps) {
+export function ApprovalsSummaryCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
   const t = useTranslations('Account');
+  const { getApprovalCountsThisMonth } = useCompany();
 
-  const pendingApprovals = approvals.filter((approval) => approval.status === 'pending');
+  const { pending, total } = getApprovalCountsThisMonth();
 
   return (
-    <DashboardCard title={t('pendingApprovals')} className={className}>
+    <StatCard
+      title={t('approvals')}
+      value={pending + ' / ' + total}
+      description={t('approvalsDescription')}
+      icon={<CheckSquare className="h-4 w-4" />}
+    />
+  );
+}
+
+export function ApprovalsCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
+  const t = useTranslations('Account');
+  const { getPendingApprovals } = useCompany();
+
+  const pendingApprovals = getPendingApprovals();
+
+  return (
+    <DashboardCard title={title || t('pendingApprovals')} className={className} {...props}>
       <div className="flex items-center justify-between mb-4">
         <Badge variant="secondary">{pendingApprovals.length}</Badge>
       </div>

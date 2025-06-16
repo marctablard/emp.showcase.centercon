@@ -5,6 +5,7 @@ import { useStore } from 'zustand/react';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';
 import { createCustomerStore } from '@/stores/customer-store';
+import { createDashboardStore } from '@/stores/dashboard-store';
 import { createHistoryStore } from '@/stores/history-store';
 import { createProductStore } from '@/stores/products-store';
 import { createShippingMethodsStore } from '@/stores/shipping-methods-store';
@@ -24,6 +25,8 @@ export type CustomerStoreApi = ReturnType<typeof createCustomerStore>;
 export const CustomerStoreContext = createContext<CustomerStoreApi | null>(null);
 export type HistoryStoreApi = ReturnType<typeof createHistoryStore>;
 export const HistoryStoreContext = createContext<HistoryStoreApi | null>(null);
+export type DashboardStoreApi = ReturnType<typeof createDashboardStore>;
+export const DashboardStoreContext = createContext<DashboardStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
@@ -58,6 +61,10 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
   if (historyStoreRef.current === null) {
     historyStoreRef.current = createHistoryStore();
   }
+  const dashboardStoreRef = useRef<DashboardStoreApi | null>(null);
+  if (dashboardStoreRef.current === null) {
+    dashboardStoreRef.current = createDashboardStore();
+  }
   /**
    * The order is relevant, because store data can only depend on one another,
    * when nested properly.
@@ -76,7 +83,11 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
           <CustomerStoreContext.Provider value={customerStoreRef.current}>
             <CartStoreContext.Provider value={cartStoreRef.current}>
               <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
-                <HistoryStoreContext.Provider value={historyStoreRef.current}>{children}</HistoryStoreContext.Provider>
+                <HistoryStoreContext.Provider value={historyStoreRef.current}>
+                  <DashboardStoreContext.Provider value={dashboardStoreRef.current}>
+                    {children}
+                  </DashboardStoreContext.Provider>
+                </HistoryStoreContext.Provider>
               </CheckoutStoreContext.Provider>
             </CartStoreContext.Provider>
           </CustomerStoreContext.Provider>
@@ -138,6 +149,14 @@ export const useHistoryStore = () => {
   const storeContext = useContext(HistoryStoreContext);
   if (!storeContext) {
     throw new Error('useHistoryStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useDashboardStore = () => {
+  const storeContext = useContext(DashboardStoreContext);
+  if (!storeContext) {
+    throw new Error('useDashboardStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

@@ -6,15 +6,15 @@ import { persist } from 'zustand/middleware';
 
 export interface DashboardState {
   // Dashboard layout data
-  layout: Layouts;
+  layouts: Layouts;
   loading: boolean;
   error: Error | null;
 }
 
 interface DashboardActions {
-  setLayout: (layout: Layouts) => void;
-  getLayout: () => Layouts;
-  resetLayout: () => void;
+  setLayouts: (layouts: Layouts) => void;
+  getLayouts: () => Layouts;
+  resetLayouts: () => void;
   setLoading: (loading: boolean) => void;
   getLoading: () => boolean;
 }
@@ -22,7 +22,7 @@ interface DashboardActions {
 export type DashboardStore = DashboardState & DashboardActions;
 
 // Default layout configuration for the dashboard
-const defaultLayout: Layouts = {
+const defaultLayouts: Layouts = {
   // Large screens (≥1200px) - 3 columns
   xl: [
     // Top row - small stat cards (half height)
@@ -75,7 +75,7 @@ const defaultLayout: Layouts = {
 };
 
 const defaultState: DashboardState = {
-  layout: defaultLayout,
+  layouts: defaultLayouts,
   loading: false,
   error: null,
 };
@@ -86,9 +86,9 @@ export const createDashboardStore = (initState: DashboardState = defaultState) =
     persist(
       (set, get) => ({
         ...initState,
-        setLayout: (layout: Layouts) => set({ layout: defaultLayout }),
-        getLayout: () => get().layout,
-        resetLayout: () => set({ layout: defaultLayout }),
+        setLayouts: (layouts: Layouts) => set({ layouts }),
+        getLayouts: () => get().layouts,
+        resetLayouts: () => set({ layouts: defaultLayouts }),
         setLoading: (loading: boolean) => set({ loading }),
         getLoading: () => get().loading,
       }),
@@ -98,6 +98,3 @@ export const createDashboardStore = (initState: DashboardState = defaultState) =
     ),
   );
 };
-
-// Create a singleton instance of the dashboard store
-export const useDashboardStore = createDashboardStore();

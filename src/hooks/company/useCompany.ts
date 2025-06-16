@@ -59,6 +59,15 @@ interface CompanyHook {
   orderSummary: { total: number; inProgress: number };
   returnSummary: { total: number; open: number };
   pendingApprovals: number;
+
+  // Approval methods
+  getAllApprovals: () => Approval[];
+  getPendingApprovals: () => Approval[];
+  getCompletedApprovals: () => Approval[];
+  getApprovalById: (id: string) => Approval | undefined;
+  approveApproval: (id: string) => Promise<boolean>;
+  rejectApproval: (id: string) => Promise<boolean>;
+  getApprovalCountsThisMonth: () => { pending: number; total: number };
 }
 
 /**
@@ -202,6 +211,74 @@ export const useCompany = (): CompanyHook => {
   // Calculate pending approvals
   const pendingApprovals = company?.approvals.filter((approval) => approval.status === 'pending').length || 0;
 
+  // Approval management methods
+  const getAllApprovals = (): Approval[] => {
+    return company?.approvals || [];
+  };
+
+  const getPendingApprovals = (): Approval[] => {
+    return company?.approvals.filter((approval) => approval.status === 'pending') || [];
+  };
+
+  const getCompletedApprovals = (): Approval[] => {
+    return (
+      company?.approvals.filter((approval) => approval.status === 'approved' || approval.status === 'rejected') || []
+    );
+  };
+
+  const getApprovalById = (id: string): Approval | undefined => {
+    return company?.approvals.find((approval) => approval.id === id);
+  };
+
+  const approveApproval = async (id: string): Promise<boolean> => {
+    if (!company) return false;
+
+    // In a real implementation, this would be an API call
+    // For now, we'll update the local state
+    const updatedApprovals = company.approvals.map((approval) =>
+      approval.id === id ? { ...approval, status: 'approved' } : approval,
+    );
+
+    // Update company state would happen here in a real implementation
+    // For mock purposes, we'll just log the action
+    console.log(`Approval ${id} has been approved`);
+    return true;
+  };
+
+  const rejectApproval = async (id: string): Promise<boolean> => {
+    if (!company) return false;
+
+    // In a real implementation, this would be an API call
+    // For now, we'll update the local state
+    const updatedApprovals = company.approvals.map((approval) =>
+      approval.id === id ? { ...approval, status: 'rejected' } : approval,
+    );
+
+    // Update company state would happen here in a real implementation
+    // For mock purposes, we'll just log the action
+    console.log(`Approval ${id} has been rejected`);
+    return true;
+  };
+
+  const getApprovalCountsThisMonth = (): { pending: number; total: number } => {
+    if (!company) return { pending: 0, total: 0 };
+
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const thisMonthApprovals = company.approvals.filter((approval) => {
+      const approvalDate = new Date(approval.date);
+      return approvalDate >= firstDayOfMonth;
+    });
+
+    const pendingThisMonth = thisMonthApprovals.filter((approval) => approval.status === 'pending').length;
+
+    return {
+      pending: pendingThisMonth,
+      total: thisMonthApprovals.length,
+    };
+  };
+
   return {
     company,
     loading,
@@ -209,6 +286,13 @@ export const useCompany = (): CompanyHook => {
     orderSummary,
     returnSummary,
     pendingApprovals,
+    getAllApprovals,
+    getPendingApprovals,
+    getCompletedApprovals,
+    getApprovalById,
+    approveApproval,
+    rejectApproval,
+    getApprovalCountsThisMonth,
   };
 };
 
