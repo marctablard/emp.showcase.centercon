@@ -19,6 +19,11 @@ let nextConfig: NextConfig = {
         hostname: '*.storyblok.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '*',
+        pathname: '/**',
+      },
     ],
   },
 

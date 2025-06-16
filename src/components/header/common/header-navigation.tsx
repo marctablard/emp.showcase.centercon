@@ -17,7 +17,11 @@ export default function HeaderNavigation() {
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger>{t('allProducts')}</NavigationMenuTrigger>
-          <NavigationMenuContent></NavigationMenuContent>
+          <NavigationMenuContent>
+            <NavigationMenuLink href="/product/victron-bluesolar-55w">Bluesolar 55W</NavigationMenuLink>
+            <NavigationMenuLink href="/product/enjoysolar-200w-module">Enjoysolar 200W Module</NavigationMenuLink>
+            <NavigationMenuLink href="/product/ecoflow-extension-cable">EcoFlow Extension Cable</NavigationMenuLink>
+          </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuTrigger>{t('services')}</NavigationMenuTrigger>
