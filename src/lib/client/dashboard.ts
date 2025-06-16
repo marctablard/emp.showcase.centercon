@@ -29,8 +29,8 @@ const defaultLayouts: Layouts = {
     { i: 'weather', x: 3, y: 0, w: 1, h: 2 },
     { i: 'budget', x: 3, y: 3, w: 1, h: 2 },
     { i: 'inbox', x: 2, y: 0, w: 1, h: 2 },
-    { i: 'recent-orders', x: 0, y: 0, w: 2, h: 2 },
-    { i: 'solar-output', x: 0, y: 3, w: 3, h: 3 },
+    { i: 'recent-orders', x: 0, y: 0, w: 2, h: 2, minH: 2, minW: 2 },
+    { i: 'solar-output', x: 0, y: 3, w: 3, h: 3, minH: 2, minW: 2 },
   ],
 
   // Medium screens (≥996px) - 3 columns
@@ -45,7 +45,7 @@ const defaultLayouts: Layouts = {
     { i: 'inbox', x: 1, y: 1, w: 1, h: 2 },
     { i: 'weather', x: 2, y: 1, w: 1, h: 2 },
     { i: 'recent-orders', x: 0, y: 4, w: 3, h: 2, minH: 2, minW: 2 },
-    { i: 'solar-output', x: 0, y: 2, w: 3, h: 2, minH: 2, minW: 3 },
+    { i: 'solar-output', x: 0, y: 2, w: 3, h: 2, minH: 2, minW: 2 },
   ],
 
   // Small screens (≥768px) - 2 columns

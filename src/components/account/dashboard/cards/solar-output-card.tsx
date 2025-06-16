@@ -81,7 +81,7 @@ export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCa
         temperature: hour.temperature.toFixed(1),
       };
     });
-  }, [weatherData]);
+  }, [weatherData, tWeather]);
 
   // Format address for display
   const addressDisplay = useMemo(() => {
@@ -94,7 +94,7 @@ export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCa
       <Card className={className}>
         <CardHeader>
           <CardTitle>
-            <Skeleton className="h-6 w-[250px]" />
+            <Skeleton className="h-6 w-[240px]" />
           </CardTitle>
           <CardContent>
             <Skeleton className="h-4 w-[200px]" />
@@ -125,88 +125,85 @@ export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCa
   return (
     <DashboardCard
       title={title || `${t('estimatedOutput', { defaultValue: 'Estimated Output' })} (${addressDisplay})`}
-      subtitle={t('installationSize', { defaultValue: 'Installation size with 1.4 kWp', size: '1.4 kWp' })}
+      subtitle={t('installationSize', { size: '1.4 kWp' })}
       icon={<Sun className="h-4 w-4" />}
-      className={className}
+      className={`${className}`}
       {...props}
     >
-      <div className="h-[220px] w-full">
-        <ChartContainer
-          config={{
-            solarOutput: {
-              label: 'Solar Output',
-              color: '#f59e0b',
-            },
-          }}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={solarOutputData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
-              <defs>
-                <linearGradient id="solarGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis
-                dataKey="time"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 10 }}
-                tickFormatter={(value) => value}
-                interval="preserveStartEnd"
-                minTickGap={10}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 10 }}
-                tickFormatter={(value) => `${value}`}
-                domain={[0, 'auto']}
-                width={30}
-                label={{ value: 'kW', position: 'insideLeft', angle: -90, dy: 10, fontSize: 10, fill: '#888' }}
-              />
-              <ChartTooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="rounded-lg border bg-background p-2 shadow-sm">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">Time</span>
-                            <span className="font-bold text-foreground">{payload[0].payload.time}</span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">Output</span>
-                            <span className="font-bold text-foreground">{payload[0].value} kW</span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">Weather</span>
-                            <span className="font-bold text-foreground">{payload[0].payload.weather}</span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">Temperature</span>
-                            <span className="font-bold text-foreground">{payload[0].payload.temperature}°C</span>
-                          </div>
-                        </div>
+      <ChartContainer
+        className="h-[200px] w-full"
+        config={{
+          solarOutput: {
+            label: 'Solar Output',
+            color: '#f59e0b',
+          },
+        }}
+      >
+        <AreaChart data={solarOutputData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+          <defs>
+            <linearGradient id="solarGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <XAxis
+            dataKey="time"
+            tickLine={false}
+            axisLine={false}
+            tick={{ fontSize: 10 }}
+            tickFormatter={(value) => value}
+            interval="preserveStartEnd"
+            minTickGap={10}
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tick={{ fontSize: 10 }}
+            tickFormatter={(value) => `${value}`}
+            domain={[0, 'auto']}
+            width={30}
+            label={{ value: 'kW', position: 'insideLeft', angle: -90, dy: 10, fontSize: 10, fill: '#888' }}
+          />
+          <ChartTooltip
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                return (
+                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex flex-col">
+                        <span className="text-[0.70rem] uppercase text-muted-foreground">Time</span>
+                        <span className="font-bold text-foreground">{payload[0].payload.time}</span>
                       </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="output"
-                stroke="#f59e0b"
-                fillOpacity={1}
-                fill="url(#solarGradient)"
-                name="solarOutput"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[0.70rem] uppercase text-muted-foreground">Output</span>
+                        <span className="font-bold text-foreground">{payload[0].value} kW</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[0.70rem] uppercase text-muted-foreground">Weather</span>
+                        <span className="font-bold text-foreground">{payload[0].payload.weather}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[0.70rem] uppercase text-muted-foreground">Temperature</span>
+                        <span className="font-bold text-foreground">{payload[0].payload.temperature}°C</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
+          <Area
+            type="monotone"
+            dataKey="output"
+            stroke="#f59e0b"
+            fillOpacity={1}
+            fill="url(#solarGradient)"
+            name="solarOutput"
+          />
+        </AreaChart>
+      </ChartContainer>
     </DashboardCard>
   );
 }

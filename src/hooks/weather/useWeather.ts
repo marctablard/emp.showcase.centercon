@@ -68,17 +68,6 @@ export function useWeather() {
     }
   }, [userLocation, locationLoading, locationError, weatherLocation]);
 
-  // Function to get current date in the format "Day, Month DD, YYYY"
-  function getCurrentDate(): string {
-    const date = new Date();
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  }
-
   const changeLocation = async (location: LocationData): Promise<void> => {
     setWeatherLocation(location);
   };
