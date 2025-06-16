@@ -36,6 +36,7 @@ interface MediaTextProps {
 const MediaText = ({ blok }: MediaTextProps) => {
   const media = blok.media[0];
   const button = blok.main_button ? blok.main_button[0] : '';
+  console.log(blok.text);
 
   return (
     <div

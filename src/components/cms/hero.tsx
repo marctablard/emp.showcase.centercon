@@ -26,14 +26,14 @@ const Hero = ({ blok }: HeroProps) => {
   }
 
   const button = blok.main_button[0];
-  const isVideo = false;
+  const isVideo = true;
 
   return (
     <div {...storyblokEditable(blok)} className={cn('relative mb-10 sm:mb-20 lg:md:mb-10')}>
       <div className="w-full flex justify-end">
-        <div className="w-full mb-65 sm:mb-0 xl:w-9/10 h-120 sm:h-130 md:h-120 lg:h-200 xl:h-175 2xl:h-220 ">
+        <div className="mb-65 sm:mb-0 h-120 sm:h-130 md:h-120 lg:h-200 xl:h-175 2xl:h-220 ">
           {blok.image && (
-            <svg height="100%" className="" viewBox="0 0 1573 735">
+            <svg className="h-[100%] " viewBox="0 0 1573 735">
               <defs>
                 <clipPath id="shape">
                   <path
@@ -50,23 +50,28 @@ const Hero = ({ blok }: HeroProps) => {
                   className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
                 ></image>
               )}
-              {blok.video && isVideo && (
+              {isVideo && (
                 <foreignObject
                   width="100%"
                   height="100%"
                   clipPath="url(#shape)"
-                  className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
+                  className="w-full translate-x-20 md:translate-x-0"
                 >
-                  <video loop autoPlay width="100%">
-                    <source src={blok.video.url} type="video/mp4" />
-                  </video>
+                  <iframe
+                    className="w-full h-full"
+                    src="https://www.youtube.com/embed/iXOkwkW1HQY?si=GxmaxC6DRnZwwNPf"
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
                 </foreignObject>
               )}
             </svg>
           )}
         </div>
       </div>
-      <div className="absolute bottom-0 sm:-bottom-10 lg:bottom-20 px-4">
+      <div className="absolute bottom-0 sm:-bottom-10 lg:bottom-20 px-9">
         <div className="flex flex-col gap-4 bg-white opacity-85 sm:w-1/2 xl:w-4/7 rounded-ss-xl rounded-ee-xl shadow-lg p-6">
           <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{blok.headline}</h1>
           <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
