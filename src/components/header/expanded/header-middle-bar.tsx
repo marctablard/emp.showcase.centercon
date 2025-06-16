@@ -8,7 +8,7 @@ export default function HeaderMiddleBar() {
     <div className="flex justify-between items-center self-stretch w-full pt-6">
       <div className="min-w-[223px]">
         <Link href="/">
-          <Image src="/logo.svg" alt="Logo" width="148" height="24" />
+          <Image src="/images/logo.svg" alt="Logo" width="148" height="24" />
         </Link>
       </div>
       <HeaderSearch small={false} />
