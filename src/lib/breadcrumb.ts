@@ -2,7 +2,7 @@ import { Category } from '@/platform/services/model/category';
 import { Product } from '@/platform/services/model/product';
 import { l10n } from './utils';
 
-export interface BreadcrumbConent {
+export interface BreadcrumbContent {
   href: string;
   label: string;
 }
@@ -26,8 +26,8 @@ function getCategorySlug(category: Category, locale: string): string {
 function buildCategoryBreadcrumbs(
   category: Category | undefined | null,
   locale: string,
-  breadcrumbs: BreadcrumbConent[] = [],
-): BreadcrumbConent[] {
+  breadcrumbs: BreadcrumbContent[] = [],
+): BreadcrumbContent[] {
   // Base case: if category is undefined or null, stop recursion
   if (!category) {
     return breadcrumbs;
@@ -46,8 +46,8 @@ function buildCategoryBreadcrumbs(
   return breadcrumbs;
 }
 
-export function generateBreadcrumbForProduct(product: Product, locale: string): BreadcrumbConent[] {
-  const breadcrumbs: BreadcrumbConent[] = [];
+export function generateBreadcrumbForProduct(product: Product, locale: string): BreadcrumbContent[] {
+  const breadcrumbs: BreadcrumbContent[] = [];
   const primaryCategory = product.primaryCategory || product.categories?.[0] || null;
   // If the product has a primary category, build category breadcrumbs
   if (primaryCategory) {

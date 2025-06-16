@@ -1,8 +1,8 @@
 import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
-import { BreadcrumbConent } from '@/lib/breadcrumb';
+import { BreadcrumbContent } from '@/lib/breadcrumb';
 
 export default function BreadcrumbStyleGuide() {
-  const breadcrumbs: BreadcrumbConent[] = [
+  const breadcrumbs: BreadcrumbContent[] = [
     {
       href: '#',
       label: 'Link Name',

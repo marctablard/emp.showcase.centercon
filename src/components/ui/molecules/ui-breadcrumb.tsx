@@ -17,11 +17,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { BreadcrumbConent } from '@/lib/breadcrumb';
+import { BreadcrumbContent } from '@/lib/breadcrumb';
 import { cn } from '@/lib/utils';
 
 interface UiBreadcrumbProps extends React.ComponentProps<'nav'> {
-  items: BreadcrumbConent[];
+  items: BreadcrumbContent[];
   maxItems?: number;
 }
 

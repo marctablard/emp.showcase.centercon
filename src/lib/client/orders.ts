@@ -1,3 +1,4 @@
+import { getOrderById as ssrGetOrderById } from '@/lib/ssr/orders';
 import { Order } from '@/platform/services/model/order/order';
 
 /**
@@ -10,10 +11,10 @@ export async function fetchOrders(pageSize?: number, pageNumber?: number): Promi
   const queryParams = new URLSearchParams();
   if (pageSize) queryParams.append('pageSize', pageSize.toString());
   if (pageNumber) queryParams.append('pageNumber', pageNumber.toString());
-  
+
   const queryString = queryParams.toString();
   const url = `/api/orders${queryString ? `?${queryString}` : ''}`;
-  
+
   const response = await fetch(url);
 
   if (!response.ok) {

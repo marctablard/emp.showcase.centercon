@@ -20,6 +20,7 @@ interface OrderConfirmationProps {
  */
 const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialOrder, customerEmail }) => {
   const t = useTranslations('Confirmation');
+  const tOrder = useTranslations('Order');
   const tOrderStatus = useTranslations('OrderStatus');
   const tPayment = useTranslations('PaymentModes');
   const { order, loading, error } = useOrder({ orderId, initialOrder });
@@ -50,7 +51,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-          <p>{t('errorFetchingOrder')}</p>
+          <p>{tOrder('errorFetchingOrder')}</p>
           <p className="text-sm">{error.message}</p>
         </div>
       )}
@@ -58,16 +59,16 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
       {order && (
         <>
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">{t('orderDetails')}</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">{tOrder('orderDetails')}</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-gray-600 mb-1">{t('orderNumber')}</p>
+                <p className="text-sm text-gray-600 mb-1">{tOrder('orderNumber')}</p>
                 <p className="font-medium">{order.id || orderId}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 mb-1">{t('orderDate')}</p>
+                <p className="text-sm text-gray-600 mb-1">{tOrder('orderDate')}</p>
                 <p className="font-medium">
                   {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                 </p>
@@ -75,23 +76,23 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
 
               {customerEmail && (
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">{t('email')}</p>
+                  <p className="text-sm text-gray-600 mb-1">{tOrder('email')}</p>
                   <p className="font-medium">{customerEmail}</p>
                 </div>
               )}
 
               <div>
-                <p className="text-sm text-gray-600 mb-1">{t('status')}</p>
+                <p className="text-sm text-gray-600 mb-1">{tOrder('status')}</p>
                 <p className="font-medium capitalize">{tOrderStatus(order.status)}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 mb-1">{t('paymentMethod')}</p>
+                <p className="text-sm text-gray-600 mb-1">{tOrder('paymentMethod')}</p>
                 <p className="font-medium">{tPayment((order.payments && order.payments[0]?.method) || 'none')}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 mb-1">{t('total')}</p>
+                <p className="text-sm text-gray-600 mb-1">{tOrder('total')}</p>
                 <p className="font-medium">
                   {order.price?.total?.gross
                     ? formatCurrency(order.price.total.gross, order.price.total.currency || order.currency || 'EUR')
@@ -104,7 +105,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
           {/* Order Items */}
           {order.items && order.items.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">{t('orderItems')}</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">{tOrder('orderItems')}</h2>
 
               <div className="divide-y divide-gray-200">
                 {order.items.map((item) => (
@@ -123,7 +124,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                     <div className="flex-grow">
                       <h3 className="font-medium">{item.name || `Product ${item.productId}`}</h3>
                       <p className="text-sm text-gray-500">
-                        {t('quantity')}: {item.quantity}
+                        {tOrder('quantity')}: {item.quantity}
                       </p>
                       <p className="text-sm font-medium">
                         {item.price?.value ? formatCurrency(item.price.value, item.price.currency) : ''}
@@ -136,7 +137,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
               {/* Order Summary */}
               <div className="mt-6 border-t border-gray-200 pt-4">
                 <div className="flex justify-between mb-2">
-                  <span className="text-gray-600">{t('subtotal')}</span>
+                  <span className="text-gray-600">{tOrder('subtotal')}</span>
                   <span className="font-medium">
                     {order.price?.subtotal?.gross
                       ? formatCurrency(order.price.subtotal.gross, order.currency || 'EUR')
@@ -146,21 +147,21 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
 
                 {order.shipping && (
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-600">{t('shipping')}</span>
+                    <span className="text-gray-600">{tOrder('shipping')}</span>
                     <span className="font-medium">
                       {order.shipping.total?.value
                         ? formatCurrency(
                             order.shipping.total.value,
                             order.shipping.total.currency || order.currency || 'EUR',
                           )
-                        : t('free')}
+                        : tOrder('free')}
                     </span>
                   </div>
                 )}
 
                 {order.discounts && order.discounts.length > 0 && (
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-600">{t('discount')}</span>
+                    <span className="text-gray-600">{tOrder('discount')}</span>
                     <span className="font-medium text-green-600">
                       -{order.discounts.reduce((sum, discount) => sum + (discount.value || 0), 0)}
                     </span>
@@ -168,7 +169,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                 )}
 
                 <div className="flex justify-between pt-2 border-t border-gray-200">
-                  <span className="font-medium">{t('total')}</span>
+                  <span className="font-medium">{tOrder('total')}</span>
                   <span className="font-bold">
                     {order.price?.total?.gross ? formatCurrency(order.price.total.gross, order.currency || 'EUR') : ''}
                   </span>
@@ -180,7 +181,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
           {/* Shipping Address */}
           {order.shippingAddress && (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">{t('shippingAddress')}</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">{tOrder('shippingAddress')}</h2>
               <address className="not-italic">
                 <p>{order.shippingAddress.contactName}</p>
                 <p>{order.shippingAddress.street}</p>

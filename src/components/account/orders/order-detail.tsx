@@ -1,10 +1,9 @@
 'use client';
 
-import React from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { format, formatDistanceToNow } from 'date-fns';
-import { ArrowLeft, Eye, ShoppingBag } from 'lucide-react';
+import { format } from 'date-fns';
+import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,35 +11,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useOrder } from '@/hooks/order/useOrder';
 import { Order } from '@/platform/services/model/order/order';
-import { DashboardCard, DashboardCardProps } from './dashboard-card';
-import { StatCard } from './stat-card';
-
-/**
- * Order Summary Card component
- * Shows the total number of orders and orders in progress
- */
-function OrderSummaryCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('Account');
-  const tOrder = useTranslations('Orders');
-  const { orders, loading } = useOrder();
-
-  // Calculate order counts
-  const totalOrders = orders.length;
-  const inProgressOrders = orders.filter((order) =>
-    ['IN_CHECKOUT', 'CREATED', 'CONFIRMED', 'PROCESSING'].includes(order.status),
-  ).length;
-
-  return (
-    <StatCard
-      title={title || t('ordersAndReturns')}
-      value={`${inProgressOrders} / ${totalOrders}`}
-      description={t('ordersInProgress', { count: inProgressOrders })}
-      icon={<ShoppingBag className="h-4 w-4" />}
-      className={className}
-      {...props}
-    />
-  );
-}
 
 /**
  * Order status badge component
@@ -54,17 +24,18 @@ function OrderStatusBadge({ status }: { status: Order['status'] }) {
       case 'COMPLETED':
         return 'success';
       case 'SHIPPED':
-        return 'warning'; // Changed from 'info' to 'warning' to match available variants
-      case 'CONFIRMED':
+      case 'DELIVERED':
         return 'secondary';
-      case 'CREATED':
-        return 'default';
-      case 'CANCELLED':
-        return 'destructive';
+      case 'CONFIRMED':
       case 'PROCESSING':
       case 'READY_FOR_PICKUP':
       case 'READY_FOR_SHIPPING':
-        return 'warning';
+        return 'secondary';
+      case 'CREATED':
+      case 'IN_CHECKOUT':
+        return 'default';
+      case 'CANCELLED':
+        return 'destructive';
       default:
         return 'outline';
     }
@@ -74,167 +45,14 @@ function OrderStatusBadge({ status }: { status: Order['status'] }) {
 }
 
 /**
- * Recent Orders Card component
- * Shows the most recent orders with their status
- */
-function RecentOrdersCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('Account');
-  const tOrder = useTranslations('Orders');
-  const { orders, loading } = useOrder();
-
-  // Sort orders by creation date (newest first) and take the first 6
-  const recentOrders = [...orders]
-    .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
-    .slice(0, 6);
-
-  return (
-    <DashboardCard title={title || t('ordersAndReturns')} className={className} {...props}>
-      <div className="flex items-center justify-between mb-4">
-        <Badge variant="secondary">{orders.length}</Badge>
-      </div>
-      <div className="space-y-4">
-        {loading ? (
-          <p className="text-sm text-muted-foreground">{t('loading')}</p>
-        ) : recentOrders.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('noOrders')}</p>
-        ) : (
-          recentOrders.map((order) => (
-            <div key={order.id} className="border-b pb-3 last:border-0 last:pb-0">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="text-sm font-medium">
-                    {tOrder('orderNumber')}{' '}
-                    <Link href={`/account/orders/${order.id}`} className="hover:underline">
-                      #{order.id}
-                    </Link>
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {order.items.length} {tOrder('quantity')} · {order.price?.total.gross} {order.currency}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <OrderStatusBadge status={order.status} />
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {order.createdAt && formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-        <div className="text-center">
-          <Link href="/account/orders" className="text-xs text-primary hover:underline">
-            {t('viewAllOrders')}
-          </Link>
-        </div>
-      </div>
-    </DashboardCard>
-  );
-}
-
-/**
- * Orders List component
- * Displays a table of all orders with their details
- */
-function OrdersList() {
-  const t = useTranslations('Account');
-  const tOrder = useTranslations('Orders');
-  const { orders, loading, error } = useOrder();
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{tOrder('orderDetails')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <p className="text-red-500">{tOrder('errorFetchingOrder')}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!orders || orders.length === 0) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <p className="text-muted-foreground">{t('noOrders')}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{tOrder('orderDetails')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{tOrder('orderNumber')}</TableHead>
-              <TableHead>{tOrder('orderDate')}</TableHead>
-              <TableHead>{tOrder('status')}</TableHead>
-              <TableHead>{tOrder('total')}</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">#{order.id}</TableCell>
-                <TableCell>{order.createdAt ? format(new Date(order.createdAt), 'dd.MM.yyyy') : '-'}</TableCell>
-                <TableCell>
-                  <OrderStatusBadge status={order.status} />
-                </TableCell>
-                <TableCell>
-                  {order.price?.total.gross} {order.currency}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="link" asChild>
-                    <Link href={`/account/orders/${order.id}`}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
-}
-
-/**
  * Order Detail component
  * Displays detailed information for a single order
  */
-function OrderDetail({ orderId }: { orderId: string }) {
+export function OrderDetail({ orderId, initialOrder }: { orderId: string; initialOrder?: Order | null }) {
   const tOrder = useTranslations('Orders');
   const tPaymentModes = useTranslations('PaymentModes');
 
-  const { order, loading, error } = useOrder({ orderId });
+  const { order, loading, error } = useOrder({ orderId, initialOrder });
 
   if (loading) {
     return (
@@ -339,9 +157,9 @@ function OrderDetail({ orderId }: { orderId: string }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{tOrder('orderItems')}</TableHead>
+                  <TableHead>{tOrder('product')}</TableHead>
                   <TableHead className="text-right">{tOrder('quantity')}</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
+                  <TableHead className="text-right">{tOrder('price')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -407,6 +225,3 @@ function OrderDetail({ orderId }: { orderId: string }) {
     </div>
   );
 }
-
-// Export all components
-export { OrderSummaryCard, OrderStatusBadge, RecentOrdersCard, OrdersList, OrderDetail };

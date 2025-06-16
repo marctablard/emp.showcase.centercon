@@ -1,13 +1,16 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Building2, FileText, ListChecks, LogOut, ShoppingBag, User } from 'lucide-react';
+import { BreadcrumbContent } from '@/lib/breadcrumb';
+import { UiBreadcrumb } from '../ui/molecules/ui-breadcrumb';
 import { AccountSidebar } from './account-sidebar';
 
 interface AccountLayoutProps {
   children: React.ReactNode;
+  breadcrumbs?: BreadcrumbContent[];
 }
 
-export function AccountLayout({ children }: AccountLayoutProps) {
+export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
   const t = useTranslations('Account');
 
   const sidebarItems = [
@@ -44,10 +47,13 @@ export function AccountLayout({ children }: AccountLayoutProps) {
   ];
 
   return (
-    <div className="flex min-h-screen">
-      <AccountSidebar items={sidebarItems} />
-      <main className="flex-1 p-6">{children}</main>
-    </div>
+    <>
+      {breadcrumbs && <UiBreadcrumb items={breadcrumbs} className="max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6" />}
+      <div className="flex min-h-screen">
+        <AccountSidebar items={sidebarItems} />
+        <main className="w-full ml-4">{children}</main>
+      </div>
+    </>
   );
 }
 

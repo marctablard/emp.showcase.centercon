@@ -54,8 +54,6 @@ export default function AccountDashboard() {
       <div key="approvals" className="h-full relative">
         <ApprovalsSummaryCard />
       </div>,
-
-      // Row 2 - Larger content cards (double height)
       <div key="budget" className="h-full overflow-auto relative">
         <BudgetProgress />
       </div>,
