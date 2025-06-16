@@ -27,7 +27,7 @@ export default function Header() {
   return (
     <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
       <header
-        className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl relative transition-all duration-300 ease-in-out mx-9"
+        className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl relative transition-all duration-300 ease-in-out mx-4 lg:mx-9"
         style={{ height: scrolled ? '64px' : '168px' }}
       >
         <div
