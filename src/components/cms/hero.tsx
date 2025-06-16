@@ -41,19 +41,7 @@ const Hero = ({ blok }: HeroProps) => {
   const button = blok.main_button[0];
   const text = blok.text.content[0].content[0].text;
 
-  const iframeRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const handlePlayPause = () => {
-    const iframe: any = iframeRef.current;
-    const video = iframe?.contentWindow.document.querySelector('video');
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
+  let isVideo = false; /* needs to be removed when video functionality is working */
 
   return (
     <div {...storyblokEditable(blok)} className={cn('relative mb-10 sm:mb-20 lg:md:mb-10')}>
@@ -70,14 +58,14 @@ const Hero = ({ blok }: HeroProps) => {
                 </clipPath>
               </defs>
 
-              {blok.image && !blok.video_url && (
+              {blok.image && !isVideo && (
                 <image
                   clipPath="url(#shape)"
                   xlinkHref={blok.image.filename}
                   className="w-full translate-x-20 md:translate-x-0"
                 ></image>
               )}
-              {blok.video_url && (
+              {isVideo && blok.video_url && (
                 <foreignObject
                   width="100%"
                   height="100%"
@@ -85,7 +73,6 @@ const Hero = ({ blok }: HeroProps) => {
                   className="w-full translate-x-20 md:translate-x-0"
                 >
                   <iframe
-                    ref={iframeRef}
                     className="w-full h-full"
                     src={blok.video_url}
                     title="YouTube video player"
@@ -107,12 +94,8 @@ const Hero = ({ blok }: HeroProps) => {
         </div>
       </div>
       {blok.video_url && (
-        <div
-          className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 cursor-pointer me-9 mb-14 p-3 text-primary-500 transition hover:text-primary-700"
-          onClick={handlePlayPause}
-        >
-          {isPlaying && <CirclePlay />}
-          {!isPlaying && <CirclePause />}
+        <div className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 cursor-pointer me-9 mb-14 p-3 text-primary-500 transition hover:text-primary-700">
+          {isVideo && <CirclePause />}
         </div>
       )}
     </div>

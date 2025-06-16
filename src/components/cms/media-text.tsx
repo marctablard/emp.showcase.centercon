@@ -28,6 +28,8 @@ const MediaText = ({ blok }: MediaTextProps) => {
   const button = blok.main_button ? blok.main_button[0] : null;
   const text = blok.text.content[0].content[0].text;
 
+  let isVideo = false; /* needs to be removed when video functionality is working */
+
   return (
     <div
       {...storyblokEditable(blok)}
@@ -44,8 +46,8 @@ const MediaText = ({ blok }: MediaTextProps) => {
         >
           {blok.image && (
             <div className="h-full m-auto rounded-[inherit]">
-              {!blok.video_url && <img src={blok.image.filename} className="rounded-[inherit]" />}
-              {blok.video_url && (
+              {!isVideo && <img src={blok.image.filename} className="rounded-[inherit]" />}
+              {isVideo && blok.video_url && (
                 <div className="h-full rounded-[inherit]">
                   <iframe src={blok.video_url} className="w-full h-[500px] rounded-[inherit]" />
                 </div>
