@@ -25,8 +25,8 @@ The Emporix Showcase application follows a multi-environment deployment strategy
 
 1. **Preview Environment**: Temporary deployments for pull request reviews (URLs automatically assigned by Vercel)
 2. **Development Environment**: Continuous deployment from the `develop` branch (URL automatically assigned by Vercel)
-3. **Staging Environment**: Deployment from `release/**` branches (URL: stage.emporix-showcase.vercel.app)
-4. **Production Environment**: Deployment triggered by version tags on the `master` branch (URL: emporix-showcase.vercel.app)
+3. **Staging Environment**: Deployment from `release/**` branches (URL: https://showcase-stage.emporix.io)
+4. **Production Environment**: Deployment triggered by version tags on the `master` branch (URL: https://showcase.emporix.io)
 
 ## Vercel Configuration
 
@@ -34,8 +34,8 @@ The application uses Vercel for hosting with different deployment environments:
 
 - **Project Name**: `emporix-showcase`
 - **Environments**:
-  - **Production**: Main production environment (emporix-showcase.vercel.app)
-  - **Staging**: Staging environment for pre-release testing (stage.emporix-showcase.vercel.app)
+  - **Production**: Main production environment (https://showcase.emporix.io)
+  - **Staging**: Staging environment for pre-release testing (https://showcase-stage.emporix.io)
   - **Preview**: Automatically generated environments for development and pull requests
 
 Vercel automatically assigns URLs for development and PR preview deployments.
