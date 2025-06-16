@@ -11,6 +11,8 @@ import { Link } from '@/i18n/navigation';
 
 // Todo: This is not used at the moment
 
+// Todo: This is not used at the moment
+
 export default function HeaderAccount() {
   const t = useTranslations('header');
   const { isAuthenticated, loading } = useAuthentication();
