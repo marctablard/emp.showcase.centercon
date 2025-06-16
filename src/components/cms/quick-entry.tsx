@@ -9,6 +9,13 @@ const IconVariant = {
   ShoppingCart: ShoppingCart,
 } as const;
 
+interface QuickEntry {
+  title: string;
+  link: string;
+  link_name: string;
+  icon: string;
+}
+
 interface QuickEntryElementProps {
   blok: {
     title: string;
@@ -20,7 +27,7 @@ interface QuickEntryElementProps {
 
 interface QuickEntryProps {
   blok: {
-    elements: QuickEntryElementProps[];
+    elements: QuickEntry[];
   };
 }
 

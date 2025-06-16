@@ -1,24 +1,10 @@
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { cn } from '@/lib/utils';
-import Button, { ButtonProps } from './button';
+import Button, { ButtonData, ButtonProps } from './button';
 
 export enum ImagePosition {
   Right = 'Right',
   Left = 'Left',
-}
-
-export enum Media {
-  Image = 'Image',
-  Video = 'Video',
-}
-
-interface MediaProps {
-  type: Media;
-  image?: {
-    filename: string;
-    alt?: string;
-  };
-  video_link?: string;
 }
 
 interface MediaTextProps {
@@ -26,24 +12,26 @@ interface MediaTextProps {
     overline?: string;
     headline: string;
     text: string;
-    main_button?: ButtonProps[];
-    media: MediaProps[];
+    main_button?: ButtonData[];
+    image: {
+      filename: string;
+      alt?: string;
+    };
+    video_url?: string;
     has_background?: boolean;
     image_position: ImagePosition;
   };
 }
 
 const MediaText = ({ blok }: MediaTextProps) => {
-  const media = blok.media[0];
-  const button = blok.main_button ? blok.main_button[0] : '';
-  console.log(blok.text);
+  const button = blok.main_button ? blok.main_button[0] : null;
 
   return (
     <div
       {...storyblokEditable(blok)}
       className={cn('flex gap-5 align-center px-4 py-8', blok.has_background && 'bg-primary-50')}
     >
-      <div className={cn('grid grid-cols-1 md:grid-cols-2 gap-5')}>
+      <div className={cn('w-full grid grid-cols-1 md:grid-cols-2 gap-5')}>
         <div
           className={cn(
             'row-start-2 md:row-span-2',
@@ -52,9 +40,14 @@ const MediaText = ({ blok }: MediaTextProps) => {
             'content-center rounded-ss-3xl rounded-ee-3xl',
           )}
         >
-          {media.type === Media.Image && (
-            <div className="w-full m-auto rounded-[inherit]">
-              <img src={media?.image?.filename} className="rounded-[inherit]" />
+          {blok.image && (
+            <div className="h-full m-auto rounded-[inherit]">
+              {!blok.video_url && <img src={blok.image.filename} className="rounded-[inherit]" />}
+              {blok.video_url && (
+                <div className="h-full rounded-[inherit]">
+                  <iframe src={blok.video_url} className="w-full h-[500px] rounded-[inherit]" />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -76,7 +69,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
           )}
         >
           <p className=" text-base lg:text-xl text-neutral-800 pb-3">{blok.text}</p>
-          {blok.main_button && <Button blok={button} />}
+          {button && <Button blok={button} />}
         </div>
       </div>
     </div>

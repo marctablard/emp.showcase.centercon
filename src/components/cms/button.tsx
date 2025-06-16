@@ -6,6 +6,14 @@ const IconVariant = {
   ArrowRight: ArrowRight,
   ArrowLeft: ArrowLeft,
 } as const;
+
+export interface ButtonData {
+  title: string;
+  link: string;
+  iconLeft?: string;
+  iconRight?: string;
+}
+
 export interface ButtonProps {
   blok: {
     title: string;

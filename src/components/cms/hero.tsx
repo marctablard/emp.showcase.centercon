@@ -1,22 +1,21 @@
+'use client';
+
+import { useRef, useState } from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
-import { CirclePause } from 'lucide-react';
+import { CirclePause, CirclePlay } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Button, { ButtonProps } from './button';
+import Button, { ButtonData } from './button';
 
 interface HeroProps {
   blok: {
     headline: string;
     description: string;
-    main_button: ButtonProps[];
-    image?: {
+    main_button: ButtonData[];
+    image: {
       filename: string;
       alt?: string;
     };
-    video?: {
-      url?: string;
-      alt?: string;
-    };
-    alt_text?: string;
+    video_url?: string;
   };
 }
 
@@ -26,12 +25,25 @@ const Hero = ({ blok }: HeroProps) => {
   }
 
   const button = blok.main_button[0];
-  const isVideo = true;
+
+  const iframeRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlayPause = () => {
+    const iframe: any = iframeRef.current;
+    const video = iframe?.contentWindow.document.querySelector('video');
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
 
   return (
     <div {...storyblokEditable(blok)} className={cn('relative mb-10 sm:mb-20 lg:md:mb-10')}>
       <div className="w-full flex justify-end">
-        <div className="mb-65 sm:mb-0 h-120 sm:h-130 md:h-120 lg:h-200 xl:h-175 2xl:h-220 ">
+        <div className="mb-75 sm:mb-45 md:mb-0 h-120 sm:h-150 md:h-120 lg:h-200 xl:h-175 2xl:h-220">
           {blok.image && (
             <svg className="h-[100%] " viewBox="0 0 1573 735">
               <defs>
@@ -43,14 +55,14 @@ const Hero = ({ blok }: HeroProps) => {
                 </clipPath>
               </defs>
 
-              {blok.image && !isVideo && (
+              {blok.image && !blok.video_url && (
                 <image
                   clipPath="url(#shape)"
                   xlinkHref={blok.image.filename}
-                  className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
+                  className="w-full translate-x-20 md:translate-x-0"
                 ></image>
               )}
-              {isVideo && (
+              {blok.video_url && (
                 <foreignObject
                   width="100%"
                   height="100%"
@@ -58,12 +70,11 @@ const Hero = ({ blok }: HeroProps) => {
                   className="w-full translate-x-20 md:translate-x-0"
                 >
                   <iframe
+                    ref={iframeRef}
                     className="w-full h-full"
-                    src="https://www.youtube.com/embed/iXOkwkW1HQY?si=GxmaxC6DRnZwwNPf"
+                    src={blok.video_url}
                     title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   ></iframe>
                 </foreignObject>
               )}
@@ -72,7 +83,7 @@ const Hero = ({ blok }: HeroProps) => {
         </div>
       </div>
       <div className="absolute bottom-0 sm:-bottom-10 lg:bottom-20 px-9">
-        <div className="flex flex-col gap-4 bg-white opacity-85 sm:w-1/2 xl:w-4/7 rounded-ss-xl rounded-ee-xl shadow-lg p-6">
+        <div className="flex flex-col gap-4 bg-white opacity-85 md:w-1/2 xl:w-4/7 rounded-ss-xl rounded-ee-xl shadow-lg p-6">
           <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{blok.headline}</h1>
           <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
           <p className=" text-base lg:text-xl text-neutral-800">{blok.description}</p>
@@ -80,9 +91,13 @@ const Hero = ({ blok }: HeroProps) => {
           {blok.main_button && <Button blok={button} />}
         </div>
       </div>
-      {isVideo && (
-        <div className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 me-6 mb-20 p-3 text-primary-500">
-          <CirclePause />
+      {blok.video_url && (
+        <div
+          className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 cursor-pointer me-9 mb-14 p-3 text-primary-500 hover:text-primary-700"
+          onClick={handlePlayPause}
+        >
+          {isPlaying && <CirclePlay />}
+          {!isPlaying && <CirclePause />}
         </div>
       )}
     </div>
