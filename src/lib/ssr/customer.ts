@@ -1,3 +1,5 @@
+'use server';
+
 import { cache } from 'react';
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import type { Customer } from '@/platform/services/model/customer/customer';
@@ -11,14 +13,13 @@ const getCustomerService = () => globalThis.EMP.platform.ssr.get<CustomerService
  * Get the current customer
  * This function is cached to prevent multiple customer fetches in a single request
  */
-export const getCurrentCustomer = cache(async (): Promise<Customer | null> => {
+export const getCurrentCustomer = cache(async (): Promise<Customer | null | undefined> => {
   try {
-    const customerService = getCustomerService();
-    const customer = await customerService.getCustomer();
+    const customer = await getCustomerService().getCustomer();
     return customer;
-  } catch (error) {
-    console.error('Error fetching customer in SSR:', error);
-    return null;
+  } catch (_error) {
+    // on SSR we fail with undefined, so the Client can refetch if necessary
+    return undefined;
   }
 });
 

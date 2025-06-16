@@ -16,16 +16,8 @@ const getOrderService = () => globalThis.EMP.platform.ssr.get<OrderService>('Ord
 export const getOrderById = cache(async (orderId: string): Promise<Order | null | undefined> => {
   try {
     const orderService = getOrderService();
-    const order = await orderService.getCustomerOrderById(orderId);
-
-    if (!order) {
-      console.warn(`Order not found with ID: ${orderId}`);
-      return null;
-    }
-
-    return order;
-  } catch (error) {
-    console.error(`Error fetching order ${orderId}:`, error);
+    return await orderService.getCustomerOrderById(orderId);
+  } catch (_error) {
     return undefined;
   }
 });
@@ -34,15 +26,13 @@ export const getOrderById = cache(async (orderId: string): Promise<Order | null 
  * Get all orders for the current customer with optional pagination
  * This function is cached to prevent multiple order fetches in a single request
  */
-export const getOrders = cache(async (pageSize?: number, pageNumber?: number): Promise<Order[]> => {
+export const getOrders = cache(async (pageSize?: number, pageNumber?: number): Promise<Order[] | undefined> => {
   try {
     const orderService = getOrderService();
     const orders = await orderService.getCustomerOrders(pageSize, pageNumber);
     return orders;
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    // On SSR we fail gracefully, so the client can refetch if necessary
-    return [];
+  } catch (_error) {
+    return undefined;
   }
 });
 
@@ -50,14 +40,12 @@ export const getOrders = cache(async (pageSize?: number, pageNumber?: number): P
  * Get available status transitions for an order
  * This function is cached to prevent multiple API fetches in a single request
  */
-export const getOrderStatusTransitions = cache(async (orderId: string): Promise<string[]> => {
+export const getOrderStatusTransitions = cache(async (orderId: string): Promise<string[] | undefined> => {
   try {
     const orderService = getOrderService();
     const statusTransitions = await orderService.getOrderStatusTransitions(orderId);
     return statusTransitions;
-  } catch (error) {
-    console.error(`Error fetching status transitions for order ${orderId}:`, error);
-    // On SSR we fail gracefully, so the client can refetch if necessary
-    return [];
+  } catch (_error) {
+    return undefined;
   }
 });

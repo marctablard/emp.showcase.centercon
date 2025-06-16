@@ -35,20 +35,6 @@ export function useWeather() {
   const { location: userLocation, loading: locationLoading, error: locationError } = useLocation();
   const [weatherLocation, setWeatherLocation] = useState<LocationData | null>(null);
 
-  // Default coordinates for fallback (Berlin)
-  const defaultLocation: LocationData = {
-    city: 'Berlin',
-    country: {
-      code: 'DE',
-      name: 'Germany',
-    },
-    geoLocation: {
-      latitude: 52.52,
-      longitude: 13.405,
-    },
-    state: 'Berlin',
-  };
-
   useEffect(() => {
     // Only fetch weather when we have location data
     if (!weatherLocation || !weatherLocation.geoLocation) return;
@@ -101,17 +87,30 @@ export function useWeather() {
     };
 
     fetchWeatherData();
-  }, [weatherLocation]);
+  }, [weatherLocation, userLocation, locationLoading]);
 
   useEffect(() => {
     if (!weatherLocation && !locationLoading && !locationError && userLocation !== undefined) {
       if (userLocation) {
         setWeatherLocation(userLocation);
       } else {
+        // Default coordinates for fallback (Berlin)
+        const defaultLocation: LocationData = {
+          city: 'Berlin',
+          country: {
+            code: 'DE',
+            name: 'Germany',
+          },
+          geoLocation: {
+            latitude: 52.52,
+            longitude: 13.405,
+          },
+          state: 'Berlin',
+        };
         setWeatherLocation(defaultLocation);
       }
     }
-  }, [userLocation, locationLoading, locationError]);
+  }, [userLocation, locationLoading, locationError, weatherLocation]);
 
   // Function to get current date in the format "Day, Month DD, YYYY"
   function getCurrentDate(): string {

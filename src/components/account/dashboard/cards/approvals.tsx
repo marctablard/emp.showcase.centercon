@@ -6,12 +6,11 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { CheckSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Approval } from '@/hooks/company/useCompany';
 import { useCompany } from '@/hooks/company/useCompany';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 import { StatCard } from './stat-card';
 
-export function ApprovalsSummaryCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
+export function ApprovalsSummaryCard({}: Omit<DashboardCardProps, 'children'>) {
   const t = useTranslations('Account');
   const { getApprovalCountsThisMonth } = useCompany();
 

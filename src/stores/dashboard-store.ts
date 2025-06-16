@@ -1,6 +1,6 @@
 'use client';
 
-import type { Layout, Layouts } from 'react-grid-layout';
+import type { Layouts } from 'react-grid-layout';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

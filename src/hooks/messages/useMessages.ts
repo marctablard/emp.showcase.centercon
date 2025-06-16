@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import useCustomerMessages from '../customer/useCustomerMessages';
 
 export function useMessages() {

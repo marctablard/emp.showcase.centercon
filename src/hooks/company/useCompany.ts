@@ -235,9 +235,7 @@ export const useCompany = (): CompanyHook => {
 
     // In a real implementation, this would be an API call
     // For now, we'll update the local state
-    const updatedApprovals = company.approvals.map((approval) =>
-      approval.id === id ? { ...approval, status: 'approved' } : approval,
-    );
+    company.approvals.map((approval) => (approval.id === id ? { ...approval, status: 'approved' } : approval));
 
     // Update company state would happen here in a real implementation
     // For mock purposes, we'll just log the action
@@ -250,9 +248,7 @@ export const useCompany = (): CompanyHook => {
 
     // In a real implementation, this would be an API call
     // For now, we'll update the local state
-    const updatedApprovals = company.approvals.map((approval) =>
-      approval.id === id ? { ...approval, status: 'rejected' } : approval,
-    );
+    company.approvals.map((approval) => (approval.id === id ? { ...approval, status: 'rejected' } : approval));
 
     // Update company state would happen here in a real implementation
     // For mock purposes, we'll just log the action

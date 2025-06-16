@@ -1,11 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 import AccountLayout from '@/components/account/account-layout';
 import { OrdersList } from '@/components/account/dashboard/cards/order-cards';
-import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
 import { getPageTitle } from '@/lib/ssr/seo';
 
-export async function generateMetadata({ params }: { params: { locale: string } }) {
-  const { locale } = params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Account' });
 
   return {
@@ -18,18 +17,20 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   };
 }
 
-export default function OrdersPage() {
+export default async function OrdersPage({ params }: { params: Promise<{ locale: string }> }) {
+  // Fetch order data during SSR
+  const { locale } = await params;
+  const [tAccount] = await Promise.all([getTranslations({ locale, namespace: 'Account' })]);
   const breadcrumbs = [
     {
       href: '/account',
-      label: 'Account',
+      label: tAccount('accountDetails'),
     },
     {
       href: '/account/orders',
-      label: 'Orders',
+      label: tAccount('ordersAndReturns'),
     },
   ];
-  generateBreadcrumbForProduct;
   return (
     <AccountLayout breadcrumbs={breadcrumbs}>
       <OrdersList />

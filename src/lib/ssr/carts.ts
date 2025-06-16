@@ -15,11 +15,6 @@ const getCartService = () => globalThis.EMP.platform.ssr.get<CartService>('CartS
 const getCartById = cache(async (cartId: string): Promise<Cart | null | undefined> => {
   try {
     const cart = await getCartService().getCartById(cartId);
-
-    if (!cart) {
-      throw new Error(`Cart not found with ID: ${cartId}`);
-    }
-
     return cart;
   } catch (_error) {
     // on SSR we fail with undefined, so the Client can refetch if necessary

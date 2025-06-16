@@ -115,7 +115,7 @@ export class OpenMeteoWeatherMapper implements WeatherMapper {
    * Maps a Service WeatherForecast to an OpenMeteo WeatherForecast
    * Not implemented as we don't need to convert back to the API format
    */
-  mapToSource(forecast: WeatherForecast): OpenMeteoWeatherForecast {
+  mapToSource(_forecast: WeatherForecast): OpenMeteoWeatherForecast {
     throw new Error('Not implemented');
   }
 }

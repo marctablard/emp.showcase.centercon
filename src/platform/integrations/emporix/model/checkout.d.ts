@@ -16,7 +16,7 @@ export interface EmporixCheckoutRequest {
  * Address model for checkout
  * Extends the common BaseAddress with a required type field
  */
-export interface EmporixCheckoutAddress extends EmporixAddress {
+export interface EmporixCheckoutAddress extends Omit<EmporixAddress, 'tags'> {
   contactName: string; // Required for checkout
   type: 'BILLING' | 'SHIPPING'; // Required and restricted to these values for checkout
 }

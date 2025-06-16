@@ -1,7 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import AccountLayout from '@/components/account/account-layout';
 import AccountDashboard from '@/components/account/dashboard/account-dashboard';
 import { getCurrentCustomer } from '@/lib/ssr/customer';
 import { getPageTitle } from '@/lib/ssr/seo';
@@ -21,21 +20,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function AccountPage() {
-  const t = await getTranslations('Account');
   const customer = await getCurrentCustomer();
-
-  return (
-    <AccountLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t('welcomeBack', { name: customer?.firstName + ' ' + customer?.lastName || 'Kunde' })}
-          </h1>
-          <p className="text-muted-foreground">{t('accountDashboardDescription')}</p>
-        </div>
-
-        <AccountDashboard />
-      </div>
-    </AccountLayout>
-  );
+  return <AccountDashboard initialCustomer={customer} />;
 }

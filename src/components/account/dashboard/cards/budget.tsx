@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { HandCoins } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
 import { useCompany } from '@/hooks/company/useCompany';
 import { formatCurrency } from '@/lib/utils';
@@ -9,7 +10,7 @@ import StatCard from './stat-card';
 
 interface BudgetProgressProps extends Omit<DashboardCardProps, 'children'> {}
 
-export function BudgetSummaryCard({ className, title, ...props }: BudgetProgressProps) {
+export function BudgetSummaryCard() {
   const t = useTranslations('Account');
   const { loading, error, company } = useCompany();
 
@@ -83,12 +84,7 @@ export function BudgetProgress({ className, title, ...props }: BudgetProgressPro
             <span>{t('budgetUsed')}</span>
             <span>{budgetUsedPercentage}%</span>
           </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className={`h-full bg-primary transition-all duration-300`}
-              style={{ width: `${budgetUsedPercentage}%` }}
-            />
-          </div>
+          <Progress value={budgetUsedPercentage} className="h-2" />
         </div>
       </div>
     </DashboardCard>

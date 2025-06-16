@@ -4,12 +4,12 @@ import { OrderDetail } from '@/components/account/orders/order-detail';
 import { getOrderById } from '@/lib/ssr/orders';
 import { getPageTitle } from '@/lib/ssr/seo';
 
-export async function generateMetadata({ params }: { params: { locale: string; id: string } }) {
-  const { locale } = params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
+  const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: 'Orders' });
 
   return {
-    title: await getPageTitle(`${t('orderDetails')} #${params.id}`, locale),
+    title: await getPageTitle(`${t('orderDetails')} #${id}`, locale),
     description: t('orderDetails'),
     robots: {
       index: false,
@@ -21,22 +21,31 @@ export async function generateMetadata({ params }: { params: { locale: string; i
 // Force dynamic rendering for personalized content
 export const dynamic = 'force-dynamic';
 
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
   // Fetch order data during SSR
-  const initialOrder = await getOrderById(params.id);
+  const { id, locale } = await params;
+  const [initialOrder, tOrders, tAccount] = await Promise.all([
+    getOrderById(id),
+    getTranslations({ locale, namespace: 'Orders' }),
+    getTranslations({ locale, namespace: 'Account' }),
+  ]);
   const breadcrumbs = [
     {
       href: '/account',
-      label: 'Account',
+      label: tAccount('accountDetails'),
     },
     {
       href: '/account/orders',
-      label: 'Orders',
+      label: tAccount('ordersAndReturns'),
+    },
+    {
+      href: `/account/orders/${id}`,
+      label: tOrders('orderDetails') + ` #${id}`,
     },
   ];
   return (
     <AccountLayout breadcrumbs={breadcrumbs}>
-      <OrderDetail orderId={params.id} initialOrder={initialOrder} />
+      <OrderDetail orderId={id} initialOrder={initialOrder} />
     </AccountLayout>
   );
 }

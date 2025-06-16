@@ -3,7 +3,6 @@ import { injectable } from '@/platform/core/di/injectable';
 import type { CustomerApi } from '@/platform/integrations/emporix/customer/CustomerApi';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import { Address } from '../../model/common';
-import type { AddressMapper } from '../../model/common/AddressMapper';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { Customer } from '../../model/customer/customer';
 import { CustomerService } from '../CustomerService';

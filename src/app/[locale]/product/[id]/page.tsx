@@ -29,7 +29,7 @@ export async function generateMetadata(
     return {};
   }
   // Use the extracted SEO utility function to generate metadata
-  return generateProductMetadata(product, price, locale);
+  return generateProductMetadata(locale, product, price);
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {

@@ -1,4 +1,3 @@
-import { getOrderById as ssrGetOrderById } from '@/lib/ssr/orders';
 import { Order } from '@/platform/services/model/order/order';
 
 /**

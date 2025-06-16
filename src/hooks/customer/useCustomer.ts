@@ -1,45 +1,42 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { fetchCurrentCustomer, fetchCustomerAddresses } from '@/lib/client/customer';
-import { Address, AddressType, Address as BaseAddress } from '@/platform/services/model/common';
+import { fetchCurrentCustomer } from '@/lib/client/customer';
 import type { Customer } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
 
 interface CustomerHook {
   customer: Customer | null | undefined;
-  addresses: Address[] | undefined;
   loading: boolean;
   error: Error | null;
   fetchCustomer: () => Promise<void>;
-  getDefaultAddress: (type: AddressType) => Address | null;
-  addressLoading: boolean;
 }
 
 /**
  * Hook for customer data
  * @returns Customer data and state
  */
-export const useCustomer = (): CustomerHook => {
+export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => {
   const {
-    customer,
-    addresses,
+    customer: storeCustomer,
     loading,
     getLoading,
     setLoading,
-    setCustomer,
-    setAddresses,
-    getAddressLoading,
-    setAddressLoading,
+    setCustomer: setStoreCustomer,
+    getCustomer,
   } = useCustomerStore();
+  if (initialCustomer && getCustomer() === undefined) {
+    setStoreCustomer(initialCustomer);
+  }
+  const [customer, setCustomer] = useState<Customer | null | undefined>(initialCustomer || storeCustomer);
   const [error, setError] = useState<Error | null>(null);
-  const [addressLoading, setLocalAddressLoading] = useState<boolean>(getAddressLoading());
 
   const fetchCustomer = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await fetchCurrentCustomer();
+      setStoreCustomer(data);
       setCustomer(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch customer'));
@@ -47,72 +44,28 @@ export const useCustomer = (): CustomerHook => {
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setCustomer]);
+  }, [setLoading, setStoreCustomer]);
 
-  // Fetch customer addresses
-  const loadAddresses = useCallback(async () => {
-    if (!customer) return;
-    if (getAddressLoading()) return;
-
-    try {
-      setAddressLoading(true);
-      const addressData = await fetchCustomerAddresses();
-      setAddresses(addressData);
-    } catch (err) {
-      console.error('Error fetching addresses:', err);
-    } finally {
-      setAddressLoading(false);
-    }
-  }, [customer, setAddressLoading]);
-
+  // Initialize customer on first render if not already initialized
   useEffect(() => {
-    if (!getLoading() && customer === undefined) {
-      fetchCustomer();
-    }
-  }, [getLoading, customer, fetchCustomer]);
-
-  useEffect(() => {
-    setLocalAddressLoading(getAddressLoading());
-  }, [getAddressLoading]);
-
-  // Load addresses when customer is loaded
-  useEffect(() => {
-    if (customer && addresses === undefined && !addressLoading) {
-      loadAddresses();
-    }
-  }, [customer, loadAddresses, addressLoading, addresses]);
-
-  /**
-   * Get default address of specified type
-   * @param type Address type (SHIPPING or BILLING)
-   * @returns Default address of specified type or null if not found
-   */
-  const getDefaultAddress = useCallback(
-    (type: AddressType): Address | null => {
-      if ((addresses || []).length === 0) {
-        return null;
+    if (customer === undefined && !getLoading()) {
+      setLoading(true);
+      // first try to grab the customer from the store
+      const currentCustomer = getCustomer();
+      if (currentCustomer !== undefined) {
+        setCustomer(currentCustomer);
+        setLoading(false);
+      } else {
+        fetchCustomer();
       }
-
-      // If no default address of the specified type is found, just return the first address of that type
-      const firstTypeAddress = (addresses || []).find((addr) => addr.types.includes(type));
-
-      if (firstTypeAddress) {
-        return firstTypeAddress;
-      }
-
-      return null;
-    },
-    [addresses],
-  );
+    }
+  }, [customer, getCustomer, getLoading, setLoading, fetchCustomer]);
 
   return {
     customer,
-    addresses,
     loading,
     error,
     fetchCustomer,
-    addressLoading,
-    getDefaultAddress,
   };
 };
 

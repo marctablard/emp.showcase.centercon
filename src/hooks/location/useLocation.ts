@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { LocationData } from '@/platform/services/model/common';
-import { useCustomer } from '../customer/useCustomer';
+import { useAddresses } from '../customer/useAddresses';
 import { useSite } from '../site/useSite';
 
 export interface UseLocationResult {
@@ -19,11 +19,11 @@ export function useLocation(): UseLocationResult {
   const [location, setLocation] = useState<LocationData | null | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const { addresses, getDefaultAddress } = useCustomer();
+  const { addresses, getDefaultAddress } = useAddresses();
   const { countries } = useSite();
 
   // Try to get location from customer's shipping address
-  const getLocationFromCustomerAddress = (): LocationData | null => {
+  const getLocationFromCustomerAddress = useCallback((): LocationData | null => {
     const shippingAddress = getDefaultAddress('SHIPPING');
 
     if (!shippingAddress) {
@@ -43,9 +43,9 @@ export function useLocation(): UseLocationResult {
     }
 
     return null;
-  };
+  }, [countries, getDefaultAddress]);
 
-  const fetchLocationFromBrowser = (): Promise<LocationData> => {
+  const fetchLocationFromBrowser = useCallback((): Promise<LocationData> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported by your browser'));
@@ -53,13 +53,12 @@ export function useLocation(): UseLocationResult {
       }
 
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
+        async () => {
           try {
-            const { latitude, longitude } = position.coords;
             // In a real implementation, this would be a reverse geocoding API call
             // For now, we'll mock the response
             throw new Error('Not implemented');
-          } catch (err) {
+          } catch (_err) {
             reject(new Error('Failed to reverse geocode coordinates'));
           }
         },
@@ -69,9 +68,9 @@ export function useLocation(): UseLocationResult {
         { timeout: 10000, enableHighAccuracy: false },
       );
     });
-  };
+  }, []);
 
-  const fetchLocationFromGeoIP = async (): Promise<LocationData> => {
+  const fetchLocationFromGeoIP = useCallback(async (): Promise<LocationData> => {
     try {
       const response = await fetch('/api/location');
 
@@ -85,7 +84,7 @@ export function useLocation(): UseLocationResult {
       console.error('Error fetching from GeoIP API:', err);
       throw new Error('Failed to fetch location from GeoIP');
     }
-  };
+  }, []);
 
   const fetchLocation = useCallback(async () => {
     setLoading(true);
@@ -115,13 +114,13 @@ export function useLocation(): UseLocationResult {
     } finally {
       setLoading(false);
     }
-  }, [getDefaultAddress, fetchLocationFromBrowser, fetchLocationFromGeoIP]);
+  }, [fetchLocationFromBrowser, fetchLocationFromGeoIP, getLocationFromCustomerAddress]);
 
   useEffect(() => {
     if (location === undefined && !loading && addresses !== undefined && countries !== undefined) {
       fetchLocation();
     }
-  }, [loading, location, addresses, countries]);
+  }, [loading, location, addresses, countries, fetchLocation]);
 
   const refetch = async (): Promise<void> => {
     await fetchLocation();

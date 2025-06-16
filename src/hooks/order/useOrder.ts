@@ -4,46 +4,43 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   fetchOrderById as apiFetchOrderById,
   fetchOrderStatusTransitions as apiFetchOrderStatusTransitions,
-  fetchOrders as apiFetchOrders,
 } from '@/lib/client/orders';
 import { Order } from '@/platform/services/model/order/order';
 
 interface UseOrderOptions {
   orderId?: string;
   initialOrder?: Order | null;
-  initialOrders?: Order[];
-  pageSize?: number;
-  pageNumber?: number;
 }
 
-interface UseOrder {
+interface UseOrderResult {
   // Order data
   order: Order | null | undefined;
-  orders: Order[];
   statusTransitions: string[];
 
   // Status
   loading: boolean;
   error: Error | null;
 
+  // Order operations
+  cancelOrder?: () => Promise<void>;
+  returnOrder?: () => Promise<void>;
+
   // Utility
   refetchOrder: () => Promise<void>;
-  refetchOrders: () => Promise<void>;
   refetchStatusTransitions: () => Promise<void>;
 }
 
 /**
- * Hook for interacting with orders
+ * Hook for interacting with a single order
  *
  * @param options Configuration options for the hook
  * @returns Order data and operations
  */
-export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
-  const { orderId, initialOrder, initialOrders, pageSize, pageNumber } = options;
+export const useOrder = (options: UseOrderOptions = {}): UseOrderResult => {
+  const { orderId, initialOrder } = options;
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [order, setOrder] = useState<Order | null | undefined>(initialOrder);
-  const [orders, setOrders] = useState<Order[]>(initialOrders || []);
   const [statusTransitions, setStatusTransitions] = useState<string[]>([]);
 
   const fetchOrder = useCallback(async () => {
@@ -63,20 +60,6 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
     }
   }, [orderId]);
 
-  const fetchOrders = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const ordersData = await apiFetchOrders(pageSize, pageNumber);
-      setOrders(ordersData);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch orders'));
-      console.error('Error fetching orders:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [pageSize, pageNumber]);
-
   const fetchStatusTransitions = useCallback(async () => {
     if (!orderId) return;
 
@@ -94,24 +77,77 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
     }
   }, [orderId]);
 
+  // Cancel order function - implementation would depend on your API
+  const cancelOrder = useCallback(async () => {
+    if (!orderId || !order) return;
+
+    // Check if cancellation is allowed based on status transitions
+    if (!statusTransitions.includes('CANCELLED')) {
+      throw new Error('Order cannot be cancelled in its current state');
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // This would be replaced with an actual API call
+      // await apiCancelOrder(orderId);
+
+      // After cancellation, refetch the order to get updated status
+      await fetchOrder();
+      await fetchStatusTransitions();
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to cancel order'));
+      console.error('Error cancelling order:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [orderId, order, statusTransitions, fetchOrder, fetchStatusTransitions]);
+
+  // Return order function - implementation would depend on your API
+  const returnOrder = useCallback(async () => {
+    if (!orderId || !order) return;
+
+    // Check if return is allowed based on status or business rules
+    // This is a placeholder - actual implementation would depend on your requirements
+    if (order.status !== 'DELIVERED' && order.status !== 'COMPLETED') {
+      throw new Error('Order cannot be returned in its current state');
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // This would be replaced with an actual API call
+      // await apiReturnOrder(orderId);
+
+      // After return request, refetch the order to get updated status
+      await fetchOrder();
+      await fetchStatusTransitions();
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to return order'));
+      console.error('Error returning order:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [orderId, order, fetchOrder, fetchStatusTransitions]);
+
   // Initialize on first render
   useEffect(() => {
     if (orderId && order === undefined) {
       fetchOrder();
       fetchStatusTransitions();
-    } else if (orders.length === 0 && !orderId) {
-      fetchOrders();
     }
-  }, [orderId, order, orders.length, fetchOrder, fetchOrders, fetchStatusTransitions]);
+  }, [orderId, order, fetchOrder, fetchStatusTransitions]);
 
   return {
     order,
-    orders,
     statusTransitions,
     loading,
     error,
+    cancelOrder: order ? cancelOrder : undefined,
+    returnOrder: order ? returnOrder : undefined,
     refetchOrder: fetchOrder,
-    refetchOrders: fetchOrders,
     refetchStatusTransitions: fetchStatusTransitions,
   };
 };

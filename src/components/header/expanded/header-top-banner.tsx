@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
-import { Euro, Globe, Languages } from 'lucide-react';
+import { Euro, Globe } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { Separator } from '@/components/ui/separator';
 import { Link } from '@/i18n/navigation';
 
@@ -17,10 +18,7 @@ export default function HeaderTopBanner() {
           <div className="h-6">
             <Separator orientation="vertical" decorative />
           </div>
-          <div className="flex items-center gap-2">
-            <Languages className="w-4 h-4" />
-            <p className="text-sm pt-0.5">English</p>
-          </div>
+          <LanguageSwitcher />
           <div className="h-6">
             <Separator orientation="vertical" decorative />
           </div>

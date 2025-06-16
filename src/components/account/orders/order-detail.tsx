@@ -1,47 +1,29 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { format } from 'date-fns';
-import { ArrowLeft } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Ban, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { H2, Heading } from '@/components/ui/h';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useOrder } from '@/hooks/order/useOrder';
 import { Order } from '@/platform/services/model/order/order';
+import { OrderStatusBadge } from './order-status-badge';
 
 /**
- * Order status badge component
- * Displays a badge with appropriate color based on order status
+ * Determines if the cancel button should be shown based on order status
  */
-function OrderStatusBadge({ status }: { status: Order['status'] }) {
-  const tOrderStatus = useTranslations('OrderStatus');
+function shouldShowCancelButton(status: Order['status']): boolean {
+  return ['COMPLETED', 'PROCESSING', 'READY_FOR_PICKUP', 'READY_FOR_SHIPPING', 'CREATED'].includes(status);
+}
 
-  const getVariant = () => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'success';
-      case 'SHIPPED':
-      case 'DELIVERED':
-        return 'secondary';
-      case 'CONFIRMED':
-      case 'PROCESSING':
-      case 'READY_FOR_PICKUP':
-      case 'READY_FOR_SHIPPING':
-        return 'secondary';
-      case 'CREATED':
-      case 'IN_CHECKOUT':
-        return 'default';
-      case 'CANCELLED':
-        return 'destructive';
-      default:
-        return 'outline';
-    }
-  };
-
-  return <Badge variant={getVariant()}>{tOrderStatus(status)}</Badge>;
+/**
+ * Determines if the return button should be shown based on order status
+ */
+function shouldShowReturnButton(status: Order['status']): boolean {
+  return status === 'DELIVERED';
 }
 
 /**
@@ -52,7 +34,7 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
   const tOrder = useTranslations('Orders');
   const tPaymentModes = useTranslations('PaymentModes');
 
-  const { order, loading, error } = useOrder({ orderId, initialOrder });
+  const { order, loading, error, cancelOrder, returnOrder } = useOrder({ orderId, initialOrder });
 
   if (loading) {
     return (
@@ -82,12 +64,6 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
         <CardContent className="pt-6">
           <div className="text-center">
             <p className="text-red-500">{tOrder('errorFetchingOrder')}</p>
-            <Button variant="secondary" className="mt-4" asChild>
-              <Link href="/account/orders">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                {tOrder('viewOrders')}
-              </Link>
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -96,13 +72,6 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
 
   return (
     <div className="space-y-6">
-      <Button variant="secondary" asChild>
-        <Link href="/account/orders">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {tOrder('viewOrders')}
-        </Link>
-      </Button>
-
       <Card>
         <CardHeader>
           <div className="flex justify-between items-start">
@@ -112,7 +81,9 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                 {tOrder('orderNumber')} #{order.id}
               </CardDescription>
             </div>
-            <OrderStatusBadge status={order.status} />
+            <div>
+              <OrderStatusBadge status={order.status} />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -221,6 +192,50 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
             </div>
           </div>
         </CardContent>
+        {/* Order action buttons at the bottom */}
+        {(shouldShowCancelButton(order.status) || shouldShowReturnButton(order.status)) && (
+          <CardFooter className="flex flex-col items-start pt-6 border-t">
+            <H2 variant="h5" className="mb-3">
+              {tOrder('orderActions')}
+            </H2>
+            <div className="flex gap-2">
+              {shouldShowCancelButton(order.status) && cancelOrder && (
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={async () => {
+                    try {
+                      await cancelOrder();
+                    } catch (err) {
+                      // Handle error, could show a toast notification
+                      console.error('Failed to cancel order:', err);
+                    }
+                  }}
+                >
+                  <Ban className="mr-2 h-4 w-4" />
+                  {tOrder('cancelOrder')}
+                </Button>
+              )}
+              {shouldShowReturnButton(order.status) && returnOrder && (
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={async () => {
+                    try {
+                      await returnOrder();
+                    } catch (err) {
+                      // Handle error, could show a toast notification
+                      console.error('Failed to return order:', err);
+                    }
+                  }}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  {tOrder('returnOrder')}
+                </Button>
+              )}
+            </div>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );

@@ -4,13 +4,17 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { format, formatDistanceToNow } from 'date-fns';
-import { ArrowLeft, Eye, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, ShoppingBag } from 'lucide-react';
+import { OrderStatusBadge } from '@/components/account/orders/order-status-badge';
+import { OrdersTable } from '@/components/account/orders/orders-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useOrder } from '@/hooks/order/useOrder';
+import { useOrders } from '@/hooks/order/useOrders';
 import { Order } from '@/platform/services/model/order/order';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 import { StatCard } from './stat-card';
@@ -21,13 +25,16 @@ import { StatCard } from './stat-card';
  */
 function OrderSummaryCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
   const t = useTranslations('Account');
-  const tOrder = useTranslations('Orders');
-  const { orders, loading } = useOrder();
+  const { orders, loading } = useOrders();
+
+  if (!orders || loading) {
+    return <Spinner />;
+  }
 
   // Calculate order counts
   const totalOrders = orders.length;
-  const inProgressOrders = orders.filter((order) =>
-    ['IN_CHECKOUT', 'CREATED', 'CONFIRMED', 'PROCESSING'].includes(order.status),
+  const inProgressOrders = orders.filter((order: Order) =>
+    ['CREATED', 'CONFIRMED', 'PROCESSING'].includes(order.status),
   ).length;
 
   return (
@@ -43,44 +50,17 @@ function OrderSummaryCard({ className, title, ...props }: Omit<DashboardCardProp
 }
 
 /**
- * Order status badge component
- * Displays a badge with appropriate color based on order status
- */
-function OrderStatusBadge({ status }: { status: Order['status'] }) {
-  const tOrderStatus = useTranslations('OrderStatus');
-
-  const getVariant = () => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'success';
-      case 'SHIPPED':
-        return 'warning'; // Changed from 'info' to 'warning' to match available variants
-      case 'CONFIRMED':
-        return 'secondary';
-      case 'CREATED':
-        return 'default';
-      case 'CANCELLED':
-        return 'destructive';
-      case 'PROCESSING':
-      case 'READY_FOR_PICKUP':
-      case 'READY_FOR_SHIPPING':
-        return 'warning';
-      default:
-        return 'outline';
-    }
-  };
-
-  return <Badge variant={getVariant()}>{tOrderStatus(status)}</Badge>;
-}
-
-/**
  * Recent Orders Card component
  * Shows the most recent orders with their status
  */
 function RecentOrdersCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
   const t = useTranslations('Account');
   const tOrder = useTranslations('Orders');
-  const { orders, loading } = useOrder();
+  const { orders, loading } = useOrders();
+
+  if (!orders || loading) {
+    return <Spinner />;
+  }
 
   // Sort orders by creation date (newest first) and take the first 6
   const recentOrders = [...orders]
@@ -89,7 +69,7 @@ function RecentOrdersCard({ className, title, ...props }: Omit<DashboardCardProp
 
   return (
     <DashboardCard title={title || t('ordersAndReturns')} className={className} {...props}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="items-center justify-between absolute top-4 right-4">
         <Badge variant="secondary">{orders.length}</Badge>
       </div>
       <div className="space-y-4">
@@ -139,7 +119,7 @@ function RecentOrdersCard({ className, title, ...props }: Omit<DashboardCardProp
 function OrdersList() {
   const t = useTranslations('Account');
   const tOrder = useTranslations('Orders');
-  const { orders, loading, error } = useOrder();
+  const { orders, loading, error } = useOrders();
 
   if (loading) {
     return (
@@ -188,39 +168,7 @@ function OrdersList() {
         <CardTitle>{tOrder('orderDetails')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{tOrder('orderNumber')}</TableHead>
-              <TableHead>{tOrder('orderDate')}</TableHead>
-              <TableHead>{tOrder('status')}</TableHead>
-              <TableHead>{tOrder('total')}</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">#{order.id}</TableCell>
-                <TableCell>{order.createdAt ? format(new Date(order.createdAt), 'dd.MM.yyyy') : '-'}</TableCell>
-                <TableCell>
-                  <OrderStatusBadge status={order.status} />
-                </TableCell>
-                <TableCell>
-                  {order.price?.total.gross} {order.currency}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="link" asChild>
-                    <Link href={`/account/orders/${order.id}`}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <OrdersTable orders={orders} />
       </CardContent>
     </Card>
   );
@@ -233,7 +181,6 @@ function OrdersList() {
 function OrderDetail({ orderId }: { orderId: string }) {
   const tOrder = useTranslations('Orders');
   const tPaymentModes = useTranslations('PaymentModes');
-
   const { order, loading, error } = useOrder({ orderId });
 
   if (loading) {
@@ -345,7 +292,7 @@ function OrderDetail({ orderId }: { orderId: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {order.items.map((item) => (
+                {order.items.map((item: any) => (
                   <TableRow key={item.id}>
                     <TableCell>
                       <div className="font-medium">{item.name || item.productId}</div>
@@ -409,4 +356,4 @@ function OrderDetail({ orderId }: { orderId: string }) {
 }
 
 // Export all components
-export { OrderSummaryCard, OrderStatusBadge, RecentOrdersCard, OrdersList, OrderDetail };
+export { OrderSummaryCard, RecentOrdersCard, OrdersList, OrderDetail };

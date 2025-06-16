@@ -15,9 +15,11 @@ const buttonVariants = cva(
         neutral:
           'border border-neutral-900 px-2 py-1 disabled:border-neutral-600 hover:bg-accent hover:text-accent-foreground hover:bg-neutral-900 hover:text-white rounded-sm ',
         link: 'text-primary disabled:bg-transparent hover:text-primary-700 rounded-sm ',
+        link_foreground: 'text-primary-foreground disabled:bg-transparent hover:text-primary-foreground/80 rounded-sm ',
         input: 'bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-r-lg',
       },
       size: {
+        small: 'px-2 py-1',
         default: 'px-4 py-3',
         icon: 'p-3',
       },

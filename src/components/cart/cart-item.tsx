@@ -53,7 +53,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
             height={128}
             src={String(item.product.images[0].url)}
             alt={String(item.product.name || 'Product')}
-            className="w-40 h-full object-cover"
+            className="w-40 h-40 object-fit p-2"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">

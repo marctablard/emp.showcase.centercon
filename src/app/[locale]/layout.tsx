@@ -9,6 +9,7 @@ import Header from '@/components/header';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import CustomerSessionProvider from '@/providers/CustomerSessionProvider';
+import QuickOrderProvider from '@/providers/QuickOrderProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import '../globals.css';
@@ -48,14 +49,16 @@ export default async function LocaleLayout({ children, params }: Props) {
           <NextIntlClientProvider locale={locale}>
             <StoreProvider>
               <StoryblokProvider>
-                <Header />
-                <main className="flex-grow mt-52">{children}</main>
-                <FooterWrapper>
-                  <FooterLinks />
-                  <Footer />
-                </FooterWrapper>
-                <LegalFooter />
-                <Toaster />
+                <QuickOrderProvider>
+                  <Header />
+                  <main className="flex-grow mt-52">{children}</main>
+                  <FooterWrapper>
+                    <FooterLinks />
+                    <Footer />
+                  </FooterWrapper>
+                  <LegalFooter />
+                  <Toaster />
+                </QuickOrderProvider>
               </StoryblokProvider>
             </StoreProvider>
           </NextIntlClientProvider>

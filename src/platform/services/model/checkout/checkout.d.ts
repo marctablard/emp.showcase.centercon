@@ -21,7 +21,7 @@ export interface ContactData {
   company?: string;
 }
 
-export interface CheckoutAddress extends Address {
+export interface CheckoutAddress extends Omit<Address, 'types'> {
   type: AddressType; // Required for Checkout
 }
 

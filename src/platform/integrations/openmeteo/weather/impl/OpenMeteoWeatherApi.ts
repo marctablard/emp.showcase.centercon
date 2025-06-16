@@ -43,9 +43,10 @@ class OpenMeteoWeatherApi implements IOpenMeteoWeatherApi {
 
       // Process timezone and location data
       const utcOffsetSeconds = response.utcOffsetSeconds();
+      /*
       const timezone = response.timezone();
       const timezoneAbbreviation = response.timezoneAbbreviation();
-
+      */
       // Process current weather
       const current = response.current()!;
       const currentWeatherData: WeatherData = {

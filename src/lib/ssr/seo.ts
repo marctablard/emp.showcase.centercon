@@ -171,9 +171,9 @@ export async function generateProductJsonLd(product: Product, locale: string): P
  * Generate complete metadata for product pages
  */
 export async function generateProductMetadata(
-  product: Product,
-  price: ProductPrice | null,
   locale: string,
+  product: Product,
+  _price?: ProductPrice | null,
 ): Promise<Metadata> {
   // If product not found, return basic metadata
   if (!product) {

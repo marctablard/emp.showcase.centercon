@@ -16,7 +16,7 @@ export function DashboardCard({
   icon,
   className = '',
   children,
-  variant = 'default',
+  variant = 'stat',
 }: DashboardCardProps) {
   return (
     <Card variant={variant} rounded="none" className={className}>
@@ -27,7 +27,7 @@ export function DashboardCard({
           {icon && <div className="h-4 w-4 text-muted-foreground absolute top-4 right-4">{icon}</div>}
         </CardHeader>
       )}
-      <CardContent>{children}</CardContent>
+      <CardContent className="overflow-y-auto p-6 scrollbar-thin">{children}</CardContent>
     </Card>
   );
 }

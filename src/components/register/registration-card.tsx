@@ -137,6 +137,7 @@ export default function RegistrationCard() {
           city: values.city,
           zipCode: values.postalCode,
           country: values.country,
+          types: ['SHIPPING', 'BILLING'],
         },
       });
 

@@ -23,15 +23,13 @@ type ConfigStore = ConfigState & ConfigActions;
 const defaultLayouts: Layouts = {
   // Large screens (≥1200px) - 4 columns
   xl: [
-    // Top row - small stat cards (half height)
     { i: 'revenue', x: 0, y: 1, w: 1, h: 1 },
-    { i: 'orders', x: 0, y: 1, w: 1, h: 1 },
-    { i: 'approvals', x: 0, y: 1, w: 1, h: 1 },
+    { i: 'orders', x: 1, y: 1, w: 1, h: 1 },
+    { i: 'approvals', x: 2, y: 1, w: 1, h: 1 },
     { i: 'weather', x: 3, y: 0, w: 1, h: 2 },
-
-    // Second row - larger content cards (double height)
-    { i: 'budget', x: 1, y: 0, w: 1, h: 2 },
-    { i: 'inbox', x: 2, y: 0, w: 1, h: 3 },
+    { i: 'budget', x: 3, y: 3, w: 1, h: 2 },
+    { i: 'inbox', x: 2, y: 0, w: 1, h: 2 },
+    { i: 'recent-orders', x: 0, y: 0, w: 2, h: 2 },
   ],
 
   // Medium screens (≥996px) - 3 columns
@@ -45,6 +43,7 @@ const defaultLayouts: Layouts = {
     { i: 'budget', x: 0, y: 1, w: 1, h: 2 },
     { i: 'inbox', x: 1, y: 1, w: 1, h: 2 },
     { i: 'weather', x: 2, y: 1, w: 1, h: 2 },
+    { i: 'recent-orders', x: 0, y: 4, w: 3, h: 2 },
   ],
 
   // Small screens (≥768px) - 2 columns
