@@ -3,7 +3,7 @@ import { EmporixAddress } from './common';
 /**
  * Order status types
  */
-export type OrderStatus = 
+export type OrderStatus =
   | 'IN_CHECKOUT'
   | 'CREATED'
   | 'CONFIRMED'
@@ -136,7 +136,7 @@ export interface EmporixOrder {
   status: OrderStatus;
   lastStatusChange?: string;
   creationDate?: string;
-  entries: EmporixOrderEntry[]
+  entries: EmporixOrderEntry[];
   customer: EmporixOrderCustomer;
   billingAddress?: EmporixAddress;
   shippingAddress?: EmporixAddress;

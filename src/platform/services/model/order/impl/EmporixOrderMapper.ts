@@ -1,20 +1,25 @@
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
-import { Order, OrderItem, OrderPayment, OrderPrice, OrderShipping, OrderStatus, OrderDiscount } from '@/platform/services/model/order/order';
-import { OrderMapper } from '@/platform/services/model/order/OrderMapper';
+import { injectable } from '@/platform/core/di/injectable';
 import { EmporixOrder, EmporixOrderEntry, EmporixPayment } from '@/platform/integrations/emporix/model/order';
 import { EmporixAddressMapper } from '@/platform/services/model/common/impl/EmporixAddressMapper';
+import { OrderMapper } from '@/platform/services/model/order/OrderMapper';
+import {
+  Order,
+  OrderDiscount,
+  OrderItem,
+  OrderPayment,
+  OrderPrice,
+  OrderShipping,
+  OrderStatus,
+} from '@/platform/services/model/order/order';
 
 /**
  * Implementation of OrderMapper for Emporix order data
  */
 @injectable('EmporixOrderMapper', 'Singleton')
 class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
-  
-  constructor(
-    @inject('EmporixAddressMapper') private addressMapper: EmporixAddressMapper
-  ) {}
-  
+  constructor(@inject('EmporixAddressMapper') private addressMapper: EmporixAddressMapper) {}
+
   mapToService(integrationModel: EmporixOrder): Order {
     return {
       id: integrationModel.id,
@@ -22,10 +27,14 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
       createdAt: integrationModel.creationDate,
       lastStatusChange: integrationModel.lastStatusChange,
       items: this.mapOrderItems(integrationModel.entries),
-      billingAddress: integrationModel.billingAddress ? this.addressMapper.mapToService(integrationModel.billingAddress) : undefined,
-      shippingAddress: integrationModel.shippingAddress ? this.addressMapper.mapToService(integrationModel.shippingAddress) : undefined,
+      billingAddress: integrationModel.billingAddress
+        ? this.addressMapper.mapToService(integrationModel.billingAddress)
+        : undefined,
+      shippingAddress: integrationModel.shippingAddress
+        ? this.addressMapper.mapToService(integrationModel.shippingAddress)
+        : undefined,
       payments: this.mapPayments(integrationModel.payments),
-      discounts: integrationModel.discounts?.map(discount => ({
+      discounts: integrationModel.discounts?.map((discount) => ({
         code: discount.code,
         value: discount.amount,
         currency: discount.currency,
@@ -48,28 +57,36 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
         id: item.id,
         itemYrn: `urn:yaas:saasag:caasproduct:product:${item.productId}`,
         amount: item.quantity,
-        product: item.name ? {
-          id: item.productId,
-          name: item.name,
-          description: item.description,
-          sku: item.sku,
-          images: item.images?.map((url: string) => ({
-            id: url,
-            url: url,
-          })),
-        } : undefined,
-        price: item.price ? {
-          effectiveAmount: item.price.value,
-          originalAmount: item.price.originalValue,
-          currency: item.price.currency,
-        } : undefined,
+        product: item.name
+          ? {
+              id: item.productId,
+              name: item.name,
+              description: item.description,
+              sku: item.sku,
+              images: item.images?.map((url: string) => ({
+                id: url,
+                url: url,
+              })),
+            }
+          : undefined,
+        price: item.price
+          ? {
+              effectiveAmount: item.price.value,
+              originalAmount: item.price.originalValue,
+              currency: item.price.currency,
+            }
+          : undefined,
       })),
       customer: {
         id: 'ANONYMOUS',
         email: serviceModel.customerEmail,
       },
-      billingAddress: serviceModel.billingAddress ? this.addressMapper.mapToSource(serviceModel.billingAddress) : undefined,
-      shippingAddress: serviceModel.shippingAddress ? this.addressMapper.mapToSource(serviceModel.shippingAddress) : undefined,
+      billingAddress: serviceModel.billingAddress
+        ? this.addressMapper.mapToSource(serviceModel.billingAddress)
+        : undefined,
+      shippingAddress: serviceModel.shippingAddress
+        ? this.addressMapper.mapToSource(serviceModel.shippingAddress)
+        : undefined,
       payments: this.mapPaymentsToEmporix(serviceModel.payments),
       discounts: serviceModel.discounts?.map((discount: OrderDiscount) => ({
         code: discount.code,
@@ -87,19 +104,21 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
       return [];
     }
 
-    return entries.map(entry => ({
+    return entries.map((entry) => ({
       id: entry.id,
       productId: entry.product?.id || entry.itemYrn.split(':').pop() || '',
       quantity: entry.amount,
       name: entry.product?.name,
       description: entry.product?.description,
       sku: entry.product?.sku,
-      images: entry.product?.images?.map(img => img.url),
-      price: entry.price ? {
-        value: entry.price.effectiveAmount,
-        originalValue: entry.price.originalAmount,
-        currency: entry.price.currency,
-      } : undefined,
+      images: entry.product?.images?.map((img) => img.url),
+      price: entry.price
+        ? {
+            value: entry.price.effectiveAmount,
+            originalValue: entry.price.originalAmount,
+            currency: entry.price.currency,
+          }
+        : undefined,
     }));
   }
 
@@ -110,7 +129,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
       return undefined;
     }
 
-    return payments.map(payment => ({
+    return payments.map((payment) => ({
       status: payment.status,
       method: payment.method,
       response: payment.paymentResponse,
@@ -126,7 +145,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
       return undefined;
     }
 
-    return payments.map(payment => ({
+    return payments.map((payment) => ({
       status: payment.status,
       method: payment.method,
       paymentResponse: payment.response,

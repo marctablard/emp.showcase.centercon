@@ -1,14 +1,13 @@
-import { ValidationService } from "../ValidationService";
-import { z } from "zod";
-import { ValidationResult } from "..";
-      
+import { z } from 'zod';
+import { ValidationResult } from '..';
+import { ValidationService } from '../ValidationService';
+
 class ZodSchemaValidationService implements ValidationService {
+  private schema: z.ZodTypeAny;
 
-    private schema: z.ZodTypeAny;
-
-    constructor(schema: z.ZodTypeAny) {
-       this.schema = schema;
-    }
+  constructor(schema: z.ZodTypeAny) {
+    this.schema = schema;
+  }
 
   validate<T>(data: T): ValidationResult<T> {
     try {
@@ -18,10 +17,13 @@ class ZodSchemaValidationService implements ValidationService {
       if (error instanceof z.ZodError) {
         return {
           success: false,
-          errors: error.errors.reduce((acc, issue) => {
-            acc[issue.path.join('.')] = issue.message;
-            return acc;
-          }, {} as Record<string, string>)
+          errors: error.errors.reduce(
+            (acc, issue) => {
+              acc[issue.path.join('.')] = issue.message;
+              return acc;
+            },
+            {} as Record<string, string>,
+          ),
         };
       }
       throw error;

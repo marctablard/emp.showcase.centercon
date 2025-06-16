@@ -1,11 +1,6 @@
 import z from 'zod';
-import { 
-  CheckoutRequest,
-  QuoteCheckoutRequest
-} from '../../model/checkout';
+import { CheckoutRequest, QuoteCheckoutRequest } from '../../model/checkout';
 import { ValidationResult } from '../../validation';
-
-
 
 /**
  * Checkout step types
@@ -22,7 +17,7 @@ export interface CheckoutValidator {
    * @returns Validation result with success flag and errors if any
    */
   validateCheckoutRequest(request: CheckoutRequest): ValidationResult<CheckoutRequest>;
-  
+
   /**
    * Validate the complete checkout request
    * @param request The checkout request to validate
@@ -36,6 +31,4 @@ export interface CheckoutValidator {
    * @returns Validation result with success flag and errors if any
    */
   validateQuoteCheckoutRequest(request: QuoteCheckoutRequest): ValidationResult<QuoteCheckoutRequest>;
-
-
 }

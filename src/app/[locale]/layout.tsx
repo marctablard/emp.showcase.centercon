@@ -6,7 +6,6 @@ import { notFound } from 'next/navigation';
 import Footer from '@/components/footer';
 import { FooterLinks, FooterWrapper, LegalFooter } from '@/components/footer/footer';
 import Header from '@/components/header';
-import Searchbar from '@/components/searchbar';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import CustomerSessionProvider from '@/providers/CustomerSessionProvider';
@@ -43,15 +42,14 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Enable static rendering
   setRequestLocale(locale);
   return (
-    <html className="h-full" lang={locale}>
+    <html lang={locale}>
       <body className="flex h-full flex-col">
         <CustomerSessionProvider session={session}>
           <NextIntlClientProvider locale={locale}>
             <StoreProvider>
               <StoryblokProvider>
                 <Header />
-                <Searchbar />
-                <main className="flex-grow">{children}</main>
+                <main className="flex-grow mt-52">{children}</main>
                 <FooterWrapper>
                   <FooterLinks />
                   <Footer />

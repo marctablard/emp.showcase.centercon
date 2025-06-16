@@ -8,11 +8,11 @@ import type { PaymentMode } from '@/platform/services/model';
  */
 export async function getPaymentModes(): Promise<PaymentMode[]> {
   const response = await fetch('/api/payment/modes');
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch payment modes: ${response.statusText}`);
   }
-  
+
   return await response.json();
 }
 
@@ -23,10 +23,10 @@ export async function getPaymentModes(): Promise<PaymentMode[]> {
  */
 export async function getPaymentMode(id: string): Promise<PaymentMode> {
   const response = await fetch(`/api/payment/modes/${id}`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch payment mode: ${response.statusText}`);
   }
-  
+
   return await response.json();
 }
