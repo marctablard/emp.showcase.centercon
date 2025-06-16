@@ -1,4 +1,4 @@
-import { H1, H2, H3, H4, H5, H6, Overline } from '@/components/ui/h';
+import { Headline } from '@/components/ui/headline';
 import UiLink from '@/components/ui/link';
 
 export default function TextStyleGuide() {
@@ -6,13 +6,17 @@ export default function TextStyleGuide() {
     <div className="py-12">
       <h4 className="text-3xl/5 lg:text-4xl font-bold text-headlines font-headlines mb-3">Typography</h4>
       <div className="p-4 grid grid-cols-[1fr] gap-6 mb-2">
-        <H1>H1 - The quick brown fox jumps over...</H1>
-        <H2>H2 - The quick brown fox jumps over...</H2>
-        <H3>H3 - The quick brown fox jumps over...</H3>
-        <H4>H4 - The quick brown fox jumps over...</H4>
-        <H5>H5 - The quick brown fox jumps over...</H5>
-        <H6>H6 - The quick brown fox jumps over...</H6>
-        <Overline>Overline</Overline>
+        <Headline variant="h1">H1 - The quick brown fox jumps over...</Headline>
+        <Headline variant="h1" as="h2">
+          H2 looks like H1 - The quick brown fox jumps over...
+        </Headline>
+        <Headline variant="h3">H3 - The quick brown fox jumps over...</Headline>
+        <Headline variant="h4">H4 - The quick brown fox jumps over...</Headline>
+        <Headline variant="h5">H5 - The quick brown fox jumps over...</Headline>
+        <Headline variant="h6">H6 - The quick brown fox jumps over...</Headline>
+        <Headline variant="overline" as="h4">
+          overline
+        </Headline>
       </div>
       <div className="p-4 grid grid-cols-[1fr] gap-6 mb-2">
         <p className="text-xl">

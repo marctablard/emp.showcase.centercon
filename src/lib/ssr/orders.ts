@@ -1,8 +1,8 @@
 'use server';
 
 import { cache } from 'react';
-import { OrderService } from '@/platform/services/order/OrderService';
 import { Order } from '@/platform/services/model/order/order';
+import { OrderService } from '@/platform/services/order/OrderService';
 
 /**
  * Get the order service instance from the platform container

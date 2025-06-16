@@ -8,7 +8,7 @@ import { OrderService } from '@/platform/services/order/OrderService';
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const orderId = resolvedParams.id;
-  
+
   try {
     const orderService = globalThis.EMP.platform.server.get<OrderService>('OrderService');
 

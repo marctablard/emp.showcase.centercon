@@ -69,7 +69,7 @@
     "react-redux": "^9.2.0",
     "react-sizeme": "^3.0.2",
     "reflect-metadata": "^0.2.2",
-    "sonner": "^2.0.3",
+    "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.0",
     "tar": "^7.4.3",
     "zod": "^3.25.28",

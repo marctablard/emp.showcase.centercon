@@ -3,8 +3,9 @@ import ColorStyleGuide from './atoms/color';
 import TextStyleGuide from './atoms/text';
 import BreadcrumbStyleGuide from './ui/breadcrumb';
 import ButtonStyleGuide from './ui/button';
-import FormFieldStyleGuide from './ui/form-field';
+import FormFieldSytelguide from './ui/form-field';
 import LinkStyleGuide from './ui/link';
+import NotificationSytelguide from './ui/notification';
 import PaginationStyleGuide from './ui/pagination';
 
 export default function StyleGuide() {
@@ -31,7 +32,8 @@ export default function StyleGuide() {
       <LinkStyleGuide />
       <BreadcrumbStyleGuide />
       <PaginationStyleGuide />
-      <FormFieldStyleGuide />
+      <FormFieldSytelguide />
+      <NotificationSytelguide />
     </main>
   );
 }

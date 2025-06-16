@@ -9,9 +9,6 @@
 
 name: Deploy develop preview
 on:
-  push:
-    branches:
-      - develop
   workflow_dispatch:
 
 concurrency:

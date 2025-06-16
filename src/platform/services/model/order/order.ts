@@ -3,7 +3,7 @@ import { Address } from '../common';
 /**
  * Order status types
  */
-export type OrderStatus = 
+export type OrderStatus =
   | 'IN_CHECKOUT'
   | 'CREATED'
   | 'CONFIRMED'

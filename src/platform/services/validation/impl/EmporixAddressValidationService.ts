@@ -1,6 +1,6 @@
-import { injectable } from "@platform/core/di/injectable";
-import { z } from "zod";
-import ZodSchemaValidationService from "./ZodSchemaValidationService";
+import { injectable } from '@platform/core/di/injectable';
+import { z } from 'zod';
+import ZodSchemaValidationService from './ZodSchemaValidationService';
 
 const AddressFormSchema = z.object({
   contactName: z.string().min(1, { message: 'address.contactName.required' }),
@@ -16,11 +16,9 @@ const AddressFormSchema = z.object({
 
 @injectable('AddressValidationService', 'Singleton')
 class EmporixAddressValidationService extends ZodSchemaValidationService {
-
   constructor() {
     super(AddressFormSchema);
   }
-
 }
 
 export default EmporixAddressValidationService;
