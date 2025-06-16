@@ -6,30 +6,8 @@ import { LocationData } from '@/platform/services/model/common';
 import { WeatherForecast } from '@/platform/services/model/weather';
 import { useLocation } from '../location/useLocation';
 
-export interface WeatherData {
-  location: {
-    city: string;
-    mainLocation: {
-      postalCode: string;
-      city: string;
-    };
-  };
-  weather: {
-    description: string;
-    date: string;
-    temperature: number;
-    precipitation: number;
-    humidity: number;
-    wind: number;
-  };
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
-}
-
 export function useWeather() {
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherForecast | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { location: userLocation, loading: locationLoading, error: locationError } = useLocation();
@@ -55,29 +33,7 @@ export function useWeather() {
           weatherLocation.geoLocation.longitude,
         );
 
-        // Map the service data to our UI format
-        const currentWeather = forecast.current;
-
-        const weatherData: WeatherData = {
-          location: {
-            city: weatherLocation.city,
-            mainLocation: {
-              postalCode: userLocation?.postalCode || '',
-              city: weatherLocation.city,
-            },
-          },
-          weather: {
-            description: currentWeather.description,
-            date: getCurrentDate(),
-            temperature: currentWeather.temperature,
-            precipitation: currentWeather.precipitation,
-            humidity: currentWeather.humidity,
-            wind: currentWeather.windSpeed,
-          },
-          coordinates: weatherLocation.geoLocation,
-        };
-
-        setWeatherData(weatherData);
+        setWeatherData(forecast);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching weather data:', err);

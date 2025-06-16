@@ -15,11 +15,16 @@ import {
 import { useConfigStore } from '@/lib/client/dashboard';
 
 interface DashboardControlsProps {
+  className?: string;
   isCustomizableInitial: boolean;
   onIsCustomizableChanged: (isCustomizable: boolean) => void;
 }
 
-export default function DashboardControls({ isCustomizableInitial, onIsCustomizableChanged }: DashboardControlsProps) {
+export default function DashboardControls({
+  className,
+  isCustomizableInitial,
+  onIsCustomizableChanged,
+}: DashboardControlsProps) {
   const t = useTranslations('Account');
   const [isCustomizable, setIsCustomizable] = useState(isCustomizableInitial);
   const { resetLayouts } = useConfigStore();
@@ -32,11 +37,11 @@ export default function DashboardControls({ isCustomizableInitial, onIsCustomiza
   };
 
   return (
-    <div className="relative z-10">
+    <div className={className}>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button variant="link" className="flex items-center" aria-label={t('settings')}>
-            <Settings className="h-4 w-4 mr-2" />
+          <Button variant="secondary" size="icon" className="flex items-center" aria-label={t('settings')}>
+            <Settings className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="mr-4">

@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { Languages } from 'lucide-react';
 import { routing } from '@/app/i18n/routing';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -13,6 +13,7 @@ import { ApprovalsSummaryCard } from './cards/approvals';
 import { BudgetProgress, BudgetSummaryCard } from './cards/budget';
 import { InboxCard } from './cards/inbox-card';
 import { OrderSummaryCard, RecentOrdersCard } from './cards/order-cards';
+import { SolarOutputCard } from './cards/solar-output-card';
 import { WeatherCard } from './cards/weather-card';
 
 interface DashboardProps {
@@ -60,6 +61,9 @@ export default function Dashboard({ isCustomizable }: DashboardProps) {
       </div>,
       <div key="weather" className="h-full overflow-auto relative">
         <WeatherCard />
+      </div>,
+      <div key="solar-output" className="h-full overflow-auto relative">
+        <SolarOutputCard />
       </div>,
       <div key="recent-orders" className="h-full overflow-auto relative">
         <RecentOrdersCard />

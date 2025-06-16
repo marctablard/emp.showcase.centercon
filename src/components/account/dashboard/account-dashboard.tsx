@@ -23,14 +23,14 @@ export default function AccountDashboard({ initialCustomer }: AccountDashboardPr
   return (
     <AccountLayout>
       <div className="space-y-6">
-        <div className="">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {t('welcomeBack', { name: customer?.firstName + ' ' + customer?.lastName || 'Kunde' })}
-            </h1>
-            <p className="text-muted-foreground">{t('accountDashboardDescription')}</p>
-          </div>
+        <div className="relative">
+          <h1 className="text-3xl font-bold tracking-tight">
+            {t('welcomeBack', { name: customer?.firstName + ' ' + customer?.lastName || 'Kunde' })}
+          </h1>
+          <p className="text-muted-foreground">{t('accountDashboardDescription')}</p>
+
           <DashboardControls
+            className="top-4 right-4 absolute"
             isCustomizableInitial={isCustomizable}
             onIsCustomizableChanged={() => {
               setIsCustomizable(!isCustomizable);

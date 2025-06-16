@@ -98,8 +98,16 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
   }
   return (
     <DashboardCard
-      title={title || t(weatherData.weather.description)}
-      subtitle={subtitle || weatherData.weather.date}
+      title={title || t(weatherData.current.description)}
+      subtitle={
+        subtitle ||
+        weatherData.current.date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      }
       className={className}
       variant="primary"
       {...props}
@@ -108,14 +116,14 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
         <div className={`flex-wrap gap-4 w-full`}>
           <div className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <WeatherIcon description={weatherData.weather.description} />
+              <WeatherIcon description={weatherData.current.description} />
             </div>
             <div>
               <div className="text-3xl font-bold flex items-start">
-                {weatherData.weather.temperature.toFixed(1)}
+                {weatherData.current.temperature.toFixed(1)}
                 <span className="text-lg mt-1">°</span>
               </div>
-              <div className="text-sm">{weatherData.location.city}</div>
+              <div className="text-sm">{weatherData.current.location}</div>
             </div>
           </div>
           <div
@@ -127,15 +135,15 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
           >
             <div className="flex justify-between py-1">
               <span>{t('precipitation')}:</span>
-              <span>{weatherData.weather.precipitation}%</span>
+              <span>{weatherData.current.precipitation}%</span>
             </div>
             <div className="flex justify-between py-1">
               <span>{t('humidity')}:</span>
-              <span>{weatherData.weather.humidity}%</span>
+              <span>{weatherData.current.humidity}%</span>
             </div>
             <div className="flex justify-between py-1">
               <span>{t('wind')}:</span>
-              <span>{weatherData.weather.wind.toFixed(1)} km/h</span>
+              <span>{weatherData.current.windSpeed.toFixed(1)} km/h</span>
             </div>
           </div>
         </div>

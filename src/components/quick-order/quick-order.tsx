@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2, Plus, Search, ShoppingCart, Upload, X } from 'lucide-react';
+import { Loader2, Plus, ShoppingCart, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -42,7 +42,7 @@ export function QuickOrderDialog({ trigger }: { trigger: React.ReactNode }) {
     if (items.length === 0) {
       setItems([createEmptyItem(), createEmptyItem(), createEmptyItem()]);
     }
-  }, []);
+  }, [items.length]);
 
   function createEmptyItem(): QuickOrderItem {
     return {
