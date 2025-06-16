@@ -47,7 +47,7 @@ const QuickEntryElement = ({ blok }: QuickEntryElementProps) => {
 
 const QuickEntry = ({ blok }: QuickEntryProps) => {
   return (
-    <div {...storyblokEditable(blok)}>
+    <div {...storyblokEditable(blok)} className="mb-10">
       <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr]  gap-6 py-6 px-9 bg-primary-50">
         {blok.elements &&
           blok.elements.map((element, index) => {

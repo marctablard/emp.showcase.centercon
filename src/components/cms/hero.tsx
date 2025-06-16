@@ -13,7 +13,7 @@ interface HeroProps {
       alt?: string;
     };
     video?: {
-      filename: string;
+      url?: string;
       alt?: string;
     };
     alt_text?: string;
@@ -29,11 +29,11 @@ const Hero = ({ blok }: HeroProps) => {
   const isVideo = false;
 
   return (
-    <div {...storyblokEditable(blok)} className={cn('relative sm:mb-10 lg:mb-0')}>
+    <div {...storyblokEditable(blok)} className={cn('relative mb-10 sm:mb-20 lg:md:mb-10')}>
       <div className="w-full flex justify-end">
         <div className="w-full mb-65 sm:mb-0 xl:w-9/10 h-120 sm:h-130 md:h-120 lg:h-200 xl:h-175 2xl:h-220 ">
           {blok.image && (
-            <svg height="100%" className="w-full" viewBox="0 0 1573 735">
+            <svg height="100%" className="" viewBox="0 0 1573 735">
               <defs>
                 <clipPath id="shape">
                   <path
@@ -50,7 +50,7 @@ const Hero = ({ blok }: HeroProps) => {
                   className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
                 ></image>
               )}
-              {isVideo && (
+              {blok.video && isVideo && (
                 <foreignObject
                   width="100%"
                   height="100%"
@@ -58,10 +58,7 @@ const Hero = ({ blok }: HeroProps) => {
                   className="w-full -translate-x-150 sm:-translate-x-120 md:-translate-x-30 lg:-translate-x-120 xl:translate-x-0"
                 >
                   <video loop autoPlay width="100%">
-                    <source
-                      src="https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4"
-                      type="video/mp4"
-                    />
+                    <source src={blok.video.url} type="video/mp4" />
                   </video>
                 </foreignObject>
               )}
