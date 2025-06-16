@@ -1,9 +1,11 @@
 export interface ProductPrice {
   id: string;
   productId: string;
-  currency: string;
+  currency: Currency;
   originalValue: number;
   effectiveValue: number;
+  discountValue: number;
+  discountPercentage: number;
   totalValue: number;
   quantity: {
     quantity: number;
