@@ -73,6 +73,24 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
     credentials?: { username: string; password: string },
   ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
     // When recieving credentials we MUST recreate a new Token
+    const customerToken = await this.getCustomerToken(tenant, clientId, credentials);
+    if (customerToken) {
+      return customerToken;
+    } else {
+      return this.getAnonymousToken(tenant, clientId);
+    }
+  }
+
+  public async clearAnonymousToken(tenant: string): Promise<void> {
+    return this.writeToken('anonymous', undefined, tenant);
+  }
+
+  public async getCustomerToken(
+    tenant: string,
+    clientId: string,
+    credentials?: { username: string; password: string },
+  ): Promise<{ accessToken: string; saasToken?: string; sessionId: string } | null> {
+    // When recieving credentials we MUST recreate a new Token
     let customerToken;
     if (credentials) {
       customerToken = await this.createCustomerToken(tenant, clientId, credentials);
@@ -103,7 +121,7 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
         sessionId: customerToken.token.session_id,
       };
     } else {
-      return this.getAnonymousToken(tenant, clientId);
+      return null;
     }
   }
 
@@ -154,6 +172,10 @@ export abstract class EmporixTokenManagerAbstract implements TokenManager {
     } else {
       return undefined;
     }
+  }
+
+  public async clearCustomerToken(tenant: string): Promise<void> {
+    return this.writeToken('customer', undefined, tenant);
   }
 
   public async getServiceAccessToken(

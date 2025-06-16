@@ -40,7 +40,6 @@ interface UseOrder {
  */
 export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
   const { orderId, initialOrder, initialOrders, pageSize, pageNumber } = options;
-
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [order, setOrder] = useState<Order | null | undefined>(initialOrder);
@@ -74,7 +73,6 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrder => {
     try {
       setLoading(true);
       setError(null);
-
       const ordersData = await apiFetchOrders(pageSize, pageNumber);
       setOrders(ordersData);
     } catch (err) {

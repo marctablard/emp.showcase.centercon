@@ -17,7 +17,7 @@ export interface CartService {
    * Retrieves the current Sessions Cart.
    * @returns The cart if found, otherwise undefined.
    */
-  getCart(): Promise<Cart | undefined>;
+  getCart(): Promise<Cart | null>;
 
   /**
    * Retrieves a cart by its ID.
@@ -41,7 +41,7 @@ export interface CartService {
    * @param itemId The ID of the item to update
    * @param quantity The new quantity
    */
-  updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<void>;
+  updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<CartItem>;
 
   /**
    * Removes an item from the cart

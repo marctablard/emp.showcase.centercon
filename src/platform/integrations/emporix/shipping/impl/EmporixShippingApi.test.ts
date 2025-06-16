@@ -55,7 +55,6 @@ describe('EmporixShippingApi', () => {
 
       // Execute
       const result = await shippingApi.getShippingMethod(siteId, zoneId, methodId);
-
       // Assert
       expect(result).toBeDefined();
       if (result) {
@@ -69,7 +68,6 @@ describe('EmporixShippingApi', () => {
       const siteId = 'main';
       const zoneId = 'de-default';
       const methodId = 'non-existent-method';
-
       // Mock response
       (apiInvoker.authenticatedFetch as jest.Mock).mockResolvedValue({
         ok: false,
@@ -79,7 +77,6 @@ describe('EmporixShippingApi', () => {
 
       // Execute
       const result = await shippingApi.getShippingMethod(siteId, zoneId, methodId);
-
       // Assert
       expect(result).toBeUndefined();
     });
@@ -93,7 +90,6 @@ describe('EmporixShippingApi', () => {
 
       // Execute
       const result = await shippingApi.getShippingMethods(siteId, zoneId);
-
       // Assert
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
@@ -111,7 +107,6 @@ describe('EmporixShippingApi', () => {
 
       // Execute
       const result = await shippingApi.findSite(request);
-
       // Assert
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
@@ -127,7 +122,6 @@ describe('EmporixShippingApi', () => {
       // Setup
       const siteId = 'main';
       const zoneId = 'de-default';
-
       // Mock response
       (apiInvoker.authenticatedFetch as jest.Mock).mockRejectedValue(new Error('API Error'));
 

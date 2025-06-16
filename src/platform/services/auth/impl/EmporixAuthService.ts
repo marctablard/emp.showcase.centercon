@@ -1,12 +1,14 @@
 import { inject } from 'inversify';
+import { getCartIdFromCookie } from '@/lib/server/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import EmporixCustomerApi from '@/platform/integrations/emporix/customer/impl/EmporixCustomerApi';
+import { EmporixAddress } from '@/platform/integrations/emporix/model';
 import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer';
 import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
 import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
+import type { CartMigrationService } from '../../cart/CartMigrationService';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { AuthService } from '../AuthService';
-import { EmporixAddress } from '@/platform/integrations/emporix/model';
 
 /**
  * Emporix implementation of the AuthService
@@ -26,6 +28,8 @@ export class EmporixAuthService implements AuthService {
     private readonly emporixCustomerApi: EmporixCustomerApi,
     @inject('EmporixAddressMapper')
     private readonly emporixAddressMapper: EmporixAddressMapper,
+    @inject('CartMigrationService')
+    private readonly cartMigrationService: CartMigrationService,
   ) {}
 
   async login(credentials: Credentials): Promise<Session> {
@@ -34,12 +38,16 @@ export class EmporixAuthService implements AuthService {
       if (!session) {
         throw new Error('Failed to get session context');
       }
+      const cartId = await getCartIdFromCookie(session.siteCode || 'main', session.currency || 'EUR');
+      if (cartId && session.customerId) {
+        await this.cartMigrationService.migrateCartToCustomer(cartId, session.customerId);
+      }
       return {
         sessionId: session.sessionId,
         customerId: session.customerId,
         siteCode: session.siteCode,
         currency: session.currency,
-        cartId: session.cartId,
+        cartId: cartId || undefined,
         country: session.targetLocation,
       };
     } catch (error) {

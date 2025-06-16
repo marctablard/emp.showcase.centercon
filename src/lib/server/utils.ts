@@ -68,12 +68,6 @@ export async function addCartToCookie(cart: Cart, response: NextResponse): Promi
       currency: cart.currency,
       legalEntityId: cart.legalEntity,
       channel: cart.channel,
-      items: cart.items
-        .filter((item) => item.product?.id)
-        .map((item) => ({
-          pId: item.product!.id!,
-          qty: item.quantity,
-        })),
     },
   ];
 
