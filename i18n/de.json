@@ -269,6 +269,11 @@
         "description": "Vielen Dank für Ihre Bestellung",
         "orderConfirmed": "Bestellung bestätigt!",
         "thankYou": "Vielen Dank für Ihren Einkauf. Ihre Bestellung wurde entgegengenommen.",
+        "emailConfirmation": "Eine Bestätigungs-E-Mail wurde gesendet an",
+        "continueShopping": "Weiter einkaufen",
+        "viewOrders": "Meine Bestellungen anzeigen"
+    },
+    "Orders": {
         "orderDetails": "Bestelldetails",
         "orderNumber": "Bestellnummer",
         "orderDate": "Bestelldatum",
@@ -276,6 +281,8 @@
         "status": "Status",
         "paymentMethod": "Zahlungsmethode",
         "orderItems": "Bestellte Artikel",
+        "product": "Produkt",
+        "price": "Preis",
         "quantity": "Menge",
         "total": "Gesamtsumme",
         "subtotal": "Zwischensumme",
@@ -284,8 +291,6 @@
         "free": "Kostenlos",
         "shippingAddress": "Lieferadresse",
         "errorFetchingOrder": "Fehler beim Abrufen der Bestelldetails",
-        "emailConfirmation": "Eine Bestätigungs-E-Mail wurde gesendet an",
-        "continueShopping": "Weiter einkaufen",
         "viewOrders": "Meine Bestellungen anzeigen"
     },
     "searchResults": {
@@ -331,11 +336,13 @@
         "viewAllMessages": "Alle Nachrichten anzeigen",
         "pendingApprovals": "Ausstehende Freigaben",
         "noApprovals": "Keine ausstehenden Freigaben",
+        "noOrders": "Keine Bestellungen gefunden",
         "orderApproval": "Bestellfreigabe",
         "quoteApproval": "Angebotsfreigabe",
         "returnApproval": "Retourenfreigabe",
         "requestedBy": "Angefordert von",
         "viewAllApprovals": "Alle Freigaben anzeigen",
+        "viewAllOrders": "Alle Bestellungen anzeigen",
         "companyPageDescription": "Unternehmensinformationen anzeigen und verwalten",
         "companyPagePlaceholder": "Unternehmensinformationen werden hier angezeigt",
         "ordersPageDescription": "Bestellungen und Retouren anzeigen und verwalten",

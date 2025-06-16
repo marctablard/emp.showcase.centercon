@@ -261,6 +261,10 @@
         "description": "Thank you for your order",
         "orderConfirmed": "Order Confirmed!",
         "thankYou": "Thank you for your purchase. Your order has been received.",
+        "emailConfirmation": "A confirmation email has been sent to",
+        "continueShopping": "Continue Shopping"    
+    },
+    "Orders": {
         "orderDetails": "Order Details",
         "orderNumber": "Order Number",
         "orderDate": "Order Date",
@@ -268,6 +272,8 @@
         "status": "Status",
         "paymentMethod": "Payment Method",
         "orderItems": "Order Items",
+        "product": "Product",
+        "price": "Price",
         "quantity": "Quantity",
         "total": "Total",
         "subtotal": "Subtotal",
@@ -276,8 +282,6 @@
         "free": "Free",
         "shippingAddress": "Shipping Address",
         "errorFetchingOrder": "Error fetching order details",
-        "emailConfirmation": "A confirmation email has been sent to",
-        "continueShopping": "Continue Shopping",
         "viewOrders": "View My Orders"
     },
     "searchResults": {
@@ -323,11 +327,13 @@
         "viewAllMessages": "View all messages",
         "pendingApprovals": "Pending Approvals",
         "noApprovals": "No pending approvals",
+        "noOrders": "No orders found",
         "orderApproval": "Order Approval",
         "quoteApproval": "Quote Approval",
         "returnApproval": "Return Approval",
         "requestedBy": "Requested by",
         "viewAllApprovals": "View all approvals",
+        "viewAllOrders": "View all orders",
         "companyPageDescription": "View and manage your company information",
         "companyPagePlaceholder": "Company information will be displayed here",
         "ordersPageDescription": "View and manage your orders and returns",
