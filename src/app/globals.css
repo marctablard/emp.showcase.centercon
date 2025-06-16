@@ -112,6 +112,9 @@
   --container-6xl: 120rem;
   /* max for full-width elements */
   --container-7xl: 160rem;
+
+  /*shadow*/
+  --shadow-footer: -10px 0px 10px -5px rgba(27, 27, 30, 0.1), 10px 0px 10px -5px rgba(27, 27, 30, 0.1);
 }
 
 @theme inline {

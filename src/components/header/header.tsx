@@ -1,53 +1,51 @@
-import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
-import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
-import HeaderAccount from './header-account';
+'use client';
 
-export default async function Header() {
-  const t = await getTranslations('header');
+import { useEffect, useState } from 'react';
+import HeaderCollapsed from '@/components/header/collapsed/header-collapsed';
+import HeaderExpanded from '@/components/header/expanded/header-expanded';
+
+export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 200;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrolled]);
+
   return (
-    <header className="bg-white shadow-md">
-      <div className="max-w-6xl mx-auto px-12">
-        <div className="flex justify-between h-16">
-          <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="font-bold text-xl text-neutral-800">
-              Emporix Showcase
-            </Link>
-          </div>
-          <div className="overflow-hidden flex items-center gap-10">
-            <div className="hidden md:flex items-center">
-              <NavigationMenu className="flex gap-4 no-underline">
-                <NavigationMenuLink href="/product/10637590" className="no-underline px-4">
-                  {t('featuredProduct')}
-                </NavigationMenuLink>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Components</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <NavigationMenuLink>Link</NavigationMenuLink>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
-            <div className="hidden md:flex items-center gap-2">
-              <HeaderAccount />
-            </div>
-            <Button className="md:hidden flex py-4" variant="primary" size="icon">
-              <Menu />
-            </Button>
-          </div>
+    <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
+      <header
+        className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl relative transition-all duration-300 ease-in-out mx-9"
+        style={{ height: scrolled ? '64px' : '168px' }}
+      >
+        <div
+          className={`transition-all duration-300 ease-in-out absolute top-0 left-0 right-0 w-full ${
+            scrolled ? 'opacity-0 transform -translate-y-4 z-1' : 'opacity-100 z-2'
+          }`}
+        >
+          <HeaderExpanded />
         </div>
-      </div>
-    </header>
+
+        <div
+          className={`flex justify-between items-center transition-all duration-300 ease-in-out absolute top-0 left-0 right-0 h-[64px] px-6 ${
+            scrolled ? 'opacity-100 transform translate-y-0 z-2' : 'opacity-0 transform translate-y-4 z-1'
+          }`}
+        >
+          <HeaderCollapsed />
+        </div>
+      </header>
+    </div>
   );
 }

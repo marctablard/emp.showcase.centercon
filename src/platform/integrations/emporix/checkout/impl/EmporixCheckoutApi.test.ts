@@ -57,6 +57,7 @@ const createSampleCheckoutRequest = (
   cartId: string,
   isGuest: boolean = true,
   email: string = 'guest@checkout.com',
+  customerNumber?: string,
 ): EmporixCartCheckoutRequest => {
   // Sample customer
   const customer: EmporixCheckoutCustomer = {
@@ -66,6 +67,10 @@ const createSampleCheckoutRequest = (
     contactPhone: '1234567890',
     guest: isGuest,
   };
+
+  if (customerNumber) {
+    customer.id = customerNumber;
+  }
 
   // Sample billing address
   const billingAddress: EmporixCheckoutAddress = {
@@ -163,7 +168,7 @@ describe('EmporixCheckoutApi', () => {
           await cartApi.deleteCart(createdCartId);
         }
       } catch (error) {
-        console.warn('Error during cart cleanup:', error);
+        // fail silently, because it may have succesfully checked out
       }
     }, 10000);
 
@@ -215,10 +220,7 @@ describe('EmporixCheckoutApi', () => {
         const password = 'Test1234';
 
         // Use the customer API to login
-        const sessionContext = await customerApi.login(username, password);
-
-        // The login method should automatically store the token in the token manager
-        console.log('Customer login successful, session ID:', sessionContext.sessionId);
+        await customerApi.login(username, password);
       } catch (error) {
         console.error('Error setting up customer token:', error);
         throw error;
@@ -227,6 +229,9 @@ describe('EmporixCheckoutApi', () => {
     let customerCartId: string;
 
     beforeEach(async () => {
+      // Set up a customer token with test user credentials
+      await setupCustomerToken();
+
       // Create a cart
       customerCartId = await cartApi.createCart(sampleCreateCartRequest);
       expect(customerCartId).toBeDefined();
@@ -234,34 +239,13 @@ describe('EmporixCheckoutApi', () => {
       // Add an item to the cart
       const itemId = await cartApi.addItemToCart(customerCartId, sampleAddItemRequest);
       expect(itemId).toBeDefined();
-
-      // Set up a customer token with test user credentials
-      await setupCustomerToken();
     }, 15000);
 
-    /*
-    afterEach(async () => {
-      try {
-        // Delete the cart if it exists
-        if (customerCartId) {
-          await cartApi.deleteCart(customerCartId);
-        }
-      } catch (error) {
-        console.warn('Error during cart cleanup:', error);
-      }
-    }, 10000);
-    */
-
-    /**
-     * Re-Included once Approval issue is resolved (No Ticket yet)
-     */
-    it.skip('should perform a B2B customer checkout', async () => {
+    it('should perform a B2B customer checkout', async () => {
       // Create a checkout request for the cart
-      const checkoutRequest = createSampleCheckoutRequest(customerCartId, false, username);
-
+      const checkoutRequest = createSampleCheckoutRequest(customerCartId, false, username, '00632699');
       // Perform the checkout
       const response = await checkoutApi.checkout(checkoutRequest);
-
       // Verify the checkout response
       expect(response).toBeDefined();
       expect(response.orderId).toBeDefined();
@@ -278,10 +262,7 @@ describe('EmporixCheckoutApi', () => {
         const password = 'Test1234';
 
         // Use the customer API to login
-        const sessionContext = await customerApi.login(username, password);
-
-        // The login method should automatically store the token in the token manager
-        console.log('B2C Customer login successful, session ID:', sessionContext.sessionId);
+        await customerApi.login(username, password);
       } catch (error) {
         console.error('Error setting up B2C customer token:', error);
         throw error;
@@ -290,6 +271,9 @@ describe('EmporixCheckoutApi', () => {
     let customerCartId: string;
 
     beforeEach(async () => {
+      // Set up a customer token with test user credentials
+      await setupCustomerToken();
+
       // Create a cart
       customerCartId = await cartApi.createCart(sampleCreateCartRequest);
       expect(customerCartId).toBeDefined();
@@ -297,30 +281,11 @@ describe('EmporixCheckoutApi', () => {
       // Add an item to the cart
       const itemId = await cartApi.addItemToCart(customerCartId, sampleAddItemRequest);
       expect(itemId).toBeDefined();
-
-      // Set up a customer token with test user credentials
-      await setupCustomerToken();
     }, 15000);
 
-    /*
-    afterEach(async () => {
-      try {
-        // Delete the cart if it exists
-        if (customerCartId) {
-          await cartApi.deleteCart(customerCartId);
-        }
-      } catch (error) {
-        console.warn('Error during cart cleanup:', error);
-      }
-    }, 10000);
-    */
-
-    /**
-     * Will be re-included once DCPS-16509 is resolved
-     */
-    it.skip('should perform a B2C customer checkout', async () => {
+    it('should perform a B2C customer checkout', async () => {
       // Create a checkout request for the cart
-      const checkoutRequest = createSampleCheckoutRequest(customerCartId, false, username);
+      const checkoutRequest = createSampleCheckoutRequest(customerCartId, false, username, '32667917');
 
       // Perform the checkout
       const response = await checkoutApi.checkout(checkoutRequest);

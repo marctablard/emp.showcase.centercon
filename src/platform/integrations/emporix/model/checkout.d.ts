@@ -7,7 +7,7 @@ import { EmporixAddress } from './common';
  * Common properties for all checkout requests
  */
 export interface EmporixCheckoutRequest {
-  paymentMethods: EmporixPaymentMethod[];
+  paymentMethods: EmporixCheckoutPaymentMethod[];
   deliveryWindowId?: string;
   currency?: string;
 }
@@ -44,7 +44,7 @@ export interface EmporixCheckoutCustomer {
 /**
  * Payment method model for checkout
  */
-export interface EmporixPaymentMethod {
+export interface EmporixCheckoutPaymentMethod {
   provider: string;
   customAttributes?: {
     token?: string;

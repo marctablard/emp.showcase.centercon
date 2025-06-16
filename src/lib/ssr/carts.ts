@@ -34,7 +34,7 @@ const getCartById = cache(async (cartId: string): Promise<Cart | null | undefine
 export async function getCurrentCart(): Promise<Cart | null | undefined> {
   const cartId = await getCartIdFromCookie('main', 'EUR');
   if (!cartId) {
-    return null;
+    return undefined;
   }
 
   return getCartById(cartId);

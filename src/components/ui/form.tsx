@@ -10,6 +10,7 @@ import {
   useFormContext,
   useFormState,
 } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { LucideIcon } from 'lucide-react';
@@ -135,27 +136,23 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn('text-muted-foreground text-xs text-neutral-300', className)}
+      className={cn('text-xs text-neutral-300', className)}
       {...props}
     />
   );
 }
 
 function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
+  const t = useTranslations('Validation');
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? '') : props.children;
+  const body = error ? String(error?.message ? t(error.message) : '') : props.children;
 
   if (!body) {
     return null;
   }
 
   return (
-    <p
-      data-slot="form-message"
-      id={formMessageId}
-      className={cn('text-destructive text-sm text-danger-500', className)}
-      {...props}
-    >
+    <p data-slot="form-message" id={formMessageId} className={cn('text-sm text-danger-500', className)} {...props}>
       {body}
     </p>
   );

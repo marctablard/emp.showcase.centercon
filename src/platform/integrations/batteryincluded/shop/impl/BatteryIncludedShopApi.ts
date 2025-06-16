@@ -1,3 +1,8 @@
+import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
+import type BatteryIncludedApiInvoker from '../../common/impl/BatteryIncludedApiInvoker';
+import { buildSearchParams } from '../../common/util/common';
+import type { BatteryIncludedConfig } from '../../config';
 import {
   BatteryIncludedHighlight,
   BatteryIncludedPreset,
@@ -7,11 +12,6 @@ import {
   BatteryIncludedSuggestion,
 } from '../../model';
 import { ShopApi } from '../ShopApi';
-import { buildSearchParams } from '../../common/util/common';
-import { inject } from 'inversify';
-import type { BatteryIncludedConfig } from '../../config';
-import type BatteryIncludedApiInvoker from '../../common/impl/BatteryIncludedApiInvoker';
-import { injectable } from '@/platform/core/di/injectable';
 
 @injectable('BatteryIncludedShopApi', 'Singleton')
 class BatteryIncludedShopApi implements ShopApi {

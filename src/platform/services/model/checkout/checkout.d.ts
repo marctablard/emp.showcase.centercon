@@ -2,13 +2,14 @@
  * Service layer model definitions for checkout
  */
 import { Address } from '@/platform/services/model/common';
+import { PaymentMode } from '@/platform/services/model/payment';
 
 /**
  * Common properties for all checkout requests
  */
 export interface BaseCheckoutRequest {
-  customer: Customer;
-  paymentMethod: PaymentMethod;
+  customer: ContactData;
+  paymentMethod: CheckoutPaymentMethod;
   currency?: string;
 }
 
@@ -31,8 +32,7 @@ export interface CheckoutAddress extends Address {
 /**
  * Customer information for checkout
  */
-export interface Customer {
-  id?: string;
+export interface ContactData {
   firstName: string;
   lastName: string;
   email: string;
@@ -43,9 +43,7 @@ export interface Customer {
 /**
  * Payment method for checkout
  */
-export interface PaymentMethod {
-  provider: string;
-  method?: string;
+export interface CheckoutPaymentMethod extends PaymentMode {
   amount?: number;
   customAttributes?: Record<string, any>;
 }
@@ -53,7 +51,7 @@ export interface PaymentMethod {
 /**
  * Shipping information for checkout
  */
-export interface Shipping {
+export interface CheckoutShipping {
   methodId: string;
   zoneId: string;
   methodName: string;
@@ -66,9 +64,10 @@ export interface Shipping {
  */
 export interface CheckoutRequest extends BaseCheckoutRequest {
   cartId: string;
-  shipping: Shipping;
+  shipping: CheckoutShipping;
   addresses: CheckoutAddress[];
-  customer: Customer;
+  customer: ContactData | null;
+  paymentMethod: CheckoutPaymentMethod;
 }
 
 /**

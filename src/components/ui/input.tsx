@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ArrowRight, LucideIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 
@@ -7,6 +7,9 @@ export interface InputProps extends React.ComponentProps<'input'> {
   startIcon?: LucideIcon;
   endIcon?: LucideIcon;
   isButton?: boolean;
+  iconButtonBefore?: LucideIcon;
+  iconButtonAfter?: LucideIcon;
+  buttonText?: string;
 }
 
 function Input({ className, type, startIcon, endIcon, isButton, ...props }: InputProps) {
@@ -40,7 +43,7 @@ function Input({ className, type, startIcon, endIcon, isButton, ...props }: Inpu
           startIcon && 'pl-10',
           endIcon && 'pr-10',
           'placeholder:text-neutral-300 py-3 text-base md:text-base',
-          'transition duration-150 ease-in-out hover:border-primary-500 hover:text-primary-700 hover:border-primary-700 hover:bg-white',
+          'transition duration-150 ease-in-out hover:text-primary-700 hover:border-primary-700 hover:bg-white',
           'disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
           'aria-invalid:text-danger-500 aria-invalid:border-danger-500 hover:aria-invalid:border-primary-500 hover:aria-invalid:text-primary-700',
@@ -61,14 +64,16 @@ function Input({ className, type, startIcon, endIcon, isButton, ...props }: Inpu
   );
 }
 
-function InputButton({ startIcon, endIcon, ...props }: InputProps) {
+function InputButton({ startIcon, endIcon, iconButtonBefore, iconButtonAfter, buttonText, ...props }: InputProps) {
+  const ButtonStartIcon = iconButtonBefore;
+  const ButtonEndIcon = iconButtonAfter;
   return (
     <div className={cn('flex items-center')}>
       <Input startIcon={startIcon} endIcon={endIcon} isButton {...props} />
       <Button variant="input">
-        <ArrowRight />
-        Button
-        <ArrowRight />
+        {ButtonStartIcon && <ButtonStartIcon />}
+        {buttonText}
+        {ButtonEndIcon && <ButtonEndIcon />}
       </Button>
     </div>
   );

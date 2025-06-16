@@ -1,5 +1,5 @@
-import { injectable } from '@/platform/core/di/injectable';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixConfig } from '../../config';
 
 /**
@@ -67,6 +67,30 @@ class EmporixCommonUtil {
   extractIdFromYrn(yrn: string): string {
     const parts = yrn.split(';');
     return parts[parts.length - 1];
+  }
+
+  /**
+   * Adds object fields to a query string, encoding values as needed
+   * @param queryObject The object containing query parameters
+   * @param baseQueryString The base query string to append to
+   * @param excludeFields Optional array of field names to exclude from processing
+   * @returns The updated query string with all parameters added
+   */
+  addObjectFieldsToQuery(queryObject: Record<string, any>, baseQueryString: string): string {
+    let queryParams = baseQueryString;
+
+    // Process all fields in the object, encoding all values
+    Object.keys(queryObject).forEach((field) => {
+      // Skip excluded fields and undefined/null values
+      if (queryObject[field] === undefined || queryObject[field] === null) {
+        return;
+      }
+
+      // Add the field to the query string with proper encoding
+      queryParams += `&${field}=${encodeURIComponent(queryObject[field])}`;
+    });
+
+    return queryParams;
   }
 }
 

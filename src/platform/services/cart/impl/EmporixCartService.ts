@@ -5,7 +5,7 @@ import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/
 import { AddCartItemRequest, UpdateCartItemRequest } from '@/platform/integrations/emporix/model';
 import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
 import type { CartService } from '@/platform/services/cart/CartService';
-import type { Cart } from '@/platform/services/model/cart/cart';
+import type { Cart, CartItem } from '@/platform/services/model/cart/cart';
 import type { PriceService } from '@/platform/services/price/PriceService';
 import type { ProductService } from '@/platform/services/product/ProductService';
 import type { SessionService } from '@/platform/services/session/SessionService';
@@ -73,13 +73,13 @@ class EmporixCartService implements CartService {
     }
   }
 
-  async getCart(): Promise<Cart | undefined> {
+  async getCart(): Promise<Cart | null> {
     const session = await this.sessionService.getCurrentSession();
     if (!session) {
       throw new Error('Failed to get session context');
     }
     const cart = await this.cartApi.getCartByCriteria(session.siteCode || 'main', session.id, undefined, 'shopping');
-    return cart ? this.mapper.mapToService(cart) : undefined;
+    return cart ? this.mapper.mapToService(cart) : null;
   }
 
   async getCartById(id: string): Promise<Cart | null> {
@@ -88,12 +88,14 @@ class EmporixCartService implements CartService {
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<string> {
-    const product = await this.productService.getProductById(productId);
+    const [product, price] = await Promise.all([
+      this.productService.getProductById(productId),
+      this.priceService.getProductPrice(productId, 'pc', quantity),
+    ]);
     if (!product) {
       throw new Error('Product missing');
     }
     // TODO find existing cartItem and merge if desired
-    const price = await this.priceService.getProductPrice(productId, 'pc', quantity);
     if (!price) {
       throw new Error('Price missing');
     }
@@ -114,7 +116,7 @@ class EmporixCartService implements CartService {
       price: {
         priceId: price.id,
         effectiveAmount: price.effectiveValue,
-        originalAmount: price.originalValue,
+        originalAmount: price.originalValue || price.effectiveValue,
         currency: price.currency,
       },
     };
@@ -122,7 +124,7 @@ class EmporixCartService implements CartService {
     return await this.cartApi.addItemToCart(cartId, addItemRequest);
   }
 
-  async updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<void> {
+  async updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<CartItem> {
     const cart = await this.getCartById(cartId);
     const cartItem = cart?.items.find((item) => item.id === itemId);
     if (!cartItem || !cartItem.product?.id) {
@@ -136,12 +138,18 @@ class EmporixCartService implements CartService {
       quantity,
       price: {
         effectiveAmount: price.effectiveValue,
-        originalAmount: price.originalValue,
+        originalAmount: price.originalValue || price.effectiveValue,
         currency: price.currency,
       },
     };
 
     await this.cartApi.updateCartItemQuantity(cartId, itemId, updateRequest);
+    // update Item
+    cartItem.quantity = quantity;
+    cartItem.price.amount = updateRequest.price.effectiveAmount;
+    cartItem.price.currency = updateRequest.price.currency;
+    cartItem.price.originalAmount = updateRequest.price.originalAmount;
+    return cartItem;
   }
 
   async removeCartItem(cartId: string, itemId: string): Promise<void> {

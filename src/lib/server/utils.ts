@@ -42,6 +42,20 @@ export async function getCartCookie(
   );
 }
 
+export async function removeCartFromCookie(cartId: string, response: NextResponse): Promise<void> {
+  const cartCookie: CartCookie = await readCartCookie();
+  for (const siteCode of Object.keys(cartCookie)) {
+    cartCookie[siteCode] = cartCookie[siteCode].filter((cart) => cart.cartId !== cartId);
+  }
+  response.cookies.set({
+    name: CART_COOKIE_ID,
+    value: JSON.stringify(cartCookie),
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+    sameSite: 'strict',
+  });
+}
+
 export async function addCartToCookie(cart: Cart, response: NextResponse): Promise<void> {
   const cartCookie: CartCookie = await readCartCookie();
   if (!cartCookie[cart.site]) {
@@ -54,12 +68,6 @@ export async function addCartToCookie(cart: Cart, response: NextResponse): Promi
       currency: cart.currency,
       legalEntityId: cart.legalEntity,
       channel: cart.channel,
-      items: cart.items
-        .filter((item) => item.product?.id)
-        .map((item) => ({
-          pId: item.product!.id!,
-          qty: item.quantity,
-        })),
     },
   ];
 

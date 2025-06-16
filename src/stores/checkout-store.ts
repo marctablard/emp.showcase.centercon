@@ -3,7 +3,12 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { Cart } from '@/platform/services/model/cart/cart';
-import { CheckoutAddress, ContactData, PaymentMethod, Shipping } from '@/platform/services/model/checkout/checkout';
+import {
+  CheckoutAddress,
+  CheckoutPaymentMethod,
+  CheckoutShipping,
+  ContactData,
+} from '@/platform/services/model/checkout/checkout';
 
 export interface CheckoutState {
   // Cart data
@@ -11,8 +16,8 @@ export interface CheckoutState {
   contactData: ContactData | null;
   shippingAddress: CheckoutAddress | null;
   billingAddress: CheckoutAddress | null;
-  paymentMethod: PaymentMethod | null;
-  shippingMethod: Shipping | null;
+  paymentMethod: CheckoutPaymentMethod | null;
+  shippingMethod: CheckoutShipping | null;
 }
 
 interface CheckoutActions {
@@ -23,8 +28,8 @@ interface CheckoutActions {
   setContactData: (contactData: ContactData) => void;
   setShippingAddress: (address: CheckoutAddress) => void;
   setBillingAddress: (address: CheckoutAddress) => void;
-  setPaymentMethod: (paymentMethod: PaymentMethod) => void;
-  setShippingMethod: (shippingMethod: Shipping) => void;
+  setPaymentMethod: (paymentMethod: CheckoutPaymentMethod) => void;
+  setShippingMethod: (shippingMethod: CheckoutShipping) => void;
 }
 
 export type CheckoutStore = CheckoutState & CheckoutActions;
@@ -66,16 +71,16 @@ export const createCheckoutStore = (initState: CheckoutState = defaultState) => 
         setBillingAddress: (address: CheckoutAddress) => {
           set({ billingAddress: address });
         },
-        setPaymentMethod: (paymentMethod: PaymentMethod) => {
+        setPaymentMethod: (paymentMethod: CheckoutPaymentMethod) => {
           set({ paymentMethod });
         },
-        setShippingMethod: (shippingMethod: Shipping) => {
+        setShippingMethod: (shippingMethod: CheckoutShipping) => {
           set({ shippingMethod });
         },
       }),
       {
         name: 'emp-checkout',
-        storage: createJSONStorage(() => localStorage),
+        storage: createJSONStorage(() => sessionStorage),
       },
     ),
   );

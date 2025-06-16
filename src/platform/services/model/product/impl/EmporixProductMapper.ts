@@ -1,8 +1,8 @@
-import { Product } from '@/platform/services/model/product';
-import { ProductMapper } from '../ProductMapper';
+import { injectable } from '@/platform/core/di/injectable';
 import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import { LocalizedString } from '@/platform/services/model/common';
-import { injectable } from '@/platform/core/di/injectable';
+import { Product } from '@/platform/services/model/product';
+import { ProductMapper } from '../ProductMapper';
 
 /**
  * Implementation of ProductMapper for Emporix product data.

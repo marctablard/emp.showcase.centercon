@@ -1,7 +1,7 @@
-import type { HelloService } from '../HelloService';
-import { injectable } from '@/platform/core/di/injectable';
-import type { UserAgentService } from '../UserAgentService';
 import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
+import type { HelloService } from '../HelloService';
+import type { UserAgentService } from '../UserAgentService';
 
 @injectable('HelloService', 'Singleton')
 class HelloAgentService implements HelloService {
