@@ -35,14 +35,14 @@ const QuickEntryElement = ({ blok }: QuickEntryElementProps) => {
   const Icon = blok.icon && IconVariant[blok.icon as keyof typeof IconVariant];
   return (
     <div className="flex gap-6 align-center min-w-full bg-white shadow-lg first:rounded-ss-xl last:rounded-ee-xl md:first:rounded-ss-3xl md:last:rounded-ee-3xl">
-      <div className="bg-primary-500 hover:bg-primary-700 text-white p-4 lg:p-5 rounded-ss-[inherit]">
+      <div className="bg-primary-500 transition  hover:bg-primary-700 text-white p-4 lg:p-5 rounded-ss-[inherit]">
         {Icon && <Icon className="w-8 h-8 lg:w-10 lg:h-10" />}
       </div>
       <div className="flex flex-col justify-center bg-white ">
         <p className="text-xl font-bold">{blok.title}</p>
         <Link
           href={blok.link}
-          className="text-base inline-flex items-center gap-1 text-primary font-bold underline hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          className="text-base inline-flex items-center gap-1 text-primary font-bold underline transition  hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         >
           {blok.link_name}
           <ArrowRight />

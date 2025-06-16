@@ -1,6 +1,7 @@
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { cn } from '@/lib/utils';
 import Button, { ButtonData, ButtonProps } from './button';
+import { TextEditorData } from './hero';
 
 export enum ImagePosition {
   Right = 'Right',
@@ -11,7 +12,7 @@ interface MediaTextProps {
   blok: {
     overline?: string;
     headline: string;
-    text: string;
+    text: TextEditorData;
     main_button?: ButtonData[];
     image: {
       filename: string;
@@ -25,6 +26,7 @@ interface MediaTextProps {
 
 const MediaText = ({ blok }: MediaTextProps) => {
   const button = blok.main_button ? blok.main_button[0] : null;
+  const text = blok.text.content[0].content[0].text;
 
   return (
     <div
@@ -68,7 +70,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
             blok.image_position === ImagePosition.Right && 'md:col-start-1',
           )}
         >
-          <p className=" text-base lg:text-xl text-neutral-800 pb-3">{blok.text}</p>
+          <p className=" text-base lg:text-xl text-neutral-800 pb-3">{text}</p>
           {button && <Button blok={button} />}
         </div>
       </div>
