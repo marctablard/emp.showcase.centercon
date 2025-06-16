@@ -67,7 +67,8 @@
         "services": "Services",
         "solutions": "Solutions",
         "onlinePlaner": "Online Planer",
-        "aboutUs": "About us"
+        "aboutUs": "About us",
+        "menu": "Menu"
     },
     "footer": {
         "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",
