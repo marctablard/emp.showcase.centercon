@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useResponsive } from '@/hooks/useResponsive';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { cn } from '@/lib/utils';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
@@ -54,7 +54,10 @@ function SidebarProvider({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const { isMobile } = useResponsive();
+  // Use useBreakpoint for mobile device detection
+  // Mobile devices have a screen width < 768px
+  // This corresponds to Tailwind's md breakpoint (768px)
+  const isMobile = !useBreakpoint('md');
   const [openMobile, setOpenMobile] = React.useState(false);
 
   // This is the internal state of the sidebar.
