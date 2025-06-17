@@ -5,7 +5,7 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
 
 export default function HeaderMiddleBar() {
-  const isLargeScreen = useBreakpoint('lg');
+  const isExtraLargeScreen = useBreakpoint('xl');
 
   return (
     <div className="flex justify-between items-center self-stretch w-full pt-6">
@@ -14,7 +14,7 @@ export default function HeaderMiddleBar() {
           <Image src="/images/logo.svg" alt="Logo" width="148" height="24" />
         </Link>
       </div>
-      <HeaderSearch small={!isLargeScreen} />
+      <HeaderSearch small={!isExtraLargeScreen} />
       <HeaderActions />
     </div>
   );

@@ -16,7 +16,7 @@ export default function HeaderCollapsed() {
         <Link className="lg:hidden" href="/">
           <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108] min-h-[16]" />
         </Link>
-        <div className="hidden lg:block">
+        <div className="hidden xl:block">
           <HeaderNavigation />
         </div>
       </div>
@@ -26,7 +26,7 @@ export default function HeaderCollapsed() {
         </div>
         <HeaderActions />
         <HeaderCartButton />
-        <div className="lg:hidden">
+        <div className="xl:hidden">
           <HeaderMenu />
         </div>
       </div>

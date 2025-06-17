@@ -11,11 +11,13 @@ export default function HeaderExpanded() {
   return (
     <>
       <HeaderTopBanner />
+      {/* Desktop */}
       <div className="px-6 pb-2 hidden lg:block">
         <HeaderMiddleBar />
         <HeaderBottomBar />
       </div>
 
+      {/* Tablet */}
       <div className="lg:hidden flex justify-between items-center px-6 pt-6">
         <div className="flex gap-8 items-center">
           <Link href="/">

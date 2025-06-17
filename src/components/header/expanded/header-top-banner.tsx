@@ -30,7 +30,7 @@ export default function HeaderTopBanner() {
             <p className="text-sm pt-0.5">Euro</p>
           </div>
         </div>
-        <div className="hidden lg:flex justify-center items-center font-bold">
+        <div className="hidden xl:flex justify-center items-center font-bold">
           Here is space for you top banner&nbsp;
           <UiLink type="Link" className="text-white" iconAfter={<ArrowUpRight className="w-4 h-4" />}>
             announcements!
