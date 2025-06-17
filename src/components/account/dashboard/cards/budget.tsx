@@ -71,7 +71,7 @@ export function BudgetProgress({ className, title, ...props }: BudgetProgressPro
     }
   }, [orders, revenue]);
 
-  if (loading) {
+  if (loading || ordersLoading) {
     return (
       <div>
         <Spinner />
