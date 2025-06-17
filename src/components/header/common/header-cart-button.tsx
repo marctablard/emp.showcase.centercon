@@ -6,6 +6,7 @@ import { ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
 import { useL10n } from '@/hooks/useL10n';
 import { formatCurrency } from '@/lib/utils';
@@ -25,15 +26,13 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
     <Popover>
       <PopoverTrigger asChild>
         <Button className="pl-4 pr-1 py-1 gap-4 self-center">
-          <span className="text-xl">
-            {formatCurrency(cart?.totalPrice.amount || 0, cart?.totalPrice.currency || 'EUR')}
+          <span className="text-white text-xl">
+            {loading ? '' : formatCurrency(cart?.totalPrice.amount || 0, cart?.totalPrice.currency || 'EUR')}
           </span>
           <div className="flex items-center w-[43px] h-[35px] relative">
-            {totalItems > 0 && (
-              <Badge variant="white" className="h-5 min-w-5 rounded-full px-1 tabular-nums absolute top-0 right-0">
-                {totalItems}
-              </Badge>
-            )}
+            <Badge variant="white" className="h-5 min-w-5 rounded-full px-1 tabular-nums absolute top-0 right-0">
+              {loading ? <Spinner color="primary" variant="xs" /> : cart?.items.length || 0}
+            </Badge>
             <ShoppingCart width="32" height="32" />
           </div>
         </Button>

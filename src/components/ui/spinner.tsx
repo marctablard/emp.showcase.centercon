@@ -5,7 +5,8 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface SpinnerProps {
-  variant?: 'sm' | 'md' | 'lg';
+  variant?: 'xs' | 'sm' | 'md' | 'lg';
+  color?: 'primary' | 'secondary' | 'white' | 'default';
   className?: string;
   loadingText?: string;
 }
@@ -13,21 +14,25 @@ interface SpinnerProps {
 /**
  * Spinner component for loading states
  */
-export const Spinner: React.FC<SpinnerProps> = ({ loadingText, variant = 'md', className }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ loadingText, variant = 'md', color = 'default', className }) => {
   const t = useTranslations('UI.spinner');
   const variants = {
+    xs: 'h-2 w-2 border-1',
     sm: 'h-4 w-4 border-2',
     md: 'h-8 w-8 border-3',
     lg: 'h-12 w-12 border-4',
   };
 
+  const colors = {
+    default: 'border-muted-foreground/20 border-t-muted-foreground',
+    primary: 'border-primary/20 border-t-primary',
+    secondary: 'border-secondary/20 border-t-secondary',
+    white: 'border-white/20 border-t-white',
+  };
+
   return (
     <div
-      className={cn(
-        'animate-spin rounded-full border-solid border-primary border-t-transparent',
-        variants[variant],
-        className,
-      )}
+      className={cn('animate-spin rounded-full border-solid', variants[variant], colors[color], className)}
       role="status"
       aria-label={loadingText || t('loading')}
     >
