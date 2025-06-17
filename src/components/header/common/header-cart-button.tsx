@@ -25,8 +25,8 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="pl-4 pr-1 py-1 gap-4 self-center">
-          <span className="text-white text-xl">
+        <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center">
+          <span className="text-white text-xl hidden md:inline-block">
             {loading ? '' : formatCurrency(cart?.totalPrice.amount || 0, cart?.totalPrice.currency || 'EUR')}
           </span>
           <div className="flex items-center w-[43px] h-[35px] relative">

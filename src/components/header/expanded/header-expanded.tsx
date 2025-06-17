@@ -19,7 +19,7 @@ export default function HeaderExpanded() {
 
       {/* Tablet */}
       <div className="lg:hidden flex justify-between items-center px-6 pt-6">
-        <div className="flex gap-8 items-center">
+        <div className="flex items-center">
           <Link href="/">
             <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108px] min-h-[16px]" />
           </Link>

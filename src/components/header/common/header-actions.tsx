@@ -13,7 +13,7 @@ export default function HeaderActions() {
 
   return (
     <div className="flex justify-end items-center gap-5 text-nowrap">
-      <div className="block lg:hidden">
+      <div className="hidden md:block lg:hidden">
         <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />
       </div>
 
@@ -23,8 +23,10 @@ export default function HeaderActions() {
         <HeaderIconLink icon={User} text={t('signIn')} href="/login" />
       )}
 
-      <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
-      <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
+      <div className="hidden md:flex gap-5">
+        <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
+        <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
+      </div>
     </div>
   );
 }
