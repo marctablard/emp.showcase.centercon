@@ -69,6 +69,32 @@ jobs:
           echo "deploy_status=$DEPLOY_STATUS" >> $GITHUB_OUTPUT
           echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
+      - uses: chrnorm/deployment-action@v2
+        name: Create GitHub deployment
+        id: deployment
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy.outputs.preview_url }}
+          environment: 'preview'
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy.outputs.preview_url }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: 'success'
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy.outputs.preview_url }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: 'failure'
+
       - name: Find Comment
         if: steps.deploy.outputs.deploy_status == '0' && steps.deploy.outputs.preview_url != ''
         uses: peter-evans/find-comment@v2
