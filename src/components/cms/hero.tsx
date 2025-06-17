@@ -83,20 +83,22 @@ const Hero = ({ blok }: HeroProps) => {
           )}
         </div>
       </div>
-      <div className="absolute bottom-0 sm:-bottom-10 lg:bottom-20 px-9">
-        <div className="flex flex-col gap-4 bg-white opacity-85 md:w-1/2 xl:w-4/7 rounded-ss-xl rounded-ee-xl shadow-lg p-6">
-          <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{blok.headline}</h1>
-          <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
-          <p className=" text-base lg:text-xl text-neutral-800">{text}</p>
+      <div className="w-full max-w-6xl mx-auto">
+        <div className="ms-auto absolute bottom-0 sm:-bottom-10 lg:bottom-20 px-9">
+          <div className="flex flex-col gap-4 bg-white opacity-85 md:w-1/2 xl:w-4/7 rounded-ss-xl rounded-ee-xl shadow-lg p-6">
+            <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{blok.headline}</h1>
+            <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
+            <p className=" text-base lg:text-xl text-neutral-800">{text}</p>
 
-          {blok.main_button && <Button blok={button} />}
+            {blok.main_button && <Button blok={button} />}
+          </div>
         </div>
+        {isVideo && blok.video_url && (
+          <div className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 cursor-pointer me-9 mb-14 p-3 text-primary-500 transition hover:text-primary-700">
+            {<CirclePause />}
+          </div>
+        )}
       </div>
-      {blok.video_url && (
-        <div className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 cursor-pointer me-9 mb-14 p-3 text-primary-500 transition hover:text-primary-700">
-          {isVideo && <CirclePause />}
-        </div>
-      )}
     </div>
   );
 };
