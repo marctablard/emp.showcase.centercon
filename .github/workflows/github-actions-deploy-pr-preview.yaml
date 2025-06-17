@@ -78,7 +78,7 @@ jobs:
         with:
           token: '${{ github.token }}'
           environment-url: ${{ steps.deploy.outputs.preview_url }}
-          environment: 'PR Preview'
+          environment: 'preview'
 
       - name: Update deployment status (success)
         if: success()

@@ -30,6 +30,7 @@ export default function HeaderMobile() {
       <div className="fixed bottom-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm shadow-xl h-[58px] flex justify-between items-center text-nowrap">
         <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
         <HeaderIconLink icon={Search} text={t('shortSearch')} href="/#" />
+        {/* Todo: When clicking on Menu, toggle between below buttons */}
         <Button className="flex flex-col w-16 h-16 min-w-12 min-h-[46px] px-3 py-1 justify-center items-center rounded-tl-lg rounded-tr-none rounded-bl-none rounded-br-lg bg-gradient-to-t from-primary-700 to-primary-500 text-white normal-case tracking-normal">
           <Menu className="w-8 h-8" />
           <p className="text-sm font-bold -mt-4">{t('menu')}</p>
