@@ -7,6 +7,7 @@ import { createCheckoutStore } from '@/stores/checkout-store';
 import { createCustomerStore } from '@/stores/customer-store';
 import { createDashboardStore } from '@/stores/dashboard-store';
 import { createHistoryStore } from '@/stores/history-store';
+import { createOrderStore } from '@/stores/order-store';
 import { createProductStore } from '@/stores/products-store';
 import { createShippingMethodsStore } from '@/stores/shipping-methods-store';
 import { createSiteStore } from '@/stores/site-store';
@@ -27,6 +28,8 @@ export type HistoryStoreApi = ReturnType<typeof createHistoryStore>;
 export const HistoryStoreContext = createContext<HistoryStoreApi | null>(null);
 export type DashboardStoreApi = ReturnType<typeof createDashboardStore>;
 export const DashboardStoreContext = createContext<DashboardStoreApi | null>(null);
+export type OrderStoreApi = ReturnType<typeof createOrderStore>;
+export const OrderStoreContext = createContext<OrderStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
@@ -65,6 +68,10 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
   if (dashboardStoreRef.current === null) {
     dashboardStoreRef.current = createDashboardStore();
   }
+  const orderStoreRef = useRef<OrderStoreApi | null>(null);
+  if (orderStoreRef.current === null) {
+    orderStoreRef.current = createOrderStore();
+  }
   /**
    * The order is relevant, because store data can only depend on one another,
    * when nested properly.
@@ -72,24 +79,27 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
    * 2. Shipping Methods Data depends on Countries and Currency Data (from Site)
    * 3. Product Data depends on Currency and their Availability from Country (from Site)
    * 4. Customer Data depends on Currency for Customer-Preferences
-   * 5. Cart Data depends on Customer Data in logged in State
-   * 6. Checkout Data depends on Cart Data.
-   * 7. History Data may depend on various aspects of customer's Browsing Behaviour
+   * 5. Order Data depends on Customer Data in logged in State
+   * 6. Cart Data depends on Customer Data in logged in State
+   * 7. Checkout Data depends on Cart Data.
+   * 8. History Data may depend on various aspects of customer's Browsing Behaviour
    */
   return (
     <SiteStoreContext.Provider value={siteStoreRef.current}>
       <ShippingMethodsStoreContext.Provider value={shippingMethodsStoreRef.current}>
         <ProductStoreContext.Provider value={productStoreRef.current}>
           <CustomerStoreContext.Provider value={customerStoreRef.current}>
-            <CartStoreContext.Provider value={cartStoreRef.current}>
-              <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
-                <HistoryStoreContext.Provider value={historyStoreRef.current}>
-                  <DashboardStoreContext.Provider value={dashboardStoreRef.current}>
-                    {children}
-                  </DashboardStoreContext.Provider>
-                </HistoryStoreContext.Provider>
-              </CheckoutStoreContext.Provider>
-            </CartStoreContext.Provider>
+            <OrderStoreContext.Provider value={orderStoreRef.current}>
+              <CartStoreContext.Provider value={cartStoreRef.current}>
+                <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
+                  <HistoryStoreContext.Provider value={historyStoreRef.current}>
+                    <DashboardStoreContext.Provider value={dashboardStoreRef.current}>
+                      {children}
+                    </DashboardStoreContext.Provider>
+                  </HistoryStoreContext.Provider>
+                </CheckoutStoreContext.Provider>
+              </CartStoreContext.Provider>
+            </OrderStoreContext.Provider>
           </CustomerStoreContext.Provider>
         </ProductStoreContext.Provider>
       </ShippingMethodsStoreContext.Provider>
@@ -157,6 +167,14 @@ export const useDashboardStore = () => {
   const storeContext = useContext(DashboardStoreContext);
   if (!storeContext) {
     throw new Error('useDashboardStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useOrderStore = () => {
+  const storeContext = useContext(OrderStoreContext);
+  if (!storeContext) {
+    throw new Error('useOrderStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

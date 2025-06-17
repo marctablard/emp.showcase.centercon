@@ -9,7 +9,6 @@ import Header from '@/components/header';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import CustomerSessionProvider from '@/providers/CustomerSessionProvider';
-import QuickOrderProvider from '@/providers/QuickOrderProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import '../globals.css';

@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { fetchOrders as apiFetchOrders } from '@/lib/client/orders';
+import { buildSearchQuery } from '@/platform/integrations/emporix/common/util/common';
 import { Order } from '@/platform/services/model/order/order';
+import { useOrderStore } from '@/providers/StoreProvider';
 
 interface UseOrdersOptions {
   initialOrders?: Order[];
@@ -47,9 +49,25 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
     filters: initialFilters = {},
   } = options;
 
+  const {
+    getOrders: getStoreOrders,
+    setOrders: setStoreOrders,
+    getLoading: getStoreLoading,
+    setLoading: setStoreLoading,
+  } = useOrderStore();
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [orders, setOrders] = useState<Order[] | undefined>(initialOrders);
+  const query = buildSearchQuery({
+    page: initialPageNumber,
+    size: initialPageSize,
+    criteria: initialFilters,
+  });
+  const queryKey = query.query + query.body;
+  if (initialOrders) {
+    setStoreOrders(queryKey, initialOrders);
+  }
+  const [orders, setOrders] = useState<Order[] | undefined>(initialOrders || getStoreOrders(queryKey));
   const [pageSize, setPageSize] = useState<number>(initialPageSize);
   const [pageNumber, setPageNumber] = useState<number>(initialPageNumber);
   const [filters, setFilters] = useState<Record<string, any>>(initialFilters);
@@ -57,26 +75,45 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
+      setStoreLoading(queryKey, true);
       setError(null);
 
       // In a real implementation, you would pass filters to the API
       // For now, we're just using the existing API function
       const ordersData = await apiFetchOrders(pageSize, pageNumber);
+      setStoreOrders(queryKey, ordersData);
       setOrders(ordersData);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch orders'));
       console.error('Error fetching orders:', err);
     } finally {
+      setStoreLoading(queryKey, false);
       setLoading(false);
     }
-  }, [pageSize, pageNumber]);
+  }, [pageSize, pageNumber, queryKey, setStoreLoading]);
 
   // Initialize on first render or when pagination/filters change
   useEffect(() => {
     if (orders === undefined) {
-      fetchOrders();
+      const storeOrders = getStoreOrders(queryKey);
+      if (loading) {
+        if (!getStoreLoading(queryKey) && storeOrders) {
+          setOrders(storeOrders);
+          setLoading(false);
+        }
+      } else {
+        setLoading(true);
+        if (storeOrders) {
+          setOrders(storeOrders);
+          setLoading(false);
+        } else if (!getStoreLoading(queryKey)) {
+          fetchOrders();
+        } else {
+          setLoading(true);
+        }
+      }
     }
-  }, [pageSize, pageNumber, filters, orders, fetchOrders]);
+  }, [pageSize, pageNumber, filters, orders, fetchOrders, queryKey, getStoreLoading, getStoreOrders]);
 
   return {
     orders,

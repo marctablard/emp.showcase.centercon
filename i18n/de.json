@@ -373,7 +373,7 @@
         "orderApproval": "Bestellfreigabe",
         "quoteApproval": "Angebotsfreigabe",
         "estimatedOutput": "Geschätzte Leistung",
-        "installationSize": "Anlagengröße mit {size}",
+        "installationSize": "Anlagengröße: {size}",
         "solarOutput": "Solaranlagenleistung",
         "solarOutputError": "Solarleistungsdaten konnten nicht geladen werden",
         "weatherDataUnavailable": "Wetterdaten nicht verfügbar",

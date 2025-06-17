@@ -366,7 +366,7 @@
         "returnApproval": "Return Approval",
         "requestedBy": "Requested by",
         "estimatedOutput": "Estimated Output",
-        "installationSize": "Installation size with {size}",
+        "installationSize": "Installation size: {size}",
         "solarOutput": "Solar Panel Output",
         "solarOutputError": "Unable to load solar output data",
         "weatherDataUnavailable": "Weather data unavailable",
