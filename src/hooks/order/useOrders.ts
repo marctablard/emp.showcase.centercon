@@ -44,7 +44,7 @@ interface UseOrdersResult {
 export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
   const {
     initialOrders = undefined,
-    pageSize: initialPageSize = 10,
+    pageSize: initialPageSize = 50,
     pageNumber: initialPageNumber = 1,
     filters: initialFilters = {},
   } = options;
@@ -90,7 +90,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
       setStoreLoading(queryKey, false);
       setLoading(false);
     }
-  }, [pageSize, pageNumber, queryKey, setStoreLoading]);
+  }, [pageSize, pageNumber, queryKey, setStoreOrders, setStoreLoading]);
 
   // Initialize on first render or when pagination/filters change
   useEffect(() => {
@@ -113,7 +113,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
         }
       }
     }
-  }, [pageSize, pageNumber, filters, orders, fetchOrders, queryKey, getStoreLoading, getStoreOrders]);
+  }, [loading, pageSize, pageNumber, filters, orders, fetchOrders, queryKey, getStoreLoading, getStoreOrders]);
 
   return {
     orders,

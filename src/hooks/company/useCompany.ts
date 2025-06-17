@@ -38,7 +38,6 @@ export interface Approval {
 export interface CompanyFinancials {
   revenue: number;
   budget: number;
-  remainingBudget: number;
   currency: string;
 }
 
@@ -182,9 +181,8 @@ export const useCompany = (): CompanyHook => {
       },
     ],
     financials: {
-      revenue: 25000.0,
-      budget: 50000.0,
-      remainingBudget: 25000.0,
+      revenue: 2500.0,
+      budget: 5000.0,
       currency: 'USD',
     },
   };

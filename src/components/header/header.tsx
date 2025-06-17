@@ -1,13 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import Image from 'next/image';
-import { Gauge, LayoutGrid, Menu, Pin, Search } from 'lucide-react';
 import HeaderCollapsed from '@/components/header/collapsed/header-collapsed';
-import HeaderActions from '@/components/header/common/header-actions';
-import HeaderCartButton from '@/components/header/common/header-cart-button';
-import HeaderIconLink from '@/components/header/common/header-icon-link';
 import HeaderExpanded from '@/components/header/expanded/header-expanded';
 import HeaderMobile from '@/components/header/mobile/header-mobile';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
