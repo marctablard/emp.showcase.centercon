@@ -8,10 +8,11 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 export default function Header() {
   const isLargeScreen = useBreakpoint('lg');
   const [scrolled, setScrolled] = useState(false);
+  const scrollThreshold = isLargeScreen ? 100 : 60;
 
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 100;
+      const isScrolled = window.scrollY > scrollThreshold;
       if (isScrolled !== scrolled) {
         setScrolled(isScrolled);
       }
@@ -24,7 +25,7 @@ export default function Header() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [scrolled]);
+  }, [scrollThreshold, scrolled]);
 
   function getHeaderHeight() {
     if (!scrolled) {
