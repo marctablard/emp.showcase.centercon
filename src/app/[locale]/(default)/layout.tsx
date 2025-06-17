@@ -8,5 +8,5 @@ type Props = {
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
-  return <div className="mx-auto mt-53">{children}</div>;
+  return <div className="flex-grow mt-17 md:mt-36 lg:mt-52">{children}</div>;
 }
