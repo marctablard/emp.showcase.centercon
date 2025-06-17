@@ -19,13 +19,13 @@ interface PageProps {
 
 const Page = ({ blok }: PageProps) => {
   return (
-    <main {...storyblokEditable(blok)} className="mx-auto py-8">
+    <div {...storyblokEditable(blok)} className="mx-auto">
       {blok.title && <h1 className="text-3xl font-bold mb-6">{blok.title}</h1>}
 
       <div className="space-y-8">
         {blok.body?.map((nestedBlok) => <StoryblokServerComponent blok={nestedBlok} key={nestedBlok._uid} />)}
       </div>
-    </main>
+    </div>
   );
 };
 
