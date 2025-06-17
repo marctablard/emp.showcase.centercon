@@ -37,6 +37,7 @@ let nextConfig: NextConfig = {
 
     return config;
   },
+  /*
   headers: async () => {
     const headers = [];
     if (process.env.NEXT_PUBLIC_ROBOTS_NOINDEX === 'true') {
@@ -49,9 +50,8 @@ let nextConfig: NextConfig = {
         ],
         source: '/:path*',
       });
-    }
     return headers;
-  },
+  },*/
 };
 
 // add i18n Logic to Next-Configuration
