@@ -257,6 +257,6 @@
 
 @layer utilities {
   .clip-style {
-    clip-path: url('public/Image_mask_desktop.svg');
+    clip-path: url('/images/image_mask_desktop.svg');
   }
 }
