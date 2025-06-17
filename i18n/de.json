@@ -73,21 +73,8 @@
         "solutions": "Lösungen",
         "onlinePlaner": "Online Planer",
         "aboutUs": "Über uns",
-        "menu": "Menü"
-    },
-    "quickOrder": {
-        "title": "Quick Order",
-        "searchPlaceholder": "Produkte suchen",
-        "quantity": "Menge",
-        "addRow": "Mehr",
-        "uploadFile": "Hochladen",
-        "uploadSuccess": "Datei hochgeladen",
-        "uploadError": "Upload-Fehler",
-        "addToCart": "In den Warenkorb",
-        "productNotFound": "Produkt nicht gefunden",
-        "selectProduct": "Produkt auswählen",
-        "successMessage": "Produkte zum Warenkorb hinzugefügt",
-        "errorMessage": "Fehler beim Hinzufügen der Produkte zum Warenkorb"
+        "menu": "Menü",
+        "close": "Schließen"
     },
     "footer": {
         "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",

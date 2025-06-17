@@ -9,11 +9,10 @@ import HeaderActions from '@/components/header/common/header-actions';
 import HeaderCartButton from '@/components/header/common/header-cart-button';
 import HeaderIconLink from '@/components/header/common/header-icon-link';
 import HeaderExpanded from '@/components/header/expanded/header-expanded';
+import HeaderMobile from '@/components/header/mobile/header-mobile';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { Link } from '@/i18n/navigation';
 
-export default function Header() {
-  const t = useTranslations('header');
+export function Header() {
   const isLargeScreen = useBreakpoint('lg');
   const [scrolled, setScrolled] = useState(false);
   const scrollThreshold = isLargeScreen ? 100 : 60;
@@ -66,37 +65,8 @@ export default function Header() {
       </div>
 
       {/* Mobile */}
-      <div className="md:hidden fixed w-full">
-        <div className="top-0 left-0 right-0 z-50 w-full">
-          <header className="bg-white/95 backdrop-blur-sm shadow-xl px-4 py-2 h-[68px]">
-            <div className="flex h-full justify-between items-center">
-              <Link href="/">
-                <Image
-                  src="/images/logo.svg"
-                  alt="Logo"
-                  width="108"
-                  height="16"
-                  className="min-w-[108px] min-h-[16px]"
-                />
-              </Link>
-              <div className="flex gap-2">
-                <HeaderActions />
-                <HeaderCartButton />
-              </div>
-            </div>
-          </header>
-        </div>
-        <div className="fixed bottom-0 left-0 right-0 z-50 w-full">
-          <div className="bg-white/95 backdrop-blur-sm shadow-xl h-[58px]">
-            <div className="flex h-full justify-between items-center">
-              <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
-              <HeaderIconLink icon={Search} text={t('shortSearch')} href="/#" />
-              <HeaderIconLink icon={Menu} text={t('menu')} href="/#" />
-              <HeaderIconLink icon={LayoutGrid} text={t('products')} href="/#" />
-              <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
-            </div>
-          </div>
-        </div>
+      <div className="md:hidden w-full">
+        <HeaderMobile />
       </div>
     </>
   );

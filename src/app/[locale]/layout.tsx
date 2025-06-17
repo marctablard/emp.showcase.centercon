@@ -49,7 +49,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <StoreProvider>
               <StoryblokProvider>
                 <Header />
-                <main>{children}</main>
+                {children}
                 <FooterWrapper>
                   <FooterLinks />
                   <Footer />

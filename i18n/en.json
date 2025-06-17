@@ -73,21 +73,8 @@
         "solutions": "Solutions",
         "onlinePlaner": "Online Planer",
         "aboutUs": "About us",
-        "menu": "Menu"
-    },
-    "quickOrder": {
-        "title": "Quick Order",
-        "searchPlaceholder": "Search for products",
-        "quantity": "Quantity",
-        "addRow": "More",
-        "uploadFile": "Upload",
-        "uploadSuccess": "File Uploaded",
-        "uploadError": "Upload Error",
-        "addToCart": "Submit",
-        "productNotFound": "No products found",
-        "selectProduct": "Please select at least one product",
-        "successMessage": "Products added to cart",
-        "errorMessage": "Error adding products to cart"
+        "menu": "Menu",
+        "close": "Close"
     },
     "footer": {
         "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",
