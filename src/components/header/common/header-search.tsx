@@ -10,7 +10,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
   const t = useTranslations('header');
 
   return (
-    <div className={`w-full relative ${small ? 'max-w-[320px]' : 'max-w-[720px]'}`}>
+    <div className={`hidden lg:block w-full relative ${small ? 'max-w-[320px]' : 'max-w-[720px]'}`}>
       <Input
         placeholder={small ? t('shortSearch') : t('search')}
         className="h-[44px] pr-[62px] text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700"

@@ -6,7 +6,7 @@ export default function HeaderMenu() {
   const t = useTranslations('header');
 
   return (
-    <div className="flex justify-end items-center gap-6">
+    <div className="flex justify-end items-center">
       <HeaderIconLink icon={Menu} text={t('menu')} href="/#" />
     </div>
   );

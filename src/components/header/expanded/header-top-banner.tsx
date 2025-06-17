@@ -8,7 +8,7 @@ export default function HeaderTopBanner() {
   const t = useTranslations('header');
 
   return (
-    <div className="bg-primary text-white shadow-sm rounded-2xl flex items-center -mx-2 lg:-mx-4 -mt-1 h-8 px-10">
+    <div className="bg-primary text-white shadow-sm rounded-2xl flex items-center -mx-2 lg:-mx-4 -mt-1 h-8 px-8 lg:px-10">
       <div className="flex justify-between items-center self-stretch w-full">
         <div className="flex grow basis-0 shrink-0 items-center gap-4">
           <div className="flex items-center gap-2">
@@ -36,7 +36,7 @@ export default function HeaderTopBanner() {
             announcements!
           </UiLink>
         </div>
-        <div className="flex grow basis-0 shrink-0 justify-end items-center gap-6">
+        <div className="flex grow basis-0 shrink-0 justify-end items-center gap-6 text-nowrap">
           {/* Todo: Links are missing */}
           <Link href="/#">{t('blog')}</Link>
           <Link href="/#">{t('newsletter')}</Link>

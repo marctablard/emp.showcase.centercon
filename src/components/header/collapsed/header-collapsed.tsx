@@ -10,8 +10,11 @@ export default function HeaderCollapsed() {
   return (
     <>
       <div className="flex gap-8 items-center">
-        <Link href="/">
+        <Link className="hidden lg:block" href="/">
           <Image src="/images/logo_small.svg" alt="Logo" width="25" height="22" className="min-w-[25px] min-h-[22px]" />
+        </Link>
+        <Link className="lg:hidden" href="/">
+          <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108] min-h-[16]" />
         </Link>
         <div className="hidden lg:block">
           <HeaderNavigation />
