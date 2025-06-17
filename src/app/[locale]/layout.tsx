@@ -49,16 +49,14 @@ export default async function LocaleLayout({ children, params }: Props) {
           <NextIntlClientProvider locale={locale}>
             <StoreProvider>
               <StoryblokProvider>
-                <QuickOrderProvider>
-                  <Header />
-                  <main className="flex-grow mt-52">{children}</main>
-                  <FooterWrapper>
-                    <FooterLinks />
-                    <Footer />
-                  </FooterWrapper>
-                  <LegalFooter />
-                  <Toaster />
-                </QuickOrderProvider>
+                <Header />
+                <main>{children}</main>
+                <FooterWrapper>
+                  <FooterLinks />
+                  <Footer />
+                </FooterWrapper>
+                <LegalFooter />
+                <Toaster />
               </StoryblokProvider>
             </StoreProvider>
           </NextIntlClientProvider>

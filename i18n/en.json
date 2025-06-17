@@ -68,10 +68,12 @@
         "quickOrder": "Quick Order",
         "wishlists": "Wishlists",
         "allProducts": "All Products",
+        "products": "Products",
         "services": "Services",
         "solutions": "Solutions",
         "onlinePlaner": "Online Planer",
-        "aboutUs": "About us"
+        "aboutUs": "About us",
+        "menu": "Menu"
     },
     "quickOrder": {
         "title": "Quick Order",
