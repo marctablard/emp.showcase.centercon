@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { Gauge, Pin, Search, User } from 'lucide-react';
+import { Gauge, Pin, Search, User, UserCheck } from 'lucide-react';
 import HeaderIconLink from '@/components/header/common/header-icon-link';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 
@@ -18,7 +18,7 @@ export default function HeaderActions() {
       </div>
 
       {isAuthenticated ? (
-        <HeaderIconLink icon={User} text={t('account')} href="/account" />
+        <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
       ) : (
         <HeaderIconLink icon={User} text={t('signIn')} href="/login" />
       )}
