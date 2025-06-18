@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { getServerSession } from 'next-auth';
 import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import Footer from '@/components/footer';
 import { FooterLinks, FooterWrapper, LegalFooter } from '@/components/footer/footer';
@@ -12,6 +13,12 @@ import CustomerSessionProvider from '@/providers/CustomerSessionProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import '../globals.css';
+
+const ubuntu = Ubuntu({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-ubuntu',
+});
 
 type Props = {
   children: ReactNode;
@@ -42,7 +49,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Enable static rendering
   setRequestLocale(locale);
   return (
-    <html lang={locale}>
+    <html lang={locale} className={ubuntu.className}>
       <body className="flex h-full flex-col">
         <CustomerSessionProvider session={session}>
           <NextIntlClientProvider locale={locale}>
