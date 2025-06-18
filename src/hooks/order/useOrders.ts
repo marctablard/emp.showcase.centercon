@@ -96,22 +96,15 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
   useEffect(() => {
     if (orders === undefined) {
       const storeOrders = getStoreOrders(queryKey);
-      if (loading) {
-        if (!getStoreLoading(queryKey) && storeOrders) {
-          setOrders(storeOrders);
-          setLoading(false);
-        }
-      } else {
+      const storeLoading = getStoreLoading(queryKey);
+      if (storeOrders) {
+        setOrders(storeOrders);
+        setLoading(false);
+      } else if (storeLoading) {
         setLoading(true);
-        if (storeOrders) {
-          setOrders(storeOrders);
-          setLoading(false);
-        } else if (!getStoreLoading(queryKey)) {
-          setStoreLoading(queryKey, true);
-          fetchOrders();
-        } else {
-          setLoading(true);
-        }
+      } else {
+        setStoreLoading(queryKey, true);
+        fetchOrders();
       }
     }
   }, [
