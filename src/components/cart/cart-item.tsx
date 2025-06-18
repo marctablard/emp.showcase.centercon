@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ interface CartItemProps {
 
 export function CartItemRow({ cart, item }: CartItemProps) {
   const { l10n } = useL10n();
+  const t = useTranslations('cart');
   const { updateItemQuantity, removeItem } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -45,33 +47,39 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   };
 
   return (
-    <div className="flex justify-between my-4 border-t first:border-none">
-      <div className="flex gap-2">
-        {item.product && item.product.images?.length ? (
-          <Image
-            width={128}
-            height={128}
-            src={String(item.product.images[0].url)}
-            alt={String(item.product.name || 'Product')}
-            className="w-40 h-40 object-fit p-2"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <ShoppingCart className="h-8 w-8 opacity-30" />
+    <div className="grid grid-cols-7 py-6 border-t border-neutral-200">
+      <div className="col-span-5 flex">
+        <div className="rounded-ss-xl rounded-ee-xl  w-[120px] h-[78px] object-fit overflow-hidden">
+          {item.product && item.product.images?.length ? (
+            <Image
+              width={120}
+              height={78}
+              src={String(item.product.images[0].url)}
+              alt={String(item.product.name || 'Product')}
+              className="rounded-ss-xl-[inherit] rounded-ee-xl-[inherit]"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+              <ShoppingCart className="h-8 w-8 opacity-30" />
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-1 px-4">
+          <p className="">Serie GMV</p>
+          <div className="flex flex-col gap-2">
+            <p className="font-bold text-base">{l10n(item.product?.name || 'Product')}</p>
+            <p className="text-sm">Item Number bla</p>
+            <p className="text-sm text-success-500">Online Available</p>
+            <p className="text-sm text-primary-500 font-bold">Add to Wishlist</p>
           </div>
-        )}
-        <div className="flex flex-col gap-2 p-4">
-          <p className="font-bold text-xl">{l10n(item.product?.name || 'Product')}</p>
-          <Badge className="mb-2 bg-cyan-500 hover:bg-cyan-600">In Stock</Badge>
         </div>
       </div>
-      <div className="flex flex-col gap-4 items-end py-4">
-        <div className="font-bold">{formatCurrency(item.price.amount, item.price.currency)}</div>
-        <div className="flex items-center justify-center">
+      <div className="col-span-1 gap-4 items-end">
+        <div className="flex">
           <Button
             variant="secondary"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
             disabled={isProcessing || item.quantity <= 1}
             onClick={() => handleUpdateQuantity(item.quantity - 1)}
           >
@@ -83,14 +91,14 @@ export function CartItemRow({ cart, item }: CartItemProps) {
           <Button
             variant="secondary"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm"
             disabled={isProcessing}
             onClick={() => handleUpdateQuantity(item.quantity + 1)}
           >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
-        <div>
+        {/* <div>
           <Button
             variant="link"
             size="icon"
@@ -104,6 +112,16 @@ export function CartItemRow({ cart, item }: CartItemProps) {
               <Trash2 className="h-4 w-4" />
             )}
           </Button>
+        </div> */}
+      </div>
+      <div className="col-span-1 gap-4 flex justify-end py-4">
+        <div className="flex flex-col gap-1">
+          <p className="line-through text-end">{formatCurrency(item.price.amount, item.price.currency)}</p>
+          <div className="font-bold text-end">{formatCurrency(item.price.amount, item.price.currency)}</div>
+          <span className="text-xs text-neutral-300 text-end">
+            {t('net')}
+            {formatCurrency(item.price.amount, item.price.currency)}
+          </span>
         </div>
       </div>
     </div>

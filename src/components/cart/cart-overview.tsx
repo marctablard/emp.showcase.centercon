@@ -1,27 +1,62 @@
 'use client';
 
+import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  ArrowRight,
+  Car,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  FolderUp,
+  Info,
+  Lock,
+  LockKeyhole,
+  Package,
+  Pencil,
+  Save,
+  Share2,
+  ShoppingCart,
+} from 'lucide-react';
+import z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
 import { formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart/cart';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { Form, FormControl, FormItem, FormLabel } from '../ui/form';
+import UiLink from '../ui/link';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { CartItemRow } from './cart-item';
 
 interface CartOverviewProps {
   initialCart?: Cart | null;
 }
 
+const FormSchemaDeliveryMethod = z.object({
+  method: z.enum(['delivery', 'pickup'], {
+    required_error: 'You need to select a delivery method.',
+  }),
+});
+
 export function CartOverview({ initialCart }: CartOverviewProps) {
   const t = useTranslations('cart');
   const { cart, loading } = useCart(initialCart);
 
+  const form = useForm<z.infer<typeof FormSchemaDeliveryMethod>>({
+    resolver: zodResolver(FormSchemaDeliveryMethod),
+    defaultValues: {
+      method: 'delivery',
+    },
+  });
+
   if (loading) {
     return (
-      <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
         <Card className="mx-auto max-w-3xl">
           <CardHeader>
             <CardTitle className="text-center text-2xl">{t('yourCart')}</CardTitle>
@@ -36,53 +71,198 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
 
   if (cart && cart.items.length > 0) {
     return (
-      <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8">{t('yourCart')}</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Card className="py-0">
-              <CardContent className="px-4">
-                {cart?.items.map((item) => <CartItemRow key={item.id} cart={cart} item={item} />)}
-              </CardContent>
-            </Card>
+      <div className="max-w-6xl mx-auto">
+        <div className="mx-9">
+          <div className="flex gap-3 align-end mb-8">
+            <h3 className="text-5xl font-bold">{t('title')}</h3>
+            <div className="text-neutral-300 text-xl m-0 leading-[2]">3 {t('product')}</div>
           </div>
-
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('orderSummary')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t('subtotal')}</span>
-                    <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
-                  </div>
-
-                  {/* Add shipping, tax, etc. if available */}
-
-                  <div className="flex justify-between font-medium text-lg pt-4 border-t">
-                    <span>{t('total')}</span>
-                    <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+            <div className="col-span-1 lg:col-span-2 2xl:col-span-3">
+              <div className="flex justify-between mb-4">
+                <div className="flex gap-6">
+                  <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<Save />}>
+                    {t('saveCart')}
+                  </UiLink>
+                  <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<FolderUp />}>
+                    {t('loadCart')}
+                  </UiLink>
+                  <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<Share2 />}>
+                    {t('share')}
+                  </UiLink>
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Link
-                  href={'/checkout'}
-                  className="bg-primary rounded-md text-sm font-medium  no-underline text-white p-3"
-                >
-                  {t('checkout')}
-                </Link>
-              </CardFooter>
-            </Card>
+                <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
+                  {t('backToShop')}
+                </UiLink>
+              </div>
+              <Card className="p-0 shadow-xl mb-6">
+                <CardContent className="p-6 grid gird-cols-1 md:grid-cols-2">
+                  <div className="border-r flex flex-col gap-4">
+                    <h5 className="text-3xl font-bold">{t('deliveryMethod')}</h5>
+                    <Form {...form}>
+                      <FormItem className="space-y-3">
+                        <RadioGroup className="flex flex-col">
+                          <FormItem className="flex items-center gap-3">
+                            <FormControl>
+                              <RadioGroupItem value="all" />
+                            </FormControl>
+                            <FormLabel className="font-normal">{t('ship')}</FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center gap-3">
+                            <FormControl>
+                              <RadioGroupItem value="mentions" />
+                            </FormControl>
+                            <FormLabel className="font-normal">{t('pickup')}</FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormItem>
+                    </Form>
+                  </div>
+                  <div className="flex flex-col gap-4 ps-6">
+                    <div className="flex justify-between">
+                      <h5 className="text-3xl font-bold">{t('shipTo')}</h5>
+                      <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<Pencil />}>
+                        {t('change')}
+                      </UiLink>
+                    </div>
+                    <div>
+                      <p>Emporix AG</p>
+                      <p>Philipp Grunewald</p>
+                      <p>Bundesplatz 16</p>
+                      <p>300 Zug</p>
+                      <p>Switzerland</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="p-0 shadow-xl mb-6 gap-3">
+                <CardHeader className="pt-6">
+                  <div className="grid grid-cols-7">
+                    <p className="col-span-5 font-bold">{t('product')}</p>
+                    <p className="col-span-1 font-bold">{t('qty')}</p>
+                    <p className="col-span-1 font-bold flex justify-end">{t('price')}</p>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-6">
+                  {cart?.items.map((item) => <CartItemRow key={item.id} cart={cart} item={item} />)}
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="col-span-1">
+              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-xl">
+                <CardHeader className="p-0">
+                  <CardTitle>
+                    <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="bg-white rounded-md p-4">
+                  <div className="space-y-4">
+                    <div className="flex gap-2 text-primary-500">
+                      <div>
+                        <Info />
+                      </div>
+                      <div className="text-base">{t('promoCodeInfo')}</div>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="">{t('valueOfGoods')}</span>
+                      <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
+                    </div>
+
+                    {/* Add shipping, tax, etc. if available */}
+
+                    <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
+                      <span>{t('netValueOfGoods')}</span>
+                      <span className="font-bold">
+                        {formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between font-medium text-base">
+                        <span>{t('statutoryVat')}</span>
+                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                      </div>
+                      <div className="flex justify-between font-medium text-base">
+                        <span>{t('shippingCosts')}</span>
+                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                      </div>
+                    </div>
+                    <CardContent className="flex flex-col gap-4 bg-primary-50 rounded-md p-4">
+                      <div className="flex gap-2 text-primary-500">
+                        <Package />
+                        <div className="font-bold text-neutral-900">Preis {t('untilFreeShipping')}</div>
+                      </div>
+                      <div className="rounded-xl h-4 border border-primary-800"></div>
+                      <span className="text-primary-500">{t('freeShippingOn')}</span>
+                      <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
+                        {t('continueShopping')}
+                      </UiLink>
+                    </CardContent>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between font-medium text-base">
+                        <span>{t('freightCosts')}</span>
+                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-xl">
+                        <span>{t('total')}</span>
+                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col p-0">
+                  <Button className="w-full">{t('checkout')}</Button>
+                  <div className="flex align-center gap-2 text-neutral-600 pt-4">
+                    <div>
+                      <LockKeyhole width={12} />
+                    </div>
+                    <div className="text-sm leading-6">{t('dataTransmittedSecure')}</div>
+                  </div>
+                </CardFooter>
+              </Card>
+              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-xl text-neutral-900">
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full group flex items-center justify-between gap-2">
+                    <div className="flex gap-2">
+                      <FileText />
+                      <span className="flex items-center gap-2 font-bold">{t('requestQuote')}</span>
+                    </div>
+                    <ChevronDown
+                      className="group-data-[state=open]:rotate-180 transition-transform"
+                      width={32}
+                      height={32}
+                    />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4">
+                    <span className="text-base mb-4">{t('requestQuoteTitle')}</span>
+                    <div className="flex flex-col gap-2 pt-4">
+                      <div className="flex gap-2">
+                        <p className="font-bold">1.</p>
+                        <p className="font-bold">{t('requestQuotestep1')}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <p className="font-bold">2.</p>
+                        <p className="">{t('requestQuotestep2')}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <p className="font-bold">3.</p>
+                        <p className="">{t('requestQuotestep3')}</p>
+                      </div>
+                    </div>
+                    <Button className="w-full mt-4" variant="secondary">
+                      {t('requestQuoteButton')}
+                    </Button>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
     );
   }
   return (
-    <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-6xl mx-auto">
       <Card className="mx-auto max-w-3xl">
         <CardHeader>
           <CardTitle className="text-center text-2xl">{t('yourCart')}</CardTitle>
