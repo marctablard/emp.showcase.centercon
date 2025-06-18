@@ -114,7 +114,18 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
         }
       }
     }
-  }, [loading, pageSize, pageNumber, filters, orders, fetchOrders, queryKey, getStoreLoading, getStoreOrders]);
+  }, [
+    loading,
+    pageSize,
+    pageNumber,
+    filters,
+    orders,
+    fetchOrders,
+    queryKey,
+    getStoreLoading,
+    getStoreOrders,
+    setStoreLoading,
+  ]);
 
   return {
     orders,
