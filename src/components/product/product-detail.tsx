@@ -142,7 +142,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
       <div>
         <div className="flex gap-2 mb-6">
           {product.labels?.map((label) => (
-            <Badge key={label.id} variant="warning" rounded="none">
+            <Badge key={label.id} variant="promo" rounded="rounded_right">
               {label.name}
             </Badge>
           ))}
@@ -165,7 +165,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
 
           <ProductShippingInfo />
 
-          <div className="text-lg text-neutral-500 mt-6">
+          <div className="text-lg text-neutral mt-6">
             <p dangerouslySetInnerHTML={{ __html: product.description }}></p>
           </div>
 

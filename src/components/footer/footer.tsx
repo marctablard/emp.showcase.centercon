@@ -28,7 +28,12 @@ export default function Footer() {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <InputButton placeholder={t('newsletterInput')} {...field} iconButtonAfter={Mail} />
+                        <InputButton
+                          placeholder={t('newsletterInput')}
+                          {...field}
+                          iconButtonAfter={Mail}
+                          buttonLabel={t('newsletterButtonLabel')}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

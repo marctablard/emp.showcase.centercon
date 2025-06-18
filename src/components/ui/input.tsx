@@ -10,6 +10,7 @@ export interface InputProps extends React.ComponentProps<'input'> {
   iconButtonBefore?: LucideIcon;
   iconButtonAfter?: LucideIcon;
   buttonText?: string;
+  buttonLabel?: string;
 }
 
 function Input({ className, type, startIcon, endIcon, isButton, ...props }: InputProps) {
@@ -64,13 +65,21 @@ function Input({ className, type, startIcon, endIcon, isButton, ...props }: Inpu
   );
 }
 
-function InputButton({ startIcon, endIcon, iconButtonBefore, iconButtonAfter, buttonText, ...props }: InputProps) {
+function InputButton({
+  startIcon,
+  endIcon,
+  iconButtonBefore,
+  iconButtonAfter,
+  buttonText,
+  buttonLabel,
+  ...props
+}: InputProps) {
   const ButtonStartIcon = iconButtonBefore;
   const ButtonEndIcon = iconButtonAfter;
   return (
     <div className={cn('flex items-center')}>
       <Input startIcon={startIcon} endIcon={endIcon} isButton {...props} />
-      <Button variant="input">
+      <Button variant="input" aria-label={buttonLabel}>
         {ButtonStartIcon && <ButtonStartIcon />}
         {buttonText}
         {ButtonEndIcon && <ButtonEndIcon />}

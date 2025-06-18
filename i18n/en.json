@@ -79,6 +79,7 @@
     "footer": {
         "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",
         "newsletterInput": "Email address",
+        "newsletterButtonLabel": "Submit",
         "beforePrivacyPolicy": "I have acknowledged the ",
         "privacyPolicyLink": "privacy policy",
         "beforeTermsAndConditions": " and read the ",

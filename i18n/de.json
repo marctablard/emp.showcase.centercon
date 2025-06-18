@@ -79,6 +79,7 @@
     "footer": {
         "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",
         "newsletterInput": "E-Mail Adresse",
+        "newsletterButtonLabel": "Absenden",
         "beforePrivacyPolicy": "Ich habe die ",
         "privacyPolicyLink": "Datenschutzerklärung",
         "beforeTermsAndConditions": " und habe die ",

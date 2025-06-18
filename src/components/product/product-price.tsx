@@ -67,11 +67,11 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
         <div className="font-bold text-neutral-900">{priceFragment}</div>
 
         {price.originalValue && price.originalValue > price.effectiveValue && (
-          <div className="text-neutral-400 line-through">{price.originalValue.toFixed(2)} €</div>
+          <div className="text-neutral-600 line-through">{price.originalValue.toFixed(2)} €</div>
         )}
       </div>
       {price.tax && (
-        <div className="text-sm text-neutral-500 mb-2">
+        <div className="text-sm text-neutral-600 mb-2">
           {price.includesTax ? (
             <>
               {t('includingTax', { taxRate: price.tax.taxRate })} / {formatCurrency(price.tax.netValue, price.currency)}{' '}
