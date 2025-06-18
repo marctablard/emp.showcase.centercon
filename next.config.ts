@@ -39,7 +39,8 @@ let nextConfig: NextConfig = {
   },
 
   headers: async () => {
-    const headers = [];
+    const headers: any[] = [];
+    /*
     if (process.env.NEXT_PUBLIC_ROBOTS_NOINDEX === 'true') {
       headers.push({
         headers: [
@@ -51,6 +52,7 @@ let nextConfig: NextConfig = {
         source: '/:path*',
       });
     }
+  */
     return headers;
   },
 };
