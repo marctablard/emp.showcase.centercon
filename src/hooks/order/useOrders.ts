@@ -64,8 +64,9 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
     criteria: initialFilters,
   });
   const queryKey = query.query + query.body;
-  if (initialOrders) {
+  if (initialOrders && !getStoreLoading(queryKey)) {
     setStoreOrders(queryKey, initialOrders);
+    setStoreLoading(queryKey, false);
   }
   const [orders, setOrders] = useState<Order[] | undefined>(initialOrders || getStoreOrders(queryKey));
   const [pageSize, setPageSize] = useState<number>(initialPageSize);
@@ -75,7 +76,6 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      setStoreLoading(queryKey, true);
       setError(null);
 
       // In a real implementation, you would pass filters to the API
@@ -107,6 +107,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
           setOrders(storeOrders);
           setLoading(false);
         } else if (!getStoreLoading(queryKey)) {
+          setStoreLoading(queryKey, true);
           fetchOrders();
         } else {
           setLoading(true);
