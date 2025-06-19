@@ -8,6 +8,7 @@ export interface OrderState {
   orderQueries: Record<string, string[]>;
   orders: Record<string, Order>;
   loading: Record<string, boolean>;
+  updated: number;
 }
 interface OrderActions {
   setOrders: (query: string, orders: Order[]) => void;
@@ -24,6 +25,7 @@ const defaultState: OrderState = {
   orderQueries: {},
   orders: {},
   loading: {},
+  updated: 0,
 };
 
 export const createOrderStore = () =>
@@ -48,6 +50,7 @@ export const createOrderStore = () =>
         ...state,
         orders: orderRecords,
         orderQueries: orderQueries,
+        updated: state.updated + 1,
       }));
     },
     getOrders: (query: string) => {

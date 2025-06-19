@@ -23,9 +23,9 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     getLoading,
     setLoading,
     setCustomer: setStoreCustomer,
-    getCustomer,
+    getCustomer: getStoreCustomer,
   } = useCustomerStore();
-  if (initialCustomer && getCustomer() === undefined) {
+  if (initialCustomer && getStoreCustomer() === undefined) {
     setStoreCustomer(initialCustomer);
   }
   const [customer, setCustomer] = useState<Customer | null | undefined>(initialCustomer || storeCustomer);
@@ -51,7 +51,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     if (customer === undefined && !getLoading()) {
       setLoading(true);
       // first try to grab the customer from the store
-      const currentCustomer = getCustomer();
+      const currentCustomer = getStoreCustomer();
       if (currentCustomer !== undefined) {
         setCustomer(currentCustomer);
         setLoading(false);
@@ -59,7 +59,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
         fetchCustomer();
       }
     }
-  }, [customer, getCustomer, getLoading, setLoading, fetchCustomer]);
+  }, [customer, getStoreCustomer, getLoading, setLoading, fetchCustomer]);
 
   return {
     customer,
