@@ -28,7 +28,7 @@ class EmporixOrderService implements OrderService {
   }
 
   async createOrder(cartId: string, customerEmail?: string, customerNote?: string): Promise<string> {
-    const session = await this.sessionService.getCurrentSession();
+    const session = await this.sessionService.getCurrent();
     if (!session) {
       throw new Error('Failed to get session context');
     }

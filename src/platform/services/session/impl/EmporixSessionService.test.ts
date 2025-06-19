@@ -90,7 +90,7 @@ describe('EmporixSessionService', () => {
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue(mockSessionContext);
       mockSessionMapper.mapToService.mockReturnValue(mockSession);
 
-      const result = await sessionService.getCurrentSession();
+      const result = await sessionService.getCurrent();
 
       expect(mockSessionContextApi.getOwnSessionContext).toHaveBeenCalledTimes(1);
       expect(mockSessionMapper.mapToService).toHaveBeenCalledWith(mockSessionContext);
@@ -100,7 +100,7 @@ describe('EmporixSessionService', () => {
     it('should return undefined when session not found', async () => {
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue(undefined);
 
-      const result = await sessionService.getCurrentSession();
+      const result = await sessionService.getCurrent();
 
       expect(mockSessionContextApi.getOwnSessionContext).toHaveBeenCalledTimes(1);
       expect(mockSessionMapper.mapToService).not.toHaveBeenCalled();
@@ -110,22 +110,15 @@ describe('EmporixSessionService', () => {
 
   describe('updateCurrentSession', () => {
     it('should map the session and call updateOwnSessionContext on the SessionContextApi', async () => {
-      const partialSession: Partial<Session> = {
-        currency: 'EUR',
-        siteCode: 'new-site',
-      };
-
       const mappedPartialContext: Partial<EmporixSessionContext> = {
         currency: 'EUR',
-        siteCode: 'new-site',
       };
 
       mockSessionMapper.mapPartialToSource.mockReturnValue(mappedPartialContext);
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
 
-      await sessionService.updateCurrentSession(partialSession);
+      await sessionService.setCurrency('EUR');
 
-      expect(mockSessionMapper.mapPartialToSource).toHaveBeenCalledWith(partialSession);
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledTimes(1);
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith(mappedPartialContext);
     });
@@ -133,26 +126,13 @@ describe('EmporixSessionService', () => {
 
   describe('addAttributeToCurrentSession', () => {
     it('should map the attribute and call addOwnSessionContextAttribute on the SessionContextApi', async () => {
-      mockSessionMapper.mapAttributeToSource.mockReturnValue(mockContextAttribute);
-      mockSessionContextApi.addOwnSessionContextAttribute.mockResolvedValue('success');
-
-      const result = await sessionService.addAttributeToCurrentSession(mockSessionAttribute);
-
-      expect(mockSessionMapper.mapAttributeToSource).toHaveBeenCalledWith(mockSessionAttribute);
+      const mockSessionAttribute: EmporixContextAttribute = {
+        key: 'language',
+        value: 'en',
+      };
+      sessionService.setLanguage('en');
       expect(mockSessionContextApi.addOwnSessionContextAttribute).toHaveBeenCalledTimes(1);
-      expect(mockSessionContextApi.addOwnSessionContextAttribute).toHaveBeenCalledWith(mockContextAttribute);
-      expect(result).toBe('success');
-    });
-  });
-
-  describe('removeAttributeFromCurrentSession', () => {
-    it('should call removeOwnSessionContextAttribute on the SessionContextApi', async () => {
-      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
-
-      await sessionService.removeAttributeFromCurrentSession('testAttribute');
-
-      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledTimes(1);
-      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('testAttribute');
+      expect(mockSessionContextApi.addOwnSessionContextAttribute).toHaveBeenCalledWith(mockSessionAttribute);
     });
   });
 });

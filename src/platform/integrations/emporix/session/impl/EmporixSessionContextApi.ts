@@ -16,10 +16,11 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
   }
 
   async getSessionContext(sessionId: string): Promise<EmporixSessionContext | undefined> {
-    // TODO clarify proper Token Handling for managed Sessions
+    // DCPS-16635 clarify proper Token Handling for managed Sessions
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/context/${sessionId}`,
       { method: 'GET' },
+      'service',
     );
 
     if (!response.ok) {

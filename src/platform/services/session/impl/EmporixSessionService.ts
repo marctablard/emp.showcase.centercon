@@ -26,35 +26,36 @@ class EmporixSessionService implements SessionService {
     this.mapper = mapper;
   }
 
+  async setLanguage(language: string): Promise<void> {
+    this.sessionContextApi.addOwnSessionContextAttribute({
+      key: 'language',
+      value: language,
+    });
+  }
+
+  async setCurrency(currency: string): Promise<void> {
+    this.sessionContextApi.updateOwnSessionContext({
+      currency: currency,
+    });
+  }
+  async setCountry(country: string): Promise<void> {
+    this.sessionContextApi.updateOwnSessionContext({
+      targetLocation: country,
+    });
+  }
+
+  async setSite(site: string): Promise<void> {
+    this.sessionContextApi.updateOwnSessionContext({
+      siteCode: site,
+    });
+  }
+
   /**
    * Get the current session context
    */
-  async getCurrentSession(): Promise<Session | undefined> {
+  async getCurrent(): Promise<Session | undefined> {
     const sessionContext = await this.sessionContextApi.getOwnSessionContext();
     return sessionContext ? this.mapper.mapToService(sessionContext) : undefined;
-  }
-
-  /**
-   * Update the current session context
-   */
-  async updateCurrentSession(session: Partial<Session>): Promise<void> {
-    const sessionContext = this.mapper.mapPartialToSource(session);
-    await this.sessionContextApi.updateOwnSessionContext(sessionContext);
-  }
-
-  /**
-   * Add an attribute to the current session context
-   */
-  async addAttributeToCurrentSession(attribute: SessionAttribute): Promise<string> {
-    const integrationAttribute = this.mapper.mapAttributeToSource(attribute);
-    return await this.sessionContextApi.addOwnSessionContextAttribute(integrationAttribute);
-  }
-
-  /**
-   * Remove an attribute from the current session context
-   */
-  async removeAttributeFromCurrentSession(attributeName: string): Promise<void> {
-    await this.sessionContextApi.removeOwnSessionContextAttribute(attributeName);
   }
 }
 
