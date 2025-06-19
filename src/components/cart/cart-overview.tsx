@@ -1,18 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ArrowRight,
-  Car,
   ChevronDown,
-  ChevronRight,
   FileText,
   FolderUp,
   Info,
-  Lock,
   LockKeyhole,
   Package,
   Pencil,
@@ -25,32 +23,54 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
+import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart/cart';
+import { CheckoutAddress, CheckoutShipping } from '@/platform/services/model/checkout';
+import { useCheckoutStore } from '@/providers/StoreProvider';
+import ShippingMethod from '../checkout/shipping-method';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-import { Form, FormControl, FormItem, FormLabel } from '../ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
 import UiLink from '../ui/link';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { CartItemRow } from './cart-item';
 
 interface CartOverviewProps {
   initialCart?: Cart | null;
+  shippingAddress: CheckoutAddress | null;
+  shippingMethod: CheckoutShipping | null;
+  submitShippingAddress: (address: CheckoutAddress) => void;
+  submitShippingMethod: (method: ShippingMethod) => void;
 }
 
 const FormSchemaDeliveryMethod = z.object({
-  method: z.enum(['delivery', 'pickup'], {
+  deliveryMethod: z.enum(['delivery', 'pickup'], {
     required_error: 'You need to select a delivery method.',
   }),
 });
 
+const setDeliveryMethod = (method: string) => {
+  console.log(method);
+};
+
 export function CartOverview({ initialCart }: CartOverviewProps) {
   const t = useTranslations('cart');
+
+  const {
+    shippingAddress: storeShippingAddress,
+    shippingMethod: storeShippingMethod,
+    setShippingAddress: setStoreShippingAddress,
+    setShippingMethod: setStoreShippingMethod,
+  } = useCheckoutStore();
+
   const { cart, loading } = useCart(initialCart);
+  const [shippingAddress, setShippingAddress] = useState<CheckoutAddress | null>(storeShippingAddress);
+  const [shippingMethod, setShippingMethod] = useState<CheckoutShipping | null>(storeShippingMethod);
 
   const form = useForm<z.infer<typeof FormSchemaDeliveryMethod>>({
     resolver: zodResolver(FormSchemaDeliveryMethod),
     defaultValues: {
-      method: 'delivery',
+      deliveryMethod: 'delivery',
     },
   });
 
@@ -72,58 +92,88 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   if (cart && cart.items.length > 0) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="mx-9">
+        <div className="mx-4 md:mx-9">
           <div className="flex gap-3 align-end mb-8">
             <h3 className="text-5xl font-bold">{t('title')}</h3>
             <div className="text-neutral-300 text-xl m-0 leading-[2]">3 {t('product')}</div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
             <div className="col-span-1 lg:col-span-2 2xl:col-span-3">
-              <div className="flex justify-between mb-4">
-                <div className="flex gap-6">
-                  <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<Save />}>
+              <div className="flex flex-col md:flex-row justify-between mb-4 gap-4 sm:gap-1">
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
+                  <Button
+                    variant="link"
+                    size="default"
+                    className="normal-case text-base tracking-normal p-0 gap-1 underline justify-start"
+                  >
                     {t('saveCart')}
-                  </UiLink>
-                  <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<FolderUp />}>
+                    <Save />
+                  </Button>
+                  <Button
+                    variant="link"
+                    size="default"
+                    className="normal-case text-base tracking-normal p-0 gap-1 underline justify-start"
+                  >
                     {t('loadCart')}
-                  </UiLink>
-                  <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<Share2 />}>
+                    <FolderUp />
+                  </Button>
+                  <Button
+                    variant="link"
+                    size="default"
+                    className="normal-case text-base tracking-normal p-0 gap-1 underline justify-start"
+                  >
                     {t('share')}
-                  </UiLink>
+                    <Share2 />
+                  </Button>
                 </div>
                 <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
                   {t('backToShop')}
                 </UiLink>
               </div>
               <Card className="p-0 shadow-xl mb-6">
-                <CardContent className="p-6 grid gird-cols-1 md:grid-cols-2">
-                  <div className="border-r flex flex-col gap-4">
+                <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2">
+                  <div className="border-b pb-4 md:border-r md:border-b-0 md:pb-0 flex flex-col gap-4">
                     <h5 className="text-3xl font-bold">{t('deliveryMethod')}</h5>
                     <Form {...form}>
-                      <FormItem className="space-y-3">
-                        <RadioGroup className="flex flex-col">
-                          <FormItem className="flex items-center gap-3">
-                            <FormControl>
-                              <RadioGroupItem value="all" />
-                            </FormControl>
-                            <FormLabel className="font-normal">{t('ship')}</FormLabel>
+                      <FormField
+                        control={form.control}
+                        name="deliveryMethod"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <RadioGroup
+                              onValueChange={(value) => setDeliveryMethod(value)}
+                              defaultValue={field.value}
+                              className="flex flex-col"
+                            >
+                              <FormItem className="flex items-center gap-3">
+                                <FormControl>
+                                  <RadioGroupItem value="delivery" />
+                                </FormControl>
+                                <FormLabel className="font-normal">{t('ship')}</FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center gap-3">
+                                <FormControl>
+                                  <RadioGroupItem value="pickup" />
+                                </FormControl>
+                                <FormLabel className="font-normal">{t('pickup')}</FormLabel>
+                              </FormItem>
+                            </RadioGroup>
                           </FormItem>
-                          <FormItem className="flex items-center gap-3">
-                            <FormControl>
-                              <RadioGroupItem value="mentions" />
-                            </FormControl>
-                            <FormLabel className="font-normal">{t('pickup')}</FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormItem>
+                        )}
+                      />
                     </Form>
                   </div>
-                  <div className="flex flex-col gap-4 ps-6">
+                  <div className="flex flex-col gap-4 pt-4 md:ps-6 md:pt-0">
                     <div className="flex justify-between">
-                      <h5 className="text-3xl font-bold">{t('shipTo')}</h5>
-                      <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<Pencil />}>
+                      <h5 className="text-3xl font-bold">{t('ship')}</h5>
+                      <Button
+                        variant="link"
+                        size="default"
+                        className="normal-case text-base tracking-normal p-0 gap-1 underline"
+                      >
                         {t('change')}
-                      </UiLink>
+                        <Pencil />
+                      </Button>
                     </div>
                     <div>
                       <p>Emporix AG</p>
@@ -136,11 +186,11 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                 </CardContent>
               </Card>
               <Card className="p-0 shadow-xl mb-6 gap-3">
-                <CardHeader className="pt-6">
-                  <div className="grid grid-cols-7">
-                    <p className="col-span-5 font-bold">{t('product')}</p>
-                    <p className="col-span-1 font-bold">{t('qty')}</p>
-                    <p className="col-span-1 font-bold flex justify-end">{t('price')}</p>
+                <CardHeader className="pt-6 hidden md:block">
+                  <div className="grid grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_1fr_1fr] xl:grid-cols-[120px_3fr_1fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
+                    <p className="col-start-1 font-bold">{t('product')}</p>
+                    <p className="col-start-3 xl:col-start-3 font-bold">{t('qty')}</p>
+                    <p className="col-start-4 xl:col-start-4 font-bold text-end">{t('price')}</p>
                   </div>
                 </CardHeader>
                 <CardContent className="px-6">
