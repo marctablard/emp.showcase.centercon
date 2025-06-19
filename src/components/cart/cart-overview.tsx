@@ -12,11 +12,13 @@ import {
   FolderUp,
   Info,
   LockKeyhole,
+  LogIn,
   Package,
   Pencil,
   Save,
   Share2,
   ShoppingCart,
+  User,
 } from 'lucide-react';
 import z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -66,6 +68,14 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   const [shippingAddress, setShippingAddress] = useState<CheckoutAddress | null>(storeShippingAddress);
   const [shippingMethod, setShippingMethod] = useState<CheckoutShipping | null>(storeShippingMethod);
 
+  const changeShippingAddress = () => {
+    console.log('Open Modal Shipping Address');
+  };
+
+  const changePickupLocation = () => {
+    console.log('Open Modal Pickup Location');
+  };
+
   const form = useForm<z.infer<typeof FormSchemaDeliveryMethod>>({
     resolver: zodResolver(FormSchemaDeliveryMethod),
     defaultValues: {
@@ -73,13 +83,13 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
     },
   });
 
-  let isDelivery = true;
+  let isDelivery = false;
   const freeShippingValue = 500;
 
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto">
-        <Card className="mx-auto max-w-3xl">
+        <Card className="mx-4 xl:mx-9">
           <CardHeader>
             <CardTitle className="text-center text-2xl">{t('yourCart')}</CardTitle>
           </CardHeader>
@@ -94,12 +104,15 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   if (cart && cart.items.length > 0) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="mx-4 md:mx-9">
+        <div className="mx-4 xl:mx-9">
           <div className="flex gap-3 align-end mb-8">
             <h3 className="text-5xl font-bold">{t('title')}</h3>
-            <div className="text-neutral-300 text-xl m-0 leading-[2]">3 {t('product')}</div>
+            <div className="text-neutral-300 text-xl m-0 leading-[2]">
+              {' '}
+              {cart.items.length > 1 ? cart.items.length + t('products') : cart.items.length + t('product')}
+            </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4">
             <div className="col-span-1 lg:col-span-2 2xl:col-span-3">
               <div className="flex flex-col md:flex-row justify-between mb-4 gap-4 sm:gap-1">
                 <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
@@ -132,6 +145,10 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   {t('backToShop')}
                 </UiLink>
               </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+            <div className="col-span-1 lg:col-span-2 2xl:col-span-3">
               <Card className="p-0 shadow-xl mb-6">
                 <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2">
                   <div className="border-b pb-4 md:border-r md:border-b-0 md:pb-0 flex flex-col gap-4">
@@ -172,12 +189,13 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                         variant="link"
                         size="default"
                         className="normal-case text-base tracking-normal p-0 gap-1 underline"
+                        onClick={() => (isDelivery ? changeShippingAddress() : changePickupLocation())}
                       >
                         {t('change')}
                         <Pencil />
                       </Button>
                     </div>
-                    <div className="flex flex-col 2xl:flex-row gap-4 justify-between">
+                    <div className="flex flex-col md:flex-row gap-4 justify-between">
                       <div>
                         <p>Emporix AG</p>
                         <p>Philipp Grunewald</p>
@@ -186,14 +204,14 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                         <p>Switzerland</p>
                       </div>
                       {!isDelivery && (
-                        <div className="flex flex-col pe-4 text-base">
-                          <div className="flex gap-1">
-                            <p className="font-bold">{t('hours')}</p>
-                            <p>M-F 7:00 AM - 4:00 PM Central</p>
+                        <div className="flex flex-col xl:pe-4 text-base w-full sm:w-1/2">
+                          <div>
+                            <span className="font-bold">{t('hours')}</span>
+                            <span>M-F 7:00 AM - 4:00 PM Central</span>
                           </div>
-                          <div className="flex gap-1">
-                            <p className="font-bold">{t('phone')}</p>
-                            <p>0123 987654-32</p>
+                          <div>
+                            <span className="font-bold">{t('phone')}</span>
+                            <span>0123 987654-32</span>
                           </div>
                         </div>
                       )}
@@ -244,10 +262,12 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                         <span>{t('statutoryVat')}</span>
                         <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
                       </div>
-                      <div className="flex justify-between font-medium text-base">
-                        <span>{t('shippingCosts')}</span>
-                        <span>folgt</span>
-                      </div>
+                      {isDelivery && (
+                        <div className="flex justify-between font-medium text-base">
+                          <span>{t('shippingCosts')}</span>
+                          <span>folgt</span>
+                        </div>
+                      )}
                     </div>
                     {freeShippingValue - cart.totalPrice.amount > 0 && (
                       <CardContent className="flex flex-col gap-4 bg-primary-50 rounded-md p-4">
@@ -270,10 +290,12 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                       </CardContent>
                     )}
                     <div className="flex flex-col gap-2">
-                      <div className="flex justify-between font-medium text-base">
-                        <span>{t('freightCosts')}</span>
-                        <span>folgt</span>
-                      </div>
+                      {isDelivery && (
+                        <div className="flex justify-between font-medium text-base">
+                          <span>{t('freightCosts')}</span>
+                          <span>folgt</span>
+                        </div>
+                      )}
                       <div className="flex justify-between font-bold text-xl">
                         <span>{t('total')}</span>
                         <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
@@ -344,19 +366,27 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
     );
   }
   return (
-    <div className="max-w-6xl mx-auto">
-      <Card className="mx-auto max-w-3xl">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl">{t('yourCart')}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
-          <p className="text-xl text-muted-foreground mb-6">{t('emptyCart')}</p>
-          <Link href="/">
-            <Button>{t('continueShopping')}</Button>
-          </Link>
-        </CardContent>
-      </Card>
+    <div className="max-w-6xl mx-auto mt-6 mb-16">
+      <div className="mx-4 xl:mx-9">
+        <div className="flex flex-col sm:justify-center items-center gap-6">
+          <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{t('cartEmpty')}</h1>
+          <p className="text-xl">{t('cartEmptyText')}</p>
+          <div className="flex gap-2 sm:gap-6">
+            <Link href="/login">
+              <Button>
+                {t('cartEmptyLogin')}
+                <User />
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="secondary">
+                {t('cartEmptyLinkText')}
+                <ArrowRight />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

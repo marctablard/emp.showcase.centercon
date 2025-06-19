@@ -68,7 +68,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
           </div>
         </div>
         <div className="col-start-1 col-end-3 row-start-1 md:col-start-2 flex flex-col gap-1 mb-4 md:mb-0 md:ms-4">
-          <p className="text-sm md:text-base">Serie GMV</p>
+          <p className="text-sm md:text-base">folgt</p>
           <p className="font-bold text-base">{l10n(item.product?.name || 'Product')}</p>
         </div>
         <div className="row-start-3 col-start-2 md:col-end-2 flex flex-col gap-2 md:row-start-2 ms-4 pt-2">

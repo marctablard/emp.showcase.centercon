@@ -22,6 +22,8 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading, totalItems } = useCart(initialCart);
 
+  let isDelivery = true;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -37,14 +39,10 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 outline" align="end">
-        <div className="p-4 border-b">
-          <h3 className="font-medium">{t('yourCart')}</h3>
-          <p className="text-sm text-muted-foreground">
-            {totalItems} {t('items')}
-          </p>
-        </div>
-
+      <PopoverContent
+        className="w-[600px] p-4 opacity-85 shadow-xl parent:backdrop-blur-xs @apply backdrop-blur-xs"
+        align="end"
+      >
         {loading ? (
           <div className="p-4 flex items-center justify-center">
             <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary"></div>
@@ -54,8 +52,8 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
             <p className="text-muted-foreground">{t('emptyCart')}</p>
           </div>
         ) : (
-          <>
-            <div className="max-h-80 overflow-auto">
+          <div className="flex flex-col gap-4">
+            <div className="max-h-120 overflow-auto">
               {cart.items.map((item) => (
                 <div key={item.id} className="p-3 border-b flex items-center gap-3">
                   <div className="w-12 h-12 bg-muted flex-shrink-0 rounded overflow-hidden">
@@ -86,16 +84,36 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
               ))}
             </div>
 
-            <div className="p-4 border-t">
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">{t('total')}</span>
-                <span className="font-bold">{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between border-b border-neutral-200 py-2">
+                <span className="">{t('valueOfGoods')}</span>
+                <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
               </div>
-              <Link href="/cart" className="block">
-                <Button className="w-full">{t('viewCart')}</Button>
-              </Link>
+              <div className="flex justify-between">
+                <span>{t('statutoryVat')}</span>
+                <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
+              </div>
+              {isDelivery && (
+                <div className="flex justify-between">
+                  <span>{t('shippingCosts')}</span>
+                  <span>folgt</span>
+                </div>
+              )}
+              {isDelivery && (
+                <div className="flex justify-between">
+                  <span>{t('freightCosts')}</span>
+                  <span>folgt</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-base">
+                <span>{t('total')}</span>
+                <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+              </div>
             </div>
-          </>
+            <Link href="/cart" className="block">
+              <Button className="w-full">{t('viewCart')}</Button>
+            </Link>
+          </div>
         )}
       </PopoverContent>
     </Popover>

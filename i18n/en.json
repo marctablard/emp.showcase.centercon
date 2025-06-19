@@ -128,7 +128,8 @@
         "qty": "Qty",
         "total": "Total value",
         "viewCart": "View Cart",
-        "product": "Product",
+        "product": " Product",
+        "products": " Products",
         "details": "Details",
         "price": "Price",
         "quantity": "Quantity",
@@ -165,9 +166,12 @@
         "availableInWeeks": "Available in 4-6 weeks",
         "addToWishlist": "Add to wishlist",
         "net": "Net ",
-        "hours": "Hours:",
-        "phone": "Phone:"
-
+        "hours": "Hours: ",
+        "phone": "Phone: ",
+        "cartEmpty": "Oh no, your shopping cart is currently empty!",
+        "cartEmptyText": "Add products or log in to load a saved cart.",
+        "cartEmptyLogin": "Login",
+        "cartEmptyLinkText": "Shop now"
     },
     "login": {
         "title": "Sign In",
