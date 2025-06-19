@@ -6,7 +6,7 @@ import type {
 } from '@/platform/integrations/emporix/model/session-context';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import type { SessionMapper } from '@/platform/services/model/session/SessionMapper';
-import type { Session, SessionAttribute } from '@/platform/services/model/session/session';
+import type { Session } from '@/platform/services/model/session/session';
 import { SessionService } from '../SessionService';
 
 /**
