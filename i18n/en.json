@@ -164,7 +164,9 @@
         "available": "Online Available",
         "availableInWeeks": "Available in 4-6 weeks",
         "addToWishlist": "Add to wishlist",
-        "net": "Net "
+        "net": "Net ",
+        "hours": "Hours:",
+        "phone": "Phone:"
 
     },
     "login": {

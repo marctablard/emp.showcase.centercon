@@ -7,7 +7,7 @@ import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
 import { useL10n } from '@/hooks/useL10n';
-import { formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { Cart, CartItem } from '@/platform/services/model/cart/cart.d';
 
 interface CartItemProps {
@@ -20,6 +20,8 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   const t = useTranslations('cart');
   const { updateItemQuantity, removeItem } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const isStrike = false;
 
   // Handle quantity update
   const handleUpdateQuantity = async (newQuantity: number) => {
@@ -121,12 +123,18 @@ export function CartItemRow({ cart, item }: CartItemProps) {
           </div>
         </div>
         <div className="col-start-2 row-start-2 md:col-start-4 md:row-start-1 md:row-end-3 lg:col-start-4 flex flex-col gap-1 ps-4 md:ps-0">
-          <p className="line-through md:text-end">{formatCurrency(item.price.amount, item.price.currency)}</p>
+          {isStrike && (
+            <p className={cn('line-through md:text-end', isStrike && 'text-danger-500')}>
+              {formatCurrency(item.price.amount, item.price.currency)}
+            </p>
+          )}
           <div className="font-bold md:text-end">{formatCurrency(item.price.amount, item.price.currency)}</div>
-          <span className="text-xs text-neutral-300 md:text-end">
-            {t('net')}
-            {formatCurrency(item.price.amount, item.price.currency)}
-          </span>
+          {item.tax?.netValue && (
+            <span className="text-xs text-neutral-300 md:text-end">
+              {t('net')}
+              {formatCurrency(item.tax?.netValue, item.price.currency)}
+            </span>
+          )}
         </div>
       </div>
     </div>

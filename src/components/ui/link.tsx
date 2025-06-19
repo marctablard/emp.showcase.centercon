@@ -13,6 +13,7 @@ const linkVariants = cva(
         text: 'text-primary underline hover:text-primary-700',
         button:
           'inline-flex items-center gap-1 text-primary font-bold underline hover:text-primary-700 disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600',
+        buttonNoUnderline: 'inline-flex items-center gap-1 text-primary font-bold',
       },
       size: {
         s: 'text-sm [&_svg]:w-4 [&_svg]:h-4',

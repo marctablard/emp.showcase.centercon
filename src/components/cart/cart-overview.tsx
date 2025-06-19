@@ -23,8 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
-import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { CheckoutAddress, CheckoutShipping } from '@/platform/services/model/checkout';
 import { useCheckoutStore } from '@/providers/StoreProvider';
@@ -73,6 +72,9 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
       deliveryMethod: 'delivery',
     },
   });
+
+  let isDelivery = true;
+  const freeShippingValue = 500;
 
   if (loading) {
     return (
@@ -165,7 +167,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   </div>
                   <div className="flex flex-col gap-4 pt-4 md:ps-6 md:pt-0">
                     <div className="flex justify-between">
-                      <h5 className="text-3xl font-bold">{t('ship')}</h5>
+                      <h5 className="text-3xl font-bold">{isDelivery ? t('ship') : t('pickup')}</h5>
                       <Button
                         variant="link"
                         size="default"
@@ -175,12 +177,26 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                         <Pencil />
                       </Button>
                     </div>
-                    <div>
-                      <p>Emporix AG</p>
-                      <p>Philipp Grunewald</p>
-                      <p>Bundesplatz 16</p>
-                      <p>300 Zug</p>
-                      <p>Switzerland</p>
+                    <div className="flex flex-col 2xl:flex-row gap-4 justify-between">
+                      <div>
+                        <p>Emporix AG</p>
+                        <p>Philipp Grunewald</p>
+                        <p>Bundesplatz 16</p>
+                        <p>300 Zug</p>
+                        <p>Switzerland</p>
+                      </div>
+                      {!isDelivery && (
+                        <div className="flex flex-col pe-4 text-base">
+                          <div className="flex gap-1">
+                            <p className="font-bold">{t('hours')}</p>
+                            <p>M-F 7:00 AM - 4:00 PM Central</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <p className="font-bold">{t('phone')}</p>
+                            <p>0123 987654-32</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -219,39 +235,44 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                       <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
                     </div>
 
-                    {/* Add shipping, tax, etc. if available */}
-
                     <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
                       <span>{t('netValueOfGoods')}</span>
-                      <span className="font-bold">
-                        {formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}
-                      </span>
+                      <span className="font-bold">{formatCurrency(cart.tax.netValue, cart.tax.currency)}</span>
                     </div>
                     <div className="flex flex-col gap-2">
                       <div className="flex justify-between font-medium text-base">
                         <span>{t('statutoryVat')}</span>
-                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                        <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
                       </div>
                       <div className="flex justify-between font-medium text-base">
                         <span>{t('shippingCosts')}</span>
-                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                        <span>folgt</span>
                       </div>
                     </div>
-                    <CardContent className="flex flex-col gap-4 bg-primary-50 rounded-md p-4">
-                      <div className="flex gap-2 text-primary-500">
-                        <Package />
-                        <div className="font-bold text-neutral-900">Preis {t('untilFreeShipping')}</div>
-                      </div>
-                      <div className="rounded-xl h-4 border border-primary-800"></div>
-                      <span className="text-primary-500">{t('freeShippingOn')}</span>
-                      <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
-                        {t('continueShopping')}
-                      </UiLink>
-                    </CardContent>
+                    {freeShippingValue - cart.totalPrice.amount > 0 && (
+                      <CardContent className="flex flex-col gap-4 bg-primary-50 rounded-md p-4">
+                        <div className="flex gap-2 text-primary-500">
+                          <Package />
+                          <div className="font-bold text-neutral-900">
+                            {(freeShippingValue - cart.totalPrice.amount).toFixed(2) + t('untilFreeShipping')}
+                          </div>
+                        </div>
+                        <div className="rounded-xl h-4 border border-primary-800">
+                          <div
+                            className="bg-gradient-to-t from-primary-700 to-primary-500 rounded-[inherit] h-full"
+                            style={{ width: ((100 / freeShippingValue) * cart.totalPrice.amount).toFixed(0) + '%' }}
+                          ></div>
+                        </div>
+                        <span className="text-primary-500">{t('freeShippingOn')}</span>
+                        <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
+                          {t('continueShopping')}
+                        </UiLink>
+                      </CardContent>
+                    )}
                     <div className="flex flex-col gap-2">
                       <div className="flex justify-between font-medium text-base">
                         <span>{t('freightCosts')}</span>
-                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                        <span>folgt</span>
                       </div>
                       <div className="flex justify-between font-bold text-xl">
                         <span>{t('total')}</span>
@@ -261,7 +282,18 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col p-0">
-                  <Button className="w-full">{t('checkout')}</Button>
+                  <UiLink
+                    type="Link"
+                    href={'/checkout'}
+                    variant="buttonNoUnderline"
+                    size="m"
+                    className={cn(
+                      'no-underline cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base/6 tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-neutral-100 disabled:text-neutral-600 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+                      'w-full bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-sm',
+                    )}
+                  >
+                    {t('checkout')}
+                  </UiLink>
                   <div className="flex align-center gap-2 text-neutral-600 pt-4">
                     <div>
                       <LockKeyhole width={12} />

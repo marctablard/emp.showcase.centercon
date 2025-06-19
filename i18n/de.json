@@ -150,7 +150,7 @@
         "netValueOfGoods": "Netto-Warenwert",
         "statutoryVat": "Steuersatz",
         "shippingCosts": "Versandkosten",
-        "untilFreeShipping": "bis gratis Versand",
+        "untilFreeShipping": " € bis gratis Versand",
         "freeShippingOn": "Gratisversand bei Bestellungen über 400.00 €!",
         "freightCosts": "Frachtkosten",
         "dataTransmittedSecure": "Ihre Daten werden verschlüsselt und sicher transportiert",
@@ -164,7 +164,9 @@
         "available": "Online Verfügbar",
         "availableInWeeks": "Verfügbar in 4-6 Wochen",
         "addToWishlist": "Zu Wunschliste hinzufügen",
-        "net": "Net "
+        "net": "Net ",
+        "hours": "Stunden:",
+        "phone": "Telefon:"
     },
     "login": {
         "title": "Anmelden",
