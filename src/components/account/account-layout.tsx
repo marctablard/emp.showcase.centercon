@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { Building2, FileText, ListChecks, LogOut, ShoppingBag, User } from 'lucide-react';
+import { Building2, FileText, ListChecks, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
 import { BreadcrumbContent } from '@/lib/breadcrumb';
 import { UiBreadcrumb } from '../ui/molecules/ui-breadcrumb';
 import { AccountSidebar } from './account-sidebar';
@@ -18,6 +18,16 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
       href: '/account',
       title: t('accountDetails'),
       icon: <User className="h-4 w-4" />,
+    },
+    {
+      href: '/account/addresses/shipping',
+      title: t('shippingAddresses'),
+      icon: <MapPin className="h-4 w-4" />,
+    },
+    {
+      href: '/account/addresses/billing',
+      title: t('billingAddresses'),
+      icon: <MapPin className="h-4 w-4" />,
     },
     {
       href: '/account/company',

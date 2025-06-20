@@ -59,6 +59,80 @@ export class EmporixCustomerService implements CustomerService {
     throw new Error('Not implemented');
   }
 
+  /**
+   * Create a new address for the current customer
+   * @param address The address data to create
+   * @returns Promise with the created address including its ID
+   */
+  async createAddress(address: Address): Promise<Address> {
+    try {
+      // Convert service model to Emporix model
+      const emporixAddress = this.addressMapper.mapToSource(address);
+
+      // Create address using API
+      const result = await this.customerApi.addCustomerAddress(emporixAddress);
+
+      // Get all addresses to find the newly created one
+      const addresses = await this.customerApi.getCustomerAddresses();
+      const createdAddress = addresses.find((addr) => addr.id === result.id);
+
+      if (!createdAddress) {
+        throw new Error('Failed to retrieve created address');
+      }
+
+      // Convert back to service model
+      return this.addressMapper.mapToService(createdAddress);
+    } catch (error) {
+      console.error('Error creating customer address:', error);
+      throw new Error(`Failed to create address: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Update an existing address
+   * @param addressId The ID of the address to update
+   * @param address The address data to update
+   * @returns Promise with the updated address
+   */
+  async updateAddress(addressId: string, address: Address): Promise<Address> {
+    try {
+      // Convert service model to Emporix model
+      const emporixAddress = this.addressMapper.mapToSource(address);
+
+      // Update address using API
+      await this.customerApi.updateCustomerAddress(addressId, emporixAddress);
+
+      // Get all addresses to find the updated one
+      const addresses = await this.customerApi.getCustomerAddresses();
+      const updatedAddress = addresses.find((addr) => addr.id === addressId);
+
+      if (!updatedAddress) {
+        throw new Error('Failed to retrieve updated address');
+      }
+
+      // Convert back to service model
+      return this.addressMapper.mapToService(updatedAddress);
+    } catch (error) {
+      console.error('Error updating customer address:', error);
+      throw new Error(`Failed to update address: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Delete an address
+   * @param addressId The ID of the address to delete
+   * @returns Promise that resolves when deletion is complete
+   */
+  async deleteAddress(addressId: string): Promise<void> {
+    try {
+      // Delete address using API
+      await this.customerApi.deleteCustomerAddress(addressId);
+    } catch (error) {
+      console.error('Error deleting customer address:', error);
+      throw new Error(`Failed to delete address: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   passwordReset(email: string): Promise<void> {
     return this.customerApi.passwordReset(email);
   }

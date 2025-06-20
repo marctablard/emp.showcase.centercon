@@ -376,7 +376,27 @@
         "quotesPageDescription": "Angebote anzeigen und verwalten",
         "quotesPagePlaceholder": "Angebote werden hier angezeigt",
         "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
-        "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt"
+        "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt",
+        "shippingAddresses": "Versandadressen",
+        "manageShippingAddresses": "Versandadressen verwalten",
+        "shippingAddressesDescription": "Versandadressen anzeigen und verwalten",
+        "billingAddresses": "Rechnungsadressen",
+        "manageBillingAddresses": "Rechnungsadressen verwalten",
+        "billingAddressesDescription": "Rechnungsadressen anzeigen und verwalten",
+        "noAddresses": "Keine Adressen gefunden",
+        "addNewAddress": "Neu Adresse hinzufügen",
+        "addShippingAddress": "Versandadresse hinzufügen",
+        "addBillingAddress": "Rechnungsadresse hinzufügen",
+        "addressFormDescription": "Füllen Sie die Adresse aus",
+        "saveAddress": "Adresse speichern",
+        "cancel": "Abbrechen",
+        "default": "Standart",
+        "deleteAddress": "Adresse löschen",
+        "editAddress": "Adresse bearbeiten",
+        "saving": "Wird gespeichert...",
+        "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
+        "success": "Das hat geklappt",
+        "addressDeleted": "Adresse gelöscht"
     },
     "Validation": {
         "contactData": {
@@ -471,6 +491,7 @@
         "newPassword": "Neues Passwort",
         "confirmPassword": "Passwort bestätigen",
         "updatePassword": "Passwort aktualisieren",
+        "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
         "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet."
     },
     "Weather": {

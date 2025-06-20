@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { fetchCustomerAddresses } from '@/lib/client/customer';
+import {
+  createCustomerAddress,
+  deleteCustomerAddress,
+  fetchCustomerAddresses,
+  updateCustomerAddress,
+} from '@/lib/client/customer';
 import { Address, AddressType } from '@/platform/services/model/common';
 import { useCustomerStore } from '@/providers/StoreProvider';
 
@@ -9,6 +14,9 @@ interface CustomerHook {
   error: Error | null;
   fetchAddresses: () => Promise<void>;
   getDefaultAddress: (type: AddressType) => Address | null;
+  createAddress: (address: Partial<Address>) => Promise<Address>;
+  updateAddress: (id: string, address: Partial<Address>) => Promise<Address>;
+  deleteAddress: (id: string) => Promise<void>;
 }
 
 /**
@@ -66,6 +74,79 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
     [addresses],
   );
 
+  // Create a new address
+  const createAddress = useCallback(
+    async (address: Partial<Address>): Promise<Address> => {
+      try {
+        setAddressLoading(true);
+        setError(null);
+        const newAddress = await createCustomerAddress(address);
+        // Update the addresses list
+        const updatedAddresses = addresses ? [...addresses, newAddress] : [newAddress];
+        setAddresses(updatedAddresses);
+        setStoreAddresses(updatedAddresses);
+        return newAddress;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to create address');
+        setError(error);
+        console.error('Error creating address:', err);
+        throw error;
+      } finally {
+        setAddressLoading(false);
+      }
+    },
+    [addresses, setAddressLoading, setStoreAddresses],
+  );
+
+  // Update an existing address
+  const updateAddress = useCallback(
+    async (id: string, address: Partial<Address>): Promise<Address> => {
+      try {
+        setAddressLoading(true);
+        setError(null);
+        const updatedAddress = await updateCustomerAddress(id, address);
+        // Update the addresses list
+        const updatedAddresses = addresses?.map((addr) =>
+          addr.id === id || (addr as any)._id === id ? updatedAddress : addr,
+        );
+        setAddresses(updatedAddresses);
+        setStoreAddresses(updatedAddresses);
+        return updatedAddress;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to update address');
+        setError(error);
+        console.error('Error updating address:', err);
+        throw error;
+      } finally {
+        setAddressLoading(false);
+      }
+    },
+    [addresses, setAddressLoading, setStoreAddresses],
+  );
+
+  // Delete an address
+  const deleteAddress = useCallback(
+    async (id: string): Promise<void> => {
+      try {
+        setAddressLoading(true);
+        setError(null);
+        await deleteCustomerAddress(id);
+        // Remove the address from the list
+        const updatedAddresses = addresses?.filter((addr) => addr.id !== id && (addr as any)._id !== id);
+        setAddresses(updatedAddresses);
+        setStoreAddresses(updatedAddresses);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to delete address');
+        setError(error);
+        console.error('Error deleting address:', err);
+        throw error;
+      } finally {
+        setAddressLoading(false);
+      }
+    },
+    [addresses, setAddressLoading, setStoreAddresses],
+  );
+
   // Initialize customer on first render if not already initialized
   useEffect(() => {
     if (addresses === undefined && !getAddressLoading()) {
@@ -87,5 +168,8 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
     error,
     fetchAddresses,
     getDefaultAddress,
+    createAddress,
+    updateAddress,
+    deleteAddress,
   };
 };
