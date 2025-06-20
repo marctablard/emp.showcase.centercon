@@ -112,13 +112,16 @@ describe('EmporixSessionService', () => {
     it('should map the session and call updateOwnSessionContext on the SessionContextApi', async () => {
       const mappedPartialContext: Partial<EmporixSessionContext> = {
         currency: 'EUR',
+        metadata: {
+          version: 1,
+        },
       };
 
       mockSessionMapper.mapPartialToSource.mockReturnValue(mappedPartialContext);
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue(mockSessionContext);
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
 
       await sessionService.setCurrency('EUR');
-
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledTimes(1);
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith(mappedPartialContext);
     });

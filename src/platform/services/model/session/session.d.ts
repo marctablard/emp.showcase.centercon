@@ -13,5 +13,8 @@ export interface Session {
   id: string;
   currency?: string;
   siteCode?: string;
+  language?: string;
+  country?: string;
+  region?: string;
   attributes?: Record<string, SessionAttribute>;
 }

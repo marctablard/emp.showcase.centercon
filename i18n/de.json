@@ -1,7 +1,14 @@
 {
     "Languages": {
+        "label": "Sprachen",
         "en": "English",
         "de": "Deutsch"
+    },
+    "Currencies": {
+        "label": "Währungen"
+    },
+    "Regions": {
+        "label": "Regionen"
     },
     "hello": {
         "world": "Hallo Welt",

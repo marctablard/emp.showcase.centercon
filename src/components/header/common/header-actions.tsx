@@ -8,7 +8,6 @@ import useAuthentication from '@/hooks/authentication/useAuthentication';
 export default function HeaderActions() {
   const t = useTranslations('header');
   const { isAuthenticated, loading } = useAuthentication();
-
   if (loading) {
     return null;
   }

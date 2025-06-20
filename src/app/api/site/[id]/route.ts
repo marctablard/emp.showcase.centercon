@@ -1,14 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { SiteService } from '@/platform/services/site/SiteService';
 
 /**
- * GET /api/site
+ * GET /api/site/{id}
  * Get site data (countries, regions, currencies)
  */
-export async function GET() {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const siteService = EMP.platform.server.get<SiteService>('SiteService');
-    const site = await siteService.getSite();
+    const { id } = await params;
+    const site = await siteService.getSite(id);
+
     return NextResponse.json(site);
   } catch (error) {
     console.error('Error fetching site data:', error);

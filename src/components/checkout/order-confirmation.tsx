@@ -20,7 +20,7 @@ interface OrderConfirmationProps {
  */
 const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialOrder, customerEmail }) => {
   const t = useTranslations('Confirmation');
-  const tOrder = useTranslations('Order');
+  const tOrder = useTranslations('Orders');
   const tOrderStatus = useTranslations('OrderStatus');
   const tPayment = useTranslations('PaymentModes');
   const { order, loading, error } = useOrder({ orderId, initialOrder });

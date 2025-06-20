@@ -28,4 +28,9 @@ export interface SessionService {
    * Set the site for the current session context
    */
   setSite(site: string): Promise<void>;
+
+  /**
+   * Set the region for the current session context
+   */
+  setRegion(region: string): Promise<void>;
 }

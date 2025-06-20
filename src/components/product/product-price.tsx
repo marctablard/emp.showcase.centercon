@@ -57,7 +57,7 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
           <>
             <span className="text-sm font-medium ml-[-0.5em]">, {t('including')}</span>
             <Badge variant="destructive" rounded="default">
-              -{price.discountPercentage}%
+              -{Math.round(price.discountPercentage)}%
             </Badge>
           </>
         )}
@@ -67,7 +67,7 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
         <div className="font-bold text-neutral-900">{priceFragment}</div>
 
         {price.originalValue && price.originalValue > price.effectiveValue && (
-          <div className="text-neutral-600 line-through">{price.originalValue.toFixed(2)} €</div>
+          <div className="text-neutral-600 line-through">{formatCurrency(price.originalValue, price.currency)}</div>
         )}
       </div>
       {price.tax && (

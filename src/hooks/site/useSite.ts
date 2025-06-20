@@ -9,8 +9,12 @@ import { useSiteStore } from '@/providers/StoreProvider';
 /**
  * Hook for accessing site data like countries, regions, and currencies
  */
-export function useSite() {
-  const { setLoading, getLoading, setSite, getSite, site, loading } = useSiteStore();
+export function useSite(id?: string) {
+  const { setLoading, getLoading, setSite, getSite, reset, loading, site } = useSiteStore();
+  if (id && site && site.code != id) {
+    // id mismatch, that's a client-side site-switch
+    reset();
+  }
   const [countries, setCountries] = useState<Country[] | undefined>(getSite()?.countries);
   const [regions, setRegions] = useState<Region[] | undefined>(getSite()?.regions);
   const [currencies, setCurrencies] = useState<Currency[] | undefined>(getSite()?.currencies);
@@ -45,7 +49,7 @@ export function useSite() {
     } else if (site === undefined && !getLoading()) {
       fetchSiteData();
     }
-  }, [site, fetchSiteData, getLoading]);
+  }, [getSite, getLoading, fetchSiteData, site]);
 
   return {
     countries,

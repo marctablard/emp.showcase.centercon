@@ -4,7 +4,12 @@ import type { EmporixCountryApi } from '@/platform/integrations/emporix/country/
 import type { EmporixCurrencyApi } from '@/platform/integrations/emporix/currency/EmporixCurrencyApi';
 import { EmporixCountry, EmporixRegion } from '@/platform/integrations/emporix/model/country';
 import { EmporixCurrency, EmporixExchangeRate } from '@/platform/integrations/emporix/model/currency';
-import { Country, Currency, ExchangeRate, Region } from '@/platform/services/model/common';
+import { EmporixSite } from '@/platform/integrations/emporix/model/site-settings';
+import type { EmporixSiteSettingsApi } from '@/platform/integrations/emporix/site-settings/EmporixSiteSettingsApi';
+import { Address, Country, Currency, ExchangeRate, Region } from '@/platform/services/model/common';
+import { PaymentMode } from '../../model';
+import { Site } from '../../model/common/site';
+import type { PaymentService } from '../../payment/PaymentService';
 import { SiteService } from '../SiteService';
 
 /**
@@ -16,7 +21,69 @@ class EmporixSiteService implements SiteService {
   constructor(
     @inject('EmporixCountryApi') private countryApi: EmporixCountryApi,
     @inject('EmporixCurrencyApi') private currencyApi: EmporixCurrencyApi,
+    @inject('EmporixSiteSettingsApi') private siteSettingsApi: EmporixSiteSettingsApi,
+    @inject('PaymentService') private paymentService: PaymentService,
   ) {}
+
+  async getSite(code: string): Promise<Site | null> {
+    if (!code) {
+      const sites = await this.siteSettingsApi.getSites({}, false);
+      // TODO we could be faster, by using this result below
+      const defaultSite = sites.items.find((site: EmporixSite) => site.default === true);
+      code = defaultSite?.code;
+    }
+    if (!code) {
+      return null;
+    }
+    try {
+      const [emporixSite, currencies, countries, regions, paymentModes] = await Promise.all([
+        this.siteSettingsApi.getSite(code),
+        this.getCurrencies(),
+        this.getCountries(true),
+        this.getRegions(),
+        this.paymentService.getPaymentModes(),
+      ]);
+      return emporixSite ? this.mapSite(emporixSite, currencies, countries, regions, paymentModes) : null;
+    } catch (error) {
+      console.error(`Error getting site ${code}:`, error);
+      return null;
+    }
+  }
+  // Map EmporixSite to Site
+  private mapSite(
+    emporixSite: EmporixSite,
+    currencies: Currency[],
+    countries: Country[],
+    regions: Region[],
+    paymentModes: PaymentMode[],
+  ): Site {
+    const address: Address = emporixSite.homeBase?.address || {};
+    address.geoLocation = emporixSite.homeBase?.location;
+    let availableCurrencies =
+      emporixSite.availableCurrencies?.map((currency) => currencies.find((c) => c.id === currency)) || undefined;
+    if (!availableCurrencies) {
+      // TODO is empty on Emporix side
+      availableCurrencies = currencies;
+    }
+    // TODO use what the site returns
+    const availablePaymentModes = paymentModes;
+    return {
+      code: emporixSite.code,
+      name: emporixSite.name || emporixSite.code,
+      defaultLanguage: emporixSite.defaultLanguage || 'en',
+      defaultCurrency: currencies.find((c) => c.id === emporixSite.currency) || currencies[0],
+      countries: countries,
+      shipToCountries:
+        emporixSite.shipToCountries?.map((countryCode) => countries.find((c) => c.code === countryCode)) || [],
+      address: address,
+      currencies: availableCurrencies,
+      languages: emporixSite.languages || [],
+      regions: regions,
+      paymentModes: availablePaymentModes,
+      includesTax: emporixSite.includesTax || false,
+      decimals: emporixSite.cartCalculationScale || 2,
+    };
+  }
 
   // Map EmporixCountry to Country
   private mapCountry(emporixCountry: EmporixCountry): Country {
@@ -46,14 +113,9 @@ class EmporixSiteService implements SiteService {
     }
   }
 
-  async getCountry(countryCode: string): Promise<Country | undefined> {
-    try {
-      const emporixCountry = await this.countryApi.getCountry(countryCode);
-      return emporixCountry ? this.mapCountry(emporixCountry) : undefined;
-    } catch (error) {
-      console.error(`Error getting country ${countryCode}:`, error);
-      return undefined;
-    }
+  async getCountry(countryCode: string): Promise<Country | null> {
+    const emporixCountry = await this.countryApi.getCountry(countryCode);
+    return emporixCountry ? this.mapCountry(emporixCountry) : null;
   }
 
   async getRegions(): Promise<Region[]> {
@@ -66,14 +128,9 @@ class EmporixSiteService implements SiteService {
     }
   }
 
-  async getRegion(regionCode: string): Promise<Region | undefined> {
-    try {
-      const emporixRegion = await this.countryApi.getRegion(regionCode);
-      return emporixRegion ? this.mapRegion(emporixRegion) : undefined;
-    } catch (error) {
-      console.error(`Error getting region ${regionCode}:`, error);
-      return undefined;
-    }
+  async getRegion(regionCode: string): Promise<Region | null> {
+    const emporixRegion = await this.countryApi.getRegion(regionCode);
+    return emporixRegion ? this.mapRegion(emporixRegion) : null;
   }
 
   // Map EmporixCurrency to Currency
@@ -81,8 +138,6 @@ class EmporixSiteService implements SiteService {
     return {
       // Map code to id for the existing Currency interface
       id: emporixCurrency.code,
-      // EmporixCurrency doesn't have symbol, so use a default
-      symbol: '$',
       // Add the enhanced properties
       code: emporixCurrency.code,
       name:
