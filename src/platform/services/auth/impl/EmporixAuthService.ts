@@ -69,6 +69,10 @@ export class EmporixAuthService implements AuthService {
     };
     if (customer.company) {
       customer.businessModel = 'B2B';
+      customer.b2b = {
+        // TODO: Add actual company registration ID
+        companyRegistrationId: '123-456-789',
+      };
     } else {
       customer.businessModel = 'B2C';
     }
