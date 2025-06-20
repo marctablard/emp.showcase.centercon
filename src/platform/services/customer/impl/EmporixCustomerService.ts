@@ -58,6 +58,14 @@ export class EmporixCustomerService implements CustomerService {
     }
     throw new Error('Not implemented');
   }
+
+  passwordReset(email: string): Promise<void> {
+    return this.customerApi.passwordReset(email);
+  }
+
+  passwordResetUpdate(token: string, password: string): Promise<void> {
+    return this.customerApi.passwordResetUpdate(token, password);
+  }
 }
 
 export default EmporixCustomerService;

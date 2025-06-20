@@ -97,7 +97,11 @@ export default function LoginCard({ callbackUrl }: { callbackUrl: string }) {
               />
 
               <div>
-                <Link href="/">{t('forgotPassword')}</Link>
+                <Link
+                  href={`/password-reset${form.watch('username') ? `?email=${encodeURIComponent(form.watch('username'))}` : ''}`}
+                >
+                  {t('forgotPassword')}
+                </Link>
               </div>
             </div>
           </form>

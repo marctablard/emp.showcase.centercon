@@ -16,4 +16,19 @@ export interface CustomerService {
    * @returns Promise with the list of addresses or empty array if no addresses
    */
   getAddresses(customerId?: string): Promise<Address[]>;
+
+  /**
+   * Request a password reset for a customer's email address
+   * @param email The customer's email address
+   * @returns Promise that resolves when the password reset request is complete
+   */
+  passwordReset(email: string): Promise<void>;
+
+  /**
+   * Request a password reset for a customer's email address
+   * @param token the Password Reset Token
+   * @param password the new Password
+   * @returns Promise that resolves when the password reset update is complete
+   */
+  passwordResetUpdate(token: string, password: string): Promise<void>;
 }
