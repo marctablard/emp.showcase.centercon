@@ -5,8 +5,8 @@
 
 @theme {
   /* fonts */
-  --font-headlines: Ubuntu, sans-serif;
-  --font-body: Open-Sans, sans-serif;
+  --font-headlines: var(--font-ubuntu), sans-serif;
+  --font-body: var(--font-open-sans), sans-serif;
   --text-8xl: 3rem; /* 48px */
   --text-8xl--line-height: 1.08;
   --text-7xl: 2.75rem; /* 44px */

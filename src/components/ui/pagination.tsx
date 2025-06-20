@@ -39,7 +39,7 @@ function PaginationLink({ className, isActive, size = 'default', ...props }: Pag
           variant: isActive ? 'secondary' : 'link',
           size,
           className:
-            'font-normal p-0 w-8 h-8 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
+            'font-normal p-0 w-10 h-10 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
         }),
         className,
       )}
