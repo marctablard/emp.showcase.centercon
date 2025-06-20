@@ -13,9 +13,9 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
     <div className={`hidden lg:block w-full relative ${small ? 'max-w-[320px]' : 'max-w-[720px]'}`}>
       <Input
         placeholder={small ? t('shortSearch') : t('search')}
-        className="h-[44px] pr-[62px] text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700"
+        className="h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700"
       />
-      <div className="absolute right-6 top-1/2 -translate-y-1/2 bg-transparent p-2 cursor-pointer">
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent p-2 cursor-pointer">
         <Search className="text-primary-600" width="28" height="28" />
       </div>
     </div>
