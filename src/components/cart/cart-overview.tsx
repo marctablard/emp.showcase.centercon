@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -24,6 +24,7 @@ import z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useCart } from '@/hooks/cart/useCart';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart/cart';
@@ -83,8 +84,10 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
     },
   });
 
-  let isDelivery = false;
-  const freeShippingValue = 500;
+  const freeShippingValue = 400;
+  const [isDelivery, setIsDelivery] = useState(false);
+
+  const { isAuthenticated } = useAuthentication();
 
   if (loading) {
     return (
@@ -141,7 +144,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                     <Share2 />
                   </Button>
                 </div>
-                <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
+                <UiLink type="Link" href="/" variant="primary" size="m" iconAfter={<ArrowRight />}>
                   {t('backToShop')}
                 </UiLink>
               </div>
@@ -149,7 +152,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
             <div className="col-span-1 lg:col-span-2 2xl:col-span-3">
-              <Card className="p-0 shadow-xl mb-6">
+              <Card className="p-0 border-none shadow-footer mb-6">
                 <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2">
                   <div className="border-b pb-4 md:border-r md:border-b-0 md:pb-0 flex flex-col gap-4">
                     <h5 className="text-3xl font-bold">{t('deliveryMethod')}</h5>
@@ -160,7 +163,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                         render={({ field }) => (
                           <FormItem className="flex flex-col">
                             <RadioGroup
-                              onValueChange={(value) => setDeliveryMethod(value)}
+                              onValueChange={(value) => setIsDelivery(value === 'delivery')}
                               defaultValue={field.value}
                               className="flex flex-col"
                             >
@@ -219,7 +222,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="p-0 shadow-xl mb-6 gap-3">
+              <Card className="p-0 shadow-footer border-none mb-6 gap-3">
                 <CardHeader className="pt-6 hidden md:block">
                   <div className="grid grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_1fr_1fr] xl:grid-cols-[120px_3fr_1fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
                     <p className="col-start-1 font-bold">{t('product')}</p>
@@ -234,7 +237,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
             </div>
 
             <div className="col-span-1">
-              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-xl">
+              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer">
                 <CardHeader className="p-0">
                   <CardTitle>
                     <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
@@ -269,7 +272,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                         </div>
                       )}
                     </div>
-                    {freeShippingValue - cart.totalPrice.amount > 0 && (
+                    {isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && (
                       <CardContent className="flex flex-col gap-4 bg-primary-50 rounded-md p-4">
                         <div className="flex gap-2 text-primary-500">
                           <Package />
@@ -324,7 +327,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   </div>
                 </CardFooter>
               </Card>
-              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-xl text-neutral-900">
+              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer text-neutral-900">
                 <Collapsible>
                   <CollapsibleTrigger className="w-full group flex items-center justify-between gap-2">
                     <div className="flex gap-2">
@@ -337,23 +340,37 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                       height={32}
                     />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="pt-4">
+                  <CollapsibleContent
+                    className={cn(
+                      'pt-4 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+                    )}
+                  >
                     <span className="text-base mb-4">{t('requestQuoteTitle')}</span>
                     <div className="flex flex-col gap-2 pt-4">
                       <div className="flex gap-2">
-                        <p className="font-bold">1.</p>
-                        <p className="font-bold">{t('requestQuotestep1')}</p>
+                        <p className={cn(!isAuthenticated && 'font-bold')}>1.</p>
+                        {!isAuthenticated ? (
+                          <p className="font-bold">{t('requestQuotestep1')}</p>
+                        ) : (
+                          <p>{t('requestQuotestep2')}</p>
+                        )}
                       </div>
                       <div className="flex gap-2">
-                        <p className="font-bold">2.</p>
-                        <p className="">{t('requestQuotestep2')}</p>
+                        <p className={cn(!isAuthenticated && 'font-bold')}>2.</p>
+                        {!isAuthenticated ? (
+                          <p>{t('requestQuotestep2')}</p>
+                        ) : (
+                          <p className="">{t('requestQuotestep3')}</p>
+                        )}
                       </div>
-                      <div className="flex gap-2">
-                        <p className="font-bold">3.</p>
-                        <p className="">{t('requestQuotestep3')}</p>
-                      </div>
+                      {!isAuthenticated && (
+                        <div className="flex gap-2">
+                          <p className="font-bold">3.</p>
+                          <p>{t('requestQuotestep3')}</p>
+                        </div>
+                      )}
                     </div>
-                    <Button className="w-full mt-4" variant="secondary">
+                    <Button className="w-full mt-4" variant="secondary" disabled={!isAuthenticated}>
                       {t('requestQuoteButton')}
                     </Button>
                   </CollapsibleContent>

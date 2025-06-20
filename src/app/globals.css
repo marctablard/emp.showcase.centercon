@@ -7,25 +7,35 @@
   /* fonts */
   --font-headlines: Ubuntu, sans-serif;
   --font-body: Open-Sans, sans-serif;
-  --text-8xl: 3rem; /* 48px */
+  --text-8xl: 3rem;
+  /* 48px */
   --text-8xl--line-height: 1.08;
-  --text-7xl: 2.75rem; /* 44px */
+  --text-7xl: 2.75rem;
+  /* 44px */
   --text-7xl--line-height: 1.09;
-  --text-6xl: 2.25rem; /* 36px */
+  --text-6xl: 2.25rem;
+  /* 36px */
   --text-6xl--line-height: 1.11;
-  --text-5xl: 2rem; /* 32px */
+  --text-5xl: 2rem;
+  /* 32px */
   --text-5xl--line-height: 1.12;
-  --text-4xl: 1.75rem; /* 28px */
+  --text-4xl: 1.75rem;
+  /* 28px */
   --text-4xl--line-height: 1.28;
-  --text-3xl: 1.25rem; /* 20px */
+  --text-3xl: 1.25rem;
+  /* 20px */
   --text-3xl--line-height: 1.2;
-  --text-2xl: 1rem; /* 16px */
+  --text-2xl: 1rem;
+  /* 16px */
   --text-2xl--line-height: 1.25;
-  --text-xl: 1.25rem; /* 20px */
+  --text-xl: 1.25rem;
+  /* 20px */
   --text-xl--line-height: 1.6;
-  --text-base: 1rem; /* 16px */
+  --text-base: 1rem;
+  /* 16px */
   --text-base--line-height: 1.5;
-  --text-sm: 0.75rem; /* 12px */
+  --text-sm: 0.75rem;
+  /* 12px */
   --text-sm--line-height: 1.66;
 
   /* colors */
@@ -241,11 +251,15 @@
   }
 
   .hide-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
+
   .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
+    /* Chrome, Safari, Opera */
   }
 }
 
@@ -255,8 +269,6 @@
   } */
 }
 
-@layer utilities {
-  .clip-style {
-    clip-path: url('/images/image_mask_desktop.svg');
-  }
+[data-radix-popper-content-wrapper] {
+  backdrop-filter: blur(4px);
 }
