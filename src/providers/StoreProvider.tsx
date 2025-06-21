@@ -2,6 +2,8 @@
 
 import { type ReactNode, createContext, useContext, useRef } from 'react';
 import { useStore } from 'zustand/react';
+import { Site } from '@/platform/services/model/common/site';
+import { Session } from '@/platform/services/model/session';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';
 import { createCustomerStore } from '@/stores/customer-store';
@@ -9,6 +11,7 @@ import { createDashboardStore } from '@/stores/dashboard-store';
 import { createHistoryStore } from '@/stores/history-store';
 import { createOrderStore } from '@/stores/order-store';
 import { createProductStore } from '@/stores/products-store';
+import { createSessionStore } from '@/stores/session-store-context';
 import { createShippingMethodsStore } from '@/stores/shipping-methods-store';
 import { createSiteStore } from '@/stores/site-store';
 
@@ -30,12 +33,16 @@ export type DashboardStoreApi = ReturnType<typeof createDashboardStore>;
 export const DashboardStoreContext = createContext<DashboardStoreApi | null>(null);
 export type OrderStoreApi = ReturnType<typeof createOrderStore>;
 export const OrderStoreContext = createContext<OrderStoreApi | null>(null);
+export type SessionStoreApi = ReturnType<typeof createSessionStore>;
+export const SessionStoreContext = createContext<SessionStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
+  shopSession?: Session | null;
+  site?: Site | null;
 }
 
-export const StoreProvider = ({ children }: StoreProviderProps) => {
+export const StoreProvider = ({ children, shopSession, site }: StoreProviderProps) => {
   const productStoreRef = useRef<ProductStoreApi | null>(null);
   if (productStoreRef.current === null) {
     productStoreRef.current = createProductStore();
@@ -50,7 +57,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
   }
   const siteStoreRef = useRef<SiteStoreApi | null>(null);
   if (siteStoreRef.current === null) {
-    siteStoreRef.current = createSiteStore();
+    siteStoreRef.current = createSiteStore({ site, loading: false, error: null });
   }
   const shippingMethodsStoreRef = useRef<ShippingMethodsStoreApi | null>(null);
   if (shippingMethodsStoreRef.current === null) {
@@ -71,6 +78,10 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
   const orderStoreRef = useRef<OrderStoreApi | null>(null);
   if (orderStoreRef.current === null) {
     orderStoreRef.current = createOrderStore();
+  }
+  const sessionStoreRef = useRef<SessionStoreApi | null>(null);
+  if (sessionStoreRef.current === null) {
+    sessionStoreRef.current = createSessionStore({ session: shopSession, loading: false });
   }
   /**
    * The order is relevant, because store data can only depend on one another,
@@ -94,7 +105,9 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
                 <CheckoutStoreContext.Provider value={checkoutStoreRef.current}>
                   <HistoryStoreContext.Provider value={historyStoreRef.current}>
                     <DashboardStoreContext.Provider value={dashboardStoreRef.current}>
-                      {children}
+                      <SessionStoreContext.Provider value={sessionStoreRef.current}>
+                        {children}
+                      </SessionStoreContext.Provider>
                     </DashboardStoreContext.Provider>
                   </HistoryStoreContext.Provider>
                 </CheckoutStoreContext.Provider>
@@ -175,6 +188,14 @@ export const useOrderStore = () => {
   const storeContext = useContext(OrderStoreContext);
   if (!storeContext) {
     throw new Error('useOrderStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useSessionStore = () => {
+  const storeContext = useContext(SessionStoreContext);
+  if (!storeContext) {
+    throw new Error('useSessionStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

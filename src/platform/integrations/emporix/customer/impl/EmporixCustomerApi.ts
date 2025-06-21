@@ -288,6 +288,59 @@ class EmporixCustomerApi implements CustomerApi {
     // After successful signup, login the user to get their profile
     return response.json();
   }
+
+  async passwordReset(email: string): Promise<void> {
+    const url = `customer/${this.config.tenant}/password/reset`;
+
+    const response = await this.apiInvoker.authenticatedFetch(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      },
+      'public',
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to request Password Reset for E-Mail ${email}: ${response.statusText} - ${errorText}`);
+    }
+
+    return;
+  }
+
+  async passwordResetUpdate(token: string, password: string): Promise<void> {
+    const url = `customer/${this.config.tenant}/password/reset/update`;
+
+    const response = await this.apiInvoker.authenticatedFetch(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          token: token,
+          password: password,
+        }),
+      },
+      'public',
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to Update Password for Reset}: ${response.statusText} - ${errorText}`);
+    }
+
+    return;
+  }
 }
 
 export default EmporixCustomerApi;

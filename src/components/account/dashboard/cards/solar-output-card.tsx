@@ -18,12 +18,12 @@ import { DashboardCard, DashboardCardProps } from './dashboard-card';
 export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
   const t = useTranslations('Account');
   const tWeather = useTranslations('Weather');
-  const { weatherData, loading, error } = useWeather();
+  const { weather, loading, error } = useWeather();
   const { location } = useLocation();
 
   // Calculate solar output based on weather conditions and time of day
   const solarOutputData = useMemo(() => {
-    if (!weatherData || !weatherData.hourly) {
+    if (!weather || !weather.hourly) {
       return [];
     }
 
@@ -37,12 +37,12 @@ export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCa
       hourDate.setHours(currentDate.getHours() + i);
 
       // Slightly vary the weather conditions for simulation
-      const weatherDescription = weatherData.hourly[i].description;
+      const weatherDescription = weather.hourly[i].description;
 
       hourlyData.push({
         time: hourDate.toISOString(),
         description: weatherDescription,
-        temperature: weatherData.hourly[i].temperature, // Add some variation
+        temperature: weather.hourly[i].temperature, // Add some variation
       });
     }
 
@@ -81,7 +81,7 @@ export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCa
         temperature: hour.temperature.toFixed(1),
       };
     });
-  }, [weatherData, tWeather]);
+  }, [weather, tWeather]);
 
   // Format address for display
   const addressDisplay = useMemo(() => {
@@ -107,7 +107,7 @@ export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCa
     );
   }
 
-  if (error || !weatherData) {
+  if (error || !weather) {
     return (
       <DashboardCard
         title={title || t('solarOutput', { defaultValue: 'Solar Output' })}

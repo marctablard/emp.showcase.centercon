@@ -167,7 +167,7 @@ class EmporixOAuthApi implements OAuthApi {
    * Circular dependency : EmporixTokenManager -> EmporixOAuthApi -> EmporixApiInvoker -> EmporixTokenManager
    */
   async fetch(url: string, options: RequestInit = {}): Promise<Response> {
-    url = `${this.baseUrl}/${url}`;
+    url = `${this.baseUrl}${url.startsWith('/') ? url : '/' + url}`;
 
     if (this.debugCurl) {
       console.debug(buildCurl(url, options));

@@ -65,7 +65,17 @@ export class EmporixAuthService implements AuthService {
       contactEmail: registration.credentials.username,
       firstName: registration.customer?.firstName,
       lastName: registration.customer?.lastName,
+      company: registration.customer?.company,
     };
+    if (customer.company) {
+      customer.businessModel = 'B2B';
+      customer.b2b = {
+        // TODO: Add actual company registration ID
+        companyRegistrationId: '123-456-789',
+      };
+    } else {
+      customer.businessModel = 'B2C';
+    }
     const address: EmporixAddress | undefined = registration.address
       ? this.emporixAddressMapper.mapToSource(registration.address)
       : undefined;

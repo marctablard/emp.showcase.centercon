@@ -54,6 +54,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
     setOrders: setStoreOrders,
     getLoading: getStoreLoading,
     setLoading: setStoreLoading,
+    updated,
   } = useOrderStore();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -94,33 +95,32 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
 
   // Initialize on first render or when pagination/filters change
   useEffect(() => {
-    if (orders === undefined) {
+    if (orders === undefined || updated > 0) {
+      // this feels so messy
+      if (orders) {
+        return;
+      }
       const storeOrders = getStoreOrders(queryKey);
-      if (loading) {
-        if (!getStoreLoading(queryKey) && storeOrders) {
-          setOrders(storeOrders);
-          setLoading(false);
-        }
-      } else {
+      const storeLoading = getStoreLoading(queryKey);
+      if (storeOrders) {
+        setOrders(storeOrders);
+        setLoading(false);
+      } else if (storeLoading) {
         setLoading(true);
-        if (storeOrders) {
-          setOrders(storeOrders);
-          setLoading(false);
-        } else if (!getStoreLoading(queryKey)) {
-          setStoreLoading(queryKey, true);
-          fetchOrders();
-        } else {
-          setLoading(true);
-        }
+      } else {
+        setStoreLoading(queryKey, true);
+        fetchOrders();
       }
     }
   }, [
+    updated,
     loading,
     pageSize,
     pageNumber,
     filters,
     orders,
     fetchOrders,
+    setOrders,
     queryKey,
     getStoreLoading,
     getStoreOrders,

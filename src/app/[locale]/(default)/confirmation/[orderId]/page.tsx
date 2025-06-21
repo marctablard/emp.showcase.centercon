@@ -28,7 +28,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<Con
 
   return (
     <main className="min-h-screen bg-gray-50 py-8">
-      <OrderConfirmation orderId={orderId} initialOrder={order} customerEmail="customer@example.com" />
+      <OrderConfirmation orderId={orderId} initialOrder={order} customerEmail={order?.customerEmail || ''} />
     </main>
   );
 }

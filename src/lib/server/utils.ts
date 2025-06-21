@@ -42,22 +42,32 @@ export async function getCartCookie(
   );
 }
 
-export async function removeCartFromCookie(cartId: string, response: NextResponse): Promise<void> {
+export async function removeCartFromCookie(cartId: string, response: NextResponse | Response): Promise<void> {
   const cartCookie: CartCookie = await readCartCookie();
   for (const siteCode of Object.keys(cartCookie)) {
     cartCookie[siteCode] = cartCookie[siteCode].filter((cart) => cart.cartId !== cartId);
   }
 
-  response.cookies.set({
-    name: CART_COOKIE_ID,
-    value: JSON.stringify(cartCookie),
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-    sameSite: 'strict',
-  });
+  // Handle both NextResponse and standard Response objects
+  if ('cookies' in response && typeof response.cookies?.set === 'function') {
+    // NextResponse object
+    response.cookies.set({
+      name: CART_COOKIE_ID,
+      value: JSON.stringify(cartCookie),
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'strict',
+    });
+  } else {
+    // Standard Response object
+    const cookieValue = `${CART_COOKIE_ID}=${encodeURIComponent(JSON.stringify(cartCookie))}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Strict`;
+
+    // Use headers.append to add the Set-Cookie header
+    response.headers.append('Set-Cookie', cookieValue);
+  }
 }
 
-export async function addCartToCookie(cart: Cart, response: NextResponse): Promise<void> {
+export async function addCartToCookie(cart: Cart, response: NextResponse | Response): Promise<void> {
   const cartCookie: CartCookie = await readCartCookie();
   if (!cartCookie[cart.site]) {
     cartCookie[cart.site] = [];
@@ -72,11 +82,21 @@ export async function addCartToCookie(cart: Cart, response: NextResponse): Promi
     },
   ];
 
-  response.cookies.set({
-    name: CART_COOKIE_ID,
-    value: JSON.stringify(cartCookie),
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-    sameSite: 'strict',
-  });
+  // Handle both NextResponse and standard Response objects
+  if ('cookies' in response && typeof response.cookies?.set === 'function') {
+    // NextResponse object
+    response.cookies.set({
+      name: CART_COOKIE_ID,
+      value: JSON.stringify(cartCookie),
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'strict',
+    });
+  } else {
+    // Standard Response object
+    const cookieValue = `${CART_COOKIE_ID}=${encodeURIComponent(JSON.stringify(cartCookie))}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Strict`;
+
+    // Use headers.append to add the Set-Cookie header
+    response.headers.append('Set-Cookie', cookieValue);
+  }
 }

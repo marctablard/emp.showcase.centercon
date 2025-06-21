@@ -1,9 +1,17 @@
 import { Country, Currency, ExchangeRate, Region } from '@/platform/services/model/common';
+import { Site } from '@/platform/services/model/common/site';
 
 /**
  * Service for site-related operations including countries, regions, currencies, shipping, and payment
  */
 export interface SiteService {
+  /**
+   * Get a specific site by code
+   * @param code Site code
+   * @returns Site information or null if not found
+   */
+  getSite(code?: string): Promise<Site | null>;
+
   /**
    * Get all countries
    * @returns List of countries
@@ -13,9 +21,9 @@ export interface SiteService {
   /**
    * Get a specific country by code
    * @param countryCode ISO country code
-   * @returns Country information or undefined if not found
+   * @returns Country information or null if not found
    */
-  getCountry(countryCode: string): Promise<Country | undefined>;
+  getCountry(countryCode: string): Promise<Country | null>;
 
   /**
    * Get all regions
@@ -26,9 +34,9 @@ export interface SiteService {
   /**
    * Get a specific region by code
    * @param regionCode Region code
-   * @returns Region information or undefined if not found
+   * @returns Region information or null if not found
    */
-  getRegion(regionCode: string): Promise<Region | undefined>;
+  getRegion(regionCode: string): Promise<Region | null>;
 
   /**
    * Get all currencies

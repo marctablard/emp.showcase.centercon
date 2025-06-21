@@ -39,13 +39,20 @@ interface UseCart {
  * @returns Cart data and operations
  */
 export const useCart = (initialCart?: Cart | null): UseCart => {
-  const { setCurrentCart, getCurrentCart, getLoading, setLoading, loading, currentCart: storeCart } = useCartStore();
-  if (getCurrentCart() === undefined && initialCart !== undefined) {
-    setCurrentCart(initialCart);
+  const {
+    setCurrentCart: setStoreCart,
+    getCurrentCart: getStoreCart,
+    getLoading,
+    setLoading,
+    loading,
+    currentCart: storeCart,
+  } = useCartStore();
+  if (getStoreCart() === undefined && initialCart !== undefined) {
+    setStoreCart(initialCart);
   }
   const [error, setError] = useState<Error | null>(null);
   // we do this, so that the invokers of this hook can immediately use the cart
-  const [cart, setCart] = useState<Cart | null | undefined>(getCurrentCart());
+  const [cart, setCart] = useState<Cart | null | undefined>(getStoreCart());
 
   const fetchCart = useCallback(
     async (createCurrent?: boolean) => {
@@ -56,20 +63,20 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         // Try to fetch existing cart
         try {
           const cartData = await apiFetchCurrentCart(createCurrent);
-          setCurrentCart(cartData);
+          setStoreCart(cartData);
           return cartData;
         } catch (_err) {
           // TODO clarify error handling when cart is gone
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch cart'));
-        setCurrentCart(undefined);
+        setStoreCart(undefined);
         console.error('Error fetching cart:', err);
       } finally {
         setLoading(false);
       }
     },
-    [setCurrentCart, setLoading],
+    [setStoreCart, setLoading],
   );
 
   // Initialize cart on first render if not already initialized
@@ -77,7 +84,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     if (cart === undefined && !getLoading()) {
       setLoading(true);
       // first try to grab the cart from the store
-      const currentCart = getCurrentCart();
+      const currentCart = getStoreCart();
       if (currentCart !== undefined) {
         setCart(currentCart);
         setLoading(false);
@@ -86,7 +93,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
       // Otherwise fetch current cart
       fetchCart();
     }
-  }, [cart, getCurrentCart, fetchCart, getLoading, setLoading]);
+  }, [cart, getStoreCart, fetchCart, getLoading, setLoading]);
 
   useEffect(() => {
     // listen to changes on storeCart to update local state
@@ -219,9 +226,9 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
   );
 
   const clearCart = useCallback(() => {
-    setCurrentCart(undefined);
+    setStoreCart(undefined);
     setCart(undefined);
-  }, [setCurrentCart]);
+  }, [setStoreCart]);
 
   return {
     cart,

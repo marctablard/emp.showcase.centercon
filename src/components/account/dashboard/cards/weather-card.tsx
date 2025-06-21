@@ -82,14 +82,14 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
   const t = useTranslations('Weather');
   const state = useLocalDashboardStore();
   const [grid, setGrid] = useState({ cols: 1, rows: 1 });
-  const { weatherData, loading, changeLocation } = useWeather();
+  const { weather, loading, changeLocation } = useWeather();
 
   useEffect(() => {
     if (state.renderedLayout) {
       setGrid(findCardLayout('weather', state.renderedLayout));
     }
   }, [state.renderedLayout]);
-  if (loading || !weatherData) {
+  if (loading || !weather) {
     return (
       <DashboardCard className={className} variant="primary" {...props}>
         <div className="flex justify-center items-center h-32">{t('loading')}</div>
@@ -98,10 +98,10 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
   }
   return (
     <DashboardCard
-      title={title || t(weatherData.current.description)}
+      title={title || t(weather.current.description)}
       subtitle={
         subtitle ||
-        weatherData.current.date.toLocaleDateString('en-US', {
+        weather.current.date.toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
@@ -116,14 +116,14 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
         <div className={`flex-wrap gap-4 w-full`}>
           <div className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <WeatherIcon description={weatherData.current.description} />
+              <WeatherIcon description={weather.current.description} />
             </div>
             <div>
               <div className="text-3xl font-bold flex items-start">
-                {weatherData.current.temperature.toFixed(1)}
+                {weather.current.temperature.toFixed(1)}
                 <span className="text-lg mt-1">°</span>
               </div>
-              <div className="text-sm">{weatherData.current.location}</div>
+              <div className="text-sm">{weather.current.location}</div>
             </div>
           </div>
           <div
@@ -135,15 +135,15 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
           >
             <div className="flex justify-between py-1">
               <span>{t('precipitation')}:</span>
-              <span>{weatherData.current.precipitation}%</span>
+              <span>{weather.current.precipitation}%</span>
             </div>
             <div className="flex justify-between py-1">
               <span>{t('humidity')}:</span>
-              <span>{weatherData.current.humidity}%</span>
+              <span>{weather.current.humidity}%</span>
             </div>
             <div className="flex justify-between py-1">
               <span>{t('wind')}:</span>
-              <span>{weatherData.current.windSpeed.toFixed(1)} km/h</span>
+              <span>{weather.current.windSpeed.toFixed(1)} km/h</span>
             </div>
           </div>
         </div>

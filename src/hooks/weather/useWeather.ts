@@ -1,15 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getWeatherForecast } from '@/lib/server/weather';
+import { getWeatherData, useWeatherStore } from '@/lib/client/weather';
 import { LocationData } from '@/platform/services/model/common';
-import { WeatherForecast } from '@/platform/services/model/weather';
 import { useLocation } from '../location/useLocation';
 
 export function useWeather() {
-  const [weatherData, setWeatherData] = useState<WeatherForecast | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { weather, loading, error, setWeather, setLoading, setError } = useWeatherStore();
   const { location: userLocation, loading: locationLoading, error: locationError } = useLocation();
   const [weatherLocation, setWeatherLocation] = useState<LocationData | null>(null);
 
@@ -17,6 +14,13 @@ export function useWeather() {
     // Only fetch weather when we have location data
     if (!weatherLocation || !weatherLocation.geoLocation) return;
 
+    if (weather) {
+      setLoading(false);
+      return;
+    }
+    if (loading) {
+      return;
+    }
     // Fetch real weather data using server action
     const fetchWeatherData = async () => {
       try {
@@ -27,13 +31,12 @@ export function useWeather() {
           return;
         }
 
-        // Fetch real weather data from our weather service
-        const forecast: WeatherForecast = await getWeatherForecast(
+        const forecast = await getWeatherData(
           weatherLocation.geoLocation.latitude,
           weatherLocation.geoLocation.longitude,
         );
 
-        setWeatherData(forecast);
+        setWeather(forecast);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching weather data:', err);
@@ -43,7 +46,7 @@ export function useWeather() {
     };
 
     fetchWeatherData();
-  }, [weatherLocation, userLocation, locationLoading]);
+  }, [weather, loading, weatherLocation, userLocation, locationLoading, setError, setWeather, setLoading]);
 
   useEffect(() => {
     if (!weatherLocation && !locationLoading && !locationError && userLocation !== undefined) {
@@ -69,11 +72,12 @@ export function useWeather() {
   }, [userLocation, locationLoading, locationError, weatherLocation]);
 
   const changeLocation = async (location: LocationData): Promise<void> => {
+    setWeather(null);
     setWeatherLocation(location);
   };
 
   return {
-    weatherData,
+    weather,
     loading,
     error,
     changeLocation,

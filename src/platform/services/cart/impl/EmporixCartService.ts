@@ -59,7 +59,7 @@ class EmporixCartService implements CartService {
     } catch (error) {
       // only error can be that it's a duplicate
       if (error instanceof Error && error.message.includes('Duplicate key found for a unique index.')) {
-        const session = await this.sessionService.getCurrentSession();
+        const session = await this.sessionService.getCurrent();
         if (!session) {
           throw new Error('Failed to get session context');
         }
@@ -74,7 +74,7 @@ class EmporixCartService implements CartService {
   }
 
   async getCart(): Promise<Cart | null> {
-    const session = await this.sessionService.getCurrentSession();
+    const session = await this.sessionService.getCurrent();
     if (!session) {
       throw new Error('Failed to get session context');
     }

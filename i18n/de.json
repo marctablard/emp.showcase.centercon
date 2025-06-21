@@ -1,7 +1,14 @@
 {
     "Languages": {
+        "label": "Sprachen",
         "en": "English",
         "de": "Deutsch"
+    },
+    "Currencies": {
+        "label": "Währungen"
+    },
+    "Regions": {
+        "label": "Regionen"
     },
     "hello": {
         "world": "Hallo Welt",
@@ -412,7 +419,27 @@
         "quotesPageDescription": "Angebote anzeigen und verwalten",
         "quotesPagePlaceholder": "Angebote werden hier angezeigt",
         "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
-        "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt"
+        "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt",
+        "shippingAddresses": "Versandadressen",
+        "manageShippingAddresses": "Versandadressen verwalten",
+        "shippingAddressesDescription": "Versandadressen anzeigen und verwalten",
+        "billingAddresses": "Rechnungsadressen",
+        "manageBillingAddresses": "Rechnungsadressen verwalten",
+        "billingAddressesDescription": "Rechnungsadressen anzeigen und verwalten",
+        "noAddresses": "Keine Adressen gefunden",
+        "addNewAddress": "Neu Adresse hinzufügen",
+        "addShippingAddress": "Versandadresse hinzufügen",
+        "addBillingAddress": "Rechnungsadresse hinzufügen",
+        "addressFormDescription": "Füllen Sie die Adresse aus",
+        "saveAddress": "Adresse speichern",
+        "cancel": "Abbrechen",
+        "default": "Standart",
+        "deleteAddress": "Adresse löschen",
+        "editAddress": "Adresse bearbeiten",
+        "saving": "Wird gespeichert...",
+        "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
+        "success": "Das hat geklappt",
+        "addressDeleted": "Adresse gelöscht"
     },
     "Validation": {
         "contactData": {
@@ -492,6 +519,23 @@
         "spinner": {
             "loading": "Wird geladen..."
         }
+    },
+    
+    "Password": {
+        "resetPassword": "Passwort zurücksetzen",
+        "resetPasswordDescription": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link, um Ihr Passwort zurückzusetzen.",
+        "email": "E-Mail",
+        "sendResetLink": "Anfrage senden",
+        "processing": "Wird verarbeitet...",
+        "resetEmailSent": "Wenn Ihre E-Mail-Adresse in unserem System vorhanden ist, erhalten Sie einen Passwort-Reset-Link.",
+        "backToLogin": "Zurück zur Login-Seite",
+        "createNewPassword": "Neues Passwort erstellen",
+        "createNewPasswordDescription": "Bitte geben Sie Ihr neues Passwort unten ein.",
+        "newPassword": "Neues Passwort",
+        "confirmPassword": "Passwort bestätigen",
+        "updatePassword": "Passwort aktualisieren",
+        "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
+        "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet."
     },
     "Weather": {
         "loading": "Wetterdaten werden geladen...",

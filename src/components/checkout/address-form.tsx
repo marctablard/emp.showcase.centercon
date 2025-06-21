@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useSite } from '@/hooks/site/useSite';
@@ -42,14 +41,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
     'onBlur',
     onDataChange,
   );
-  const { countries, loading, fetchSiteData } = useSite();
-
-  // Fetch countries when component mounts
-  useEffect(() => {
-    if (countries === undefined) {
-      fetchSiteData();
-    }
-  }, [fetchSiteData, countries]);
+  const { countries, loading } = useSite();
 
   return (
     <FormProvider {...form}>

@@ -4,7 +4,7 @@ import { Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
 
 // Wrapper around the Next-Auth SessionProvider that otherwise fails to render in a React Server Component
-export default function CustomerSessionProvider({
+export default function AuthSessionProvider({
   children,
   session,
 }: {

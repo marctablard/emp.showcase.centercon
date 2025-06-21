@@ -91,4 +91,19 @@ export interface CustomerApi {
    * @returns Promise with the created customer Id
    */
   signup(customerData: EmporixSignupRequest): Promise<{ id: string }>;
+
+  /**
+   * Request a password reset for a customer's email address
+   * @param email The customer's email address
+   * @returns Promise that resolves when the password reset request is complete
+   */
+  passwordReset(email: string): Promise<void>;
+
+  /**
+   * Update a password reset for a customer's email address
+   * @param token The password reset token
+   * @param password The new password
+   * @returns Promise that resolves when the password reset update is complete
+   */
+  passwordResetUpdate(token: string, password: string): Promise<void>;
 }

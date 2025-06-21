@@ -4,10 +4,8 @@ import React, { useCallback } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { useTranslations } from 'next-intl';
 import { isEqual } from 'lodash';
-import { useCustomer } from '@/hooks/customer/useCustomer';
-import { useConfigStore, useLocalDashboardStore } from '@/lib/client/dashboard';
+import { useLocalDashboardStore } from '@/lib/client/dashboard';
 // Import card components from the cards folder
 import { ApprovalsSummaryCard } from './cards/approvals';
 import { BudgetProgress, BudgetSummaryCard } from './cards/budget';
@@ -18,12 +16,11 @@ import { WeatherCard } from './cards/weather-card';
 
 interface DashboardProps {
   isCustomizable: boolean;
+  layouts: Layouts;
+  layoutChanged: (layouts: Layouts) => void;
 }
 
-export default function Dashboard({ isCustomizable }: DashboardProps) {
-  const t = useTranslations('Account');
-  const { customer, loading: isCustomerLoading } = useCustomer();
-  const { layouts, setLayouts } = useConfigStore();
+export default function Dashboard({ isCustomizable, layouts, layoutChanged }: DashboardProps) {
   const state = useLocalDashboardStore();
 
   const ResponsiveReactGridLayout = WidthProvider(Responsive);
@@ -32,15 +29,20 @@ export default function Dashboard({ isCustomizable }: DashboardProps) {
     state.currentBreakpoint = breakpoint;
   };
 
-  const onLayoutChange = (layout: Layout[], layouts: Layouts) => {
-    if (!isEqual(layouts, layouts)) {
-      setLayouts(layouts);
-    }
-    const currentLayout = state.currentLayout;
-    if (!isEqual(layout, currentLayout)) {
-      state.currentLayout = layout;
-    }
-  };
+  const onLayoutChange = useCallback(
+    (layout: Layout[], newLayouts: Layouts) => {
+      if (!isEqual(layouts, newLayouts)) {
+        // TODO this triggers a re-render of the dashboard component
+        // when it changes the state of the Config-Store... no idea why
+        layoutChanged(newLayouts);
+      }
+      const currentLayout = state.currentLayout;
+      if (!isEqual(layout, currentLayout)) {
+        state.currentLayout = layout;
+      }
+    },
+    [layouts, layoutChanged, state],
+  );
 
   const renderItems = useCallback(() => {
     state.items = [
@@ -73,9 +75,6 @@ export default function Dashboard({ isCustomizable }: DashboardProps) {
 
   renderItems();
 
-  if (isCustomerLoading || !customer) {
-    return <div className="flex justify-center items-center h-full">{t('loading')}</div>;
-  }
   return (
     <div className="relative">
       <ResponsiveReactGridLayout

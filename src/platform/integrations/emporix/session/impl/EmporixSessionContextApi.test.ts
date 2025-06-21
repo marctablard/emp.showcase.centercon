@@ -65,9 +65,9 @@ describe('EmporixSessionContextApi', () => {
     // Spy on the authenticatedFetch method to verify calls
     jest.spyOn(apiInvoker, 'authenticatedFetch');
   });
-
-  describe('getSessionContext', () => {
-    it.skip('should fetch a session context by ID', async () => {
+  // DCPS-16635 <- Wait's for Clarification
+  describe.skip('getSessionContext', () => {
+    it('should fetch a session context by ID', async () => {
       const tokenManager = container.get<TokenManager>('EmporixTokenManager');
       const { accessToken: _token, sessionId } = await tokenManager.getAnonymousToken(config.tenant, config.clientId);
 
@@ -83,7 +83,7 @@ describe('EmporixSessionContextApi', () => {
       expect(result?.sessionId).toEqual(testSessionId);
     });
 
-    it.skip('should return undefined when session context is not found', async () => {
+    it('should return undefined when session context is not found', async () => {
       const nonExistentSessionId = 'non-existent-session-' + Date.now();
 
       const result = await sessionContextApi.getSessionContext(nonExistentSessionId);
@@ -97,8 +97,9 @@ describe('EmporixSessionContextApi', () => {
     });
   });
 
-  describe('updateSessionContext', () => {
-    it.skip('should update a session context with upsert=true', async () => {
+  // DCPS-16635 <- Wait's for Clarification
+  describe.skip('updateSessionContext', () => {
+    it('should update a session context with upsert=true', async () => {
       // Create a session context to update
 
       const tokenManager = container.get<TokenManager>('EmporixTokenManager');
@@ -124,8 +125,9 @@ describe('EmporixSessionContextApi', () => {
     });
   });
 
-  describe('addSessionContextAttribute', () => {
-    it.skip('should add an attribute to a session context', async () => {
+  // DCPS-16635 <- Wait's for Clarification
+  describe.skip('addSessionContextAttribute', () => {
+    it('should add an attribute to a session context', async () => {
       const attributeKey = `test-attribute-${Date.now()}`;
       const attributeToAdd = createTestAttribute(attributeKey);
 
@@ -146,8 +148,9 @@ describe('EmporixSessionContextApi', () => {
     });
   });
 
-  describe('removeSessionContextAttribute', () => {
-    it.skip('should remove an attribute from a session context', async () => {
+  // DCPS-16635 <- Wait's for Clarification
+  describe.skip('removeSessionContextAttribute', () => {
+    it('should remove an attribute from a session context', async () => {
       // First add an attribute
       const attributeKey = `test-attribute-to-remove-${Date.now()}`;
       const attributeToAdd = createTestAttribute(attributeKey);

@@ -7,20 +7,30 @@ export interface SessionService {
   /**
    * Get the current session context
    */
-  getCurrentSession(): Promise<Session | undefined>;
+  getCurrent(): Promise<Session | undefined>;
 
   /**
-   * Update the current session context
+   * Set the language for the current session context
    */
-  updateCurrentSession(session: Partial<Session>): Promise<void>;
+  setLanguage(language: string): Promise<void>;
 
   /**
-   * Add an attribute to the current session context
+   * Set the currency for the current session context
    */
-  addAttributeToCurrentSession(attribute: SessionAttribute): Promise<string>;
+  setCurrency(currency: string): Promise<void>;
 
   /**
-   * Remove an attribute from the current session context
+   * Set the country for the current session context
    */
-  removeAttributeFromCurrentSession(attributeName: string): Promise<void>;
+  setCountry(country: string): Promise<void>;
+
+  /**
+   * Set the site for the current session context
+   */
+  setSite(site: string): Promise<void>;
+
+  /**
+   * Set the region for the current session context
+   */
+  setRegion(region: string): Promise<void>;
 }

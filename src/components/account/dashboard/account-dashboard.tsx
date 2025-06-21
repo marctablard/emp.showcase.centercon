@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useCustomer } from '@/hooks/customer/useCustomer';
+import { useConfigStore } from '@/lib/client/dashboard';
 import { Customer } from '@/platform/services/model/customer/customer';
 import AccountLayout from '../account-layout';
 import Dashboard from './dashboard';
@@ -14,6 +15,7 @@ interface AccountDashboardProps {
 
 export default function AccountDashboard({ initialCustomer }: AccountDashboardProps) {
   const t = useTranslations('Account');
+  const { setLayouts, getLayouts } = useConfigStore();
   const { customer, loading: isCustomerLoading } = useCustomer(initialCustomer);
   const [isCustomizable, setIsCustomizable] = useState(false);
 
@@ -37,7 +39,7 @@ export default function AccountDashboard({ initialCustomer }: AccountDashboardPr
             }}
           />
         </div>
-        <Dashboard isCustomizable={isCustomizable} />
+        <Dashboard isCustomizable={isCustomizable} layouts={getLayouts()} layoutChanged={setLayouts} />
       </div>
     </AccountLayout>
   );

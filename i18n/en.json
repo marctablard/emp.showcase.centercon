@@ -1,7 +1,14 @@
 {
     "Languages": {
+        "label": "Languages",
         "en": "English",
         "de": "German"
+    },
+    "Currencies": {
+        "label": "Währungen"
+    },
+    "Regions":{
+        "label": "Regionen"
     },
     "hello": {
         "world": "Hello World",
@@ -403,7 +410,13 @@
         "quotesPageDescription": "View and manage your quotes",
         "quotesPagePlaceholder": "Quotes will be displayed here",
         "shoppingListsPageDescription": "View and manage your shopping lists",
-        "shoppingListsPagePlaceholder": "Shopping lists will be displayed here"
+        "shoppingListsPagePlaceholder": "Shopping lists will be displayed here",
+        "billingAddresses": "Billing Addresses",
+        "billingAddressesDescription": "Manage your billing addresses",
+        "manageBillingAddresses": "Manage Billing Addresses",
+        "shippingAddresses": "Shipping Addresses",
+        "shippingAddressesDescription": "Manage your shipping addresses",
+        "manageShippingAddresses": "Manage Shipping Addresses"
     },
     "Validation": {
         "contactData": {
@@ -483,6 +496,22 @@
         "spinner": {
             "loading": "Loading..."
         }
+    },
+    "Password": {
+        "resetPassword": "Reset Password",
+        "resetPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
+        "email": "Email",
+        "sendResetLink": "Send Reset Link",
+        "processing": "Processing...",
+        "resetEmailSent": "If your email exists in our system, you will receive a password reset link shortly.",
+        "backToLogin": "Back to Login",
+        "createNewPassword": "Create New Password",
+        "createNewPasswordDescription": "Please enter your new password below.",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm Password",
+        "updatePassword": "Update Password",
+        "updatePasswordDescription": "Update your password to secure your account.",
+        "passwordUpdatedSuccess": "Your password has been updated successfully. You will be redirected to the login page."
     },
     "Weather": {
         "loading": "Loading weather data...",

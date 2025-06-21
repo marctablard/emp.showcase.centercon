@@ -38,9 +38,6 @@ export interface Region {
 
 export interface Currency {
   id: string;
-  symbol: string;
-
-  // Enhanced properties for use with SiteService
   code?: string;
   name?: string;
   active?: boolean;
@@ -110,6 +107,8 @@ export interface LocalizedString {
 export type AddressType = 'SHIPPING' | 'BILLING';
 
 export interface Address {
+  id?: string;
+  isDefault?: boolean;
   contactName: string;
   companyName?: string;
   street: string;
