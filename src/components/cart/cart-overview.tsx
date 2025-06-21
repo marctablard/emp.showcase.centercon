@@ -233,7 +233,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                     <p className="col-start-4 xl:col-start-4 font-bold text-end">{t('price')}</p>
                   </div>
                 </CardHeader>
-                <CardContent className="px-6 pb-100">
+                <CardContent className="px-6">
                   {cart?.items.map((item) => <CartItemRow key={item.id} cart={cart} item={item} />)}
                 </CardContent>
               </Card>
