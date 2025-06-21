@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { first } from 'lodash';
 import {
   ArrowRight,
   ChevronDown,
@@ -21,6 +22,7 @@ import {
   User,
 } from 'lucide-react';
 import z from 'zod';
+import { fi, th } from 'zod/v4/locales';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
@@ -51,23 +53,23 @@ const FormSchemaDeliveryMethod = z.object({
   }),
 });
 
-const setDeliveryMethod = (method: string) => {
-  console.log(method);
-};
-
 export function CartOverview({ initialCart }: CartOverviewProps) {
   const t = useTranslations('cart');
 
-  const {
-    shippingAddress: storeShippingAddress,
-    shippingMethod: storeShippingMethod,
-    setShippingAddress: setStoreShippingAddress,
-    setShippingMethod: setStoreShippingMethod,
-  } = useCheckoutStore();
+  const { shippingAddress: storeShippingAddress, setShippingAddress: setStoreShippingAddress } = useCheckoutStore();
 
   const { cart, loading } = useCart(initialCart);
   const [shippingAddress, setShippingAddress] = useState<CheckoutAddress | null>(storeShippingAddress);
-  const [shippingMethod, setShippingMethod] = useState<CheckoutShipping | null>(storeShippingMethod);
+
+  const pickupAddress = {
+    company: 'Emporix AG',
+    firstName: 'Philipp',
+    lastName: 'Grunewald',
+    street: 'Bundesplatz 16',
+    city: 'Zug',
+    country: 'Switzerland',
+    zip: '300',
+  };
 
   const changeShippingAddress = () => {
     console.log('Open Modal Shipping Address');
@@ -77,6 +79,46 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
     console.log('Open Modal Pickup Location');
   };
 
+  const fixedContainer = useRef<HTMLInputElement>(null);
+  const productContainer = useRef<HTMLInputElement>(null);
+  const threshold = 100;
+
+  /* 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (fixedContainer.current && productContainer.current) {
+        // You can now access the DOM element
+        let top = fixedContainer.current.getBoundingClientRect().top;
+        let bottom = fixedContainer.current.getBoundingClientRect().bottom;
+        let maxBottom = productContainer.current.getBoundingClientRect().bottom;
+
+        console.log(bottom, maxBottom);
+        if(top <= 100){
+          fixedContainer.current.style.position = 'fixed'; 
+       
+          fixedContainer.current.style.top = '100px';
+        } 
+        if(bottom === maxBottom){
+          console.log('bottom');
+         fixedContainer.current.style.position = 'initial'; 
+         fixedContainer.current.style.removeProperty('top');
+
+        
+          
+        }
+
+      }
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []); */
+
   const form = useForm<z.infer<typeof FormSchemaDeliveryMethod>>({
     resolver: zodResolver(FormSchemaDeliveryMethod),
     defaultValues: {
@@ -85,7 +127,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   });
 
   const freeShippingValue = 400;
-  const [isDelivery, setIsDelivery] = useState(false);
+  const [isDelivery, setIsDelivery] = useState(true);
 
   const { isAuthenticated } = useAuthentication();
 
@@ -200,11 +242,13 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                     </div>
                     <div className="flex flex-col md:flex-row gap-4 justify-between">
                       <div>
-                        <p>Emporix AG</p>
-                        <p>Philipp Grunewald</p>
-                        <p>Bundesplatz 16</p>
-                        <p>300 Zug</p>
-                        <p>Switzerland</p>
+                        <p>{isDelivery ? 'Emporix AG' : pickupAddress.company}</p>
+                        <p>
+                          {isDelivery ? 'Philipp Grunewald' : pickupAddress.firstName + ' ' + pickupAddress.lastName}
+                        </p>
+                        <p>{isDelivery ? 'Bundesplatz 16' : pickupAddress.street}</p>
+                        <p>{isDelivery ? '300 Zug' : pickupAddress.zip + ' ' + pickupAddress.city}</p>
+                        <p>{isDelivery ? 'Switzerland' : pickupAddress.country}</p>
                       </div>
                       {!isDelivery && (
                         <div className="flex flex-col xl:pe-4 text-base w-full sm:w-1/2">
@@ -222,7 +266,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="p-0 shadow-footer border-none mb-6 gap-3">
+              <Card className="p-0 shadow-footer border-none mb-6 gap-3" ref={productContainer}>
                 <CardHeader className="pt-6 hidden md:block">
                   <div className="grid grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_1fr_1fr] xl:grid-cols-[120px_3fr_1fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
                     <p className="col-start-1 font-bold">{t('product')}</p>
@@ -236,146 +280,141 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
               </Card>
             </div>
 
-            <div className="col-span-1">
-              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer">
-                <CardHeader className="p-0">
-                  <CardTitle>
-                    <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="bg-white rounded-md p-4">
-                  <div className="space-y-4">
-                    <div className="flex gap-2 text-primary-500">
-                      <div>
-                        <Info />
+            <div className="col-span-1 relative">
+              <div className="mr-6" ref={fixedContainer}>
+                <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer">
+                  <CardHeader className="p-0">
+                    <CardTitle>
+                      <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="bg-white rounded-md p-4">
+                    <div className="space-y-4">
+                      <div className="flex gap-2 text-primary-500">
+                        <div>
+                          <Info />
+                        </div>
+                        <div className="text-base">{t('promoCodeInfo')}</div>
                       </div>
-                      <div className="text-base">{t('promoCodeInfo')}</div>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="">{t('valueOfGoods')}</span>
-                      <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
-                    </div>
+                      <div className="flex justify-between">
+                        <span className="">{t('valueOfGoods')}</span>
+                        <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
+                      </div>
 
-                    <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
-                      <span>{t('netValueOfGoods')}</span>
-                      <span className="font-bold">{formatCurrency(cart.tax.netValue, cart.tax.currency)}</span>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex justify-between font-medium text-base">
-                        <span>{t('statutoryVat')}</span>
-                        <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
+                      <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
+                        <span>{t('netValueOfGoods')}</span>
+                        <span className="font-bold">{formatCurrency(cart.tax.netValue, cart.tax.currency)}</span>
                       </div>
-                      {isDelivery && (
+                      <div className="flex flex-col gap-2">
                         <div className="flex justify-between font-medium text-base">
-                          <span>{t('shippingCosts')}</span>
-                          <span>folgt</span>
+                          <span>{t('statutoryVat')}</span>
+                          <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
                         </div>
-                      )}
-                    </div>
-                    {isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && (
-                      <CardContent className="flex flex-col gap-4 bg-primary-50 rounded-md p-4">
-                        <div className="flex gap-2 text-primary-500">
-                          <Package />
-                          <div className="font-bold text-neutral-900">
-                            {(freeShippingValue - cart.totalPrice.amount).toFixed(2) + t('untilFreeShipping')}
+                        {isDelivery && (
+                          <div className="flex justify-between font-medium text-base">
+                            <span>{t('shippingCosts')}</span>
+                            <span>folgt</span>
                           </div>
-                        </div>
-                        <div className="rounded-xl h-4 border border-primary-800">
-                          <div
-                            className="bg-gradient-to-t from-primary-700 to-primary-500 rounded-[inherit] h-full"
-                            style={{ width: ((100 / freeShippingValue) * cart.totalPrice.amount).toFixed(0) + '%' }}
-                          ></div>
-                        </div>
-                        <span className="text-primary-500">{t('freeShippingOn')}</span>
-                        <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
-                          {t('continueShopping')}
-                        </UiLink>
-                      </CardContent>
-                    )}
-                    <div className="flex flex-col gap-2">
-                      {isDelivery && (
-                        <div className="flex justify-between font-medium text-base">
-                          <span>{t('freightCosts')}</span>
-                          <span>folgt</span>
-                        </div>
+                        )}
+                      </div>
+                      {isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && (
+                        <CardContent className="flex flex-col gap-4 bg-primary-50 rounded-md p-4">
+                          <div className="flex gap-2 text-primary-500">
+                            <Package />
+                            <div className="font-bold text-neutral-900">
+                              {(freeShippingValue - cart.totalPrice.amount).toFixed(2) + t('untilFreeShipping')}
+                            </div>
+                          </div>
+                          <div className="rounded-xl h-4 border border-primary-800">
+                            <div
+                              className="bg-gradient-to-t from-primary-700 to-primary-500 rounded-[inherit] h-full"
+                              style={{ width: ((100 / freeShippingValue) * cart.totalPrice.amount).toFixed(0) + '%' }}
+                            ></div>
+                          </div>
+                          <span className="text-primary-500">{t('freeShippingOn')}</span>
+                          <UiLink type="Link" href="#" variant="primary" size="m" iconAfter={<ArrowRight />}>
+                            {t('continueShopping')}
+                          </UiLink>
+                        </CardContent>
                       )}
-                      <div className="flex justify-between font-bold text-xl">
-                        <span>{t('total')}</span>
-                        <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col p-0">
-                  <UiLink
-                    type="Link"
-                    href={'/checkout'}
-                    variant="buttonNoUnderline"
-                    size="m"
-                    className={cn(
-                      'no-underline cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base/6 tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-neutral-100 disabled:text-neutral-600 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
-                      'w-full bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-sm',
-                    )}
-                  >
-                    {t('checkout')}
-                  </UiLink>
-                  <div className="flex align-center gap-2 text-neutral-600 pt-4">
-                    <div>
-                      <LockKeyhole width={12} />
-                    </div>
-                    <div className="text-sm leading-6">{t('dataTransmittedSecure')}</div>
-                  </div>
-                </CardFooter>
-              </Card>
-              <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer text-neutral-900">
-                <Collapsible>
-                  <CollapsibleTrigger className="w-full group flex items-center justify-between gap-2">
-                    <div className="flex gap-2">
-                      <FileText />
-                      <span className="flex items-center gap-2 font-bold">{t('requestQuote')}</span>
-                    </div>
-                    <ChevronDown
-                      className="group-data-[state=open]:rotate-180 transition-transform"
-                      width={32}
-                      height={32}
-                    />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent
-                    className={cn(
-                      'pt-4 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-                    )}
-                  >
-                    <span className="text-base mb-4">{t('requestQuoteTitle')}</span>
-                    <div className="flex flex-col gap-2 pt-4">
-                      <div className="flex gap-2">
-                        <p className={cn(!isAuthenticated && 'font-bold')}>1.</p>
-                        {!isAuthenticated ? (
-                          <p className="font-bold">{t('requestQuotestep1')}</p>
-                        ) : (
-                          <p>{t('requestQuotestep2')}</p>
+                      <div className="flex flex-col gap-2">
+                        {isDelivery && (
+                          <div className="flex justify-between font-medium text-base">
+                            <span>{t('freightCosts')}</span>
+                            <span>folgt</span>
+                          </div>
                         )}
+                        <div className="flex justify-between font-bold text-xl">
+                          <span>{t('total')}</span>
+                          <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                        </div>
                       </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-col p-0">
+                    <Link href="/checkout" className="w-full">
+                      <Button className="w-full" disabled={!isDelivery}>
+                        {t('viewCart')}
+                      </Button>
+                    </Link>
+                    <div className="flex align-center gap-2 text-neutral-600 pt-4">
+                      <div>
+                        <LockKeyhole width={12} />
+                      </div>
+                      <div className="text-sm leading-6">{t('dataTransmittedSecure')}</div>
+                    </div>
+                  </CardFooter>
+                </Card>
+                <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer text-neutral-900">
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full group flex items-center justify-between gap-2">
                       <div className="flex gap-2">
-                        <p className={cn(!isAuthenticated && 'font-bold')}>2.</p>
-                        {!isAuthenticated ? (
-                          <p>{t('requestQuotestep2')}</p>
-                        ) : (
-                          <p className="">{t('requestQuotestep3')}</p>
-                        )}
+                        <FileText />
+                        <span className="flex items-center gap-2 font-bold">{t('requestQuote')}</span>
                       </div>
-                      {!isAuthenticated && (
+                      <ChevronDown
+                        className="group-data-[state=open]:rotate-180 transition-transform"
+                        width={32}
+                        height={32}
+                      />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent
+                      className={cn(
+                        'pt-4 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+                      )}
+                    >
+                      <span className="text-base mb-4">{t('requestQuoteTitle')}</span>
+                      <div className="flex flex-col gap-2 pt-4">
                         <div className="flex gap-2">
-                          <p className="font-bold">3.</p>
-                          <p>{t('requestQuotestep3')}</p>
+                          <p className={cn(!isAuthenticated && 'font-bold')}>1.</p>
+                          {!isAuthenticated ? (
+                            <p className="font-bold">{t('requestQuotestep1')}</p>
+                          ) : (
+                            <p>{t('requestQuotestep2')}</p>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <Button className="w-full mt-4" variant="secondary" disabled={!isAuthenticated}>
-                      {t('requestQuoteButton')}
-                    </Button>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
+                        <div className="flex gap-2">
+                          <p className={cn(!isAuthenticated && 'font-bold')}>2.</p>
+                          {!isAuthenticated ? (
+                            <p>{t('requestQuotestep2')}</p>
+                          ) : (
+                            <p className="">{t('requestQuotestep3')}</p>
+                          )}
+                        </div>
+                        {!isAuthenticated && (
+                          <div className="flex gap-2">
+                            <p className="font-bold">3.</p>
+                            <p>{t('requestQuotestep3')}</p>
+                          </div>
+                        )}
+                      </div>
+                      <Button className="w-full mt-4" variant="secondary" disabled={!isAuthenticated}>
+                        {t('requestQuoteButton')}
+                      </Button>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </Card>
+              </div>
             </div>
           </div>
         </div>

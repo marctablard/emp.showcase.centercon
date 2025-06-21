@@ -9,6 +9,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useL10n } from '@/hooks/useL10n';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart, CartItem } from '@/platform/services/model/cart/cart.d';
+import { Input } from '../ui/input';
 
 interface CartItemProps {
   cart: Cart;
@@ -104,11 +105,17 @@ export function CartItemRow({ cart, item }: CartItemProps) {
                 <Minus className="h-6 w-6" />
               </Button>
             )}
-            <div className="w-15 h-13 py-3 border-y border-neutral-300 text-center py-1">
+            <div className="w-15 h-13 border-y border-neutral-300">
               {isProcessing ? (
                 <div className="animate-pulse h-4 w-4 mx-auto bg-muted rounded-full"></div>
               ) : (
-                item.quantity
+                <Input
+                  value={item.quantity}
+                  className="py-3 text-center border-none"
+                  onChange={(e) => {
+                    handleUpdateQuantity(Number(e.currentTarget.value));
+                  }}
+                />
               )}
             </div>
             <Button
