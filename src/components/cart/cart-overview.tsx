@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { first } from 'lodash';
 import {
   ArrowRight,
   ChevronDown,
@@ -13,26 +13,21 @@ import {
   FolderUp,
   Info,
   LockKeyhole,
-  LogIn,
   Package,
   Pencil,
   Save,
   Share2,
-  ShoppingCart,
   User,
 } from 'lucide-react';
 import z from 'zod';
-import { fi, th } from 'zod/v4/locales';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useCart } from '@/hooks/cart/useCart';
+import { useAddresses } from '@/hooks/customer/useAddresses';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart/cart';
-import { CheckoutAddress, CheckoutShipping } from '@/platform/services/model/checkout';
-import { useCheckoutStore } from '@/providers/StoreProvider';
-import ShippingMethod from '../checkout/shipping-method';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
 import UiLink from '../ui/link';
@@ -41,10 +36,6 @@ import { CartItemRow } from './cart-item';
 
 interface CartOverviewProps {
   initialCart?: Cart | null;
-  shippingAddress: CheckoutAddress | null;
-  shippingMethod: CheckoutShipping | null;
-  submitShippingAddress: (address: CheckoutAddress) => void;
-  submitShippingMethod: (method: ShippingMethod) => void;
 }
 
 const FormSchemaDeliveryMethod = z.object({
@@ -56,10 +47,9 @@ const FormSchemaDeliveryMethod = z.object({
 export function CartOverview({ initialCart }: CartOverviewProps) {
   const t = useTranslations('cart');
 
-  const { shippingAddress: storeShippingAddress, setShippingAddress: setStoreShippingAddress } = useCheckoutStore();
-
   const { cart, loading } = useCart(initialCart);
-  const [shippingAddress, setShippingAddress] = useState<CheckoutAddress | null>(storeShippingAddress);
+  const { getDefaultAddress } = useAddresses();
+  const shippingAddress = getDefaultAddress('SHIPPING');
 
   const pickupAddress = {
     company: 'Emporix AG',
@@ -78,46 +68,6 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   const changePickupLocation = () => {
     console.log('Open Modal Pickup Location');
   };
-
-  const fixedContainer = useRef<HTMLInputElement>(null);
-  const productContainer = useRef<HTMLInputElement>(null);
-  const threshold = 100;
-
-  /* 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (fixedContainer.current && productContainer.current) {
-        // You can now access the DOM element
-        let top = fixedContainer.current.getBoundingClientRect().top;
-        let bottom = fixedContainer.current.getBoundingClientRect().bottom;
-        let maxBottom = productContainer.current.getBoundingClientRect().bottom;
-
-        console.log(bottom, maxBottom);
-        if(top <= 100){
-          fixedContainer.current.style.position = 'fixed'; 
-       
-          fixedContainer.current.style.top = '100px';
-        } 
-        if(bottom === maxBottom){
-          console.log('bottom');
-         fixedContainer.current.style.position = 'initial'; 
-         fixedContainer.current.style.removeProperty('top');
-
-        
-          
-        }
-
-      }
-    }
-    if (typeof window !== 'undefined') {
-      window.addEventListener('scroll', handleScroll);
-    }
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, []); */
 
   const form = useForm<z.infer<typeof FormSchemaDeliveryMethod>>({
     resolver: zodResolver(FormSchemaDeliveryMethod),
@@ -241,32 +191,41 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                       </Button>
                     </div>
                     <div className="flex flex-col md:flex-row gap-4 justify-between">
-                      <div>
-                        <p>{isDelivery ? 'Emporix AG' : pickupAddress.company}</p>
-                        <p>
-                          {isDelivery ? 'Philipp Grunewald' : pickupAddress.firstName + ' ' + pickupAddress.lastName}
-                        </p>
-                        <p>{isDelivery ? 'Bundesplatz 16' : pickupAddress.street}</p>
-                        <p>{isDelivery ? '300 Zug' : pickupAddress.zip + ' ' + pickupAddress.city}</p>
-                        <p>{isDelivery ? 'Switzerland' : pickupAddress.country}</p>
-                      </div>
-                      {!isDelivery && (
-                        <div className="flex flex-col xl:pe-4 text-base w-full sm:w-1/2">
-                          <div>
-                            <span className="font-bold">{t('hours')}</span>
-                            <span>M-F 7:00 AM - 4:00 PM Central</span>
-                          </div>
-                          <div>
-                            <span className="font-bold">{t('phone')}</span>
-                            <span>0123 987654-32</span>
-                          </div>
+                      {shippingAddress && (
+                        <div>
+                          <p>{shippingAddress?.companyName}</p>
+                          <p>{shippingAddress?.contactName}</p>
+                          <p>{shippingAddress?.street}</p>
+                          <p>{shippingAddress?.city}</p>
+                          <p>{shippingAddress?.country}</p>
                         </div>
+                      )}
+                      {!isDelivery && (
+                        <>
+                          <div>
+                            <p>{pickupAddress.company}</p>
+                            <p>{pickupAddress.firstName + ' ' + pickupAddress.lastName}</p>
+                            <p>{pickupAddress.street}</p>
+                            <p>{pickupAddress.zip + ' ' + pickupAddress.city}</p>
+                            <p>{pickupAddress.country}</p>
+                          </div>
+                          <div className="flex flex-col xl:pe-4 text-base w-full sm:w-1/2">
+                            <div>
+                              <span className="font-bold">{t('hours')}</span>
+                              <span>M-F 7:00 AM - 4:00 PM Central</span>
+                            </div>
+                            <div>
+                              <span className="font-bold">{t('phone')}</span>
+                              <span>0123 987654-32</span>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="p-0 shadow-footer border-none mb-6 gap-3" ref={productContainer}>
+              <Card className="p-0 shadow-footer border-none mb-6 gap-3">
                 <CardHeader className="pt-6 hidden md:block">
                   <div className="grid grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_1fr_1fr] xl:grid-cols-[120px_3fr_1fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
                     <p className="col-start-1 font-bold">{t('product')}</p>
@@ -274,15 +233,15 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                     <p className="col-start-4 xl:col-start-4 font-bold text-end">{t('price')}</p>
                   </div>
                 </CardHeader>
-                <CardContent className="px-6">
+                <CardContent className="px-6 pb-100">
                   {cart?.items.map((item) => <CartItemRow key={item.id} cart={cart} item={item} />)}
                 </CardContent>
               </Card>
             </div>
 
-            <div className="col-span-1 relative">
-              <div className="mr-6" ref={fixedContainer}>
-                <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer">
+            <div className="col-span-1 mb-6 flex">
+              <div className="mr-6 flex flex-col gap-4">
+                <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer">
                   <CardHeader className="p-0">
                     <CardTitle>
                       <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
@@ -353,7 +312,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   </CardContent>
                   <CardFooter className="flex flex-col p-0">
                     <Link href="/checkout" className="w-full">
-                      <Button className="w-full" disabled={!isDelivery}>
+                      <Button className="w-full" disabled={!isDelivery || loading || shippingAddress === null}>
                         {t('viewCart')}
                       </Button>
                     </Link>

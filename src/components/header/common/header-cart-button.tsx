@@ -21,10 +21,10 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
   const { l10n } = useL10n();
 
   // Pass initialCart directly to useCart to skip loading
-  const { cart, loading, totalItems } = useCart(initialCart);
+  const { cart, loading } = useCart(initialCart);
   const [isOpen, setIsOpen] = useState(false);
 
-  let isDelivery = true;
+  const isDelivery = true;
 
   return (
     <Popover open={isOpen}>
