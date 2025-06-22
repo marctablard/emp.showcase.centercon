@@ -24,7 +24,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto mt-8">
         <Card className="mx-4 xl:mx-9">
           <CardHeader>
             <CardTitle className="text-center text-2xl">{t('yourCart')}</CardTitle>
@@ -39,7 +39,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
 
   if (cart && cart.items.length > 0) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto mt-8">
         <div className="mx-4 xl:mx-9">
           <div className="flex gap-3 align-end mb-8">
             <h3 className="text-5xl font-bold">{t('title')}</h3>

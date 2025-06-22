@@ -20,7 +20,7 @@ export function CartSummary({ cart, isDelivery, loading }: CartSummaryProps) {
 
   return (
     <div className="col-span-1 mb-6 flex">
-      <div className="mr-6 flex flex-col gap-4">
+      <div className="flex flex-col gap-4 w-full">
         <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer">
           <CardHeader className="p-0">
             <CardTitle>

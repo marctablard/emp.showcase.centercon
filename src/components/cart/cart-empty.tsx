@@ -7,7 +7,7 @@ export function CartEmpty() {
   const t = useTranslations('cart');
 
   return (
-    <div className="max-w-6xl mx-auto mt-6 mb-16">
+    <div className="max-w-6xl mx-auto mt-8 mb-16">
       <div className="mx-4 xl:mx-9">
         <div className="flex flex-col sm:justify-center items-center gap-6">
           <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{t('cartEmpty')}</h1>
