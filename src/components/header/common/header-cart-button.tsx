@@ -23,7 +23,6 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
   const [isOpen, setIsOpen] = useState(false);
-  const popoverContentRef = useRef<HTMLDivElement>(null);
 
   const isDelivery = true;
 
@@ -53,7 +52,6 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        ref={popoverContentRef}
         className="w-[600px] mt-4 -mr-6 pt-0 pr-0 opacity-85 pointer-events:none border-none shadow-xl parent:backdrop-blur-xs @apply backdrop-blur-xs"
         align="end"
         side="top"
