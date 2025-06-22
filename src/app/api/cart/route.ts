@@ -28,6 +28,9 @@ export async function GET(request: NextRequest) {
       // Try to get existing cart
       try {
         cart = await cartService.getCartById(cartCookie.cartId);
+        if (cart == null) {
+          throw new Error('Cookie Cart is gone');
+        }
       } catch (_error) {
         if (!create) {
           const response = new Response(null, {
