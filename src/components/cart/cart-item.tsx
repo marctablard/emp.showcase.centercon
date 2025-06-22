@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
 import { useL10n } from '@/hooks/useL10n';
@@ -76,7 +76,12 @@ export function CartItemRow({ cart, item }: CartItemProps) {
           <p className="text-sm">
             {t('itemNumber')}: {item.product?.id}
           </p>
-          <p className="text-sm text-success-500">{t('available')}</p>
+          <div className="flex items-center gap-1">
+            <div className="text-success-500">
+              <Package className="h-4 w-4" />
+            </div>
+            <p className="text-sm text-success-500">{t('available')}</p>
+          </div>
           <Button variant="link" size="small" className="normal-case text-sm tracking-normal p-0 justify-start">
             {t('addToWishlist')}
           </Button>

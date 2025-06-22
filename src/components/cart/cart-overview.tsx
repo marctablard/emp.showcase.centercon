@@ -191,7 +191,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                       </Button>
                     </div>
                     <div className="flex flex-col md:flex-row gap-4 justify-between">
-                      {shippingAddress && (
+                      {isAuthenticated && shippingAddress && (
                         <div>
                           <p>{shippingAddress?.companyName}</p>
                           <p>{shippingAddress?.contactName}</p>
@@ -312,7 +312,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
                   </CardContent>
                   <CardFooter className="flex flex-col p-0">
                     <Link href="/checkout" className="w-full">
-                      <Button className="w-full" disabled={!isDelivery || loading || shippingAddress === null}>
+                      <Button className="w-full" disabled={!isDelivery || loading}>
                         {t('viewCart')}
                       </Button>
                     </Link>

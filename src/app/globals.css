@@ -270,4 +270,5 @@
 
 [data-radix-popper-content-wrapper] {
   backdrop-filter: blur(4px);
+  top: -20px;
 }
