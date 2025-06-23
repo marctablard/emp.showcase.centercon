@@ -11,7 +11,7 @@ import {
   EmporixCartCheckoutRequest,
   EmporixCheckoutAddress,
   EmporixCheckoutCustomer,
-  EmporixPaymentMethod,
+  EmporixCheckoutPaymentMethod,
   EmporixShipping,
 } from '../../model';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
@@ -95,7 +95,7 @@ const createSampleCheckoutRequest = (
   };
 
   // Sample payment method
-  const paymentMethod: EmporixPaymentMethod = {
+  const paymentMethod: EmporixCheckoutPaymentMethod = {
     provider: 'none',
     method: 'invoice',
   };

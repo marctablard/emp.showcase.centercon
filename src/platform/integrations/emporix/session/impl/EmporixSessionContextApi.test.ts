@@ -3,6 +3,7 @@ import { TokenManager } from '../../common/TokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
+import EmporixCustomerApi from '../../customer/impl/EmporixCustomerApi';
 import { EmporixContextAttribute, EmporixSessionContext } from '../../model/session-context';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixSessionContextApi from './EmporixSessionContextApi';
@@ -39,6 +40,7 @@ describe('EmporixSessionContextApi', () => {
   let sessionContextApi: EmporixSessionContextApi;
   let apiInvoker: EmporixApiInvoker;
   let tokenManager: TokenManager;
+  let customerApi: EmporixCustomerApi;
   let config: EmporixConfig;
 
   // Generate a unique session ID for testing
@@ -52,6 +54,7 @@ describe('EmporixSessionContextApi', () => {
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
     container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
+    container.bind<EmporixCustomerApi>('EmporixCustomerApi').to(EmporixCustomerApi);
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
     container.bind<EmporixSessionContextApi>('EmporixSessionContextApi').to(EmporixSessionContextApi);
     // enable for debug output as curl
@@ -60,6 +63,7 @@ describe('EmporixSessionContextApi', () => {
     // Get instances from the container
     apiInvoker = container.get<EmporixApiInvoker>('EmporixApiInvoker');
     sessionContextApi = container.get<EmporixSessionContextApi>('EmporixSessionContextApi');
+    customerApi = container.get<EmporixCustomerApi>('EmporixCustomerApi');
     tokenManager = container.get<TokenManager>('EmporixTokenManager');
     config = container.get<EmporixConfig>('EmporixConfig');
     // Spy on the authenticatedFetch method to verify calls
@@ -177,6 +181,38 @@ describe('EmporixSessionContextApi', () => {
 
       expect(result).toBeDefined();
     });
+  });
+
+  // Customer checkout tests with real credentials
+  describe('Customer Session Operations', () => {
+    // Helper function to set up customer token
+    const username = 'forrest.gump@alaba.ma';
+    async function setupCustomerToken() {
+      try {
+        // Login with test customer credentials
+        const password = 'Test1234';
+
+        // Use the customer API to login
+        await customerApi.login(username, password);
+      } catch (error) {
+        console.error('Error setting up customer token:', error);
+        throw error;
+      }
+    }
+    let customerCartId: string;
+
+    beforeEach(async () => {
+      // Set up a customer token with test user credentials
+      await setupCustomerToken();
+    }, 15000);
+
+    it('should get a session context with customerId', async () => {
+      // Perform the checkout
+      const response = await sessionContextApi.getOwnSessionContext();
+      // Verify the checkout response
+      expect(response).toBeDefined();
+      expect(response?.customerId).toBe('00632699');
+    }, 20000);
   });
 
   describe('updateOwnSessionContext', () => {

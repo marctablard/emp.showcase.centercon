@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import { l10n } from '@/lib/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import type { CartApi } from '@/platform/integrations/emporix/cart/CartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
@@ -88,9 +89,10 @@ class EmporixCartService implements CartService {
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<string> {
-    const [product, price] = await Promise.all([
+    const [product, price, session] = await Promise.all([
       this.productService.getProductById(productId),
       this.priceService.getProductPrice(productId, 'pc', quantity),
+      this.sessionService.getCurrent(),
     ]);
     if (!product) {
       throw new Error('Product missing');
@@ -99,14 +101,15 @@ class EmporixCartService implements CartService {
     if (!price) {
       throw new Error('Price missing');
     }
+
     const addItemRequest: AddCartItemRequest = {
       siteCode: 'main',
       itemYrn: this.commonUtil.generateProductYrn(productId),
       quantity,
       product: {
         id: productId,
-        name: product.name,
-        description: product.description,
+        name: l10n(product.name, session.language),
+        description: l10n(product.description, session.language),
         sku: product.sku,
         images: product.images?.map((img: Media) => ({
           id: img.url,

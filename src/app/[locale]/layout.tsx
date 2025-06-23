@@ -55,9 +55,12 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  // ensure that languages are aligned
-  await setSessionLanguage(locale);
   const [authSession, shopSession] = await Promise.all([getServerSession(), getSession()]);
+  if (shopSession && shopSession.language != locale) {
+    // ensure that languages are aligned
+    await setSessionLanguage(locale);
+    shopSession.language = locale;
+  }
   // TODO read from query parameter to allow swtiching
   const site = await getSite(shopSession?.siteCode || defaultSiteCode);
   // Enable static rendering

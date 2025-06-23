@@ -15,7 +15,8 @@ class EmporixCartMigrationService implements CartMigrationService {
   async migrateCartToCustomer(cartId: string, customerId: string): Promise<void> {
     const cart = await this.cartApi.getCart(cartId);
     if (!cart) {
-      throw new Error('No Cart for Migration found with given id: ' + cartId);
+      // TODO what if someone came in with an outdated cart cookie?
+      return;
     }
     // TODO handle a situation where the Customer already has a Cart (separate Ticket)
     await this.cartApi.updateCart(cartId, {
