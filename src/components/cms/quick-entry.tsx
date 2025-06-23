@@ -34,28 +34,28 @@ interface QuickEntryProps {
 const QuickEntryElement = ({ blok }: QuickEntryElementProps) => {
   const Icon = blok.icon && IconVariant[blok.icon as keyof typeof IconVariant];
   return (
-    <div className="flex gap-6 align-center min-w-full bg-white shadow-lg first:rounded-ss-xl last:rounded-ee-xl md:first:rounded-ss-3xl md:last:rounded-ee-3xl">
-      <div className="bg-primary-500 transition  hover:bg-primary-700 text-white p-4 lg:p-5 rounded-ss-[inherit]">
+    <Link
+      href={blok.link}
+      className="flex gap-6 align-center group w-full xl:max-w-[400px] bg-white shadow-lg first:rounded-ss-xl last:rounded-ee-xl md:first:rounded-ss-3xl md:last:rounded-ee-3xl"
+    >
+      <div className="bg-primary-500 transition group-hover:bg-primary-700 text-white p-4 lg:p-5 rounded-ss-[inherit]">
         {Icon && <Icon className="w-8 h-8 lg:w-10 lg:h-10" />}
       </div>
       <div className="flex flex-col justify-center bg-white ">
-        <p className="text-xl font-bold">{blok.title}</p>
-        <Link
-          href={blok.link}
-          className="text-base inline-flex items-center gap-1 text-primary font-bold underline transition  hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-        >
+        <p className="md:text-xl font-bold font-headlines">{blok.title}</p>
+        <p className="text-base inline-flex items-center gap-1 text-primary font-bold underline transition group-hover:text-primary-700 outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white">
           {blok.link_name}
           <ArrowRight />
-        </Link>
+        </p>
       </div>
-    </div>
+    </Link>
   );
 };
 
 const QuickEntry = ({ blok }: QuickEntryProps) => {
   return (
-    <div {...storyblokEditable(blok)} className="mb-10">
-      <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr]  gap-6 py-6 px-9 bg-primary-50">
+    <div {...storyblokEditable(blok)} className="mb-10 w-full bg-primary-50">
+      <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr] xl:max-w-[1672px] mx-auto justify-items-center gap-3 md:gap-4 lg:gap-6 px-4 py-4 lg:py-6 lg:px-9">
         {blok.elements &&
           blok.elements.map((element, index) => {
             return <QuickEntryElement key={index} blok={element} />;

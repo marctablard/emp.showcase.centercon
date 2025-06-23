@@ -45,7 +45,7 @@ const Hero = ({ blok }: HeroProps) => {
   return (
     <div {...storyblokEditable(blok)} className={cn('relative mb-10 sm:mb-20 lg:md:mb-10')}>
       <div className="w-full flex justify-end">
-        <div className="mb-75 sm:mb-45 md:mb-0 h-120 sm:h-145 lg:h-185">
+        <div className="mb-25 sm:mb-25 md:mb-0 h-120 sm:h-145 lg:h-185">
           {blok.image && (
             <svg className="h-[100%] " viewBox="0 0 1573 735">
               <defs>
@@ -84,8 +84,8 @@ const Hero = ({ blok }: HeroProps) => {
         </div>
       </div>
       <div className="w-full max-w-6xl mx-auto">
-        <div className="ms-auto absolute bottom-0 sm:-bottom-10 lg:bottom-20 px-9">
-          <div className="flex flex-col gap-4 bg-white opacity-85 md:w-1/2 xl:w-4/7 rounded-ss-xl rounded-ee-xl shadow-lg p-6">
+        <div className="ms-auto absolute bottom-0 sm:-bottom-10 lg:bottom-20 px-4 lg:px-9">
+          <div className="flex flex-col gap-4 bg-white/85 md:w-1/2 xl:w-4/7 rounded-ss-2xl md:rounded-ss-4xl rounded-ee-2xl md:rounded-ee-4xl shadow-lg p-4 md:p-6 backdrop-blur-xs">
             <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{blok.headline}</h1>
             <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
             <p className=" text-base lg:text-xl text-neutral-800">{text}</p>
