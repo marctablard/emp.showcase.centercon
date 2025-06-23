@@ -27,16 +27,9 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
   const isDelivery = true;
 
   return (
-    <Popover open={isOpen}>
+    <Popover>
       <PopoverTrigger asChild>
-        <Button
-          className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center"
-          onMouseEnter={() => {
-            if (window.innerWidth >= 1024) {
-              setIsOpen(true);
-            }
-          }}
-        >
+        <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center">
           <span className="text-white text-xl hidden md:inline-block">
             {loading ? '' : formatCurrency(cart?.totalPrice.amount || 0, cart?.totalPrice.currency || 'EUR')}
           </span>
@@ -54,13 +47,8 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
       <PopoverContent
         className="w-[600px] mt-4 -mr-6 pt-0 pr-0 opacity-85 pointer-events:none border-none shadow-xl parent:backdrop-blur-xs @apply backdrop-blur-xs"
         align="end"
-        side="top"
+        side="bottom"
         sideOffset={8}
-        onMouseLeave={(e) => {
-          if (e.relatedTarget !== document.querySelector('[data-radix-popper-content-wrapper]')) {
-            setIsOpen(false);
-          }
-        }}
       >
         {loading ? (
           <div className="p-4 flex items-center justify-center">

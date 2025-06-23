@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Info, LockKeyhole } from 'lucide-react';
@@ -18,8 +19,24 @@ export function CartSummary({ cart, isDelivery, loading }: CartSummaryProps) {
   const t = useTranslations('cart');
   const freeShippingValue = 400;
 
+  const fixedContainer = useRef<HTMLDivElement>(null);
+
+  const topPosition = 100; // adjust this value to your desired top position
+  const bottomPosition = 500; // adjust this value to your desired bottom position
+
+  window.addEventListener('scroll', () => {
+    const containerTop = fixedContainer?.current?.getBoundingClientRect().top;
+    const containerBottom = fixedContainer?.current?.getBoundingClientRect().bottom;
+
+    if (containerTop && containerTop <= topPosition && containerBottom && containerBottom >= bottomPosition) {
+      fixedContainer.current?.classList.add('fixed');
+    } else {
+      fixedContainer.current?.classList.remove('fixed');
+    }
+  });
+
   return (
-    <div className="col-span-1 mb-6 flex">
+    <div className="col-span-1 mb-6 flex" ref={fixedContainer}>
       <div className="flex flex-col gap-4 w-full">
         <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer">
           <CardHeader className="p-0">
