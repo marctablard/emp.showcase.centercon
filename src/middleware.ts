@@ -24,6 +24,7 @@ const authMiddleware = withAuth(
     },
     pages: {
       signIn: '/login',
+      error: '/login',
     },
   },
 );

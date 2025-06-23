@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { VariantProps, cva } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
 const linkVariants = cva(
   'outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
@@ -67,7 +68,7 @@ export default function UiLink({
       );
     case 'Button':
       return (
-        <button type="button" className={classes} {...props}>
+        <button type="button" className={cn('cursor-pointer', classes)} {...props}>
           {iconBefore}
           {props.children}
           {iconAfter}

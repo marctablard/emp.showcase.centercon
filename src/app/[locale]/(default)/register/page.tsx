@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import RegistrationCard from '@/components/register/registration-card';
+import { Registration } from '@/components/register';
 import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default function Register() {
   return (
     <div className="flex flex-col items-center">
-      <RegistrationCard />
+      <Registration />
     </div>
   );
 }

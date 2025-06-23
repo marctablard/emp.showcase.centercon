@@ -52,5 +52,38 @@ jobs:
       #     name: playwright-report
       #     path: playwright-report/
       #     retention-days: 7
-      - name: Deploy develop preview
-        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy dev
+        id: deploy
+        run: |
+          DEPLOY_OUTPUT=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_STATUS=$?
+          URL=$(echo "$DEPLOY_OUTPUT" | grep -o 'https://.*vercel.app')
+          echo "deploy_status=$DEPLOY_STATUS" >> $GITHUB_OUTPUT
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - uses: chrnorm/deployment-action@v2
+        name: Create GitHub deployment
+        id: deployment
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy.outputs.url }}
+          environment: 'dev'
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy.outputs.url }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: 'success'
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ steps.deploy.outputs.url }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: 'failure'

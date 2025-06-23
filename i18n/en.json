@@ -145,20 +145,26 @@
         "orderSummary": "Order Summary"
     },
     "login": {
-        "title": "Sign In",
-        "username": "Username",
+        "title": "Login",
+        "username": "Email",
         "password": "Password",
         "forgotPassword": "Forgot password?",
-        "continue": "Continue",
-        "invalidCredentials": "Invalid username or password",
+        "logIn": "Log in",
+        "invalidCredentials": "Invalid email or password",
         "loginError": "An error occurred during login. Please try again.",
-        "loggingIn": "Signing in..."
+        "loggingIn": "Logging in...",
+        "noAccountYet": "Don't have an account yet?",
+        "createAccount": "Create an account",
+        "welcomeMessage": "Welcome back, {username}!",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "loginFailed": "Login Failed",
+        "close": "Close",
+        "error": "Error"
     },
     "register": {
         "title": "Registration",
         "registrationInfo": "Registration Information",
-        "personalDetails": "Please provide your personal details",
-        "registrationType": "Registration Type",
         "firstName": "First Name",
         "lastName": "Last Name",
         "email": "Email Address",
@@ -175,8 +181,6 @@
         "vatNumber": "VAT Number",
         "shippingSameAsBilling": "Shipping Address Same as Billing",
         "accountSettings": "Account Settings",
-        "accountDetails": "Please set a username and password",
-        "username": "Username",
         "password": "Password",
         "passwordConfirmation": "Confirm Password",
         "emailSignup": "Email Signup",
@@ -187,29 +191,10 @@
         "registering": "Registering...",
         "alreadyHaveAccount": "Already have an Account?",
         "logIn": "Log In",
-        "validation": {
-            "registrationTypeRequired": "Registration type is required",
-            "firstNameRequired": "First name is required",
-            "lastNameRequired": "Last name is required",
-            "invalidEmail": "Please enter a valid email address",
-            "emailMismatch": "Email addresses don't match",
-            "streetRequired": "Street is required",
-            "houseNumberRequired": "House number is required",
-            "postalCodeRequired": "Postal code is required",
-            "cityRequired": "City is required",
-            "countryRequired": "Country is required",
-            "usernameMinLength": "Username must be at least 3 characters",
-            "passwordMinLength": "Password must be at least 8 characters",
-            "passwordUppercase": "Password must contain at least one uppercase letter",
-            "passwordLowercase": "Password must contain at least one lowercase letter",
-            "passwordNumber": "Password must contain at least one number",
-            "confirmPassword": "Please confirm your password",
-            "passwordMismatch": "Passwords don't match",
-            "usernameTaken": "This username is already taken. Please choose another one.",
-            "emailExists": "This email is already registered. Please use a different email or try to log in.",
-            "registrationFailed": "Registration failed. Please try again.",
-            "serverError": "A server error occurred. Please try again later."
-        }
+        "additionalInformation": "Additional Information",
+        "additionalInformationDescription": "Describe the services or products your business is interessted in",
+        "optional": "(optional)",
+        "error": "Error"
     },
     "Checkout": {
         "title": "Checkout",
@@ -426,6 +411,70 @@
         "payment": {
             "method": {
                 "required": "Payment method is required"
+            }
+        },
+        "login": {
+            "username": {
+                "required": "Email is required",
+                "invalid": "Please enter a valid email address"
+            },
+            "password": {
+                "required": "Password is required"
+            }
+        },
+        "register": {
+            "registrationType": {
+                "required": "Registration type is required"
+            },
+            "firstName": {
+                "required": "First name is required"
+            },
+            "lastName": {
+                "required": "Last name is required"
+            },
+            "email": {
+                "required": "Email address is required",
+                "invalid": "Please enter a valid email address",
+                "mismatch": "Email addresses don't match"
+            },
+            "emailConfirmation": {
+                "required": "Please confirm your email address"
+            },
+            "companyName": {
+                "required": "Company name is required"
+            },
+            "vatNumber": {
+                "required": "VAT number is required"
+            },
+            "street": {
+                "required": "Street is required"
+            },
+            "houseNumber": {
+                "required": "House number is required"
+            },
+            "postalCode": {
+                "required": "Postal code is required"
+            },
+            "city": {
+                "required": "City is required"
+            },
+            "country": {
+                "required": "Country is required"
+            },
+            "password": {
+                "minLength": "Password must be at least 8 characters",
+                "uppercase": "Password must contain at least one uppercase letter",
+                "lowercase": "Password must contain at least one lowercase letter",
+                "number": "Password must contain at least one number",
+                "mismatch": "Passwords don't match"
+            },
+            "passwordConfirmation": {
+                "required": "Please confirm your password"
+            },
+            "general": {
+                "emailExists": "This email is already registered. Please use a different email or try to log in.",
+                "registrationFailed": "Registration failed. Please try again.",
+                "serverError": "A server error occurred. Please try again later."
             }
         }
     },

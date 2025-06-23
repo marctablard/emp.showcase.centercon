@@ -1,13 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { SignInResponse } from 'next-auth/react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 
 interface AuthenticationHook {
   isAuthenticated: boolean;
   error: Error | null;
   loading: boolean;
-  login: (username: string, password: string, callbackUrl?: string) => Promise<void>;
+  login: (
+    username: string,
+    password: string,
+    redirect?: boolean,
+    callbackUrl?: string,
+  ) => Promise<SignInResponse | undefined>;
   logout: () => Promise<void>;
 }
 
@@ -29,11 +35,34 @@ export const useAuthentication = (): AuthenticationHook => {
   const [loading, setLoading] = useState<boolean>(session.status === 'loading');
   const [error, setError] = useState<Error | null>(null);
 
-  const login = async (username: string, password: string, callbackUrl: string = '/account'): Promise<void> => {
+  // Update authentication state when session status changes
+  useEffect(() => {
+    setIsAuthenticated(session.status === 'authenticated');
+    setLoading(session.status === 'loading');
+  }, [session.status]);
+
+  const login = async (
+    username: string,
+    password: string,
+    redirect: boolean = true,
+    callbackUrl: string = '/account',
+  ): Promise<SignInResponse | undefined> => {
+    setLoading(true);
     try {
-      await signIn('credentials', { username, password, callbackUrl });
+      return await signIn('credentials', {
+        username,
+        password,
+        redirect,
+        callbackUrl,
+      });
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log in'));
+      return {
+        ok: false,
+        error: 'UnknownError',
+        status: 500,
+        url: null,
+      };
     } finally {
       setLoading(false);
     }

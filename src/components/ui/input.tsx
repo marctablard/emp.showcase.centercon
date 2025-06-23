@@ -11,9 +11,10 @@ export interface InputProps extends React.ComponentProps<'input'> {
   iconButtonAfter?: LucideIcon;
   buttonText?: string;
   buttonLabel?: string;
+  onEndIconClick?: () => void;
 }
 
-function Input({ className, type, startIcon, endIcon, isButton, ...props }: InputProps) {
+function Input({ className, type, startIcon, endIcon, isButton, onEndIconClick, ...props }: InputProps) {
   const StartIcon = startIcon;
   const EndIcon = endIcon;
   const dataSuccess = 'data-success' in props ? (props['data-success'] as boolean) : false;
@@ -57,7 +58,16 @@ function Input({ className, type, startIcon, endIcon, isButton, ...props }: Inpu
       />
 
       {EndIcon && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+        <div
+          className={cn(
+            'absolute right-3 top-1/2 transform -translate-y-1/2',
+            onEndIconClick && 'cursor-pointer hover:text-primary-700',
+          )}
+          onClick={onEndIconClick}
+          role={onEndIconClick ? 'button' : undefined}
+          tabIndex={onEndIconClick ? 0 : undefined}
+          aria-label={onEndIconClick ? 'Toggle visibility' : undefined}
+        >
           <EndIcon size={20} />
         </div>
       )}

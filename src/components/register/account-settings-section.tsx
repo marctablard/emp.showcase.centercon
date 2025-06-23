@@ -2,50 +2,50 @@
 
 import { Control } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { Checkbox } from '@/components/ui/checkbox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { H5 } from '@/components/ui/h';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 
-interface EmailSignupSectionProps {
+interface AccountSettingsAccordionProps {
   control: Control<any>;
   number: number;
 }
 
-export function EmailSignupSection({ control, number }: EmailSignupSectionProps) {
+export function AccountSettingsSection({ control, number }: AccountSettingsAccordionProps) {
   const t = useTranslations('register');
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
         <H5>
-          {number}. {t('emailSignup')}
+          {number}. {t('accountSettings')}
         </H5>
         <Separator />
       </div>
       <div className="space-y-4">
         <FormField
           control={control}
-          name="newsletter"
+          name="password"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center gap-2">
+            <FormItem>
+              <FormLabel htmlFor="password">{t('password')}</FormLabel>
               <FormControl>
-                <Checkbox id="newsletter" checked={field.value} onCheckedChange={field.onChange} />
+                <Input id="password" type="password" required {...field} />
               </FormControl>
-              <FormLabel htmlFor="newsletter">{t('newsletter')}</FormLabel>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={control}
-          name="dealsAlerts"
+          name="passwordConfirmation"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center gap-2">
+            <FormItem>
+              <FormLabel htmlFor="passwordConfirmation">{t('passwordConfirmation')}</FormLabel>
               <FormControl>
-                <Checkbox id="dealsAlerts" checked={field.value} onCheckedChange={field.onChange} />
+                <Input id="passwordConfirmation" type="password" required {...field} />
               </FormControl>
-              <FormLabel htmlFor="dealsAlerts">{t('dealsAlerts')}</FormLabel>
               <FormMessage />
             </FormItem>
           )}
