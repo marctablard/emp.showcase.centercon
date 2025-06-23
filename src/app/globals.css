@@ -259,4 +259,8 @@
   .clip-style {
     clip-path: url('/images/image_mask_desktop.svg');
   }
+
+  [data-sonner-toaster='true'] {
+    max-width: 120rem;
+  }
 }
