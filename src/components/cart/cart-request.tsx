@@ -11,7 +11,7 @@ export function CartRequest() {
   const { isAuthenticated } = useAuthentication();
 
   return (
-    <Card className="bg-primary-50 p-6 border-none gap-4 mb-4 shadow-footer text-neutral-900">
+    <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer text-neutral-900">
       <Collapsible>
         <CollapsibleTrigger className="w-full group flex items-center justify-between gap-2">
           <div className="flex gap-2">

@@ -1,5 +1,4 @@
-import { RefObject, useCallback, useRef, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Info, LockKeyhole } from 'lucide-react';
@@ -14,48 +13,68 @@ interface CartSummaryProps {
   cart: Cart;
   isDelivery: boolean;
   loading: boolean;
-  itemList: RefObject<HTMLDivElement | null>;
+  leftContent: RefObject<HTMLDivElement | null>;
 }
 
-export function CartSummary({ cart, isDelivery, loading, itemList }: CartSummaryProps) {
+export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSummaryProps) {
   const t = useTranslations('cart');
   const freeShippingValue = 400;
 
   const fixedContainer = useRef<HTMLDivElement>(null);
-
   const [isFixed, setIsFixed] = useState(false);
-  const [fixedToTop, setFixedToTop] = useState(false);
-
+  const [isFixedToTop, setIsFixedToTop] = useState(false);
+  const [isContainerBottom, setIsContainerBottom] = useState(false);
   const topPosition = 112;
-  // const bottomPosition = itemListBottom && containerHeight ? (itemListBottom - containerHeight).toFixed(0) : 0;
 
   window.addEventListener('scroll', () => {
+    const containerHeight = fixedContainer?.current?.getBoundingClientRect().height;
     const containerTop = Math.round(
       fixedContainer?.current?.getBoundingClientRect().top ? fixedContainer?.current?.getBoundingClientRect().top : 0,
     );
     const containerBottom = fixedContainer?.current?.getBoundingClientRect().bottom;
-    const itemListBottom = itemList.current?.getBoundingClientRect().bottom;
+    const windowHeight = window.innerHeight;
+    const contentBox = leftContent?.current?.getBoundingClientRect();
+    const contentBottom = contentBox?.bottom;
+    const contentTop = contentBox?.top;
+    const contentHeight =
+      leftContent?.current?.children &&
+      Array.from(leftContent?.current?.children)
+        .map((item) => item.getBoundingClientRect().height)
+        .reduce((a, b) => a + b, 0);
 
-    if (
-      containerTop &&
-      containerTop <= topPosition &&
-      containerBottom &&
-      itemListBottom &&
-      containerBottom <= itemListBottom
-    ) {
-      setIsFixed(true);
-      //
-    } else {
-      setFixedToTop(true);
-      setIsFixed(false);
+    if (containerHeight && contentHeight && containerHeight <= contentHeight) {
+      if (containerBottom && contentBottom && containerBottom + 24 <= contentBottom) {
+        if (containerTop && containerTop <= topPosition) {
+          setIsFixed(true);
+          setIsFixedToTop(true);
+        } else {
+          if (contentTop && contentTop > containerTop) {
+            setIsFixed(false);
+            setIsContainerBottom(false);
+          }
+        }
+      } else {
+        setIsFixed(false);
+        if (containerBottom && contentBottom && containerBottom + 24 > contentBottom) {
+          setIsContainerBottom(true);
+        }
+        if (containerBottom && windowHeight - containerBottom <= 12) {
+          setIsFixed(true);
+          setIsFixedToTop(false);
+        }
+      }
     }
   });
 
   return (
     <div className="col-span-1 mb-6 flex">
-      <div className={cn('flex flex-col w-full', fixedToTop ? 'justify-end' : '')}>
+      <div className={cn('flex flex-col w-full', isContainerBottom ? 'justify-end' : 'justify-start')}>
         <div
-          className={cn('flex flex-col gap-4', isFixed ? 'fixed top-[' + topPosition + 'px] lg:me-9' : '')}
+          className={cn(
+            'flex flex-col gap-4',
+            isFixed ? 'fixed lg:me-9' : '',
+            isFixedToTop ? 'top-[112px]' : 'bottom-[12px]',
+          )}
           ref={fixedContainer}
         >
           <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer">

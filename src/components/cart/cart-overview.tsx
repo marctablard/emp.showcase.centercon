@@ -21,7 +21,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   const t = useTranslations('cart');
   const { cart, loading } = useCart(initialCart);
   const [isDelivery, setIsDelivery] = useState(true);
-  const itemList = useRef<HTMLDivElement>(null);
+  const leftContent = useRef<HTMLDivElement>(null);
 
   if (loading) {
     return (
@@ -51,11 +51,11 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           </div>
           <CartAction />
           <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-            <div className="col-span-1 lg:col-span-2 2xl:col-span-3" ref={itemList}>
+            <div className="col-span-1 lg:col-span-2 2xl:col-span-3" ref={leftContent}>
               <CartDelivery isDelivery={isDelivery} setIsDelivery={setIsDelivery} />
               <CartItemList cart={cart} />
             </div>
-            <CartSummary cart={cart} isDelivery={isDelivery} loading={loading} itemList={itemList} />
+            <CartSummary cart={cart} isDelivery={isDelivery} loading={loading} leftContent={leftContent} />
           </div>
         </div>
       </div>

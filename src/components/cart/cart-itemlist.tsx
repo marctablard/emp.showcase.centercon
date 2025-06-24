@@ -1,4 +1,3 @@
-import { RefObject } from 'react';
 import { useTranslations } from 'next-intl';
 import { Cart } from '@/platform/services/model/cart';
 import { Card, CardContent, CardHeader } from '../ui/card';
@@ -20,7 +19,7 @@ export function CartItemList({ cart }: CartItemListProps) {
           <p className="col-start-4 xl:col-start-4 font-bold text-end">{t('price')}</p>
         </div>
       </CardHeader>
-      <CardContent className="px-6 my-100">
+      <CardContent className="px-6">
         {cart?.items.map((item) => <CartItemRow key={item.id} cart={cart} item={item} />)}
       </CardContent>
     </Card>

@@ -1,4 +1,3 @@
-import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -22,7 +21,6 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
 
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
-  const [isOpen, setIsOpen] = useState(false);
 
   const isDelivery = true;
 
@@ -133,7 +131,4 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
       </PopoverContent>
     </Popover>
   );
-}
-function useMediaQuery(arg0: { minWidth: number }) {
-  throw new Error('Function not implemented.');
 }
