@@ -45,7 +45,6 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           <div className="flex gap-3 align-end mb-8">
             <h3 className="text-5xl font-bold">{t('title')}</h3>
             <div className="text-neutral-300 text-xl m-0 leading-[2]">
-              {' '}
               {cart.items.length > 1 ? cart.items.length + t('products') : cart.items.length + t('product')}
             </div>
           </div>

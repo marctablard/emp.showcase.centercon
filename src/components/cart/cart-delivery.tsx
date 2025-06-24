@@ -1,12 +1,12 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil } from 'lucide-react';
-import z from 'zod';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useAddresses } from '@/hooks/customer/useAddresses';
+import { useValidator } from '@/hooks/validation/useValidator';
+import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
@@ -20,11 +20,13 @@ interface CartDeliveryProps {
 export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
   const t = useTranslations('cart');
 
-  const FormSchemaDeliveryMethod = z.object({
-    deliveryMethod: z.enum(['delivery', 'pickup'], {
-      required_error: 'You need to select a delivery method.',
-    }),
-  });
+  const { form } = useValidator(
+    'CartDeliveryValidationService',
+    {
+      deliveryMethod: 'delivery',
+    },
+    'onBlur',
+  );
 
   const changeShippingAddress = () => {
     console.log('Open Modal Shipping Address');
@@ -33,13 +35,6 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
   const changePickupLocation = () => {
     console.log('Open Modal Pickup Location');
   };
-
-  const form = useForm<z.infer<typeof FormSchemaDeliveryMethod>>({
-    resolver: zodResolver(FormSchemaDeliveryMethod),
-    defaultValues: {
-      deliveryMethod: 'delivery',
-    },
-  });
 
   const pickupAddress = {
     company: 'Emporix AG',
@@ -138,4 +133,7 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
       </CardContent>
     </Card>
   );
+}
+function setFormError(arg0: null) {
+  throw new Error('Function not implemented.');
 }
