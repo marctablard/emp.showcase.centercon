@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   const t = useTranslations('cart');
   const { cart, loading } = useCart(initialCart);
   const [isDelivery, setIsDelivery] = useState(true);
+  const itemList = useRef<HTMLDivElement>(null);
 
   if (loading) {
     return (
@@ -40,7 +41,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   if (cart && cart.items.length > 0) {
     return (
       <div className="max-w-6xl mx-auto mt-8">
-        <div className="mx-4 xl:mx-9">
+        <div className="mx-4 xl:mx-9" id="itemli">
           <div className="flex gap-3 align-end mb-8">
             <h3 className="text-5xl font-bold">{t('title')}</h3>
             <div className="text-neutral-300 text-xl m-0 leading-[2]">
@@ -50,11 +51,11 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           </div>
           <CartAction />
           <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-            <div className="col-span-1 lg:col-span-2 2xl:col-span-3">
+            <div className="col-span-1 lg:col-span-2 2xl:col-span-3" ref={itemList}>
               <CartDelivery isDelivery={isDelivery} setIsDelivery={setIsDelivery} />
               <CartItemList cart={cart} />
             </div>
-            <CartSummary cart={cart} isDelivery={isDelivery} loading={loading} />
+            <CartSummary cart={cart} isDelivery={isDelivery} loading={loading} itemList={itemList} />
           </div>
         </div>
       </div>
