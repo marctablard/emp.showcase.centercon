@@ -1,3 +1,4 @@
+import { PasswordChangeDto } from '@/platform/services/customer/CustomerService';
 import { Address } from '@/platform/services/model/common';
 import { Customer } from '@/platform/services/model/customer/customer';
 
@@ -119,6 +120,31 @@ export async function deleteCustomerAddress(id: string): Promise<void> {
     }
   } catch (error) {
     console.error('Error deleting customer address:', error);
+    throw error;
+  }
+}
+
+/**
+ * Change the password of the current customer
+ * @param {PasswordChangeDto} passwordData - Object containing current and new password
+ * @returns {Promise<void>}
+ */
+export async function changeCustomerPassword(passwordData: PasswordChangeDto): Promise<void> {
+  try {
+    const response = await fetch('/api/customer/current/password', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(passwordData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to change password: ${response.statusText} - ${errorText}`);
+    }
+  } catch (error) {
+    console.error('Error changing customer password:', error);
     throw error;
   }
 }

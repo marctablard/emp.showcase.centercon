@@ -5,7 +5,7 @@ import type { TokenManager } from '../../common/TokenManager';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCustomer, EmporixCustomerAddress, EmporixSignupRequest } from '../../model/customer';
 import { EmporixSessionContext } from '../../model/session-context';
-import { CustomerApi } from '../CustomerApi';
+import { CustomerApi, PasswordChangeDto } from '../CustomerApi';
 
 @injectable('EmporixCustomerApi', 'Singleton')
 class EmporixCustomerApi implements CustomerApi {
@@ -287,6 +287,28 @@ class EmporixCustomerApi implements CustomerApi {
 
     // After successful signup, login the user to get their profile
     return response.json();
+  }
+
+  async changePassword(passwordData: PasswordChangeDto): Promise<void> {
+    const url = `customer/${this.config.tenant}/password/change`;
+
+    const response = await this.apiInvoker.authenticatedFetch(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(passwordData),
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to change password: ${response.statusText} - ${errorText}`);
+    }
   }
 
   async passwordReset(email: string): Promise<void> {

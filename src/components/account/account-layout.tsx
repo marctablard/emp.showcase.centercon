@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { Building2, FileText, ListChecks, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
+import { Building2, FileText, ListChecks, Lock, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
 import { BreadcrumbContent } from '@/lib/breadcrumb';
 import { UiBreadcrumb } from '../ui/molecules/ui-breadcrumb';
 import { AccountSidebar } from './account-sidebar';
@@ -48,6 +48,11 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
       href: '/account/shopping-lists',
       title: t('shoppingLists'),
       icon: <ListChecks className="h-4 w-4" />,
+    },
+    {
+      href: '/account/password',
+      title: t('password') || 'Passwort ändern',
+      icon: <Lock className="h-4 w-4" />,
     },
     {
       href: '/account/logout',

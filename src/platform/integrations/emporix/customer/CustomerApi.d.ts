@@ -2,6 +2,20 @@ import { EmporixCustomer } from '../model/customer';
 import { EmporixSessionContext } from '../model/session-context';
 
 /**
+ * Interface for password change data
+ */
+export interface PasswordChangeDto {
+  /**
+   * Customer's current account password
+   */
+  currentPassword: string;
+  /**
+   * Customer's new account password
+   */
+  newPassword: string;
+}
+
+/**
  * Customer API Interface for Emporix
  * Based on the Customer Service (customer-managed) OpenAPI specification
  */
@@ -91,6 +105,13 @@ export interface CustomerApi {
    * @returns Promise with the created customer Id
    */
   signup(customerData: EmporixSignupRequest): Promise<{ id: string }>;
+
+  /**
+   * Changes a customer's password
+   * @param passwordData Object containing current and new password
+   * @returns Promise that resolves when the password change is complete
+   */
+  changePassword(passwordData: PasswordChangeDto): Promise<void>;
 
   /**
    * Request a password reset for a customer's email address

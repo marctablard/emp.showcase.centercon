@@ -3,6 +3,7 @@ import { TokenManager } from '../../common/TokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
+import { PasswordChangeDto } from '../../customer/CustomerApi';
 import { EmporixCustomerAddress } from '../../model/customer';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixCustomerApi from './EmporixCustomerApi';
@@ -227,5 +228,106 @@ describe('EmporixCustomerApi', () => {
         throw error;
       }
     }, 15000);
+  });
+
+  describe('Password Management', () => {
+    // Store original credentials for later use
+    let originalUsername: string;
+    let originalPassword: string;
+    const tempPassword = `Temp${Date.now()}Password!`;
+
+    // Set up credentials before tests
+    beforeAll(async () => {
+      try {
+        // Get test credentials
+        originalUsername = 'forrest.gump@alaba.ma';
+        originalPassword = 'Test1234';
+
+        if (!originalUsername || !originalPassword) {
+          throw new Error('Test credentials not found');
+        }
+
+        // Login with the original credentials
+        await customerApi.login(originalUsername, originalPassword);
+        console.log('Successfully logged in with original credentials');
+      } catch (error) {
+        console.error('Error during test setup authentication:', error);
+        throw error;
+      }
+    }, 15000);
+
+    // Clean up after all tests - ensure password is restored
+    afterAll(async () => {
+      // Clear tokens before logging out
+      await tokenManager.clearTokens(tenant);
+      console.log('Tokens cleared after tests');
+    }, 10000);
+
+    it('should change password and then revert back to original', async () => {
+      // Skip this test if we don't have valid credentials
+      if (!originalUsername || !originalPassword) {
+        console.warn('Skipping password change test due to missing credentials');
+        return;
+      }
+
+      try {
+        console.log('Starting password change test...');
+
+        // Step 1: Change password from original to temp
+        const firstChangeData: PasswordChangeDto = {
+          currentPassword: originalPassword,
+          newPassword: tempPassword,
+        };
+
+        await customerApi.changePassword(firstChangeData);
+        console.log('Successfully changed password to temporary password');
+
+        // Step 2: Verify we can login with the new password
+        // First clear the token to force a new login
+        await tokenManager.clearTokens(tenant);
+
+        // Try logging in with the new password
+        await customerApi.login(originalUsername, tempPassword);
+        console.log('Successfully verified login with temporary password');
+
+        // Step 3: Change password back to original
+        const secondChangeData: PasswordChangeDto = {
+          currentPassword: tempPassword,
+          newPassword: originalPassword,
+        };
+
+        await customerApi.changePassword(secondChangeData);
+        console.log('Successfully reverted password to original');
+
+        // Step 4: Verify we can login with the original password again
+        // Clear token to force a new login
+        await tokenManager.clearTokens(tenant);
+
+        // Try logging in with the original password
+        await customerApi.login(originalUsername, originalPassword);
+        console.log('Successfully verified login with original password');
+      } catch (error) {
+        console.error('Error in password change test:', error);
+
+        // Emergency restoration of original password if something fails
+        try {
+          // Try to login with temp password first
+          await tokenManager.clearTokens(tenant);
+          await customerApi.login(originalUsername, tempPassword);
+
+          // Change back to original
+          const emergencyChangeData: PasswordChangeDto = {
+            currentPassword: tempPassword,
+            newPassword: originalPassword,
+          };
+          await customerApi.changePassword(emergencyChangeData);
+          console.log('Emergency password restoration completed');
+        } catch (restoreError) {
+          console.error('Failed emergency password restoration:', restoreError);
+        }
+
+        fail(`Password change test failed: ${error}`);
+      }
+    }, 30000);
   });
 });

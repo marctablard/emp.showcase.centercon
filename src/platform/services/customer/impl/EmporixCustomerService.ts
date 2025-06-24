@@ -5,7 +5,7 @@ import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/s
 import { Address } from '../../model/common';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { Customer } from '../../model/customer/customer';
-import { CustomerService } from '../CustomerService';
+import { CustomerService, PasswordChangeDto } from '../CustomerService';
 
 const ANONYMOUS_CUSTOMER_ID = '00000000';
 
@@ -130,6 +130,21 @@ export class EmporixCustomerService implements CustomerService {
     } catch (error) {
       console.error('Error deleting customer address:', error);
       throw new Error(`Failed to delete address: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Change the password of the current customer
+   * @param passwordData Object containing the current and new password
+   * @returns Promise that resolves when the password change is complete
+   */
+  async changePassword(passwordData: PasswordChangeDto): Promise<void> {
+    try {
+      // Call the CustomerApi to change the password
+      await this.customerApi.changePassword(passwordData);
+    } catch (error) {
+      console.error('Error changing customer password:', error);
+      throw new Error(`Failed to change password: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
