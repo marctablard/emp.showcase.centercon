@@ -34,7 +34,6 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
     const containerBottom = fixedContainer?.current?.getBoundingClientRect().bottom;
     const windowHeight = window.innerHeight;
     const windowScroll = window.scrollY;
-    console.log('windowScroll', windowScroll);
     const contentBox = leftContent?.current?.getBoundingClientRect();
     const contentBottom = contentBox?.bottom;
     const contentTop = contentBox?.top;
