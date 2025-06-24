@@ -33,6 +33,8 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
     );
     const containerBottom = fixedContainer?.current?.getBoundingClientRect().bottom;
     const windowHeight = window.innerHeight;
+    const windowScroll = window.scrollY;
+    console.log('windowScroll', windowScroll);
     const contentBox = leftContent?.current?.getBoundingClientRect();
     const contentBottom = contentBox?.bottom;
     const contentTop = contentBox?.top;
@@ -47,8 +49,12 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
         if (containerTop && containerTop <= topPosition) {
           setIsFixed(true);
           setIsFixedToTop(true);
-        } else {
           if (contentTop && contentTop > containerTop) {
+            setIsFixed(false);
+            setIsContainerBottom(false);
+          }
+        } else {
+          if ((contentTop && contentTop > containerTop) || windowScroll <= 0) {
             setIsFixed(false);
             setIsContainerBottom(false);
           }
