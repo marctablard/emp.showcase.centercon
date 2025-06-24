@@ -183,6 +183,8 @@
         "accountSettings": "Kontoeinstellungen",
         "password": "Passwort",
         "passwordConfirmation": "Passwort bestätigen",
+        "showPassword": "Passwort anzeigen",
+        "hidePassword": "Passwort verbergen",
         "emailSignup": " E-Mail-Anmeldung",
         "newsletter": "Newsletter",
         "dealsAlerts": "Angebots-Benachrichtigungen",

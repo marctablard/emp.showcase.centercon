@@ -154,7 +154,7 @@ export default function LoginDialog({
                         type={showPassword ? 'text' : 'password'}
                         id="password"
                         startIcon={LockKeyhole}
-                        endIcon={showPassword ? EyeOff : Eye}
+                        endIcon={showPassword ? Eye : EyeOff}
                         onEndIconClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                         {...field}

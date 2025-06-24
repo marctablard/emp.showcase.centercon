@@ -83,7 +83,7 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             </FormItem>
           )}
         />
-        <div className="flex gap-6">
+        <div className="flex gap-6 items-start">
           <FormField
             control={control}
             name="street"
@@ -102,26 +102,30 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             name="houseNumber"
             render={({ field }) => (
               <FormItem className="w-1/3 md:w-1/4">
-                <FormLabel htmlFor="houseNumber">{t('houseNumber')}</FormLabel>
+                <FormLabel htmlFor="houseNumber" className="overflow-hidden">
+                  <p className="text-nowrap whitespace-nowrap overflow-ellipsis overflow-hidden">{t('houseNumber')}</p>
+                </FormLabel>
                 <FormControl>
                   <Input id="houseNumber" type="text" required {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-nowrap overflow-hidden overflow-ellipsis" />
               </FormItem>
             )}
           />
         </div>
-        <div className="flex gap-6">
+        <div className="flex gap-6 items-start">
           <FormField
             control={control}
             name="postalCode"
             render={({ field }) => (
               <FormItem className="w-1/3 md:w-1/4">
-                <FormLabel htmlFor="postalCode">{t('postalCode')}</FormLabel>
+                <FormLabel htmlFor="postalCode" className="overflow-hidden">
+                  <p className="text-nowrap whitespace-nowrap overflow-ellipsis overflow-hidden">{t('postalCode')}</p>
+                </FormLabel>
                 <FormControl>
                   <Input id="postalCode" type="text" required {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-nowrap overflow-hidden overflow-ellipsis" />
               </FormItem>
             )}
           />
