@@ -15,6 +15,7 @@ function Textarea({ className, maxLength, ...props }: React.ComponentProps<'text
           'disabled:cursor-not-allowed',
           className,
         )}
+        maxLength={maxLength}
         {...props}
       />
       <div className="text-xs text-neutral-300">

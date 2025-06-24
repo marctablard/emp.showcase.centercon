@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import LoginCard from '@/components/login/login-card';
+import { LoginDialog } from '@/components/login';
 import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -17,11 +17,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function Login({ params }: { params: Promise<{ locale: string; callbackUrl: string }> }) {
-  const { locale: _locale, callbackUrl } = await params;
-  return (
-    <div className="flex flex-col items-center">
-      <LoginCard callbackUrl={callbackUrl} />
-    </div>
-  );
+export default async function LoginPage() {
+  return <LoginDialog defaultOpen={true} callbackUrl="/" redirectAfterLogin={true} />;
 }

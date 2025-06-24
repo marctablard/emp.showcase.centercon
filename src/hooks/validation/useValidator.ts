@@ -8,9 +8,11 @@ import { ValidationService } from '@/platform/services/validation';
 
 /**
  * Hook for using a validation service with a React Hook Form instance
- * @param form The React Hook Form instance to validate
  * @param validatorId The DI identifier for the validator service
- * @returns Validation utilities for the form
+ * @param initialData Initial data for the form
+ * @param mode Validation mode ('onBlur', 'onChange', 'onSubmit', or 'all'), defaults to 'onSubmit'
+ * @param onValidated Optional callback function that is called when the form is successfully validated
+ * @returns Object containing the form instance and validator service
  */
 export function useValidator(
   validatorId: string,

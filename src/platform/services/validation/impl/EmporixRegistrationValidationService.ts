@@ -1,0 +1,51 @@
+import { injectable } from '@platform/core/di/injectable';
+import { z } from 'zod';
+import ZodSchemaValidationService from './ZodSchemaValidationService';
+
+// Registration validation schema
+export const RegistrationSchema = z
+  .object({
+    firstName: z.string().min(1, 'register.firstName.required'),
+    lastName: z.string().min(1, 'register.lastName.required'),
+    email: z.string().min(1, 'register.email.required').email('register.email.invalid'),
+    emailConfirmation: z.string().min(1, 'register.emailConfirmation.required'),
+    companyName: z.string().min(1, 'register.companyName.required'),
+    businessType: z.string().optional(),
+    street: z.string().min(1, 'register.street.required'),
+    houseNumber: z.string().min(1, 'register.houseNumber.required'),
+    postalCode: z.string().min(1, 'register.postalCode.required'),
+    city: z.string().min(1, 'register.city.required'),
+    country: z.string().min(1, 'register.country.required'),
+    vatNumber: z.string().min(1, 'register.vatNumber.required'),
+    shippingSameAsBilling: z.boolean(),
+    password: z
+      .string()
+      .min(8, 'register.password.minLength')
+      .regex(/[A-Z]/, 'register.password.uppercase')
+      .regex(/[a-z]/, 'register.password.lowercase')
+      .regex(/[0-9]/, 'register.password.number'),
+    passwordConfirmation: z.string().min(1, 'register.passwordConfirmation.required'),
+    additionalInformation: z.string().max(500).optional(),
+    newsletter: z.boolean(),
+    dealsAlerts: z.boolean(),
+  })
+  .refine((data) => data.email === data.emailConfirmation, {
+    message: 'register.email.mismatch',
+    path: ['emailConfirmation'],
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: 'register.password.mismatch',
+    path: ['passwordConfirmation'],
+  });
+
+// Export type for the registration data
+export type RegistrationData = z.infer<typeof RegistrationSchema>;
+
+@injectable('RegistrationValidationService', 'Singleton')
+class EmporixRegistrationValidationService extends ZodSchemaValidationService {
+  constructor() {
+    super(RegistrationSchema);
+  }
+}
+
+export default EmporixRegistrationValidationService;
