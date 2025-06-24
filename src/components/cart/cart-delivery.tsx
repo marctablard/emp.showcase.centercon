@@ -1,12 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Pencil } from 'lucide-react';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import { useValidator } from '@/hooks/validation/useValidator';
-import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
@@ -133,7 +131,4 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
       </CardContent>
     </Card>
   );
-}
-function setFormError(arg0: null) {
-  throw new Error('Function not implemented.');
 }
