@@ -20,6 +20,11 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
       icon: <User className="h-4 w-4" />,
     },
     {
+      href: '/account/profile',
+      title: t('profileSettings') || 'Profileinstellungen',
+      icon: <User className="h-4 w-4" />,
+    },
+    {
       href: '/account/addresses/shipping',
       title: t('shippingAddresses'),
       icon: <MapPin className="h-4 w-4" />,

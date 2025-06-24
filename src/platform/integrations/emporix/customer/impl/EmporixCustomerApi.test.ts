@@ -330,4 +330,98 @@ describe('EmporixCustomerApi', () => {
       }
     }, 30000);
   });
+
+  describe('Profile Management', () => {
+    // Store original profile data for restoration
+    let originalProfile: any;
+    let isAuthenticated = false;
+
+    // Set up credentials before tests
+    beforeAll(async () => {
+      try {
+        // Get test credentials
+        const username = 'forrest.gump@alaba.ma';
+        const password = 'Test1234';
+
+        if (!username || !password) {
+          throw new Error('Test credentials not found');
+        }
+
+        // Login with the test credentials
+        await customerApi.login(username, password);
+        console.log('Successfully logged in for profile management tests');
+        isAuthenticated = true;
+
+        // Get original profile data to restore later
+        originalProfile = await customerApi.getCustomerProfile();
+        console.log('Original profile data saved for restoration');
+      } catch (error) {
+        console.error('Error during profile test setup:', error);
+        throw error;
+      }
+    }, 15000);
+
+    // Clean up after all tests - restore original profile data
+    afterAll(async () => {
+      if (isAuthenticated && originalProfile) {
+        try {
+          // Restore the original profile data
+          await customerApi.updateCustomerProfile({
+            firstName: originalProfile.firstName,
+            lastName: originalProfile.lastName,
+            contactPhone: originalProfile.contactPhone,
+            company: originalProfile.company,
+            preferredLanguage: originalProfile.preferredLanguage,
+          });
+          console.log('Original profile data restored');
+        } catch (error) {
+          console.error('Error restoring original profile data:', error);
+        }
+      }
+
+      // Clear tokens
+      await tokenManager.clearTokens(tenant);
+      console.log('Tokens cleared after profile tests');
+    }, 10000);
+
+    it('should update customer profile and verify changes', async () => {
+      if (!isAuthenticated) {
+        console.warn('Skipping profile update test due to authentication failure');
+        return;
+      }
+
+      try {
+        console.log('Starting profile update test...');
+
+        // Step 1: Create profile update data
+        const timestamp = Date.now();
+        const updateData = {
+          firstName: `ForrestTest${timestamp}`,
+          lastName: `GumpTest${timestamp}`,
+          contactPhone: `123-456-${timestamp % 10000}`,
+          company: `Bubba Gump Test Co ${timestamp}`,
+          preferredLanguage: 'de_DE',
+        };
+
+        // Step 2: Update the profile
+        await customerApi.updateCustomerProfile(updateData);
+        console.log('Profile update request completed');
+
+        // Step 3: Verify the profile was updated by retrieving it
+        const updatedProfile = await customerApi.getCustomerProfile();
+
+        // Verify each updated field
+        expect(updatedProfile.firstName).toBe(updateData.firstName);
+        expect(updatedProfile.lastName).toBe(updateData.lastName);
+        expect(updatedProfile.contactPhone).toBe(updateData.contactPhone);
+        expect(updatedProfile.company).toBe(updateData.company);
+        expect(updatedProfile.preferredLanguage).toBe(updateData.preferredLanguage);
+
+        console.log('Successfully verified profile updates');
+      } catch (error) {
+        console.error('Error in profile update test:', error);
+        fail(`Profile update test failed: ${error}`);
+      }
+    }, 15000);
+  });
 });

@@ -2,6 +2,48 @@ import { Address } from '../model/common';
 import { Customer } from '../model/customer/customer';
 
 /**
+ * Data transfer object for customer profile update
+ */
+export interface CustomerUpdateDto {
+  /**
+   * Customer's title (Mr, Mrs, Ms, etc.)
+   */
+  title?: string;
+  /**
+   * Customer's first name
+   */
+  firstName?: string;
+  /**
+   * Customer's middle name
+   */
+  middleName?: string;
+  /**
+   * Customer's last name
+   */
+  lastName?: string;
+  /**
+   * Customer's contact email
+   */
+  contactEmail?: string;
+  /**
+   * Customer's contact phone
+   */
+  contactPhone?: string;
+  /**
+   * Customer's company
+   */
+  company?: string;
+  /**
+   * Customer's preferred language
+   */
+  preferredLanguage?: string;
+  /**
+   * Customer's preferred currency
+   */
+  preferredCurrency?: string;
+}
+
+/**
  * Data transfer object for password change
  */
 export interface PasswordChangeDto {
@@ -96,4 +138,11 @@ export interface CustomerService {
    * @returns Promise that resolves when deletion is complete
    */
   deleteAddress(addressId: string): Promise<void>;
+
+  /**
+   * Update the current customer's profile
+   * @param customerData Customer profile data to update
+   * @returns Promise that resolves with the updated customer profile
+   */
+  updateCustomerProfile(customerData: CustomerUpdateDto): Promise<Customer>;
 }

@@ -5,7 +5,7 @@ import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/s
 import { Address } from '../../model/common';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { Customer } from '../../model/customer/customer';
-import { CustomerService, PasswordChangeDto } from '../CustomerService';
+import { CustomerService, CustomerUpdateDto, PasswordChangeDto } from '../CustomerService';
 
 const ANONYMOUS_CUSTOMER_ID = '00000000';
 
@@ -154,6 +154,36 @@ export class EmporixCustomerService implements CustomerService {
 
   passwordResetUpdate(token: string, password: string): Promise<void> {
     return this.customerApi.passwordResetUpdate(token, password);
+  }
+
+  /**
+   * Update the current customer's profile
+   * @param customerData Customer profile data to update
+   * @returns Promise that resolves with the updated customer profile
+   */
+  async updateCustomerProfile(customerData: CustomerUpdateDto): Promise<Customer> {
+    try {
+      // Update the customer profile via the API
+      await this.customerApi.updateCustomerProfile(customerData);
+
+      // Fetch the updated profile to return the new values
+      const updatedProfile = await this.customerApi.getCustomerProfile();
+
+      // Convert to the service Customer model
+      return {
+        id: updatedProfile.id,
+        email: updatedProfile.contactEmail || '',
+        firstName: updatedProfile.firstName,
+        lastName: updatedProfile.lastName,
+        company: updatedProfile.company,
+        language: updatedProfile.preferredLanguage,
+        currency: updatedProfile.preferredCurrency,
+        contactPhone: updatedProfile.contactPhone,
+      };
+    } catch (error) {
+      console.error('Error updating customer profile:', error);
+      throw new Error(`Failed to update customer profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 }
 

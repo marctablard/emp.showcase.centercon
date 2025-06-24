@@ -319,6 +319,45 @@
         "storeName": "Emporix Showcase Store"
     },
     "Account": {
+        "profile": {
+            "title": "Profileinstellungen",
+            "description": "Aktualisieren Sie Ihre persönlichen Daten",
+            "form": {
+                "titleLabel": "Anrede",
+                "firstNameLabel": "Vorname",
+                "lastNameLabel": "Nachname",
+                "emailLabel": "E-Mail",
+                "phoneLabel": "Telefon",
+                "preferredLanguage": "Bevorzugte Sprache",
+                "preferredCurrency": "Bevorzugte Währung",
+                "selectTitle": "Anrede auswählen",
+                "selectLanguage": "Sprache auswählen",
+                "selectCurrency": "Währung auswählen",
+                "saveProfile": "Profil speichern",
+                "saving": "Wird gespeichert...",
+                "updateSuccess": "Ihre Profildaten wurden erfolgreich aktualisiert.",
+                "updateError": "Fehler beim Aktualisieren des Profils",
+                "mustBeLoggedIn": "Sie müssen angemeldet sein, um Ihr Profil zu bearbeiten.",
+                "unknownError": "Ein unbekannter Fehler ist aufgetreten.",
+                "firstName": {
+                    "required": "Bitte geben Sie Ihren Vornamen ein."
+                },
+                "lastName": {
+                    "required": "Bitte geben Sie Ihren Nachnamen ein."
+                },
+                "email": {
+                    "required": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
+                    "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+                },
+                "phone": {
+                    "invalid": "Bitte geben Sie eine gültige Telefonnummer ein."
+                },
+                "language": {
+                    "de": "Deutsch",
+                    "en": "English"
+                }
+            }
+        },
         "loading": "Dashboard wird geladen...",
         "resetLayout": "Layout zurücksetzen",
         "settings": "Einstellungen",
@@ -328,6 +367,7 @@
         "welcomeBack": "Willkommen, {name}",
         "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
         "accountDetails": "Kontodaten",
+        "profileSettings": "Profileinstellungen",
         "company": "Unternehmen",
         "ordersAndReturns": "Bestellungen & Retouren",
         "quotes": "Angebote",
@@ -542,7 +582,6 @@
             "loading": "Wird geladen..."
         }
     },
-    
     "Password": {
         "resetPassword": "Passwort zurücksetzen",
         "resetPasswordDescription": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link, um Ihr Passwort zurückzusetzen.",

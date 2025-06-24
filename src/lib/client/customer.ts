@@ -1,4 +1,4 @@
-import { PasswordChangeDto } from '@/platform/services/customer/CustomerService';
+import { CustomerUpdateDto, PasswordChangeDto } from '@/platform/services/customer/CustomerService';
 import { Address } from '@/platform/services/model/common';
 import { Customer } from '@/platform/services/model/customer/customer';
 
@@ -145,6 +145,34 @@ export async function changeCustomerPassword(passwordData: PasswordChangeDto): P
     }
   } catch (error) {
     console.error('Error changing customer password:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update the current customer's profile
+ * @param {CustomerUpdateDto} profileData - The profile data to update
+ * @returns {Promise<Customer>} The updated customer profile
+ */
+export async function updateCustomerProfile(profileData: CustomerUpdateDto): Promise<Customer> {
+  try {
+    const response = await fetch('/api/customer/current/profile', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profileData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to update profile: ${response.statusText} - ${errorText}`);
+    }
+
+    const updatedCustomer = await response.json();
+    return updatedCustomer;
+  } catch (error) {
+    console.error('Error updating customer profile:', error);
     throw error;
   }
 }

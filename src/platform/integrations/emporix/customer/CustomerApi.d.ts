@@ -2,6 +2,52 @@ import { EmporixCustomer } from '../model/customer';
 import { EmporixSessionContext } from '../model/session-context';
 
 /**
+ * Interface for profile update data
+ */
+export interface CustomerUpdateDto {
+  /**
+   * Customer's title (e.g., MR, MRS, MS)
+   */
+  title?: string;
+  /**
+   * Customer's first name
+   */
+  firstName?: string;
+  /**
+   * Customer's middle name
+   */
+  middleName?: string;
+  /**
+   * Customer's last name
+   */
+  lastName?: string;
+  /**
+   * Customer's contact email
+   */
+  contactEmail?: string;
+  /**
+   * Customer's contact phone
+   */
+  contactPhone?: string;
+  /**
+   * Customer's company
+   */
+  company?: string;
+  /**
+   * Customer's preferred language
+   */
+  preferredLanguage?: string;
+  /**
+   * Customer's preferred currency
+   */
+  preferredCurrency?: string;
+  /**
+   * Customer's preferred site
+   */
+  preferredSite?: string;
+}
+
+/**
  * Interface for password change data
  */
 export interface PasswordChangeDto {
