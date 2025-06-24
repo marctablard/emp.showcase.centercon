@@ -271,4 +271,13 @@
 [data-radix-popper-content-wrapper] {
   backdrop-filter: blur(4px);
   top: -20px;
+  @layer utilities {
+    .clip-style {
+      clip-path: url('/images/image_mask_desktop.svg');
+    }
+
+    [data-sonner-toaster='true'] {
+      max-width: 120rem;
+    }
+  }
 }

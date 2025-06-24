@@ -48,7 +48,8 @@ function toast(toast: Omit<ToastProps, 'id'>) {
     ),
     {
       duration: 4000,
-      className: 'w-full sm:max-w-[300px]',
+      position: 'bottom-center',
+      className: 'w-full pb-[60px] md:pb-2 md:px-4 md:flex md:justify-end md:[&>div]:max-w-[300px]',
     },
   );
 }
@@ -68,8 +69,8 @@ function notify(toast: Omit<NotificationProps, 'id'>) {
     ),
     {
       position: 'top-center',
-      duration: 4000,
-      className: 'w-full px-2',
+      duration: 400000,
+      className: 'w-full mt-17 md:mt-30 lg:mt-44 md:[&>div]:mx-4 lg:[&>div]:mx-9',
     },
   );
 }
@@ -93,7 +94,7 @@ function Toast(props: ToastProps) {
   return (
     <div
       className={cn(
-        'rounded-t-lg border border-b-0 shadow-2xl w-full items-center p-3',
+        'rounded border shadow-2xl w-full items-center p-4',
         'top-right',
         'bg-' + className[type] + '-100 border-' + className[type] + '-500 ',
       )}
