@@ -130,7 +130,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
             <CardFooter className="flex flex-col p-0">
               <Link href="/checkout" className="w-full">
                 <Button className="w-full" disabled={!isDelivery || loading}>
-                  {t('viewCart')}
+                  {t('goToCheckout')}
                 </Button>
               </Link>
               <div className="flex align-center gap-2 text-neutral-600 pt-4">

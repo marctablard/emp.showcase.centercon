@@ -178,7 +178,8 @@
         "cartEmpty": "Oh no, your shopping cart is currently empty!",
         "cartEmptyText": "Add products or log in to load a saved cart.",
         "cartEmptyLogin": "Login",
-        "cartEmptyLinkText": "Shop now"
+        "cartEmptyLinkText": "Shop now",
+        "goToCheckout": "Go to Checkout"
     },
     "login": {
         "title": "Login",
