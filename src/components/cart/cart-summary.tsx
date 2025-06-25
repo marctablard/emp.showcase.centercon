@@ -49,7 +49,13 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
         .map((item) => item.getBoundingClientRect().height)
         .reduce((a, b) => a + b, 0);
 
-    if (containerHeight && contentHeight && containerHeight <= contentHeight && windowHeight - containerHeight > 0) {
+    if (
+      containerHeight &&
+      contentHeight &&
+      containerHeight <= contentHeight &&
+      windowHeight - containerHeight > 0 &&
+      window.innerWidth >= 1024
+    ) {
       if (containerBottom && contentBottom && containerBottom < contentBottom) {
         if (containerTop && containerTop <= topPosition) {
           setIsFixed(true);
@@ -78,7 +84,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
   });
 
   return (
-    <div className="col-span-1 mb-6 flex">
+    <div className="col-span-1 lg:col-span-4 xl:col-span-1 mb-6 flex">
       <div className={cn('flex flex-col w-full', isContainerBottom ? 'justify-end' : 'justify-start')}>
         <div
           className={cn(
@@ -88,10 +94,10 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
           )}
           ref={fixedContainer}
         >
-          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer max-w-[438px]">
+          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-sm lg:max-w-[438px] w-full">
             <CardHeader className="p-0">
               <CardTitle>
-                <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
+                <h5 className="text-3xl  font-headlines">{t('orderSummary')}</h5>
               </CardTitle>
             </CardHeader>
             <CardContent className="bg-white rounded-md p-4">
@@ -109,7 +115,9 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
 
                 <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
                   <span>{t('netValueOfGoods')}</span>
-                  <span className="font-bold">{formatCurrency(cart.tax.netValue, cart.tax.currency)}</span>
+                  <span className="font-bold font-headlines">
+                    {formatCurrency(cart.tax.netValue, cart.tax.currency)}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between font-medium text-base">
@@ -131,7 +139,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                       <span>Freight Costs</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold text-xl">
+                  <div className="flex justify-between font-bold font-headlines text-xl">
                     <span>{t('total')}</span>
                     <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
                   </div>

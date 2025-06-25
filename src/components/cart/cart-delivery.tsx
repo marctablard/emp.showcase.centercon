@@ -71,10 +71,10 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
   }
 
   return (
-    <Card className="p-0 border-none shadow-footer mb-6">
+    <Card className="p-0 border-none shadow-sm mb-4 lg:mb-6">
       <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2">
         <div className="border-b pb-4 md:border-r md:border-b-0 md:pb-0 flex flex-col gap-4">
-          <h5 className="text-3xl font-bold">{t('deliveryMethod')}</h5>
+          <h5 className="text-3xl font-bold font-headlines">{t('deliveryMethod')}</h5>
           <Form {...form}>
             <form id="cart-delivery-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
               <FormField
@@ -108,7 +108,7 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
         </div>
         <div className="flex flex-col gap-4 pt-4 md:ps-6 md:pt-0">
           <div className="flex justify-between">
-            <h5 className="text-3xl font-bold">{isDelivery ? t('ship') : t('pickup')}</h5>
+            <h5 className="text-3xl font-bold font-headlines">{isDelivery ? t('ship') : t('pickup')}</h5>
             <Button
               variant="link"
               size="default"
@@ -140,11 +140,11 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
                 </div>
                 <div className="flex flex-col xl:pe-4 text-base w-full sm:w-1/2">
                   <div>
-                    <span className="font-bold">{t('hours')}</span>
+                    <span className="font-bold font-headlines">{t('hours')}</span>
                     <span>M-F 7:00 AM - 4:00 PM Central</span>
                   </div>
                   <div>
-                    <span className="font-bold">{t('phone')}</span>
+                    <span className="font-bold font-headlines">{t('phone')}</span>
                     <span>0123 987654-32</span>
                   </div>
                 </div>

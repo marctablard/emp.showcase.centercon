@@ -11,12 +11,12 @@ export function CartRequest() {
   const { isAuthenticated } = useAuthentication();
 
   return (
-    <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer text-neutral-900">
+    <Card className="bg-primary-50 p-6 border-none gap-4 shadow-sm text-neutral-900">
       <Collapsible>
         <CollapsibleTrigger className="w-full group flex items-center justify-between gap-2">
           <div className="flex gap-2">
             <FileText />
-            <span className="flex items-center gap-2 font-bold">{t('requestQuote')}</span>
+            <span className="flex items-center gap-2 font-headlines">{t('requestQuote')}</span>
           </div>
           <ChevronDown className="group-data-[state=open]:rotate-180 transition-transform" width={32} height={32} />
         </CollapsibleTrigger>
@@ -28,20 +28,20 @@ export function CartRequest() {
           <span className="text-base mb-4">{t('requestQuoteTitle')}</span>
           <div className="flex flex-col gap-2 pt-4">
             <div className="flex gap-2">
-              <p className={cn(!isAuthenticated && 'font-bold')}>1.</p>
+              <p className={cn(!isAuthenticated && 'font-bold font-headlines')}>1.</p>
               {!isAuthenticated ? (
-                <p className="font-bold">{t('requestQuotestep1')}</p>
+                <p className="font-bold font-headlines">{t('requestQuotestep1')}</p>
               ) : (
                 <p>{t('requestQuotestep2')}</p>
               )}
             </div>
             <div className="flex gap-2">
-              <p className={cn(!isAuthenticated && 'font-bold')}>2.</p>
+              <p className={cn(!isAuthenticated && 'font-bold font-headlines')}>2.</p>
               {!isAuthenticated ? <p>{t('requestQuotestep2')}</p> : <p className="">{t('requestQuotestep3')}</p>}
             </div>
             {!isAuthenticated && (
               <div className="flex gap-2">
-                <p className="font-bold">3.</p>
+                <p className="font-bold font-headlines">3.</p>
                 <p>{t('requestQuotestep3')}</p>
               </div>
             )}

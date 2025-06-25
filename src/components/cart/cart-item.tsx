@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
@@ -21,6 +22,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   const t = useTranslations('cart');
   const { updateItemQuantity, removeItem } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
 
   const isStrike = false;
 
@@ -50,8 +52,8 @@ export function CartItemRow({ cart, item }: CartItemProps) {
 
   return (
     <div className="py-6 first:border-none border-t border-neutral-200 md:first:border-solid">
-      <div className="grid grid-cols-[1fr_2fr] sm:grid-cols-[120px_3fr] md:grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_1fr_1fr] xl:grid-cols-[120px_3fr_1fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
-        <div className="col-start-1 row-start-2 md:row-start-1 row-end-3">
+      <div className="grid grid-cols-[1fr_2fr] sm:grid-cols-[120px_3fr] md:grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_2fr_1fr] xl:grid-cols-[120px_3fr_1.5fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
+        <div className="col-start-1 row-start-2  md:row-start-1 row-end-3">
           <div className="rounded-ss-xl rounded-ee-xl w-[100px] h-[65px] sm:w-[120px] sm:h-[78px] object-fit overflow-hidden">
             {item.product && item.product.images?.length ? (
               <Image
@@ -68,11 +70,21 @@ export function CartItemRow({ cart, item }: CartItemProps) {
             )}
           </div>
         </div>
-        <div className="col-start-1 col-end-3 row-start-1 md:col-start-2 flex flex-col gap-1 mb-4 md:mb-0 md:ms-4">
+        <div className="col-start-1 col-end-3 row-start-1 md:col-start-2 flex flex-col gap-1 mb-4 md:mb-0 md:mx-4">
           <p className="text-sm md:text-base">Allen Key Type</p>
-          <p className="font-bold text-base">{l10n(item.product?.name || 'Product')}</p>
+          <p
+            className="font-bold text-base font-headlines cursor-pointer"
+            onClick={() => router.push(`/product/${item.product?.id}`)}
+          >
+            {l10n(item.product?.name || 'Product')}
+          </p>
         </div>
-        <div className="row-start-3 col-start-2 md:col-end-2 flex flex-col gap-2 md:row-start-2 ms-4 pt-2">
+        <div
+          className={cn(
+            'row-start-3 col-start-2 md:col-end-2 flex flex-col gap-2 md:row-start-2 mx-4 pt-2',
+            !isStrike && '-mt-4 ',
+          )}
+        >
           <p className="text-sm">
             {t('itemNumber')}: {item.product?.id}
           </p>
