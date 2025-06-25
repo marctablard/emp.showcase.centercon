@@ -40,7 +40,6 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
         : 0,
     );
     const windowHeight = window.innerHeight;
-    const windowScroll = window.scrollY;
     const contentBox = leftContent?.current?.getBoundingClientRect();
     const contentBottom = Math.round(contentBox?.bottom ? contentBox?.bottom : 0);
     const contentTop = Math.round(contentBox?.top ? contentBox?.top : 0);
@@ -50,7 +49,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
         .map((item) => item.getBoundingClientRect().height)
         .reduce((a, b) => a + b, 0);
 
-    if (containerHeight && contentHeight && containerHeight <= contentHeight) {
+    if (containerHeight && contentHeight && containerHeight <= contentHeight && windowHeight - containerHeight > 0) {
       if (containerBottom && contentBottom && containerBottom < contentBottom) {
         if (containerTop && containerTop <= topPosition) {
           setIsFixed(true);
@@ -66,15 +65,14 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
           }
         }
       } else {
-        setIsFixed(false);
         if (containerBottom && contentBottom && containerBottom > contentBottom) {
+          setIsFixed(false);
           setIsContainerBottom(true);
         }
-        /*  if (containerBottom && windowHeight - containerBottom <= 12) {
-         
+        if (containerBottom && windowHeight - containerBottom < 12) {
           setIsFixed(true);
           setIsFixedToTop(false);
-        } */
+        }
       }
     }
   });
@@ -86,11 +84,11 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
           className={cn(
             'flex flex-col gap-4',
             isFixed ? 'fixed lg:me-9' : '',
-            isFixedToTop ? 'top-[112px]' : 'bottom-[12px]',
+            isFixedToTop ? 'top-[112px]' : 'bottom-[40px]',
           )}
           ref={fixedContainer}
         >
-          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer">
+          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer max-w-[438px]">
             <CardHeader className="p-0">
               <CardTitle>
                 <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
