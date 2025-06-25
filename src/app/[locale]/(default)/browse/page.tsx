@@ -5,6 +5,7 @@ import { searchProducts } from '@/lib/ssr/search';
 import { getPageTitle } from '@/lib/ssr/seo';
 import { SearchParams } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
+import { extractFiltersFromSearchParams } from '@/utils/filterUtils';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -26,14 +27,24 @@ export default async function BrowsePage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; page?: string; size?: string }>;
+  searchParams: Promise<Record<string, string | string[]>>;
 }) {
   const { locale } = await params;
-  const { q, page, size } = await searchParams;
+  const rawParams = await searchParams;
+
+  // Extract basic search parameters
+  const q = rawParams.q as string | undefined;
+  const page = rawParams.page as string | undefined;
+  const size = rawParams.size as string | undefined;
+
+  // Extract filters from the URL parameters
+  const filters = extractFiltersFromSearchParams(rawParams);
+
   const initialSearch: SearchParams<Product> = {
     page: page ? parseInt(page, 10) : 0,
     size: size ? parseInt(size, 10) : 12,
     query: q,
+    filters: Object.keys(filters).length > 0 ? filters : undefined,
   };
   // Fetch initial products server-side
   const initialResults = await searchProducts(initialSearch);

@@ -5,7 +5,7 @@ import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/s
 import { Address } from '../../model/common';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { Customer } from '../../model/customer/customer';
-import { CustomerService } from '../CustomerService';
+import { CustomerService, CustomerUpdateDto, PasswordChangeDto } from '../CustomerService';
 
 const ANONYMOUS_CUSTOMER_ID = '00000000';
 
@@ -133,12 +133,57 @@ export class EmporixCustomerService implements CustomerService {
     }
   }
 
+  /**
+   * Change the password of the current customer
+   * @param passwordData Object containing the current and new password
+   * @returns Promise that resolves when the password change is complete
+   */
+  async changePassword(passwordData: PasswordChangeDto): Promise<void> {
+    try {
+      // Call the CustomerApi to change the password
+      await this.customerApi.changePassword(passwordData);
+    } catch (error) {
+      console.error('Error changing customer password:', error);
+      throw new Error(`Failed to change password: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   passwordReset(email: string): Promise<void> {
     return this.customerApi.passwordReset(email);
   }
 
   passwordResetUpdate(token: string, password: string): Promise<void> {
     return this.customerApi.passwordResetUpdate(token, password);
+  }
+
+  /**
+   * Update the current customer's profile
+   * @param customerData Customer profile data to update
+   * @returns Promise that resolves with the updated customer profile
+   */
+  async updateCustomerProfile(customerData: CustomerUpdateDto): Promise<Customer> {
+    try {
+      // Update the customer profile via the API
+      await this.customerApi.updateCustomerProfile(customerData);
+
+      // Fetch the updated profile to return the new values
+      const updatedProfile = await this.customerApi.getCustomerProfile();
+
+      // Convert to the service Customer model
+      return {
+        id: updatedProfile.id,
+        email: updatedProfile.contactEmail || '',
+        firstName: updatedProfile.firstName,
+        lastName: updatedProfile.lastName,
+        company: updatedProfile.company,
+        language: updatedProfile.preferredLanguage,
+        currency: updatedProfile.preferredCurrency,
+        contactPhone: updatedProfile.contactPhone,
+      };
+    } catch (error) {
+      console.error('Error updating customer profile:', error);
+      throw new Error(`Failed to update customer profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 }
 

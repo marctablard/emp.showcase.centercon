@@ -21,7 +21,7 @@ function Label({ className, isOptional, hasTooltip, tooltipText, ...props }: Lab
       )}
       {...props}
     >
-      <div>{props.children}</div>
+      {props.children}
       {hasTooltip && (
         <Tooltip>
           <TooltipTrigger asChild>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from '@/hooks/history/useHistory';
 import { Filter, SearchParams, SearchResult } from '@/platform/services/model/common';
+import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
 
 export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: SearchResult<T>) {
   const { addSearchQuery } = useHistory();
@@ -13,6 +14,12 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>(initialSearch?.filters || {});
   const [currentQuery, setCurrentQuery] = useState<string | undefined>(initialSearch?.query);
   const [currentSort, setCurrentSort] = useState<string | undefined>(initialSearch?.sort);
+  // Suggestions state
+  const [suggestions, setSuggestions] = useState<SearchSuggestions>({
+    queryCompletions: [],
+    products: [],
+    categories: [],
+  });
 
   // Keep track of the last search params for pagination
   const lastSearchParams = useRef<SearchParams<T>>({
@@ -28,7 +35,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
 
     try {
       // Build the URL with query parameters
-      const url = new URL('/api/search');
+      const url = new URL('/api/search', window.location.origin);
 
       // Add basic parameters
       if (params.query) {
@@ -158,6 +165,37 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   /**
    * Change the sort order
    */
+  /**
+   * Get query suggestions
+   */
+  const getSuggestions = useCallback(async (query: string, locale?: string): Promise<void> => {
+    if (!query?.trim()) {
+      setSuggestions({
+        queryCompletions: [],
+        products: [],
+        categories: [],
+      });
+      return;
+    }
+    try {
+      const url = new URL('/api/search/suggestions', window.location.origin);
+      url.searchParams.append('query', query);
+      if (locale) {
+        url.searchParams.append('locale', locale);
+      }
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        throw new Error(`Suggestions failed: ${response.statusText}`);
+      }
+      const data = await response.json();
+
+      // Set suggestions directly from API response
+      setSuggestions(data);
+    } catch (err) {
+      console.error('Error fetching suggestions:', err);
+    }
+  }, []);
+
   const changeSort = useCallback(
     (sort: string) => {
       search({
@@ -194,6 +232,9 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
     resetAllFacets,
     changePage,
     changeSort,
+    suggestions,
+    getSuggestions,
+    setPage: changePage,
   };
 }
 

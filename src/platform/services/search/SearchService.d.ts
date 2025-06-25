@@ -1,6 +1,7 @@
 // c:\Workspace\emporix-showcase\src\platform\services\search\SearchService.d.ts
 import { SearchParams, SearchResult } from '../model/common';
 import { Product } from '../model/product';
+import { SearchSuggestions } from '../model/search';
 
 export interface SearchService {
   /**
@@ -10,8 +11,11 @@ export interface SearchService {
 
   /**
    * Get product suggestions based on a search query
+   * @param query Search query string
+   * @param locale Optional locale for localized content
+   * @returns SearchSuggestions object containing query completions, products, and categories
    */
-  getSuggestions(query: string, locale?: string): Promise<string[]>;
+  getSuggestions(query: string, locale?: string): Promise<SearchSuggestions>;
 
   /**
    * Get highlighted products

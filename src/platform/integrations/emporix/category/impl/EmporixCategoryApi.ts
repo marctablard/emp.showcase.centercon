@@ -219,6 +219,10 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         url += `?showUnpublished=${showUnpublished}`;
       }
 
+      // Use service access token for unpublished categories, otherwise use public token
+      const tokenType = showUnpublished ? 'service' : 'public';
+      const authOptions = showUnpublished ? { scopes: ['category:read'] } : undefined;
+
       const response = await this.apiInvoker.authenticatedFetch(
         url,
         {
@@ -227,7 +231,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
             'X-Version': 'v2', // Required for this endpoint as per API docs
           },
         },
-        'public',
+        tokenType,
+        authOptions,
       );
 
       if (!response.ok) {

@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     const suggestions = await searchService.getSuggestions(query, locale);
 
-    return NextResponse.json({ suggestions });
+    return NextResponse.json(suggestions);
   } catch (error) {
     console.error('Error fetching suggestions:', error);
     return NextResponse.json({ error: 'Failed to fetch suggestions' }, { status: 500 });

@@ -53,13 +53,25 @@ class BatteryIncludedShopApi implements ShopApi {
 
     const url = `/api/v1/collections/${this.config.collection}/documents/suggest?${params.toString()}`;
 
-    const response = await this.apiClient.apiFetch(url, {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-    });
+    try {
+      const response = await this.apiClient.apiFetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+      });
 
-    const data = await response.json();
-    return data.suggestions || [];
+      console.log(`[ShopApi] Suggest response status: ${response.status}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[ShopApi] Suggest API error: ${response.statusText}`, errorText);
+        return [];
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('[ShopApi] Exception in suggest API call:', error);
+      return [];
+    }
   }
 
   /**

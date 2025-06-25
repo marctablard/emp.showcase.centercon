@@ -113,7 +113,7 @@ export default function Registration() {
   }
 
   return (
-    <div className="w-full max-w-228 px-6 pb-8 flex flex-col gap-8" ref={top}>
+    <div className="w-full max-w-228 px-6 pb-32 pt-6 md:pt-0 flex flex-col gap-8" ref={top}>
       <div className="flex flex-col gap-2">
         <H4>{t('title')}</H4>
         <p>

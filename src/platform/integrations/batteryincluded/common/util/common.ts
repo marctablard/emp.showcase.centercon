@@ -43,11 +43,18 @@ export function buildSearchParams<T>(params: BatteryIncludedSearchParams<T>): st
   if (params.filters) {
     Object.entries(params.filters).forEach(([key, value]) => {
       if (Array.isArray(value)) {
+        // Handle array values
         value.forEach((v) => {
           queryParams.append(`f[${key}][]`, v);
         });
+      } else if (typeof value === 'object' && value !== null) {
+        // Handle nested filter objects like price ranges
+        Object.entries(value).forEach(([subKey, subValue]) => {
+          queryParams.append(`f[${key}][${subKey}]`, String(subValue));
+        });
       } else {
-        queryParams.append(`f[${key}]`, value);
+        // Handle simple string values
+        queryParams.append(`f[${key}]`, String(value));
       }
     });
   }

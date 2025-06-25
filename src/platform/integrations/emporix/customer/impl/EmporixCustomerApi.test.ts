@@ -3,6 +3,7 @@ import { TokenManager } from '../../common/TokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
+import { PasswordChangeDto } from '../../customer/CustomerApi';
 import { EmporixCustomerAddress } from '../../model/customer';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixCustomerApi from './EmporixCustomerApi';
@@ -225,6 +226,201 @@ describe('EmporixCustomerApi', () => {
       } catch (error) {
         console.error('Error in address update test:', error);
         throw error;
+      }
+    }, 15000);
+  });
+
+  describe('Password Management', () => {
+    // Store original credentials for later use
+    let originalUsername: string;
+    let originalPassword: string;
+    const tempPassword = `Temp${Date.now()}Password!`;
+
+    // Set up credentials before tests
+    beforeAll(async () => {
+      try {
+        // Get test credentials
+        originalUsername = 'forrest.gump@alaba.ma';
+        originalPassword = 'Test1234';
+
+        if (!originalUsername || !originalPassword) {
+          throw new Error('Test credentials not found');
+        }
+
+        // Login with the original credentials
+        await customerApi.login(originalUsername, originalPassword);
+        console.log('Successfully logged in with original credentials');
+      } catch (error) {
+        console.error('Error during test setup authentication:', error);
+        throw error;
+      }
+    }, 15000);
+
+    // Clean up after all tests - ensure password is restored
+    afterAll(async () => {
+      // Clear tokens before logging out
+      await tokenManager.clearTokens(tenant);
+      console.log('Tokens cleared after tests');
+    }, 10000);
+
+    it('should change password and then revert back to original', async () => {
+      // Skip this test if we don't have valid credentials
+      if (!originalUsername || !originalPassword) {
+        console.warn('Skipping password change test due to missing credentials');
+        return;
+      }
+
+      try {
+        console.log('Starting password change test...');
+
+        // Step 1: Change password from original to temp
+        const firstChangeData: PasswordChangeDto = {
+          currentPassword: originalPassword,
+          newPassword: tempPassword,
+        };
+
+        await customerApi.changePassword(firstChangeData);
+        console.log('Successfully changed password to temporary password');
+
+        // Step 2: Verify we can login with the new password
+        // First clear the token to force a new login
+        await tokenManager.clearTokens(tenant);
+
+        // Try logging in with the new password
+        await customerApi.login(originalUsername, tempPassword);
+        console.log('Successfully verified login with temporary password');
+
+        // Step 3: Change password back to original
+        const secondChangeData: PasswordChangeDto = {
+          currentPassword: tempPassword,
+          newPassword: originalPassword,
+        };
+
+        await customerApi.changePassword(secondChangeData);
+        console.log('Successfully reverted password to original');
+
+        // Step 4: Verify we can login with the original password again
+        // Clear token to force a new login
+        await tokenManager.clearTokens(tenant);
+
+        // Try logging in with the original password
+        await customerApi.login(originalUsername, originalPassword);
+        console.log('Successfully verified login with original password');
+      } catch (error) {
+        console.error('Error in password change test:', error);
+
+        // Emergency restoration of original password if something fails
+        try {
+          // Try to login with temp password first
+          await tokenManager.clearTokens(tenant);
+          await customerApi.login(originalUsername, tempPassword);
+
+          // Change back to original
+          const emergencyChangeData: PasswordChangeDto = {
+            currentPassword: tempPassword,
+            newPassword: originalPassword,
+          };
+          await customerApi.changePassword(emergencyChangeData);
+          console.log('Emergency password restoration completed');
+        } catch (restoreError) {
+          console.error('Failed emergency password restoration:', restoreError);
+        }
+
+        fail(`Password change test failed: ${error}`);
+      }
+    }, 30000);
+  });
+
+  describe('Profile Management', () => {
+    // Store original profile data for restoration
+    let originalProfile: any;
+    let isAuthenticated = false;
+
+    // Set up credentials before tests
+    beforeAll(async () => {
+      try {
+        // Get test credentials
+        const username = 'forrest.gump@alaba.ma';
+        const password = 'Test1234';
+
+        if (!username || !password) {
+          throw new Error('Test credentials not found');
+        }
+
+        // Login with the test credentials
+        await customerApi.login(username, password);
+        console.log('Successfully logged in for profile management tests');
+        isAuthenticated = true;
+
+        // Get original profile data to restore later
+        originalProfile = await customerApi.getCustomerProfile();
+        console.log('Original profile data saved for restoration');
+      } catch (error) {
+        console.error('Error during profile test setup:', error);
+        throw error;
+      }
+    }, 15000);
+
+    // Clean up after all tests - restore original profile data
+    afterAll(async () => {
+      if (isAuthenticated && originalProfile) {
+        try {
+          // Restore the original profile data
+          await customerApi.updateCustomerProfile({
+            firstName: originalProfile.firstName,
+            lastName: originalProfile.lastName,
+            contactPhone: originalProfile.contactPhone,
+            company: originalProfile.company,
+            preferredLanguage: originalProfile.preferredLanguage,
+          });
+          console.log('Original profile data restored');
+        } catch (error) {
+          console.error('Error restoring original profile data:', error);
+        }
+      }
+
+      // Clear tokens
+      await tokenManager.clearTokens(tenant);
+      console.log('Tokens cleared after profile tests');
+    }, 10000);
+
+    it('should update customer profile and verify changes', async () => {
+      if (!isAuthenticated) {
+        console.warn('Skipping profile update test due to authentication failure');
+        return;
+      }
+
+      try {
+        console.log('Starting profile update test...');
+
+        // Step 1: Create profile update data
+        const timestamp = Date.now();
+        const updateData = {
+          firstName: `ForrestTest${timestamp}`,
+          lastName: `GumpTest${timestamp}`,
+          contactPhone: `123-456-${timestamp % 10000}`,
+          company: `Bubba Gump Test Co ${timestamp}`,
+          preferredLanguage: 'de_DE',
+        };
+
+        // Step 2: Update the profile
+        await customerApi.updateCustomerProfile(updateData);
+        console.log('Profile update request completed');
+
+        // Step 3: Verify the profile was updated by retrieving it
+        const updatedProfile = await customerApi.getCustomerProfile();
+
+        // Verify each updated field
+        expect(updatedProfile.firstName).toBe(updateData.firstName);
+        expect(updatedProfile.lastName).toBe(updateData.lastName);
+        expect(updatedProfile.contactPhone).toBe(updateData.contactPhone);
+        expect(updatedProfile.company).toBe(updateData.company);
+        expect(updatedProfile.preferredLanguage).toBe(updateData.preferredLanguage);
+
+        console.log('Successfully verified profile updates');
+      } catch (error) {
+        console.error('Error in profile update test:', error);
+        fail(`Profile update test failed: ${error}`);
       }
     }, 15000);
   });

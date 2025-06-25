@@ -220,6 +220,8 @@
         "accountSettings": "Account Settings",
         "password": "Password",
         "passwordConfirmation": "Confirm Password",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
         "emailSignup": "Email Signup",
         "newsletter": "Newsletter",
         "dealsAlerts": "Deals Alerts",
