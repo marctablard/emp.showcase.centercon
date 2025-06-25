@@ -61,4 +61,5 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
     );
   }
   return <CartEmpty />;
+  return <CartEmpty />;
 }
