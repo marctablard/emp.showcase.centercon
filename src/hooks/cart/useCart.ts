@@ -232,7 +232,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     [cart, fetchCart, setLoading],
   );
 
-  const updateDeliveryMethod = async (data: CartDeliveryData): Promise<CartMethodResult> => {
+  const updateDeliveryMethod = async (): Promise<CartMethodResult> => {
     setLoading(true);
     setError(null);
 

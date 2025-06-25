@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Pencil } from 'lucide-react';
@@ -52,14 +51,9 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
   const { isAuthenticated } = useAuthentication();
   const { getDefaultAddress } = useAddresses();
   const shippingAddress = getDefaultAddress('SHIPPING');
-
-  const [formError, setFormError] = useState<string | null>(null);
   const { updateDeliveryMethod } = useCart();
 
   async function onSubmit(values: CartDeliveryData) {
-    console.log('test');
-    setFormError(null);
-
     try {
       const result = await updateDeliveryMethod({
         deliveryMethod: values.deliveryMethod,
@@ -73,7 +67,6 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
       }
     } catch (error) {
       console.error('Cart Delivery error:', error);
-      setFormError('Cart Delivery error');
     }
   }
 

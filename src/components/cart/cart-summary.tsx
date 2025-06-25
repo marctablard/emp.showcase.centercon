@@ -1,13 +1,8 @@
 import { RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import router from 'next/router';
 import { Info, LockKeyhole } from 'lucide-react';
-import { useCart } from '@/hooks/cart/useCart';
-import { useValidator } from '@/hooks/validation/useValidator';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart';
-import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { CartFreeship } from './cart-freeship';
