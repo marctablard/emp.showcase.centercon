@@ -7,6 +7,7 @@ import type { Filter, SearchParams, SearchResult } from '@/platform/services/mod
 import type { Product } from '@/platform/services/model/product';
 import type { SearchService } from '@/platform/services/search/SearchService';
 import type { ProductMapper } from '../../model/product/ProductMapper';
+import type { SearchSuggestions, SuggestionsMapper } from '../../model/search';
 
 /**
  * Implementation of SearchService for BatteryIncluded product data.
@@ -16,6 +17,7 @@ import type { ProductMapper } from '../../model/product/ProductMapper';
 class BatteryIncludedSearchService implements SearchService {
   private shopApi: ShopApi;
   private productMapper: ProductMapper<BatteryIncludedProduct>;
+  private suggestionsMapper: SuggestionsMapper;
 
   constructor(
     @inject('BatteryIncludedShopApi') shopApi: ShopApi,
@@ -23,6 +25,8 @@ class BatteryIncludedSearchService implements SearchService {
   ) {
     this.shopApi = shopApi;
     this.productMapper = productMapper;
+    // Since our BatteryIncludedProductMapper also implements SuggestionsMapper, we can use it directly
+    this.suggestionsMapper = productMapper as unknown as SuggestionsMapper;
   }
 
   async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
@@ -57,11 +61,19 @@ class BatteryIncludedSearchService implements SearchService {
     };
   }
 
-  async getSuggestions(query: string, locale?: string): Promise<string[]> {
-    const suggestions = await this.shopApi.suggest(query, locale);
+  async getSuggestions(query: string, locale?: string): Promise<SearchSuggestions> {
+    try {
+      const apiResponse = await this.shopApi.suggest(query, locale);
 
-    // Extract the text from suggestions
-    return suggestions.map((suggestion) => suggestion.text);
+      return this.suggestionsMapper.mapSearchSuggestions(apiResponse);
+    } catch (error) {
+      console.error('[SearchService] Error getting suggestions:', error);
+      return {
+        queryCompletions: [],
+        products: [],
+        categories: [],
+      };
+    }
   }
 
   async getHighlights(): Promise<Product[]> {
