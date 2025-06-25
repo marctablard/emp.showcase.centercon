@@ -1,9 +1,13 @@
 import { RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import router from 'next/router';
 import { Info, LockKeyhole } from 'lucide-react';
+import { useCart } from '@/hooks/cart/useCart';
+import { useValidator } from '@/hooks/validation/useValidator';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart';
+import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { CartFreeship } from './cart-freeship';
@@ -113,7 +117,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                   {isDelivery && (
                     <div className="flex justify-between font-medium text-base">
                       <span>{t('shippingCosts')}</span>
-                      <span>folgt</span>
+                      <span>Shipping Costs</span>
                     </div>
                   )}
                 </div>
@@ -122,7 +126,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                   {isDelivery && (
                     <div className="flex justify-between font-medium text-base">
                       <span>{t('freightCosts')}</span>
-                      <span>folgt</span>
+                      <span>Freight Costs</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-xl">
@@ -133,11 +137,10 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
               </div>
             </CardContent>
             <CardFooter className="flex flex-col p-0">
-              <Link href="/checkout" className="w-full">
-                <Button className="w-full" disabled={!isDelivery || loading}>
-                  {t('goToCheckout')}
-                </Button>
-              </Link>
+              <Button type="submit" form="cart-delivery-form" className="w-full" disabled={!isDelivery || loading}>
+                {t('goToCheckout')}
+              </Button>
+
               <div className="flex align-center gap-2 text-neutral-600 pt-4">
                 <div>
                   <LockKeyhole width={12} />

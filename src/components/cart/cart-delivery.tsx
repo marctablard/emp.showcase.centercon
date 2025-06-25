@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { Pencil } from 'lucide-react';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
+import { useCart } from '@/hooks/cart/useCart';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
@@ -17,6 +21,7 @@ interface CartDeliveryProps {
 
 export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
   const t = useTranslations('cart');
+  const router = useRouter();
 
   const { form } = useValidator(
     'CartDeliveryValidationService',
@@ -48,38 +53,64 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
   const { getDefaultAddress } = useAddresses();
   const shippingAddress = getDefaultAddress('SHIPPING');
 
+  const [formError, setFormError] = useState<string | null>(null);
+  const { updateDeliveryMethod } = useCart();
+
+  async function onSubmit(values: CartDeliveryData) {
+    console.log('test');
+    setFormError(null);
+
+    try {
+      const result = await updateDeliveryMethod({
+        deliveryMethod: values.deliveryMethod,
+      });
+
+      if (result.success) {
+        // Redirect to login page or show a success message
+        router.push('/checkout');
+      } else {
+        console.log('Pickup not possible');
+      }
+    } catch (error) {
+      console.error('Cart Delivery error:', error);
+      setFormError('Cart Delivery error');
+    }
+  }
+
   return (
     <Card className="p-0 border-none shadow-footer mb-6">
       <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2">
         <div className="border-b pb-4 md:border-r md:border-b-0 md:pb-0 flex flex-col gap-4">
           <h5 className="text-3xl font-bold">{t('deliveryMethod')}</h5>
           <Form {...form}>
-            <FormField
-              control={form.control}
-              name="deliveryMethod"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <RadioGroup
-                    onValueChange={(value) => setIsDelivery(value === 'delivery')}
-                    defaultValue={field.value}
-                    className="flex flex-col"
-                  >
-                    <FormItem className="flex items-center gap-3">
-                      <FormControl>
-                        <RadioGroupItem value="delivery" />
-                      </FormControl>
-                      <FormLabel className="font-normal">{t('ship')}</FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center gap-3">
-                      <FormControl>
-                        <RadioGroupItem value="pickup" />
-                      </FormControl>
-                      <FormLabel className="font-normal">{t('pickup')}</FormLabel>
-                    </FormItem>
-                  </RadioGroup>
-                </FormItem>
-              )}
-            />
+            <form id="cart-delivery-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
+              <FormField
+                control={form.control}
+                name="deliveryMethod"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <RadioGroup
+                      onValueChange={(value) => setIsDelivery(value === 'delivery')}
+                      defaultValue={field.value}
+                      className="flex flex-col"
+                    >
+                      <FormItem className="flex items-center gap-3">
+                        <FormControl>
+                          <RadioGroupItem value="delivery" />
+                        </FormControl>
+                        <FormLabel className="font-normal">{t('ship')}</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center gap-3">
+                        <FormControl>
+                          <RadioGroupItem value="pickup" />
+                        </FormControl>
+                        <FormLabel className="font-normal">{t('pickup')}</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormItem>
+                )}
+              />
+            </form>
           </Form>
         </div>
         <div className="flex flex-col gap-4 pt-4 md:ps-6 md:pt-0">
@@ -96,7 +127,7 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
             </Button>
           </div>
           <div className="flex flex-col md:flex-row gap-4 justify-between">
-            {isAuthenticated && shippingAddress && (
+            {isAuthenticated && shippingAddress && isDelivery && (
               <div>
                 <p>{shippingAddress?.companyName}</p>
                 <p>{shippingAddress?.contactName}</p>

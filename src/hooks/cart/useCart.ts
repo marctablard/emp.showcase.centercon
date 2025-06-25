@@ -9,8 +9,14 @@ import {
   updateShippingInfo as apiUpdateShippingInfo,
 } from '@/lib/client/carts';
 import { Cart } from '@/platform/services/model/cart/cart';
+import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
 import { useCartStore } from '@/providers/StoreProvider';
 
+interface CartMethodResult {
+  success: boolean;
+  error?: string;
+  method?: string;
+}
 interface UseCart {
   // Cart data
   cart: Cart | null | undefined;
@@ -26,6 +32,7 @@ interface UseCart {
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
+  updateDeliveryMethod: (contactData: CartDeliveryData) => Promise<CartMethodResult>;
   clearCart: () => void;
 
   // Utility
@@ -225,6 +232,29 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     [cart, fetchCart, setLoading],
   );
 
+  const updateDeliveryMethod = async (data: CartDeliveryData): Promise<CartMethodResult> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const method = 'delivery';
+      setLoading(false);
+
+      return {
+        success: true,
+        method: method,
+      };
+    } catch (error) {
+      setLoading(false);
+      setError(error instanceof Error ? error : new Error('Failed switch delivery method'));
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed switch delivery method',
+      };
+    }
+  };
+
   const clearCart = useCallback(() => {
     setStoreCart(undefined);
     setCart(undefined);
@@ -240,6 +270,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     updateItemQuantity,
     removeItem,
     updateShippingInfo,
+    updateDeliveryMethod,
     clearCart,
     refetch: async () => {
       await fetchCart(false);

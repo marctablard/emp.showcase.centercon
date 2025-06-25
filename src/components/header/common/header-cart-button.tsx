@@ -58,7 +58,7 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
           </div>
         ) : (
           <div className="flex flex-col gap-4 justify-center">
-            <div className="overflow-y-scroll max-h-[250px] pr-2">
+            <div className="overflow-y-scroll max-h-[300px] pr-2">
               {cart.items.map((item) => (
                 <div key={item.id} className="py-4 border-b flex items-end justify-between gap-3">
                   <div className="flex gap-4">
@@ -78,7 +78,7 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
                       )}
                     </div>
                     <div className="flex-grow min-w-0">
-                      <p className="text-sm">folgt</p>
+                      <p className="text-sm">Allen Key Type</p>
                       <p className="font-bold truncate">{l10n(item.product?.name || 'Product')}</p>
                       <div className="flex items-center">
                         <p className="text-xs border-r border-neutral-200 pr-4">
@@ -109,13 +109,13 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
               {isDelivery && (
                 <div className="flex justify-between">
                   <span>{t('shippingCosts')}</span>
-                  <span>folgt</span>
+                  <span>Shipping Costs</span>
                 </div>
               )}
               {isDelivery && (
                 <div className="flex justify-between">
                   <span>{t('freightCosts')}</span>
-                  <span>folgt</span>
+                  <span>Freight Costs</span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-base">
