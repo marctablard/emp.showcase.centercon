@@ -26,16 +26,24 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
   const topPosition = 112;
 
   window.addEventListener('scroll', () => {
-    const containerHeight = fixedContainer?.current?.getBoundingClientRect().height;
+    const containerHeight = Math.round(
+      fixedContainer?.current?.getBoundingClientRect().height
+        ? fixedContainer?.current?.getBoundingClientRect().height
+        : 0,
+    );
     const containerTop = Math.round(
       fixedContainer?.current?.getBoundingClientRect().top ? fixedContainer?.current?.getBoundingClientRect().top : 0,
     );
-    const containerBottom = fixedContainer?.current?.getBoundingClientRect().bottom;
+    const containerBottom = Math.round(
+      fixedContainer?.current?.getBoundingClientRect().bottom
+        ? fixedContainer?.current?.getBoundingClientRect().bottom + 24
+        : 0,
+    );
     const windowHeight = window.innerHeight;
     const windowScroll = window.scrollY;
     const contentBox = leftContent?.current?.getBoundingClientRect();
-    const contentBottom = contentBox?.bottom;
-    const contentTop = contentBox?.top;
+    const contentBottom = Math.round(contentBox?.bottom ? contentBox?.bottom : 0);
+    const contentTop = Math.round(contentBox?.top ? contentBox?.top : 0);
     const contentHeight =
       leftContent?.current?.children &&
       Array.from(leftContent?.current?.children)
@@ -43,7 +51,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
         .reduce((a, b) => a + b, 0);
 
     if (containerHeight && contentHeight && containerHeight <= contentHeight) {
-      if (containerBottom && contentBottom && containerBottom + 24 <= contentBottom) {
+      if (containerBottom && contentBottom && containerBottom < contentBottom) {
         if (containerTop && containerTop <= topPosition) {
           setIsFixed(true);
           setIsFixedToTop(true);
@@ -52,20 +60,21 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
             setIsContainerBottom(false);
           }
         } else {
-          if ((contentTop && contentTop > containerTop) || windowScroll <= 0) {
+          if (contentTop && contentTop > containerTop) {
             setIsFixed(false);
             setIsContainerBottom(false);
           }
         }
       } else {
         setIsFixed(false);
-        if (containerBottom && contentBottom && containerBottom + 24 > contentBottom) {
+        if (containerBottom && contentBottom && containerBottom > contentBottom) {
           setIsContainerBottom(true);
         }
-        if (containerBottom && windowHeight - containerBottom <= 12) {
+        /*  if (containerBottom && windowHeight - containerBottom <= 12) {
+         
           setIsFixed(true);
           setIsFixedToTop(false);
-        }
+        } */
       }
     }
   });
