@@ -225,6 +225,12 @@
         "passwordConfirmation": "Confirm Password",
         "showPassword": "Show password",
         "hidePassword": "Hide password",
+        "passwordCriteria": {
+            "minLength": "Must be at least 8 characters long",
+            "uppercase": "Must contain at least one uppercase letter",
+            "lowercase": "Must contain at least one lowercase letter",
+            "number": "Must contain at least one number"
+        },
         "emailSignup": "Email Signup",
         "newsletter": "Newsletter",
         "dealsAlerts": "Deals Alerts",
@@ -504,10 +510,6 @@
                 "required": "Country is required"
             },
             "password": {
-                "minLength": "Password must be at least 8 characters",
-                "uppercase": "Password must contain at least one uppercase letter",
-                "lowercase": "Password must contain at least one lowercase letter",
-                "number": "Password must contain at least one number",
                 "mismatch": "Passwords don't match"
             },
             "passwordConfirmation": {

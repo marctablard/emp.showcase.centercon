@@ -18,12 +18,7 @@ export const RegistrationSchema = z
     country: z.string().min(1, 'register.country.required'),
     vatNumber: z.string().min(1, 'register.vatNumber.required'),
     shippingSameAsBilling: z.boolean(),
-    password: z
-      .string()
-      .min(8, 'register.password.minLength')
-      .regex(/[A-Z]/, 'register.password.uppercase')
-      .regex(/[a-z]/, 'register.password.lowercase')
-      .regex(/[0-9]/, 'register.password.number'),
+    password: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
     passwordConfirmation: z.string().min(1, 'register.passwordConfirmation.required'),
     additionalInformation: z.string().max(500).optional(),
     newsletter: z.boolean(),
