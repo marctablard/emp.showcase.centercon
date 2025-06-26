@@ -29,7 +29,7 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
 
   const onOpen = () => {
     if (window.innerWidth > 1024) {
-      isOpen ? setIsOpen(false) : setIsOpen(true);
+      return isOpen ? setIsOpen(false) : setIsOpen(true);
     }
   };
   const onClose = () => {
