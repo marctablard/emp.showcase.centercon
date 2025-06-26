@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { set } from 'lodash';
 import { Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
@@ -24,7 +25,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   const { updateItemQuantity, removeItem, loading } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
-
+  const [quantity, setQuantity] = useState(item.quantity);
   const isStrike = false;
 
   // Handle quantity update
@@ -32,6 +33,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
     if (newQuantity < 1 || isProcessing) return;
     setIsProcessing(true);
     try {
+      setQuantity(newQuantity);
       updateItemQuantity(item.id, newQuantity);
     } finally {
       setIsProcessing(false);
@@ -40,13 +42,21 @@ export function CartItemRow({ cart, item }: CartItemProps) {
 
   // Handle item removal
   const handleRemoveItem = async () => {
-    //  if (isProcessing) return;
+    if (isProcessing) return;
     setIsProcessing(true);
     try {
+      setQuantity(0);
       removeItem(item.id);
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const onChangeQty = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuantity(parseInt(e.target.value));
+    setTimeout(() => {
+      handleUpdateQuantity(parseInt(e.target.value));
+    }, 500);
   };
 
   return (
@@ -99,7 +109,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
         </div>
         <div className="col-start-2 row-start-4 md:col-start-3 md:col-end-3 md:row-start-1 lg:col-start-3 flex gap-4 ms-4 mt-4 md:ms-0 md:mt-0">
           <div className="w-full flex">
-            {item.quantity <= 1 ? (
+            {quantity <= 1 ? (
               <Button
                 variant="secondary"
                 size="icon"
@@ -115,9 +125,8 @@ export function CartItemRow({ cart, item }: CartItemProps) {
                 size="icon"
                 className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
                 disabled={loading}
-                onClick={() => handleUpdateQuantity(item.quantity - 1)}
+                onClick={() => handleUpdateQuantity(quantity - 1)}
               >
-                {' '}
                 <Minus className="h-6 w-6" />
               </Button>
             )}
@@ -127,15 +136,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
                   <Spinner color="primary" variant="sm" />
                 </div>
               ) : (
-                <Input
-                  defaultValue={item.quantity}
-                  className="py-3 text-center border-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleUpdateQuantity(Number(e.currentTarget.value));
-                    }
-                  }}
-                />
+                <Input value={quantity} className="py-3 text-center border-none" onChange={(e) => onChangeQty(e)} />
               )}
             </div>
             <Button
@@ -143,7 +144,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
               size="icon"
               className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm"
               disabled={loading}
-              onClick={() => handleUpdateQuantity(item.quantity + 1)}
+              onClick={() => handleUpdateQuantity(quantity + 1)}
             >
               <Plus className="h-6 w-6" />
             </Button>
