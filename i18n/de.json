@@ -326,27 +326,89 @@
         "viewOrders": "Meine Bestellungen anzeigen"
     },
     "Orders": {
-        "orderDetails": "Bestelldetails",
+        "previous": "Vorherige",
+        "next": "Nächste",
+        "title": "Bestellungen",
+        "myOrders": "Meine Bestellungen",
+        "showAllOrders": "Alle Bestellungen anzeigen",
         "orderNumber": "Bestellnummer",
         "orderDate": "Bestelldatum",
-        "email": "E-Mail",
-        "status": "Status",
-        "paymentMethod": "Zahlungsmethode",
-        "orderItems": "Bestellte Artikel",
-        "product": "Produkt",
-        "price": "Preis",
-        "quantity": "Menge",
-        "total": "Gesamtsumme",
+        "shippingAddress": "Lieferadresse",
+        "payment": "Zahlungsart",
+        "orderItems": "Bestellpositionen",
+        "quantity": "Artikel",
         "subtotal": "Zwischensumme",
         "shipping": "Versand",
-        "discount": "Rabatt",
         "free": "Kostenlos",
-        "shippingAddress": "Lieferadresse",
-        "errorFetchingOrder": "Fehler beim Abrufen der Bestelldetails",
-        "viewOrders": "Meine Bestellungen anzeigen",
-        "cancelOrder": "Stornieren",
-        "returnOrder": "Rückgabe",
+        "discount": "Rabatt",
+        "total": "Gesamt",
+        "email": "E-Mail",
+        "loading": "Bestellungen werden geladen...",
+        "noOrders": "Keine Bestellungen gefunden",
+        "ordersTotal": "Bestellungen insgesamt",
+        "search": {
+            "placeholder": "Bestellungen durchsuchen..."
+        },
+        "columns": {
+            "orderNumber": "Bestell-Nr.",
+            "status": "Status",
+            "orderDate": "Bestelldatum",
+            "deliveryDate": "Lieferdatum",
+            "deliveryAddress": "Lieferadresse",
+            "payment": "Zahlungsart",
+            "orderValue": "Bestellwert"
+        },
+        "status": {
+            "in_checkout": "Im Warenkorb",
+            "created": "Erstellt",
+            "confirmed": "Bestätigt",
+            "processing": "In Bearbeitung",
+            "ready_for_pickup": "Abholbereit",
+            "ready_for_shipping": "Versandbereit",
+            "shipped": "Versendet",
+            "delivered": "Geliefert",
+            "completed": "Abgeschlossen",
+            "cancelled": "Storniert"
+        },
+        "paymentTypes": {
+            "creditcard": "Kreditkarte",
+            "paypal": "PayPal",
+            "invoice": "Rechnung",
+            "prepayment": "Vorkasse"
+        },
         "orderActions": "Bestellaktionen"
+    },
+    "Documents": {
+        "title": "Dokumente für Ihre Organisation",
+        "categories": {
+            "contracts": "Verträge & Vereinbarungen",
+            "company": "Meine Firmendokumente",
+            "manuals": "Produkthandbücher & technische Datenblätter",
+            "warranty": "Garantieunterlagen"
+        }
+    },
+    "Invoices": {
+        "title": "Rechnungen",
+        "showAllInvoices": "Alle Rechnungen anzeigen",
+        "previous": "Zurück",
+        "next": "Weiter",
+        "noInvoices": "Keine Rechnungen gefunden",
+        "search": {
+            "placeholder": "Rechnungen durchsuchen..."
+        },
+        "columns": {
+            "invoiceNumber": "Rechnungs-Nr.",
+            "status": "Status",
+            "invoiceDate": "Rechnungsdatum",
+            "dueDate": "Fälligkeitsdatum",
+            "billingDate": "Abrechnungsdatum",
+            "orderValue": "Bestellwert"
+        },
+        "status": {
+            "open": "Offen",
+            "overdue": "Überfällig",
+            "paid": "Bezahlt"
+        }
     },
     "searchResults": {
         "showing": "Zeige {start}-{end} von {total} Produkten",
@@ -364,6 +426,15 @@
         "storeName": "Emporix Showcase Store"
     },
     "Account": {
+        "newServiceTicket": "Neues Service-Ticket",
+        "serviceTicketDialog": {
+            "title": "Service-Ticket erstellen",
+            "subject": "Betreff",
+            "message": "Nachricht",
+            "send": "Ticket senden",
+            "subjectPlaceholder": "Betreff eingeben",
+            "messagePlaceholder": "Beschreiben Sie Ihr Anliegen hier..."
+        },
         "profile": {
             "title": "Profileinstellungen",
             "description": "Aktualisieren Sie Ihre persönlichen Daten",
@@ -409,7 +480,36 @@
         "dashboardSettings": "Dashboard-Einstellungen",
         "customize": "Anpassen",
         "title": "Service Portal",
-        "welcomeBack": "Willkommen, {name}",
+        "hello": "Hallo",
+        "dashboard": "Dashboard",
+        "sidebar": {
+            "dashboard": "Dashboard",
+            "groups": {
+                "selfService": "Self Service",
+                "orderManagement": "Bestellverwaltung",
+                "myOrganisation": "Meine Organisation",
+                "myAccount": "Mein Konto"
+            },
+            "items": {
+                "supportTickets": "Support-Tickets",
+                "serviceCalendar": "Service-Kalender",
+                "trainingMaterial": "Schulungsmaterial",
+                "orderHistory": "Bestellhistorie",
+                "invoicesPayments": "Rechnungen & Zahlungen",
+                "quotes": "Angebote",
+                "returnsClaims": "Retouren & Reklamationen",
+                "quickOrder": "Schnellbestellung",
+                "companyManagement": "Unternehmensverwaltung",
+                "addressManagement": "Adressverwaltung",
+                "userManagement": "Benutzerverwaltung",
+                "paymentOptions": "Zahlungsoptionen",
+                "wishlists": "Wunschlisten",
+                "productsMaintenance": "Produkte & Wartung",
+                "contractsAgreements": "Verträge & Vereinbarungen",
+                "personalData": "Persönliche Daten",
+                "accountSettings": "Kontoeinstellungen"
+            }
+        },
         "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
         "accountDetails": "Kontodaten",
         "profileSettings": "Profileinstellungen",
@@ -482,7 +582,60 @@
         "saving": "Wird gespeichert...",
         "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
         "success": "Das hat geklappt",
-        "addressDeleted": "Adresse gelöscht"
+        "addressDeleted": "Adresse gelöscht",
+        "addressManagement": "Adressverwaltung",
+        "manageAddresses": "Adressen verwalten",
+        "addressManagementDescription": "Adressen anzeigen und verwalten"
+    },
+    "Notifications": {
+        "title": "Benachrichtigungen",
+        "viewAll": "Alle anzeigen",
+        "newInvoices": "neue Rechnungen",
+        "overdueInvoices": "überfällige Rechnungen",
+        "pendingOffers": "Angebote warten auf Ihre Genehmigung",
+        "tasksToComplete": "Aufgaben zu erledigen",
+        "openReturns": "offene Rückgaben",
+        "unreadDocuments": "ungelesene Dokumente"
+    },
+    "AiHelper": {
+        "title": "KI-Dashboard-Assistent",
+        "placeholder": "Stellen Sie Ihre Frage an den KI-Agenten",
+        "buttonText": "LOS!",
+        "suggestions": {
+            "openInvoices": "Wie viele Rechnungen sind offen?",
+            "availableOffers": "Welche Angebote sind aktuell verfügbar?",
+            "recentPurchases": "Welche Produkte wurden kürzlich gekauft?"
+        }
+    },
+    "Tickets": {
+        "title": "Support-Tickets",
+        "viewAll": "Alle Tickets anzeigen",
+        "search": {
+            "placeholder": "Tickets durchsuchen..."
+        },
+        "columns": {
+            "ticketNumber": "Ticket-Nr.",
+            "subject": "Betreff",
+            "status": "Status",
+            "date": "Datum",
+            "priority": "Priorität"
+        },
+        "status": {
+            "open": "Offen",
+            "pending": "In Bearbeitung",
+            "closed": "Geschlossen"
+        },
+        "priority": {
+            "high": "Hoch",
+            "medium": "Mittel",
+            "low": "Niedrig"
+        },
+        "sampleTicketSubjects": {
+            "delivery": "Frage zur Lieferzeit",
+            "invoice": "Problem mit Rechnung #INV-87634",
+            "product": "Produktinformationsanfrage",
+            "return": "Rückgabeanforderung für Bestellung #ORD-28746"
+        }
     },
     "Validation": {
         "contactData": {

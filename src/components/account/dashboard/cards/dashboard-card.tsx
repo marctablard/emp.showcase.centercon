@@ -19,7 +19,7 @@ export function DashboardCard({
   variant = 'stat',
 }: DashboardCardProps) {
   return (
-    <Card variant={variant} rounded="none" className={className}>
+    <Card variant={variant} rounded="xl" className={className}>
       {title && (
         <CardHeader>
           <CardTitle>{title}</CardTitle>
@@ -27,7 +27,7 @@ export function DashboardCard({
           {icon && <div className="h-4 w-4 text-muted-foreground absolute top-4 right-4">{icon}</div>}
         </CardHeader>
       )}
-      <CardContent className="overflow-y-auto p-6 pt-0 pb-0 scrollbar-thin">{children}</CardContent>
+      <CardContent className="overflow-y-auto p-4 pt-0 pb-0 scrollbar-thin">{children}</CardContent>
     </Card>
   );
 }

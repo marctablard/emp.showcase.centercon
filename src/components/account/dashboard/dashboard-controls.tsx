@@ -41,7 +41,7 @@ export default function DashboardControls({
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="flex items-center" aria-label={t('settings')}>
-            <Settings className="h-4 w-4" />
+            <Settings className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="mr-4">

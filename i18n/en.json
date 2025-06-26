@@ -7,7 +7,7 @@
     "Currencies": {
         "label": "Währungen"
     },
-    "Regions":{
+    "Regions": {
         "label": "Regionen"
     },
     "hello": {
@@ -317,30 +317,97 @@
         "orderConfirmed": "Order Confirmed!",
         "thankYou": "Thank you for your purchase. Your order has been received.",
         "emailConfirmation": "A confirmation email has been sent to",
-        "continueShopping": "Continue Shopping"    
+        "continueShopping": "Continue Shopping"
     },
     "Orders": {
-        "orderDetails": "Order Details",
-        "orderNumber": "Order Number",
-        "orderDate": "Order Date",
-        "email": "Email",
-        "status": "Status",
-        "paymentMethod": "Payment Method",
-        "orderItems": "Order Items",
-        "product": "Product",
-        "price": "Price",
-        "quantity": "Quantity",
-        "total": "Total",
+        "previous": "Previous",
+        "next": "Next",
+        "title": "Orders",
+        "myOrders": "My Orders",
+        "showAllOrders": "Show all orders",
+        "orderNumber": "Order number",
+        "orderDate": "Order date",
+        "shippingAddress": "Shipping address",
+        "paymentMethod": "Payment method",
+        "orderItems": "Order items",
+        "quantity": "item(s)",
         "subtotal": "Subtotal",
         "shipping": "Shipping",
-        "discount": "Discount",
         "free": "Free",
-        "shippingAddress": "Shipping Address",
-        "errorFetchingOrder": "Error fetching order details",
-        "viewOrders": "View My Orders",
-        "cancelOrder": "Cancel Order",
+        "discount": "Discount",
+        "total": "Total",
+        "email": "Email",
+        "loading": "Loading orders...",
         "returnOrder": "Return Order",
-        "orderActions": "Order Actions"
+        "orderActions": "Order Actions",
+        "deliveryDate": "Delivery Date",
+        "deliveryAddress": "Delivery Address",
+        "payment": "Payment",
+        "orderValue": "Order Value",
+        "noOrders": "No orders found",
+        "ordersTotal": "Total orders",
+        "search": {
+            "placeholder": "Search orders..."
+        },
+        "columns": {
+            "orderNumber": "Order #",
+            "status": "Status",
+            "orderDate": "Order Date",
+            "deliveryDate": "Delivery Date",
+            "deliveryAddress": "Delivery Address",
+            "payment": "Payment",
+            "orderValue": "Order Value"
+        },
+        "status": {
+            "in_checkout": "In Checkout",
+            "created": "Created",
+            "confirmed": "Confirmed",
+            "processing": "Processing",
+            "ready_for_pickup": "Ready for Pickup",
+            "ready_for_shipping": "Ready for Shipping",
+            "shipped": "Shipped",
+            "delivered": "Delivered",
+            "completed": "Completed",
+            "cancelled": "Cancelled"
+        },
+        "paymentTypes": {
+            "creditcard": "Credit Card",
+            "paypal": "PayPal",
+            "invoice": "Invoice",
+            "prepayment": "Prepayment"
+        }
+    },
+    "Documents": {
+        "title": "Documents for your Organisation",
+        "categories": {
+            "contracts": "Contracts & Agreements",
+            "company": "My Company Documents",
+            "manuals": "Product manuals & technical sheets",
+            "warranty": "Warranty documents"
+        }
+    },
+    "Invoices": {
+        "title": "Invoices",
+        "showAllInvoices": "Show all invoices",
+        "previous": "Previous",
+        "next": "Next",
+        "noInvoices": "No invoices found",
+        "search": {
+            "placeholder": "Search invoices..."
+        },
+        "columns": {
+            "invoiceNumber": "Invoice #",
+            "status": "Status",
+            "invoiceDate": "Invoice Date",
+            "dueDate": "Due Date",
+            "billingDate": "Billing Date",
+            "orderValue": "Order Value"
+        },
+        "status": {
+            "open": "Open",
+            "overdue": "Overdue",
+            "paid": "Paid"
+        }
     },
     "searchResults": {
         "showing": "Showing {start}-{end} of {total} products",
@@ -358,13 +425,61 @@
         "storeName": "Emporix Showcase Store"
     },
     "Account": {
+        "newServiceTicket": "New Service Ticket",
+        "serviceTicketDialog": {
+            "title": "Create Service Ticket",
+            "subject": "Subject",
+            "message": "Message",
+            "send": "Send Ticket",
+            "subjectPlaceholder": "Enter subject",
+            "messagePlaceholder": "Describe your issue here..."
+        },
+        "addressManagement": "Address Management",
+        "addressManagementDescription": "Manage your shipping and billing addresses",
+        "manageAddresses": "Manage Addresses",
+        "dashboard": "Dashboard",
+        "passwordChangeTitle": "Change Password",
+        "passwordChangeDescription": "Update your account password",
+        "profile": {
+            "title": "User Profile",
+            "description": "View and edit your personal details"
+        },
         "loading": "Dashboard loading...",
         "resetLayout": "Reset Layout",
         "settings": "Settings",
         "dashboardSettings": "Dashboard Settings",
         "customize": "Customize",
-        "title" : "Service Portal",
+        "title": "Service Portal",
         "welcomeBack": "Welcome, {name}",
+        "hello": "Hello",
+        "sidebar": {
+            "dashboard": "Dashboard",
+            "groups": {
+                "selfService": "Self Service",
+                "orderManagement": "Order Management",
+                "myOrganisation": "My Organisation",
+                "myAccount": "My Account"
+            },
+            "items": {
+                "supportTickets": "Support Tickets",
+                "serviceCalendar": "Service Calendar",
+                "trainingMaterial": "Training Material",
+                "orderHistory": "Order History",
+                "invoicesPayments": "Invoices & Payments",
+                "quotes": "Quotes",
+                "returnsClaims": "Returns & Claims",
+                "quickOrder": "Quick Order",
+                "companyManagement": "Company Management",
+                "addressManagement": "Address Management",
+                "userManagement": "User Management",
+                "paymentOptions": "Payment Options",
+                "wishlists": "Wishlists",
+                "productsMaintenance": "Products & Maintenance",
+                "contractsAgreements": "Contracts & Agreements",
+                "personalData": "Personal Data",
+                "accountSettings": "Account Settings"
+            }
+        },
         "accountDashboardDescription": "Manage your account, orders, and company information",
         "accountDetails": "Account Details",
         "company": "Company",
@@ -414,6 +529,56 @@
         "shippingAddresses": "Shipping Addresses",
         "shippingAddressesDescription": "Manage your shipping addresses",
         "manageShippingAddresses": "Manage Shipping Addresses"
+    },
+    "Notifications": {
+        "title": "Notifications",
+        "viewAll": "View all",
+        "newInvoices": "new invoices",
+        "overdueInvoices": "overdue invoices",
+        "pendingOffers": "offers waiting for your approval",
+        "tasksToComplete": "tasks to complete",
+        "openReturns": "open returns",
+        "unreadDocuments": "unread documents"
+    },
+    "AiHelper": {
+        "title": "AI Dashboard Helper",
+        "placeholder": "Enter your question for the AI agent",
+        "buttonText": "GO!",
+        "suggestions": {
+            "openInvoices": "How many invoices are open?",
+            "availableOffers": "What offers are currently available?",
+            "recentPurchases": "What products were purchased recently?"
+        }
+    },
+    "Tickets": {
+        "title": "Support Tickets",
+        "viewAll": "View all tickets",
+        "search": {
+            "placeholder": "Search tickets..."
+        },
+        "columns": {
+            "ticketNumber": "Ticket #",
+            "subject": "Subject",
+            "status": "Status",
+            "date": "Date",
+            "priority": "Priority"
+        },
+        "status": {
+            "open": "Open",
+            "pending": "Pending",
+            "closed": "Closed"
+        },
+        "priority": {
+            "high": "High",
+            "medium": "Medium",
+            "low": "Low"
+        },
+        "sampleTicketSubjects": {
+            "delivery": "Question about delivery time",
+            "invoice": "Issue with invoice #INV-87634",
+            "product": "Product information request",
+            "return": "Return request for order #ORD-28746"
+        }
     },
     "Validation": {
         "contactData": {
