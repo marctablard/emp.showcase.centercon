@@ -26,24 +26,37 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
   const topPosition = 112;
 
   window.addEventListener('scroll', () => {
-    const containerHeight = fixedContainer?.current?.getBoundingClientRect().height;
+    const containerHeight = Math.round(
+      fixedContainer?.current?.getBoundingClientRect().height
+        ? fixedContainer?.current?.getBoundingClientRect().height
+        : 0,
+    );
     const containerTop = Math.round(
       fixedContainer?.current?.getBoundingClientRect().top ? fixedContainer?.current?.getBoundingClientRect().top : 0,
     );
-    const containerBottom = fixedContainer?.current?.getBoundingClientRect().bottom;
+    const containerBottom = Math.round(
+      fixedContainer?.current?.getBoundingClientRect().bottom
+        ? fixedContainer?.current?.getBoundingClientRect().bottom + 24
+        : 0,
+    );
     const windowHeight = window.innerHeight;
-    const windowScroll = window.scrollY;
     const contentBox = leftContent?.current?.getBoundingClientRect();
-    const contentBottom = contentBox?.bottom;
-    const contentTop = contentBox?.top;
+    const contentBottom = Math.round(contentBox?.bottom ? contentBox?.bottom : 0);
+    const contentTop = Math.round(contentBox?.top ? contentBox?.top : 0);
     const contentHeight =
       leftContent?.current?.children &&
       Array.from(leftContent?.current?.children)
         .map((item) => item.getBoundingClientRect().height)
         .reduce((a, b) => a + b, 0);
 
-    if (containerHeight && contentHeight && containerHeight <= contentHeight) {
-      if (containerBottom && contentBottom && containerBottom + 24 <= contentBottom) {
+    if (
+      containerHeight &&
+      contentHeight &&
+      containerHeight <= contentHeight &&
+      windowHeight - containerHeight > 0 &&
+      window.innerWidth >= 1024
+    ) {
+      if (containerBottom && contentBottom && containerBottom < contentBottom) {
         if (containerTop && containerTop <= topPosition) {
           setIsFixed(true);
           setIsFixedToTop(true);
@@ -52,17 +65,17 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
             setIsContainerBottom(false);
           }
         } else {
-          if ((contentTop && contentTop > containerTop) || windowScroll <= 0) {
+          if (contentTop && contentTop > containerTop) {
             setIsFixed(false);
             setIsContainerBottom(false);
           }
         }
       } else {
-        setIsFixed(false);
-        if (containerBottom && contentBottom && containerBottom + 24 > contentBottom) {
+        if (containerBottom && contentBottom && containerBottom > contentBottom) {
+          setIsFixed(false);
           setIsContainerBottom(true);
         }
-        if (containerBottom && windowHeight - containerBottom <= 12) {
+        if (containerBottom && windowHeight - containerBottom < 12) {
           setIsFixed(true);
           setIsFixedToTop(false);
         }
@@ -71,20 +84,20 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
   });
 
   return (
-    <div className="col-span-1 mb-6 flex">
+    <div className="col-span-1 lg:col-span-4 xl:col-span-1 mb-6 flex">
       <div className={cn('flex flex-col w-full', isContainerBottom ? 'justify-end' : 'justify-start')}>
         <div
           className={cn(
             'flex flex-col gap-4',
             isFixed ? 'fixed lg:me-9' : '',
-            isFixedToTop ? 'top-[112px]' : 'bottom-[12px]',
+            isFixedToTop ? 'top-[112px]' : 'bottom-[40px]',
           )}
           ref={fixedContainer}
         >
-          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer">
+          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-sm lg:max-w-[438px] w-full">
             <CardHeader className="p-0">
               <CardTitle>
-                <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
+                <h5 className="text-3xl  font-headlines">{t('orderSummary')}</h5>
               </CardTitle>
             </CardHeader>
             <CardContent className="bg-white rounded-md p-4">
@@ -100,17 +113,19 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                   <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
                 </div>
 
-                <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
+                <div className="flex justify-between text-base pt-4 border-t border-neutral-200">
                   <span>{t('netValueOfGoods')}</span>
-                  <span className="font-bold">{formatCurrency(cart.tax.netValue, cart.tax.currency)}</span>
+                  <span className="font-bold font-headlines">
+                    {formatCurrency(cart.tax.netValue, cart.tax.currency)}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <div className="flex justify-between font-medium text-base">
+                  <div className="flex justify-between text-base">
                     <span>{t('statutoryVat')}</span>
                     <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
                   </div>
                   {isDelivery && (
-                    <div className="flex justify-between font-medium text-base">
+                    <div className="flex justify-between text-base">
                       <span>{t('shippingCosts')}</span>
                       <span>Shipping Costs</span>
                     </div>
@@ -119,12 +134,12 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                 {isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && <CartFreeship cart={cart} />}
                 <div className="flex flex-col gap-2">
                   {isDelivery && (
-                    <div className="flex justify-between font-medium text-base">
+                    <div className="flex justify-between text-base">
                       <span>{t('freightCosts')}</span>
                       <span>Freight Costs</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold text-xl">
+                  <div className="flex justify-between font-bold font-headlines text-xl">
                     <span>{t('total')}</span>
                     <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
                   </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
@@ -10,6 +11,7 @@ import { useL10n } from '@/hooks/useL10n';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart, CartItem } from '@/platform/services/model/cart/cart.d';
 import { Input } from '../ui/input';
+import { Spinner } from '../ui/spinner';
 
 interface CartItemProps {
   cart: Cart;
@@ -19,17 +21,18 @@ interface CartItemProps {
 export function CartItemRow({ cart, item }: CartItemProps) {
   const { l10n } = useL10n();
   const t = useTranslations('cart');
-  const { updateItemQuantity, removeItem } = useCart(cart);
+  const { updateItemQuantity, removeItem, loading } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
-
+  const router = useRouter();
+  const [quantity, setQuantity] = useState(item.quantity);
   const isStrike = false;
 
   // Handle quantity update
   const handleUpdateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1 || isProcessing) return;
-
     setIsProcessing(true);
     try {
+      setQuantity(newQuantity);
       updateItemQuantity(item.id, newQuantity);
     } finally {
       setIsProcessing(false);
@@ -39,19 +42,26 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   // Handle item removal
   const handleRemoveItem = async () => {
     if (isProcessing) return;
-
     setIsProcessing(true);
     try {
+      setQuantity(0);
       removeItem(item.id);
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const onChangeQty = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuantity(parseInt(e.target.value));
+    setTimeout(() => {
+      handleUpdateQuantity(parseInt(e.target.value));
+    }, 500);
+  };
+
   return (
     <div className="py-6 first:border-none border-t border-neutral-200 md:first:border-solid">
-      <div className="grid grid-cols-[1fr_2fr] sm:grid-cols-[120px_3fr] md:grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_1fr_1fr] xl:grid-cols-[120px_3fr_1fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
-        <div className="col-start-1 row-start-2 md:row-start-1 row-end-3">
+      <div className="grid grid-cols-[1fr_2fr] sm:grid-cols-[120px_3fr] md:grid-cols-[120px_3fr_1fr_1fr] lg:grid-cols-[120px_2fr_2fr_1fr] xl:grid-cols-[120px_3fr_1.5fr_2fr] 2xl:grid-cols-[120px_4fr_1fr_1fr]">
+        <div className="col-start-1 row-start-2  md:row-start-1 row-end-3">
           <div className="rounded-ss-xl rounded-ee-xl w-[100px] h-[65px] sm:w-[120px] sm:h-[78px] object-fit overflow-hidden">
             {item.product && item.product.images?.length ? (
               <Image
@@ -68,11 +78,21 @@ export function CartItemRow({ cart, item }: CartItemProps) {
             )}
           </div>
         </div>
-        <div className="col-start-1 col-end-3 row-start-1 md:col-start-2 flex flex-col gap-1 mb-4 md:mb-0 md:ms-4">
+        <div className="col-start-1 col-end-3 row-start-1 md:col-start-2 flex flex-col gap-1 mb-4 md:mb-0 md:mx-4">
           <p className="text-sm md:text-base">Allen Key Type</p>
-          <p className="font-bold text-base">{l10n(item.product?.name || 'Product')}</p>
+          <p
+            className="font-bold text-base font-headlines cursor-pointer"
+            onClick={() => router.push(`/product/${item.product?.id}`)}
+          >
+            {l10n(item.product?.name || 'Product')}
+          </p>
         </div>
-        <div className="row-start-3 col-start-2 md:col-end-2 flex flex-col gap-2 md:row-start-2 ms-4 pt-2">
+        <div
+          className={cn(
+            'row-start-3 col-start-2 md:col-end-2 flex flex-col gap-2 md:row-start-2 mx-4 pt-2',
+            !isStrike && '-mt-4 sm:-mt-6 md:-mt-0',
+          )}
+        >
           <p className="text-sm">
             {t('itemNumber')}: {item.product?.id}
           </p>
@@ -88,12 +108,12 @@ export function CartItemRow({ cart, item }: CartItemProps) {
         </div>
         <div className="col-start-2 row-start-4 md:col-start-3 md:col-end-3 md:row-start-1 lg:col-start-3 flex gap-4 ms-4 mt-4 md:ms-0 md:mt-0">
           <div className="w-full flex">
-            {item.quantity <= 1 ? (
+            {quantity <= 1 ? (
               <Button
                 variant="secondary"
                 size="icon"
                 className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
-                disabled={isProcessing}
+                disabled={loading}
                 onClick={handleRemoveItem}
               >
                 <Trash2 className="h-6 w-6" />
@@ -103,32 +123,27 @@ export function CartItemRow({ cart, item }: CartItemProps) {
                 variant="secondary"
                 size="icon"
                 className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
-                disabled={isProcessing}
-                onClick={() => handleUpdateQuantity(item.quantity - 1)}
+                disabled={loading}
+                onClick={() => handleUpdateQuantity(quantity - 1)}
               >
-                {' '}
                 <Minus className="h-6 w-6" />
               </Button>
             )}
             <div className="w-15 h-13 border-y border-neutral-300">
-              {isProcessing ? (
-                <div className="animate-pulse h-4 w-4 mx-auto bg-muted rounded-full"></div>
+              {loading ? (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Spinner color="primary" variant="sm" />
+                </div>
               ) : (
-                <Input
-                  value={item.quantity}
-                  className="py-3 text-center border-none"
-                  onChange={(e) => {
-                    handleUpdateQuantity(Number(e.currentTarget.value));
-                  }}
-                />
+                <Input value={quantity} className="py-3 text-center border-none" onChange={(e) => onChangeQty(e)} />
               )}
             </div>
             <Button
               variant="secondary"
               size="icon"
               className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm"
-              disabled={isProcessing}
-              onClick={() => handleUpdateQuantity(item.quantity + 1)}
+              disabled={loading}
+              onClick={() => handleUpdateQuantity(quantity + 1)}
             >
               <Plus className="h-6 w-6" />
             </Button>

@@ -9,10 +9,10 @@ export function CartAction() {
   const t = useTranslations('cart');
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4">
-      <div className="col-span-1 lg:col-span-2 2xl:col-span-3">
-        <div className="flex flex-col md:flex-row justify-between mb-4 gap-4 sm:gap-1">
-          <div className="flex flex-col sm:flex-row gap-1 sm:gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="col-span-1 lg:col-span-6 xl:col-span-2 2xl:col-span-3">
+        <div className="flex flex-wrap justify-between mb-4 gap-4 sm:gap-1">
+          <div className="flex flex-wrap gap-1 sm:gap-6">
             <Button
               variant="link"
               size="default"
