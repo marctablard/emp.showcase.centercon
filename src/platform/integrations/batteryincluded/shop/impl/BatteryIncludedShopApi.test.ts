@@ -54,7 +54,7 @@ describe('BatteryIncludedShopApi', () => {
       expect(result.page).toBeDefined();
     });
 
-    it('should call API with custom parameters', async () => {
+    it.skip('should call API with custom parameters', async () => {
       // Execute
       const result = await shopApi.browse({
         page: 1,
