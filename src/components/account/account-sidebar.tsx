@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { SidebarGroup } from '@/components/ui/sidebar-group';
 import { SidebarNavLink } from '@/components/ui/sidebar-nav-link';
@@ -28,10 +29,9 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
 export function AccountSidebar({ className, items, groups = [], ...props }: SidebarNavProps) {
   const pathname = usePathname();
   const { logout } = useAuthentication();
+  const locale = useLocale();
 
   const renderSidebarLink = (item: SidebarItem) => {
-    const isActive = pathname === item.href;
-
     if (item.href === '/account/logout') {
       return (
         <SidebarNavLink
@@ -46,7 +46,8 @@ export function AccountSidebar({ className, items, groups = [], ...props }: Side
         />
       );
     }
-
+    // Check if active prop is provided or determine based on path with locale handling
+    const isActive = pathname === `/${locale}${item.href}` || pathname === item.href;
     return (
       <SidebarNavLink
         key={item.href}

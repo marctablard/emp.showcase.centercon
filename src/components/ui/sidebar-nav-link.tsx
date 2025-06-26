@@ -1,9 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useLocale } from 'next-intl';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
@@ -50,16 +48,8 @@ export function SidebarNavLink({
   isLogout,
   ...props
 }: SidebarNavLinkProps) {
-  const pathname = usePathname();
-  const locale = useLocale();
-
-  // Check if active prop is provided or determine based on path with locale handling
-  const isActive = pathname === `/${locale}${href}` || pathname;
-
-  const activeVariant = isActive ? 'active' : variant || 'default';
+  const activeVariant = active ? 'active' : variant || 'default';
   const linkClassName = cn(sidebarNavLinkVariants({ variant: activeVariant }), className);
-  // For debugging purposes
-  console.log('isActive check:', { isActive, active, href, pathname, locale }, `/${locale}${href}`, pathname);
   if (isLogout || onClick) {
     return (
       <button type="button" className={linkClassName} onClick={onClick} {...props}>
