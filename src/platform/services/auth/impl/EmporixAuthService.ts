@@ -8,6 +8,7 @@ import EmporixSessionContextApi from '@/platform/integrations/emporix/session/im
 import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import type { CartMigrationService } from '../../cart/CartMigrationService';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
+import type { SessionService } from '../../session';
 import { AuthService } from '../AuthService';
 
 /**
@@ -30,6 +31,8 @@ export class EmporixAuthService implements AuthService {
     private readonly emporixAddressMapper: EmporixAddressMapper,
     @inject('CartMigrationService')
     private readonly cartMigrationService: CartMigrationService,
+    @inject('SessionService')
+    private readonly sessionService: SessionService,
   ) {}
 
   async login(credentials: Credentials): Promise<Session> {
@@ -76,6 +79,17 @@ export class EmporixAuthService implements AuthService {
     } else {
       customer.businessModel = 'B2C';
     }
+
+    const currentSession = await this.sessionService.getCurrent();
+
+    if (!currentSession) {
+      throw new Error('Failed to get session context');
+    }
+
+    customer.preferredLanguage = currentSession.language || 'en';
+    customer.preferredCurrency = currentSession.currency || 'EUR';
+    customer.preferredSite = currentSession.siteCode || 'main';
+
     const address: EmporixAddress | undefined = registration.address
       ? this.emporixAddressMapper.mapToSource(registration.address)
       : undefined;
