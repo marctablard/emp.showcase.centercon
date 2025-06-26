@@ -81,7 +81,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
         <div
           className={cn(
             'row-start-3 col-start-2 md:col-end-2 flex flex-col gap-2 md:row-start-2 mx-4 pt-2',
-            !isStrike && '-mt-4 ',
+            !isStrike && '-mt-4 sm:-mt-6 md:-mt-0',
           )}
         >
           <p className="text-sm">
