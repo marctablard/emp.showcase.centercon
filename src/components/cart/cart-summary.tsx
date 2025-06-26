@@ -113,19 +113,19 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                   <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
                 </div>
 
-                <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
+                <div className="flex justify-between text-base pt-4 border-t border-neutral-200">
                   <span>{t('netValueOfGoods')}</span>
                   <span className="font-bold font-headlines">
                     {formatCurrency(cart.tax.netValue, cart.tax.currency)}
                   </span>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <div className="flex justify-between font-medium text-base">
+                  <div className="flex justify-between text-base">
                     <span>{t('statutoryVat')}</span>
                     <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
                   </div>
                   {isDelivery && (
-                    <div className="flex justify-between font-medium text-base">
+                    <div className="flex justify-between text-base">
                       <span>{t('shippingCosts')}</span>
                       <span>Shipping Costs</span>
                     </div>
@@ -134,7 +134,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                 {isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && <CartFreeship cart={cart} />}
                 <div className="flex flex-col gap-2">
                   {isDelivery && (
-                    <div className="flex justify-between font-medium text-base">
+                    <div className="flex justify-between text-base">
                       <span>{t('freightCosts')}</span>
                       <span>Freight Costs</span>
                     </div>

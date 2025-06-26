@@ -24,7 +24,6 @@ export function CartItemRow({ cart, item }: CartItemProps) {
   const { updateItemQuantity, removeItem, loading } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
-  const [quantity, setQuantity] = useState(item.quantity);
 
   const isStrike = false;
 
@@ -129,7 +128,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
                 </div>
               ) : (
                 <Input
-                  defaultValue={quantity}
+                  defaultValue={item.quantity}
                   className="py-3 text-center border-none"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
