@@ -23,7 +23,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   const [isDelivery, setIsDelivery] = useState(true);
   const leftContent = useRef<HTMLDivElement>(null);
 
-  if (loading) {
+  if (loading && !cart) {
     return (
       <div className="max-w-6xl mx-auto mt-8">
         <Card className="mx-4 xl:mx-9">

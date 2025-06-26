@@ -11,6 +11,7 @@ import { useL10n } from '@/hooks/useL10n';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart, CartItem } from '@/platform/services/model/cart/cart.d';
 import { Input } from '../ui/input';
+import { Spinner } from '../ui/spinner';
 
 interface CartItemProps {
   cart: Cart;
@@ -20,16 +21,16 @@ interface CartItemProps {
 export function CartItemRow({ cart, item }: CartItemProps) {
   const { l10n } = useL10n();
   const t = useTranslations('cart');
-  const { updateItemQuantity, removeItem } = useCart(cart);
+  const { updateItemQuantity, removeItem, loading } = useCart(cart);
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+  const [quantity, setQuantity] = useState(item.quantity);
 
   const isStrike = false;
 
   // Handle quantity update
   const handleUpdateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1 || isProcessing) return;
-
     setIsProcessing(true);
     try {
       updateItemQuantity(item.id, newQuantity);
@@ -40,8 +41,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
 
   // Handle item removal
   const handleRemoveItem = async () => {
-    if (isProcessing) return;
-
+    //  if (isProcessing) return;
     setIsProcessing(true);
     try {
       removeItem(item.id);
@@ -105,7 +105,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
                 variant="secondary"
                 size="icon"
                 className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
-                disabled={isProcessing}
+                disabled={loading}
                 onClick={handleRemoveItem}
               >
                 <Trash2 className="h-6 w-6" />
@@ -115,7 +115,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
                 variant="secondary"
                 size="icon"
                 className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
-                disabled={isProcessing}
+                disabled={loading}
                 onClick={() => handleUpdateQuantity(item.quantity - 1)}
               >
                 {' '}
@@ -123,14 +123,18 @@ export function CartItemRow({ cart, item }: CartItemProps) {
               </Button>
             )}
             <div className="w-15 h-13 border-y border-neutral-300">
-              {isProcessing ? (
-                <div className="animate-pulse h-4 w-4 mx-auto bg-muted rounded-full"></div>
+              {loading ? (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Spinner color="primary" variant="sm" />
+                </div>
               ) : (
                 <Input
-                  value={item.quantity}
+                  defaultValue={quantity}
                   className="py-3 text-center border-none"
-                  onChange={(e) => {
-                    handleUpdateQuantity(Number(e.currentTarget.value));
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleUpdateQuantity(Number(e.currentTarget.value));
+                    }
                   }}
                 />
               )}
@@ -139,7 +143,7 @@ export function CartItemRow({ cart, item }: CartItemProps) {
               variant="secondary"
               size="icon"
               className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm"
-              disabled={isProcessing}
+              disabled={loading}
               onClick={() => handleUpdateQuantity(item.quantity + 1)}
             >
               <Plus className="h-6 w-6" />
