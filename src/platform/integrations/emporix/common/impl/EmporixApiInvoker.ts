@@ -12,7 +12,7 @@ import type { TokenManager } from '../TokenManager';
 class EmporixApiInvoker {
   private config: EmporixConfig;
   private tokenManager: TokenManager;
-  private debugCurl: boolean = true;
+  private debugCurl: boolean = false;
 
   constructor(
     @inject('EmporixConfig') config: EmporixConfig,
