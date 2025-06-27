@@ -42,7 +42,7 @@ const FormSchemaRadio = z.object({
   }),
 });
 
-export default function FormFieldSytelguide() {
+export default function FormFieldStyleguide() {
   const form = useForm<z.infer<typeof FormSchemaInput>>({
     resolver: zodResolver(FormSchemaInput),
     defaultValues: {

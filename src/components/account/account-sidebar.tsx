@@ -1,62 +1,83 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { SidebarGroup } from '@/components/ui/sidebar-group';
+import { SidebarNavLink } from '@/components/ui/sidebar-nav-link';
 import { useAuthentication } from '@/hooks/authentication/useAuthentication';
 import { cn } from '@/lib/utils';
 
-interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
-  items: {
-    href: string;
-    title: string;
-    icon?: React.ReactNode;
-  }[];
+interface SidebarItem {
+  href: string;
+  title: string;
+  icon?: React.ReactNode;
+  counter?: number;
+  badgeVariant?: 'primary' | 'success';
 }
 
-export function AccountSidebar({ className, items, ...props }: SidebarNavProps) {
+interface SidebarGroup {
+  title: string;
+  items: SidebarItem[];
+}
+
+interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
+  items: SidebarItem[];
+  groups?: SidebarGroup[];
+}
+
+export function AccountSidebar({ className, items, groups = [], ...props }: SidebarNavProps) {
   const pathname = usePathname();
   const { logout } = useAuthentication();
+  const locale = useLocale();
+
+  const renderSidebarLink = (item: SidebarItem) => {
+    if (item.href === '/account/logout') {
+      return (
+        <SidebarNavLink
+          key={item.href}
+          href={item.href}
+          icon={item.icon}
+          text={item.title}
+          counter={item.counter}
+          badgeVariant={item.badgeVariant}
+          isLogout={true}
+          onClick={() => logout()}
+        />
+      );
+    }
+    // Check if active prop is provided or determine based on path with locale handling
+    const isActive = pathname === `/${locale}${item.href}` || pathname === item.href;
+    return (
+      <SidebarNavLink
+        key={item.href}
+        href={item.href}
+        icon={item.icon}
+        text={item.title}
+        counter={item.counter}
+        badgeVariant={item.badgeVariant}
+        active={isActive}
+      />
+    );
+  };
 
   return (
-    <nav className={cn('flex flex-col space-y-1 min-w-[200px] border-r h-full p-4', className)} {...props}>
-      {items.map((item) => {
-        const isActive = pathname === item.href;
+    <nav
+      className={cn(
+        'flex flex-col min-w-[288px] items-start border rounded-2xl h-full overflow-y-auto py-4',
+        className,
+      )}
+      {...props}
+    >
+      {/* Regular items (no group) */}
+      {items.map(renderSidebarLink)}
 
-        if (item.href === '/account/logout') {
-          return (
-            <Button
-              key={item.href}
-              variant="secondary"
-              className={cn(
-                'justify-start px-4 py-2 text-sm font-medium text-left',
-                isActive ? 'bg-muted' : 'hover:bg-muted',
-              )}
-              onClick={() => logout()}
-            >
-              {item.icon}
-              <span className="ml-2">{item.title}</span>
-            </Button>
-          );
-        }
-
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              'flex items-center px-4 py-2 text-sm font-medium rounded-md',
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted',
-            )}
-          >
-            {item.icon}
-            <span className="ml-2">{item.title}</span>
-          </Link>
-        );
-      })}
+      {/* Groups */}
+      {groups.map((group) => (
+        <SidebarGroup key={group.title} title={group.title}>
+          {group.items.map(renderSidebarLink)}
+        </SidebarGroup>
+      ))}
     </nav>
   );
 }

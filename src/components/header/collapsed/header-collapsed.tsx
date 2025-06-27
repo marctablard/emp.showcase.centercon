@@ -1,10 +1,8 @@
 import Image from 'next/image';
 import HeaderMenu from '@/components/header/collapsed/header-menu';
-import HeaderActions from '@/components/header/common/header-actions';
-import HeaderCartButton from '@/components/header/common/header-cart-button';
-import HeaderNavigation from '@/components/header/common/header-navigation';
-import HeaderSearch from '@/components/header/common/header-search';
+import HeaderSearch from '@/components/header/common/search/header-search';
 import { Link } from '@/i18n/navigation';
+import HeaderNavigation from '../common/header-navigation';
 
 export default function HeaderCollapsed() {
   return (
@@ -20,13 +18,12 @@ export default function HeaderCollapsed() {
           <HeaderNavigation />
         </div>
       </div>
-      <div className="flex gap-8 items-end">
+      <div className="flex gap-8 items-end group">
         <div className="self-center">
           <HeaderSearch small />
         </div>
-        <HeaderActions />
-        <HeaderCartButton />
-        <div className="xl:hidden">
+
+        <div className="xl:hidden transition-all duration-300 group-focus-within:w-0 group-focus-within:opacity-0">
           <HeaderMenu />
         </div>
       </div>

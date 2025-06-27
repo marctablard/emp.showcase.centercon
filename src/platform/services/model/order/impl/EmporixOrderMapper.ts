@@ -1,6 +1,11 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixOrder, EmporixOrderEntry, EmporixPayment } from '@/platform/integrations/emporix/model/order';
+import {
+  EmporixOrder,
+  EmporixOrderEntry,
+  EmporixPayment,
+  EmporixShipping,
+} from '@/platform/integrations/emporix/model/order';
 import { EmporixAddressMapper } from '@/platform/services/model/common/impl/EmporixAddressMapper';
 import { OrderMapper } from '@/platform/services/model/order/OrderMapper';
 import {
@@ -40,6 +45,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
         currency: discount.currency,
         description: discount.description,
       })),
+      shipping: this.mapShipping(integrationModel.shipping),
       price: this.mapPrice(integrationModel.calculatedPrice, integrationModel.currency),
       currency: integrationModel.currency,
       customerEmail: integrationModel.customer?.email,
@@ -156,7 +162,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
     }));
   }
 
-  private mapShipping(shipping: any): OrderShipping | undefined {
+  private mapShipping(shipping?: EmporixShipping): OrderShipping | undefined {
     if (!shipping) {
       return undefined;
     }

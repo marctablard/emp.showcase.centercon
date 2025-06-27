@@ -65,7 +65,12 @@ export const createHistoryStore = (initState: HistoryState = defaultState) => {
         ...initState,
         addLastSeenProduct: (product: Product) =>
           set((state) => {
-            addToHistoryArray(state.lastSeenProducts, product, MAX_LAST_SEEN_PRODUCTS, (a, b) => a.id === b.id);
+            addToHistoryArray(
+              state.lastSeenProducts,
+              product,
+              MAX_LAST_SEEN_PRODUCTS,
+              (a, b) => a.id.trim() === b.id.trim(),
+            );
           }),
         addSearchQuery: (query: string) =>
           set((state) => {

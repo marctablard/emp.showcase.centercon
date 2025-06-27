@@ -50,7 +50,7 @@ export default async function BrowsePage({
   const initialResults = await searchProducts(initialSearch);
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="max-w-6xl mx-auto px-4 lg:px-9 pb-32">
       <h1 className="text-3xl font-bold mb-6">Product Search</h1>
 
       {/* Client-side search wrapper */}

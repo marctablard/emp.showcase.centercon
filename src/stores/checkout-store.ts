@@ -25,11 +25,11 @@ interface CheckoutActions {
   setCart: (cart: Cart) => void;
   getCart: () => Cart | null;
   reset: () => void;
-  setContactData: (contactData: ContactData) => void;
-  setShippingAddress: (address: CheckoutAddress) => void;
-  setBillingAddress: (address: CheckoutAddress) => void;
-  setPaymentMethod: (paymentMethod: CheckoutPaymentMethod) => void;
-  setShippingMethod: (shippingMethod: CheckoutShipping) => void;
+  setContactData: (contactData: ContactData | null) => void;
+  setShippingAddress: (address: CheckoutAddress | null) => void;
+  setBillingAddress: (address: CheckoutAddress | null) => void;
+  setPaymentMethod: (paymentMethod: CheckoutPaymentMethod | null) => void;
+  setShippingMethod: (shippingMethod: CheckoutShipping | null) => void;
 }
 
 export type CheckoutStore = CheckoutState & CheckoutActions;
@@ -62,19 +62,19 @@ export const createCheckoutStore = (initState: CheckoutState = defaultState) => 
             shippingMethod: null,
           });
         },
-        setContactData: (contactData: ContactData) => {
+        setContactData: (contactData: ContactData | null) => {
           set({ contactData });
         },
-        setShippingAddress: (address: CheckoutAddress) => {
+        setShippingAddress: (address: CheckoutAddress | null) => {
           set({ shippingAddress: address });
         },
-        setBillingAddress: (address: CheckoutAddress) => {
+        setBillingAddress: (address: CheckoutAddress | null) => {
           set({ billingAddress: address });
         },
-        setPaymentMethod: (paymentMethod: CheckoutPaymentMethod) => {
+        setPaymentMethod: (paymentMethod: CheckoutPaymentMethod | null) => {
           set({ paymentMethod });
         },
-        setShippingMethod: (shippingMethod: CheckoutShipping) => {
+        setShippingMethod: (shippingMethod: CheckoutShipping | null) => {
           set({ shippingMethod });
         },
       }),

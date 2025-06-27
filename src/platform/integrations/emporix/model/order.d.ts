@@ -150,6 +150,7 @@ export interface EmporixOrder {
   customerId?: string;
   customerEmail?: string;
   customerNote?: string;
+  shipping?: EmporixShipping;
 }
 
 /**

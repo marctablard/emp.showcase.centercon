@@ -8,14 +8,10 @@ export interface Cart {
   legalEntity?: string;
   channel?: string;
   items: CartItem[];
-  totalPrice: {
-    amount: number;
-    currency: string;
-  };
-  subTotalPrice: {
-    amount: number;
-    currency: string;
-  };
+  shippingCosts?: Price;
+  fees?: Price;
+  totalPrice: Price;
+  subTotalPrice: Price;
   tax: Tax;
 }
 

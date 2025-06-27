@@ -15,6 +15,7 @@ class EmporixCheckoutValidator implements CheckoutValidator {
     @inject('AddressValidationService') private addressValidator: ValidationService,
     @inject('ShippingValidationService') private shippingValidator: ValidationService,
     @inject('PaymentValidationService') private paymentValidator: ValidationService,
+    @inject('SummaryValidationService') private summaryValidator: ValidationService,
   ) {}
 
   /**
@@ -25,7 +26,7 @@ class EmporixCheckoutValidator implements CheckoutValidator {
   validateCheckoutRequest(request: CheckoutRequest): ValidationResult<CheckoutRequest> {
     const errors: Record<string, string> = {};
 
-    const stepsResult = this.validateSteps(request, ['addresses', 'shipping', 'payment']);
+    const stepsResult = this.validateSteps(request, ['addresses', 'shipping', 'payment', 'summary']);
     if (stepsResult.errors) {
       this.mergeErrors(stepsResult.errors, errors);
     }
@@ -48,7 +49,7 @@ class EmporixCheckoutValidator implements CheckoutValidator {
       errors.customer = 'required';
     }
 
-    const stepsResult = this.validateSteps(request, ['customer', 'addresses', 'shipping', 'payment']);
+    const stepsResult = this.validateSteps(request, ['customer', 'addresses', 'shipping', 'payment', 'summary']);
     if (stepsResult.errors) {
       this.mergeErrors(stepsResult.errors, errors);
     }
@@ -87,6 +88,9 @@ class EmporixCheckoutValidator implements CheckoutValidator {
         case 'payment':
           result = this.validatePayment(request.paymentMethod);
           break;
+        case 'summary':
+          result = this.validateSummary(request.summary);
+          break;
       }
       if (result.errors) {
         this.mergeErrors(result.errors, errors, step);
@@ -116,6 +120,8 @@ class EmporixCheckoutValidator implements CheckoutValidator {
         return this.validateShipping(data);
       case 'payment':
         return this.validatePayment(data);
+      case 'summary':
+        return this.validateSummary(data);
       default:
         throw new Error(`Unknown checkout step: ${step}`);
     }
@@ -180,6 +186,10 @@ class EmporixCheckoutValidator implements CheckoutValidator {
    */
   private validatePayment<T>(data: any): ValidationResult<T> {
     return this.paymentValidator.validate(data);
+  }
+
+  private validateSummary<T>(data: any): ValidationResult<T> {
+    return this.summaryValidator.validate(data);
   }
 
   private mergeErrors(errors: Record<string, string>, into: Record<string, string>, prefix?: string) {

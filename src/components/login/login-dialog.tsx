@@ -61,7 +61,6 @@ export default function LoginDialog({
     const response = await login(values.username, values.password, false, callbackUrl);
 
     if (response && response.ok) {
-      console.log(response);
       notify({
         title: t('welcomeMessage', { username: values.username }),
         type: ToastType.Success,

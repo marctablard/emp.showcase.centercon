@@ -5,7 +5,7 @@ import { ValidationResult } from '../../validation';
 /**
  * Checkout step types
  */
-export type CheckoutStep = 'customer' | 'addresses' | 'shipping' | 'payment';
+export type CheckoutStep = 'customer' | 'addresses' | 'shipping' | 'payment' | 'summary';
 
 /**
  * Interface for checkout validation service

@@ -1,6 +1,6 @@
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixAddress, Mixins } from '@/platform/integrations/emporix/model/common';
-import { Address, AddressType, GeoLocation } from '@/platform/services/model/common';
+import { Address, GeoLocation } from '@/platform/services/model/common';
 import { AddressMapper } from '../AddressMapper';
 
 /**
@@ -17,17 +17,6 @@ export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
    */
   mapToService(source: EmporixAddress): Address {
     const geoLocation = source.mixins?.['geolocation'] as GeoLocation;
-    const addressTypes: AddressType[] =
-      source?.tags?.map((tag) => {
-        switch (tag) {
-          default:
-          case 'shipping':
-            return 'SHIPPING';
-          case 'billing':
-            return 'BILLING';
-        }
-      }) || [];
-
     return {
       id: source.id,
       isDefault: source.isDefault,
@@ -42,7 +31,6 @@ export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
       state: source.state,
       contactPhone: source.contactPhone,
       geoLocation,
-      types: addressTypes,
     };
   }
 
@@ -57,16 +45,7 @@ export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
     if (service.geoLocation) {
       mixins['geolocation'] = service.geoLocation;
     }
-    const tags: string[] =
-      service.types?.map((type) => {
-        switch (type) {
-          default:
-          case 'SHIPPING':
-            return 'shipping';
-          case 'BILLING':
-            return 'billing';
-        }
-      }) || [];
+
     return {
       id: service.id,
       isDefault: service.isDefault,
@@ -81,7 +60,7 @@ export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
       state: service.state,
       contactPhone: service.contactPhone,
       mixins,
-      tags,
+      tags: [],
     };
   }
 }
