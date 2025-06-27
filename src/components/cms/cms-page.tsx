@@ -32,7 +32,7 @@ export default async function CMSPageComponent({ slug, locale }: CMSPageParams) 
   }
 
   return (
-    <div>
+    <div className={data.story.content.no_margin ? '' : 'flex-grow mt-17 md:mt-36 lg:mt-52'}>
       <StoryblokStory story={data.story} />
     </div>
   );
