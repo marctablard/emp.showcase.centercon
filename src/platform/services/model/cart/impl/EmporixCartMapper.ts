@@ -74,6 +74,16 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
     } else {
       fees = undefined;
     }
+    let processUpdate;
+    if (emporixCart.mixins['processupdate']) {
+      processUpdate = {
+        itemId: emporixCart.mixins['processupdate'].itemId,
+        productId: emporixCart.mixins['processupdate'].productId,
+        description: emporixCart.mixins['processupdate'].description,
+      };
+    } else {
+      processUpdate = undefined;
+    }
     return {
       id: emporixCart.id,
       currency: emporixCart.currency,
@@ -86,6 +96,7 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
       totalPrice: totalPrice,
       subTotalPrice: subTotalPrice,
       tax: tax,
+      processUpdate: processUpdate,
     };
   }
 
