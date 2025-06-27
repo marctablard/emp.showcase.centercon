@@ -77,14 +77,14 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Nominal Power"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productVariantAttributes['nominal-power']}
+                      value={product.mixins?.productVariantAttributes?.['nominal-power']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Length"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['length']}
+                      value={product.mixins?.productTemplateAttributes?.['length']}
                     />
                     <BulletPoint
                       className="font-bold"
@@ -98,21 +98,21 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Width"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['width']}
+                      value={product.mixins?.productTemplateAttributes?.['width']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Cell Type"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['cell-type']}
+                      value={product.mixins?.productTemplateAttributes?.['cell-type']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Height"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['height']}
+                      value={product.mixins?.productTemplateAttributes?.['height']}
                     />
                   </div>
 
@@ -232,33 +232,13 @@ export default function ProductDetail({ product: initialProduct, price, classNam
         </>
         <div className="lg:col-start-2 row-start-1">
           <div>
-            <div className="flex gap-2">
-              {product.labels?.map((label) => (
-                <Badge key={label.id} variant="promo" rounded="rounded_right">
-                  {label.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          <div>
             <div className="flex justify-between">
-              {/* <div>
-                {product.brand && (
-                  <Overline className="flex items-center gap-2">
-                    {product.brand.logo && (
-                      <Image src={product.brand.logo?.url} alt={l10n(product.brand.name)} height={70} width={70} />
-                    )}
-                    <span>{l10n(product.brand.name)}</span>
-                  </Overline>
-                )}
-              </div> */}
               <div className="flex gap-2 h-7">
-                <Badge key={0} variant="black" rounded="rounded_right">
-                  BLACK FRIDAY
-                </Badge>
-                <Badge key={1} variant="promo" rounded="rounded_right">
-                  MEMBER DEAL
-                </Badge>
+                {product.labels?.map((label) => (
+                  <Badge key={label.id} variant="promo" rounded="rounded_right">
+                    {label.name}
+                  </Badge>
+                ))}
               </div>
               <div className="flex gap-2">
                 <Button size="icon" variant="secondary" aria-label="icon">
@@ -275,6 +255,16 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           </div>
         </div>
         <div className="row-start-2 lg:col-start-2 lg:row-start-2">
+          {/* <div>
+                {product.brand && (
+                  <Overline className="flex items-center gap-2">
+                    {product.brand.logo && (
+                      <Image src={product.brand.logo?.url} alt={l10n(product.brand.name)} height={70} width={70} />
+                    )}
+                    <span>{l10n(product.brand.name)}</span>
+                  </Overline>
+                )}
+              </div> */}
           <p className="mb-2 text-primary-500 font-bold">Bluetti</p>
           <H1>{l10n(product.name)}</H1>
           <div className="flex gap-2 items-center">
