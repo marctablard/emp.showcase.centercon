@@ -1,6 +1,4 @@
 import CMSPageComponent from '@/components/cms/cms-page';
-import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
-import { BreadcrumbContent } from '@/lib/breadcrumb';
 
 interface DynamicPageParams {
   slug: string[];

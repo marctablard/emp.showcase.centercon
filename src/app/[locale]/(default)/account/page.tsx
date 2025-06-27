@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function AccountPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function AccountPage({ params: _params }: { params: Promise<{ locale: string }> }) {
   // Get translations and current customer
   const [customer] = await Promise.all([getCurrentCustomer()]);
 

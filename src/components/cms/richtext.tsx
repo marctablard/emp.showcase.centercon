@@ -1,7 +1,6 @@
 'use client';
 
 import { BlockTypes, StoryblokRichTextNode, TextTypes } from '@storyblok/react/rsc';
-import { BulletPoint } from '../ui/bullet-point';
 import { H1, H2, H3, H4, H5, H6 } from '../ui/h';
 
 interface RichTextProps {
