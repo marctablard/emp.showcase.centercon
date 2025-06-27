@@ -29,7 +29,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
     return {
       id: integrationModel.id,
       status: integrationModel.status as OrderStatus,
-      createdAt: integrationModel.creationDate,
+      createdAt: integrationModel.created,
       lastStatusChange: integrationModel.lastStatusChange,
       items: this.mapOrderItems(integrationModel.entries),
       billingAddress: integrationModel.billingAddress
@@ -48,6 +48,15 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
       shipping: this.mapShipping(integrationModel.shipping),
       price: this.mapPrice(integrationModel.calculatedPrice, integrationModel.currency),
       currency: integrationModel.currency,
+      customer: integrationModel.customer
+        ? {
+            id: integrationModel.customer.id,
+            name: integrationModel.customer.name,
+            firstName: integrationModel.customer.firstName,
+            lastName: integrationModel.customer.lastName,
+            email: integrationModel.customer.email,
+          }
+        : undefined,
       customerEmail: integrationModel.customer?.email,
       customerNote: integrationModel.customerNote,
     };

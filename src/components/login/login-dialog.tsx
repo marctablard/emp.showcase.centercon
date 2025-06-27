@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { ToastType, notify } from '@/components/ui/toast-notification';
 import { useAuthentication } from '@/hooks/authentication/useAuthentication';
+import useCustomer from '@/hooks/customer/useCustomer';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { useRouter } from '@/i18n/navigation';
 
@@ -45,6 +46,7 @@ export default function LoginDialog({
 }: LoginProps) {
   const t = useTranslations('login');
   const { login, loading } = useAuthentication();
+  const { onboardingStatusKey } = useCustomer();
   const [isOpen, setOpen] = useState(defaultOpen);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,8 +63,13 @@ export default function LoginDialog({
     const response = await login(values.username, values.password, false, callbackUrl);
 
     if (response && response.ok) {
+      let titleMessage = t('welcomeMessage', { username: values.username });
+      const onBoardingMessageKey = await onboardingStatusKey();
+      if (onBoardingMessageKey) {
+        titleMessage = titleMessage + t('company.onboarding.' + onBoardingMessageKey);
+      }
       notify({
-        title: t('welcomeMessage', { username: values.username }),
+        title: titleMessage,
         type: ToastType.Success,
         button: {
           label: t('close'),

@@ -227,7 +227,14 @@
         "error": "Fehler",
         "showPassword": "Passwort anzeigen",
         "hidePassword": "Passwort verbergen",
-        "loginFailed": "Anmeldung fehlgeschlagen"
+        "loginFailed": "Anmeldung fehlgeschlagen",
+        "company": {
+            "onboarding": {
+                "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+                "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+                "approved": "Congratulations! Your company has been approved. You can now start shopping."
+            }
+        }
     },
     "register": {
         "title": "Registrierung",
@@ -297,7 +304,7 @@
             "change": "Ändern",
             "paymentMethod": "Zahlungsmethode",
             "loading": "Zahlungsmethoden werden geladen...",
-            "fromAddressbook":  "Select from Addressbook",
+            "fromAddressbook": "Select from Addressbook",
             "address": "Rechnungsadresse",
             "billingAddressSameAsShipping": "Die Rechnungsadresse ist gleich der Lieferadresse",
             "errorLoadingPaymentMethods": "Fehler beim Laden der Zahlungsmethoden. Bitte versuchen Sie es erneut.",
@@ -316,7 +323,7 @@
             "title": "Versand",
             "close": "Schließen",
             "change": "Ändern",
-            "fromAddressbook":  "Aus dem Adressbuch wählen",
+            "fromAddressbook": "Aus dem Adressbuch wählen",
             "address": "Lieferadresse",
             "shippingMethod": "Versandart",
             "loading": "Versandarten werden geladen...",
@@ -421,6 +428,7 @@
         "columns": {
             "orderNumber": "Bestell-Nr.",
             "status": "Status",
+            "customer": "Kunde",
             "orderDate": "Bestelldatum",
             "deliveryDate": "Lieferdatum",
             "deliveryAddress": "Lieferadresse",

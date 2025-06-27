@@ -1,10 +1,10 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { AlertTriangle, ArrowRight, CircleAlert, CircleCheck, MoveRight } from 'lucide-react';
 import { CardTitle } from '@/components/ui/card';
 import UiLink from '@/components/ui/link';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 

@@ -31,6 +31,9 @@ export function AccountSidebar({ className, items, groups = [], ...props }: Side
   const { logout } = useAuthentication();
   const locale = useLocale();
 
+  // Whitelist for available links, prevent 404s, just for the demo
+  const validLinks = ['/account', '/account/orders', '/account/addresses', '/account/profile', '/account/settings'];
+
   const renderSidebarLink = (item: SidebarItem) => {
     if (item.href === '/account/logout') {
       return (
@@ -46,12 +49,16 @@ export function AccountSidebar({ className, items, groups = [], ...props }: Side
         />
       );
     }
+    // Check if the link is in the whitelist, otherwise use '#' to prevent 404s
+    const href = validLinks.includes(item.href) ? item.href : '#';
+
     // Check if active prop is provided or determine based on path with locale handling
     const isActive = pathname === `/${locale}${item.href}` || pathname === item.href;
+
     return (
       <SidebarNavLink
         key={item.href}
-        href={item.href}
+        href={href}
         icon={item.icon}
         text={item.title}
         counter={item.counter}

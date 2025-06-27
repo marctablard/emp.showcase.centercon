@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { CheckSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useCompany } from '@/hooks/company/useCompany';
+import { Link } from '@/i18n/navigation';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 import { StatCard } from './stat-card';
 

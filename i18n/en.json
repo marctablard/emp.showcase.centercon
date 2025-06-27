@@ -68,7 +68,7 @@
                 "effectiveAmount": "Effective Amount"
             },
             "categoryAssignments": {
-                "name": "Category name" 
+                "name": "Category name"
             }
         },
         "tabs": {
@@ -220,7 +220,14 @@
         "hidePassword": "Hide password",
         "loginFailed": "Login Failed",
         "close": "Close",
-        "error": "Error"
+        "error": "Error",
+        "company": {
+            "onboarding": {
+                "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+                "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+                "approved": "Congratulations! Your company has been approved. You can now start shopping."
+            }
+        }
     },
     "register": {
         "title": "Registration",
@@ -293,7 +300,7 @@
             "close": "Close",
             "change": "Change",
             "loading": "Loading payment methods...",
-            "fromAddressbook":  "Select from Addressbook",
+            "fromAddressbook": "Select from Addressbook",
             "address": "Billing Address",
             "paymentMethod": "Payment Method",
             "billingAddressSameAsShipping": "Billing address same as shipping",
@@ -313,7 +320,7 @@
             "title": "Delivery",
             "close": "Close",
             "change": "Change",
-            "fromAddressbook":  "Select from Addressbook",
+            "fromAddressbook": "Select from Addressbook",
             "address": "Shipping Address",
             "shippingMethod": "Shipping Method",
             "loading": "Loading shipping methods...",
@@ -423,6 +430,7 @@
         "columns": {
             "orderNumber": "Order #",
             "status": "Status",
+            "customer": "Customer",
             "orderDate": "Order Date",
             "deliveryDate": "Delivery Date",
             "deliveryAddress": "Delivery Address",
@@ -926,5 +934,12 @@
         "thunderstormWithSlightHail": "Thunderstorm with Light Hail",
         "thunderstormWithHeavyHail": "Thunderstorm with Heavy Hail",
         "unknown": "Unknown Weather Condition"
+    },
+    "company": {
+        "onboarding": {
+            "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+            "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+            "approved": "Congratulations! Your company has been approved. You can now start shopping."
+        }
     }
 }

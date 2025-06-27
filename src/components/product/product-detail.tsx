@@ -324,12 +324,11 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 )}
               </div> */}
               <div className="flex gap-2 h-7">
-                <Badge key={0} variant="black" rounded="rounded_right">
-                  BLACK FRIDAY
-                </Badge>
-                <Badge key={1} variant="promo" rounded="rounded_right">
-                  MEMBER DEAL
-                </Badge>
+                {price?.originalValue !== price?.effectiveValue && (
+                  <Badge key="memberdeal" variant="promo" rounded="rounded_right">
+                    Member Deal
+                  </Badge>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button size="icon" variant="secondary" aria-label="icon">

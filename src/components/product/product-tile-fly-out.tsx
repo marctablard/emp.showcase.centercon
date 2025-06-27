@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { LocalizedString } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
 import MarkedText from '../header/common/search/marked-text';

@@ -43,7 +43,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     activeFilters,
     changePage,
   } = useSearch<Product>(initialSearch, initialResults);
-  const [visiblePagination, setVisibilePagination] = useState<number[]>([]);
+  const [visiblePagination, setVisiblePagination] = useState<number[]>([]);
 
   useEffect(() => {
     search({
@@ -57,14 +57,14 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     const totalPages = Math.ceil(total / pageSize);
     const start = Math.max(0, currentPage - 2);
     const end = Math.min(totalPages - 1, currentPage + 2);
-    setVisibilePagination(Array.from({ length: end - start + 1 }, (_, i) => start + i));
+    setVisiblePagination(Array.from({ length: end - start + 1 }, (_, i) => start + i));
   }, [currentPage, total, pageSize]);
 
   return (
     <>
       <SearchFilter {...{ activeFilters, availableFilters, resetFacet, resetAllFacets, applyFacet, applyRangeFacet }} />
       {/* Product Grid */}
-      <div className="w-full">
+      <div className="mt-6 w-full">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr">
             {Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { ArrowRight, Search } from 'lucide-react';
@@ -35,7 +35,12 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
   };
 
   // Fetch orders from the hook
-  const { orders, loading } = useOrders();
+  const { orders, loading, refetchOrders } = useOrders();
+
+  // Fetch fresh order data when component mounts
+  useEffect(() => {
+    refetchOrders();
+  }, [refetchOrders]);
 
   // Get the appropriate status badge variant
   const getStatusBadge = (status: string) => {

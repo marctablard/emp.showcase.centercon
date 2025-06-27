@@ -56,7 +56,7 @@ Here's an example of the Article component:
 ```tsx
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { renderRichText, storyblokEditable } from '@storyblok/react/rsc';
 
 interface ArticleProps {

@@ -13,6 +13,9 @@ export interface Customer {
   contactPhone?: string;
   language?: string;
   currency?: string;
+  lastLogin?: Date;
+  businessModel?: 'B2B' | 'B2C';
+  legalEntityId?: string; // For B2B customers, the legal entity ID
 }
 
 export interface CustomerAddress extends Address {

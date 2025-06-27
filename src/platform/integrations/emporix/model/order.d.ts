@@ -132,7 +132,7 @@ export interface EmporixOrderCustomer {
  */
 export interface EmporixOrder {
   id: string;
-  createdBy?: string;
+  created?: string;
   status: OrderStatus;
   lastStatusChange?: string;
   creationDate?: string;

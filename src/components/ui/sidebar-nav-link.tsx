@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
 import { type VariantProps, cva } from 'class-variance-authority';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
 
@@ -36,12 +36,12 @@ export interface SidebarNavLinkProps extends VariantProps<typeof sidebarNavLinkV
 }
 
 export function SidebarNavLink({
-  className,
-  variant,
   href,
   icon,
   text,
   counter,
+  className,
+  variant,
   badgeVariant = 'primary',
   active,
   onClick,
