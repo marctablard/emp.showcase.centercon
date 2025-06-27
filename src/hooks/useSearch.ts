@@ -199,7 +199,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       search({
         ...lastSearchParams.current,
         page: 0,
-        filters: Object.keys(newFilters).length > 0 ? newFilters : undefined,
+        filters: newFilters,
       });
     },
     [activeFilters, search],

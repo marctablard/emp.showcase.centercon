@@ -61,7 +61,14 @@
         "filters": {
             "mixins": {
                 "productVariantAttributes": {
-                    "capacity": "Capacity"
+                    "capacity": "Capacity",
+                    "nominal-power": "Nominal Power"
+                },
+                "productTemplateAttributes": {
+                    "length": "Product Length",
+                    "width": "Product Width",
+                    "height": "Product Height",
+                    "cell-type": "Cell Type"
                 }
             },
             "prices": {
@@ -69,7 +76,10 @@
             },
             "categoryAssignments": {
                 "name": "Category name"
-            }
+            },
+            "filterButton": "Filter",
+            "clearFilter": "Clear Filter",
+            "applyFilters": "Apply Filters"
         },
         "tabs": {
             "description": "Description",

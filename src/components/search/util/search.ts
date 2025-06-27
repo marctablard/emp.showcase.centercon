@@ -20,10 +20,10 @@ export function isNumberRange(values: FilterValue[]): boolean {
 }
 
 /**
- * Checks if filter values represent a selection list
+ * Checks if filter is a pricing filter
  */
-export function isSelect(values: FilterValue[]): boolean {
-  return values.length > 0 && values.every(({ name }) => name && /\w+/.test(name || 'w'));
+export function isSelect(name: string): boolean {
+  return name !== 'prices.effectiveAmount';
 }
 
 /**
