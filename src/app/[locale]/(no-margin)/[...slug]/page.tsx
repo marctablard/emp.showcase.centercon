@@ -8,9 +8,5 @@ interface DynamicPageParams {
 export default async function DynamicPage({ params }: { params: Promise<DynamicPageParams> }) {
   const { slug, locale } = await params;
 
-  return (
-    <div>
-      <CMSPageComponent slug={slug.join('/')} locale={locale} />
-    </div>
-  );
+  return <CMSPageComponent slug={slug.join('/')} locale={locale} />;
 }
