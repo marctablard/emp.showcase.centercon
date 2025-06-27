@@ -45,7 +45,7 @@ export class EmporixCustomerService implements CustomerService {
         currency: response.preferredCurrency,
         contactPhone: response.contactPhone,
         businessModel: response.businessModel,
-        lastLogin: response.lastLogin ? new Date(response.lastLogin).toISOString() : undefined,
+        lastLogin: response.lastLogin ? new Date(response.lastLogin) : undefined,
         legalEntityId: response.b2b?.legalEntities?.[0]?.id,
       };
     } catch (error) {

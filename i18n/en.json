@@ -7,7 +7,7 @@
     "Currencies": {
         "label": "Währungen"
     },
-    "Regions":{
+    "Regions": {
         "label": "Regionen"
     },
     "hello": {
@@ -197,7 +197,14 @@
         "hidePassword": "Hide password",
         "loginFailed": "Login Failed",
         "close": "Close",
-        "error": "Error"
+        "error": "Error",
+        "company": {
+            "onboarding": {
+                "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+                "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+                "approved": "Congratulations! Your company has been approved. You can now start shopping."
+            }
+        }
     },
     "register": {
         "title": "Registration",
@@ -308,7 +315,7 @@
         "orderConfirmed": "Order Confirmed!",
         "thankYou": "Thank you for your purchase. Your order has been received.",
         "emailConfirmation": "A confirmation email has been sent to",
-        "continueShopping": "Continue Shopping"    
+        "continueShopping": "Continue Shopping"
     },
     "Orders": {
         "orderDetails": "Order Details",
@@ -354,7 +361,7 @@
         "settings": "Settings",
         "dashboardSettings": "Dashboard Settings",
         "customize": "Customize",
-        "title" : "Service Portal",
+        "title": "Service Portal",
         "welcomeBack": "Welcome, {name}",
         "accountDashboardDescription": "Manage your account, orders, and company information",
         "accountDetails": "Account Details",
@@ -602,5 +609,12 @@
         "thunderstormWithSlightHail": "Thunderstorm with Light Hail",
         "thunderstormWithHeavyHail": "Thunderstorm with Heavy Hail",
         "unknown": "Unknown Weather Condition"
+    },
+    "company": {
+        "onboarding": {
+            "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+            "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+            "approved": "Congratulations! Your company has been approved. You can now start shopping."
+        }
     }
 }

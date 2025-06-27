@@ -1,3 +1,4 @@
+import { CompanyOnboardingStatus } from '@/platform/services/customer/CustomerManagementService';
 import { CustomerUpdateDto, PasswordChangeDto } from '@/platform/services/customer/CustomerService';
 import { Address } from '@/platform/services/model/common';
 import { Customer } from '@/platform/services/model/customer/customer';
@@ -175,4 +176,27 @@ export async function updateCustomerProfile(profileData: CustomerUpdateDto): Pro
     console.error('Error updating customer profile:', error);
     throw error;
   }
+}
+
+/**
+ * Fetch the current customer information
+ * @returns {Promise<Customer|null>} The customer or null if not logged in
+ */
+export async function fetchCurrentCustomerOnboardingStatus(): Promise<CompanyOnboardingStatus | null> {
+  try {
+    const response = await fetch('/api/customer/current/onboarding/');
+
+    if (response.status !== 200) {
+      return null;
+    }
+
+    // For other error codes, throw an error
+    if (response.body) {
+      const bodyText = await response.json();
+      return bodyText;
+    }
+  } catch (error) {
+    console.error('Error fetching customer:', error);
+  }
+  return null;
 }

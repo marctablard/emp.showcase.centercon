@@ -197,7 +197,14 @@
         "error": "Fehler",
         "showPassword": "Passwort anzeigen",
         "hidePassword": "Passwort verbergen",
-        "loginFailed": "Anmeldung fehlgeschlagen"
+        "loginFailed": "Anmeldung fehlgeschlagen",
+        "company": {
+            "onboarding": {
+                "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+                "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+                "approved": "Congratulations! Your company has been approved. You can now start shopping."
+            }
+        }
     },
     "register": {
         "title": "Registrierung",
