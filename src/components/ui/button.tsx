@@ -14,6 +14,7 @@ const buttonVariants = cva(
           'border border-primary bg-transparent text-primary disabled:border-neutral-600 hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700 rounded-sm ',
         neutral:
           'border border-neutral-900 px-2 py-1 disabled:border-neutral-600 hover:bg-accent hover:text-accent-foreground hover:bg-neutral-900 hover:text-white rounded-sm ',
+        red: 'bg-danger-100 text-danger-500 border border-transparent hover:bg-danger-200 rounded-sm normal-case',
         link: 'text-primary disabled:bg-transparent hover:text-primary-700 rounded-sm ',
         link_foreground: 'text-primary-foreground disabled:bg-transparent hover:text-primary-foreground/80 rounded-sm ',
         input: 'bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-r-lg',

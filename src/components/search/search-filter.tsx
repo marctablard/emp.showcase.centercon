@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
-import { ListFilter } from 'lucide-react';
+import { ListFilter, Trash2, X } from 'lucide-react';
 import z from 'zod';
 import { FilterValue as SearchFilterValue } from '@/hooks/useSearch';
 import { Filter } from '@/platform/services/model/common';
@@ -211,11 +211,10 @@ function SearchFilter({
   activeFilters,
 }: SearchFilterProps) {
   return (
-    <span>
+    <div className="flex gap-4">
       <Popover>
         <PopoverTrigger asChild>
           <Button variant={'secondary'}>
-            {' '}
             <ListFilter /> Filter
           </Button>
         </PopoverTrigger>
@@ -226,8 +225,12 @@ function SearchFilter({
           />
         </PopoverContent>
       </Popover>
-      <Button onClick={resetAllFacets}>Clear Filter</Button>
-    </span>
+      <Button variant="red" onClick={resetAllFacets}>
+        <Trash2 />
+        Clear Filter
+        <X />
+      </Button>
+    </div>
   );
 }
 

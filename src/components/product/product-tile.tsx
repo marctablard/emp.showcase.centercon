@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Feather, MapPin, Pin, ShoppingCart, Truck } from 'lucide-react';
+import { Circle, DropletOff, Globe, LucideIcon, MapPin, Pin, Shield, ShoppingCart, Trees, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { ProductCharacteristic } from '@/components/product/product-characteristic';
 import { ProductTag } from '@/components/product/product-tag';
@@ -46,6 +46,20 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
       });
     }
   };
+
+  function getIcon(icon: string): LucideIcon {
+    if (icon.includes('years')) {
+      return Shield;
+    } else if (icon === 'worldwide') {
+      return Globe;
+    } else if (icon === 'waterproof') {
+      return DropletOff;
+    } else if (icon === 'sustainable') {
+      return Trees;
+    }
+
+    return Circle;
+  }
 
   return (
     <Link href={`/product/${product.id}`} className="h-full block">
@@ -101,28 +115,12 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
             <div className="flex flex-col gap-2 absolute top-4 -left-6">
               {/* Todo: read labels from product */}
               {/*{product.labels?.map((label) => (*/}
-              {/* Mock labels - randomly selected based on product ID */}
-              {(() => {
-                // Use product ID to generate consistent but random labels for each product
-                const productIdSum = product.id?.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) || 0;
-                const showBlackFriday = productIdSum % 2 === 0;
-                const showMemberDeal = productIdSum % 3 === 0;
-
-                return (
-                  <>
-                    {showBlackFriday && (
-                      <Badge key="blackfriday" variant="black" rounded="rounded_right">
-                        BLACK FRIDAY
-                      </Badge>
-                    )}
-                    {showMemberDeal && (
-                      <Badge key="memberdeal" variant="promo" rounded="rounded_right">
-                        MEMBER DEAL
-                      </Badge>
-                    )}
-                  </>
-                );
-              })()}
+              {/* Mock labels - only show on reduced items */}
+              {product.price?.originalAmount !== product.price?.amount && (
+                <Badge key="memberdeal" variant="promo" rounded="rounded_right">
+                  Member Deal
+                </Badge>
+              )}
               {/*))}*/}
             </div>
           </div>
@@ -130,25 +128,22 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
           <div className="flex flex-col gap-2">
             {product.templateAttributes && (
               <div className="w-full">
-                {/* Todo: read specs from product */}
-                <div className="flex justify-between">
-                  <p className="text-sm">Length</p>
-                  <p className="text-sm font-bold">{product.templateAttributes?.width}cm</p>
-                </div>
-                <div className="flex justify-between">
-                  <p className="text-sm">Width</p>
-                  <p className="text-sm font-bold">{product.templateAttributes?.width}cm</p>
-                </div>
-                <div className="flex justify-between">
-                  <p className="text-sm">Cell type</p>
-                  <p className="text-sm font-bold">{product.templateAttributes?.['cell-type']}</p>
-                </div>
+                {/* Dynamically display all template attributes */}
+                {product.templateAttributes &&
+                  Object.entries(product.templateAttributes).map(([key, value]) => (
+                    <div key={key} className="flex justify-between">
+                      <p className="text-sm capitalize">{key.replace(/-/g, ' ')}</p>
+                      <p className="text-sm font-bold capitalize">
+                        {value}
+                        {key === 'length' || key === 'width' || key === 'height' ? 'cm' : ''}
+                      </p>
+                    </div>
+                  ))}
               </div>
             )}
             <div ref={horizontalScrollRef} className="flex gap-2 max-w-full overflow-x-scroll hide-scrollbar">
               {product.usps?.map((usp) => (
-                // Todo: map Icon
-                <ProductTag icon={Feather} text={l10n(usp.description)} key={l10n(usp.description)} />
+                <ProductTag icon={getIcon(usp.icon)} text={l10n(usp.description)} key={l10n(usp.description)} />
               ))}
             </div>
           </div>

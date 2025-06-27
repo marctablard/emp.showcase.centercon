@@ -19,7 +19,7 @@ const badgeVariants = cva(
           'border-transparent bg-[#BF0D0D] text-primary-foreground [a&]:hover:bg-[#BF0D0D]/90 focus-visible:ring-[#BF0D0D]/20 dark:focus-visible:ring-[#BF0D0D]/40 dark:bg-[#BF0D0D]/60',
         outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         // TODO check naming from styleguide
-        promo: 'border-transparent bg-[#F7DECF] text-neutral [a&]:hover:bg-[#F7DECF]/90',
+        promo: 'border-transparent bg-[#F7DECF] text-neutral uppercase [a&]:hover:bg-[#F7DECF]/90',
       },
       rounded: {
         none: 'rounded-none',
