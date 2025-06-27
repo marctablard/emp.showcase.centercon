@@ -69,6 +69,7 @@ export function MyOrdersTable({
           <TableRow className="text-base">
             <TableHead className="w-[120px] font-bold">{t('columns.orderNumber')}</TableHead>
             <TableHead className="w-[100px] font-bold">{t('columns.status')}</TableHead>
+            <TableHead className="w-[100px] font-bold">{t('columns.customer')}</TableHead>
             <TableHead className="w-[100px] font-bold">{t('columns.orderDate')}</TableHead>
             <TableHead className="w-[100px] font-bold">{t('columns.deliveryDate')}</TableHead>
             <TableHead className="w-[150px] font-bold">{t('columns.deliveryAddress')}</TableHead>
@@ -108,6 +109,9 @@ export function MyOrdersTable({
                   <Badge variant={getStatusBadge(order.status).variant}>
                     {t(`status.${order.status.toLowerCase()}`)}
                   </Badge>
+                </TableCell>
+                <TableCell className="px-2 py-4">
+                  {order.customer?.name || order.customer?.firstName || order.customer?.lastName}
                 </TableCell>
                 <TableCell className="px-2 py-4">{formatDate(order.lastStatusChange)}</TableCell>
                 <TableCell className="px-2 py-4">

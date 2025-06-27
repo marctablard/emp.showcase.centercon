@@ -68,7 +68,7 @@
                 "effectiveAmount": "Effective Amount"
             },
             "categoryAssignments": {
-                "name": "Category name" 
+                "name": "Category name"
             }
         },
         "tabs": {
@@ -293,7 +293,7 @@
             "close": "Close",
             "change": "Change",
             "loading": "Loading payment methods...",
-            "fromAddressbook":  "Select from Addressbook",
+            "fromAddressbook": "Select from Addressbook",
             "address": "Billing Address",
             "paymentMethod": "Payment Method",
             "billingAddressSameAsShipping": "Billing address same as shipping",
@@ -313,7 +313,7 @@
             "title": "Delivery",
             "close": "Close",
             "change": "Change",
-            "fromAddressbook":  "Select from Addressbook",
+            "fromAddressbook": "Select from Addressbook",
             "address": "Shipping Address",
             "shippingMethod": "Shipping Method",
             "loading": "Loading shipping methods...",
@@ -423,6 +423,7 @@
         "columns": {
             "orderNumber": "Order #",
             "status": "Status",
+            "customer": "Customer",
             "orderDate": "Order Date",
             "deliveryDate": "Delivery Date",
             "deliveryAddress": "Delivery Address",

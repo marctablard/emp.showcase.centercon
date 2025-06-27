@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
@@ -36,18 +37,19 @@ export interface SidebarNavLinkProps extends VariantProps<typeof sidebarNavLinkV
 }
 
 export function SidebarNavLink({
-  className,
-  variant,
   href,
   icon,
   text,
   counter,
+  className,
+  variant,
   badgeVariant = 'primary',
   active,
   onClick,
   isLogout,
   ...props
 }: SidebarNavLinkProps) {
+  const locale = useLocale();
   const activeVariant = active ? 'active' : variant || 'default';
   const linkClassName = cn(sidebarNavLinkVariants({ variant: activeVariant }), className);
   if (isLogout || onClick) {
@@ -61,8 +63,11 @@ export function SidebarNavLink({
     );
   }
 
+  // Prepare href with locale prefix
+  const localizedHref = href.startsWith('/') ? `/${locale}${href}` : href; // TODO: this should be handled by the router, just a quick fix for the demo
+
   return (
-    <Link href={href} className={linkClassName} {...props}>
+    <Link href={localizedHref} className={linkClassName} {...props}>
       <div className="flex items-center gap-3">
         {icon && <div className="w-6 h-6 shrink-0">{icon}</div>}
         <span className="group-hover:underline">{text}</span>
