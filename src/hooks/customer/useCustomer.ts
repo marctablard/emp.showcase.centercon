@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { fetchCurrentCustomer } from '@/lib/client/customer';
+import { fetchCurrentCustomer, fetchCurrentCustomerOnboardingStatus } from '@/lib/client/customer';
+import { CompanyOnboardingStatus } from '@/platform/services/customer/CustomerManagementService';
 import type { Customer } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
 
@@ -10,6 +11,7 @@ interface CustomerHook {
   loading: boolean;
   error: Error | null;
   fetchCustomer: () => Promise<void>;
+  onboardingStatusKey: () => Promise<string | null>;
 }
 
 /**
@@ -61,6 +63,19 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     }
   }, [customer, getStoreCustomer, getLoading, setLoading, fetchCustomer]);
 
+  const onboardingStatusKey = useCallback(async (): Promise<string | null> => {
+    try {
+      const onboardingStatus: CompanyOnboardingStatus | null = await fetchCurrentCustomerOnboardingStatus();
+      if (onboardingStatus === null) {
+        return null;
+      }
+      return onboardingStatus.status || null;
+    } catch (err) {
+      console.error('Error fetching customer onboarding status:', err);
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
     // listen to changes on storeCart to update local state
     // this reflects changes to the store into all components
@@ -75,6 +90,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     loading,
     error,
     fetchCustomer,
+    onboardingStatusKey,
   };
 };
 

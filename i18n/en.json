@@ -220,7 +220,14 @@
         "hidePassword": "Hide password",
         "loginFailed": "Login Failed",
         "close": "Close",
-        "error": "Error"
+        "error": "Error",
+        "company": {
+            "onboarding": {
+                "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+                "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+                "approved": "Congratulations! Your company has been approved. You can now start shopping."
+            }
+        }
     },
     "register": {
         "title": "Registration",
@@ -927,5 +934,12 @@
         "thunderstormWithSlightHail": "Thunderstorm with Light Hail",
         "thunderstormWithHeavyHail": "Thunderstorm with Heavy Hail",
         "unknown": "Unknown Weather Condition"
+    },
+    "company": {
+        "onboarding": {
+            "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+            "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+            "approved": "Congratulations! Your company has been approved. You can now start shopping."
+        }
     }
 }
