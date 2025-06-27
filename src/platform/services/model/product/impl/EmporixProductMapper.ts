@@ -52,20 +52,27 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
                   return acc;
                 }, {} as any)
               : {},
-            label: spec.label.reduce((acc: LocalizedString, item: any) => {
-              acc[item.language] = item.value;
-              return acc;
-            }, {} as any),
-            value: spec.value.reduce((acc: LocalizedString, item: any) => {
-              acc[item.language] = item.value;
-              return acc;
-            }, {} as any),
-            ...(spec.unit && {
-              unit: spec.unit.reduce((acc: LocalizedString, item: any) => {
-                acc[item.language] = item.value;
-                return acc;
-              }, {} as any),
-            }),
+            label:
+              spec.label && Array.isArray(spec.label)
+                ? spec.label.reduce((acc: LocalizedString, item: any) => {
+                    acc[item.language] = item.value;
+                    return acc;
+                  }, {} as any)
+                : { en: spec.key || '' },
+            value:
+              spec.value && Array.isArray(spec.value)
+                ? spec.value.reduce((acc: LocalizedString, item: any) => {
+                    acc[item.language] = item.value;
+                    return acc;
+                  }, {} as any)
+                : { en: '' },
+            ...(spec.unit &&
+              Array.isArray(spec.unit) && {
+                unit: spec.unit.reduce((acc: LocalizedString, item: any) => {
+                  acc[item.language] = item.value;
+                  return acc;
+                }, {} as any),
+              }),
           }));
 
     // Also create a grouped version of specifications
