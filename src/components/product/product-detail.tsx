@@ -12,7 +12,7 @@ import { useProduct } from '@/hooks/product/useProduct';
 import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
-import { Product } from '@/platform/services/model/product';
+import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import { Button } from '../ui/button';
 import { H1, H2, H3, H4 } from '../ui/h';
 import UiLink from '../ui/link';
@@ -21,77 +21,6 @@ import ProductAddToCart from './product-add-to-cart';
 import { ProductPriceComponent } from './product-price';
 import { ProductShippingInfo } from './product-shipping-info';
 
-const specifications = [
-  {
-    groupName: 'General information',
-    item: [
-      { label: 'Manufacturer', value: 'Bluetti' },
-      { label: 'Category', value: 'Solar panels' },
-      { label: 'Manufacturer no.', value: 'P-BGPV410-EU-BK-BL-010' },
-      { label: 'Release date', value: '7.3.2024' },
-    ],
-  },
-  {
-    groupName: 'Product dimensions',
-    item: [
-      { label: 'Length', value: '172.20 cm' },
-      { label: 'Width', value: '113.40 cm' },
-      { label: 'Height', value: '3 cm' },
-      { label: 'Weight', value: '20.80 kg' },
-    ],
-  },
-  {
-    groupName: 'Colour',
-    item: [
-      { label: 'Colour', value: 'black' },
-      { label: 'Exact colour description', value: 'black' },
-      { label: 'Frame colour', value: 'black' },
-    ],
-  },
-  {
-    groupName: 'Material',
-    item: [
-      { label: 'Material Group', value: 'Glass' },
-      { label: 'Material', value: 'EVA film' },
-    ],
-  },
-  {
-    groupName: 'Solar Technology properties',
-    item: [
-      { label: 'Solar panel type', value: 'Solar panel' },
-      { label: 'Socket type', value: 'MC4' },
-      { label: 'Plug type', value: 'MC4' },
-      { label: 'Protection type (IP code)', value: 'IP68' },
-    ],
-  },
-  {
-    groupName: 'Solar panel properties',
-    item: [
-      { label: 'Cell type', value: 'Monocrystalline' },
-      { label: 'Solar panel design', value: 'Rigid' },
-      { label: 'Nominal power', value: '410 W' },
-      { label: 'Rated current (MPP)', value: '13.05 A' },
-      { label: 'Short circuit current', value: '13.84 A' },
-      { label: 'Efficiency', value: '23 %' },
-    ],
-  },
-  {
-    groupName: 'Voluntary climate contribution',
-    item: [
-      { label: 'CO₂-Emission', value: '1’390.83 kg' },
-      { label: 'Climate contribution', value: '33.08 €' },
-    ],
-  },
-  {
-    groupName: 'Package dimensions',
-    item: [
-      { label: 'Length', value: '118 cm' },
-      { label: 'Width', value: '175 cm' },
-      { label: 'Height', value: '18 cm' },
-      { label: 'Weight', value: '21 kg' },
-    ],
-  },
-];
 export interface ProductDetailProps {
   product?: Product;
   price?: ProductPrice | null;
@@ -148,14 +77,14 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Nominal Power"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins?.productVariantAttributes?.['nominal-power']}
+                      value={product.mixins.productVariantAttributes['nominal-power']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Length"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins?.productTemplateAttributes?.['length']}
+                      value={product.mixins.productTemplateAttributes['length']}
                     />
                     <BulletPoint
                       className="font-bold"
@@ -169,21 +98,21 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Width"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins?.productTemplateAttributes?.['width']}
+                      value={product.mixins.productTemplateAttributes['width']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Cell Type"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins?.productTemplateAttributes?.['cell-type']}
+                      value={product.mixins.productTemplateAttributes['cell-type']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Height"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins?.productTemplateAttributes?.['height']}
+                      value={product.mixins.productTemplateAttributes['height']}
                     />
                   </div>
 
@@ -324,11 +253,12 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 )}
               </div> */}
               <div className="flex gap-2 h-7">
-                {price?.originalValue !== price?.effectiveValue && (
-                  <Badge key="memberdeal" variant="promo" rounded="rounded_right">
-                    Member Deal
-                  </Badge>
-                )}
+                <Badge key={0} variant="black" rounded="rounded_right">
+                  BLACK FRIDAY
+                </Badge>
+                <Badge key={1} variant="promo" rounded="rounded_right">
+                  MEMBER DEAL
+                </Badge>
               </div>
               <div className="flex gap-2">
                 <Button size="icon" variant="secondary" aria-label="icon">
@@ -394,11 +324,11 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           )}
         </div>
       </div>
-      {specifications && (
+      {product?.groupedSpecifications && (
         <div className={cn(className)}>
           <H3 className="my-6"> {t('technicalInformation')}</H3>
           <div className="grid grid-cols-1 gap-y-6 lg:gap-y-16 gap-x-6 lg:grid-cols-2 xl:grid-cols-4 mb-16">
-            {specifications.map((spec) => {
+            {product.groupedSpecifications.map((spec: GroupedSpecification) => {
               return (
                 <div className="flex flex-col" key={spec.groupName}>
                   <p className="font-bold font-headlines font-sm p-4 border-b border-neutral-200">{spec.groupName}</p>

@@ -16,7 +16,7 @@ export interface ProductLabel {
 export interface ProductSpecification {
   key: string;
   group?: string;
-  groupLabel?: LocalizedString;
+  groupName?: LocalizedString;
   label: LocalizedString;
   value: LocalizedString;
   unit?: LocalizedString;
