@@ -38,6 +38,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     search,
     applyFacet,
     applyRangeFacet,
+    applyAllFacets,
     resetFacet,
     resetAllFacets,
     activeFilters,
@@ -62,7 +63,17 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
 
   return (
     <>
-      <SearchFilter {...{ activeFilters, availableFilters, resetFacet, resetAllFacets, applyFacet, applyRangeFacet }} />
+      <SearchFilter
+        {...{
+          activeFilters,
+          availableFilters,
+          resetFacet,
+          resetAllFacets,
+          applyFacet,
+          applyRangeFacet,
+          applyAllFacets,
+        }}
+      />
       {/* Product Grid */}
       <div className="mt-6 w-full">
         {loading ? (

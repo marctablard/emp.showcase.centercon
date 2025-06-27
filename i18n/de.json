@@ -76,7 +76,10 @@
             },
             "categoryAssignments": {
                 "name": "Kategorie Name"
-            }
+            },
+            "filterButton": "Filter",
+            "clearFilter": "Filter löschen",
+            "applyFilters": "Filter anwenden"
         },
         "tabs": {
             "description": "Beschreibung",

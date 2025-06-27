@@ -1,26 +1,29 @@
-import { useForm } from 'react-hook-form';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { ListFilter, Trash2, X } from 'lucide-react';
-import z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { FilterValue as SearchFilterValue } from '@/hooks/useSearch';
 import { Filter } from '@/platform/services/model/common';
-import { Button } from '../ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Slider } from '../ui/slider';
-import { getMinMaxValues, hasUnitOfMeasurement, isNumberRange, isSelect } from './util/search';
+import { getMinMaxValues, isNumberRange, isSelect } from './util/search';
 
 interface SearchFilterProps {
   availableFilters: Filter[];
   activeFilters: Record<string, SearchFilterValue>;
   applyFacet: (facetId: string, value: string | string[]) => void;
   applyRangeFacet: (facetId: string, min: string, max: string) => void;
+  applyAllFacets: (
+    facets: Array<{ facetId: string; value: string | string[] } | { facetId: string; min: string; max: string }>,
+  ) => void;
   resetFacet: (facetId: string) => void;
   resetAllFacets: () => void;
+  onSubmitComplete?: () => void;
 }
+
+type FilterFormValues = Record<string, string | number>;
 
 interface ActiveFiltersProps {
   activeFilters: Record<string, SearchFilterValue>;
@@ -31,205 +34,304 @@ interface ActiveFiltersProps {
 function ActiveFilters({ activeFilters, resetFacet }: ActiveFiltersProps) {
   const t = useTranslations('product');
   const filters = Object.entries(activeFilters);
-  console.log(filters);
+
+  // Helper function to format filter values for display
+  const formatFilterValue = (value: SearchFilterValue): string => {
+    if (typeof value === 'string') {
+      return value;
+    } else if (Array.isArray(value)) {
+      return value.join(', ');
+    } else if (value && typeof value === 'object') {
+      // Handle Record<string, string>
+      return Object.entries(value)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(', ');
+    }
+    return '';
+  };
+
   return (
-    <div className="p-6 pt-10">
+    <>
       {filters &&
-        filters.map(([id, _value]) => (
-          <Button
-            onClick={() => resetFacet(id)}
-            className="p-2 bg-gray-300 rounded-xs mr-6 mb-6 text-black border-none"
-            variant={'secondary'}
-            key={id}
-          >
-            {t(`filters.${id}`)} X
-          </Button>
-        ))}
-    </div>
+        filters.map(([id, value]) => {
+          return (
+            <Button
+              onClick={() => resetFacet(id)}
+              className="bg-gray-300 text-black border-none normal-case"
+              variant="secondary"
+              key={id}
+            >
+              {t(`filters.${id}`)} ({formatFilterValue(value)})
+              <X />
+            </Button>
+          );
+        })}
+    </>
   );
 }
 
-function FilterMenu({
-  availableFilters,
-  applyFacet,
-  applyRangeFacet,
-  // resetAllFacets,
-  // resetFacet,
-}: SearchFilterProps) {
+function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitComplete }: SearchFilterProps) {
   const t = useTranslations('product');
-  // Create a dynamic schema based on available filters
-  const createFormSchema = () => {
-    const schemaFields: Record<string, any> = {};
 
-    availableFilters.forEach(({ id, values }) => {
-      const filterIdMin = `${id}_min`;
-      const filterIdMax = `${id}_max`;
-      if (isSelect(values)) {
-        schemaFields[id] = z.string().optional();
-        schemaFields[filterIdMin] = z.string().optional();
-        schemaFields[filterIdMax] = z.string().optional();
+  // State to store form values
+  const [formValues, setFormValues] = useState<FilterFormValues>(() => {
+    // Initialize with default values from active filters
+    const initialValues: FilterFormValues = {};
+
+    availableFilters.forEach(({ values, id, name }) => {
+      if (isSelect(name || '')) {
+        // Use active filter value if available, otherwise empty string
+        const activeValue = activeFilters[id];
+        initialValues[id] = activeValue ? String(activeValue) : '';
       } else if (isNumberRange(values)) {
-      } else if (hasUnitOfMeasurement(values)) {
-        schemaFields[filterIdMin] = z.string().optional();
-        schemaFields[filterIdMax] = z.string().optional();
+        // Set min/max values for range filters
+        const [min, max] = getMinMaxValues(values);
+
+        // Check if there's an active range filter
+        const activeRange = activeFilters[id] as { from: string; till: string } | undefined;
+
+        if (activeRange) {
+          // Use active filter range values
+          initialValues[`${id}_min`] = Number(activeRange.from);
+          initialValues[`${id}_max`] = Number(activeRange.till);
+        } else {
+          // Use default min/max values
+          initialValues[`${id}_min`] = min;
+          initialValues[`${id}_max`] = max;
+        }
       }
     });
 
-    return z.object(schemaFields);
-  };
-
-  const FormSchemaInput = createFormSchema();
-
-  // Create default values based on available filters
-  const createDefaultValues = () => {
-    const defaultValues: Record<string, any> = {};
-
-    availableFilters.forEach(({ values, id }) => {
-      if (isSelect(values)) {
-        defaultValues[id] = values[0].id;
-      }
-
-      if (isNumberRange(values)) {
-        defaultValues[`${id}_min`] = getMinMaxValues(values)[0];
-        defaultValues[`${id}_max`] = getMinMaxValues(values)[1];
-      }
-    });
-
-    return defaultValues;
-  };
-
-  const form = useForm<z.infer<typeof FormSchemaInput>>({
-    resolver: zodResolver(FormSchemaInput),
-    defaultValues: createDefaultValues(),
+    return initialValues;
   });
 
-  const onSubmit = (_data: z.infer<ReturnType<typeof createFormSchema>>) => {};
+  // Handle input changes
+  const handleInputChange = (id: string, value: string | number) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
 
-  // Helper functions are now imported from util/search.ts
+  // Handle slider changes
+  const handleSliderChange = (id: string, values: number[]) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [`${id}_min`]: values[0],
+      [`${id}_max`]: values[1],
+    }));
+  };
+
+  // Handle select changes
+  const handleSelectChange = (id: string, value: string) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  // Submit handler to apply all filters at once
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      // Collect all filters to apply in a single API call
+      const filtersToApply: Array<
+        { facetId: string; value: string | string[] } | { facetId: string; min: string; max: string }
+      > = [];
+
+      availableFilters.forEach(({ id, name, values }) => {
+        if (isSelect(name || '')) {
+          // Collect select filters
+          const value = formValues[id] as string;
+          // Only include filter if value is not empty
+          if (value && value !== '') {
+            filtersToApply.push({
+              facetId: id,
+              value: value,
+            });
+          }
+        } else if (isNumberRange(values)) {
+          // Collect range filters
+          const [defaultMin, defaultMax] = getMinMaxValues(values);
+          const minValue = Number(formValues[`${id}_min`]);
+          const maxValue = Number(formValues[`${id}_max`]);
+
+          // Only add filter if values are different from default min/max
+          const isDefault = minValue === defaultMin && maxValue === defaultMax;
+
+          if (!isDefault && minValue !== undefined && maxValue !== undefined) {
+            filtersToApply.push({
+              facetId: id,
+              min: String(minValue),
+              max: String(maxValue),
+            });
+          }
+        }
+      });
+
+      // Apply all filters in a single API call
+      if (filtersToApply.length > 0) {
+        applyAllFacets(filtersToApply);
+      }
+
+      // Close the popover after submitting
+      if (onSubmitComplete) {
+        onSubmitComplete();
+      }
+    } catch (error) {
+      console.error('Error applying filters:', error);
+    }
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
-        {availableFilters.map(({ id, values, name }) => {
-          if (isNumberRange(values)) {
-            const [min, max] = getMinMaxValues(values);
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {availableFilters.map(({ id, values, name }) => {
+        if (!isSelect(name || '')) {
+          const [min, max] = getMinMaxValues(values);
+          const minValue = formValues[`${id}_min`] !== undefined ? Number(formValues[`${id}_min`]) : min;
+          const maxValue = formValues[`${id}_max`] !== undefined ? Number(formValues[`${id}_max`]) : max;
 
-            const filterIdMin = `${id}_min`;
-            const filterIdMax = `${id}_max`;
-            // Get current values from form
-            const minValue = form.watch(filterIdMin) || min;
-            const maxValue = form.watch(filterIdMax) || max;
+          return (
+            <div key={id} className="space-y-2">
+              <Label>{t(`filters.${name}`)}</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {['min', 'max'].map((input) => {
+                  const inputId = `${id}_${input}`;
+                  const inputValue = input === 'min' ? minValue : maxValue;
 
-            return (
-              <div key={id} className="space-y-2">
-                <FormLabel>{t(`filters.${name}`)}</FormLabel>
-                <div className="grid grid-cols-2 gap-2">
-                  {['min', 'max'].map((input) => (
-                    <FormField
-                      key={input}
-                      name={`${id}_${input}`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input type="number" placeholder={input.toUpperCase()} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
-                <Slider
-                  value={[Number(minValue), Number(maxValue)]}
-                  min={min}
-                  max={max}
-                  step={1}
-                  className="mt-2"
-                  onValueChange={(values: number[]) => {
-                    form.setValue(filterIdMin, String(values[0]));
-                    form.setValue(filterIdMax, String(values[1]));
-
-                    applyRangeFacet(id, form.getValues(filterIdMin), form.getValues(filterIdMax));
-                  }}
-                />
+                  return (
+                    <div key={inputId}>
+                      <Input
+                        type="number"
+                        placeholder={input.toUpperCase()}
+                        value={inputValue}
+                        min={min}
+                        max={max}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          handleInputChange(inputId, e.target.value);
+                        }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
-            );
-          }
-          // Select filter type
-          if (isSelect(values)) {
-            return (
-              <FormField
-                key={id}
-                name={id}
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t(`filters.${name}`)}</FormLabel>
-                    <Select
-                      onValueChange={() => {
-                        applyFacet(id, field.value);
-                      }}
-                      value={field.value || ''}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select an option" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {values.map((value) => (
-                          <SelectItem key={value.id} value={value.id}>
-                            {value.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <Slider
+                value={[Number(minValue), Number(maxValue)]}
+                min={min}
+                max={max}
+                step={1}
+                className="mt-2"
+                onValueChange={(values: number[]) => {
+                  handleSliderChange(id, values);
+                }}
               />
-            );
-          }
+            </div>
+          );
+        }
 
-          return null;
-        })}
-        {/* Submit button */}
-        <Button type="submit" className="w-full mt-4">
-          Apply Filters
-        </Button>
-      </form>
-    </Form>
+        // Select filter type
+        if (isSelect(name || '')) {
+          return (
+            <div key={id} className="space-y-2">
+              <Label>{t(`filters.${name}`)}</Label>
+              <Select
+                value={formValues[id] as string}
+                onValueChange={(value) => {
+                  handleSelectChange(id, value);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t(`filters.${name}`)} />
+                </SelectTrigger>
+                <SelectContent>
+                  {values.map((value) => (
+                    <SelectItem key={value.id} value={value.id}>
+                      {value.name} ({value.count})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        }
+
+        return null;
+      })}
+
+      {/* Submit button */}
+      <Button type="submit" className="w-full mt-4">
+        Apply Filters
+      </Button>
+    </form>
   );
 }
+
 function SearchFilter({
   availableFilters,
   applyFacet,
   applyRangeFacet,
-  resetAllFacets,
+  applyAllFacets,
   resetFacet,
+  resetAllFacets,
   activeFilters,
 }: SearchFilterProps) {
+  // Check if there are any active filters
+  const hasActiveFilters = Object.keys(activeFilters).length > 0;
+  // State to control if the filter offcanvas is visible
+  const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
+
+  // Toggle filter offcanvas visibility
+  const toggleFilterOffcanvas = () => {
+    setShowFilterOffcanvas(!showFilterOffcanvas);
+  };
+
   return (
-    <div className="flex gap-4">
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant={'secondary'}>
-            <ListFilter /> Filter
+    <div className="relative w-full">
+      {/* Filter Toggle Button */}
+      <div className="flex gap-4 max-w-full overflow-x-scroll hide-scrollbar mb-4">
+        <Button variant="secondary" onClick={toggleFilterOffcanvas}>
+          <ListFilter className="mr-2" /> Filter
+        </Button>
+
+        <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
+        {hasActiveFilters && (
+          <Button variant="red" onClick={resetAllFacets}>
+            <Trash2 className="mr-1" />
+            Clear Filter
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0 outline z-50 bg-white" align="end">
-          <ActiveFilters {...{ activeFilters, resetAllFacets, resetFacet }} />
-          <FilterMenu
-            {...{ availableFilters, applyFacet, applyRangeFacet, resetAllFacets, resetFacet, activeFilters }}
-          />
-        </PopoverContent>
-      </Popover>
-      <Button variant="red" onClick={resetAllFacets}>
-        <Trash2 />
-        Clear Filter
-        <X />
-      </Button>
+        )}
+      </div>
+
+      {/* Offcanvas Filter Menu - shown when toggled */}
+      {showFilterOffcanvas && (
+        <>
+          {/* Backdrop - closes the filter when clicked */}
+          <div className="fixed inset-0 z-40" onClick={toggleFilterOffcanvas} aria-hidden="true" />
+
+          {/* Offcanvas Panel */}
+          <div className="fixed left-0 top-10 h-[calc(100%-40px)] max-w-[590px] w-full bg-white p-6 z-50 overflow-y-auto border rounded-sm shadow-sm">
+            <div className="flex justify-end mb-4 -mr-4 -mt-4">
+              <Button variant="link" size="icon" onClick={toggleFilterOffcanvas} className="text-black">
+                <X />
+              </Button>
+            </div>
+
+            <FilterMenu
+              {...{
+                availableFilters,
+                applyFacet,
+                applyRangeFacet,
+                applyAllFacets,
+                resetAllFacets,
+                resetFacet,
+                activeFilters,
+                onSubmitComplete: toggleFilterOffcanvas,
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
