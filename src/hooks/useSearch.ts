@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory } from '@/hooks/history/useHistory';
+import useHistory from '@/hooks/history/useHistory';
 import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
 
@@ -14,6 +14,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   const { addSearchQuery } = useHistory();
   const [data, setData] = useState<T[]>(initialResult?.items || []);
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null);
   const [facets, setFacets] = useState<Filter[]>([]);
   const [total, setTotal] = useState(initialResult?.total || 0);
   const [currentPage, setCurrentPage] = useState(initialResult?.page || 0);
@@ -40,6 +42,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   const search = useCallback(async (params: SearchParams<T>) => {
     try {
       setLoading(true);
+      setError(null);
+
       // Build the URL with query parameters
       const url = new URL('/api/search', window.location.origin);
 
@@ -104,8 +108,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       if (data.availableFilters) {
         setFacets(data.availableFilters);
       }
-    } catch (error) {
-      console.error('Error searching products:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -230,9 +234,6 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
 
   /**
    * Change the sort order
-   */
-  /**
-   * Get query suggestions
    */
   const getSuggestions = useCallback(async (query: string, locale?: string): Promise<void> => {
     setLoading(true);

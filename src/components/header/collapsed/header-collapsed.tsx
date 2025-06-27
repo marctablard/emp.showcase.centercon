@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import HeaderMenu from '@/components/header/collapsed/header-menu';
+import HeaderActions from '@/components/header/common/header-actions';
+import HeaderCartButton from '@/components/header/common/header-cart-button';
 import HeaderSearch from '@/components/header/common/search/header-search';
 import { Link } from '@/i18n/navigation';
 import HeaderNavigation from '../common/header-navigation';
@@ -22,7 +24,8 @@ export default function HeaderCollapsed() {
         <div className="self-center">
           <HeaderSearch small />
         </div>
-
+        <HeaderActions />
+        <HeaderCartButton />
         <div className="xl:hidden transition-all duration-300 group-focus-within:w-0 group-focus-within:opacity-0">
           <HeaderMenu />
         </div>

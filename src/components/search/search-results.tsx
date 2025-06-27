@@ -51,8 +51,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
       page: currentPage,
       size: pageSize,
     });
-    applyRangeFacet('prices.effectiveAmount', '105', '285');
-  }, [searchParams, currentPage, pageSize, search, applyRangeFacet]);
+  }, [searchParams, currentPage, pageSize, search]);
 
   useEffect(() => {
     const totalPages = Math.ceil(total / pageSize);

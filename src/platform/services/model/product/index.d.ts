@@ -13,6 +13,27 @@ export interface ProductLabel {
   };
 }
 
+export interface ProductSpecification {
+  key: string;
+  label: LocalizedString;
+  value: LocalizedString;
+  unit?: LocalizedString;
+}
+
+export interface ProductDocument {
+  title: LocalizedString;
+  description: LocalizedString;
+  url: string;
+  mime: string;
+  group: string;
+  groupLabel: LocalizedString;
+}
+
+export interface ProductUSP {
+  icon: string;
+  description: LocalizedString;
+}
+
 export interface Product {
   id: string;
   name: string | LocalizedString;
@@ -30,9 +51,14 @@ export interface Product {
   primaryImage?: Media;
   images?: Media[];
   taxType?: TaxType;
-  specifications?: string[];
   usp?: string | LocalizedString;
   highlights?: string[];
   documents?: Media[];
   mixins: Mixins;
+
+  // Additional fields from mixins
+  specifications?: ProductSpecification[];
+  usps?: ProductUSP[];
+  templateAttributes?: Record<string, string>;
+  variantAttributes?: Record<string, string>;
 }

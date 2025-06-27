@@ -1,4 +1,5 @@
 import { EmporixLocalizedString, Media, Metadata, Mixins } from './common';
+import { EmporixMatchedPrice as EmporixPrice } from './price';
 
 export interface EmporixLabelOverlay {
   isTrue?: boolean;
@@ -31,4 +32,5 @@ export interface Product {
   mixins?: Mixins;
   published?: boolean;
   metadata?: Metadata;
+  prices?: EmporixPrice[];
 }

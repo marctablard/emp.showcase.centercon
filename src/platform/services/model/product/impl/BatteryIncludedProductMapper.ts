@@ -3,9 +3,11 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
 import { Product as ServiceProduct } from '@/platform/services/model/product';
+import { LocalizedString, Price } from '../../common';
 import { CategorySuggestion, SearchSuggestions } from '../../search/SearchSuggestions';
 import { SuggestionsMapper } from '../../search/SuggestionsMapper';
 import { ProductMapper } from '../ProductMapper';
+import { Product } from '../index';
 import { EmporixProductMapper } from './EmporixProductMapper';
 
 /**
@@ -25,11 +27,20 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
   mapToService(product: BatteryIncludedProduct): ServiceProduct {
     // Since BatteryIncluded uses the same structure as Emporix, delegate to EmporixProductMapper
     // custom modifications can be included here
-    const result = this.emporixMapper.mapToService({
+    const productData = this.emporixMapper.mapToService({
       ...product,
       media: product.medias ? product.medias : [],
     });
-    return result;
+
+    // Map price data if available - using mixins data as requested
+    if (product.prices) {
+      productData.price = this.mapPrice(product.prices[0]);
+    }
+
+    // Map product mixins to the existing product data
+    const productDataWithMixins = this.mapProductMixins(product.mixins, productData);
+
+    return productDataWithMixins;
   }
 
   /**
@@ -135,6 +146,72 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
     });
 
     return result;
+  }
+
+  /**
+   * Maps a price object to extract only effectiveAmount, currency and originalAmount
+   * @param priceData - The price data from mixins
+   * @returns Simplified price object with only required fields
+   */
+  mapPrice(priceData: any): Price {
+    return {
+      amount: priceData.effectiveAmount || 0,
+      currency: priceData.currency || 'EUR',
+      originalAmount: priceData.originalAmount || priceData.amount || 0,
+    };
+  }
+
+  /**
+   * Maps product mixins data to proper Product interface structure
+   * @param mixins The source mixins data from API
+   * @param product The existing product object to enhance
+   * @returns Enhanced product object with mixins data
+   */
+  mapProductMixins(mixins: any, product: Product): Product {
+    if (!mixins) return product;
+
+    // Create a new object to avoid mutating the input
+    const enhancedProduct: Product = { ...product };
+
+    if (mixins.specifications?.specifications) {
+      enhancedProduct.specifications = mixins.specifications.specifications.map((spec: any) => ({
+        key: spec.key,
+        label: spec.label.reduce((acc: LocalizedString, item: any) => {
+          acc[item.language] = item.value;
+          return acc;
+        }, {} as any),
+        value: spec.value.reduce((acc: LocalizedString, item: any) => {
+          acc[item.language] = item.value;
+          return acc;
+        }, {} as any),
+        ...(spec.unit && {
+          unit: spec.unit.reduce((acc: LocalizedString, item: any) => {
+            acc[item.language] = item.value;
+            return acc;
+          }, {} as any),
+        }),
+      }));
+    }
+
+    if (mixins.usp?.usp) {
+      enhancedProduct.usps = mixins.usp.usp.map((usp: any) => ({
+        icon: usp.icon,
+        description: usp.description.reduce((acc: LocalizedString, item: any) => {
+          acc[item.language] = item.value;
+          return acc;
+        }, {} as any),
+      }));
+    }
+
+    if (mixins.productTemplateAttributes) {
+      enhancedProduct.templateAttributes = { ...mixins.productTemplateAttributes };
+    }
+
+    if (mixins.productVariantAttributes) {
+      enhancedProduct.variantAttributes = { ...mixins.productVariantAttributes };
+    }
+
+    return enhancedProduct;
   }
 }
 

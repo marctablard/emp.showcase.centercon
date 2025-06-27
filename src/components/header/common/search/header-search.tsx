@@ -90,7 +90,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
 
   return (
     <div
-      className={`hidden z-50 drop-shadow-md lg:block relative transition-all transition-discrete duration-350  ${hasInputFocus ? 'search w-full' : 'w-[720px]'}`}
+      className={`hidden z-50 lg:block relative transition-all transition-discrete duration-350 w-full ${hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180'}`}
     >
       <form onSubmit={(e) => redirectToBrowse(e)}>
         <Input
@@ -99,7 +99,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
           onFocus={handleInput}
           ref={inputRef}
           onKeyDown={(e) => e.key === 'Enter' && redirectToBrowse(e)}
-          className={`h-[44px] pr-[62px] text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700`}
+          className={`h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700 ${hasInputFocus ? 'drop-shadow-md' : ''}`}
         />
 
         <Button
