@@ -18,13 +18,9 @@ export async function GET(_request: NextRequest) {
     const customerManagementService =
       globalThis.EMP.platform.server.get<CustomerManagementService>('CustomerManagementService');
     const onboardingStatus = await customerManagementService.getCompanyOnboardingStatus(customer.legalEntityId);
-    if (onboardingStatus?.status === 'approved') {
-      if (onboardingStatus?.updatedAt && customer.lastLogin && onboardingStatus.updatedAt > customer.lastLogin) {
-        return NextResponse.json(onboardingStatus, { status: 200 });
-      }
-    } else {
-      return NextResponse.json(onboardingStatus, { status: 200 });
-    }
+    return NextResponse.json(onboardingStatus, { status: 200 });
+    // TODO: "approved" message should only be displayed once. But lastLogin already updated at this point.
+    // Hence, it's always displayed. Needs to be fixed
   } catch (error) {
     console.error('Error fetching onboarding status:', error);
     return NextResponse.json({}, { status: 200 });
