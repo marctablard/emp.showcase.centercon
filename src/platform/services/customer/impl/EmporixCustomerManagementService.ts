@@ -25,9 +25,9 @@ export class EmporixCustomerManagementService implements CustomerManagementServi
       return null;
     }
   }
-  mapStatus(internalrating: any): 'completed' | 'pending' | 'rejected' {
+  mapStatus(internalrating: any): 'approved' | 'pending' | 'rejected' {
     if (internalrating === 'approved' || internalrating === 'auto-approved' || internalrating === 'whitelisted') {
-      return 'completed';
+      return 'approved';
     } else if (internalrating === 'blacklisted') {
       return 'rejected';
     } else {
