@@ -12,7 +12,7 @@ interface CMSPageParams {
  */
 async function fetchData(locale: string, slug: string) {
   const sbParams: ISbStoriesParams = {
-    version: process.env.NODE_ENV === 'production' ? 'published' : 'draft',
+    version: process.env.STORYBLOK_ACCESS_PREVIEW === 'true' ? 'draft' : 'published',
     language: locale,
   };
 
