@@ -117,7 +117,10 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
             let lowestPrice: { amount: number; currency: string } | undefined = undefined;
             hit.highlighted.prices.forEach((price: any) => {
               if (!lowestPrice || price.effectiveAmount < lowestPrice.amount) {
-                lowestPrice = price;
+                lowestPrice = {
+                  amount: price.effectiveAmount,
+                  currency: price.currency,
+                };
               }
             });
             product.price = lowestPrice;
