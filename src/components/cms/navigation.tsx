@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { storyblokEditable } from '@storyblok/react/rsc';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Navigation component for Storyblok

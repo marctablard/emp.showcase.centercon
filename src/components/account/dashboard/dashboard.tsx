@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { isEqual } from 'lodash';
 import { useLocalDashboardStore } from '@/lib/client/dashboard';
+import { AiHelperCard } from './cards/ai-helper-card';
+import { DocumentsCard } from './cards/documents-card';
+import { MyInvoicesCard } from './cards/my-invoices-card';
+import { MyOrdersCard } from './cards/my-orders-card';
+import { NotificationCard } from './cards/notification-card';
+import { TicketCard } from './cards/ticket-card';
 // Import card components from the cards folder
-import { ApprovalsSummaryCard } from './cards/approvals';
-import { BudgetProgress, BudgetSummaryCard } from './cards/budget';
-import { InboxCard } from './cards/inbox-card';
-import { OrderSummaryCard, RecentOrdersCard } from './cards/order-cards';
-import { SolarOutputCard } from './cards/solar-output-card';
 import { WeatherCard } from './cards/weather-card';
 
 interface DashboardProps {
@@ -44,36 +45,31 @@ export default function Dashboard({ isCustomizable, layouts, layoutChanged }: Da
     [layouts, layoutChanged, state],
   );
 
-  const renderItems = useCallback(() => {
-    state.items = [
-      <div key="revenue" className="h-full relative">
-        <BudgetSummaryCard />
-      </div>,
-      <div key="orders" className="h-full relative">
-        <OrderSummaryCard />
-      </div>,
-      <div key="approvals" className="h-full relative">
-        <ApprovalsSummaryCard />
-      </div>,
-      <div key="budget" className="h-full overflow-auto relative">
-        <BudgetProgress />
-      </div>,
-      <div key="inbox" className="h-full overflow-auto relative">
-        <InboxCard />
+  const layoutItems = useMemo(() => {
+    return [
+      <div key="ai-helper" className="h-full relative">
+        <AiHelperCard className="h-full" />
       </div>,
       <div key="weather" className="h-full overflow-auto relative">
-        <WeatherCard />
+        <WeatherCard className="h-full" />
       </div>,
-      <div key="solar-output" className="h-full overflow-auto relative">
-        <SolarOutputCard />
+      <div key="notification" className="h-full relative">
+        <NotificationCard className="h-full" />
       </div>,
-      <div key="recent-orders" className="h-full overflow-auto relative">
-        <RecentOrdersCard />
+      <div key="ticket" className="h-full relative">
+        <TicketCard className="h-full" />
+      </div>,
+      <div key="orders" className="h-full relative">
+        <MyOrdersCard className="h-full" />
+      </div>,
+      <div key="invoices" className="h-full relative">
+        <MyInvoicesCard className="h-full" />
+      </div>,
+      <div key="documents" className="h-full relative">
+        <DocumentsCard className="h-full" />
       </div>,
     ];
-  }, [state]);
-
-  renderItems();
+  }, []);
 
   return (
     <div className="relative">
@@ -83,11 +79,12 @@ export default function Dashboard({ isCustomizable, layouts, layoutChanged }: Da
         onBreakpointChange={onBreakpointChange}
         onLayoutChange={onLayoutChange}
         breakpoints={{ xl: 1200, lg: 1024, md: 640, sm: 320 }}
-        cols={{ xl: 4, lg: 3, md: 2, sm: 1 }}
+        cols={{ xl: 3, lg: 3, md: 2, sm: 1 }}
+        rowHeight={20}
         isDraggable={isCustomizable}
         isResizable={isCustomizable}
       >
-        {state.items}
+        {layoutItems}
       </ResponsiveReactGridLayout>
     </div>
   );

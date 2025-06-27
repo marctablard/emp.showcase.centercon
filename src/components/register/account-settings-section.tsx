@@ -8,6 +8,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { H5 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { PasswordCriteria } from './password-criteria';
 
 interface AccountSettingsAccordionProps {
   control: Control<any>;
@@ -45,7 +46,7 @@ export function AccountSettingsSection({ control, number }: AccountSettingsAccor
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
+              <PasswordCriteria control={control} passwordField="password" />
             </FormItem>
           )}
         />

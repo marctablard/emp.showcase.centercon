@@ -1,17 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory } from '@/hooks/history/useHistory';
-import { Filter, SearchParams, SearchResult } from '@/platform/services/model/common';
+import useHistory from '@/hooks/history/useHistory';
+import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
+
+// Extend the SearchParams type to support nested objects in filters
+export type FilterValue = string | string[] | Record<string, string>;
+
+type SearchParams<T> = Omit<BaseSearchParams<T>, 'filters'> & {
+  filters?: Record<string, FilterValue>;
+};
 
 export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: SearchResult<T>) {
   const { addSearchQuery } = useHistory();
   const [data, setData] = useState<T[]>(initialResult?.items || []);
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null);
   const [facets, setFacets] = useState<Filter[]>([]);
   const [total, setTotal] = useState(initialResult?.total || 0);
   const [currentPage, setCurrentPage] = useState(initialResult?.page || 0);
   const [pageSize, setPageSize] = useState(initialResult?.pageSize || 20);
-  const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>(initialSearch?.filters || {});
+  const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>(initialSearch?.filters || {});
   const [currentQuery, setCurrentQuery] = useState<string | undefined>(initialSearch?.query);
   const [currentSort, setCurrentSort] = useState<string | undefined>(initialSearch?.sort);
   // Suggestions state
@@ -31,9 +40,10 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
    * Search for products with the given parameters
    */
   const search = useCallback(async (params: SearchParams<T>) => {
-    setLoading(true);
-
     try {
+      setLoading(true);
+      setError(null);
+
       // Build the URL with query parameters
       const url = new URL('/api/search', window.location.origin);
 
@@ -65,8 +75,13 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
             value.forEach((val) => {
               url.searchParams.append(`filters[${key}][]`, val);
             });
+          } else if (typeof value === 'object' && value !== null) {
+            // Handle nested objects like range filters
+            Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+              url.searchParams.append(`filters[${key}][${nestedKey}]`, String(nestedValue));
+            });
           } else {
-            url.searchParams.append(`filters[${key}]`, value);
+            url.searchParams.append(`filters[${key}]`, String(value));
           }
         });
         setActiveFilters(params.filters);
@@ -93,8 +108,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       if (data.availableFilters) {
         setFacets(data.availableFilters);
       }
-    } catch (error) {
-      console.error('Error searching products:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -108,6 +123,61 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       const newFilters = { ...activeFilters, [facetId]: value };
 
       // Reset to first page when applying a filter
+      search({
+        ...lastSearchParams.current,
+        page: 0,
+        filters: newFilters,
+      });
+    },
+    [activeFilters, search],
+  );
+
+  /**
+   * Apply a range facet filter to the search
+   */
+  const applyRangeFacet = useCallback(
+    (facetId: string, min: string, max: string) => {
+      const newFilters = {
+        ...activeFilters,
+        [facetId]: {
+          from: min,
+          till: max,
+        },
+      };
+
+      // Reset to first page when applying a filter
+      search({
+        ...lastSearchParams.current,
+        page: 0,
+        filters: newFilters,
+      });
+    },
+    [activeFilters, search],
+  );
+
+  /**
+   * Apply multiple facet filters at once to the search
+   */
+  const applyAllFacets = useCallback(
+    (facets: Array<{ facetId: string; value: string | string[] } | { facetId: string; min: string; max: string }>) => {
+      // Start with current active filters
+      const newFilters = { ...activeFilters };
+
+      // Apply each facet to build up the filters object
+      facets.forEach((facet) => {
+        if ('value' in facet) {
+          // Handle standard facet
+          newFilters[facet.facetId] = facet.value;
+        } else if ('min' in facet && 'max' in facet) {
+          // Handle range facet
+          newFilters[facet.facetId] = {
+            from: facet.min,
+            till: facet.max,
+          };
+        }
+      });
+
+      // Reset to first page when applying filters
       search({
         ...lastSearchParams.current,
         page: 0,
@@ -165,10 +235,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   /**
    * Change the sort order
    */
-  /**
-   * Get query suggestions
-   */
   const getSuggestions = useCallback(async (query: string, locale?: string): Promise<void> => {
+    setLoading(true);
     if (!query?.trim()) {
       setSuggestions({
         queryCompletions: [],
@@ -193,6 +261,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       setSuggestions(data);
     } catch (err) {
       console.error('Error fetching suggestions:', err);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -227,7 +297,9 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
 
     // Functions
     search,
+    applyAllFacets,
     applyFacet,
+    applyRangeFacet,
     resetFacet,
     resetAllFacets,
     changePage,

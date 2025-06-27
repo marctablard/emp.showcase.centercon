@@ -7,7 +7,7 @@ export const NewsletterSchema = z.object({
 });
 
 export function useNewsletterForm() {
-  const methods = useForm({
+  const form = useForm({
     resolver: zodResolver(NewsletterSchema),
     defaultValues: {
       email: '',
@@ -19,7 +19,7 @@ export function useNewsletterForm() {
   };
 
   return {
-    ...methods,
+    form,
     onSubmit,
   };
 }

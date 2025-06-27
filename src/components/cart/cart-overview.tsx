@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
+import useCustomer from '@/hooks/customer/useCustomer';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { CartAction } from './cart-action';
 import { CartDelivery } from './cart-delivery';
@@ -20,10 +21,11 @@ interface CartOverviewProps {
 export function CartOverview({ initialCart }: CartOverviewProps) {
   const t = useTranslations('cart');
   const { cart, loading } = useCart(initialCart);
-  const [isDelivery, setIsDelivery] = useState(true);
+  const { customer } = useCustomer();
+
   const leftContent = useRef<HTMLDivElement>(null);
 
-  if (loading) {
+  if (loading && !cart) {
     return (
       <div className="max-w-6xl mx-auto mt-8">
         <Card className="mx-4 xl:mx-9">
@@ -38,27 +40,28 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
     );
   }
 
-  if (cart && cart.items.length > 0) {
-    return (
-      <div className="max-w-6xl mx-auto mt-8">
-        <div className="mx-4 xl:mx-9" id="itemli">
-          <div className="flex gap-3 align-end mb-8">
-            <h3 className="text-5xl font-bold">{t('title')}</h3>
-            <div className="text-neutral-300 text-xl m-0 leading-[2]">
-              {cart.items.length > 1 ? cart.items.length + t('products') : cart.items.length + t('product')}
-            </div>
-          </div>
-          <CartAction />
-          <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-            <div className="col-span-1 lg:col-span-2 2xl:col-span-3" ref={leftContent}>
-              <CartDelivery isDelivery={isDelivery} setIsDelivery={setIsDelivery} />
-              <CartItemList cart={cart} />
-            </div>
-            <CartSummary cart={cart} isDelivery={isDelivery} loading={loading} leftContent={leftContent} />
+  if (!cart || cart.items.length == 0) {
+    return <CartEmpty />;
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto mt-8">
+      <div className="mx-4 xl:mx-9">
+        <div className="flex gap-3 align-end mb-8">
+          <h3 className="text-5xl font-bold font-headlines">{t('title')}</h3>
+          <div className="text-neutral-300 text-xl m-0 leading-[2]">
+            {cart.items.length > 1 ? cart.items.length + t('products') : cart.items.length + t('product')}
           </div>
         </div>
+        <CartAction />
+        <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-8 mb-11">
+          <div className="col-span-1 lg:col-span-6 xl:col-span-2 2xl:col-span-3" ref={leftContent}>
+            {false && customer && <CartDelivery />}
+            <CartItemList cart={cart} />
+          </div>
+          <CartSummary cart={cart} boundingContent={leftContent} />
+        </div>
       </div>
-    );
-  }
-  return <CartEmpty />;
+    </div>
+  );
 }

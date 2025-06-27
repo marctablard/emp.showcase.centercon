@@ -28,12 +28,10 @@ export const createCartStore = (initState: CartState = defaultState) => {
   return create<CartStore>()((set, get) => ({
     ...initState,
     setCurrentCart: (cart: Cart | null | undefined) => {
-      set((state) => {
-        if (cart === state.currentCart) {
-          return state;
-        }
-        return { currentCart: cart, loading: false };
-      });
+      if (cart === get().currentCart) {
+        return;
+      }
+      set({ currentCart: cart, loading: false });
     },
     getCurrentCart: () => get().currentCart,
     setLoading: (loading: boolean) => set({ loading }),

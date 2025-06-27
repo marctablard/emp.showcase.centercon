@@ -1,6 +1,11 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixOrder, EmporixOrderEntry, EmporixPayment } from '@/platform/integrations/emporix/model/order';
+import {
+  EmporixOrder,
+  EmporixOrderEntry,
+  EmporixPayment,
+  EmporixShipping,
+} from '@/platform/integrations/emporix/model/order';
 import { EmporixAddressMapper } from '@/platform/services/model/common/impl/EmporixAddressMapper';
 import { OrderMapper } from '@/platform/services/model/order/OrderMapper';
 import {
@@ -24,7 +29,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
     return {
       id: integrationModel.id,
       status: integrationModel.status as OrderStatus,
-      createdAt: integrationModel.creationDate,
+      createdAt: integrationModel.created,
       lastStatusChange: integrationModel.lastStatusChange,
       items: this.mapOrderItems(integrationModel.entries),
       billingAddress: integrationModel.billingAddress
@@ -40,8 +45,18 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
         currency: discount.currency,
         description: discount.description,
       })),
+      shipping: this.mapShipping(integrationModel.shipping),
       price: this.mapPrice(integrationModel.calculatedPrice, integrationModel.currency),
       currency: integrationModel.currency,
+      customer: integrationModel.customer
+        ? {
+            id: integrationModel.customer.id,
+            name: integrationModel.customer.name,
+            firstName: integrationModel.customer.firstName,
+            lastName: integrationModel.customer.lastName,
+            email: integrationModel.customer.email,
+          }
+        : undefined,
       customerEmail: integrationModel.customer?.email,
       customerNote: integrationModel.customerNote,
     };
@@ -156,7 +171,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
     }));
   }
 
-  private mapShipping(shipping: any): OrderShipping | undefined {
+  private mapShipping(shipping?: EmporixShipping): OrderShipping | undefined {
     if (!shipping) {
       return undefined;
     }

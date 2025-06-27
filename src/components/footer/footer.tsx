@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Instagram, Linkedin, Mail, Youtube } from 'lucide-react';
 import { useNewsletterForm } from '@/hooks/newsletter/useNewsletterForm';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { InputButton } from '../ui/input';
@@ -12,7 +12,7 @@ import UiLink from '../ui/link';
 
 export default function Footer() {
   const t = useTranslations('footer');
-  const newsletterForm = useNewsletterForm();
+  const { form } = useNewsletterForm();
 
   return (
     <footer className="w-full">
@@ -20,26 +20,23 @@ export default function Footer() {
         <div>
           <p className="font-bold mb-2">{t('newsletterTitle')}</p>
           <div className="max-w-[560px]">
-            <Form {...newsletterForm}>
-              <form onSubmit={newsletterForm.handleSubmit(newsletterForm.onSubmit)}>
-                <FormField
-                  control={newsletterForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <InputButton
-                          placeholder={t('newsletterInput')}
-                          {...field}
-                          iconButtonAfter={Mail}
-                          buttonLabel={t('newsletterButtonLabel')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
+            <Form {...form}>
+              <FormField
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <InputButton
+                        placeholder={t('newsletterInput')}
+                        {...field}
+                        iconButtonAfter={Mail}
+                        buttonLabel={t('newsletterButtonLabel')}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </Form>
           </div>
           <p className="mt-2">
@@ -58,7 +55,6 @@ export default function Footer() {
           <p className="font-bold mb-2 md:mb-6">{t('paymentMethodsTitle')}</p>
           <div className="flex gap-2 justify-between items-center max-w-[400px]">
             <Image src="/images/mastercard.svg" alt="Mastercard" width="88" height="20" />
-            <Image src="/images/visa.svg" alt="Visa" width="32" height="10" />
             <Image src="/images/paypal.svg" alt="Paypal" width="60" height="16" />
             <Image src="/images/pci-dss-compliant.svg" alt="PCI DSS Compliant" width="50" height="20" />
             <Image src="/images/gdpr.svg" alt="GDPR" width={19} height={24} />

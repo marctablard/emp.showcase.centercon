@@ -71,14 +71,14 @@ export interface CustomerService {
    * Get the list of addresses for the current customer
    * @returns Promise with the list of addresses or empty array if no addresses
    */
-  getAddresses(customerId?: string): Promise<Address[]>;
+  getAddresses(customerId?: string): Promise<CustomerAddress[]>;
 
   /**
    * Create a new address for the current customer
    * @param address The address data to create
    * @returns Promise with the created address including its ID
    */
-  createAddress(address: Address): Promise<Address>;
+  createAddress(address: CustomerAddress): Promise<CustomerAddress>;
 
   /**
    * Update an existing address
@@ -86,7 +86,7 @@ export interface CustomerService {
    * @param address The address data to update
    * @returns Promise with the updated address
    */
-  updateAddress(addressId: string, address: Address): Promise<Address>;
+  updateAddress(addressId: string, address: CustomerAddress): Promise<CustomerAddress>;
 
   /**
    * Delete an address
@@ -116,28 +116,6 @@ export interface CustomerService {
    * @returns Promise that resolves when the password reset update is complete
    */
   passwordResetUpdate(token: string, password: string): Promise<void>;
-
-  /**
-   * Create a new address for the current customer
-   * @param address The address data to create
-   * @returns Promise with the created address including its ID
-   */
-  createAddress(address: Address): Promise<Address>;
-
-  /**
-   * Update an existing address
-   * @param addressId The ID of the address to update
-   * @param address The address data to update
-   * @returns Promise with the updated address
-   */
-  updateAddress(addressId: string, address: Address): Promise<Address>;
-
-  /**
-   * Delete an address
-   * @param addressId The ID of the address to delete
-   * @returns Promise that resolves when deletion is complete
-   */
-  deleteAddress(addressId: string): Promise<void>;
 
   /**
    * Update the current customer's profile

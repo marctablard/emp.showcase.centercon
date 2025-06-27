@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { ArrowRight, Gauge, MessageSquareQuote, ScanSearch, ShoppingCart } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 
 const IconVariant = {
   MessageSquareQuote: MessageSquareQuote,

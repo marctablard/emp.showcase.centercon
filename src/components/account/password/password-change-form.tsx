@@ -112,7 +112,7 @@ export default function PasswordChangeForm({ customer }: PasswordChangeFormProps
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">{t('currentPassword') || 'Aktuelles Passwort'}</Label>
+              <Label htmlFor="currentPassword">{t('Password.form.currentPasswordLabel') || 'Current Password'}</Label>
               <Input
                 id="currentPassword"
                 type="password"
@@ -121,13 +121,13 @@ export default function PasswordChangeForm({ customer }: PasswordChangeFormProps
               />
               {form.formState.errors.currentPassword && (
                 <p className="text-sm text-red-500 mt-1">
-                  {t('password.currentPassword.required') || 'Bitte geben Sie Ihr aktuelles Passwort ein.'}
+                  {t('Password.form.currentPassword.required') || 'Bitte geben Sie Ihr aktuelles Passwort ein.'}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="newPassword">{t('newPassword') || 'Neues Passwort'}</Label>
+              <Label htmlFor="newPassword">{t('Password.form.newPasswordLabel') || 'New Password'}</Label>
               <Input
                 id="newPassword"
                 type="password"
@@ -137,22 +137,25 @@ export default function PasswordChangeForm({ customer }: PasswordChangeFormProps
               {form.formState.errors.newPassword && (
                 <p className="text-sm text-red-500 mt-1">
                   {form.formState.errors.newPassword.message === 'password.newPassword.minLength'
-                    ? t('password.newPassword.minLength') || 'Das Passwort muss mindestens 8 Zeichen lang sein.'
+                    ? t('Password.form.newPassword.minLength') || 'Das Passwort muss mindestens 8 Zeichen lang sein.'
                     : form.formState.errors.newPassword.message === 'password.newPassword.lowercase'
-                      ? t('password.newPassword.lowercase') ||
+                      ? t('Password.form.newPassword.lowercase') ||
                         'Das Passwort muss mindestens einen Kleinbuchstaben enthalten.'
                       : form.formState.errors.newPassword.message === 'password.newPassword.uppercase'
-                        ? t('password.newPassword.uppercase') ||
+                        ? t('Password.form.newPassword.uppercase') ||
                           'Das Passwort muss mindestens einen Großbuchstaben enthalten.'
                         : form.formState.errors.newPassword.message === 'password.newPassword.number'
-                          ? t('password.newPassword.number') || 'Das Passwort muss mindestens eine Ziffer enthalten.'
-                          : t('password.newPassword.required') || 'Bitte geben Sie ein neues Passwort ein.'}
+                          ? t('Password.form.newPassword.number') ||
+                            'Das Passwort muss mindestens eine Ziffer enthalten.'
+                          : t('Password.form.newPassword.required') || 'Bitte geben Sie ein neues Passwort ein.'}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t('confirmPassword') || 'Neues Passwort bestätigen'}</Label>
+              <Label htmlFor="confirmPassword">
+                {t('Password.form.confirmPasswordLabel') || 'Confirm New Password'}
+              </Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -161,16 +164,18 @@ export default function PasswordChangeForm({ customer }: PasswordChangeFormProps
               />
               {form.formState.errors.confirmPassword && (
                 <p className="text-sm text-red-500 mt-1">
-                  {form.formState.errors.confirmPassword.message === 'password.confirmPassword.mismatch'
-                    ? t('password.confirmPassword.mismatch') || 'Die Passwörter stimmen nicht überein.'
-                    : t('password.confirmPassword.required') || 'Bitte bestätigen Sie Ihr Passwort.'}
+                  {form.formState.errors.confirmPassword.message === 'Password.form.confirmPassword.mismatch'
+                    ? t('Password.form.confirmPassword.mismatch') || 'The passwords do not match.'
+                    : t('Password.form.confirmPassword.required') || 'Please confirm your password.'}
                 </p>
               )}
             </div>
 
             <div className="flex justify-end pt-4">
               <Button type="submit" disabled={isLoading || Object.keys(form.formState.errors).length > 0}>
-                {isLoading ? t('changing') || 'Wird geändert...' : t('changePassword') || 'Passwort ändern'}
+                {isLoading
+                  ? t('Password.form.saving') || 'Wird gespeichert...'
+                  : t('Password.form.changePasswordLabel') || 'Passwort ändern'}
               </Button>
             </div>
           </form>

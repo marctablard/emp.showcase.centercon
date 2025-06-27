@@ -11,8 +11,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: 'Account' });
 
   return {
-    title: await getPageTitle(t('passwordChangeTitle'), locale),
-    description: t('passwordChangeDescription'),
+    title: await getPageTitle(t('Password.title'), locale),
+    description: t('Password.description'),
     robots: {
       index: false,
       follow: false,
@@ -20,14 +20,17 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function PasswordChangePage() {
+export default async function PasswordChangePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'Account' });
+
   const customer = await getCurrentCustomer();
 
   return (
     <AccountLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Passwort ändern</h1>
-        <p className="text-muted-foreground">Hier können Sie Ihr Passwort ändern.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('Password.title')}</h1>
+        <p className="text-muted-foreground">{t('Password.description')}</p>
 
         <PasswordChangeForm customer={customer || null} />
       </div>

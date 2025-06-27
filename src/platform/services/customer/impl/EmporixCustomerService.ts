@@ -1,10 +1,10 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { CustomerApi } from '@/platform/integrations/emporix/customer/CustomerApi';
+import { EmporixAddress } from '@/platform/integrations/emporix/model';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
-import { Address } from '../../model/common';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
-import { Customer } from '../../model/customer/customer';
+import { Customer, CustomerAddress } from '../../model/customer/customer';
 import { CustomerService, CustomerUpdateDto, PasswordChangeDto } from '../CustomerService';
 
 const ANONYMOUS_CUSTOMER_ID = '00000000';
@@ -54,10 +54,10 @@ export class EmporixCustomerService implements CustomerService {
     }
   }
 
-  async getAddresses(customerId?: string): Promise<Address[]> {
+  async getAddresses(customerId?: string): Promise<CustomerAddress[]> {
     if (!customerId) {
       const addresses = await this.customerApi.getCustomerAddresses();
-      return addresses.map(this.addressMapper.mapToService);
+      return addresses.map((address) => this.mapToCustomerAddress(address));
     }
     throw new Error('Not implemented');
   }
@@ -67,10 +67,10 @@ export class EmporixCustomerService implements CustomerService {
    * @param address The address data to create
    * @returns Promise with the created address including its ID
    */
-  async createAddress(address: Address): Promise<Address> {
+  async createAddress(address: CustomerAddress): Promise<CustomerAddress> {
     try {
       // Convert service model to Emporix model
-      const emporixAddress = this.addressMapper.mapToSource(address);
+      const emporixAddress = this.mapFromCustomerAddress(address);
 
       // Create address using API
       const result = await this.customerApi.addCustomerAddress(emporixAddress);
@@ -84,7 +84,7 @@ export class EmporixCustomerService implements CustomerService {
       }
 
       // Convert back to service model
-      return this.addressMapper.mapToService(createdAddress);
+      return this.mapToCustomerAddress(createdAddress);
     } catch (error) {
       console.error('Error creating customer address:', error);
       throw new Error(`Failed to create address: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -97,14 +97,12 @@ export class EmporixCustomerService implements CustomerService {
    * @param address The address data to update
    * @returns Promise with the updated address
    */
-  async updateAddress(addressId: string, address: Address): Promise<Address> {
+  async updateAddress(addressId: string, address: CustomerAddress): Promise<CustomerAddress> {
     try {
       // Convert service model to Emporix model
-      const emporixAddress = this.addressMapper.mapToSource(address);
-
+      const emporixAddress = this.mapFromCustomerAddress(address);
       // Update address using API
       await this.customerApi.updateCustomerAddress(addressId, emporixAddress);
-
       // Get all addresses to find the updated one
       const addresses = await this.customerApi.getCustomerAddresses();
       const updatedAddress = addresses.find((addr) => addr.id === addressId);
@@ -114,7 +112,7 @@ export class EmporixCustomerService implements CustomerService {
       }
 
       // Convert back to service model
-      return this.addressMapper.mapToService(updatedAddress);
+      return this.mapToCustomerAddress(updatedAddress);
     } catch (error) {
       console.error('Error updating customer address:', error);
       throw new Error(`Failed to update address: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -187,6 +185,39 @@ export class EmporixCustomerService implements CustomerService {
       console.error('Error updating customer profile:', error);
       throw new Error(`Failed to update customer profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  private mapFromCustomerAddress(source: CustomerAddress): EmporixAddress {
+    const emporixAddress = this.addressMapper.mapToSource(source);
+    emporixAddress.tags =
+      source.types?.map((type) => {
+        switch (type) {
+          default:
+          case 'SHIPPING':
+            return 'shipping';
+          case 'BILLING':
+            return 'billing';
+        }
+      }) || [];
+    return emporixAddress;
+  }
+
+  private mapToCustomerAddress(source: EmporixAddress): CustomerAddress {
+    const address = this.addressMapper.mapToService(source);
+    const customerAddress: CustomerAddress = {
+      ...address,
+      types:
+        source?.tags?.map((tag) => {
+          switch (tag) {
+            default:
+            case 'shipping':
+              return 'SHIPPING';
+            case 'billing':
+              return 'BILLING';
+          }
+        }) || [],
+    };
+    return customerAddress;
   }
 }
 

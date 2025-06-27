@@ -9,14 +9,8 @@ import {
   updateShippingInfo as apiUpdateShippingInfo,
 } from '@/lib/client/carts';
 import { Cart } from '@/platform/services/model/cart/cart';
-import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
 import { useCartStore } from '@/providers/StoreProvider';
 
-interface CartMethodResult {
-  success: boolean;
-  error?: string;
-  method?: string;
-}
 interface UseCart {
   // Cart data
   cart: Cart | null | undefined;
@@ -32,7 +26,6 @@ interface UseCart {
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
-  updateDeliveryMethod: (contactData: CartDeliveryData) => Promise<CartMethodResult>;
   clearCart: () => void;
 
   // Utility
@@ -52,14 +45,12 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     getLoading,
     setLoading,
     loading,
-    currentCart: storeCart,
+    currentCart: cart,
   } = useCartStore();
   if (getStoreCart() === undefined && initialCart !== undefined) {
     setStoreCart(initialCart);
   }
   const [error, setError] = useState<Error | null>(null);
-  // we do this, so that the invokers of this hook can immediately use the cart
-  const [cart, setCart] = useState<Cart | null | undefined>(getStoreCart());
 
   const fetchCart = useCallback(
     async (createCurrent?: boolean) => {
@@ -85,31 +76,6 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     },
     [setStoreCart, setLoading],
   );
-
-  // Initialize cart on first render if not already initialized
-  useEffect(() => {
-    if (cart === undefined && !getLoading()) {
-      setLoading(true);
-      // first try to grab the cart from the store
-      const currentCart = getStoreCart();
-      if (currentCart !== undefined) {
-        setCart(currentCart);
-        setLoading(false);
-        return;
-      }
-      // Otherwise fetch current cart
-      fetchCart();
-    }
-  }, [cart, getStoreCart, fetchCart, getLoading, setLoading]);
-
-  useEffect(() => {
-    // listen to changes on storeCart to update local state
-    // this reflects changes to the store into all components
-    // that use the Hook
-    if (storeCart !== cart) {
-      setCart(storeCart);
-    }
-  }, [storeCart, cart]);
 
   /**
    * Add an item to the cart
@@ -140,6 +106,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to add item to cart'));
         console.error('Error adding item to cart:', err);
+        throw err;
       } finally {
         setLoading(false);
       }
@@ -215,7 +182,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setError(null);
         if (!cart) {
           await fetchCart();
-          if (!cart) throw new Error('No cart available');
+          if (!cart) return;
         }
         // Call API to update shipping info
         await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
@@ -232,33 +199,24 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     [cart, fetchCart, setLoading],
   );
 
-  const updateDeliveryMethod = async (): Promise<CartMethodResult> => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const method = 'delivery';
-      setLoading(false);
-
-      return {
-        success: true,
-        method: method,
-      };
-    } catch (error) {
-      setLoading(false);
-      setError(error instanceof Error ? error : new Error('Failed switch delivery method'));
-
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed switch delivery method',
-      };
-    }
-  };
-
   const clearCart = useCallback(() => {
     setStoreCart(undefined);
-    setCart(undefined);
   }, [setStoreCart]);
+
+  // Initialize cart on first render if not already initialized
+  useEffect(() => {
+    if (cart === undefined && !getLoading()) {
+      setLoading(true);
+      // first try to grab the cart from the store
+      const currentCart = getStoreCart();
+      if (currentCart !== undefined) {
+        setLoading(false);
+        return;
+      }
+      // Otherwise fetch current cart
+      fetchCart();
+    }
+  }, [cart, getStoreCart, fetchCart, getLoading, setLoading]);
 
   return {
     cart,
@@ -270,7 +228,6 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     updateItemQuantity,
     removeItem,
     updateShippingInfo,
-    updateDeliveryMethod,
     clearCart,
     refetch: async () => {
       await fetchCart(false);

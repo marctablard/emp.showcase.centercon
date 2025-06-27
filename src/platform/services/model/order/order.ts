@@ -109,4 +109,11 @@ export interface Order {
   currency?: string;
   customerEmail?: string;
   customerNote?: string;
+  customer?: {
+    id: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
 }

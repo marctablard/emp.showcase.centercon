@@ -13,6 +13,7 @@ import type {
 import { ShippingMethod } from '@/platform/services/model/shipping';
 import { useCheckoutStore } from '@/providers/StoreProvider';
 import { useCart } from '../cart/useCart';
+import { useAddresses } from '../customer/useAddresses';
 import useCustomer from '../customer/useCustomer';
 import { useShippingMethods } from '../shipping/useShippingMethods';
 
@@ -50,28 +51,24 @@ interface UseCheckout {
 export const useCheckout = (): UseCheckout => {
   // Get checkout store data
   const {
-    contactData: storeContactData,
-    billingAddress: storeBillingAddress,
-    shippingAddress: storeShippingAddress,
-    paymentMethod: storePaymentMethod,
-    shippingMethod: storeShippingMethod,
+    contactData,
+    billingAddress,
+    shippingAddress,
+    paymentMethod,
+    shippingMethod,
 
-    setContactData: setStoreContactData,
-    setBillingAddress: setStoreBillingAddress,
-    setShippingAddress: setStoreShippingAddress,
-    setPaymentMethod: setStorePaymentMethod,
-    setShippingMethod: setStoreShippingMethod,
+    setContactData,
+    setBillingAddress,
+    setShippingAddress,
+    setPaymentMethod,
+    setShippingMethod,
   } = useCheckoutStore();
 
   // Get cart from cart store
   const { cart: checkoutCart, updateShippingInfo, clearCart } = useCart();
   const { customer } = useCustomer();
+  const { getDefaultAddress, loading: addressesLoading } = useAddresses();
   const [loading, setLoading] = useState<boolean>(false);
-  const [contactData, setContactData] = useState<ContactData | null>(storeContactData);
-  const [billingAddress, setBillingAddress] = useState<CheckoutAddress | null>(storeBillingAddress);
-  const [shippingAddress, setShippingAddress] = useState<CheckoutAddress | null>(storeShippingAddress);
-  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod | null>(storePaymentMethod);
-  const [shippingMethod, setShippingMethod] = useState<CheckoutShipping | null>(storeShippingMethod);
   const [error, setError] = useState<Error | null>(null);
   const [orderResponse, setOrderResponse] = useState<CheckoutResponse | null>(null);
   const {
@@ -81,79 +78,53 @@ export const useCheckout = (): UseCheckout => {
     loading: shippingMethodsLoading,
   } = useShippingMethods();
 
-  // Sync with checkout store
-  useEffect(() => {
-    setContactData(storeContactData);
-  }, [storeContactData]);
-
-  useEffect(() => {
-    setBillingAddress(storeBillingAddress);
-  }, [storeBillingAddress]);
-
-  useEffect(() => {
-    setShippingAddress(storeShippingAddress);
-  }, [storeShippingAddress]);
-
-  useEffect(() => {
-    setPaymentMethod(storePaymentMethod);
-  }, [storePaymentMethod]);
-
-  useEffect(() => {
-    setShippingMethod(storeShippingMethod);
-  }, [storeShippingMethod]);
-
-  useEffect(() => {
-    if (checkoutCart && shippingAddress?.country && shippingAddress?.zipCode) {
-      fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode, checkoutCart.totalPrice);
-    } else {
-      clearShippingMethods();
-    }
-  }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
-
   const submitContactData = useCallback(
     (contactData: ContactData) => {
       // TODO validation!
-      setStoreContactData(contactData);
+      setContactData(contactData);
     },
-    [setStoreContactData],
+    [setContactData],
   );
 
   const submitShippingAddress = useCallback(
     (address: CheckoutAddress) => {
       // TODO validation!
-      if (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode) {
+      if (
+        checkoutCart &&
+        (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode)
+      ) {
         updateShippingInfo(address.country, address.zipCode);
       }
-      setStoreShippingAddress(address);
+      setShippingAddress(address);
     },
-    [setStoreShippingAddress, shippingAddress?.country, shippingAddress?.zipCode, updateShippingInfo],
+    [checkoutCart, shippingAddress, setShippingAddress, updateShippingInfo],
   );
 
   const submitBillingAddress = useCallback(
     (address: CheckoutAddress) => {
       // TODO validation!
-      setStoreBillingAddress(address);
+      setBillingAddress(address);
     },
-    [setStoreBillingAddress],
+    [setBillingAddress],
   );
 
   const submitPaymentMethod = useCallback(
     (method: CheckoutPaymentMethod) => {
-      setStorePaymentMethod(method);
+      setPaymentMethod(method);
     },
-    [setStorePaymentMethod],
+    [setPaymentMethod],
   );
 
   const submitShippingMethod = useCallback(
     (method: ShippingMethod) => {
-      setStoreShippingMethod({
+      setShippingMethod({
         methodId: method.id,
         zoneId: method.zoneId,
         methodName: method.name,
         amount: method.cost?.amount || 0,
       });
     },
-    [setStoreShippingMethod],
+    [setShippingMethod],
   );
 
   /**
@@ -200,6 +171,9 @@ export const useCheckout = (): UseCheckout => {
         addresses: [billingAddress, shippingAddress],
         customer: contactData,
         paymentMethod: paymentMethod,
+        summary: {
+          termsAndConditions: true,
+        },
       };
 
       const checkoutResponse = await checkout(checkoutData);
@@ -209,6 +183,10 @@ export const useCheckout = (): UseCheckout => {
       }
 
       clearCart();
+      setShippingMethod(null);
+      setPaymentMethod(null);
+      setShippingAddress(null);
+      setBillingAddress(null);
       setOrderResponse(checkoutResponse);
       return checkoutResponse;
     } catch (err) {
@@ -254,6 +232,42 @@ export const useCheckout = (): UseCheckout => {
     setError(null);
     setOrderResponse(null);
   };
+
+  useEffect(() => {
+    if (checkoutCart && shippingAddress) {
+      if (shippingAddress.country && shippingAddress.zipCode) {
+        fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode, checkoutCart.totalPrice);
+      }
+    } else {
+      clearShippingMethods();
+    }
+  }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
+
+  useEffect(() => {
+    if (!addressesLoading && !shippingAddress && !billingAddress) {
+      const billingAddress = getDefaultAddress('BILLING');
+      if (billingAddress) {
+        submitBillingAddress({
+          ...billingAddress,
+          type: 'BILLING',
+        });
+      }
+      const shippingAddress = getDefaultAddress('SHIPPING');
+      if (shippingAddress) {
+        submitShippingAddress({
+          ...shippingAddress,
+          type: 'SHIPPING',
+        });
+      }
+    }
+  }, [
+    addressesLoading,
+    shippingAddress,
+    billingAddress,
+    getDefaultAddress,
+    submitBillingAddress,
+    submitShippingAddress,
+  ]);
 
   return {
     loading,

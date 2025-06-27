@@ -1,0 +1,59 @@
+'use client';
+
+import React from 'react';
+import { useTranslations } from 'next-intl';
+import { H3 } from '@/components/ui/h';
+import { useCustomer } from '@/hooks/customer/useCustomer';
+import { BreadcrumbContent } from '@/lib/breadcrumb';
+import { Customer } from '@/platform/services/model/customer/customer';
+import AccountLayout from '../account-layout';
+import { AiHelperCard } from './cards/ai-helper-card';
+import { DocumentsCard } from './cards/documents-card';
+import { MyInvoicesCard } from './cards/my-invoices-card';
+import { MyOrdersCard } from './cards/my-orders-card';
+import NotificationCard from './cards/notification-card';
+import { SupportTicketData, SupportTicketDialog } from './cards/support-ticket-dialog';
+import TicketCard from './cards/ticket-card';
+import WeatherCard from './cards/weather-card';
+
+interface AccountDashboardProps {
+  initialCustomer?: Customer | null;
+  breadcrumbs?: BreadcrumbContent[];
+}
+
+export default function AccountDashboard({ initialCustomer, breadcrumbs }: AccountDashboardProps) {
+  const t = useTranslations('Account');
+  const { customer, loading: isCustomerLoading } = useCustomer(initialCustomer);
+
+  const handleTicketSubmit = (data: SupportTicketData) => {
+    console.log('Ticket submitted:', data);
+    // Hier kann später die API-Integration erfolgen
+  };
+
+  if (isCustomerLoading || !customer) {
+    return <div className="flex justify-center items-center h-full">{t('loading')}</div>;
+  }
+  return (
+    <AccountLayout breadcrumbs={breadcrumbs}>
+      <div className="mb-6">
+        <div className="mb-12 flex justify-between items-start">
+          <H3>
+            {t('hello')}{' '}
+            <span className="text-primary">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
+          </H3>
+
+          <SupportTicketDialog onSubmit={handleTicketSubmit} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <AiHelperCard className="md:col-span-2" />
+          <WeatherCard className="md:col-span-1" />
+          <NotificationCard className="md:col-span-1" />
+          <TicketCard className="md:col-span-2" />
+          <MyOrdersCard className="md:col-span-2" />
+          <MyInvoicesCard className="md:col-span-2" />
+          <DocumentsCard className="md:col-span-3" />
+        </div>
+      </div>
+    </AccountLayout>
+  );
+}

@@ -23,6 +23,7 @@ export interface ContactData {
 
 export interface CheckoutAddress extends Omit<Address, 'types'> {
   type: AddressType; // Required for Checkout
+  sameAs?: AddressType;
 }
 
 /**
@@ -32,6 +33,7 @@ export interface ContactData {
   firstName: string;
   lastName: string;
   email: string;
+  emailConfirmation: string;
   phone?: string;
   company?: string;
 }
@@ -64,6 +66,9 @@ export interface CheckoutRequest extends BaseCheckoutRequest {
   addresses: CheckoutAddress[];
   customer: ContactData | null;
   paymentMethod: CheckoutPaymentMethod;
+  summary: {
+    termsAndConditions: boolean;
+  };
 }
 
 /**

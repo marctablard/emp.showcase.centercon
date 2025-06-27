@@ -22,7 +22,7 @@ const cardVariants = cva('flex flex-col gap-6 border py-6', {
   },
   defaultVariants: {
     variant: 'default',
-    shadow: 'none',
+    shadow: 'default',
     rounded: 'xl',
   },
 });

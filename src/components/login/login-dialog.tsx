@@ -63,13 +63,11 @@ export default function LoginDialog({
     const response = await login(values.username, values.password, false, callbackUrl);
 
     if (response && response.ok) {
-      console.log(response);
       let titleMessage = t('welcomeMessage', { username: values.username });
       const onBoardingMessageKey = await onboardingStatusKey();
       if (onBoardingMessageKey) {
         titleMessage = titleMessage + t('company.onboarding.' + onBoardingMessageKey);
       }
-
       notify({
         title: titleMessage,
         type: ToastType.Success,

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { ArrowRight, User } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import { Button } from '../ui/button';
 
 export function CartEmpty() {

@@ -6,7 +6,9 @@ import { useTranslations } from 'next-intl';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { ContactData } from '@/platform/services/model/checkout';
+import { Card, CardContent, CardHeader } from '../ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { H2 } from '../ui/h';
 import { Input } from '../ui/input';
 
 interface ContactDataProps {
@@ -16,6 +18,7 @@ interface ContactDataProps {
 
 const emptyContactData = {
   email: '',
+  emailConfirmation: '',
   phone: '',
   firstName: '',
   lastName: '',
@@ -26,8 +29,8 @@ const emptyContactData = {
  * Customer data form component for checkout
  * Collects basic customer information (email, name)
  */
-const ContactDataComponent: React.FC<ContactDataProps> = ({ isReadOnly = false, initialData = undefined }) => {
-  const t = useTranslations('Checkout');
+const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefined }) => {
+  const t = useTranslations('Checkout.contactData');
   const { submitContactData, contactData } = useCheckout();
   const { form } = useValidator(
     'ContactDataValidationService',
@@ -37,93 +40,118 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ isReadOnly = false, 
   );
 
   return (
-    <FormProvider {...form}>
-      <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold text-neutral-800">{t('contactInformation')}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="email">{t('emailAddress')}*</FormLabel>
-                <FormControl>
-                  <Input id="email" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="phone">{t('phoneNumber')}</FormLabel>
-                <FormControl>
-                  <Input id="phone" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="firstName">{t('firstName')}*</FormLabel>
-                <FormControl>
-                  <Input id="firstName" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="lastName">{t('lastName')}*</FormLabel>
-                <FormControl>
-                  <Input id="lastName" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="company"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="email">{t('companyName')}</FormLabel>
-                <FormControl>
-                  <Input id="company" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Card className="p-0 shadow-footer border-none mb-6">
+      <CardHeader className="p-0 mt-6 mx-6 border-b border-neutral-200 [.border-b]:pb-0 flex justify-between">
+        <H2 variant="h5" className="col-start-1 font-bold text-xl">
+          {t('title')}
+        </H2>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-6">
+          <p className="text-xs">{t('info')}</p>
+          <FormProvider {...form}>
+            <div className="space-y-6 bg-white">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="firstName">{t('firstName')}*</FormLabel>
+                        <FormControl>
+                          <Input id="firstName" type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="lastName">{t('lastName')}*</FormLabel>
+                        <FormControl>
+                          <Input id="lastName" type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-6 bg-white">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="email">{t('emailAddress')}*</FormLabel>
+                        <FormControl>
+                          <Input id="email" type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="emailConfirmation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="emailConfirmation">{t('confirmEmailAddress')}*</FormLabel>
+                        <FormControl>
+                          <Input id="emailConfirmation" type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="company"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="email">{t('companyName')}</FormLabel>
+                        <FormControl>
+                          <Input id="company" type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="phone">{t('phoneNumber')}</FormLabel>
+                        <FormControl>
+                          <Input id="phone" type="text" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+          </FormProvider>
         </div>
-
-        {isReadOnly && (
-          <div className="mt-4 text-right">
-            <button
-              type="button"
-              className="text-primary-600 hover:text-primary-800"
-              onClick={() => {
-                /* Add edit functionality here */
-              }}
-            >
-              Edit
-            </button>
-          </div>
-        )}
-      </div>
-    </FormProvider>
+      </CardContent>
+    </Card>
   );
 };
-
 export default ContactDataComponent;

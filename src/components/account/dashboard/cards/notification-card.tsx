@@ -1,0 +1,125 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { AlertTriangle, ArrowRight, CircleAlert, CircleCheck, MoveRight } from 'lucide-react';
+import { CardTitle } from '@/components/ui/card';
+import UiLink from '@/components/ui/link';
+import { Link } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
+import { DashboardCard, DashboardCardProps } from './dashboard-card';
+
+// Define the notification item structure
+interface NotificationItem {
+  id: string;
+  count: number;
+  title: string;
+  type: 'info' | 'warning' | 'danger' | 'success' | 'task';
+  href: string;
+}
+
+interface NotificationCardProps extends Omit<DashboardCardProps, 'children'> {
+  items?: NotificationItem[];
+}
+
+export function NotificationCard({ className, title, items: customItems, ...props }: NotificationCardProps) {
+  const t = useTranslations('Notifications');
+
+  // Default notification items if none provided
+  const defaultItems: NotificationItem[] = [
+    {
+      id: 'new-invoices',
+      count: 12,
+      title: t('newInvoices'),
+      type: 'info',
+      href: '/account/invoices',
+    },
+    {
+      id: 'overdue-invoices',
+      count: 12,
+      title: t('overdueInvoices'),
+      type: 'danger',
+      href: '/account/invoices?filter=overdue',
+    },
+    {
+      id: 'pending-offers',
+      count: 4,
+      title: t('pendingOffers'),
+      type: 'warning',
+      href: '/account/offers',
+    },
+    {
+      id: 'tasks',
+      count: 4,
+      title: t('tasksToComplete'),
+      type: 'task',
+      href: '/account/tasks',
+    },
+    {
+      id: 'returns',
+      count: 3,
+      title: t('openReturns'),
+      type: 'success',
+      href: '/account/returns',
+    },
+    {
+      id: 'documents',
+      count: 3,
+      title: t('unreadDocuments'),
+      type: 'info',
+      href: '/account/documents',
+    },
+  ];
+
+  const items = customItems || defaultItems;
+
+  // Get the appropriate icon based on notification type
+  const getIcon = (type: string, className: string = 'h-5 w-5') => {
+    switch (type) {
+      case 'info':
+        return <CircleAlert className={cn(className, 'text-blue-500')} />;
+      case 'warning':
+        return <AlertTriangle className={cn(className, 'text-amber-500')} />;
+      case 'danger':
+        return <AlertTriangle className={cn(className, 'text-red-500')} />;
+      case 'success':
+        return <CircleCheck className={cn(className, 'text-green-500')} />;
+      case 'task':
+        return <CircleAlert className={cn(className, 'text-orange-500')} />;
+      default:
+        return <CircleAlert className={cn(className, 'text-blue-500')} />;
+    }
+  };
+
+  return (
+    <DashboardCard variant="default" className={cn('py-4', className)} {...props}>
+      <div className="flex items-center justify-between mb-4">
+        <CardTitle className="text-4xl font-bold">{title || t('title')}</CardTitle>
+        <UiLink type="Link" href="/account/notifications" variant="primary" size="m" iconAfter={<ArrowRight />}>
+          {t('viewAll')}
+        </UiLink>
+      </div>
+
+      <div className="flex flex-col">
+        {items.map((item) => (
+          <Link
+            key={item.id}
+            href={item.href}
+            className={cn('flex items-center justify-between py-4 px-2 transition-colors rounded px-1', {
+              'border-b-1': item.id !== items[items.length - 1].id,
+            })}
+          >
+            <div className="flex items-center gap-3">
+              {getIcon(item.type)}
+              <span>
+                {item.count} {item.title}
+              </span>
+            </div>
+            <MoveRight />
+          </Link>
+        ))}
+      </div>
+    </DashboardCard>
+  );
+}
+
+export default NotificationCard;

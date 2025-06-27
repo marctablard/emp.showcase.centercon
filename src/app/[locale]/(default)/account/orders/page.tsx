@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import AccountLayout from '@/components/account/account-layout';
-import { OrdersList } from '@/components/account/dashboard/cards/order-cards';
+import { MyOrdersCard } from '@/components/account/dashboard/cards/my-orders-card';
 import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -33,7 +33,7 @@ export default async function OrdersPage({ params }: { params: Promise<{ locale:
   ];
   return (
     <AccountLayout breadcrumbs={breadcrumbs}>
-      <OrdersList />
+      <MyOrdersCard />
     </AccountLayout>
   );
 }

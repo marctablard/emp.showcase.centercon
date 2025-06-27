@@ -1,90 +1,42 @@
-import { RefObject, useRef, useState } from 'react';
+import { RefObject, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Info, LockKeyhole } from 'lucide-react';
+import { useCartTotal } from '@/hooks/cart/useCartTotal';
+import { useElementScroll } from '@/hooks/ui/useElementScroll';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart';
-import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { CartFreeship } from './cart-freeship';
+import UiLink from '../ui/link';
 import { CartRequest } from './cart-request';
 
 interface CartSummaryProps {
   cart: Cart;
-  isDelivery: boolean;
-  loading: boolean;
-  leftContent: RefObject<HTMLDivElement | null>;
+  boundingContent: RefObject<HTMLDivElement | null>;
 }
 
-export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSummaryProps) {
-  const t = useTranslations('cart');
-  const freeShippingValue = 400;
+export function CartSummary({ cart, boundingContent }: CartSummaryProps) {
+  const t = useTranslations('cart.summary');
+  //const freeShippingValue = 400;
 
   const fixedContainer = useRef<HTMLDivElement>(null);
-  const [isFixed, setIsFixed] = useState(false);
-  const [isFixedToTop, setIsFixedToTop] = useState(false);
-  const [isContainerBottom, setIsContainerBottom] = useState(false);
   const topPosition = 112;
-
-  window.addEventListener('scroll', () => {
-    const containerHeight = fixedContainer?.current?.getBoundingClientRect().height;
-    const containerTop = Math.round(
-      fixedContainer?.current?.getBoundingClientRect().top ? fixedContainer?.current?.getBoundingClientRect().top : 0,
-    );
-    const containerBottom = fixedContainer?.current?.getBoundingClientRect().bottom;
-    const windowHeight = window.innerHeight;
-    const windowScroll = window.scrollY;
-    const contentBox = leftContent?.current?.getBoundingClientRect();
-    const contentBottom = contentBox?.bottom;
-    const contentTop = contentBox?.top;
-    const contentHeight =
-      leftContent?.current?.children &&
-      Array.from(leftContent?.current?.children)
-        .map((item) => item.getBoundingClientRect().height)
-        .reduce((a, b) => a + b, 0);
-
-    if (containerHeight && contentHeight && containerHeight <= contentHeight) {
-      if (containerBottom && contentBottom && containerBottom + 24 <= contentBottom) {
-        if (containerTop && containerTop <= topPosition) {
-          setIsFixed(true);
-          setIsFixedToTop(true);
-          if (contentTop && contentTop > containerTop) {
-            setIsFixed(false);
-            setIsContainerBottom(false);
-          }
-        } else {
-          if ((contentTop && contentTop > containerTop) || windowScroll <= 0) {
-            setIsFixed(false);
-            setIsContainerBottom(false);
-          }
-        }
-      } else {
-        setIsFixed(false);
-        if (containerBottom && contentBottom && containerBottom + 24 > contentBottom) {
-          setIsContainerBottom(true);
-        }
-        if (containerBottom && windowHeight - containerBottom <= 12) {
-          setIsFixed(true);
-          setIsFixedToTop(false);
-        }
-      }
-    }
-  });
-
+  const { isFixed, isFixedToTop, isContainerBottom } = useElementScroll(fixedContainer, topPosition, boundingContent);
+  const { cartTotal, shippingCosts, currency } = useCartTotal();
   return (
-    <div className="col-span-1 mb-6 flex">
+    <div className="col-span-1 lg:col-span-4 xl:col-span-1 mb-6 flex">
       <div className={cn('flex flex-col w-full', isContainerBottom ? 'justify-end' : 'justify-start')}>
         <div
           className={cn(
             'flex flex-col gap-4',
             isFixed ? 'fixed lg:me-9' : '',
-            isFixedToTop ? 'top-[112px]' : 'bottom-[12px]',
+            isFixedToTop ? 'top-[112px]' : 'bottom-[40px]',
           )}
           ref={fixedContainer}
         >
-          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-footer">
+          <Card className="bg-primary-50 p-6 border-none gap-4 shadow-sm lg:max-w-[438px] w-full">
             <CardHeader className="p-0">
               <CardTitle>
-                <h5 className="text-3xl font-bold">{t('orderSummary')}</h5>
+                <h5 className="text-3xl  font-headlines">{t('title')}</h5>
               </CardTitle>
             </CardHeader>
             <CardContent className="bg-white rounded-md p-4">
@@ -100,42 +52,45 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                   <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
                 </div>
 
-                <div className="flex justify-between font-medium text-base pt-4 border-t border-neutral-200">
+                <div className="flex justify-between text-base pt-4 border-t border-neutral-200">
                   <span>{t('netValueOfGoods')}</span>
-                  <span className="font-bold">{formatCurrency(cart.tax.netValue, cart.tax.currency)}</span>
+                  <span className="font-bold font-headlines">
+                    {formatCurrency(cart.tax.netValue, cart.tax.currency)}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <div className="flex justify-between font-medium text-base">
-                    <span>{t('statutoryVat')}</span>
+                  <div className="flex justify-between text-base">
+                    <span>{t('vat')}</span>
                     <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
                   </div>
-                  {isDelivery && (
-                    <div className="flex justify-between font-medium text-base">
-                      <span>{t('shippingCosts')}</span>
-                      <span>Shipping Costs</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between text-base">
+                    <span>{t('shippingCosts')}</span>
+                    {shippingCosts !== undefined ? (
+                      <span>{formatCurrency(shippingCosts, currency)}</span>
+                    ) : (
+                      <span>{t('calculatedAtCheckout')}</span>
+                    )}
+                  </div>
                 </div>
-                {isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && <CartFreeship cart={cart} />}
+                {/*isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && <CartFreeship cart={cart} />*/}
                 <div className="flex flex-col gap-2">
-                  {isDelivery && (
-                    <div className="flex justify-between font-medium text-base">
-                      <span>{t('freightCosts')}</span>
-                      <span>Freight Costs</span>
+                  {cart.fees && (
+                    <div className="flex justify-between text-base">
+                      <span>{t('fees')}</span>
+                      <span>{formatCurrency(cart.fees.amount, cart.fees.currency)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold text-xl">
+                  <div className="flex justify-between font-bold font-headlines text-xl">
                     <span>{t('total')}</span>
-                    <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                    <span>{formatCurrency(cartTotal, currency)}</span>
                   </div>
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col p-0">
-              <Button type="submit" form="cart-delivery-form" className="w-full" disabled={!isDelivery || loading}>
+              <UiLink variant="button_primary" type="Link" href="/checkout" className="w-full">
                 {t('goToCheckout')}
-              </Button>
-
+              </UiLink>
               <div className="flex align-center gap-2 text-neutral-600 pt-4">
                 <div>
                   <LockKeyhole width={12} />

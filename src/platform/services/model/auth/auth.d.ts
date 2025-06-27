@@ -1,5 +1,5 @@
 import { Address } from '../common/';
-import { Customer } from '../customer/customer';
+import { Customer, CustomerAddress } from '../customer/customer';
 
 /**
  * Authentication Credentials
@@ -15,7 +15,7 @@ export interface Credentials {
 export interface Registration {
   credentials: Credentials;
   customer?: Omit<Customer, 'id'>;
-  address?: Address;
+  address?: CustomerAddress;
 }
 
 /**

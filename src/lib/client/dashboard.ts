@@ -23,16 +23,17 @@ type ConfigStore = ConfigState & ConfigActions;
 const defaultLayouts: Layouts = {
   // Large screens (≥1200px) - 4 columns
   xl: [
-    { i: 'revenue', x: 0, y: 1, w: 1, h: 1 },
-    { i: 'orders', x: 1, y: 1, w: 1, h: 1 },
-    { i: 'approvals', x: 2, y: 1, w: 1, h: 1 },
-    { i: 'weather', x: 3, y: 0, w: 1, h: 2 },
-    { i: 'budget', x: 3, y: 3, w: 1, h: 2 },
-    { i: 'inbox', x: 2, y: 0, w: 1, h: 2 },
-    { i: 'recent-orders', x: 0, y: 0, w: 2, h: 2, minH: 2, minW: 2 },
-    { i: 'solar-output', x: 0, y: 3, w: 3, h: 3, minH: 2, minW: 2 },
+    { i: 'ai-helper', x: 0, y: 0, w: 2, h: 12 },
+    { i: 'weather', x: 3, y: 0, w: 1, h: 12 },
+    { i: 'notification', x: 0, y: 1, w: 1, h: 16 },
+    { i: 'ticket', x: 2, y: 1, w: 2, h: 16 },
+    { i: 'orders', x: 0, y: 2, w: 2, h: 19 },
+    { i: 'invoices', x: 0, y: 3, w: 2, h: 19 },
+    { i: 'documents', x: 0, y: 4, w: 3, h: 6 },
   ],
+  /*
 
+TODO: Add missing layouts
   // Medium screens (≥996px) - 3 columns
   lg: [
     // Top row - small stat cards
@@ -76,6 +77,7 @@ const defaultLayouts: Layouts = {
     { i: 'recent-orders', x: 0, y: 9, w: 1, h: 2, minH: 2 },
     { i: 'solar-output', x: 0, y: 8, w: 1, h: 2, minH: 2 },
   ],
+  */
 };
 
 // Create the dashboard store with persistence

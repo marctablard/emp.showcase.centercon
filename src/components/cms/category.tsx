@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { storyblokEditable } from '@storyblok/react/rsc';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Category component for Storyblok

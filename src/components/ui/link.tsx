@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { VariantProps, cva } from 'class-variance-authority';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 const linkVariants = cva(
@@ -12,8 +12,8 @@ const linkVariants = cva(
         secondary:
           'inline-flex items-center gap-1 text-body hover:underline hover:text-primary-500 disabled:hover:no-underline disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600',
         text: 'text-primary underline hover:text-primary-700',
-        button:
-          'inline-flex items-center gap-1 text-primary font-bold underline hover:text-primary-700 disabled:text-neutral-300 disabled:[&_svg]:text-neutral-600',
+        button_primary:
+          'cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base/6 tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-neutral-100 disabled:text-neutral-600 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-sm',
         buttonNoUnderline: 'inline-flex items-center gap-1 text-primary font-bold',
       },
       size: {

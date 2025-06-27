@@ -102,7 +102,7 @@ function FormLabel({ className, isOptional, hasTooltip, ...props }: LabelProps) 
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn('', className)}
+      className={cn('text-neutral-900 font-bold', className)}
       htmlFor={formItemId}
       isOptional={isOptional}
       hasTooltip={hasTooltip}

@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { useMessages } from '@/hooks/messages/useMessages';
+import { Link } from '@/i18n/navigation';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 
 interface InboxCardProps extends Omit<DashboardCardProps, 'children'> {}

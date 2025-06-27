@@ -119,9 +119,9 @@ export interface Address {
   country: string;
   state?: string;
   contactPhone?: string;
-  types: AddressType[];
   geoLocation?: GeoLocation;
 }
+
 export interface Media {
   url: string;
   altText?: string | LocalizedString;
