@@ -21,7 +21,7 @@ import Teaser from '@/components/cms/teaser';
  * Using RSC (React Server Components) approach
  */
 export const getStoryblokApi = storyblokInit({
-  accessToken: process.env.STORYBLOK_ACCESS_TOKEN || '',
+  accessToken: process.env.NEXT_PUBLIC_STORYBLOK_ACCESS_TOKEN || '',
   use: [apiPlugin],
   components: {
     feature: Feature,

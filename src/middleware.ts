@@ -3,11 +3,12 @@ import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest } from 'next/server';
 
 const locales = ['en', 'de'];
+const defaultLocale = 'en';
 const securedPages = ['/account'];
 
 const intlMiddleware = createIntlMiddleware({
   locales,
-  defaultLocale: 'en',
+  defaultLocale,
   localePrefix: 'as-needed',
 });
 

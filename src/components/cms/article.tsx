@@ -1,7 +1,8 @@
 'use client';
 
-import { renderRichText, storyblokEditable } from '@storyblok/react/rsc';
+import { StoryblokRichTextNode, storyblokEditable } from '@storyblok/react/rsc';
 import { Link } from '@/i18n/navigation';
+import RichText from './richtext';
 
 /**
  * Article component for Storyblok
@@ -15,7 +16,7 @@ interface ArticleProps {
       url?: string;
       title?: string;
     };
-    content?: any; // Rich text content
+    content?: StoryblokRichTextNode; // Rich text content
     linked_products?: Array<{
       _uid: string;
       product_id?: string;
@@ -26,13 +27,16 @@ interface ArticleProps {
 
 const Article = ({ blok }: ArticleProps) => {
   return (
-    <article {...storyblokEditable(blok)} className="article max-w-4xl mx-auto py-8">
+    <article {...storyblokEditable(blok)} className="article max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6">
       {/* Article header */}
-      <header className="mb-8">
-        {blok.title && <h1 className="text-3xl font-bold mb-4">{blok.title}</h1>}
+      {blok.title ||
+        (blok.introduction && (
+          <header className="mb-8">
+            {blok.title && <h1 className="text-3xl font-bold mb-4">{blok.title}</h1>}
 
-        {blok.introduction && <div className="text-xl text-neutral-600 mb-6">{blok.introduction}</div>}
-      </header>
+            {blok.introduction && <div className="text-xl text-neutral-600 mb-6">{blok.introduction}</div>}
+          </header>
+        ))}
 
       {/* Video */}
       {blok.video?.url && (
@@ -47,7 +51,7 @@ const Article = ({ blok }: ArticleProps) => {
       )}
 
       {/* Rich text content */}
-      {blok.content && <div className="prose max-w-none mb-8">{renderRichText(blok.content)}</div>}
+      {blok.content && <RichText content={blok.content} className="mb-8" />}
 
       {/* Linked products */}
       {blok.linked_products && blok.linked_products.length > 0 && (
