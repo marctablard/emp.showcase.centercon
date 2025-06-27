@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { on } from 'events';
 import { CustomerManagementService } from '@/platform/services/customer/CustomerManagementService';
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
 
