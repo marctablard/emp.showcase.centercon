@@ -3,10 +3,10 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Check, Package, ReceiptText } from 'lucide-react';
 import useCustomer from '@/hooks/customer/useCustomer';
 import { useOrder } from '@/hooks/order/useOrder';
+import { Link } from '@/i18n/navigation';
 import { formatCurrency } from '@/lib/utils';
 import { Order } from '@/platform/services/model/order/order';
 import { AddressDisplay } from '../common/address-display';

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { OrderStatusBadge } from '@/components/account/orders/order-status-badge';
@@ -15,6 +14,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useOrder } from '@/hooks/order/useOrder';
 import { useOrders } from '@/hooks/order/useOrders';
+import { Link } from '@/i18n/navigation';
 import { Order } from '@/platform/services/model/order/order';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 import { StatCard } from './stat-card';

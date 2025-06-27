@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Circle, DropletOff, Globe, LucideIcon, MapPin, Pin, Shield, ShoppingCart, Trees, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { ProductCharacteristic } from '@/components/product/product-characteristic';
@@ -13,6 +12,7 @@ import { H5, H6 } from '@/components/ui/h';
 import { useCart } from '@/hooks/cart/useCart';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
+import { Link } from '@/i18n/navigation';
 import { formatCurrency, imageSizes } from '@/lib/utils';
 import { Product } from '@/platform/services/model/product';
 
