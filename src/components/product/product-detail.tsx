@@ -12,7 +12,7 @@ import { useProduct } from '@/hooks/product/useProduct';
 import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
-import { GroupedSpecification, Product, ProductSpecification } from '@/platform/services/model/product';
+import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import { Button } from '../ui/button';
 import { H1, H2, H3, H4 } from '../ui/h';
 import UiLink from '../ui/link';
