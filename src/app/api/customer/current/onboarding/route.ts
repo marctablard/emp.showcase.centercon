@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest) {
     const customerManagementService =
       globalThis.EMP.platform.server.get<CustomerManagementService>('CustomerManagementService');
     const onboardingStatus = await customerManagementService.getCompanyOnboardingStatus(customer.legalEntityId);
-    if (onboardingStatus?.status === 'completed') {
+    if (onboardingStatus?.status === 'approved') {
       if (onboardingStatus?.updatedAt && customer.lastLogin && onboardingStatus.updatedAt > customer.lastLogin) {
         return NextResponse.json(onboardingStatus, { status: 200 });
       }
