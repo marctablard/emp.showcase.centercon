@@ -9,8 +9,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: 'Account' });
 
   return {
-    title: await getPageTitle(t('addressManagement'), locale),
-    description: t('addressManagementDescription'),
+    title: await getPageTitle(t('Address.title'), locale),
+    description: t('Address.description'),
     robots: {
       index: false,
       follow: false,
@@ -31,22 +31,22 @@ export default async function AddressesPage({ params }: { params: Promise<{ loca
     },
     {
       href: '/account/addresses',
-      label: tAccount('addressManagement'),
+      label: tAccount('Address.title'),
     },
   ];
 
   return (
     <AccountLayout breadcrumbs={breadcrumbs}>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">{tAccount('addressManagement')}</h1>
-        <p className="text-muted-foreground mb-8">{tAccount('manageAddresses')}</p>
+        <h1 className="text-2xl font-bold mb-6">{tAccount('Address.title')}</h1>
+        <p className="text-muted-foreground mb-8">{tAccount('Address.description')}</p>
 
         <div className="grid gap-8">
           {/* Billing Addresses Section */}
           <Card>
             <CardHeader>
-              <CardTitle>{tAccount('billingAddresses')}</CardTitle>
-              <p className="text-muted-foreground">{tAccount('manageBillingAddresses')}</p>
+              <CardTitle>{tAccount('Address.billingAddresses')}</CardTitle>
+              <p className="text-muted-foreground">{tAccount('Address.manageBillingAddresses')}</p>
             </CardHeader>
             <CardContent>
               <AddressesList type="BILLING" />
@@ -56,8 +56,8 @@ export default async function AddressesPage({ params }: { params: Promise<{ loca
           {/* Shipping Addresses Section */}
           <Card>
             <CardHeader>
-              <CardTitle>{tAccount('shippingAddresses')}</CardTitle>
-              <p className="text-muted-foreground">{tAccount('manageShippingAddresses')}</p>
+              <CardTitle>{tAccount('Address.shippingAddresses')}</CardTitle>
+              <p className="text-muted-foreground">{tAccount('Address.manageShippingAddresses')}</p>
             </CardHeader>
             <CardContent>
               <AddressesList type="SHIPPING" />

@@ -39,7 +39,7 @@ export function AddressCard({ address, isDeleting = false, onEdit, onDelete }: A
             {address.contactName}
             {address.isDefault && (
               <Badge variant="secondary" className="ml-2">
-                {t('default')}
+                {t('Address.default')}
               </Badge>
             )}
           </CardTitle>
@@ -50,7 +50,7 @@ export function AddressCard({ address, isDeleting = false, onEdit, onDelete }: A
                 size="icon"
                 className="h-8 w-8"
                 onClick={() => onEdit(address)}
-                aria-label={t('editAddress')}
+                aria-label={t('Address.editAddress')}
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -62,7 +62,7 @@ export function AddressCard({ address, isDeleting = false, onEdit, onDelete }: A
                 className="h-8 w-8"
                 onClick={() => onDelete(address)}
                 disabled={isDeleting}
-                aria-label={t('deleteAddress')}
+                aria-label={t('Address.deleteAddress')}
               >
                 {isDeleting ? <Spinner variant="sm" /> : <Trash className="h-4 w-4" />}
               </Button>
@@ -113,7 +113,7 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-red-500">{t('errorLoadingAddresses')}</p>
+        <p className="text-red-500">{t('Address.errorLoadingAddresses')}</p>
         <Button variant="secondary" onClick={() => fetchAddresses()} className="mt-4">
           {t('tryAgain')}
         </Button>
@@ -124,10 +124,10 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
   if (!addresses || addresses.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">{t('noAddresses')}</p>
+        <p className="text-muted-foreground">{t('Address.noAddresses')}</p>
         <Button onClick={() => setIsDialogOpen(true)} className="mt-4">
           <Plus className="mr-2 h-4 w-4" />
-          {t('addNewAddress')}
+          {t('Address.addNewAddress')}
         </Button>
       </div>
     );
@@ -137,22 +137,22 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold">
-          {type === 'SHIPPING' ? t('shippingAddresses') : t('billingAddresses')}
+          {type === 'SHIPPING' ? t('Address.shippingAddresses') : t('Address.billingAddresses')}
         </h1>
         <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          {t('addNewAddress')}
+          {t('Address.addNewAddress')}
         </Button>
       </div>
 
       {addresses.filter((address) => address.types.includes(type)).length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">
-            {type === 'SHIPPING' ? t('noShippingAddresses') : t('noBillingAddresses')}
+            {type === 'SHIPPING' ? t('Address.noShippingAddresses') : t('Address.noBillingAddresses')}
           </p>
           <Button onClick={() => setIsDialogOpen(true)} className="mt-4">
             <Plus className="mr-2 h-4 w-4" />
-            {t('addNewAddress')}
+            {t('Address.addNewAddress')}
           </Button>
         </div>
       ) : (
@@ -180,16 +180,16 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
                           await deleteAddress(addressId);
                           // Die Adressliste wird automatisch durch den Hook aktualisiert
                           toast({
-                            title: t('success'),
-                            description: t('addressDeleted'),
+                            title: t('Address.success'),
+                            description: t('Address.addressDeleted'),
                             variant: 'success',
                           });
                         }
                       } catch (error) {
                         console.error('Error deleting address:', error);
                         toast({
-                          title: t('error'),
-                          description: t('errorDeletingAddress'),
+                          title: t('Address.error'),
+                          description: t('Address.errorDeletingAddress'),
                           variant: 'destructive',
                         });
                       } finally {
@@ -216,7 +216,11 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
         addressType={type}
         initialData={currentAddress || {}}
         title={
-          currentAddress ? t('editAddress') : type === 'SHIPPING' ? t('addShippingAddress') : t('addBillingAddress')
+          currentAddress
+            ? t('Address.editAddress')
+            : type === 'SHIPPING'
+              ? t('Address.addShippingAddress')
+              : t('Address.addBillingAddress')
         }
         onSave={(savedAddress) => {
           console.log('Address saved:', savedAddress);

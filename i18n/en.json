@@ -134,10 +134,7 @@
         "emptyCart": "Your cart is empty",
         "qty": "Qty",
         "total": "Total value",
-        "total": "Total value",
         "viewCart": "View Cart",
-        "product": " Product",
-        "products": " Products",
         "product": " Product",
         "products": " Products",
         "details": "Details",
@@ -321,6 +318,7 @@
         "continueShopping": "Continue Shopping"
     },
     "Orders": {
+        "product": "Product",
         "previous": "Previous",
         "next": "Next",
         "title": "Orders",
@@ -329,7 +327,6 @@
         "orderNumber": "Order number",
         "orderDate": "Order date",
         "shippingAddress": "Shipping address",
-        "paymentMethod": "Payment method",
         "orderItems": "Order items",
         "quantity": "item(s)",
         "subtotal": "Subtotal",
@@ -340,7 +337,6 @@
         "email": "Email",
         "loading": "Loading orders...",
         "returnOrder": "Return Order",
-        "orderActions": "Order Actions",
         "deliveryDate": "Delivery Date",
         "deliveryAddress": "Delivery Address",
         "payment": "Payment",
@@ -376,7 +372,12 @@
             "paypal": "PayPal",
             "invoice": "Invoice",
             "prepayment": "Prepayment"
-        }
+        },
+        "orderActions": "Order Actions",
+        "cancelOrder": "Cancel Order",
+        "price": "Price",
+        "paymentMethod": "Payment Method",
+        "orderDetails": "Order Details"
     },
     "Documents": {
         "title": "Documents for your Organisation",
@@ -435,15 +436,96 @@
             "subjectPlaceholder": "Enter subject",
             "messagePlaceholder": "Describe your issue here..."
         },
-        "addressManagement": "Address Management",
-        "addressManagementDescription": "Manage your shipping and billing addresses",
-        "manageAddresses": "Manage Addresses",
+        "Address": {
+            "title": "Address Management",
+            "description": "Manage your shipping and billing addresses",
+            "shippingAddresses": "Shipping Addresses",
+            "manageShippingAddresses": "Manage Shipping Addresses",
+            "shippingAddressesDescription": "Manage your shipping addresses",
+            "billingAddresses": "Billing Addresses",
+            "manageBillingAddresses": "Manage Billing Addresses",
+            "billingAddressesDescription": "Manage your billing addresses",
+            "noAddresses": "No addresses found",
+            "addNewAddress": "Add New Address",
+            "addShippingAddress": "Add Shipping Address",
+            "addBillingAddress": "Add Billing Address",
+            "addressFormDescription": "Fill in the address details",
+            "saveAddress": "Save Address",
+            "cancel": "Cancel",
+            "default": "Default",
+            "deleteAddress": "Delete Address",
+            "editAddress": "Edit Address",
+            "saving": "Saving...",
+            "confirmDeleteAddress": "Are you sure you want to delete this address?",
+            "success": "Success",
+            "addressDeleted": "Address deleted",
+            "addressManagement": "Address Management",
+            "manageAddresses": "Manage Addresses"
+        },
         "dashboard": "Dashboard",
-        "passwordChangeTitle": "Change Password",
-        "passwordChangeDescription": "Update your account password",
         "profile": {
             "title": "User Profile",
-            "description": "View and edit your personal details"
+            "description": "View and edit your personal details",
+            "form": {
+                "titleLabel": "Title",
+                "firstNameLabel": "First Name",
+                "lastNameLabel": "Last Name",
+                "emailLabel": "Email",
+                "phoneLabel": "Phone",
+                "preferredLanguage": "Preferred Language",
+                "preferredCurrency": "Preferred Currency",
+                "selectTitle": "Select title",
+                "selectLanguage": "Select language",
+                "selectCurrency": "Select currency",
+                "saveProfile": "Save Profile",
+                "saving": "Saving...",
+                "updateSuccess": "Your profile data has been successfully updated.",
+                "updateError": "Error updating profile",
+                "mustBeLoggedIn": "You must be logged in to edit your profile.",
+                "unknownError": "An unknown error occurred.",
+                "firstName": {
+                    "required": "Please enter your first name."
+                },
+                "lastName": {
+                    "required": "Please enter your last name."
+                },
+                "email": {
+                    "required": "Please enter your email address.",
+                    "invalid": "Please enter a valid email address."
+                },
+                "phone": {
+                    "invalid": "Please enter a valid phone number."
+                },
+                "language": {
+                    "de": "German",
+                    "en": "English"
+                }
+            }
+        },
+        "Password": {
+            "title": "Change Password",
+            "description": "Update your account password",
+            "form": {
+                "currentPasswordLabel": "Current Password",
+                "newPasswordLabel": "New Password",
+                "confirmPasswordLabel": "Confirm New Password",
+                "changePasswordLabel": "Change Password",
+                "currentPassword": {
+                    "required": "Please enter your current password."
+                },
+                "newPassword": {
+                    "required": "Please enter your new password."
+                },
+                "confirmPassword": {
+                    "mismatch": "The passwords do not match.",
+                    "required": "Please confirm your password."
+                },
+                "saving": "Saving...",
+                "success": "Success",
+                "error": "Error",
+                "showPassword": "Show Password",
+                "hidePassword": "Hide Password"
+            }
         },
         "loading": "Dashboard loading...",
         "resetLayout": "Reset Layout",
@@ -523,13 +605,7 @@
         "quotesPageDescription": "View and manage your quotes",
         "quotesPagePlaceholder": "Quotes will be displayed here",
         "shoppingListsPageDescription": "View and manage your shopping lists",
-        "shoppingListsPagePlaceholder": "Shopping lists will be displayed here",
-        "billingAddresses": "Billing Addresses",
-        "billingAddressesDescription": "Manage your billing addresses",
-        "manageBillingAddresses": "Manage Billing Addresses",
-        "shippingAddresses": "Shipping Addresses",
-        "shippingAddressesDescription": "Manage your shipping addresses",
-        "manageShippingAddresses": "Manage Shipping Addresses"
+        "shoppingListsPagePlaceholder": "Shopping lists will be displayed here"
     },
     "Notifications": {
         "title": "Notifications",

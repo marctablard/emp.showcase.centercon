@@ -327,6 +327,7 @@
         "viewOrders": "Meine Bestellungen anzeigen"
     },
     "Orders": {
+        "product": "Produkt",
         "previous": "Vorherige",
         "next": "Nächste",
         "title": "Bestellungen",
@@ -377,7 +378,11 @@
             "invoice": "Rechnung",
             "prepayment": "Vorkasse"
         },
-        "orderActions": "Bestellaktionen"
+        "orderActions": "Bestellaktionen",
+        "cancelOrder": "Bestellung stornieren",
+        "price": "Preis",
+        "paymentMethod": "Zahlungsmethode",
+        "orderDetails": "Bestelldetails"
     },
     "Documents": {
         "title": "Dokumente für Ihre Organisation",
@@ -475,6 +480,31 @@
                 }
             }
         },
+        "Password": {
+            "title": "Passwort ändern",
+            "description": "Passwortänderung für Ihr Konto",
+            "form": {
+                "currentPasswordLabel": "Aktuelles Passwort",
+                "newPasswordLabel": "Neues Passwort",
+                "confirmPasswordLabel": "Bestätigung des neuen Passworts",
+                "changePasswordLabel": "Passwort ändern",
+                "currentPassword": {
+                    "required": "Bitte geben Sie Ihr aktuelles Passwort ein."
+                },
+                "newPassword": {
+                    "required": "Bitte geben Sie Ihr neues Passwort ein."
+                },
+                "confirmPassword": {
+                    "mismatch": "Die Passwörter stimmen nicht überein.",
+                    "required": "Bitte bestätigen Sie Ihr Passwort."
+                },
+                "saving": "Wird gespeichert...",
+                "success": "Erfolgreich",
+                "error": "Fehler",
+                "showPassword": "Passwort anzeigen",
+                "hidePassword": "Passwort verbergen"
+            }
+        },
         "loading": "Dashboard wird geladen...",
         "resetLayout": "Layout zurücksetzen",
         "settings": "Einstellungen",
@@ -539,8 +569,6 @@
         "orderApproval": "Bestellfreigabe",
         "quoteApproval": "Angebotsfreigabe",
         "password": "Passwort ändern",
-        "passwordChangeTitle": "Passwort ändern",
-        "passwordChangeDescription": "Passwortänderung für Ihr Konto",
         "currentPassword": "Aktuelles Passwort",
         "newPassword": "Neues Passwort",
         "confirmPassword": "Neues Passwort bestätigen",
@@ -564,29 +592,32 @@
         "quotesPagePlaceholder": "Angebote werden hier angezeigt",
         "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
         "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt",
-        "shippingAddresses": "Versandadressen",
-        "manageShippingAddresses": "Versandadressen verwalten",
-        "shippingAddressesDescription": "Versandadressen anzeigen und verwalten",
-        "billingAddresses": "Rechnungsadressen",
-        "manageBillingAddresses": "Rechnungsadressen verwalten",
-        "billingAddressesDescription": "Rechnungsadressen anzeigen und verwalten",
-        "noAddresses": "Keine Adressen gefunden",
-        "addNewAddress": "Neu Adresse hinzufügen",
-        "addShippingAddress": "Versandadresse hinzufügen",
-        "addBillingAddress": "Rechnungsadresse hinzufügen",
-        "addressFormDescription": "Füllen Sie die Adresse aus",
-        "saveAddress": "Adresse speichern",
-        "cancel": "Abbrechen",
-        "default": "Standart",
-        "deleteAddress": "Adresse löschen",
-        "editAddress": "Adresse bearbeiten",
-        "saving": "Wird gespeichert...",
-        "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
-        "success": "Das hat geklappt",
-        "addressDeleted": "Adresse gelöscht",
-        "addressManagement": "Adressverwaltung",
-        "manageAddresses": "Adressen verwalten",
-        "addressManagementDescription": "Adressen anzeigen und verwalten"
+        "Address": {
+            "title": "Adressverwaltung",
+            "description": "Adressen anzeigen und verwalten",
+            "shippingAddresses": "Versandadressen",
+            "manageShippingAddresses": "Versandadressen verwalten",
+            "shippingAddressesDescription": "Versandadressen anzeigen und verwalten",
+            "billingAddresses": "Rechnungsadressen",
+            "manageBillingAddresses": "Rechnungsadressen verwalten",
+            "billingAddressesDescription": "Rechnungsadressen anzeigen und verwalten",
+            "noAddresses": "Keine Adressen gefunden",
+            "addNewAddress": "Neu Adresse hinzufügen",
+            "addShippingAddress": "Versandadresse hinzufügen",
+            "addBillingAddress": "Rechnungsadresse hinzufügen",
+            "addressFormDescription": "Füllen Sie die Adresse aus",
+            "saveAddress": "Adresse speichern",
+            "cancel": "Abbrechen",
+            "default": "Standart",
+            "deleteAddress": "Adresse löschen",
+            "editAddress": "Adresse bearbeiten",
+            "saving": "Wird gespeichert...",
+            "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
+            "success": "Das hat geklappt",
+            "addressDeleted": "Adresse gelöscht",
+            "addressManagement": "Adressverwaltung",
+            "manageAddresses": "Adressen verwalten"
+        }
     },
     "Notifications": {
         "title": "Benachrichtigungen",

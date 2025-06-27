@@ -81,9 +81,9 @@ export function AddressDialog({
       <DialogContent className="sm:max-w-[500px]" showCloseButton>
         <DialogHeader>
           <DialogTitle>
-            {title || (addressType === 'SHIPPING' ? t('addShippingAddress') : t('addBillingAddress'))}
+            {title || (addressType === 'SHIPPING' ? t('Address.addShippingAddress') : t('Address.addBillingAddress'))}
           </DialogTitle>
-          <DialogDescription>{t('addressFormDescription')}</DialogDescription>
+          <DialogDescription>{t('Address.addressFormDescription')}</DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
@@ -92,10 +92,10 @@ export function AddressDialog({
 
         <DialogFooter>
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={isSaving}>
-            {t('cancel')}
+            {t('Address.cancel')}
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? t('saving') : t('saveAddress')}
+            {isSaving ? t('Address.saving') : t('Address.saveAddress')}
           </Button>
         </DialogFooter>
       </DialogContent>
