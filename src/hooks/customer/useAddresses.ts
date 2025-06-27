@@ -6,16 +6,18 @@ import {
   updateCustomerAddress,
 } from '@/lib/client/customer';
 import { Address, AddressType } from '@/platform/services/model/common';
+import { CustomerAddress } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
+import useCustomer from './useCustomer';
 
-interface CustomerHook {
-  addresses: Address[] | undefined;
+interface CustomerAddressesHook {
+  addresses?: CustomerAddress[];
   loading: boolean;
   error: Error | null;
   fetchAddresses: () => Promise<void>;
   getDefaultAddress: (type: AddressType) => Address | null;
-  createAddress: (address: Partial<Address>) => Promise<Address>;
-  updateAddress: (id: string, address: Partial<Address>) => Promise<Address>;
+  createAddress: (address: CustomerAddress) => Promise<CustomerAddress>;
+  updateAddress: (id: string, address: CustomerAddress) => Promise<CustomerAddress>;
   deleteAddress: (id: string) => Promise<void>;
 }
 
@@ -23,7 +25,7 @@ interface CustomerHook {
  * Hook for customer data
  * @returns Customer data and state
  */
-export const useAddresses = (initialAddresses?: Address[] | undefined): CustomerHook => {
+export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): CustomerAddressesHook => {
   const {
     addresses: storeAddresses,
     loading,
@@ -32,8 +34,8 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
     setAddresses: setStoreAddresses,
     getAddresses,
   } = useCustomerStore();
-
-  const [addresses, setAddresses] = useState<Address[] | undefined>(initialAddresses || storeAddresses);
+  const { customer } = useCustomer();
+  const [addresses, setAddresses] = useState<CustomerAddress[] | undefined>(initialAddresses || storeAddresses);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchAddresses = useCallback(async () => {
@@ -57,7 +59,7 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
    * @returns Default address of specified type or null if not found
    */
   const getDefaultAddress = useCallback(
-    (type: AddressType): Address | null => {
+    (type: AddressType): CustomerAddress | null => {
       if ((addresses || []).length === 0) {
         return null;
       }
@@ -76,7 +78,7 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
 
   // Create a new address
   const createAddress = useCallback(
-    async (address: Partial<Address>): Promise<Address> => {
+    async (address: CustomerAddress): Promise<CustomerAddress> => {
       try {
         setAddressLoading(true);
         setError(null);
@@ -100,15 +102,13 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
 
   // Update an existing address
   const updateAddress = useCallback(
-    async (id: string, address: Partial<Address>): Promise<Address> => {
+    async (id: string, address: CustomerAddress): Promise<CustomerAddress> => {
       try {
         setAddressLoading(true);
         setError(null);
         const updatedAddress = await updateCustomerAddress(id, address);
         // Update the addresses list
-        const updatedAddresses = addresses?.map((addr) =>
-          addr.id === id || (addr as any)._id === id ? updatedAddress : addr,
-        );
+        const updatedAddresses = addresses?.map((addr) => (addr.id === id ? updatedAddress : addr));
         setAddresses(updatedAddresses);
         setStoreAddresses(updatedAddresses);
         return updatedAddress;
@@ -132,7 +132,7 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
         setError(null);
         await deleteCustomerAddress(id);
         // Remove the address from the list
-        const updatedAddresses = addresses?.filter((addr) => addr.id !== id && (addr as any)._id !== id);
+        const updatedAddresses = addresses?.filter((addr) => addr.id !== id);
         setAddresses(updatedAddresses);
         setStoreAddresses(updatedAddresses);
       } catch (err) {
@@ -149,7 +149,7 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
 
   // Initialize customer on first render if not already initialized
   useEffect(() => {
-    if (addresses === undefined && !getAddressLoading()) {
+    if (customer && addresses === undefined && !getAddressLoading()) {
       setAddressLoading(true);
       // first try to grab the customer from the store
       const currentAddresses = getAddresses();
@@ -160,7 +160,7 @@ export const useAddresses = (initialAddresses?: Address[] | undefined): Customer
         fetchAddresses();
       }
     }
-  }, [addresses, getAddresses, getAddressLoading, setAddressLoading, fetchAddresses]);
+  }, [customer, addresses, getAddresses, getAddressLoading, setAddressLoading, fetchAddresses]);
 
   return {
     addresses,

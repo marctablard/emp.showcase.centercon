@@ -1,13 +1,13 @@
 'use client';
 
 import { create } from 'zustand';
-import { Address } from '@/platform/services/model/common';
 import { Customer } from '@/platform/services/model/customer/customer';
+import { CustomerAddress } from '@/platform/services/model/customer/customer';
 
 export interface CustomerState {
   // Site data
   customer: Customer | null | undefined;
-  addresses: Address[] | undefined;
+  addresses: CustomerAddress[] | undefined;
   loading: boolean;
   addressLoading: boolean;
 }
@@ -15,8 +15,8 @@ interface CustomerActions {
   setCustomer: (customer: Customer | null | undefined) => void;
   getCustomer: () => Customer | null | undefined;
 
-  setAddresses: (addresses: Address[] | undefined) => void;
-  getAddresses: () => Address[] | undefined;
+  setAddresses: (addresses: CustomerAddress[] | undefined) => void;
+  getAddresses: () => CustomerAddress[] | undefined;
 
   setLoading: (loading: boolean) => void;
   getLoading: () => boolean;
@@ -40,7 +40,7 @@ export const createCustomerStore = (initState: CustomerState = defaultState) => 
     ...initState,
     setCustomer: (customer: Customer | null | undefined) => set({ customer }),
     getCustomer: () => get().customer,
-    setAddresses: (addresses: Address[] | undefined) => set({ addresses }),
+    setAddresses: (addresses: CustomerAddress[] | undefined) => set({ addresses }),
     getAddresses: () => get().addresses,
     setLoading: (loading: boolean) => set({ loading }),
     getLoading: () => get().loading,

@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Edit, MapPin, Plus, Trash } from 'lucide-react';
+import { Edit, Plus, Trash } from 'lucide-react';
+import { AddressDisplay } from '@/components/common/address-display';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,17 +13,11 @@ import { useToast } from '@/hooks/ui/useToast';
 import { Address, AddressType } from '@/platform/services/model/common';
 import { AddressDialog } from './address-dialog';
 
-// Extended interface for addresses with IDs (from API responses)
-interface ExtendedAddress extends Address {
-  // id und isDefault sind jetzt bereits im Address-Interface
-  _id?: string; // nur für Kompatibilität mit API-Antworten
-}
-
 interface AddressCardProps {
-  address: ExtendedAddress;
+  address: Address;
   isDeleting?: boolean;
-  onEdit?: (address: ExtendedAddress) => void;
-  onDelete?: (address: ExtendedAddress) => void;
+  onEdit?: (address: Address) => void;
+  onDelete?: (address: Address) => void;
 }
 
 /**
@@ -71,20 +66,7 @@ export function AddressCard({ address, isDeleting = false, onEdit, onDelete }: A
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-start space-x-2">
-          <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
-          <div className="space-y-1">
-            {address.companyName && <p className="text-sm">{address.companyName}</p>}
-            <p className="text-sm">
-              {address.street} {address.streetNumber || ''}
-            </p>
-            <p className="text-sm">
-              {address.zipCode} {address.city}
-            </p>
-            <p className="text-sm">{address.country}</p>
-            {address.contactPhone && <p className="text-sm">{address.contactPhone}</p>}
-          </div>
-        </div>
+        <AddressDisplay address={address} />
       </CardContent>
     </Card>
   );
@@ -96,7 +78,7 @@ export function AddressCard({ address, isDeleting = false, onEdit, onDelete }: A
  */
 export function AddressesList({ type = 'SHIPPING' as AddressType }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentAddress, setCurrentAddress] = useState<ExtendedAddress | null>(null);
+  const [currentAddress, setCurrentAddress] = useState<Address | null>(null);
   const [deletingAddressId, setDeletingAddressId] = useState<string | null>(null);
   const t = useTranslations('Account');
   const { toast } = useToast();
@@ -159,12 +141,12 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {addresses
             .filter((address) => address.types.includes(type))
-            .map((address: ExtendedAddress) => {
+            .map((address: Address) => {
               return (
                 <AddressCard
                   key={address.id || `${address.contactName}-${address.street}-${address.city}`}
                   address={address}
-                  isDeleting={deletingAddressId === (address.id || (address as any)._id)}
+                  isDeleting={deletingAddressId === address.id}
                   onEdit={(addr) => {
                     // Öffnet den Dialog im Bearbeitungsmodus
                     setCurrentAddress(addr);
@@ -173,7 +155,7 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
                   onDelete={async (address) => {
                     if (window.confirm(t('confirmDeleteAddress'))) {
                       try {
-                        const addressId = address.id || (address as any)._id;
+                        const addressId = address.id;
                         if (addressId) {
                           setDeletingAddressId(addressId);
 
@@ -214,7 +196,7 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
           }
         }}
         addressType={type}
-        initialData={currentAddress || {}}
+        initialData={currentAddress || undefined}
         title={
           currentAddress
             ? t('Address.editAddress')

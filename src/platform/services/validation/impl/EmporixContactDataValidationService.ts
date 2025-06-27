@@ -6,9 +6,8 @@ import ZodSchemaValidationService from './ZodSchemaValidationService';
 export const ContactDataSchema = z.object({
   firstName: z.string().min(1, 'contactData.firstName.required'),
   lastName: z.string().min(1, 'contactData.lastName.required'),
-  email: z.string().min(1, 'contactData.email.required').email('contactData.email.invalid'),
-  phone: z.string().optional(),
-  company: z.string().optional(),
+  email: z.string().min(1, 'register.email.required').email('register.email.invalid'),
+  emailConfirmation: z.string().min(1, 'register.emailConfirmation.required'),
 });
 
 @injectable('ContactDataValidationService', 'Singleton')

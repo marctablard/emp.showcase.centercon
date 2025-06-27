@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import AddressForm from '@/components/checkout/address-form';
+import AddressForm from '@/components/common/address-form';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,18 +14,13 @@ import {
 } from '@/components/ui/dialog';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import { Address, AddressType } from '@/platform/services/model/common';
-
-// Extended interface for addresses with IDs (from API responses)
-interface ExtendedAddress extends Address {
-  id?: string;
-  _id?: string;
-}
+import { CustomerAddress } from '@/platform/services/model/customer/customer';
 
 interface AddressDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave?: (address: Partial<ExtendedAddress>) => void;
-  initialData?: Partial<ExtendedAddress>;
+  onSave?: (address: Partial<CustomerAddress>) => void;
+  initialData?: Address;
   addressType?: AddressType;
   title?: string;
 }
@@ -37,35 +32,34 @@ export function AddressDialog({
   isOpen,
   onOpenChange,
   onSave,
-  initialData = {},
+  initialData,
   addressType = 'SHIPPING',
   title,
 }: AddressDialogProps) {
   const t = useTranslations('Account');
-  const [formData, setFormData] = useState<Partial<ExtendedAddress>>(initialData);
+  const [formData, setFormData] = useState<Address | undefined>(initialData);
   const [isSaving, setIsSaving] = useState(false);
   const { createAddress, updateAddress } = useAddresses();
 
-  // Handle form data changes
-  const handleDataChange = (data: Partial<ExtendedAddress>) => {
-    setFormData({
-      ...data,
-      types: [addressType],
-    });
-  };
-
   // Handle save button click
   const handleSave = async () => {
+    if (!formData) return;
     setIsSaving(true);
     try {
       // If we have an id, we're updating an existing address
-      const addressId = initialData.id || (initialData as any)._id;
+      const addressId = initialData?.id;
       if (addressId) {
-        const updatedAddress = await updateAddress(addressId, formData);
+        const updatedAddress = await updateAddress(addressId, {
+          ...formData,
+          types: [addressType],
+        });
         if (onSave) onSave(updatedAddress);
       } else {
         // Otherwise create a new address
-        const newAddress = await createAddress(formData);
+        const newAddress = await createAddress({
+          ...formData,
+          types: [addressType],
+        });
         if (onSave) onSave(newAddress);
       }
       onOpenChange(false);
@@ -87,7 +81,7 @@ export function AddressDialog({
         </DialogHeader>
 
         <div className="py-4">
-          <AddressForm initialData={initialData} onDataChange={handleDataChange} />
+          <AddressForm initialData={initialData} onDataChange={setFormData} />
         </div>
 
         <DialogFooter>

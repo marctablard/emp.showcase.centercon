@@ -3,10 +3,13 @@
 import React, { useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { ReceiptText } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useSite } from '@/hooks/site/useSite';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { cn } from '@/lib/utils';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Spinner } from '../ui/spinner';
 
@@ -40,9 +43,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
 
   return (
     <FormProvider {...form}>
-      <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold text-neutral-800">{t('paymentMethod')}</h2>
-
+      <div className="space-y-6 bg-white">
         {loading && <Spinner variant="md" loadingText={t('loading')} />}
 
         {error && <div className="py-4 text-center text-red-500">{t('errorLoadingPaymentMethods')}</div>}
@@ -61,13 +62,18 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                   <RadioGroup
                     defaultValue={field.value}
                     onValueChange={field.onChange}
-                    className="flex flex-col space-y-1"
+                    className={cn('flex flex-col space-y-1')}
                   >
-                    <div className="space-y-6">
-                      <div className="space-y-4">
+                    <div className="">
+                      <div>
                         {paymentModes?.map((option) => (
                           <div key={option.id}>
-                            <FormItem className="flex items-center">
+                            <FormItem
+                              className={cn(
+                                'flex items-center border rounded-md p-4',
+                                paymentMethod?.code === option.code && 'border-primary-500 bg-primary-50',
+                              )}
+                            >
                               <FormControl>
                                 <RadioGroupItem value={option.id} id={option.code} />
                               </FormControl>
@@ -75,7 +81,10 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                                 htmlFor={option.code}
                                 className="w-full ml-3 block text-sm font-medium text-neutral-700"
                               >
-                                {tPayment(option.code)}
+                                <div className=" flex justify-between">
+                                  {tPayment(option.code)}
+                                  {option.code === 'invoice' ? <ReceiptText /> : null}
+                                </div>
                               </FormLabel>
                             </FormItem>
                           </div>
@@ -147,15 +156,8 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
 
                       {/* PayPal Form */}
                       {paymentMethod?.code === 'paypal' && (
-                        <div className="mt-6 border-t pt-4">
+                        <div className="border-t p-4">
                           <p className="text-sm text-neutral-600">{t('paypalRedirect')}</p>
-                        </div>
-                      )}
-
-                      {/* Invoice Form */}
-                      {paymentMethod?.code === 'invoice' && (
-                        <div className="mt-6 border-t pt-4">
-                          <p className="text-sm text-neutral-600">{t('invoiceTerms')}</p>
                         </div>
                       )}
                     </div>
@@ -177,6 +179,21 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
             )}
           </div>
         )}
+      </div>
+      <div className="pt-4">
+        <FormField
+          control={form.control}
+          name="companyName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="companyName">{t('additionalInvoice')}</FormLabel>
+              <FormControl>
+                <Input id="additionalInvoice" type="text" placeholder="Email" {...field} disabled={isReadOnly} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </FormProvider>
   );

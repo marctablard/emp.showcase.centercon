@@ -16,9 +16,10 @@ import { Spinner } from '../ui/spinner';
 interface CartItemProps {
   cart: Cart;
   item: CartItem;
+  showQty?: boolean;
 }
 
-export function CartItemRow({ cart, item }: CartItemProps) {
+export function CartItemRow({ cart, item, showQty }: CartItemProps) {
   const { l10n } = useL10n();
   const t = useTranslations('cart');
   const { updateItemQuantity, removeItem, loading } = useCart(cart);
@@ -90,65 +91,80 @@ export function CartItemRow({ cart, item }: CartItemProps) {
         <div
           className={cn(
             'row-start-3 col-start-2 md:col-end-2 flex flex-col gap-2 md:row-start-2 mx-4 pt-2',
-            !isStrike && '-mt-4 sm:-mt-6 md:-mt-0',
+            !isStrike && showQty && '-mt-4 sm:-mt-6 md:-mt-0',
           )}
         >
-          <p className="text-sm">
-            {t('itemNumber')}: {item.product?.id}
-          </p>
+          {!showQty ? (
+            <div className="flex flex-col gap-1 md:flex-row md:items-center">
+              <p className="text-xs md:border-r border-neutral-200 md:pr-4">
+                {t('itemNumber')}: {item.product?.id}
+              </p>
+              <p className="text-xs md:pl-4">
+                {t('qty')}: {item.quantity}
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs">
+              {t('itemNumber')}: {item.product?.id}
+            </p>
+          )}
           <div className="flex items-center gap-1">
             <div className="text-success-500">
               <Package className="h-4 w-4" />
             </div>
             <p className="text-sm text-success-500">{t('available')}</p>
           </div>
-          <Button variant="link" size="small" className="normal-case text-sm tracking-normal p-0 justify-start">
-            {t('addToWishlist')}
-          </Button>
-        </div>
-        <div className="col-start-2 row-start-4 md:col-start-3 md:col-end-3 md:row-start-1 lg:col-start-3 flex gap-4 ms-4 mt-4 md:ms-0 md:mt-0">
-          <div className="w-full flex">
-            {quantity <= 1 ? (
-              <Button
-                variant="secondary"
-                size="icon"
-                className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
-                disabled={loading}
-                onClick={handleRemoveItem}
-              >
-                <Trash2 className="h-6 w-6" />
-              </Button>
-            ) : (
-              <Button
-                variant="secondary"
-                size="icon"
-                className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
-                disabled={loading}
-                onClick={() => handleUpdateQuantity(quantity - 1)}
-              >
-                <Minus className="h-6 w-6" />
-              </Button>
-            )}
-            <div className="w-15 h-13 border-y border-neutral-300">
-              {loading ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Spinner color="primary" variant="sm" />
-                </div>
-              ) : (
-                <Input value={quantity} className="py-3 text-center border-none" onChange={(e) => onChangeQty(e)} />
-              )}
-            </div>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm"
-              disabled={loading}
-              onClick={() => handleUpdateQuantity(quantity + 1)}
-            >
-              <Plus className="h-6 w-6" />
+          {showQty && (
+            <Button variant="link" size="small" className="normal-case text-sm tracking-normal p-0 justify-start">
+              {t('addToWishlist')}
             </Button>
-          </div>
+          )}
         </div>
+        {showQty && (
+          <div className="col-start-2 row-start-4 md:col-start-3 md:col-end-3 md:row-start-1 lg:col-start-3 flex gap-4 ms-4 mt-4 md:ms-0 md:mt-0">
+            <div className="w-full flex">
+              {quantity <= 1 ? (
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
+                  disabled={loading}
+                  onClick={handleRemoveItem}
+                >
+                  <Trash2 className="h-6 w-6" />
+                </Button>
+              ) : (
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm"
+                  disabled={loading}
+                  onClick={() => handleUpdateQuantity(quantity - 1)}
+                >
+                  <Minus className="h-6 w-6" />
+                </Button>
+              )}
+              <div className="w-15 h-13 border-y border-neutral-300">
+                {loading ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Spinner color="primary" variant="sm" />
+                  </div>
+                ) : (
+                  <Input value={quantity} className="py-3 text-center border-none" onChange={(e) => onChangeQty(e)} />
+                )}
+              </div>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm"
+                disabled={loading}
+                onClick={() => handleUpdateQuantity(quantity + 1)}
+              >
+                <Plus className="h-6 w-6" />
+              </Button>
+            </div>
+          </div>
+        )}
         <div className="col-start-2 row-start-2 md:col-start-4 md:row-start-1 md:row-end-3 lg:col-start-4 flex flex-col gap-1 ps-4 md:ps-0">
           {isStrike && (
             <p className={cn('line-through md:text-end', isStrike && 'text-danger-500')}>

@@ -55,6 +55,25 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
         grossValue: 0,
       };
     }
+
+    let shippingCosts;
+    if (emporixCart.calculatedPrice?.totalShipping) {
+      shippingCosts = {
+        amount: emporixCart.calculatedPrice.totalShipping.grossValue,
+        currency: emporixCart.currency,
+      };
+    } else {
+      shippingCosts = undefined;
+    }
+    let fees;
+    if (emporixCart.calculatedPrice?.totalFee) {
+      fees = {
+        amount: emporixCart.calculatedPrice.totalFee.grossValue,
+        currency: emporixCart.currency,
+      };
+    } else {
+      fees = undefined;
+    }
     return {
       id: emporixCart.id,
       currency: emporixCart.currency,
@@ -62,6 +81,8 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
       legalEntity: emporixCart.legalEntityId,
       channel: emporixCart.channel?.name,
       items: emporixCart.items?.map((item) => this.mapCartItemToService(emporixCart, item)) || [],
+      shippingCosts: shippingCosts,
+      fees: fees,
       totalPrice: totalPrice,
       subTotalPrice: subTotalPrice,
       tax: tax,

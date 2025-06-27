@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover
 import { ListFilter } from 'lucide-react';
 import z from 'zod';
 import { FilterValue as SearchFilterValue } from '@/hooks/useSearch';
-import { Filter, FilterValue } from '@/platform/services/model/common';
+import { Filter } from '@/platform/services/model/common';
 import { Button } from '../ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
@@ -35,7 +35,7 @@ function ActiveFilters({ activeFilters, resetFacet }: ActiveFiltersProps) {
   return (
     <div className="p-6 pt-10">
       {filters &&
-        filters.map(([id, value]) => (
+        filters.map(([id, _value]) => (
           <Button
             onClick={() => resetFacet(id)}
             className="p-2 bg-gray-300 rounded-xs mr-6 mb-6 text-black border-none"
@@ -55,7 +55,6 @@ function FilterMenu({
   applyRangeFacet,
   // resetAllFacets,
   // resetFacet,
-  activeFilters,
 }: SearchFilterProps) {
   const t = useTranslations('product');
   // Create a dynamic schema based on available filters
@@ -104,7 +103,7 @@ function FilterMenu({
     defaultValues: createDefaultValues(),
   });
 
-  const onSubmit = (data: z.infer<ReturnType<typeof createFormSchema>>) => {};
+  const onSubmit = (_data: z.infer<ReturnType<typeof createFormSchema>>) => {};
 
   // Helper functions are now imported from util/search.ts
 

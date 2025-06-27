@@ -1,88 +1,27 @@
-import { RefObject, useRef, useState } from 'react';
+import { RefObject, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Info, LockKeyhole } from 'lucide-react';
+import { useCartTotal } from '@/hooks/cart/useCartTotal';
+import { useElementScroll } from '@/hooks/ui/useElementScroll';
 import { cn, formatCurrency } from '@/lib/utils';
 import { Cart } from '@/platform/services/model/cart';
-import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { CartFreeship } from './cart-freeship';
+import UiLink from '../ui/link';
 import { CartRequest } from './cart-request';
 
 interface CartSummaryProps {
   cart: Cart;
-  isDelivery: boolean;
-  loading: boolean;
-  leftContent: RefObject<HTMLDivElement | null>;
+  boundingContent: RefObject<HTMLDivElement | null>;
 }
 
-export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSummaryProps) {
-  const t = useTranslations('cart');
-  const freeShippingValue = 400;
+export function CartSummary({ cart, boundingContent }: CartSummaryProps) {
+  const t = useTranslations('cart.summary');
+  //const freeShippingValue = 400;
 
   const fixedContainer = useRef<HTMLDivElement>(null);
-  const [isFixed, setIsFixed] = useState(false);
-  const [isFixedToTop, setIsFixedToTop] = useState(false);
-  const [isContainerBottom, setIsContainerBottom] = useState(false);
   const topPosition = 112;
-
-  window.addEventListener('scroll', () => {
-    const containerHeight = Math.round(
-      fixedContainer?.current?.getBoundingClientRect().height
-        ? fixedContainer?.current?.getBoundingClientRect().height
-        : 0,
-    );
-    const containerTop = Math.round(
-      fixedContainer?.current?.getBoundingClientRect().top ? fixedContainer?.current?.getBoundingClientRect().top : 0,
-    );
-    const containerBottom = Math.round(
-      fixedContainer?.current?.getBoundingClientRect().bottom
-        ? fixedContainer?.current?.getBoundingClientRect().bottom + 24
-        : 0,
-    );
-    const windowHeight = window.innerHeight;
-    const contentBox = leftContent?.current?.getBoundingClientRect();
-    const contentBottom = Math.round(contentBox?.bottom ? contentBox?.bottom : 0);
-    const contentTop = Math.round(contentBox?.top ? contentBox?.top : 0);
-    const contentHeight =
-      leftContent?.current?.children &&
-      Array.from(leftContent?.current?.children)
-        .map((item) => item.getBoundingClientRect().height)
-        .reduce((a, b) => a + b, 0);
-
-    if (
-      containerHeight &&
-      contentHeight &&
-      containerHeight <= contentHeight &&
-      windowHeight - containerHeight > 0 &&
-      window.innerWidth >= 1024
-    ) {
-      if (containerBottom && contentBottom && containerBottom < contentBottom) {
-        if (containerTop && containerTop <= topPosition) {
-          setIsFixed(true);
-          setIsFixedToTop(true);
-          if (contentTop && contentTop > containerTop) {
-            setIsFixed(false);
-            setIsContainerBottom(false);
-          }
-        } else {
-          if (contentTop && contentTop > containerTop) {
-            setIsFixed(false);
-            setIsContainerBottom(false);
-          }
-        }
-      } else {
-        if (containerBottom && contentBottom && containerBottom > contentBottom) {
-          setIsFixed(false);
-          setIsContainerBottom(true);
-        }
-        if (containerBottom && windowHeight - containerBottom < 12) {
-          setIsFixed(true);
-          setIsFixedToTop(false);
-        }
-      }
-    }
-  });
-
+  const { isFixed, isFixedToTop, isContainerBottom } = useElementScroll(fixedContainer, topPosition, boundingContent);
+  const { cartTotal, shippingCosts, currency } = useCartTotal();
   return (
     <div className="col-span-1 lg:col-span-4 xl:col-span-1 mb-6 flex">
       <div className={cn('flex flex-col w-full', isContainerBottom ? 'justify-end' : 'justify-start')}>
@@ -97,7 +36,7 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
           <Card className="bg-primary-50 p-6 border-none gap-4 shadow-sm lg:max-w-[438px] w-full">
             <CardHeader className="p-0">
               <CardTitle>
-                <h5 className="text-3xl  font-headlines">{t('orderSummary')}</h5>
+                <h5 className="text-3xl  font-headlines">{t('title')}</h5>
               </CardTitle>
             </CardHeader>
             <CardContent className="bg-white rounded-md p-4">
@@ -121,36 +60,37 @@ export function CartSummary({ cart, isDelivery, loading, leftContent }: CartSumm
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between text-base">
-                    <span>{t('statutoryVat')}</span>
+                    <span>{t('vat')}</span>
                     <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
                   </div>
-                  {isDelivery && (
-                    <div className="flex justify-between text-base">
-                      <span>{t('shippingCosts')}</span>
-                      <span>Shipping Costs</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between text-base">
+                    <span>{t('shippingCosts')}</span>
+                    {shippingCosts !== undefined ? (
+                      <span>{formatCurrency(shippingCosts, currency)}</span>
+                    ) : (
+                      <span>{t('calculatedAtCheckout')}</span>
+                    )}
+                  </div>
                 </div>
-                {isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && <CartFreeship cart={cart} />}
+                {/*isDelivery && freeShippingValue - cart.totalPrice.amount > 0 && <CartFreeship cart={cart} />*/}
                 <div className="flex flex-col gap-2">
-                  {isDelivery && (
+                  {cart.fees && (
                     <div className="flex justify-between text-base">
-                      <span>{t('freightCosts')}</span>
-                      <span>Freight Costs</span>
+                      <span>{t('fees')}</span>
+                      <span>{formatCurrency(cart.fees.amount, cart.fees.currency)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold font-headlines text-xl">
                     <span>{t('total')}</span>
-                    <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
+                    <span>{formatCurrency(cartTotal, currency)}</span>
                   </div>
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col p-0">
-              <Button type="submit" form="cart-delivery-form" className="w-full" disabled={!isDelivery || loading}>
+              <UiLink variant="button_primary" type="Link" href="/checkout" className="w-full">
                 {t('goToCheckout')}
-              </Button>
-
+              </UiLink>
               <div className="flex align-center gap-2 text-neutral-600 pt-4">
                 <div>
                   <LockKeyhole width={12} />

@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { ToastType, notify, toast } from '@/components/ui/toast-notification';
 
-export default function NotificationSytelguide() {
+export default function NotificationStyleguide() {
   const description =
     'Message - Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
   const title = 'Title';

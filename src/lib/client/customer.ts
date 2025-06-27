@@ -1,6 +1,5 @@
 import { CustomerUpdateDto, PasswordChangeDto } from '@/platform/services/customer/CustomerService';
-import { Address } from '@/platform/services/model/common';
-import { Customer } from '@/platform/services/model/customer/customer';
+import { Customer, CustomerAddress } from '@/platform/services/model/customer/customer';
 
 /**
  * Fetch the current customer information
@@ -30,9 +29,9 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
 
 /**
  * Fetch addresses for the current customer
- * @returns {Promise<Address[]>} Array of customer addresses
+ * @returns {Promise<CustomerAddress[]>} Array of customer addresses
  */
-export async function fetchCustomerAddresses(): Promise<Address[]> {
+export async function fetchCustomerAddresses(): Promise<CustomerAddress[]> {
   try {
     const response = await fetch('/api/customer/current/addresses');
 
@@ -51,10 +50,10 @@ export async function fetchCustomerAddresses(): Promise<Address[]> {
 
 /**
  * Create a new address for the current customer
- * @param {Address} address - The address data to save
- * @returns {Promise<Address>} The saved address with ID
+ * @param {CustomerAddress} address - The address data to save
+ * @returns {Promise<CustomerAddress>} The saved address with ID
  */
-export async function createCustomerAddress(address: Partial<Address>): Promise<Address> {
+export async function createCustomerAddress(address: CustomerAddress): Promise<CustomerAddress> {
   try {
     const response = await fetch('/api/customer/current/addresses', {
       method: 'POST',
@@ -79,10 +78,10 @@ export async function createCustomerAddress(address: Partial<Address>): Promise<
 /**
  * Update an existing customer address
  * @param {string} id - The ID of the address to update
- * @param {Address} address - The updated address data
- * @returns {Promise<Address>} The updated address
+ * @param {CustomerAddress} address - The updated address data
+ * @returns {Promise<CustomerAddress>} The updated address
  */
-export async function updateCustomerAddress(id: string, address: Partial<Address>): Promise<Address> {
+export async function updateCustomerAddress(id: string, address: CustomerAddress): Promise<CustomerAddress> {
   try {
     const response = await fetch(`/api/customer/current/addresses/${id}`, {
       method: 'PUT',

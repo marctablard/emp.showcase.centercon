@@ -52,7 +52,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
       size: pageSize,
     });
     applyRangeFacet('prices.effectiveAmount', '105', '285');
-  }, [searchParams, currentPage, pageSize, search]);
+  }, [searchParams, currentPage, pageSize, search, applyRangeFacet]);
 
   useEffect(() => {
     const totalPages = Math.ceil(total / pageSize);

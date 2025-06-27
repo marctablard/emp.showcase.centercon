@@ -4,9 +4,6 @@ import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
-import Footer from '@/components/footer';
-import { FooterLinks, FooterWrapper, LegalFooter } from '@/components/footer/footer';
-import Header from '@/components/header';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
@@ -72,13 +69,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <NextIntlClientProvider locale={locale}>
             <StoreProvider shopSession={shopSession} site={site}>
               <StoryblokProvider>
-                <Header />
                 {children}
-                <FooterWrapper>
-                  <FooterLinks />
-                  <Footer />
-                </FooterWrapper>
-                <LegalFooter />
                 <Toaster />
               </StoryblokProvider>
             </StoreProvider>

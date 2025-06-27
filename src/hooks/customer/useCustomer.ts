@@ -61,6 +61,15 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     }
   }, [customer, getStoreCustomer, getLoading, setLoading, fetchCustomer]);
 
+  useEffect(() => {
+    // listen to changes on storeCart to update local state
+    // this reflects changes to the store into all components
+    // that use the Hook
+    if (storeCustomer !== customer) {
+      setCustomer(storeCustomer);
+    }
+  }, [storeCustomer, customer]);
+
   return {
     customer,
     loading,

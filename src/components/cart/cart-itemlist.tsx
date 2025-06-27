@@ -22,7 +22,7 @@ export function CartItemList({ cart }: CartItemListProps) {
         </div>
       </CardHeader>
       <CardContent className="px-6">
-        {cart?.items.map((item) => <CartItemRow key={item.id} cart={cart} item={item} />)}
+        {cart?.items.map((item) => <CartItemRow key={item.id} cart={cart} item={item} showQty={true} />)}
       </CardContent>
     </Card>
   );

@@ -31,10 +31,5 @@ export default async function CheckoutPage({ params }: { params: Promise<Checkou
   if (!cart || cart.items.length === 0) {
     redirect('/cart');
   }
-
-  return (
-    <main className="min-h-screen bg-neutral-50 py-8">
-      <Checkout />
-    </main>
-  );
+  return <Checkout />;
 }

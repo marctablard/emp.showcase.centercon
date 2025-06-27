@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
+import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useL10n } from '@/hooks/useL10n';
 import { formatCurrency } from '@/lib/utils';
 
@@ -20,13 +21,10 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
   const t = useTranslations('cart');
   const { l10n } = useL10n();
   const router = useRouter();
-
+  const { cartTotal, shippingCosts, currency } = useCartTotal();
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
   const [isOpen, setIsOpen] = useState(false);
-
-  const isDelivery = true;
-
   const onOpen = () => {
     if (window.innerWidth > 1024) {
       return isOpen ? setIsOpen(false) : setIsOpen(true);
@@ -42,7 +40,7 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
       <PopoverTrigger asChild>
         <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center" onClick={onOpen}>
           <span className="text-white text-xl hidden md:inline-block">
-            {loading ? '' : formatCurrency(cart?.totalPrice.amount || 0, cart?.totalPrice.currency || 'EUR')}
+            {loading ? '' : formatCurrency(cartTotal, currency)}
           </span>
           <div className="flex items-center w-[43px] h-[35px] relative">
             <Badge
@@ -114,33 +112,37 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
                 </div>
               ))}
             </div>
+            {cart && (
+              <div className="flex flex-col gap-2 pr-4">
+                <div className="flex justify-between border-b border-neutral-200 py-2">
+                  <span className="">{t('summary.valueOfGoods')}</span>
+                  <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('summary.vat')}</span>
+                  <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('summary.shippingCosts')}</span>
+                  {shippingCosts ? (
+                    <span>{formatCurrency(shippingCosts, currency)}</span>
+                  ) : (
+                    <span>{t('summary.calculatedAtCheckout')}</span>
+                  )}
+                </div>
 
-            <div className="flex flex-col gap-2 pr-4">
-              <div className="flex justify-between border-b border-neutral-200 py-2">
-                <span className="">{t('valueOfGoods')}</span>
-                <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>{t('statutoryVat')}</span>
-                <span>{formatCurrency(cart.tax.amount, cart.tax.currency)}</span>
-              </div>
-              {isDelivery && (
-                <div className="flex justify-between">
-                  <span>{t('shippingCosts')}</span>
-                  <span>Shipping Costs</span>
+                {cart.fees && (
+                  <div className="flex justify-between">
+                    <span>{t('fees')}</span>
+                    <span>{formatCurrency(cart.fees.amount, cart.fees.currency)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-base font-headlines">
+                  <span>{t('total')}</span>
+                  <span>{formatCurrency(cartTotal, currency)}</span>
                 </div>
-              )}
-              {isDelivery && (
-                <div className="flex justify-between">
-                  <span>{t('freightCosts')}</span>
-                  <span>Freight Costs</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-base font-headlines">
-                <span>{t('total')}</span>
-                <span>{formatCurrency(cart.totalPrice.amount, cart.totalPrice.currency)}</span>
               </div>
-            </div>
+            )}
             <div className="pr-4">
               <Button className="w-full" onClick={onClose}>
                 {t('viewCart')}
