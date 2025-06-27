@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction, forwardRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { ProductTileFlyOut } from '@/components/product/product-tile-fly-out';
 import { Headline } from '@/components/ui/headline';
 import useHistory from '@/hooks/history/useHistory';
@@ -22,6 +23,7 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
     ref,
   ) => {
     const { lastSeenProducts } = useHistory();
+    const t = useTranslations('header');
     const isProductsShown = query.length > 2;
     const productsShow = isProductsShown ? products : lastSeenProducts;
 
@@ -29,11 +31,11 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
       <section ref={ref} className="absolute z-10 w-full mt-1 bg-white p-9 rounded-b-lg grid grid-cols-5">
         <QueryCompletions {...{ isProductsShown, queryCompletions, setQuery }} />
         {isProductsShown && <SideBar {...{ categories, query }} />}
-        <div className="grid auto-rows-max grid-cols-subgrid gap-6 col-start-2 col-end-6">
+        <div className="grid auto-rows-max grid-cols-subgrid gap-4 col-start-2 col-end-6 grid-cols-2 lg:grid-cols-3 ">
           {productsShow.length ? (
             <>
               <Headline className="col-span-full" variant={'h5'}>
-                {isProductsShown ? 'Suggested Products' : 'Last seen Products'}
+                {isProductsShown ? t('suggestedProducts') : t('lastSeenProducts')}
               </Headline>
               {productsShow.map((product) => (
                 <ProductTileFlyOut key={product.id} locale={locale} product={product} />

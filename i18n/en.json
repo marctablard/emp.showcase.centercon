@@ -85,6 +85,8 @@
         "account": "Account",
         "search": "Enter keyword, item, model or part number",
         "shortSearch": "Search",
+        "suggestedProducts": "Suggested Products",
+        "lastSeenProducts": "Last seen Products",
         "blog": "Blog",
         "newsletter": "Newsletter",
         "offerRequest": "Offer Request",
@@ -271,6 +273,7 @@
         "optional": "(optional)",
         "error": "Error"
     },
+
     "Checkout": {
         "title": "Checkout",
         "loading": "Loading...",
@@ -504,6 +507,12 @@
         "storeName": "Emporix Showcase Store"
     },
     "Account": {
+        "shippingAddresses": "Shipping Addresses",
+        "shippingAddressesDescription": "Manage your shipping addresses for product delivery",
+        "manageShippingAddresses": "Manage Shipping Addresses",
+        "billingAddresses": "Billing Addresses",
+        "billingAddressesDescription": "Manage your billing addresses for invoicing",
+        "manageBillingAddresses": "Manage Billing Addresses",
         "newServiceTicket": "New Service Ticket",
         "serviceTicketDialog": {
             "title": "Create Service Ticket",
@@ -516,11 +525,7 @@
         "Address": {
             "title": "Address Management",
             "description": "Manage your shipping and billing addresses",
-            "shippingAddresses": "Shipping Addresses",
-            "manageShippingAddresses": "Manage Shipping Addresses",
             "shippingAddressesDescription": "Manage your shipping addresses",
-            "billingAddresses": "Billing Addresses",
-            "manageBillingAddresses": "Manage Billing Addresses",
             "billingAddressesDescription": "Manage your billing addresses",
             "noAddresses": "No addresses found",
             "addNewAddress": "Add New Address",
