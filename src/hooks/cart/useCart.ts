@@ -140,6 +140,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to add item to cart'));
         console.error('Error adding item to cart:', err);
+        throw err;
       } finally {
         setLoading(false);
       }

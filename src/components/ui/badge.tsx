@@ -13,6 +13,7 @@ const badgeVariants = cva(
         secondary: 'border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
         warning: 'border-transparent bg-warning-500 text-white [a&]:hover:bg-warning/90',
         white: 'border-transparent bg-white text-primary [a&]:hover:bg-white/90',
+        black: 'border-transparent bg-black text-white [a&]:hover:bg-black/90',
         // TODO take over into globals.css as destructive variable
         destructive:
           'border-transparent bg-[#BF0D0D] text-primary-foreground [a&]:hover:bg-[#BF0D0D]/90 focus-visible:ring-[#BF0D0D]/20 dark:focus-visible:ring-[#BF0D0D]/40 dark:bg-[#BF0D0D]/60',

@@ -7,7 +7,7 @@ import HeaderIconLink from '@/components/header/common/header-icon-link';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import LoginDialog from '../../login/login-dialog';
 
-export default function HeaderActions() {
+export default function HeaderActions({ className }: { className?: string }) {
   const t = useTranslations('header');
   const { isAuthenticated, loading } = useAuthentication();
   if (loading) {
@@ -15,7 +15,7 @@ export default function HeaderActions() {
   }
 
   return (
-    <div className="flex justify-end items-center gap-5 text-nowrap">
+    <div className={`flex items-center gap-5 text-nowrap ${className}`}>
       <div className="hidden md:block lg:hidden">
         <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />
       </div>

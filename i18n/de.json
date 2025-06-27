@@ -54,6 +54,26 @@
             "net": "netto",
             "gross": "brutto"
         },
+        "filters": {
+            "mixins": {
+                "productVariantAttributes": {
+                    "capacity": "Kapazität",
+                    "nominal-power": "Nennleistung"
+                },
+                "productTemplateAttributes": {
+                    "length": "Produktlänge",
+                    "width": "Produktbreite",
+                    "height": "Produkthöhe",
+                    "cell-type": "Zellenart"
+                }
+            },
+            "prices": {
+                "effectiveAmount": "Effektiver Betrag"
+            },
+            "categoryAssignments": {
+                "name": "Kategorie Name"
+            }
+        },
         "tabs": {
             "description": "Beschreibung",
             "specs": "Spezifikationen",

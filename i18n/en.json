@@ -54,6 +54,19 @@
             "net": "net",
             "gross": "gross"
         },
+        "filters": {
+            "mixins": {
+                "productVariantAttributes": {
+                    "capacity": "Capacity"
+                }
+            },
+            "prices": {
+                "effectiveAmount": "Effective Amount"
+            },
+            "categoryAssignments": {
+                "name": "Category name" 
+            }
+        },
         "tabs": {
             "description": "Description",
             "specs": "Specs",
