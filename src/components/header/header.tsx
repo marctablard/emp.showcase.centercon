@@ -38,7 +38,7 @@ export function Header() {
   }
 
   return (
-    <div className="has-[.search]:fixed has-[.search]:backdrop-blur-xs has-[.search]:z-50 z-0  h-full w-full relative">
+    <div className="has-[.search]:fixed has-[.search]:backdrop-blur-xs has-[.search]:z-60 h-full w-full relative">
       {/* Desktop & Tablet */}
       <div className="hidden md:block fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
         <header
