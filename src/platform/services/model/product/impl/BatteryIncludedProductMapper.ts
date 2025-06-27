@@ -2,11 +2,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
-import {
-  GroupedSpecification,
-  ProductSpecification,
-  Product as ServiceProduct,
-} from '@/platform/services/model/product';
+import { Product as ServiceProduct } from '@/platform/services/model/product';
 import { LocalizedString, Price } from '../../common';
 import { CategorySuggestion, SearchSuggestions } from '../../search/SearchSuggestions';
 import { SuggestionsMapper } from '../../search/SuggestionsMapper';
