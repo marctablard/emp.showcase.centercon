@@ -16,9 +16,10 @@ const getLocalizedString = (locale: string) => (value: string | LocalizedString)
 export function ProductTileFlyOut({ product: { id, name, brand, price, images }, locale = 'de' }: ProductTileProps) {
   const getLocalized = getLocalizedString(locale);
   const [image] = images || [];
-
+  // TODO create an unmarked field in battery_included
+  const clean_id = id.replace(/<\/?mark>/g, '');
   return (
-    <Link href={`/product/${id}`}>
+    <Link href={`/product/${clean_id}`}>
       <div className="flex">
         {images && (
           <div className="mr-3 bg-gray-100 w-[100px] h-[144px] rounded-tl-md rounded-br-md flex align-center justify-center">
