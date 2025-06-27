@@ -75,11 +75,12 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
       fees = undefined;
     }
     let processUpdate;
-    if (emporixCart.mixins['processupdate']) {
+    const processUpdateMixin = emporixCart.mixins?.['processupdate'];
+    if (processUpdateMixin) {
       processUpdate = {
-        itemId: emporixCart.mixins['processupdate'].itemId,
-        productId: emporixCart.mixins['processupdate'].productId,
-        description: emporixCart.mixins['processupdate'].description,
+        itemId: processUpdateMixin.itemId,
+        productId: processUpdateMixin.productId,
+        description: processUpdateMixin.description,
       };
     } else {
       processUpdate = undefined;
