@@ -50,41 +50,50 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
     ];
   }
   return (
-    <div className="mt-4">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">{t('yourPrice')}</span>
-        {price.discountPercentage > 0 && (
-          <>
-            <span className="text-sm font-medium ml-[-0.5em]">, {t('including')}</span>
-            <Badge variant="destructive" rounded="default">
-              -{Math.round(price.discountPercentage)}%
-            </Badge>
-          </>
-        )}
-      </div>
-
-      <div className="flex items-baseline gap-4">
-        <div className="font-bold text-neutral-900">{priceFragment}</div>
-
-        {price.originalValue && price.originalValue > price.effectiveValue && (
-          <div className="text-neutral-600 line-through">{formatCurrency(price.originalValue, price.currency)}</div>
-        )}
-      </div>
-      {price.tax && (
-        <div className="text-sm text-neutral-600 mb-2">
-          {price.includesTax ? (
+    <div className="mt-4 flex gap-6">
+      <div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">{t('yourPrice')}</span>
+          {price.discountPercentage > 0 && (
             <>
-              {t('includingTax', { taxRate: price.tax.taxRate })} / {formatCurrency(price.tax.netValue, price.currency)}{' '}
-              {t('net')}
-            </>
-          ) : (
-            <>
-              {t('excludingTax', { taxRate: price.tax.taxRate })} /{' '}
-              {formatCurrency(price.tax.grossValue, price.currency)} {t('gross')}
+              <span className="text-sm font-medium ml-[-0.5em]">, {t('including')}</span>
+              <Badge variant="destructive" rounded="default">
+                -{Math.round(price.discountPercentage)}%
+              </Badge>
             </>
           )}
         </div>
-      )}
+
+        <div className="flex items-baseline gap-4">
+          <div className="font-bold text-neutral-900 font-headlines">{priceFragment}</div>
+        </div>
+        {price.tax && (
+          <div className="text-sm text-neutral-600 mb-2">
+            {price.includesTax ? (
+              <>
+                {t('includingTax', { taxRate: price.tax.taxRate })} /{' '}
+                {formatCurrency(price.tax.netValue, price.currency)} {t('net')}
+              </>
+            ) : (
+              <>
+                {t('excludingTax', { taxRate: price.tax.taxRate })} /{' '}
+                {formatCurrency(price.tax.grossValue, price.currency)} {t('gross')}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+      <div>
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium">{t('yourPrice')}</span>
+          <div>
+            {price.originalValue && price.originalValue > price.effectiveValue && (
+              <div className="text-neutral-600 line-through">{formatCurrency(price.originalValue, price.currency)}</div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Wait for a proper styling for List Prices
       {price.tierValues?.length > 0 && (
         <div className="mt-2 space-y-2">

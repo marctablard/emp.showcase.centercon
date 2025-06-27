@@ -30,8 +30,8 @@ export function ProductShippingInfo({
   const t = useTranslations('product.shipping');
 
   return (
-    <Card variant="gray" className={cn('mt-6', className)}>
-      <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <Card variant="gray" className={cn('mt-8 p-0', className)}>
+      <CardContent className="px-6 lg:px-8 pt-6 pb-6 lg:pb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <h2 className="font-headlines font-bold text-neutral text-md mb-4">{t('deliveryDetails')}</h2>
 

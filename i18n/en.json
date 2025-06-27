@@ -35,6 +35,10 @@
         "copy": "Copy",
         "sku": "SKU",
         "productHighlights": "Product Highlights",
+        "keySpecs": "Key specifications",
+        "more": "More product features",
+        "technicalInformation": "Technical Information",
+        "otherVariants": "Other variants",
         "shipping": {
             "deliveryDetails": "Delivery Details",
             "deliverable": "Deliverable {min} - {max} days",

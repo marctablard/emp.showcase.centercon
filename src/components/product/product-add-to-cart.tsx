@@ -15,9 +15,11 @@ import { Product } from '@/platform/services/model/product';
 export default function ProductAddToCart({
   product: initialProduct,
   className,
+  showQty,
 }: {
   product?: Product;
   className?: string;
+  showQty?: boolean;
 }) {
   const t = useTranslations('product');
   const { product, loading: productLoading, error: productError } = useProduct(initialProduct);
@@ -82,43 +84,48 @@ export default function ProductAddToCart({
   };
 
   return (
-    <div className={cn('w-full flex items-center gap-2', className)}>
-      <div className="flex items-center">
-        <Button
-          variant="secondary"
-          size="icon"
-          className="hidden md:block rounded-tr-none rounded-br-none"
-          onClick={decrementQuantity}
-          title={t('decrement')}
-          disabled={quantity <= 1}
-        >
-          <LucideMinus />
-        </Button>
-        <Input
-          id="quantity"
-          type="number"
-          min="1"
-          title={t('quantity')}
-          className="text-center rounded-none w-16 md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
-          value={quantity}
-          onChange={handleQuantityChange}
-        />
-        <Button
-          variant="secondary"
-          size="icon"
-          className="hidden md:block rounded-tl-none rounded-bl-none"
-          title={t('increment')}
-          onClick={incrementQuantity}
-        >
-          <LucidePlus />
+    <>
+      {showQty && (
+        <div className="col-start-1 row-start-2 md:col-start-2 md:row-start-1 md:content-end lg:row-start-2 lg:col-start-1">
+          <div className="flex items-center w-full">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="rounded-tr-none rounded-br-none"
+              onClick={decrementQuantity}
+              title={t('decrement')}
+              disabled={quantity <= 1}
+            >
+              <LucideMinus />
+            </Button>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              title={t('quantity')}
+              className="w-full text-center rounded-none lg:min-w-16 md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
+              value={quantity}
+              onChange={handleQuantityChange}
+            />
+            <Button
+              variant="secondary"
+              size="icon"
+              className="rounded-tl-none rounded-bl-none"
+              title={t('increment')}
+              onClick={incrementQuantity}
+            >
+              <LucidePlus />
+            </Button>
+          </div>
+        </div>
+      )}
+      <div className="col-start-1 row-start-3 md:row-start-2 md:col-end-3 lg:col-start-2 lg:col-end-5 lg-row-start-2 gap-4 lg:ps-4 xl:ps-0">
+        <Button className="flex-1 w-full mt-4 md:mt-0" onClick={handleAddToCart} disabled={cartLoading}>
+          <LucideShoppingCart />
+          {t('addToCart')}
+          <LucideShoppingCart className="hidden md:inline" />
         </Button>
       </div>
-
-      <Button className="flex-1" onClick={handleAddToCart} disabled={cartLoading}>
-        <LucideShoppingCart />
-        {t('addToCart')}
-        <LucideShoppingCart className="hidden md:inline" />
-      </Button>
-    </div>
+    </>
   );
 }

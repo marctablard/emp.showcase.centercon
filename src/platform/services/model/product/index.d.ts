@@ -1,3 +1,4 @@
+import { Mixin } from '@/platform/integrations/emporix/model';
 import { Category } from '../category';
 import { Availability, LocalizedString, Media, Price, TaxType } from '../common';
 
@@ -29,4 +30,9 @@ export interface Product {
   primaryImage?: Media;
   images?: Media[];
   taxType?: TaxType;
+  specifications?: string[];
+  usp?: string | LocalizedString;
+  highlights?: string[];
+  documents?: Media[];
+  mixins: Mixins;
 }

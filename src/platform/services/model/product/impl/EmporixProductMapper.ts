@@ -1,4 +1,5 @@
 import { injectable } from '@/platform/core/di/injectable';
+import { Mixins } from '@/platform/integrations/emporix/model';
 import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import { LocalizedString } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
@@ -30,6 +31,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
     // Extract localized name and description
     const name = this.extractLocalizedText(source.name);
     const description = source.description ? this.extractLocalizedText(source.description) : '';
+    const mixins = source.mixins ? (source.mixins as Mixins) : [];
 
     return {
       id: source.id || source.code,
@@ -37,6 +39,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       description,
       primaryImage,
       images,
+      mixins,
     };
   }
 

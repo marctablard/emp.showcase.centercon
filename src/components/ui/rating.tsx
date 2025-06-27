@@ -14,6 +14,7 @@ type StarRowProps = {
   filledCount?: number;
   disabled?: boolean;
   className?: string;
+  checkbox?: boolean;
 };
 
 type StarProps = {
@@ -41,6 +42,7 @@ function RatingStarRow({
   className,
   starsCount,
   filledCount,
+  checkbox,
   disabled,
   ...props
 }: React.ComponentProps<'div'> & StarRowProps) {
@@ -74,15 +76,17 @@ function RatingStarRow({
       )}
       {...props}
     >
-      <Checkbox
-        checked={checked}
-        disabled={disabled}
-        className={cn(
-          combinedHoverState && !disabled && 'text-primary-700',
-          checked && !disabled && 'text-primary-700',
-        )}
-        onCheckedChange={() => setChecked(!checked)}
-      />
+      {checkbox && (
+        <Checkbox
+          checked={checked}
+          disabled={disabled}
+          className={cn(
+            combinedHoverState && !disabled && 'text-primary-700',
+            checked && !disabled && 'text-primary-700',
+          )}
+          onCheckedChange={() => setChecked(!checked)}
+        />
+      )}
       <div
         tabIndex={0}
         className={cn(
