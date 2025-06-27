@@ -1,8 +1,10 @@
+import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { Mixins } from '@/platform/integrations/emporix/model';
 import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import { LocalizedString } from '@/platform/services/model/common';
-import { Product } from '@/platform/services/model/product';
+import { GroupedSpecification, Product, ProductSpecification } from '@/platform/services/model/product';
+import type { SessionService } from '@/platform/services/session';
 import { ProductMapper } from '../ProductMapper';
 
 /**
@@ -11,6 +13,10 @@ import { ProductMapper } from '../ProductMapper';
  */
 @injectable('EmporixProductMapper', 'Singleton')
 export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
+  constructor(
+    @inject('SessionService')
+    private readonly sessionService: SessionService,
+  ) {}
   /**
    * Maps an Emporix product to the internal Product model.
    *
@@ -28,10 +34,49 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       : [];
 
     const primaryImage = source.media ? source.media[0] : undefined;
+
     // Extract localized name and description
     const name = this.extractLocalizedText(source.name);
     const description = source.description ? this.extractLocalizedText(source.description) : '';
     const mixins = source.mixins ? (source.mixins as Mixins) : [];
+
+    const mappedSpecs =
+      Array.isArray(mixins) || !mixins.specifications?.specifications
+        ? []
+        : mixins.specifications.specifications.map((spec: any) => ({
+            key: spec.key,
+            group: spec.group,
+            groupLabel: spec.groupLabel
+              ? spec.groupLabel.reduce((acc: LocalizedString, item: any) => {
+                  acc[item.language] = item.value;
+                  return acc;
+                }, {} as any)
+              : {},
+            label:
+              spec.label && Array.isArray(spec.label)
+                ? spec.label.reduce((acc: LocalizedString, item: any) => {
+                    acc[item.language] = item.value;
+                    return acc;
+                  }, {} as any)
+                : { en: spec.key || '' },
+            value:
+              spec.value && Array.isArray(spec.value)
+                ? spec.value.reduce((acc: LocalizedString, item: any) => {
+                    acc[item.language] = item.value;
+                    return acc;
+                  }, {} as any)
+                : { en: '' },
+            ...(spec.unit &&
+              Array.isArray(spec.unit) && {
+                unit: spec.unit.reduce((acc: LocalizedString, item: any) => {
+                  acc[item.language] = item.value;
+                  return acc;
+                }, {} as any),
+              }),
+          }));
+
+    // Also create a grouped version of specifications
+    const groupedSpecifications = mappedSpecs.length > 0 ? this.groupSpecificationsByGroup(mappedSpecs) : [];
 
     return {
       id: source.id || source.code,
@@ -39,8 +84,52 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       description,
       primaryImage,
       images,
+      specifications: mappedSpecs,
+      groupedSpecifications: groupedSpecifications,
       mixins,
     };
+  }
+
+  /**
+   * Groups specifications by their group property
+   * @param specifications - Array of product specifications
+   * @returns Array of grouped specifications
+   */
+  groupSpecificationsByGroup(specifications: ProductSpecification[]): GroupedSpecification[] {
+    const groupedByKey: Record<string, ProductSpecification[]> = {};
+
+    specifications.forEach((spec) => {
+      const group = spec.group || 'other';
+      if (!groupedByKey[group]) {
+        groupedByKey[group] = [];
+      }
+      groupedByKey[group].push(spec);
+    });
+
+    return Object.entries(groupedByKey).map(([group, specs]) => {
+      const firstSpec = specs[0];
+      const groupName =
+        firstSpec.groupLabel?.['en'] || firstSpec.groupLabel?.['de'] || group.charAt(0).toUpperCase() + group.slice(1);
+
+      const items = specs.map((spec) => {
+        const label = spec.label['en'] || spec.label['de'] || spec.key;
+        let value = spec.value['en'] || spec.value['de'] || '';
+
+        if (spec.unit) {
+          const unit = spec.unit['en'] || spec.unit['de'] || '';
+          if (unit) {
+            value = `${value} ${unit}`;
+          }
+        }
+
+        return { label, value };
+      });
+
+      return {
+        groupName,
+        item: items,
+      };
+    });
   }
 
   /**
