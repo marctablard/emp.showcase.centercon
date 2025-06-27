@@ -182,7 +182,8 @@
         "cartEmptyText": "Add products or log in to load a saved cart.",
         "cartEmptyLogin": "Login",
         "cartEmptyLinkText": "Shop now",
-        "goToCheckout": "Go to Checkout"
+        "goToCheckout": "Go to Checkout",
+        "selectShippingAddress": "Select Shipping Address"
     },
     "login": {
         "title": "Login",
@@ -698,7 +699,15 @@
         "phoneNumber": "Phone Number",
         "companyName": "Company Name",
         "noCountriesAvailable": "No countries available",
-        "loading": "Loading address data..."
+        "loading": "Loading address data...",
+        "selectAnAddress": "Select an Address",
+        "selectShippingAddress": "Select Shipping Address",
+        "selectBillingAddress": "Select Billing Address",
+        "noAddresses": "No addresses found",
+        "addAddress": "Add Address",
+        "shipping": "Shipping",
+        "billing": "Billing",
+        "default": "Default"
     },
     "PaymentModes": {
         "creditCard": "Credit Card",

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Pencil } from 'lucide-react';
@@ -7,7 +8,9 @@ import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useCart } from '@/hooks/cart/useCart';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { Address } from '@/platform/services/model/common';
 import { CartDeliveryData } from '@/platform/services/validation/impl/EmporixCartDeliveryValidationService';
+import { AddressSelector } from '../address/address-selector';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
@@ -30,14 +33,6 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
     'onBlur',
   );
 
-  const changeShippingAddress = () => {
-    console.log('Open Modal Shipping Address');
-  };
-
-  const changePickupLocation = () => {
-    console.log('Open Modal Pickup Location');
-  };
-
   const pickupAddress = {
     company: 'Emporix AG',
     firstName: 'Philipp',
@@ -50,7 +45,7 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
 
   const { isAuthenticated } = useAuthentication();
   const { getDefaultAddress } = useAddresses();
-  const shippingAddress = getDefaultAddress('SHIPPING');
+  const [shippingAddress, setShippingAddress] = React.useState<Address | null>(getDefaultAddress('SHIPPING'));
   const { updateDeliveryMethod } = useCart();
 
   async function onSubmit(values: CartDeliveryData) {
@@ -109,15 +104,33 @@ export function CartDelivery({ isDelivery, setIsDelivery }: CartDeliveryProps) {
         <div className="flex flex-col gap-4 pt-4 md:ps-6 md:pt-0">
           <div className="flex justify-between">
             <h5 className="text-3xl font-bold font-headlines">{isDelivery ? t('ship') : t('pickup')}</h5>
-            <Button
-              variant="link"
-              size="default"
-              className="normal-case text-base tracking-normal p-0 gap-1 underline"
-              onClick={() => (isDelivery ? changeShippingAddress() : changePickupLocation())}
-            >
-              {t('change')}
-              <Pencil />
-            </Button>
+            {isDelivery ? (
+              <AddressSelector
+                onSelect={(address) => setShippingAddress(address)}
+                selectedAddressId={shippingAddress?.id}
+                triggerElement={
+                  <Button
+                    variant="link"
+                    size="default"
+                    className="normal-case text-base tracking-normal p-0 gap-1 underline"
+                  >
+                    {t('change')}
+                    <Pencil />
+                  </Button>
+                }
+                title={t('selectShippingAddress')}
+              />
+            ) : (
+              <Button
+                variant="link"
+                size="default"
+                className="normal-case text-base tracking-normal p-0 gap-1 underline"
+                onClick={() => console.log('Open Modal Pickup Location')}
+              >
+                {t('change')}
+                <Pencil />
+              </Button>
+            )}
           </div>
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             {isAuthenticated && shippingAddress && isDelivery && (

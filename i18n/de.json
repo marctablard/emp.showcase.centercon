@@ -179,7 +179,8 @@
         "cartEmptyText": "Produkte hinzufügen oder anmelden, um einen gespeicherten Warenkorb zu laden.",
         "cartEmptyLogin": "Anmelden",
         "cartEmptyLinkText": "Einkaufen",
-        "goToCheckout": "Zur Kasse"
+        "goToCheckout": "Zur Kasse",
+        "selectShippingAddress": "Lieferadresse auswählen"
     },
     "login": {
         "title": "Login",
@@ -755,7 +756,15 @@
         "phoneNumber": "Telefonnummer",
         "companyName": "Firmenname",
         "noCountriesAvailable": "Keine Länder verfügbar",
-        "loading": "Adressdaten werden geladen..."
+        "loading": "Adressdaten werden geladen...",
+        "selectAnAddress": "Adresse auswählen",
+        "selectShippingAddress": "Lieferadresse auswählen",
+        "selectBillingAddress": "Rechnungsadresse auswählen",
+        "noAddresses": "Keine Adressen gefunden",
+        "addAddress": "Adresse hinzufügen",
+        "shipping": "Lieferung",
+        "billing": "Rechnung",
+        "default": "Standard"
     },
     "PaymentModes": {
         "creditCard": "Kreditkarte",
