@@ -33,6 +33,7 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
     });
 
     // Map price data if available - using mixins data as requested
+    // TODO clarify, what to do when more pricesare returned
     if (product.prices) {
       productData.price = this.mapPrice(product.prices[0]);
     }
@@ -172,26 +173,6 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
 
     // Create a new object to avoid mutating the input
     const enhancedProduct: Product = { ...product };
-
-    if (mixins.specifications?.specifications) {
-      enhancedProduct.specifications = mixins.specifications.specifications.map((spec: any) => ({
-        key: spec.key,
-        label: spec.label?.reduce((acc: LocalizedString, item: any) => {
-          acc[item.language] = item.value;
-          return acc;
-        }, {} as any),
-        value: spec.value?.reduce((acc: LocalizedString, item: any) => {
-          acc[item.language] = item.value;
-          return acc;
-        }, {} as any),
-        ...(spec.unit && {
-          unit: spec.unit?.reduce((acc: LocalizedString, item: any) => {
-            acc[item.language] = item.value;
-            return acc;
-          }, {} as any),
-        }),
-      }));
-    }
 
     if (mixins.usp?.usp) {
       enhancedProduct.usps = mixins.usp.usp.map((usp: any) => ({

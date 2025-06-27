@@ -15,9 +15,19 @@ export interface ProductLabel {
 
 export interface ProductSpecification {
   key: string;
+  group?: string;
+  groupLabel?: LocalizedString;
   label: LocalizedString;
   value: LocalizedString;
   unit?: LocalizedString;
+}
+
+export interface GroupedSpecification {
+  groupName: string;
+  item: Array<{
+    label: string;
+    value: string;
+  }>;
 }
 
 export interface ProductDocument {
@@ -58,6 +68,7 @@ export interface Product {
 
   // Additional fields from mixins
   specifications?: ProductSpecification[];
+  groupedSpecifications?: GroupedSpecification[];
   usps?: ProductUSP[];
   templateAttributes?: Record<string, string>;
   variantAttributes?: Record<string, string>;
