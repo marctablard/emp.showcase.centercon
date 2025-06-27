@@ -13,6 +13,7 @@ export interface Cart {
   totalPrice: Price;
   subTotalPrice: Price;
   tax: Tax;
+  processUpdate?: CartUpdate;
 }
 
 export interface CartItem {
@@ -21,4 +22,10 @@ export interface CartItem {
   price: Price;
   product?: Partial<Product>;
   tax?: Tax;
+}
+
+export interface CartUpdate {
+  itemId: string;
+  productId: string;
+  description?: string;
 }
