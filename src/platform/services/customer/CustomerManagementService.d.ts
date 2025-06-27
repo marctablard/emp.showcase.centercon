@@ -22,6 +22,6 @@ export interface CustomerManagementService {
 
 export interface CompanyOnboardingStatus {
   legalEntityId: string;
-  status: 'completed' | 'pending' | 'rejected';
+  status: 'approved' | 'pending' | 'rejected';
   updatedAt: Date;
 }
