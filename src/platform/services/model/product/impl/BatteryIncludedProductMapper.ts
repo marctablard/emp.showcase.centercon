@@ -176,16 +176,16 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
     if (mixins.specifications?.specifications) {
       enhancedProduct.specifications = mixins.specifications.specifications.map((spec: any) => ({
         key: spec.key,
-        label: spec.label.reduce((acc: LocalizedString, item: any) => {
+        label: spec.label?.reduce((acc: LocalizedString, item: any) => {
           acc[item.language] = item.value;
           return acc;
         }, {} as any),
-        value: spec.value.reduce((acc: LocalizedString, item: any) => {
+        value: spec.value?.reduce((acc: LocalizedString, item: any) => {
           acc[item.language] = item.value;
           return acc;
         }, {} as any),
         ...(spec.unit && {
-          unit: spec.unit.reduce((acc: LocalizedString, item: any) => {
+          unit: spec.unit?.reduce((acc: LocalizedString, item: any) => {
             acc[item.language] = item.value;
             return acc;
           }, {} as any),
