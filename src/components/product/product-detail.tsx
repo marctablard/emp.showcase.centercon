@@ -148,14 +148,14 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Nominal Power"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productVariantAttributes['nominal-power']}
+                      value={product.mixins?.productVariantAttributes?.['nominal-power']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Length"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['length']}
+                      value={product.mixins?.productTemplateAttributes?.['length']}
                     />
                     <BulletPoint
                       className="font-bold"
@@ -169,21 +169,21 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Width"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['width']}
+                      value={product.mixins?.productTemplateAttributes?.['width']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Cell Type"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['cell-type']}
+                      value={product.mixins?.productTemplateAttributes?.['cell-type']}
                     />
                     <BulletPoint
                       className="font-bold"
                       label="Height"
                       variant="white"
                       iconColor="white"
-                      value={product.mixins.productTemplateAttributes['height']}
+                      value={product.mixins?.productTemplateAttributes?.['height']}
                     />
                   </div>
 
