@@ -71,22 +71,22 @@ export function CheckoutPayment({ initialEdit }: { initialEdit: boolean }) {
           </>
         ) : (
           <>
-            <CheckoutAddress
-              address={billingAddress}
-              addressLabel={t('address')}
-              sameAs={
-                shippingAddress
-                  ? {
-                      referenceAddress: shippingAddress,
-                      label: t('billingAddressSameAsShipping'),
-                      id: 'billingAddressSameAsShipping',
-                    }
-                  : undefined
-              }
-              isReadOnly={false}
-              onAddressChange={handleBillingAddressChange}
-            />
             <div className="col-span-2 flex flex-col gap-4">
+              <CheckoutAddress
+                address={billingAddress}
+                addressLabel={t('address')}
+                sameAs={
+                  shippingAddress
+                    ? {
+                        referenceAddress: shippingAddress,
+                        label: t('billingAddressSameAsShipping'),
+                        id: 'billingAddressSameAsShipping',
+                      }
+                    : undefined
+                }
+                isReadOnly={false}
+                onAddressChange={handleBillingAddressChange}
+              />
               {/* Payment Method */}
               <PaymentMethodComponent />
             </div>

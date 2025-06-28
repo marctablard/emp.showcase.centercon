@@ -9,6 +9,7 @@ import { createCheckoutStore } from '@/stores/checkout-store';
 import { createCustomerStore } from '@/stores/customer-store';
 import { createDashboardStore } from '@/stores/dashboard-store';
 import { createHistoryStore } from '@/stores/history-store';
+import { createNotificationStore } from '@/stores/notification-store';
 import { createOrderStore } from '@/stores/order-store';
 import { createProductStore } from '@/stores/products-store';
 import { createSessionStore } from '@/stores/session-store-context';
@@ -35,6 +36,8 @@ export type OrderStoreApi = ReturnType<typeof createOrderStore>;
 export const OrderStoreContext = createContext<OrderStoreApi | null>(null);
 export type SessionStoreApi = ReturnType<typeof createSessionStore>;
 export const SessionStoreContext = createContext<SessionStoreApi | null>(null);
+export type NotificationStoreApi = ReturnType<typeof createNotificationStore>;
+export const NotificationStoreContext = createContext<NotificationStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
@@ -83,6 +86,10 @@ export const StoreProvider = ({ children, shopSession, site }: StoreProviderProp
   if (sessionStoreRef.current === null) {
     sessionStoreRef.current = createSessionStore({ session: shopSession, loading: false });
   }
+  const notificationStoreRef = useRef<NotificationStoreApi | null>(null);
+  if (notificationStoreRef.current === null) {
+    notificationStoreRef.current = createNotificationStore();
+  }
   /**
    * The order is relevant, because store data can only depend on one another,
    * when nested properly.
@@ -106,7 +113,9 @@ export const StoreProvider = ({ children, shopSession, site }: StoreProviderProp
                   <HistoryStoreContext.Provider value={historyStoreRef.current}>
                     <DashboardStoreContext.Provider value={dashboardStoreRef.current}>
                       <SessionStoreContext.Provider value={sessionStoreRef.current}>
-                        {children}
+                        <NotificationStoreContext.Provider value={notificationStoreRef.current}>
+                          {children}
+                        </NotificationStoreContext.Provider>
                       </SessionStoreContext.Provider>
                     </DashboardStoreContext.Provider>
                   </HistoryStoreContext.Provider>
@@ -196,6 +205,14 @@ export const useSessionStore = () => {
   const storeContext = useContext(SessionStoreContext);
   if (!storeContext) {
     throw new Error('useSessionStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useNotificationStore = () => {
+  const storeContext = useContext(NotificationStoreContext);
+  if (!storeContext) {
+    throw new Error('useNotificationStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

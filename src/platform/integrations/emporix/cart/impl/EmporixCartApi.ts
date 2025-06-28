@@ -47,6 +47,14 @@ class EmporixCartApi implements CartApi {
     }
 
     const createdCart: CreatedCart = await response.json();
+    // TODO needs to be removed when Mixin Bug is done
+    this.updateCart(createdCart.cartId, {
+      mixins: {
+        processupdate: {
+          latestupdate: new Date().toISOString(),
+        },
+      },
+    });
     return createdCart.cartId;
   }
 

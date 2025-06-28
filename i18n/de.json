@@ -216,6 +216,16 @@
         "cartEmptyLogin": "Anmelden",
         "selectShippingAddress": "Lieferadresse auswählen"
     },
+    "Notification": {
+        "close" : "Schliessen",
+        "company": {
+            "onboarding": {
+                "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+                "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+                "approved": "Congratulations! Your company has been approved. You can now start shopping."
+            }
+        }
+    },
     "login": {
         "title": "Login",
         "username": "E-Mail",
@@ -232,14 +242,7 @@
         "error": "Fehler",
         "showPassword": "Passwort anzeigen",
         "hidePassword": "Passwort verbergen",
-        "loginFailed": "Anmeldung fehlgeschlagen",
-        "company": {
-            "onboarding": {
-                "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
-                "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
-                "approved": "Congratulations! Your company has been approved. You can now start shopping."
-            }
-        }
+        "loginFailed": "Anmeldung fehlgeschlagen"
     },
     "register": {
         "title": "Registrierung",

@@ -4,6 +4,7 @@ import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
+import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
@@ -72,6 +73,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               <StoryblokProvider>
                 {children}
                 <Toaster />
+                <Notification />
               </StoryblokProvider>
             </StoreProvider>
           </NextIntlClientProvider>

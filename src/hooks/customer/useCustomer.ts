@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { fetchCurrentCustomer, fetchCurrentCustomerOnboardingStatus } from '@/lib/client/customer';
-import { CompanyOnboardingStatus } from '@/platform/services/customer/CustomerManagementService';
+import { fetchCurrentCustomer } from '@/lib/client/customer';
 import type { Customer } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
 
@@ -11,7 +10,6 @@ interface CustomerHook {
   loading: boolean;
   error: Error | null;
   fetchCustomer: () => Promise<void>;
-  onboardingStatusKey: () => Promise<string | null>;
 }
 
 /**
@@ -19,18 +17,10 @@ interface CustomerHook {
  * @returns Customer data and state
  */
 export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => {
-  const {
-    customer: storeCustomer,
-    loading,
-    getLoading,
-    setLoading,
-    setCustomer: setStoreCustomer,
-    getCustomer: getStoreCustomer,
-  } = useCustomerStore();
-  if (initialCustomer && getStoreCustomer() === undefined) {
-    setStoreCustomer(initialCustomer);
+  const { customer, loading, getLoading, setLoading, setCustomer, getCustomer } = useCustomerStore();
+  if (initialCustomer && getCustomer() === undefined) {
+    setCustomer(initialCustomer);
   }
-  const [customer, setCustomer] = useState<Customer | null | undefined>(initialCustomer || storeCustomer);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchCustomer = useCallback(async () => {
@@ -38,7 +28,6 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
       setLoading(true);
       setError(null);
       const data = await fetchCurrentCustomer();
-      setStoreCustomer(data);
       setCustomer(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch customer'));
@@ -46,51 +35,26 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setStoreCustomer]);
+  }, [setLoading, setCustomer]);
 
   // Initialize customer on first render if not already initialized
   useEffect(() => {
     if (customer === undefined && !getLoading()) {
       setLoading(true);
-      // first try to grab the customer from the store
-      const currentCustomer = getStoreCustomer();
-      if (currentCustomer !== undefined) {
-        setCustomer(currentCustomer);
+      // check without state-effect
+      if (getCustomer() !== undefined) {
         setLoading(false);
       } else {
         fetchCustomer();
       }
     }
-  }, [customer, getStoreCustomer, getLoading, setLoading, fetchCustomer]);
-
-  const onboardingStatusKey = useCallback(async (): Promise<string | null> => {
-    try {
-      const onboardingStatus: CompanyOnboardingStatus | null = await fetchCurrentCustomerOnboardingStatus();
-      if (onboardingStatus === null) {
-        return null;
-      }
-      return onboardingStatus.status || null;
-    } catch (err) {
-      console.error('Error fetching customer onboarding status:', err);
-      return null;
-    }
-  }, []);
-
-  useEffect(() => {
-    // listen to changes on storeCart to update local state
-    // this reflects changes to the store into all components
-    // that use the Hook
-    if (storeCustomer !== customer) {
-      setCustomer(storeCustomer);
-    }
-  }, [storeCustomer, customer]);
+  }, [customer, getCustomer, getLoading, setLoading, fetchCustomer]);
 
   return {
     customer,
     loading,
     error,
     fetchCustomer,
-    onboardingStatusKey,
   };
 };
 

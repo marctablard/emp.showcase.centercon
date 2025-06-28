@@ -27,5 +27,5 @@ export interface CartItem {
 export interface CartUpdate {
   itemId: string;
   productId: string;
-  description?: string;
+  updatedAt: Date;
 }

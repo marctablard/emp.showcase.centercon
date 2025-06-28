@@ -21,8 +21,9 @@ export default function ProductAddToCart({
 }) {
   const t = useTranslations('product');
   const { product, loading: productLoading, error: productError } = useProduct(initialProduct);
-  const { addItem, loading: cartLoading } = useCart();
+  const { addItem, cart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [adding, setAdding] = useState(false);
 
   if (productLoading) {
     return (
@@ -52,7 +53,7 @@ export default function ProductAddToCart({
   const handleAddToCart = async () => {
     try {
       if (!product) return;
-
+      setAdding(true);
       await addItem(product.id, quantity);
 
       toast.success(t('addedToCart'), {
@@ -63,6 +64,8 @@ export default function ProductAddToCart({
       toast.error(t('errorAddingToCart'), {
         description: error instanceof Error ? error.message : String(error),
       });
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -116,7 +119,11 @@ export default function ProductAddToCart({
         </div>
       </div>
       <div className="col-start-1 row-start-3 md:row-start-2 md:col-end-3 lg:col-start-2 lg:col-end-5 lg-row-start-2 gap-4 lg:ps-4 xl:ps-0">
-        <Button className="flex-1 w-full mt-4 md:mt-0" onClick={handleAddToCart} disabled={cartLoading}>
+        <Button
+          className="flex-1 w-full mt-4 md:mt-0"
+          onClick={handleAddToCart}
+          disabled={cart === undefined || adding}
+        >
           <LucideShoppingCart />
           {t('addToCart')}
           <LucideShoppingCart className="hidden md:inline" />

@@ -9,11 +9,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps['theme']}
-      className="toaster group w-full m-0"
+      className="toaster group mx-Auto"
       data-x-position="right"
       style={
         {
-          '--width': '100%',
+          '--width': '90%',
         } as React.CSSProperties
       }
       {...props}

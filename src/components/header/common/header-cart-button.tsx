@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Cart } from '@platform/services/model/cart';
-import { ShoppingCart } from 'lucide-react';
+import { Cart, CartUpdate } from '@platform/services/model/cart';
+import { MessageCircleWarning, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -12,6 +12,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useL10n } from '@/hooks/useL10n';
 import { formatCurrency } from '@/lib/utils';
+import { useNotificationStore } from '@/stores/notification-store';
 
 interface HeaderCartButtonProps {
   initialCart?: Cart | null;
@@ -20,8 +21,10 @@ interface HeaderCartButtonProps {
 
 export default function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
   const t = useTranslations('cart');
+  const { addNotification, hasNotification } = useNotificationStore();
   const { l10n } = useL10n();
   const router = useRouter();
+  const [cartUpdate, setCartUpdate] = useState<CartUpdate | undefined>(undefined);
   const { cartTotal, shippingCosts, currency } = useCartTotal();
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
@@ -36,22 +39,53 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
     router.push('/cart');
   };
 
+  const buildCartUpdateKey = (cart: Cart, cartUpdate: CartUpdate) => {
+    return 'cart-' + cart.id + '-' + cartUpdate.itemId + '-' + cartUpdate.updatedAt;
+  };
+
+  useEffect(() => {
+    if (cart && cart.processUpdate) {
+      if (!hasNotification(buildCartUpdateKey(cart, cart.processUpdate))) {
+        setCartUpdate(cart.processUpdate);
+      }
+    }
+  }, [cart, hasNotification]);
+
+  useEffect(() => {
+    if (cart && cartUpdate) {
+      if (isOpen) {
+        addNotification(buildCartUpdateKey(cart, cartUpdate));
+      } else {
+        setCartUpdate(undefined);
+      }
+    }
+  }, [isOpen, addNotification, cart, cartUpdate]);
+
   return (
     <Popover open={isOpen}>
       <PopoverTrigger asChild>
         <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center" onClick={onOpen}>
           {showSum && (
             <span className="text-white text-xl hidden md:inline-block">
-              {loading ? '' : formatCurrency(cartTotal, currency)}
+              {!cartTotal ? '' : formatCurrency(cartTotal, currency)}
             </span>
           )}
           <div className="flex items-center w-[43px] h-[35px] relative">
-            <Badge
-              variant="white"
-              className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
-            >
-              {loading ? <Spinner color="primary" variant="xs" /> : cart?.items.length || 0}
-            </Badge>
+            {cartUpdate && !isOpen ? (
+              <Badge
+                variant="warning"
+                className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
+              >
+                <MessageCircleWarning />
+              </Badge>
+            ) : (
+              <Badge
+                variant="white"
+                className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
+              >
+                {loading ? <Spinner color="primary" variant="xs" /> : cart?.items.length || 0}
+              </Badge>
+            )}
             <ShoppingCart width="32" height="32" />
           </div>
         </Button>
@@ -74,7 +108,7 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
           <div className="flex flex-col gap-4 justify-center">
             <div className="overflow-y-scroll max-h-[300px] pr-4">
               {cart.items.map((item) => (
-                <div key={item.id} className="py-4 border-b flex items-end justify-between gap-3">
+                <div key={item.id} className={`py-4 border-b flex items-end justify-between gap-3`}>
                   <div className="flex gap-4">
                     <div className="rounded-ss-xl rounded-ee-xl w-[100px] h-[65px] object-fit overflow-hidden">
                       {item.product && item.product.images?.length ? (
@@ -92,7 +126,7 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
                       )}
                     </div>
                     <div className="flex-grow min-w-0">
-                      <p className="text-sm">Allen Key Type</p>
+                      <p className="text-sm">{l10n(item.product?.brand?.name || 'Brand')}</p>
                       <p
                         className="font-bold truncate font-headlines cursor-pointer"
                         onClick={() => router.push(`/product/${item.product?.id}`)}
@@ -110,7 +144,16 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
                     </div>
                   </div>
                   <div>
-                    <p className="font-bold font-headlines">{formatCurrency(item.price.amount, item.price.currency)}</p>
+                    {cartUpdate && cartUpdate?.itemId === item.id && (
+                      <Badge variant="warning" className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal">
+                        <MessageCircleWarning />
+                      </Badge>
+                    )}
+                    <p
+                      className={`font-bold font-headlines ${cartUpdate && cartUpdate?.itemId === item.id ? 'bg-orange-100/75' : ''}`}
+                    >
+                      {formatCurrency(item.price.amount, item.price.currency)}
+                    </p>
                   </div>
                 </div>
               ))}

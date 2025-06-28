@@ -78,9 +78,9 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
     const processUpdateMixin = emporixCart.mixins?.['processupdate'];
     if (processUpdateMixin) {
       processUpdate = {
-        itemId: processUpdateMixin.itemId,
-        productId: processUpdateMixin.productId,
-        description: processUpdateMixin.description,
+        itemId: processUpdateMixin.cartitemid,
+        productId: processUpdateMixin.productid,
+        updatedAt: new Date(processUpdateMixin.latestupdate),
       };
     } else {
       processUpdate = undefined;

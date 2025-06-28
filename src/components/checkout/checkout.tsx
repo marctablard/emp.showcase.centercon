@@ -23,7 +23,7 @@ interface CheckoutProps {
  */
 const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   const { loading, error, orderResponse, checkoutCart, processCheckout } = useCheckout();
-  const { customer, loading: customerLoading } = useCustomer();
+  const { customer } = useCustomer();
   const router = useRouter();
   const t = useTranslations('Checkout');
   const leftContent = useRef<HTMLDivElement>(null);
@@ -44,7 +44,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
     }
   }, [orderResponse, onComplete, router]);
 
-  if (customer === undefined || customerLoading || loading || orderResponse) {
+  if (customer === undefined || loading || orderResponse) {
     return (
       <div className="mx-4 xl:mx-9">
         <div className="flex gap-3 align-end mb-8">

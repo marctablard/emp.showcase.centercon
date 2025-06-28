@@ -10,6 +10,7 @@ import {
 } from '@/lib/client/carts';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { useCartStore } from '@/providers/StoreProvider';
+import { usePolling } from '../util/usePolling';
 
 interface UseCart {
   // Cart data
@@ -50,7 +51,9 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
   if (getStoreCart() === undefined && initialCart !== undefined) {
     setStoreCart(initialCart);
   }
+
   const [error, setError] = useState<Error | null>(null);
+  const [lastModification, setLastModification] = useState<Date | null>(null);
 
   const fetchCart = useCallback(
     async (createCurrent?: boolean) => {
@@ -77,6 +80,10 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     [setStoreCart, setLoading],
   );
 
+  const { start: startPolling, stop: stopPolling } = usePolling(() => {
+    fetchCart();
+  }, 10000);
+
   /**
    * Add an item to the cart
    */
@@ -100,7 +107,8 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
 
         // Call API to add item
         await apiAddItemToCart(addCartId, productId, quantity);
-
+        setLastModification(new Date());
+        startPolling();
         // Refetch cart to get updated state
         await fetchCart();
       } catch (err) {
@@ -111,7 +119,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, setLoading, fetchCart],
+    [cart, setLoading, fetchCart, startPolling],
   );
 
   /**
@@ -130,7 +138,8 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
 
         // Call API to update item
         await apiUpdateCartItemQuantity(cart.id, itemId, quantity);
-
+        setLastModification(new Date());
+        startPolling();
         // Refetch cart to get updated state
         await fetchCart();
       } catch (err) {
@@ -140,7 +149,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, fetchCart, setLoading],
+    [cart, fetchCart, setLoading, startPolling],
   );
 
   /**
@@ -159,7 +168,8 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
 
         // Call API to remove item
         await apiRemoveCartItem(cart.id, itemId);
-
+        setLastModification(new Date());
+        startPolling();
         // Refetch cart to get updated state
         await fetchCart();
       } catch (err) {
@@ -169,7 +179,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         setLoading(false);
       }
     },
-    [cart, fetchCart, setLoading],
+    [cart, fetchCart, setLoading, startPolling],
   );
 
   /**
@@ -186,7 +196,6 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
         }
         // Call API to update shipping info
         await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
-
         // Refetch cart to get updated state
         await fetchCart();
       } catch (err) {
@@ -217,6 +226,17 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
       fetchCart();
     }
   }, [cart, getStoreCart, fetchCart, getLoading, setLoading]);
+
+  useEffect(() => {
+    if (cart && lastModification) {
+      if (cart.processUpdate?.updatedAt) {
+        const updatedAt = new Date(cart.processUpdate.updatedAt);
+        if (updatedAt.getTime() > lastModification.getTime()) {
+          stopPolling();
+        }
+      }
+    }
+  }, [cart, lastModification, stopPolling]);
 
   return {
     cart,
