@@ -23,6 +23,8 @@ class TestEmporixConfig implements EmporixConfig {
   tenant: string = process.env.NEXT_EMPORIX_TEST_TENANT || '';
   clientId: string = process.env.NEXT_EMPORIX_TEST_CLIENT_ID || '';
   clientSecret: string = process.env.NEXT_EMPORIX_TEST_CLIENT_SECRET || '';
+  serverClientId: string = process.env.NEXT_EMPORIX_TEST_SERVER_CLIENT_ID || '';
+  serverClientSecret: string = process.env.NEXT_EMPORIX_TEST_SERVER_CLIENT_SECRET || '';
 }
 
 // Using EmporixTestTokenManager from the imported file
