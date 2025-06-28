@@ -15,11 +15,20 @@ export interface SearchResultFlyOutProps {
   query: string;
   loading: boolean;
   setQuery: Dispatch<SetStateAction<string>>;
+  onProductClick?: () => void;
 }
 
 export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
   (
-    { suggestions: { categories, queryCompletions, products }, loading, query, hasInitialSearch, locale, setQuery },
+    {
+      suggestions: { categories, queryCompletions, products },
+      loading,
+      query,
+      hasInitialSearch,
+      locale,
+      setQuery,
+      onProductClick,
+    },
     ref,
   ) => {
     const { lastSeenProducts } = useHistory();
@@ -38,7 +47,7 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
                 {isProductsShown ? t('suggestedProducts') : t('lastSeenProducts')}
               </Headline>
               {productsShow.map((product) => (
-                <ProductTileFlyOut key={product.id} locale={locale} product={product} />
+                <ProductTileFlyOut key={product.id} locale={locale} product={product} onProductClick={onProductClick} />
               ))}
             </>
           ) : (

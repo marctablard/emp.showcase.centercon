@@ -81,6 +81,12 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
     [inputRef, suggestionsRef, showSuggestions],
   );
 
+  // Function to close the flyout when a product is clicked
+  const handleProductClick = useCallback(() => {
+    setShowSuggestions(false);
+    setHasInputFocus(false);
+  }, []);
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -119,6 +125,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
           locale={locale}
           query={query}
           setQuery={setQuery}
+          onProductClick={handleProductClick}
         />
       )}
     </div>
