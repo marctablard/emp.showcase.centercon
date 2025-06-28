@@ -13,15 +13,19 @@ class EmporixCartMigrationService implements CartMigrationService {
   constructor(@inject('EmporixCartApi') private cartApi: CartApi) {}
 
   async migrateCartToCustomer(cartId: string, customerId: string): Promise<void> {
-    const cart = await this.cartApi.getCart(cartId);
-    if (!cart) {
-      // TODO what if someone came in with an outdated cart cookie?
+    try {
+      const cart = await this.cartApi.getCart(cartId);
+      if (!cart) {
+        // TODO what if someone came in with an outdated cart cookie?
+        return;
+      }
+      // TODO handle a situation where the Customer already has a Cart (separate Ticket)
+      await this.cartApi.updateCart(cartId, {
+        customerId: customerId,
+      });
+    } catch (_error) {
       return;
     }
-    // TODO handle a situation where the Customer already has a Cart (separate Ticket)
-    await this.cartApi.updateCart(cartId, {
-      customerId: customerId,
-    });
   }
 
   async mergeCarts(_sourceCartId: string, _targetCartId: string): Promise<Cart> {

@@ -288,8 +288,6 @@ export const useCompany = (): CompanyHook => {
           name: company.name,
           onboarding: company.onboarding,
         });
-      } else {
-        setCompany(mockCompany);
       }
     } catch (error) {
       console.error('Error fetching company:', error);
