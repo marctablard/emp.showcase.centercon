@@ -7,7 +7,7 @@ const getPriceService = () => globalThis.EMP.platform.ssr.get<PriceService>('Pri
 const _getPrice = cache(
   async (id: string, unitCode?: string, quantity?: number): Promise<ProductPrice | null | undefined> => {
     try {
-      const price = await getPriceService().getProductPrice(id, unitCode, quantity);
+      const price = await getPriceService().getProductPrice(id, quantity, unitCode);
       return price;
     } catch (_error) {
       // on SSR we fail with undefined, so the Client can refetch if necessary
