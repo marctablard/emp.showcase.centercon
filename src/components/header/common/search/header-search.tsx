@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,8 +19,8 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
   const [hasInitialSearch, setHasInitialSearch] = useState(false);
   const [hasInputFocus, setHasInputFocus] = useState(false);
 
-  // Todo replace with the real thing
-  const locale = 'de';
+  // Get the current locale
+  const locale = useLocale();
 
   // Initialize the search hook with Product type and initial results
   const { data: _products, suggestions, loading, getSuggestions, currentQuery } = useSearch<Product>();
@@ -53,7 +53,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
       // Fetch suggestions only when at least 2 characters are entered
       if (value.trim().length >= 2) {
         setShowSuggestions(true);
-        getSuggestions(value, 'de');
+        getSuggestions(value, locale);
       } else {
         setShowSuggestions(false);
       }
@@ -87,6 +87,18 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
     setHasInputFocus(false);
   }, []);
 
+  // Function to handle query selection from suggestions
+  const handleQuerySelect = useCallback(
+    (selectedQuery: string) => {
+      // Update the query state
+      setQuery(selectedQuery);
+
+      // Execute the search with the selected query
+      getSuggestions(selectedQuery, locale);
+    },
+    [getSuggestions, locale],
+  );
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -101,6 +113,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
       <form onSubmit={(e) => redirectToBrowse(e)}>
         <Input
           placeholder={small ? t('shortSearch') : t('search')}
+          value={query}
           onChange={handleInput}
           onFocus={handleInput}
           ref={inputRef}
@@ -126,6 +139,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
           query={query}
           setQuery={setQuery}
           onProductClick={handleProductClick}
+          onQuerySelect={handleQuerySelect}
         />
       )}
     </div>
