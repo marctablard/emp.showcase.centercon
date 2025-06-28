@@ -10,56 +10,60 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form'
 import { InputButton } from '../ui/input';
 import UiLink from '../ui/link';
 
-export default function Footer() {
+export default function Footer({ reduced = false }: { reduced?: boolean }) {
   const t = useTranslations('footer');
   const { form } = useNewsletterForm();
 
   return (
     <footer className="w-full">
       <div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6">
-        <div>
-          <p className="font-bold mb-2">{t('newsletterTitle')}</p>
-          <div className="max-w-[560px]">
-            <Form {...form}>
-              <FormField
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <InputButton
-                        placeholder={t('newsletterInput')}
-                        {...field}
-                        iconButtonAfter={Mail}
-                        buttonLabel={t('newsletterButtonLabel')}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </Form>
+        {!reduced && (
+          <div>
+            <p className="font-bold mb-2">{t('newsletterTitle')}</p>
+            <div className="max-w-[560px]">
+              <Form {...form}>
+                <FormField
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <InputButton
+                          placeholder={t('newsletterInput')}
+                          {...field}
+                          iconButtonAfter={Mail}
+                          buttonLabel={t('newsletterButtonLabel')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </Form>
+            </div>
+            <p className="mt-2">
+              {t('beforePrivacyPolicy')}
+              <UiLink type="Link" variant="text" href="/privacy-policy">
+                {t('privacyPolicyLink')}
+              </UiLink>
+              {t('beforeTermsAndConditions')}
+              <UiLink type="Link" variant="text" href="/terms-and-conditions">
+                {t('termsAndConditionsLink')}
+              </UiLink>
+              {t('afterTermsAndConditions')}
+            </p>
           </div>
-          <p className="mt-2">
-            {t('beforePrivacyPolicy')}
-            <UiLink type="Link" variant="text" href="/privacy-policy">
-              {t('privacyPolicyLink')}
-            </UiLink>
-            {t('beforeTermsAndConditions')}
-            <UiLink type="Link" variant="text" href="/terms-and-conditions">
-              {t('termsAndConditionsLink')}
-            </UiLink>
-            {t('afterTermsAndConditions')}
-          </p>
-        </div>
-        <div>
-          <p className="font-bold mb-2 md:mb-6">{t('paymentMethodsTitle')}</p>
-          <div className="flex gap-2 justify-between items-center max-w-[400px]">
-            <Image src="/images/mastercard.svg" alt="Mastercard" width="88" height="20" />
-            <Image src="/images/paypal.svg" alt="Paypal" width="60" height="16" />
-            <Image src="/images/pci-dss-compliant.svg" alt="PCI DSS Compliant" width="50" height="20" />
-            <Image src="/images/gdpr.svg" alt="GDPR" width={19} height={24} />
+        )}
+        {!reduced && (
+          <div>
+            <p className="font-bold mb-2 md:mb-6">{t('paymentMethodsTitle')}</p>
+            <div className="flex gap-2 justify-between items-center max-w-[400px]">
+              <Image src="/images/mastercard.svg" alt="Mastercard" width="88" height="20" />
+              <Image src="/images/paypal.svg" alt="Paypal" width="60" height="16" />
+              <Image src="/images/pci-dss-compliant.svg" alt="PCI DSS Compliant" width="50" height="20" />
+              <Image src="/images/gdpr.svg" alt="GDPR" width={19} height={24} />
+            </div>
           </div>
-        </div>
+        )}
         <div className="bg-primary-50 rounded-tl-2xl p-2 md:p-4">
           <div className="bg-[url('/images/map-pinned.svg')] bg-no-repeat bg-right-top">
             <p className="font-bold">{t('companyName')}</p>

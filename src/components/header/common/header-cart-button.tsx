@@ -15,9 +15,10 @@ import { formatCurrency } from '@/lib/utils';
 
 interface HeaderCartButtonProps {
   initialCart?: Cart | null;
+  showSum?: boolean;
 }
 
-export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps) {
+export default function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
   const t = useTranslations('cart');
   const { l10n } = useL10n();
   const router = useRouter();
@@ -39,9 +40,11 @@ export default function HeaderCartButton({ initialCart }: HeaderCartButtonProps)
     <Popover open={isOpen}>
       <PopoverTrigger asChild>
         <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center" onClick={onOpen}>
-          <span className="text-white text-xl hidden md:inline-block">
-            {loading ? '' : formatCurrency(cartTotal, currency)}
-          </span>
+          {showSum && (
+            <span className="text-white text-xl hidden md:inline-block">
+              {loading ? '' : formatCurrency(cartTotal, currency)}
+            </span>
+          )}
           <div className="flex items-center w-[43px] h-[35px] relative">
             <Badge
               variant="white"
