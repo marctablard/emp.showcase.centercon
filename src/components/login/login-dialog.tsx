@@ -64,6 +64,7 @@ export default function LoginDialog({
       const titleMessage = t('welcomeMessage', { username: values.username });
       notify({
         title: titleMessage,
+        duration: 3000,
         type: ToastType.Success,
         button: {
           label: t('close'),

@@ -25,6 +25,7 @@ export interface ToastProps {
 export interface NotificationProps {
   id: string | number;
   title: string;
+  duration?: number;
   button: {
     label: string;
     onClick: () => void;
@@ -60,6 +61,7 @@ function notify(toast: Omit<NotificationProps, 'id'>) {
       <Notification
         id={id}
         title={toast.title}
+        duration={toast.duration || 5000}
         button={{
           label: toast.button.label,
           onClick: toast.button.onClick,
@@ -69,7 +71,7 @@ function notify(toast: Omit<NotificationProps, 'id'>) {
     ),
     {
       position: 'top-center',
-      duration: 40000,
+      duration: 10000,
       className: 'w-full mt-17 md:mt-30 lg:mt-44 md:[&>div]:mx-4 lg:[&>div]:mx-9',
     },
   );
