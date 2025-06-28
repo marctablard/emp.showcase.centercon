@@ -84,14 +84,14 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
         )}
       </div>
       <div>
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium">{t('yourPrice')}</span>
-          <div>
-            {price.originalValue && price.originalValue > price.effectiveValue && (
+        {price.originalValue && price.originalValue > price.effectiveValue && (
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium">{t('listPrice')}</span>
+            <div>
               <div className="text-neutral-600 line-through">{formatCurrency(price.originalValue, price.currency)}</div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Wait for a proper styling for List Prices

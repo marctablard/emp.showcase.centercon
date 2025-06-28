@@ -13,8 +13,8 @@ export interface PriceService {
    */
   getProductPrice(
     productId: string,
-    unitCode?: string,
     quantity?: number,
+    unitCode?: string,
     params?: { currency?: string; country?: string; siteCode?: string },
   ): Promise<ProductPrice | null>;
 }

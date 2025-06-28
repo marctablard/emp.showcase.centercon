@@ -51,6 +51,7 @@
         },
         "price": {
             "yourPrice": "Ihr Preis",
+            "listPrice": "Listenpreis",
             "including": "inkl",
             "notAvailable": "N/V",
             "includingTax": "inkl. {taxRate}% MwSt",
@@ -254,7 +255,9 @@
         "addressInfo": "Adressinformationen",
         "addressDetails": "Bitte geben Sie Ihre Adressdaten an",
         "companyName": "Firmenname",
-        "businessType": "Unternehmensart",
+        "businessType": "Registrierung",
+        "businessTypeB2B": "Geschäftlich",
+        "businessTypeB2C": "Privat",
         "street": "Straße",
         "houseNumber": "Hausnummer",
         "postalCode": "Postleitzahl",

@@ -1,33 +1,89 @@
+import React from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { formatCurrency, l10n } from '@/lib/utils';
 import { Product } from '@/platform/services/model/product';
-import MarkedText from '../header/common/search/marked-text';
 
 interface ProductTileProps {
   product: Product;
   className?: string;
   locale?: string;
+  onProductClick?: () => void;
+  keyword?: string;
 }
 
 // Helper function to capitalize words and format text
-const formatAttributeKey = (text: string): string => {
-  return text
-    .replace(/-/g, ' ')
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+const formatAttributeKey = (key: string) => {
+  return key
+    .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
+    .replace(/^./, (str) => str.toUpperCase()) // Uppercase first letter
+    .trim();
+};
+
+// Helper function to mark text without creating a p element
+const markText = (text: string, keyword?: string): React.ReactNode => {
+  if (!keyword || !text) return text;
+
+  // Check if the text contains HTML tags like <mark>
+  if (text.includes('<mark>')) {
+    // Extract content between <mark> tags and make it bold
+    const parts = text.split(/<\/?mark>/g);
+    return parts.map((part, index) => {
+      // Every odd index is content that was between <mark> tags
+      if (index % 2 === 1) {
+        return (
+          <span key={index} className="font-bold">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  }
+
+  // Regular search keyword highlighting
+  try {
+    // Escape special regex characters in the keyword
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedKeyword.trim().split(' ').join('|')})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map((part, index) => {
+      if (
+        part.toLowerCase() === keyword.toLowerCase() ||
+        keyword
+          .toLowerCase()
+          .split(' ')
+          .some((word) => part.toLowerCase() === word)
+      ) {
+        return (
+          <span key={index} className="font-bold">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  } catch (_e) {
+    // Fallback in case of regex error
+    return text;
+  }
 };
 
 // Helper function to render product attributes
-const renderAttributes = (attributes: Record<string, string>, maxItems?: number, isBold?: boolean) => {
+const renderAttributes = (
+  attributes: Record<string, string>,
+  maxItems?: number,
+  isBold?: boolean,
+  keyword?: string,
+) => {
   const entries = Object.entries(attributes);
 
   const limitedEntries = maxItems ? entries.slice(0, maxItems) : entries;
 
   return limitedEntries.map(([key, value]) => (
     <p key={key} className={`text-sm ${isBold ? 'font-bold' : ''}`}>
-      {formatAttributeKey(key)}: {value}
+      {formatAttributeKey(key)}: {markText(value, keyword)}
     </p>
   ));
 };
@@ -50,10 +106,10 @@ const extractDimensions = (attributes: Record<string, string>) => {
   return null;
 };
 
-export function ProductTileFlyOut({ product, locale = 'de' }: ProductTileProps) {
+export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyword }: ProductTileProps) {
   const [image] = product.images || [];
   return (
-    <Link href={`/product/${product.id}`}>
+    <Link href={`/product/${product.id}`} onClick={onProductClick}>
       <div className="flex">
         {product.images && (
           <div className="mr-3 bg-gray-100 w-[100px] h-[144px] rounded-tl-md rounded-br-md flex align-center justify-center">
@@ -69,8 +125,8 @@ export function ProductTileFlyOut({ product, locale = 'de' }: ProductTileProps) 
           </div>
         )}
         <div id="details text-md">
-          <p>{l10n(product.brand?.name ?? '', locale)}</p>
-          <MarkedText className="text-md" text={l10n(product.name, locale)} />
+          <p>{markText(l10n(product.brand?.name ?? '', locale), keyword)}</p>
+          <p className="text-md">{markText(l10n(product.name, locale), keyword)}</p>
           <p className="text-sm font-bold">
             {product.price && formatCurrency(product.price.amount, product.price.currency)}
           </p>
@@ -98,12 +154,13 @@ export function ProductTileFlyOut({ product, locale = 'de' }: ProductTileProps) 
 
             return (
               <>
-                {variantAttributes && renderAttributes(variantAttributes, Math.min(maxTotalAttributes, variantCount))}
-                {dimensionsLine && <p className="text-sm">{dimensionsLine}</p>}
+                {variantAttributes &&
+                  renderAttributes(variantAttributes, Math.min(maxTotalAttributes, variantCount), false, keyword)}
+                {dimensionsLine && <p className="text-sm">{markText(dimensionsLine, keyword)}</p>}
                 {filteredTemplateAttributes &&
                   Object.keys(filteredTemplateAttributes).length > 0 &&
                   templateCount > 0 &&
-                  renderAttributes(filteredTemplateAttributes, templateCount)}
+                  renderAttributes(filteredTemplateAttributes, templateCount, false, keyword)}
               </>
             );
           })()}

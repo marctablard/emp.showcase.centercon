@@ -14,6 +14,7 @@ export function Notification() {
   const { start: startCompany, stop: stopCompany } = usePolling(() => {
     refreshCompany();
   }, 10000);
+
   useEffect(() => {
     if (company) {
       const status: 'approved' | 'pending' | 'rejected' = company.onboarding?.status || 'pending';
@@ -53,5 +54,6 @@ export function Notification() {
       };
     }
   }, [company, startCompany, stopCompany, addNotification, hasNotification, t]);
+
   return <></>;
 }

@@ -68,7 +68,7 @@ export const useCheckout = (): UseCheckout => {
   const { cart: checkoutCart, updateShippingInfo, clearCart } = useCart();
   const { customer } = useCustomer();
   const { getDefaultAddress, loading: addressesLoading } = useAddresses();
-  const [loading, setLoading] = useState<boolean>(addressesLoading);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [orderResponse, setOrderResponse] = useState<CheckoutResponse | null>(null);
   const {

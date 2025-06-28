@@ -27,16 +27,17 @@ export default function HeaderNavigation() {
           <NavigationMenuLink href="/services">{t('services')}</NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuTrigger>{t('solutions')}</NavigationMenuTrigger>
-          <NavigationMenuContent></NavigationMenuContent>
+          <NavigationMenuLink href="/solutions" className={navigationMenuTriggerStyle()}>
+            {t('solutions')}
+          </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink href="/#" className={navigationMenuTriggerStyle()}>
+          <NavigationMenuLink href="/online-planer" className={navigationMenuTriggerStyle()}>
             {t('onlinePlaner')}
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink href="/#" className={navigationMenuTriggerStyle()}>
+          <NavigationMenuLink href="/about-us" className={navigationMenuTriggerStyle()}>
             {t('aboutUs')}
           </NavigationMenuLink>
         </NavigationMenuItem>

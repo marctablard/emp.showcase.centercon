@@ -18,7 +18,7 @@ interface AccountDashboardProps {
 export default function AccountDashboard({ initialCustomer }: AccountDashboardProps) {
   const t = useTranslations('Account');
   const { setLayouts, getLayouts } = useConfigStore();
-  const { customer, loading: isCustomerLoading } = useCustomer(initialCustomer);
+  const { customer } = useCustomer(initialCustomer);
   const [isCustomizable, setIsCustomizable] = useState(false);
 
   const handleTicketSubmit = (data: SupportTicketData) => {
@@ -26,7 +26,7 @@ export default function AccountDashboard({ initialCustomer }: AccountDashboardPr
     // Hier kann später die API-Integration erfolgen
   };
 
-  if (isCustomerLoading || !customer) {
+  if (!customer) {
     return <div className="flex justify-center items-center h-full">{t('loading')}</div>;
   }
   return (

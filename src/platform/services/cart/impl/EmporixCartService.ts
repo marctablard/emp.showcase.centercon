@@ -91,7 +91,7 @@ class EmporixCartService implements CartService {
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<string> {
     const [product, price, session] = await Promise.all([
       this.productService.getProductById(productId),
-      this.priceService.getProductPrice(productId, 'pc', quantity),
+      this.priceService.getProductPrice(productId, quantity),
       this.sessionService.getCurrent(),
     ]);
     if (!product) {
@@ -133,7 +133,7 @@ class EmporixCartService implements CartService {
     if (!cartItem || !cartItem.product?.id) {
       throw new Error('Cart item not found');
     }
-    const price = await this.priceService.getProductPrice(cartItem.product?.id, 'pc', quantity);
+    const price = await this.priceService.getProductPrice(cartItem.product?.id, quantity);
     if (!price) {
       throw new Error('Price missing');
     }
