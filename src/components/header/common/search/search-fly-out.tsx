@@ -49,7 +49,13 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
                 {isProductsShown ? t('suggestedProducts') : t('lastSeenProducts')}
               </Headline>
               {productsShow.map((product) => (
-                <ProductTileFlyOut key={product.id} locale={locale} product={product} onProductClick={onProductClick} />
+                <ProductTileFlyOut
+                  key={product.id}
+                  locale={locale}
+                  product={product}
+                  onProductClick={onProductClick}
+                  keyword={isProductsShown ? query : undefined}
+                />
               ))}
             </>
           ) : (
