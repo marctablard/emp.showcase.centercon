@@ -7,16 +7,27 @@ export interface QueryCompletionsProps {
   isProductsShown: boolean;
   queryCompletions: string[];
   setQuery: Dispatch<SetStateAction<string>>;
+  onQuerySelect?: (query: string) => void;
 }
 
-export function QueryCompletions({ isProductsShown, queryCompletions, setQuery }: QueryCompletionsProps) {
+export function QueryCompletions({
+  isProductsShown,
+  queryCompletions,
+  setQuery,
+  onQuerySelect,
+}: QueryCompletionsProps) {
   const { searchHistory } = useHistory();
   const completions = isProductsShown ? queryCompletions : searchHistory;
   return (
     <div id="query-completions" className="col-span-5">
       {completions.map((queryCompletion) => (
         <Button
-          onClick={() => setQuery(queryCompletion)}
+          onClick={() => {
+            setQuery(queryCompletion);
+            if (onQuerySelect) {
+              onQuerySelect(queryCompletion);
+            }
+          }}
           key={queryCompletion}
           className="p-2 bg-gray-300 rounded-xs mr-6 mb-6"
         >

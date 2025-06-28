@@ -81,6 +81,8 @@ function RichTextNode(node: StoryblokRichTextNode): React.ReactNode {
           {node.content?.map((item, itemIndex) => <RichTextNode key={itemIndex} {...item} />)}
         </li>
       );
+    case BlockTypes.BR:
+      return <br />;
     default:
     case TextTypes.TEXT:
       return <>{node.text || ''}</>;

@@ -8,6 +8,7 @@ interface ProductTileProps {
   product: Product;
   className?: string;
   locale?: string;
+  onProductClick?: () => void;
 }
 
 // Helper function to capitalize words and format text
@@ -50,10 +51,10 @@ const extractDimensions = (attributes: Record<string, string>) => {
   return null;
 };
 
-export function ProductTileFlyOut({ product, locale = 'de' }: ProductTileProps) {
+export function ProductTileFlyOut({ product, locale = 'de', onProductClick }: ProductTileProps) {
   const [image] = product.images || [];
   return (
-    <Link href={`/product/${product.id}`}>
+    <Link href={`/product/${product.id}`} onClick={onProductClick}>
       <div className="flex">
         {product.images && (
           <div className="mr-3 bg-gray-100 w-[100px] h-[144px] rounded-tl-md rounded-br-md flex align-center justify-center">
