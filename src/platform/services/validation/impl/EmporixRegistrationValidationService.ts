@@ -9,14 +9,14 @@ export const RegistrationSchema = z
     lastName: z.string().min(1, 'register.lastName.required'),
     email: z.string().min(1, 'register.email.required').email('register.email.invalid'),
     emailConfirmation: z.string().min(1, 'register.emailConfirmation.required'),
-    companyName: z.string().min(1, 'register.companyName.required'),
+    companyName: z.string().optional(),
     businessType: z.string().optional(),
     street: z.string().min(1, 'register.street.required'),
     houseNumber: z.string().min(1, 'register.houseNumber.required'),
     postalCode: z.string().min(1, 'register.postalCode.required'),
     city: z.string().min(1, 'register.city.required'),
     country: z.string().min(1, 'register.country.required'),
-    vatNumber: z.string().min(1, 'register.vatNumber.required'),
+    vatNumber: z.string().optional(),
     shippingSameAsBilling: z.boolean(),
     password: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
     passwordConfirmation: z.string().min(1, 'register.passwordConfirmation.required'),
@@ -31,7 +31,16 @@ export const RegistrationSchema = z
   .refine((data) => data.password === data.passwordConfirmation, {
     message: 'register.password.mismatch',
     path: ['passwordConfirmation'],
-  });
+  })
+  .refine(
+    (data) => {
+      return data.businessType == 'B2C' || (data.companyName && data.companyName.length > 0);
+    },
+    {
+      message: 'register.companyName.required',
+      path: ['companyName'],
+    },
+  );
 
 // Export type for the registration data
 export type RegistrationData = z.infer<typeof RegistrationSchema>;

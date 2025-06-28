@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { H4, H5 } from '@/components/ui/h';
@@ -19,7 +19,6 @@ import { RegistrationInfoSection } from './registration-info-section';
 
 export default function Registration() {
   const t = useTranslations('register');
-  const router = useRouter();
   const { register, loading, error } = useRegistration();
   const [formError, setFormError] = useState<string | null>(null);
   const top = useRef<HTMLDivElement>(null);
@@ -88,7 +87,12 @@ export default function Registration() {
 
       if (result.success) {
         // Redirect to login page or show a success message
-        router.push('/login');
+        const response = await signIn('credentials', {
+          username: values.email,
+          password: values.password,
+          redirect: true,
+        });
+        console.log(response);
       } else if (result.error) {
         // Handle specific error types
         // Todo: Check below cases if they exist

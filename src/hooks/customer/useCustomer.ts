@@ -18,7 +18,7 @@ interface CustomerHook {
  */
 export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => {
   const { customer, loading, getLoading, setLoading, setCustomer, getCustomer } = useCustomerStore();
-  if (initialCustomer && getCustomer() === undefined) {
+  if (initialCustomer && !getCustomer()) {
     setCustomer(initialCustomer);
   }
   const [error, setError] = useState<Error | null>(null);

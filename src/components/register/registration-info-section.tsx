@@ -6,6 +6,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { H5 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 interface RegistrationInfoAccordionProps {
   control: Control<any>;
@@ -71,6 +72,36 @@ export function RegistrationInfoSection({ control, number }: RegistrationInfoAcc
               <FormLabel htmlFor="emailConfirmation">{t('emailConfirmation')}</FormLabel>
               <FormControl>
                 <Input id="emailConfirmation" type="email" required {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="businessType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="businessType">{t('businessType')}</FormLabel>
+              <FormControl>
+                <RadioGroup id="businessType" className="flex my-4" value={field.value} onValueChange={field.onChange}>
+                  <FormItem className="flex">
+                    <FormControl>
+                      <RadioGroupItem value="B2B" id="B2B" />
+                    </FormControl>
+                    <FormLabel className="w-full ml-2" htmlFor="B2B">
+                      {t('businessTypeB2B')}
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex">
+                    <FormControl>
+                      <RadioGroupItem value="B2C" id="B2C" />
+                    </FormControl>
+                    <FormLabel className="w-full" htmlFor="B2C">
+                      {t('businessTypeB2C')}
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>

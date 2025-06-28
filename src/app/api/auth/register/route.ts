@@ -1,4 +1,3 @@
-import { signIn } from 'next-auth/react';
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '@/platform/services/auth/AuthService';
 import { Registration } from '@/platform/services/model/auth/auth';
@@ -25,15 +24,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: 'Failed to register customer' }, { status: 401 });
     }
-    const signInResponse = await signIn('credentials', {
-      username: registrationData.credentials?.username,
-      password: registrationData.credentials?.password,
-      redirect: true,
-    });
-    if (!signInResponse || !signInResponse.url) {
-      return NextResponse.json({ error: 'Failed to sign in' }, { status: 401 });
-    }
-    return NextResponse.redirect(signInResponse.url);
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     console.error('Registration error:', error);
 
@@ -42,7 +33,11 @@ export async function POST(request: NextRequest) {
     let message = 'An unexpected error occurred during registration';
 
     if (error instanceof Error) {
-      if (error.message.includes('already exists') || error.message.includes('already registered')) {
+      if (
+        error.message.includes('already exists') ||
+        error.message.includes('already registered') ||
+        error.message.includes('conflict_resource')
+      ) {
         status = 409; // Conflict
         message = error.message;
       } else if (error.message.includes('validation')) {
