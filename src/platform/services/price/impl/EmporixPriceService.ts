@@ -23,8 +23,8 @@ class EmporixPriceService implements PriceService {
 
   async getProductPrice(
     productId: string,
-    unitCode?: string,
     quantity: number = 1,
+    unitCode?: string,
     params?: { currency?: string; country?: string; siteCode?: string },
   ): Promise<ProductPrice | null> {
     const items = [this.mapToMatchPriceItem(productId, quantity, unitCode)];
@@ -52,21 +52,24 @@ class EmporixPriceService implements PriceService {
   /**
    * Maps a product ID and quantity to a PriceMatchItem
    * @param productId The product ID
-   * @param unitCode The unit code
    * @param quantity The quantity information
+   * @param unitCode The unit code
    * @returns A PriceMatchItem
    */
   private mapToMatchPriceItem(productId: string, quantity: number, unitCode?: string): EmporixPriceMatchItem {
-    return {
+    const matchPrice: EmporixPriceMatchItem = {
       itemId: {
         itemType: 'PRODUCT',
         id: productId,
       },
       quantity: {
         quantity,
-        unitCode,
       },
     };
+    if (unitCode) {
+      matchPrice.quantity.unitCode = unitCode;
+    }
+    return matchPrice;
   }
 }
 

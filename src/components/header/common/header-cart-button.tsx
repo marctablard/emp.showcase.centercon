@@ -59,7 +59,8 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
         setCartUpdate(undefined);
       }
     }
-  }, [isOpen, addNotification, cart, cartUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, addNotification]);
 
   return (
     <Popover open={isOpen}>

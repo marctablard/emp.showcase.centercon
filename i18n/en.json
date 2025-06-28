@@ -51,6 +51,7 @@
         },
         "price": {
             "yourPrice": "Your Price",
+            "listPrice": "Listpreis",
             "including": "incl",
             "notAvailable": "N/A",
             "includingTax": "incl. {taxRate}% VAT",
