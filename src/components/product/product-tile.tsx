@@ -100,7 +100,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <span className="text-neutral-400">No image</span>
+                  <Image src={'/images/no_image_alt.png'} alt={l10n(product.name)} width={220} height={220} />
                 </div>
               )}
             </div>
@@ -154,14 +154,14 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
             <div className="flex gap-2 text-success-500 text-sm items-center">
               {/* Todo: read availability from product */}
               <Truck />
-              <p>Online Available</p>
+              <p>{t('shipping.onlineAvailable')}</p>
             </div>
             <div className="flex gap-2 text-success-500 text-sm items-center">
               {/* Todo: read pickup availability from product */}
               <MapPin />
-              <p>Can be reserved London, NW1 6XE</p>
+              <p>{t('shipping.canBeReservedExample')}</p>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-end">
               <div className="flex flex-col gap-1">
                 {product.price ? (
                   product.price.originalAmount && product.price.originalAmount !== product.price.amount ? (
@@ -179,7 +179,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                     </p>
                   )
                 ) : (
-                  <p className="text-xl/5 font-bold">Price not available</p>
+                  <p className="text-xl/5 font-bold">{t('price.priceNotAvailable')}</p>
                 )}
               </div>
               <Button
