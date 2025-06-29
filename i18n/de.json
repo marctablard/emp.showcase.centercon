@@ -45,15 +45,18 @@
             "shipping": "Versand",
             "freeShipping": "Kostenloser Versand",
             "canBeReserved": "Kann reserviert werden in {location}, {postalCode}",
+            "canBeReservedExample": "Kann reserviert werden in London, NW1 6XE",
             "yourUsps": "Ihre Emporix Vorteile",
             "warranty": "{years} Jahre Garantie",
-            "returnRight": "{days} Tage Rückgaberecht"
+            "returnRight": "{days} Tage Rückgaberecht",
+            "onlineAvailable": "Online Verfügbar"
         },
         "price": {
             "yourPrice": "Ihr Preis",
             "listPrice": "Listenpreis",
             "including": "inkl",
             "notAvailable": "N/V",
+            "priceNotAvailable": "Preis nicht verfügbar",
             "includingTax": "inkl. {taxRate}% MwSt",
             "excludingTax": "exkl. {taxRate}% MwSt",
             "net": "netto",
@@ -104,7 +107,7 @@
         "contact": "Kontakt",
         "quickOrder": "Quick Order",
         "wishlists": "Wunschlisten",
-        "allProducts": "Alle Produkte",
+        "allProducts": "Ausgewählte Produkte",
         "products": "Produkte",
         "services": "Services",
         "solutions": "Lösungen",
@@ -215,6 +218,7 @@
         "cartEmpty": "Oh nein, Ihr Warenkorb ist gerade leer!",
         "cartEmptyText": "Produkte hinzufügen oder anmelden, um einen gespeicherten Warenkorb zu laden.",
         "cartEmptyLogin": "Anmelden",
+        "cartEmptyLinkText": "Jetzt Einkaufen",
         "selectShippingAddress": "Lieferadresse auswählen"
     },
     "Notification": {

@@ -108,12 +108,13 @@ const extractDimensions = (attributes: Record<string, string>) => {
 
 export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyword }: ProductTileProps) {
   const [image] = product.images || [];
+  const clickable_id = product.id.replaceAll(/<\/?mark>/g, '');
   return (
-    <Link href={`/product/${product.id}`} onClick={onProductClick}>
+    <Link href={`/product/${clickable_id}`} onClick={onProductClick}>
       <div className="flex">
         {product.images && (
           <div className="mr-3 bg-gray-100 w-[100px] h-[144px] rounded-tl-md rounded-br-md flex align-center justify-center">
-            {image && (
+            {image ? (
               <Image
                 className="object-contain"
                 src={image?.url}
@@ -121,6 +122,16 @@ export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyw
                 width={90}
                 alt={l10n(image?.altText || '', locale) || ''}
               />
+            ) : (
+              <div className="w-[100px] h-[144px] bg-gray-100 rounded-tl-md rounded-br-md flex align-center justify-center">
+                <Image
+                  className="object-contain"
+                  src={'/images/no_image_alt.png'}
+                  height={90}
+                  width={90}
+                  alt={l10n(product.name, locale) || ''}
+                />
+              </div>
             )}
           </div>
         )}

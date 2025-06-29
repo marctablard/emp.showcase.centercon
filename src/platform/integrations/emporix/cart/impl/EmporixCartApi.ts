@@ -50,9 +50,7 @@ class EmporixCartApi implements CartApi {
     // TODO needs to be removed when Mixin Bug is done
     await this.updateCart(createdCart.cartId, {
       mixins: {
-        processupdate: {
-          latestupdate: new Date().toISOString(),
-        },
+        processupdate: {},
       },
       metadata: {
         mixins: {

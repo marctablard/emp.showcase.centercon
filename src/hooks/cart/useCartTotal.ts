@@ -13,7 +13,7 @@ interface UseCartTotal {
 export const useCartTotal = (): UseCartTotal => {
   const { shippingMethod } = useCheckout();
   const { cart } = useCart();
-  const [cartTotal, setCartTotal] = useState(() => cart?.totalPrice.amount || 0);
+  const [cartTotal, setCartTotal] = useState(() => cart?.totalPrice?.amount || 0.0);
 
   useEffect(() => {
     let totalSum = 0.0;

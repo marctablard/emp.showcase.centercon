@@ -1,17 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { H4, H5 } from '@/components/ui/h';
+import { H1, H5 } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
+import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useRegistration } from '@/hooks/registration/useRegistration';
 import useCurrency from '@/hooks/useCurrency';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { RegistrationData } from '@/platform/services/validation/impl/EmporixRegistrationValidationService';
 import LoginDialog from '../login/login-dialog';
+import { Spinner } from '../ui/spinner';
 import { AccountSettingsSection } from './account-settings-section';
 import { AddressInfoSection } from './address-info-section';
 import { EmailSignupSection } from './email-signup-section';
@@ -19,6 +20,8 @@ import { RegistrationInfoSection } from './registration-info-section';
 
 export default function Registration() {
   const t = useTranslations('register');
+
+  const { loading: loginLoading, login } = useAuthentication();
   const { register, loading, error } = useRegistration();
   const [formError, setFormError] = useState<string | null>(null);
   const top = useRef<HTMLDivElement>(null);
@@ -87,12 +90,7 @@ export default function Registration() {
 
       if (result.success) {
         // Redirect to login page or show a success message
-        const response = await signIn('credentials', {
-          username: values.email,
-          password: values.password,
-          redirect: true,
-        });
-        console.log(response);
+        await login(values.email, values.password);
       } else if (result.error) {
         // Handle specific error types
         // Todo: Check below cases if they exist
@@ -116,10 +114,22 @@ export default function Registration() {
     }
   }
 
+  if (loading || loginLoading) {
+    return (
+      <div className="mx-4 xl:mx-9">
+        <div className="flex gap-3 align-end mb-8">
+          <H1 variant="h4">{t('title')}</H1>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12">
+          <Spinner variant="lg" />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="w-full max-w-228 px-6 pb-32 pt-6 md:pt-0 flex flex-col gap-8" ref={top}>
       <div className="flex flex-col gap-2">
-        <H4>{t('title')}</H4>
+        <H1 variant="h4">{t('title')}</H1>
         <p>
           {t('alreadyHaveAccount')}{' '}
           <LoginDialog redirectAfterLogin={true} trigger={<UiLink type="Button">{t('logIn')}</UiLink>} />

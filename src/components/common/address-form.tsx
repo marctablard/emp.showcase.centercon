@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useSite } from '@/hooks/site/useSite';
@@ -41,6 +42,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
     'onBlur',
     onDataChange,
   );
+  useEffect(() => {
+    if (initialData) {
+      form.reset({ ...emptyAddress, ...initialData });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData]);
   const { countries, loading } = useSite();
 
   return (

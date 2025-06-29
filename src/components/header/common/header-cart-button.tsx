@@ -44,7 +44,7 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
   };
 
   useEffect(() => {
-    if (cart && cart.processUpdate) {
+    if (cart && cart.processUpdate && cart.processUpdate.itemId) {
       if (!hasNotification(buildCartUpdateKey(cart, cart.processUpdate))) {
         setCartUpdate(cart.processUpdate);
       }
@@ -68,7 +68,7 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
         <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center" onClick={onOpen}>
           {showSum && (
             <span className="text-white text-xl hidden md:inline-block">
-              {!cartTotal ? '' : formatCurrency(cartTotal, currency)}
+              {formatCurrency(cartTotal || 0.0, currency)}
             </span>
           )}
           <div className="flex items-center w-[43px] h-[35px] relative">

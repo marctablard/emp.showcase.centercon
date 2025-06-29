@@ -55,7 +55,7 @@ export function buildSearchQuery<T>(params: SearchParams<T>): { body: string; qu
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
-  return new Intl.NumberFormat('en', {
+  return new Intl.NumberFormat('de', {
     style: 'currency',
     currency: currencyCode,
     minimumFractionDigits: 2,

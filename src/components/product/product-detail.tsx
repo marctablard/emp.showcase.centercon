@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { CheckCircle2, FlipHorizontal, LucideArrowDown, LucideCopy, Pin, Share2, Sun } from 'lucide-react';
@@ -34,15 +34,16 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   const t = useTranslations('product');
   const currentLocale = useLocale();
 
+  useEffect(() => {
+    // set as current Product, when we display the details
+    setAsCurrent();
+  }, [setAsCurrent]);
   if (loading) {
     return <div>Loading</div>;
   }
   if (!product) {
     return <div>Product not found</div>;
   }
-  // set as current Product, when we display the details
-  setAsCurrent();
-
   return (
     <>
       <div
@@ -60,7 +61,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                   <ProductCarousel images={product.images} />
                 ) : (
                   <div className="bg-neutral-200 flex items-center justify-center">
-                    <span className="text-neutral-500">{t('noImage')}</span>
+                    <Image src={'/images/no_image_alt.png'} alt={l10n(product.name)} width={90} height={90} />
                   </div>
                 )}
               </div>
@@ -278,15 +279,13 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             <div className="col-start-1 md:row-start-1 lg:col-end-4 xl-col-end-5">
               {price && <ProductPriceComponent price={price} />}
             </div>
-            <ProductAddToCart product={product} className="mt-6" />
+            <ProductAddToCart product={product} price={price} className="mt-6" />
           </div>
           <ProductShippingInfo />
         </div>
 
         <div className="row-start-5 lg:col-start-2 lg:row-start-4">
-          <div className="text-lg text-neutral lg:mt-10">
-            <p dangerouslySetInnerHTML={{ __html: product.description }}></p>
-          </div>
+          <div className="text-lg text-neutral lg:mt-10" dangerouslySetInnerHTML={{ __html: product.description }} />
           {product.mixins.highlights.highlights && (
             <div className="mt-10">
               <H2 variant="h3" className="text-primary mb-8">
@@ -318,9 +317,9 @@ export default function ProductDetail({ product: initialProduct, price, classNam
         <div className={cn(className)}>
           <H3 className="my-6"> {t('technicalInformation')}</H3>
           <div className="grid grid-cols-1 gap-y-6 lg:gap-y-16 gap-x-6 lg:grid-cols-2 xl:grid-cols-4 mb-16">
-            {product.groupedSpecifications.map((spec: GroupedSpecification) => {
+            {product.groupedSpecifications.map((spec: GroupedSpecification, index) => {
               return (
-                <div className="flex flex-col" key={spec.groupName}>
+                <div className="flex flex-col" key={index}>
                   <p className="font-bold font-headlines font-sm p-4 border-b border-neutral-200">{spec.groupName}</p>
                   {spec.item.map((i) => (
                     <div className="font-sm p-4 border-b border-neutral-200 flex gap-4" key={i.label}>

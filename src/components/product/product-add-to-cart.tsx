@@ -9,14 +9,17 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/cart/useCart';
 import { useProduct } from '@/hooks/product/useProduct';
 import { cn } from '@/lib/utils';
+import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
 
 // Client component that uses the product signal
 export default function ProductAddToCart({
   product: initialProduct,
+  price,
   className,
 }: {
   product?: Product;
+  price?: ProductPrice | null;
   className?: string;
 }) {
   const t = useTranslations('product');
@@ -122,7 +125,7 @@ export default function ProductAddToCart({
         <Button
           className="flex-1 w-full mt-4 md:mt-0"
           onClick={handleAddToCart}
-          disabled={cart === undefined || adding}
+          disabled={cart === undefined || adding || !price}
         >
           <LucideShoppingCart />
           {t('addToCart')}
