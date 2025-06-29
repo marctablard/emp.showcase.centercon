@@ -256,6 +256,7 @@ export const useCheckout = (): UseCheckout => {
       }
       submitShippingMethod(newShippingMethod);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableShippingMethods, checkoutCart, submitShippingMethod]);
 
   useEffect(() => {
@@ -269,6 +270,7 @@ export const useCheckout = (): UseCheckout => {
       }
       submitPaymentMethod(newPaymentMethod);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentModes, checkoutCart, submitPaymentMethod]);
 
   useEffect(() => {
