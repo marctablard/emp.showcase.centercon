@@ -44,7 +44,7 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
   };
 
   useEffect(() => {
-    if (cart && cart.processUpdate) {
+    if (cart && cart.processUpdate && cart.processUpdate.itemId) {
       if (!hasNotification(buildCartUpdateKey(cart, cart.processUpdate))) {
         setCartUpdate(cart.processUpdate);
       }
