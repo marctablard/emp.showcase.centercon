@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Info } from 'lucide-react';
@@ -35,11 +35,6 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false, var
     }
   });
   const t = useTranslations('Checkout.shipping');
-  useEffect(() => {
-    if (!shippingMethods || !shippingMethods.find((option) => option.id === shippingMethod?.methodId)) {
-      form.reset();
-    }
-  }, [shippingMethods, shippingMethod, form]);
   return (
     <FormProvider {...form}>
       <div className="bg-white">

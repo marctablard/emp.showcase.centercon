@@ -26,16 +26,11 @@ interface CustomerAddressesHook {
  * @returns Customer data and state
  */
 export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): CustomerAddressesHook => {
-  const {
-    addresses: storeAddresses,
-    loading,
-    getAddressLoading,
-    setAddressLoading,
-    setAddresses: setStoreAddresses,
-    getAddresses,
-  } = useCustomerStore();
+  const { addresses, loading, getAddressLoading, setAddressLoading, setAddresses, getAddresses } = useCustomerStore();
   const { customer } = useCustomer();
-  const [addresses, setAddresses] = useState<CustomerAddress[] | undefined>(initialAddresses || storeAddresses);
+  if (initialAddresses && getAddresses() === undefined) {
+    setAddresses(initialAddresses);
+  }
   const [error, setError] = useState<Error | null>(null);
 
   const fetchAddresses = useCallback(async () => {
@@ -43,7 +38,6 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
       setAddressLoading(true);
       setError(null);
       const addressData = await fetchCustomerAddresses();
-      setStoreAddresses(addressData);
       setAddresses(addressData);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch addresses'));
@@ -51,7 +45,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
     } finally {
       setAddressLoading(false);
     }
-  }, [setAddressLoading, setStoreAddresses]);
+  }, [setAddressLoading, setAddresses]);
 
   /**
    * Get default address of specified type
@@ -86,7 +80,6 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
         // Update the addresses list
         const updatedAddresses = addresses ? [...addresses, newAddress] : [newAddress];
         setAddresses(updatedAddresses);
-        setStoreAddresses(updatedAddresses);
         return newAddress;
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to create address');
@@ -97,7 +90,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
         setAddressLoading(false);
       }
     },
-    [addresses, setAddressLoading, setStoreAddresses],
+    [addresses, setAddressLoading, setAddresses],
   );
 
   // Update an existing address
@@ -110,7 +103,6 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
         // Update the addresses list
         const updatedAddresses = addresses?.map((addr) => (addr.id === id ? updatedAddress : addr));
         setAddresses(updatedAddresses);
-        setStoreAddresses(updatedAddresses);
         return updatedAddress;
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to update address');
@@ -121,7 +113,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
         setAddressLoading(false);
       }
     },
-    [addresses, setAddressLoading, setStoreAddresses],
+    [addresses, setAddressLoading, setAddresses],
   );
 
   // Delete an address
@@ -134,7 +126,6 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
         // Remove the address from the list
         const updatedAddresses = addresses?.filter((addr) => addr.id !== id);
         setAddresses(updatedAddresses);
-        setStoreAddresses(updatedAddresses);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to delete address');
         setError(error);
@@ -144,7 +135,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
         setAddressLoading(false);
       }
     },
-    [addresses, setAddressLoading, setStoreAddresses],
+    [addresses, setAddressLoading, setAddresses],
   );
 
   // Initialize customer on first render if not already initialized
@@ -160,7 +151,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
         fetchAddresses();
       }
     }
-  }, [customer, addresses, getAddresses, getAddressLoading, setAddressLoading, fetchAddresses]);
+  }, [customer, addresses, getAddresses, getAddressLoading, setAddressLoading, fetchAddresses, setAddresses]);
 
   return {
     addresses,

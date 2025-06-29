@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { isEqual, omit } from 'lodash';
 import AddressForm from '@/components/common/address-form';
 import { Address } from '@/platform/services/model/common';
@@ -29,6 +29,12 @@ const CheckoutAddress: React.FC<CheckoutAddressProps> = ({ address, isReadOnly =
   }, [address, sameAs]);
 
   const [isSame, setIsSame] = useState<boolean>(initialSameState);
+
+  useEffect(() => {
+    if (!sameAs || !address) return;
+    setIsSame(initialSameState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, sameAs]);
 
   const handleSameAddressToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;

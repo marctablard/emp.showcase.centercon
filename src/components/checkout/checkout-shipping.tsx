@@ -4,6 +4,7 @@ import { Check, NotebookText, Package, Pencil } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import { Address } from '@/platform/services/model/common';
+import { AddressSelector } from '../address/address-selector';
 import { AddressDisplay } from '../common/address-display';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader } from '../ui/card';
@@ -88,11 +89,19 @@ export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
             <div className="col-span-2 flex flex-col gap-4">
               {/* Addresses */}
               {addresses && addresses.length > 0 && (
-                <div className="flex gap-1 text-primary-500 font-bold mb-4 cursor-pointer">
-                  <p>{t('fromAddressbook')}</p>
-                  <NotebookText />
-                </div>
+                <AddressSelector
+                  addressType="SHIPPING"
+                  selectedAddressId={shippingAddress?.id}
+                  onSelect={handleShippingAddressChange}
+                  triggerElement={
+                    <div className="flex gap-1 text-primary-500 font-bold mb-4 cursor-pointer">
+                      <p>{t('fromAddressbook')}</p>
+                      <NotebookText />
+                    </div>
+                  }
+                />
               )}
+              {/* Address Input */}
               <CheckoutAddress
                 address={shippingAddress}
                 addressLabel={t('address')}

@@ -244,21 +244,26 @@ export const useCheckout = (): UseCheckout => {
   }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
 
   useEffect(() => {
-    if (!addressesLoading && !shippingAddress && !billingAddress) {
-      const billingAddress = getDefaultAddress('BILLING');
-      if (billingAddress) {
-        submitBillingAddress({
-          ...billingAddress,
-          type: 'BILLING',
-        });
+    if (!addressesLoading) {
+      if (!shippingAddress) {
+        const defaultShippingAddress = getDefaultAddress('SHIPPING');
+        if (defaultShippingAddress) {
+          submitShippingAddress({
+            ...defaultShippingAddress,
+            type: 'SHIPPING',
+          });
+        }
       }
-      const shippingAddress = getDefaultAddress('SHIPPING');
-      if (shippingAddress) {
-        submitShippingAddress({
-          ...shippingAddress,
-          type: 'SHIPPING',
-        });
+      if (!billingAddress) {
+        const defaultBillingAddress = getDefaultAddress('BILLING');
+        if (defaultBillingAddress) {
+          submitBillingAddress({
+            ...defaultBillingAddress,
+            type: 'BILLING',
+          });
+        }
       }
+      setLoading(false);
     }
   }, [
     addressesLoading,
@@ -267,6 +272,7 @@ export const useCheckout = (): UseCheckout => {
     getDefaultAddress,
     submitBillingAddress,
     submitShippingAddress,
+    setLoading,
   ]);
 
   return {
