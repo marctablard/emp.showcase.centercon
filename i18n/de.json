@@ -319,7 +319,7 @@
             "change": "Ändern",
             "paymentMethod": "Zahlungsmethode",
             "loading": "Zahlungsmethoden werden geladen...",
-            "fromAddressbook": "Select from Addressbook",
+            "fromAddressbook": "Aus dem Adressbuch wählen",
             "address": "Rechnungsadresse",
             "billingAddressSameAsShipping": "Die Rechnungsadresse ist gleich der Lieferadresse",
             "errorLoadingPaymentMethods": "Fehler beim Laden der Zahlungsmethoden. Bitte versuchen Sie es erneut.",

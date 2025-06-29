@@ -16,6 +16,7 @@ import { useCart } from '../cart/useCart';
 import { useAddresses } from '../customer/useAddresses';
 import useCustomer from '../customer/useCustomer';
 import { useShippingMethods } from '../shipping/useShippingMethods';
+import { useSite } from '../site/useSite';
 
 interface UseCheckout {
   // Status
@@ -77,6 +78,7 @@ export const useCheckout = (): UseCheckout => {
     fetchShippingMethods,
     loading: shippingMethodsLoading,
   } = useShippingMethods();
+  const { paymentModes } = useSite();
 
   const submitContactData = useCallback(
     (contactData: ContactData) => {
@@ -242,6 +244,32 @@ export const useCheckout = (): UseCheckout => {
       clearShippingMethods();
     }
   }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
+
+  useEffect(() => {
+    if (checkoutCart && availableShippingMethods.length > 0) {
+      let newShippingMethod: ShippingMethod | null = null;
+      if (shippingMethod) {
+        newShippingMethod = availableShippingMethods.find((method) => method.id === shippingMethod.methodId) || null;
+      }
+      if (!newShippingMethod) {
+        newShippingMethod = availableShippingMethods.sort((a, b) => (a.cost?.amount || 0) - (b.cost?.amount || 0))[0];
+      }
+      submitShippingMethod(newShippingMethod);
+    }
+  }, [availableShippingMethods, checkoutCart, submitShippingMethod]);
+
+  useEffect(() => {
+    if (checkoutCart && paymentModes && paymentModes.length > 0) {
+      let newPaymentMethod: CheckoutPaymentMethod | null = null;
+      if (paymentMethod) {
+        newPaymentMethod = paymentModes.find((method) => method.id === paymentMethod.id) || null;
+      }
+      if (!newPaymentMethod) {
+        newPaymentMethod = paymentModes[0];
+      }
+      submitPaymentMethod(newPaymentMethod);
+    }
+  }, [paymentModes, checkoutCart, submitPaymentMethod]);
 
   useEffect(() => {
     if (!addressesLoading) {
