@@ -408,6 +408,7 @@
         "title": "Order Confirmation",
         "description": "Thank you for your order",
         "orderConfirmed": "Order Confirmed!",
+        "waitingForApproval": "Your Order is waiting for Approval!",
         "thankYou": "Thank you for your purchase. Your order has been received.",
         "emailConfirmation": "A confirmation email has been sent to",
         "continueShopping": "Continue Shopping",

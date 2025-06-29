@@ -406,6 +406,7 @@
         "title": "Bestellbestätigung",
         "description": "Vielen Dank für Ihre Bestellung",
         "orderConfirmed": "Bestellung bestätigt!",
+        "waitingForApproval": "Ihre Bestellung muss noch bestätigt werden!",
         "thankYou": "Vielen Dank für Ihren Einkauf. Ihre Bestellung wurde entgegengenommen.",
         "emailConfirmation": "Eine Bestätigungs-E-Mail wurde gesendet an",
         "continueShopping": "Weiter einkaufen",

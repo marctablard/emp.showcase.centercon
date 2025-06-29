@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Check, Package, ReceiptText } from 'lucide-react';
+import { Check, ClockAlert, Package, ReceiptText } from 'lucide-react';
 import useCustomer from '@/hooks/customer/useCustomer';
 import { useOrder } from '@/hooks/order/useOrder';
 import { Link } from '@/i18n/navigation';
@@ -34,10 +34,21 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-success-100 rounded-full mb-4">
-          <Check className="h-8 w-8 text-success-600" />
-        </div>
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">{t('orderConfirmed')}</h1>
+        {orderId.startsWith('Approval') ? (
+          <>
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-warning-100 rounded-full mb-4">
+              <ClockAlert className="h-8 w-8 text-warning-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-neutral-900 mb-2">{t('waitingForApproval')}</h1>
+          </>
+        ) : (
+          <>
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-success-100 rounded-full mb-4">
+              <Check className="h-8 w-8 text-success-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-neutral-900 mb-2">{t('orderConfirmed')}</h1>
+          </>
+        )}
         <p className="text-lg text-neutral-600">{t('thankYou')}</p>
       </div>
 

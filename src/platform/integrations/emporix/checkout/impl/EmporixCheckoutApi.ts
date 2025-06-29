@@ -1,21 +1,30 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
+import type EmporixCartApi from '../../cart/impl/EmporixCartApi';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from '../../model/checkout';
+import {
+  EmporixCartCheckoutRequest,
+  EmporixCheckoutResponse,
+  EmporixQuoteCheckoutRequest,
+  ErrorMessage,
+} from '../../model/checkout';
 import type { CheckoutApi } from '../CheckoutApi';
 
 @injectable('EmporixCheckoutApi', 'Singleton')
 class EmporixCheckoutApi implements CheckoutApi {
   private apiClient: EmporixApiClient;
   private config: EmporixConfig;
+  private cartApi: EmporixCartApi;
 
   constructor(
     @inject('EmporixApiInvoker') apiClient: EmporixApiClient,
     @inject('EmporixConfig') config: EmporixConfig,
+    @inject('EmporixCartApi') cartApi: EmporixCartApi,
   ) {
     this.apiClient = apiClient;
     this.config = config;
+    this.cartApi = cartApi;
   }
 
   async checkout(request: EmporixCartCheckoutRequest): Promise<EmporixCheckoutResponse> {
@@ -36,8 +45,22 @@ class EmporixCheckoutApi implements CheckoutApi {
     );
 
     if (!response.ok) {
-      const errorDetails = await response.text();
-      throw new Error(`Failed to checkout: ${response.statusText} ${errorDetails}`);
+      const errorDetails = await response.json();
+      if (errorDetails.status === 401) {
+        if (
+          errorDetails.type === 'insufficient_credentials' &&
+          errorDetails.message === 'Customer needs an approval to create an order.'
+        ) {
+          // DELETE Cart because it's broken anyways
+          this.cartApi.deleteCart(request.cartId);
+          return {
+            orderId: 'Approval Required',
+            paymentDetails: null,
+            checkoutId: '',
+          };
+        }
+      }
+      throw new Error(`Failed to checkout: ${response.statusText} ${errorDetails.message}`);
     }
 
     return await response.json();
