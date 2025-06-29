@@ -71,7 +71,7 @@ function notify(toast: Omit<NotificationProps, 'id'>) {
     ),
     {
       position: 'top-center',
-      duration: 10000,
+      duration: toast.duration || 5000,
       className: 'w-full mt-17 md:mt-30 lg:mt-44 md:[&>div]:mx-4 lg:[&>div]:mx-9',
     },
   );
