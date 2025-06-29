@@ -10,6 +10,7 @@ interface CustomerHook {
   loading: boolean;
   error: Error | null;
   fetchCustomer: () => Promise<void>;
+  reset: () => void;
 }
 
 /**
@@ -17,7 +18,7 @@ interface CustomerHook {
  * @returns Customer data and state
  */
 export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => {
-  const { customer, loading, getLoading, setLoading, setCustomer, getCustomer } = useCustomerStore();
+  const { customer, loading, getLoading, setLoading, setCustomer, getCustomer, reset } = useCustomerStore();
   if (initialCustomer && getCustomer() === undefined) {
     setCustomer(initialCustomer);
   }
@@ -55,6 +56,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     loading,
     error,
     fetchCustomer,
+    reset,
   };
 };
 

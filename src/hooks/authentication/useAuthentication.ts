@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { SignInResponse } from 'next-auth/react';
 import { signIn, signOut, useSession } from 'next-auth/react';
+import useCustomer from '../customer/useCustomer';
 
 interface AuthenticationHook {
   isAuthenticated: boolean;
@@ -22,6 +23,7 @@ interface AuthenticationHook {
  * @returns Authentication state and functions
  */
 export const useAuthentication = (): AuthenticationHook => {
+  const { fetchCustomer } = useCustomer();
   const session = useSession({
     required: true,
     onUnauthenticated: () => {
@@ -49,12 +51,16 @@ export const useAuthentication = (): AuthenticationHook => {
   ): Promise<SignInResponse | undefined> => {
     setLoading(true);
     try {
-      return await signIn('credentials', {
+      const response = await signIn('credentials', {
         username,
         password,
         redirect,
         callbackUrl,
       });
+      if (response?.ok) {
+        await fetchCustomer();
+      }
+      return response;
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log in'));
       return {
@@ -70,7 +76,9 @@ export const useAuthentication = (): AuthenticationHook => {
 
   const logout = async (): Promise<void> => {
     try {
-      await signOut();
+      await signOut({
+        callbackUrl: '/',
+      });
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log out'));
     } finally {
