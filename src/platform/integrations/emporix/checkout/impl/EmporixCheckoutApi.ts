@@ -3,12 +3,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixCartApi from '../../cart/impl/EmporixCartApi';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import {
-  EmporixCartCheckoutRequest,
-  EmporixCheckoutResponse,
-  EmporixQuoteCheckoutRequest,
-  ErrorMessage,
-} from '../../model/checkout';
+import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from '../../model/checkout';
 import type { CheckoutApi } from '../CheckoutApi';
 
 @injectable('EmporixCheckoutApi', 'Singleton')
