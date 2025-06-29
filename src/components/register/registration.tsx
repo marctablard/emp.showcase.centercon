@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { H1, H4, H5 } from '@/components/ui/h';
+import { H1, H5 } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useRegistration } from '@/hooks/registration/useRegistration';

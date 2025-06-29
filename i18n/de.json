@@ -218,6 +218,7 @@
         "cartEmpty": "Oh nein, Ihr Warenkorb ist gerade leer!",
         "cartEmptyText": "Produkte hinzufügen oder anmelden, um einen gespeicherten Warenkorb zu laden.",
         "cartEmptyLogin": "Anmelden",
+        "cartEmptyLinkText": "Jetzt Einkaufen",
         "selectShippingAddress": "Lieferadresse auswählen"
     },
     "Notification": {
