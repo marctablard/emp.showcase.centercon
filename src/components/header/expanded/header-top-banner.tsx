@@ -30,11 +30,10 @@ export default function HeaderTopBanner() {
           </UiLink>
         </div>
         <div className="flex grow basis-0 shrink-0 justify-end items-center gap-6 text-nowrap">
-          {/* Todo: Links are missing */}
-          <Link href="/#">{t('blog')}</Link>
-          <Link href="/#">{t('newsletter')}</Link>
-          <Link href="/#">{t('offerRequest')}</Link>
-          <Link href="/#">{t('contact')}</Link>
+          <Link href="/blog">{t('blog')}</Link>
+          <Link href="/newsletter">{t('newsletter')}</Link>
+          <Link href="/offer-request">{t('offerRequest')}</Link>
+          <Link href="/contact">{t('contact')}</Link>
         </div>
       </div>
     </div>
