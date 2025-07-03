@@ -4,10 +4,10 @@ import { useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { Languages } from 'lucide-react';
-import { routing } from '@/app/i18n/routing';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { Spinner } from '@/components/ui/spinner';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { routing } from '@/i18n/routing';
 
 export function LanguageSwitcher() {
   const t = useTranslations('Languages');

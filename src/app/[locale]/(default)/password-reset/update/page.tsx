@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { redirect } from '@/app/i18n/navigation';
 import { PasswordUpdateForm } from '@/components/password/password-update-form';
+import { redirect } from '@/i18n/navigation';
 import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {

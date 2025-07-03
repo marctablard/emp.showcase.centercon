@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -43,27 +43,33 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
     return 'cart-' + cart.id + '-' + cartUpdate.itemId + '-' + cartUpdate.updatedAt;
   };
 
+  const handleOpen = useCallback(() => {
+    if (cart && cartUpdate) {
+      addNotification(buildCartUpdateKey(cart, cartUpdate));
+    }
+  }, [cart, cartUpdate, addNotification]);
+
+  const handleClose = useCallback(() => {
+    setCartUpdate(undefined);
+  }, []);
+
   useEffect(() => {
     if (cart && cart.processUpdate && cart.processUpdate.itemId) {
       if (!hasNotification(buildCartUpdateKey(cart, cart.processUpdate))) {
         setCartUpdate(cart.processUpdate);
       }
     }
-  }, [cart, hasNotification]);
-
-  useEffect(() => {
-    if (cart && cartUpdate) {
-      if (isOpen) {
-        addNotification(buildCartUpdateKey(cart, cartUpdate));
-      } else {
-        setCartUpdate(undefined);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, addNotification]);
+  }, [cart, setCartUpdate, hasNotification]);
 
   return (
-    <Popover open={isOpen}>
+    <Popover
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (open) handleOpen();
+        else handleClose();
+        setIsOpen(open);
+      }}
+    >
       <PopoverTrigger asChild>
         <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center" onClick={onOpen}>
           {showSum && (
