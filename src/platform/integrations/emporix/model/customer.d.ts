@@ -52,10 +52,10 @@ export interface EmporixCustomerAddress extends EmporixAddress {
 
 export interface EmporixB2Binfo {
   companyRegistrationId?: string;
-  legalEntities?: LegalEntity[];
+  legalEntities?: EmporixLegalEntity[];
 }
 
-export interface LegalEntity {
+export interface EmporixLegalEntity {
   id: string;
   name: string;
   contactAssignmentId: string;

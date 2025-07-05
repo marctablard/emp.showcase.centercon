@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
-import type { TokenManager } from '../../common/TokenManager';
+import type { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCustomer, EmporixCustomerAddress, EmporixSignupRequest } from '../../model/customer';
 import { EmporixSessionContext } from '../../model/session-context';
@@ -10,11 +10,10 @@ import { CustomerApi, PasswordChangeDto } from '../CustomerApi';
 @injectable('EmporixCustomerApi', 'Singleton')
 class EmporixCustomerApi implements CustomerApi {
   constructor(
-    @inject('EmporixTokenManager') private readonly tokenManager: TokenManager,
+    @inject('EmporixTokenManager') private readonly tokenManager: EmporixTokenManager,
     @inject('EmporixApiInvoker') private readonly apiInvoker: EmporixApiInvoker,
     @inject('EmporixConfig') private readonly config: EmporixConfig,
   ) {}
-
   async getCustomerProfile(expand?: string): Promise<EmporixCustomer> {
     const url = `customer/${this.config.tenant}/me${expand ? `?expand=${expand}` : ''}`;
 

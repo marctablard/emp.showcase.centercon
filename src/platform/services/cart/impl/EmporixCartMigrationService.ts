@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { CartApi } from '@/platform/integrations/emporix/cart/CartApi';
+import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
 import type { CartMigrationService } from '@/platform/services/cart/CartMigrationService';
 import { Cart } from '../../model/cart';
 
@@ -10,7 +10,7 @@ import { Cart } from '../../model/cart';
  */
 @injectable('CartMigrationService', 'Singleton')
 class EmporixCartMigrationService implements CartMigrationService {
-  constructor(@inject('EmporixCartApi') private cartApi: CartApi) {}
+  constructor(@inject('EmporixCartApi') private cartApi: EmporixCartApi) {}
 
   async migrateCartToCustomer(cartId: string, customerId: string): Promise<void> {
     try {

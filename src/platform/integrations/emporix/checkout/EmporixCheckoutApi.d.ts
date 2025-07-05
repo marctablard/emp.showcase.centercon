@@ -3,7 +3,7 @@ import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteChecko
 /**
  * Interface for Checkout API operations
  */
-export interface CheckoutApi {
+export interface EmporixCheckoutApi {
   /**
    * Trigger a checkout for a given cart
    * @param request Checkout request with cart details

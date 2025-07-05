@@ -6,7 +6,7 @@ import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
 import EmporixCustomerApi from '../../customer/impl/EmporixCustomerApi';
-import { AddCartItemRequest, CreateCartRequest } from '../../model';
+import { EmporixAddCartItemRequest, EmporixCreateCartRequest } from '../../model';
 import {
   EmporixCartCheckoutRequest,
   EmporixCheckoutAddress,
@@ -32,7 +32,7 @@ class TestEmporixConfig implements EmporixConfig {
 }
 
 // Sample cart creation request
-const sampleCreateCartRequest: CreateCartRequest = {
+const sampleCreateCartRequest: EmporixCreateCartRequest = {
   siteCode: 'main',
   currency: 'EUR',
   type: 'shopping',
@@ -44,7 +44,7 @@ const sampleCreateCartRequest: CreateCartRequest = {
 };
 
 // Sample cart item request
-const sampleAddItemRequest: AddCartItemRequest = {
+const sampleAddItemRequest: EmporixAddCartItemRequest = {
   siteCode: 'main',
   itemYrn: 'urn:yaas:saasag:caasproduct:product:showcasetest;1',
   quantity: 1,

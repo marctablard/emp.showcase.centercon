@@ -1,5 +1,5 @@
 import { Container } from 'inversify';
-import { TokenManager } from '../../common/TokenManager';
+import { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
@@ -36,14 +36,14 @@ describe('EmporixCustomerApi', () => {
   let customerApi: EmporixCustomerApi;
   let oauthApi: EmporixOAuthApi;
   let apiInvoker: EmporixApiInvoker;
-  let tokenManager: TokenManager;
+  let tokenManager: EmporixTokenManager;
 
   // Set up the DI container and create instances before all tests
   beforeAll(() => {
     // Create a new container for dependency injection
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').toConstantValue(new TestEmporixConfig());
-    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager).inSingletonScope();
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager).inSingletonScope();
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker).inSingletonScope();
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi).inSingletonScope();
     container.bind<EmporixCustomerApi>('EmporixCustomerApi').to(EmporixCustomerApi).inSingletonScope();
@@ -52,7 +52,7 @@ describe('EmporixCustomerApi', () => {
     customerApi = container.get<EmporixCustomerApi>('EmporixCustomerApi');
     oauthApi = container.get<EmporixOAuthApi>('EmporixOAuthApi');
     apiInvoker = container.get<EmporixApiInvoker>('EmporixApiInvoker');
-    tokenManager = container.get<TokenManager>('EmporixTokenManager');
+    tokenManager = container.get<EmporixTokenManager>('EmporixTokenManager');
 
     // Clear any existing tokens to ensure a fresh session
     tokenManager.clearTokens(tenant);
