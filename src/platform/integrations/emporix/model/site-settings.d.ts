@@ -1,4 +1,4 @@
-import { Metadata } from './common';
+import { EmporixMetadata } from './common';
 import { EmporixPaymentModeFrontend, EmporixPaymentSiteSetting } from './payment';
 
 export interface EmporixPaymentSiteSetting {
@@ -34,5 +34,5 @@ export interface EmporixSite {
   includesTax?: boolean;
   cartCalculationScale?: number;
   mixins?: Record<string, any>;
-  metadata?: Metadata;
+  metadata?: EmporixMetadata;
 }

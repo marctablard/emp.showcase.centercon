@@ -14,7 +14,7 @@ import {
   EmporixCheckoutPaymentMethod,
   EmporixShipping,
 } from '../../model/checkout';
-import { CreateOrderRequest, UpdateOrderRequest } from '../../model/order';
+import { EmporixCreateOrderRequest, EmporixUpdateOrderRequest } from '../../model/order';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixOrderApi from './EmporixOrderApi';
 
@@ -57,7 +57,7 @@ const sampleAddItemRequest: AddCartItemRequest = {
 };
 
 // Sample order creation request (will be populated with actual cart ID)
-const sampleCreateOrderRequest: CreateOrderRequest = {
+const sampleCreateOrderRequest: EmporixCreateOrderRequest = {
   cartId: '', // Will be populated during test
   customerEmail: 'test@example.com',
   customerNote: 'Test order note',
@@ -88,7 +88,7 @@ const sampleCreateOrderRequest: CreateOrderRequest = {
 };
 
 // Sample order update request
-const sampleUpdateOrderRequest: UpdateOrderRequest = {
+const sampleUpdateOrderRequest: EmporixUpdateOrderRequest = {
   status: 'CONFIRMED',
   customerNote: 'Updated order note',
 };

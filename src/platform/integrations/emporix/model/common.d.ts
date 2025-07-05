@@ -15,8 +15,8 @@ export interface EmporixAddress {
   contactPhone?: string;
   type?: string;
   tags: string[];
-  metadata?: Metadata;
-  mixins?: Mixins;
+  metadata?: EmporixMetadata;
+  mixins?: EmporixMixins;
   id?: string;
   isDefault?: boolean;
 }
@@ -25,7 +25,7 @@ export interface EmporixLocalizedString {
   [key: string]: string;
 }
 
-export interface SearchParams<T> {
+export interface EmporixSearchParams<T> {
   query?: string;
   page?: number;
   size?: number;
@@ -33,14 +33,14 @@ export interface SearchParams<T> {
   criteria?: Partial<T>;
 }
 
-export interface PaginatedResponse<T> {
+export interface EmporixPaginatedResponse<T> {
   items: T[];
   total: number;
   page: number;
   size: number;
 }
 
-export interface Media {
+export interface EmporixMedia {
   id: string;
   url: string;
   contentType: string;
@@ -58,11 +58,11 @@ export interface EmporixMonetaryAmount {
   currency: string;
 }
 
-export interface Site {
+export interface EmporixSite {
   code: string;
 }
 
-export interface Metadata {
+export interface EmporixMetadata {
   createdAt?: string;
   modifiedAt?: string;
   calculatedAt?: string;
@@ -74,10 +74,10 @@ export interface Metadata {
   [key: string]: string | number | object | Array | null;
 }
 
-export interface Mixin {
+export interface EmporixMixin {
   [key: string]: string | number | object | Array | null;
 }
 
-export interface Mixins {
-  [key: string]: Mixin;
+export interface EmporixMixins {
+  [key: string]: EmporixMixin;
 }

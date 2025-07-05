@@ -1,4 +1,4 @@
-import { EmporixLabel, PaginatedResponse } from '../model';
+import { EmporixLabel, EmporixPaginatedResponse } from '../model';
 
 export interface EmporixLabelApi {
   /**
@@ -15,5 +15,5 @@ export interface EmporixLabelApi {
    * @param pageSize The number of items per page
    * @param justOverlay If true, only returns labels with overlay.position >= 1
    */
-  getLabels(page?: number, pageSize?: number, justOverlay?: boolean): Promise<PaginatedResponse<EmporixLabel>>;
+  getLabels(page?: number, pageSize?: number, justOverlay?: boolean): Promise<EmporixPaginatedResponse<EmporixLabel>>;
 }

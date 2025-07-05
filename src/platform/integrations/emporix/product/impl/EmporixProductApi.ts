@@ -3,7 +3,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
-import { PaginatedResponse, Product, SearchParams } from '../../model';
+import { EmporixPaginatedResponse, EmporixProduct, EmporixSearchParams } from '../../model';
 import { ProductApi } from '../ProductApi';
 
 @injectable('EmporixProductApi', 'Singleton')
@@ -16,8 +16,8 @@ class EmporixProductApi implements ProductApi {
     this.config = config;
   }
 
-  async getProducts(page?: number, pageSize?: number): Promise<PaginatedResponse<Product>> {
-    const params: SearchParams<Product> = {
+  async getProducts(page?: number, pageSize?: number): Promise<EmporixPaginatedResponse<EmporixProduct>> {
+    const params: EmporixSearchParams<EmporixProduct> = {
       page: page || 0,
       size: pageSize || 20,
     };
@@ -31,7 +31,7 @@ class EmporixProductApi implements ProductApi {
     return buildPaginatedResponse(params, response);
   }
 
-  async searchProducts(params: SearchParams<Product>): Promise<PaginatedResponse<Product>> {
+  async searchProducts(params: EmporixSearchParams<EmporixProduct>): Promise<EmporixPaginatedResponse<EmporixProduct>> {
     const { body, query } = buildSearchQuery(params);
     const response = await this.apiClient.authenticatedFetch(
       `/product/${this.config.tenant}/products/search?${query}`,
@@ -48,7 +48,7 @@ class EmporixProductApi implements ProductApi {
     return buildPaginatedResponse(params, response);
   }
 
-  async getProduct(id: string): Promise<Product | undefined> {
+  async getProduct(id: string): Promise<EmporixProduct | undefined> {
     const response = await this.apiClient.authenticatedFetch(
       `/product/${this.config.tenant}/products/${id}`,
       { method: 'GET' },

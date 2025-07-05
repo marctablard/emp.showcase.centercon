@@ -1,4 +1,4 @@
-import { Metadata } from './common';
+import { EmporixMetadata } from './common';
 import { EmporixCalculatedPrice } from './price';
 
 export interface EmporixCartPrice extends EmporixCalculatedPrice, EmporixTaxInfo {
@@ -84,7 +84,7 @@ export interface EmporixCart {
     };
   };
   totalUnitsCount?: number;
-  metadata?: Metadata;
+  metadata?: EmporixMetadata;
   mixins?: Mixins;
   channel?: {
     name: string;

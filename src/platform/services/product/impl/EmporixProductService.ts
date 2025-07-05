@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixLabel } from '@/platform/integrations/emporix/model';
-import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
+import { EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import type { EmporixBrandApi } from '@/platform/integrations/emporix/product/EmporixBrandApi';
 import type { EmporixLabelApi } from '@/platform/integrations/emporix/product/EmporixLabelApi';
 import type { ProductApi } from '@/platform/integrations/emporix/product/ProductApi';

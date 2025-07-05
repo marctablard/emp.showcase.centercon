@@ -1,5 +1,5 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixAddress, Mixins } from '@/platform/integrations/emporix/model/common';
+import { EmporixAddress, EmporixMixins } from '@/platform/integrations/emporix/model/common';
 import { Address, GeoLocation } from '@/platform/services/model/common';
 import { AddressMapper } from '../AddressMapper';
 
@@ -41,7 +41,7 @@ export class EmporixAddressMapper implements AddressMapper<EmporixAddress> {
    * @returns The Emporix address data
    */
   mapToSource(service: Address): EmporixAddress {
-    const mixins: Mixins = {};
+    const mixins: EmporixMixins = {};
     if (service.geoLocation) {
       mixins['geolocation'] = service.geoLocation;
     }

@@ -2,7 +2,12 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import { CreateOrderRequest, EmporixOrder, OrderCreationResponse, UpdateOrderRequest } from '../../model/order';
+import {
+  EmporixCreateOrderRequest,
+  EmporixOrder,
+  EmporixOrderCreationResponse,
+  EmporixUpdateOrderRequest,
+} from '../../model/order';
 import { EmporixOrderApi as IEmporixOrderApi } from '../EmporixOrderApi';
 
 // Customer-managed endpoints use '/orders' while tenant-managed endpoints use '/salesorders'
@@ -27,7 +32,7 @@ class EmporixOrderApi implements IEmporixOrderApi {
    * @param createOrderRequest Order creation request
    * @returns Promise with the created order ID
    */
-  async createOrder(createOrderRequest: CreateOrderRequest): Promise<OrderCreationResponse> {
+  async createOrder(createOrderRequest: EmporixCreateOrderRequest): Promise<EmporixOrderCreationResponse> {
     const response = await this.apiClient.authenticatedFetch(
       `/order-v2/${this.config.tenant}/salesorders`,
       {
@@ -54,7 +59,7 @@ class EmporixOrderApi implements IEmporixOrderApi {
    * @param createOrderRequest Order creation request
    * @returns Promise with the created order ID
    */
-  async createCustomerOrder(createOrderRequest: CreateOrderRequest): Promise<OrderCreationResponse> {
+  async createCustomerOrder(createOrderRequest: EmporixCreateOrderRequest): Promise<EmporixOrderCreationResponse> {
     const response = await this.apiClient.authenticatedFetch(
       `/order-v2/${this.config.tenant}/orders`,
       {
@@ -219,7 +224,7 @@ class EmporixOrderApi implements IEmporixOrderApi {
    * @param updateRequest Update request with order information
    * @returns Promise resolving when update is complete
    */
-  async updateOrder(orderId: string, updateRequest: UpdateOrderRequest): Promise<void> {
+  async updateOrder(orderId: string, updateRequest: EmporixUpdateOrderRequest): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `/order-v2/${this.config.tenant}/salesorders/${orderId}`,
       {
@@ -245,7 +250,7 @@ class EmporixOrderApi implements IEmporixOrderApi {
    * @param updateRequest Update request with order information
    * @returns Promise resolving when update is complete
    */
-  async updateCustomerOrder(orderId: string, updateRequest: UpdateOrderRequest): Promise<void> {
+  async updateCustomerOrder(orderId: string, updateRequest: EmporixUpdateOrderRequest): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `/order-v2/${this.config.tenant}/orders/${orderId}`,
       {
