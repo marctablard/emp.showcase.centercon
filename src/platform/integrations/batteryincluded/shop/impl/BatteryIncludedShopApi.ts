@@ -59,8 +59,6 @@ class BatteryIncludedShopApi implements IBatteryIncludedShopApi {
         headers: { Accept: 'application/json' },
       });
 
-      console.log(`[ShopApi] Suggest response status: ${response.status}`);
-
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`[ShopApi] Suggest API error: ${response.statusText}`, errorText);

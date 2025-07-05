@@ -1,6 +1,6 @@
 import { Container } from 'inversify';
 import BatteryIncludedApiInvoker from '../../common/impl/BatteryIncludedApiInvoker';
-import { BatteryIncludedConfig } from '../../config';
+import type { BatteryIncludedConfig } from '../../config';
 import { BatteryIncludedSearchResponse } from '../../model';
 import BatteryIncludedShopApi from './BatteryIncludedShopApi';
 
