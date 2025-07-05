@@ -1,8 +1,8 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { BatteryIncludedConfig } from '..';
+import type { BatteryIncludedConfig as IBatteryIncludedConfig } from '../BatteryIncludedConfig';
 
 @injectable('BatteryIncludedConfig', 'Singleton')
-class BatteryIncludedConfigImpl implements BatteryIncludedConfig {
+class BatteryIncludedConfig implements IBatteryIncludedConfig {
   baseUrl: string;
   apiKey: string;
   collection: string;
@@ -14,4 +14,4 @@ class BatteryIncludedConfigImpl implements BatteryIncludedConfig {
   }
 }
 
-export default BatteryIncludedConfigImpl;
+export default BatteryIncludedConfig;
