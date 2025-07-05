@@ -1,3 +1,4 @@
+import { EmporixCheckoutAddress } from './checkout';
 import { EmporixAddress } from './common';
 
 /**
@@ -158,8 +159,8 @@ export interface EmporixOrder {
  */
 export interface EmporixCreateOrderRequest {
   cartId: string;
-  billingAddress?: EmporixAddress;
-  shippingAddress?: EmporixAddress;
+  billingAddress?: EmporixCheckoutAddress;
+  shippingAddress?: EmporixCheckoutAddress;
   customerEmail?: string;
   customerNote?: string;
   payments?: EmporixPayment[];
@@ -178,8 +179,8 @@ export interface EmporixOrderCreationResponse {
  */
 export interface EmporixUpdateOrderRequest {
   status?: EmporixOrderStatus;
-  billingAddress?: EmporixAddress;
-  shippingAddress?: EmporixAddress;
+  billingAddress?: EmporixCheckoutAddress;
+  shippingAddress?: EmporixCheckoutAddress;
   customerEmail?: string;
   customerNote?: string;
   payments?: EmporixPayment[];

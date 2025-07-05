@@ -58,8 +58,13 @@ export interface EmporixMonetaryAmount {
   currency: string;
 }
 
-export interface EmporixSite {
-  code: string;
+export interface EmporixSites {
+  items: EmporixSite[];
+}
+
+export interface EmporixFindSiteRequest {
+  postalCode: string;
+  country: string;
 }
 
 export interface EmporixMetadata {

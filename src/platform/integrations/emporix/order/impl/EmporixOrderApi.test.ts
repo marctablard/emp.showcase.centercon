@@ -1,7 +1,7 @@
-import { Container, inject } from 'inversify';
+import { Container } from 'inversify';
 import EmporixCartApi from '../../cart/impl/EmporixCartApi';
 import EmporixCheckoutApi from '../../checkout/impl/EmporixCheckoutApi';
-import { TokenManager } from '../../common/TokenManager';
+import { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
@@ -68,6 +68,7 @@ const sampleCreateOrderRequest: EmporixCreateOrderRequest = {
     zipCode: '12345',
     city: 'Test City',
     country: 'DE',
+    type: 'BILLING',
   },
   shippingAddress: {
     contactName: 'Test Customer',
@@ -76,6 +77,7 @@ const sampleCreateOrderRequest: EmporixCreateOrderRequest = {
     zipCode: '12345',
     city: 'Test City',
     country: 'DE',
+    type: 'SHIPPING',
   },
   payments: [
     {
@@ -168,7 +170,7 @@ describe('EmporixOrderApi', () => {
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
     container.bind<EmporixCartApi>('EmporixCartApi').to(EmporixCartApi);
     container.bind<EmporixCustomerApi>('EmporixCustomerApi').to(EmporixCustomerApi);
@@ -411,12 +413,12 @@ describe('EmporixOrderApi', () => {
     let guestOrderId: string;
     let guestCartId: string;
     const guestEmail = 'guest.test@example.com';
-    let tokenManager: TokenManager;
+    let tokenManager: EmporixTokenManager;
 
     // Get token manager and clear tokens before all tests
     beforeAll(async () => {
       // Get the token manager from the container
-      tokenManager = container.get<TokenManager>('EmporixTokenManager');
+      tokenManager = container.get<EmporixTokenManager>('EmporixTokenManager');
 
       // Clear all tokens to ensure we start with a fresh session
       tokenManager.clearTokens(tenant);

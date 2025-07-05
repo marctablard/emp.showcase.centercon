@@ -5,7 +5,7 @@ import type {
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
-import type { OAuthApi } from '../../oauth/OAuthApi';
+import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
 import { EmporixTokenManager as IEmporixTokenManager } from '../EmporixTokenManager';
 import { checkTokenValidity } from '../util/common';
 
@@ -19,7 +19,7 @@ export interface TokenStore {
 }
 
 export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManager {
-  constructor(@inject('EmporixOAuthApi') private oauthApi: OAuthApi) {}
+  constructor(@inject('EmporixOAuthApi') private oauthApi: EmporixOAuthApi) {}
   abstract clearTokens(tenant: string): void;
   async getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string; sessionId: string }> {
     let anonymousToken = await this.readToken<
