@@ -1,4 +1,9 @@
-import { CreateOrderRequest, EmporixOrder, OrderCreationResponse, UpdateOrderRequest } from '../model/order';
+import {
+  EmporixCreateOrderRequest,
+  EmporixOrder,
+  EmporixOrderCreationResponse,
+  EmporixUpdateOrderRequest,
+} from '../model/order';
 
 /**
  * Interface for Order API operations
@@ -11,7 +16,7 @@ export interface EmporixOrderApi {
    * @param createOrderRequest Order creation request
    * @returns Promise with the created order ID
    */
-  createOrder(createOrderRequest: CreateOrderRequest): Promise<OrderCreationResponse>;
+  createOrder(createOrderRequest: EmporixCreateOrderRequest): Promise<EmporixOrderCreationResponse>;
 
   /**
    * Get order by ID (tenant-managed endpoint)
@@ -36,7 +41,7 @@ export interface EmporixOrderApi {
    * @param updateRequest Update request with order information
    * @returns Promise resolving when update is complete
    */
-  updateOrder(orderId: string, updateRequest: UpdateOrderRequest): Promise<void>;
+  updateOrder(orderId: string, updateRequest: EmporixUpdateOrderRequest): Promise<void>;
 
   /**
    * Delete an order (tenant-managed endpoint)
@@ -59,7 +64,7 @@ export interface EmporixOrderApi {
    * @param createOrderRequest Order creation request
    * @returns Promise with the created order ID
    */
-  createCustomerOrder(createOrderRequest: CreateOrderRequest): Promise<OrderCreationResponse>;
+  createCustomerOrder(createOrderRequest: EmporixCreateOrderRequest): Promise<EmporixOrderCreationResponse>;
 
   /**
    * Get customer order by ID (customer-managed endpoint)
@@ -84,7 +89,7 @@ export interface EmporixOrderApi {
    * @param updateRequest Update request with order information
    * @returns Promise resolving when update is complete
    */
-  updateCustomerOrder(orderId: string, updateRequest: UpdateOrderRequest): Promise<void>;
+  updateCustomerOrder(orderId: string, updateRequest: EmporixUpdateOrderRequest): Promise<void>;
 
   /**
    * Get customer order status transitions (customer-managed endpoint)

@@ -1,12 +1,12 @@
-import { Container, inject } from 'inversify';
+import { Container } from 'inversify';
 import EmporixCartApi from '../../cart/impl/EmporixCartApi';
 import EmporixCheckoutApi from '../../checkout/impl/EmporixCheckoutApi';
-import { TokenManager } from '../../common/TokenManager';
+import { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
 import EmporixCustomerApi from '../../customer/impl/EmporixCustomerApi';
-import { AddCartItemRequest, CreateCartRequest } from '../../model';
+import { EmporixAddCartItemRequest, EmporixCreateCartRequest } from '../../model';
 import {
   EmporixCartCheckoutRequest,
   EmporixCheckoutAddress,
@@ -14,7 +14,7 @@ import {
   EmporixCheckoutPaymentMethod,
   EmporixShipping,
 } from '../../model/checkout';
-import { CreateOrderRequest, UpdateOrderRequest } from '../../model/order';
+import { EmporixCreateOrderRequest, EmporixUpdateOrderRequest } from '../../model/order';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixOrderApi from './EmporixOrderApi';
 
@@ -32,7 +32,7 @@ class TestEmporixConfig implements EmporixConfig {
 }
 
 // Sample cart creation request
-const sampleCreateCartRequest: CreateCartRequest = {
+const sampleCreateCartRequest: EmporixCreateCartRequest = {
   siteCode: 'main',
   currency: 'EUR',
   type: 'shopping',
@@ -44,7 +44,7 @@ const sampleCreateCartRequest: CreateCartRequest = {
 };
 
 // Sample cart item request
-const sampleAddItemRequest: AddCartItemRequest = {
+const sampleAddItemRequest: EmporixAddCartItemRequest = {
   siteCode: 'main',
   itemYrn: 'urn:yaas:saasag:caasproduct:product:showcasetest;1',
   quantity: 1,
@@ -57,7 +57,7 @@ const sampleAddItemRequest: AddCartItemRequest = {
 };
 
 // Sample order creation request (will be populated with actual cart ID)
-const sampleCreateOrderRequest: CreateOrderRequest = {
+const sampleCreateOrderRequest: EmporixCreateOrderRequest = {
   cartId: '', // Will be populated during test
   customerEmail: 'test@example.com',
   customerNote: 'Test order note',
@@ -68,6 +68,7 @@ const sampleCreateOrderRequest: CreateOrderRequest = {
     zipCode: '12345',
     city: 'Test City',
     country: 'DE',
+    type: 'BILLING',
   },
   shippingAddress: {
     contactName: 'Test Customer',
@@ -76,6 +77,7 @@ const sampleCreateOrderRequest: CreateOrderRequest = {
     zipCode: '12345',
     city: 'Test City',
     country: 'DE',
+    type: 'SHIPPING',
   },
   payments: [
     {
@@ -88,7 +90,7 @@ const sampleCreateOrderRequest: CreateOrderRequest = {
 };
 
 // Sample order update request
-const sampleUpdateOrderRequest: UpdateOrderRequest = {
+const sampleUpdateOrderRequest: EmporixUpdateOrderRequest = {
   status: 'CONFIRMED',
   customerNote: 'Updated order note',
 };
@@ -168,7 +170,7 @@ describe('EmporixOrderApi', () => {
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
     container.bind<EmporixCartApi>('EmporixCartApi').to(EmporixCartApi);
     container.bind<EmporixCustomerApi>('EmporixCustomerApi').to(EmporixCustomerApi);
@@ -411,12 +413,12 @@ describe('EmporixOrderApi', () => {
     let guestOrderId: string;
     let guestCartId: string;
     const guestEmail = 'guest.test@example.com';
-    let tokenManager: TokenManager;
+    let tokenManager: EmporixTokenManager;
 
     // Get token manager and clear tokens before all tests
     beforeAll(async () => {
       // Get the token manager from the container
-      tokenManager = container.get<TokenManager>('EmporixTokenManager');
+      tokenManager = container.get<EmporixTokenManager>('EmporixTokenManager');
 
       // Clear all tokens to ensure we start with a fresh session
       tokenManager.clearTokens(tenant);

@@ -5,13 +5,13 @@ import {
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
-import { OAuthApi } from '../OAuthApi';
+import { EmporixOAuthApi as IEmporixOAuthApi } from '../EmporixOAuthApi';
 
 /**
  * Implementation of the Emporix OAuth API
  */
 @injectable('EmporixOAuthApi', 'Singleton')
-class EmporixOAuthApi implements OAuthApi {
+class EmporixOAuthApi implements IEmporixOAuthApi {
   private readonly baseUrl: string = 'https://api.emporix.io';
   private debugCurl: boolean = false;
 

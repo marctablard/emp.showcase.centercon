@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { CheckoutApi } from '@/platform/integrations/emporix/checkout/CheckoutApi';
+import type { EmporixCheckoutApi } from '@/platform/integrations/emporix/checkout/EmporixCheckoutApi';
 import {
   EmporixCartCheckoutRequest,
   EmporixCheckoutCustomer,
@@ -19,21 +19,12 @@ import type { CheckoutValidator } from '../validation/CheckoutValidator';
  */
 @injectable('CheckoutService', 'Singleton')
 class EmporixCheckoutService implements CheckoutService {
-  private checkoutApi: CheckoutApi;
-  private customerService: CustomerService;
-  private checkoutValidator: CheckoutValidator;
-  private paymentGatewayApi: EmporixPaymentGatewayApi;
   constructor(
-    @inject('EmporixCheckoutApi') checkoutApi: CheckoutApi,
-    @inject('EmporixPaymentGatewayApi') paymentGatewayApi: EmporixPaymentGatewayApi,
-    @inject('CustomerService') customerService: CustomerService,
-    @inject('CheckoutValidator') checkoutValidator: CheckoutValidator,
-  ) {
-    this.checkoutApi = checkoutApi;
-    this.customerService = customerService;
-    this.checkoutValidator = checkoutValidator;
-    this.paymentGatewayApi = paymentGatewayApi;
-  }
+    @inject('EmporixCheckoutApi') private checkoutApi: EmporixCheckoutApi,
+    @inject('EmporixPaymentGatewayApi') private paymentGatewayApi: EmporixPaymentGatewayApi,
+    @inject('CustomerService') private customerService: CustomerService,
+    @inject('CheckoutValidator') private checkoutValidator: CheckoutValidator,
+  ) {}
 
   async checkout(request: CheckoutRequest): Promise<CheckoutResponse> {
     const customer = await this.customerService.getCustomer();

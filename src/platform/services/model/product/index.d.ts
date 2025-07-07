@@ -1,4 +1,4 @@
-import { Mixin } from '@/platform/integrations/emporix/model';
+import { EmporixMixin } from '@/platform/integrations/emporix/model';
 import { Category } from '../category';
 import { Availability, LocalizedString, Media, Price, TaxType } from '../common';
 
@@ -23,10 +23,11 @@ export interface ProductSpecification {
 }
 
 export interface GroupedSpecification {
-  groupName: string;
+  groupName: string | LocalizedString;
   item: Array<{
-    label: string;
-    value: string;
+    label: string | LocalizedString;
+    value: string | LocalizedString;
+    unit: string | LocalizedString;
   }>;
 }
 

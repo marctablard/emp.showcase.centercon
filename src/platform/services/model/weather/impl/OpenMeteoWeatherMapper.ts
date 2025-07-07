@@ -1,8 +1,5 @@
 import { injectable } from '@/platform/core/di/injectable';
-import {
-  WeatherData as OpenMeteoWeatherData,
-  WeatherForecast as OpenMeteoWeatherForecast,
-} from '@/platform/integrations/openmeteo/model/weather';
+import { OpenMeteoWeatherData, OpenMeteoWeatherForecast } from '@/platform/integrations/openmeteo/model/weather';
 import { WeatherMapper } from '../WeatherMapper';
 import { Weather, WeatherForecast } from '../index';
 

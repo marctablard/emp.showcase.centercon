@@ -1,4 +1,4 @@
-import { PaginatedResponse } from '../model';
+import { EmporixPaginatedResponse } from '../model';
 import { Brand } from './model';
 
 export interface EmporixBrandApi {
@@ -15,5 +15,5 @@ export interface EmporixBrandApi {
    * @param page number
    * @param pageSize number
    */
-  getBrands(page?: number, pageSize?: number): Promise<PaginatedResponse<Brand>>;
+  getBrands(page?: number, pageSize?: number): Promise<EmporixPaginatedResponse<Brand>>;
 }

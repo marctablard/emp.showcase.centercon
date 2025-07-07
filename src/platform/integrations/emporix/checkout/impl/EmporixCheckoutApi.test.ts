@@ -6,12 +6,12 @@ import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.t
 import { EmporixConfig } from '../../config';
 import EmporixCustomerApi from '../../customer/impl/EmporixCustomerApi';
 import {
-  AddCartItemRequest,
-  CreateCartRequest,
+  EmporixAddCartItemRequest,
   EmporixCartCheckoutRequest,
   EmporixCheckoutAddress,
   EmporixCheckoutCustomer,
   EmporixCheckoutPaymentMethod,
+  EmporixCreateCartRequest,
   EmporixShipping,
 } from '../../model';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
@@ -30,7 +30,7 @@ class TestEmporixConfig implements EmporixConfig {
 // Using EmporixTestTokenManager from the imported file
 
 // Sample cart creation request
-const sampleCreateCartRequest: CreateCartRequest = {
+const sampleCreateCartRequest: EmporixCreateCartRequest = {
   siteCode: 'main',
   currency: 'EUR',
   type: 'shopping',
@@ -42,7 +42,7 @@ const sampleCreateCartRequest: CreateCartRequest = {
 };
 
 // Sample cart item request using product c1 (from the product API test)
-const sampleAddItemRequest: AddCartItemRequest = {
+const sampleAddItemRequest: EmporixAddCartItemRequest = {
   siteCode: 'main',
   itemYrn: 'urn:yaas:saasag:caasproduct:product:showcasetest;1',
   quantity: 1,

@@ -5,14 +5,14 @@ import { omit } from 'lodash';
 import { injectable } from '@/platform/core/di/injectable';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import { EmporixAccessTokenResponse } from '../../model/oauth';
-import type { OAuthApi } from '../../oauth/OAuthApi';
+import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
 import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 
 @injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
   private serviceToken: StoredToken<EmporixAccessTokenResponse> | undefined;
 
-  constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
+  constructor(@inject('EmporixOAuthApi') oauthApi: EmporixOAuthApi) {
     super(oauthApi);
   }
 

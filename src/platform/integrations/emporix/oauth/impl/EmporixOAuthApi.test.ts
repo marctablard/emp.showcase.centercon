@@ -1,7 +1,8 @@
 import { Container } from 'inversify';
-import { TokenManager } from '../../common/TokenManager';
+import { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
+import { EmporixOAuthApi as IEmporixOAuthApi } from '../EmporixOAuthApi';
 import EmporixOAuthApi from './EmporixOAuthApi';
 
 // Create a test config implementation
@@ -23,8 +24,8 @@ describe('EmporixOAuthApi', () => {
     // Set up the container with our test config
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
-    container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
+    container.bind<IEmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
 
     // Get instances from the container
     oauthApi = container.get<EmporixOAuthApi>('EmporixOAuthApi');

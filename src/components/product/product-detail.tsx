@@ -236,7 +236,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             <div className="flex justify-between">
               <div className="flex gap-2 h-7">
                 {product.labels?.map((label) => (
-                  <Badge key={label.id} variant="promo" rounded="rounded_right">
+                  <Badge key={label.id} variant="info" rounded="rounded_right">
                     {label.name}
                   </Badge>
                 ))}
@@ -285,7 +285,10 @@ export default function ProductDetail({ product: initialProduct, price, classNam
         </div>
 
         <div className="row-start-5 lg:col-start-2 lg:row-start-4">
-          <div className="text-lg text-neutral lg:mt-10" dangerouslySetInnerHTML={{ __html: product.description }} />
+          <div
+            className="text-lg text-neutral lg:mt-10"
+            dangerouslySetInnerHTML={{ __html: l10n(product.description) }}
+          />
           {product.mixins.highlights.highlights && (
             <div className="mt-10">
               <H2 variant="h3" className="text-primary mb-8">
@@ -320,11 +323,15 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             {product.groupedSpecifications.map((spec: GroupedSpecification, index) => {
               return (
                 <div className="flex flex-col" key={index}>
-                  <p className="font-bold font-headlines font-sm p-4 border-b border-neutral-200">{spec.groupName}</p>
+                  <p className="font-bold font-headlines font-sm p-4 border-b border-neutral-200">
+                    {l10n(spec.groupName)}
+                  </p>
                   {spec.item.map((i) => (
-                    <div className="font-sm p-4 border-b border-neutral-200 flex gap-4" key={i.label}>
-                      <p className="w-1/2">{i.label}</p>
-                      <p className="w-1/2">{i.value}</p>
+                    <div className="font-sm p-4 border-b border-neutral-200 flex gap-4" key={l10n(i.label)}>
+                      <p className="w-1/2">{l10n(i.label)}</p>
+                      <p className="w-1/2">
+                        {l10n(i.value)} {l10n(i.unit)}
+                      </p>
                     </div>
                   ))}
                 </div>

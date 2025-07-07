@@ -1,4 +1,4 @@
-import { EmporixLocalizedString, Metadata, Site } from './common';
+import { EmporixLocalizedString, EmporixMetadata } from './common';
 
 export interface EmporixCalculatedPrice {
   netValue: number;
@@ -57,7 +57,7 @@ export interface EmporixPriceModel {
   includesMarkup: boolean;
   measurementUnit: EmporixQuantity;
   tierDefinition: EmporixTierDefinition;
-  metadata: Metadata;
+  metadata: EmporixMetadata;
 }
 
 export interface EmporixTierValue {
@@ -71,7 +71,7 @@ export interface EmporixTierValue {
 export interface EmporixMatchedPrice {
   priceId: string;
   itemId: EmporixItemId;
-  site: Site;
+  site: { code: string };
   currency: string;
   location: EmporixLocation;
   originalValue: number;
@@ -82,5 +82,5 @@ export interface EmporixMatchedPrice {
   priceModel: EmporixPriceModel;
   tax: PriceTax;
   tierValues: EmporixTierValue[];
-  metadata: Metadata;
+  metadata: EmporixMetadata;
 }

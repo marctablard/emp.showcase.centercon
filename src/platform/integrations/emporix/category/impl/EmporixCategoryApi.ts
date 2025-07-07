@@ -4,8 +4,8 @@ import { injectable } from '@/platform/core/di/injectable';
 import {
   EmporixCategory,
   EmporixCategoryParent,
-  PaginatedResponse,
-  SearchParams,
+  EmporixPaginatedResponse,
+  EmporixSearchParams,
 } from '@/platform/integrations/emporix/model';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import EmporixCommonUtil from '../../common/util/EmporixCommonUtil';
@@ -33,7 +33,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
    * @param query Query parameters for filtering and pagination
    * @returns A paginated response containing category data
    */
-  async getCategories(query?: EmporixCategoryQuery): Promise<PaginatedResponse<EmporixCategory>> {
+  async getCategories(query?: EmporixCategoryQuery): Promise<EmporixPaginatedResponse<EmporixCategory>> {
     let queryParams = '';
 
     const params = {
@@ -125,8 +125,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
     categoryId: string,
     page?: number,
     pageSize?: number,
-  ): Promise<PaginatedResponse<EmporixCategory>> {
-    const params: SearchParams<EmporixCategory> = {
+  ): Promise<EmporixPaginatedResponse<EmporixCategory>> {
+    const params: EmporixSearchParams<EmporixCategory> = {
       page: page || 0,
       size: pageSize || 20,
     };
@@ -167,8 +167,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
     expandSupercategoriesIds?: boolean,
     page?: number,
     pageSize?: number,
-  ): Promise<PaginatedResponse<EmporixCategory>> {
-    const params: SearchParams<EmporixCategory> = {
+  ): Promise<EmporixPaginatedResponse<EmporixCategory>> {
+    const params: EmporixSearchParams<EmporixCategory> = {
       page: page,
       size: page ? pageSize || 20 : undefined,
     };

@@ -2,7 +2,8 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import { EmporixFindSiteRequest, EmporixShippingMethod, EmporixSite } from '../../model/shipping';
+import { EmporixFindSiteRequest, EmporixShippingSite } from '../../model';
+import { EmporixShippingMethod } from '../../model/shipping';
 import { EmporixShippingApi as IEmporixShippingApi } from '../EmporixShippingApi';
 
 @injectable('EmporixShippingApi', 'Singleton')
@@ -45,7 +46,7 @@ class EmporixShippingApi implements IEmporixShippingApi {
     return await response.json();
   }
 
-  async findSite(request: EmporixFindSiteRequest): Promise<EmporixSite[]> {
+  async findSite(request: EmporixFindSiteRequest): Promise<EmporixShippingSite[]> {
     const response = await this.apiClient.authenticatedFetch(
       `/shipping/${this.config.tenant}/findSite`,
       {

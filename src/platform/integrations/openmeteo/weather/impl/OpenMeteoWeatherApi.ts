@@ -1,6 +1,6 @@
 import { fetchWeatherApi } from 'openmeteo';
 import { injectable } from '@/platform/core/di/injectable';
-import type { WeatherData, WeatherForecast } from '../../model/weather';
+import type { OpenMeteoWeatherData, OpenMeteoWeatherForecast } from '../../model/weather';
 import type { OpenMeteoWeatherApi as IOpenMeteoWeatherApi } from '../OpenMeteoWeatherApi';
 
 /**
@@ -19,7 +19,7 @@ class OpenMeteoWeatherApi implements IOpenMeteoWeatherApi {
    * @param longitude The longitude coordinate
    * @returns Promise with weather forecast data
    */
-  async getWeatherForecast(latitude: number, longitude: number): Promise<WeatherForecast> {
+  async getWeatherForecast(latitude: number, longitude: number): Promise<OpenMeteoWeatherForecast> {
     // Validate coordinates are within valid ranges
     if (isNaN(latitude) || latitude < -90 || latitude > 90) {
       throw new Error(`Latitude must be in range of -90 to 90°. Given: ${latitude}.`);
@@ -49,7 +49,7 @@ class OpenMeteoWeatherApi implements IOpenMeteoWeatherApi {
       */
       // Process current weather
       const current = response.current()!;
-      const currentWeatherData: WeatherData = {
+      const currentWeatherData: OpenMeteoWeatherData = {
         temperature: current.variables(0)!.value(),
         humidity: current.variables(1)!.value(),
         precipitation: current.variables(2)!.value(),
@@ -61,7 +61,7 @@ class OpenMeteoWeatherApi implements IOpenMeteoWeatherApi {
 
       // Process hourly forecast
       const hourly = response.hourly()!;
-      const hourlyData: WeatherData[] = [];
+      const hourlyData: OpenMeteoWeatherData[] = [];
 
       for (let i = 0; i < 24; i++) {
         // Get 24 hours of forecast
@@ -78,7 +78,7 @@ class OpenMeteoWeatherApi implements IOpenMeteoWeatherApi {
 
       // Process daily forecast
       const daily = response.daily()!;
-      const dailyData: WeatherData[] = [];
+      const dailyData: OpenMeteoWeatherData[] = [];
 
       for (let i = 0; i < 7; i++) {
         dailyData.push({

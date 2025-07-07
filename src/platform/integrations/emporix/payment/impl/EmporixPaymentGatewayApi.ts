@@ -10,10 +10,7 @@ class EmporixPaymentGatewayApi implements IEmporixPaymentGatewayApi {
   constructor(
     @inject('EmporixApiInvoker') private apiClient: EmporixApiClient,
     @inject('EmporixConfig') private config: EmporixConfig,
-  ) {
-    this.apiClient = apiClient;
-    this.config = config;
-  }
+  ) {}
 
   async getPaymentModesFrontend(): Promise<EmporixPaymentModeFrontend[]> {
     const response = await this.apiClient.authenticatedFetch(

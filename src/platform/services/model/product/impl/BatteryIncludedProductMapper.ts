@@ -2,6 +2,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
+import { EmporixProduct } from '@/platform/integrations/emporix/model';
 import { Product as ServiceProduct } from '@/platform/services/model/product';
 import { LocalizedString, Price } from '../../common';
 import { CategorySuggestion, SearchSuggestions } from '../../search/SearchSuggestions';
@@ -28,7 +29,7 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
     // Since BatteryIncluded uses the same structure as Emporix, delegate to EmporixProductMapper
     // custom modifications can be included here
     const productData = this.emporixMapper.mapToService({
-      ...product,
+      ...(product as EmporixProduct),
       media: product.medias ? product.medias : [],
     });
 

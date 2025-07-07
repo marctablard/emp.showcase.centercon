@@ -2,7 +2,7 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { BatteryIncludedSearchResponse } from '@/platform/integrations/batteryincluded/model';
 import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
-import type { ShopApi } from '@/platform/integrations/batteryincluded/shop/ShopApi';
+import type { BatteryIncludedShopApi } from '@/platform/integrations/batteryincluded/shop/BatteryIncludedShopApi';
 import type { Filter, SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Product } from '@/platform/services/model/product';
 import type { SearchService } from '@/platform/services/search/SearchService';
@@ -15,12 +15,12 @@ import type { SearchSuggestions, SuggestionsMapper } from '../../model/search';
  */
 @injectable('SearchService', 'Singleton')
 class BatteryIncludedSearchService implements SearchService {
-  private shopApi: ShopApi;
+  private shopApi: BatteryIncludedShopApi;
   private productMapper: ProductMapper<BatteryIncludedProduct>;
   private suggestionsMapper: SuggestionsMapper;
 
   constructor(
-    @inject('BatteryIncludedShopApi') shopApi: ShopApi,
+    @inject('BatteryIncludedShopApi') shopApi: BatteryIncludedShopApi,
     @inject('BatteryIncludedProductMapper') productMapper: ProductMapper<BatteryIncludedProduct>,
   ) {
     this.shopApi = shopApi;

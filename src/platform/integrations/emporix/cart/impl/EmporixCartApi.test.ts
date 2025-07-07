@@ -4,7 +4,12 @@ import { TokenManager } from '../../common/TokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
 import { EmporixConfig } from '../../config';
-import { AddCartItemRequest, CreateCartRequest, EmporixCart, UpdateCartItemRequest } from '../../model';
+import {
+  EmporixAddCartItemRequest,
+  EmporixCart,
+  EmporixCreateCartRequest,
+  EmporixUpdateCartItemRequest,
+} from '../../model';
 import type { OAuthApi } from '../../oauth/OAuthApi';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixCartApi from './EmporixCartApi';
@@ -52,7 +57,7 @@ class TestTokenManager extends EmporixTokenManagerAbstract {
 }
 
 // Sample cart creation request
-const sampleCreateCartRequest: CreateCartRequest = {
+const sampleCreateCartRequest: EmporixCreateCartRequest = {
   siteCode: 'main',
   currency: 'EUR',
   type: 'shopping',
@@ -64,7 +69,7 @@ const sampleCreateCartRequest: CreateCartRequest = {
 };
 
 // Sample cart item request using product c1 (from the product API test)
-const sampleAddItemRequest: AddCartItemRequest = {
+const sampleAddItemRequest: EmporixAddCartItemRequest = {
   siteCode: 'main',
   itemYrn: 'urn:yaas:saasag:caasproduct:product:showcasetest;1',
   quantity: 1,
@@ -77,7 +82,7 @@ const sampleAddItemRequest: AddCartItemRequest = {
 };
 
 // Sample cart item request using product c1 (from the product API test)
-const sampleUpdateItemRequest: UpdateCartItemRequest = {
+const sampleUpdateItemRequest: EmporixUpdateCartItemRequest = {
   quantity: 4,
   price: {
     priceId: '682c2059e7c3ee6b744ac649',

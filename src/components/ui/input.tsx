@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cva } from 'class-variance-authority';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -14,6 +15,49 @@ export interface InputProps extends React.ComponentProps<'input'> {
   onEndIconClick?: () => void;
 }
 
+const inputVariants = cva(
+  [
+    'text-neutral-900 flex w-full min-w-0 px-3 border border-neutral-200',
+    'placeholder:text-neutral-300 py-3 text-base md:text-base',
+    'transition duration-150 ease-in-out hover:text-primary-700 hover:border-primary-700 hover:bg-white',
+    'disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
+    'aria-invalid:text-danger-500 aria-invalid:border-danger-500 hover:aria-invalid:border-primary-500 hover:aria-invalid:text-primary-700',
+    'data-[success=true]:border-success-500 hover:data-[success=true]:border-primary-500 hover:data-[success=true]:text-primary-700',
+  ],
+  {
+    variants: {
+      isButton: {
+        true: 'rounded-l-lg',
+        false: 'rounded-sm',
+      },
+      startIcon: {
+        true: 'pl-10',
+        false: '',
+      },
+      endIcon: {
+        true: 'pr-10',
+        false: '',
+      },
+      dataDirtySuccess: {
+        true: 'bg-success-100 hover:border-primary-500 hover:text-primary-700',
+        false: '',
+      },
+      dataDirtyError: {
+        true: 'bg-danger-100 hover:border-primary-500 hover:text-primary-700',
+        false: '',
+      },
+    },
+    defaultVariants: {
+      isButton: false,
+      startIcon: false,
+      endIcon: false,
+      dataDirtySuccess: false,
+      dataDirtyError: false,
+    },
+  },
+);
+
 function Input({ className, type, startIcon, endIcon, isButton, onEndIconClick, ...props }: InputProps) {
   const StartIcon = startIcon;
   const EndIcon = endIcon;
@@ -24,7 +68,7 @@ function Input({ className, type, startIcon, endIcon, isButton, onEndIconClick, 
   return (
     <div
       className={cn(
-        'w-full relative ',
+        'w-full relative',
         'transition hover:text-primary-700 hover:bg-white',
         dataSuccess && 'text-success-500 border-success-500',
         props.disabled && 'text-neutral-600 border-neutral-300 hover:text-neutral-600',
@@ -40,19 +84,14 @@ function Input({ className, type, startIcon, endIcon, isButton, onEndIconClick, 
         type={type}
         data-slot="input"
         className={cn(
-          'text-neutral-900 flex w-full min-w-0 px-3 border border-neutral-200 rounded-l-lg',
-          !isButton && 'rounded-sm',
-          startIcon && 'pl-10',
-          endIcon && 'pr-10',
-          'placeholder:text-neutral-300 py-3 text-base md:text-base',
-          'transition duration-150 ease-in-out hover:text-primary-700 hover:border-primary-700 hover:bg-white',
-          'disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
-          'aria-invalid:text-danger-500 aria-invalid:border-danger-500 hover:aria-invalid:border-primary-500 hover:aria-invalid:text-primary-700',
-          'data-[success=true]:border-success-500 hover:data-[success=true]:border-primary-500 hover:data-[success=true]:text-primary-700',
-          dataDirtySuccess && 'bg-success-100 hover:border-primary-500 hover:text-primary-700',
-          dataDirtyError && 'bg-danger-100 hover:border-primary-500 hover:text-primary-700',
-          className,
+          inputVariants({
+            isButton: !!isButton,
+            startIcon: !!startIcon,
+            endIcon: !!endIcon,
+            dataDirtySuccess: !!dataDirtySuccess,
+            dataDirtyError: !!dataDirtyError,
+            className,
+          }),
         )}
         {...props}
       />
@@ -98,4 +137,4 @@ function InputButton({
   );
 }
 
-export { Input, InputButton };
+export { Input, InputButton, inputVariants };

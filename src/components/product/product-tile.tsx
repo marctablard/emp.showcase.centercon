@@ -117,7 +117,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
               {/*{product.labels?.map((label) => (*/}
               {/* Mock labels - only show on reduced items */}
               {product.price?.originalAmount !== product.price?.amount && (
-                <Badge key="memberdeal" variant="promo" rounded="rounded_right">
+                <Badge key="memberdeal" variant="info" rounded="rounded_right">
                   Member Deal
                 </Badge>
               )}

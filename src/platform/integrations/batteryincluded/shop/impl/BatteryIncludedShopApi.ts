@@ -11,10 +11,10 @@ import {
   BatteryIncludedSearchResponse,
   BatteryIncludedSuggestion,
 } from '../../model';
-import { ShopApi } from '../ShopApi';
+import type { BatteryIncludedShopApi as IBatteryIncludedShopApi } from '../BatteryIncludedShopApi';
 
 @injectable('BatteryIncludedShopApi', 'Singleton')
-class BatteryIncludedShopApi implements ShopApi {
+class BatteryIncludedShopApi implements IBatteryIncludedShopApi {
   constructor(
     @inject('BatteryIncludedApiInvoker') private apiClient: BatteryIncludedApiInvoker,
     @inject('BatteryIncludedConfig') private config: BatteryIncludedConfig,
@@ -58,8 +58,6 @@ class BatteryIncludedShopApi implements ShopApi {
         method: 'GET',
         headers: { Accept: 'application/json' },
       });
-
-      console.log(`[ShopApi] Suggest response status: ${response.status}`);
 
       if (!response.ok) {
         const errorText = await response.text();

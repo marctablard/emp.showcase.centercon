@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixLabel, PaginatedResponse, SearchParams } from '@/platform/integrations/emporix/model';
+import { EmporixLabel, EmporixPaginatedResponse, EmporixSearchParams } from '@/platform/integrations/emporix/model';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import { EmporixLabelApi as IEmporixLabelApi } from '../EmporixLabelApi';
@@ -11,9 +11,7 @@ import { EmporixLabelApi as IEmporixLabelApi } from '../EmporixLabelApi';
  */
 @injectable('EmporixLabelApi', 'Singleton')
 class EmporixLabelApi implements IEmporixLabelApi {
-  constructor(@inject('EmporixApiInvoker') private apiInvoker: EmporixApiInvoker) {
-    this.apiInvoker = apiInvoker;
-  }
+  constructor(@inject('EmporixApiInvoker') private apiInvoker: EmporixApiInvoker) {}
 
   /**
    * Retrieves a list of all labels with pagination support.
@@ -22,8 +20,12 @@ class EmporixLabelApi implements IEmporixLabelApi {
    * @param justOverlay If true, only returns labels with overlay.position >= 1
    * @returns A paginated response containing label data
    */
-  async getLabels(page?: number, pageSize?: number, justOverlay?: boolean): Promise<PaginatedResponse<EmporixLabel>> {
-    const params: SearchParams<EmporixLabel> = {
+  async getLabels(
+    page?: number,
+    pageSize?: number,
+    justOverlay?: boolean,
+  ): Promise<EmporixPaginatedResponse<EmporixLabel>> {
+    const params: EmporixSearchParams<EmporixLabel> = {
       page: page || 0,
       size: pageSize || 20,
     };

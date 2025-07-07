@@ -1,7 +1,7 @@
 /**
  * Interface for weather data API
  */
-export interface WeatherData {
+export interface OpenMeteoWeatherData {
   temperature: number;
   precipitation: number;
   humidity: number;
@@ -11,8 +11,8 @@ export interface WeatherData {
   location: string;
 }
 
-export interface WeatherForecast {
-  current: WeatherData;
-  hourly: WeatherData[];
-  daily: WeatherData[];
+export interface OpenMeteoWeatherForecast {
+  current: OpenMeteoWeatherData;
+  hourly: OpenMeteoWeatherData[];
+  daily: OpenMeteoWeatherData[];
 }

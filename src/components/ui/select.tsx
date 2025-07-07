@@ -47,7 +47,7 @@ function SelectTrigger({ className, children, disabled, startIcon, ...props }: S
         data-slot="select-trigger"
         className={cn(
           'text-neutral-900 group flex justify-between items-center w-full min-w-0 px-3 border border-neutral-200 rounded-sm',
-          'transition duration-150 ease-in-out hover:border-primary-500 hover:text-primary-700 hover:border-primary-700 hover:bg-white',
+          'transition duration-150 ease-in-out hover:border-primary-700 hover:text-primary-700 hover:bg-white',
           startIcon && 'pl-10',
           disabled &&
             'bg-neutral-100 text-neutral-600 border-neutral-300 hover:text-neutral-600 hover:bg-neutral-100 hover:border-neutral-300 pointer-events-none',

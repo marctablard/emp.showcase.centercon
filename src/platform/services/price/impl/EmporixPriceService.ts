@@ -5,7 +5,7 @@ import type {
   EmporixMatchedPrice,
   EmporixPriceMatchItem,
 } from '@/platform/integrations/emporix/model/price';
-import type { PriceApi } from '@/platform/integrations/emporix/price/PriceApi';
+import type { EmporixPriceApi } from '@/platform/integrations/emporix/price/EmporixPriceApi';
 import type { ProductPrice } from '@/platform/services/model/price';
 import type PriceMapper from '@/platform/services/model/price/impl/EmporixPriceMapper';
 import type { PriceService } from '../PriceService';
@@ -17,7 +17,7 @@ import type { PriceService } from '../PriceService';
 @injectable('PriceService', 'Singleton')
 class EmporixPriceService implements PriceService {
   constructor(
-    @inject('EmporixPriceApi') private priceApi: PriceApi,
+    @inject('EmporixPriceApi') private priceApi: EmporixPriceApi,
     @inject('EmporixPriceMapper') private mapper: PriceMapper,
   ) {}
 

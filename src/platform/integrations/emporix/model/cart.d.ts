@@ -1,4 +1,4 @@
-import { Metadata } from './common';
+import { EmporixMetadata } from './common';
 import { EmporixCalculatedPrice } from './price';
 
 export interface EmporixCartPrice extends EmporixCalculatedPrice, EmporixTaxInfo {
@@ -84,7 +84,7 @@ export interface EmporixCart {
     };
   };
   totalUnitsCount?: number;
-  metadata?: Metadata;
+  metadata?: EmporixMetadata;
   mixins?: Mixins;
   channel?: {
     name: string;
@@ -92,7 +92,7 @@ export interface EmporixCart {
   };
 }
 
-export interface CreateCartRequest {
+export interface EmporixCreateCartRequest {
   customerId?: string;
   siteCode: string;
   currency: string;
@@ -104,12 +104,12 @@ export interface CreateCartRequest {
   sessionValidated?: boolean;
 }
 
-export interface CreatedCart {
+export interface EmporixCreatedCart {
   cartId: string;
   yrn: string;
 }
 
-export interface CartProduct {
+export interface EmporixCartProduct {
   id: string;
   name: string;
   description?: string;
@@ -120,7 +120,7 @@ export interface CartProduct {
   }[];
 }
 
-export interface AddCartItemRequest {
+export interface EmporixAddCartItemRequest {
   siteCode: string;
   itemYrn: string;
   quantity: number;
@@ -136,15 +136,15 @@ export interface AddCartItemRequest {
     grossValue: number;
     netValue: number;
   };
-  product?: CartProduct;
+  product?: EmporixCartProduct;
 }
 
-export interface CreatedCartItem {
+export interface EmporixCreatedCartItem {
   itemId: string;
   yrn: string;
 }
 
-export interface UpdateCartItemRequest {
+export interface EmporixUpdateCartItemRequest {
   quantity: number;
   price: {
     priceId?: string;

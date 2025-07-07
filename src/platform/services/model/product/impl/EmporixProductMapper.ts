@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { Mixins } from '@/platform/integrations/emporix/model';
-import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
+import { EmporixMixins } from '@/platform/integrations/emporix/model';
+import { EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import { LocalizedString } from '@/platform/services/model/common';
 import { GroupedSpecification, Product, ProductSpecification } from '@/platform/services/model/product';
 import type { SessionService } from '@/platform/services/session';
@@ -36,9 +36,9 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
     const primaryImage = source.media ? source.media[0] : undefined;
 
     // Extract localized name and description
-    const name = this.extractLocalizedText(source.name);
-    const description = source.description ? this.extractLocalizedText(source.description) : '';
-    const mixins = source.mixins ? (source.mixins as Mixins) : [];
+    const name = source.name || ''; // Add null/empty check
+    const description = source.description || '';
+    const mixins = source.mixins ? (source.mixins as EmporixMixins) : [];
 
     const mappedSpecs =
       Array.isArray(mixins) || !mixins.specifications?.specifications
@@ -108,21 +108,14 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
 
     return Object.entries(groupedByKey).map(([group, specs]) => {
       const firstSpec = specs[0];
-      const groupName =
-        firstSpec.groupLabel?.['en'] || firstSpec.groupLabel?.['de'] || group.charAt(0).toUpperCase() + group.slice(1);
+      const groupName = firstSpec.groupLabel || group.charAt(0).toUpperCase() + group.slice(1);
 
       const items = specs.map((spec) => {
-        const label = spec.label['en'] || spec.label['de'] || spec.key;
-        let value = spec.value['en'] || spec.value['de'] || '';
+        const label = spec.label || spec.key;
+        const value = spec.value || '';
+        const unit = spec.unit || '';
 
-        if (spec.unit) {
-          const unit = spec.unit['en'] || spec.unit['de'] || '';
-          if (unit) {
-            value = `${value} ${unit}`;
-          }
-        }
-
-        return { label, value };
+        return { label, value, unit };
       });
 
       return {
@@ -158,36 +151,6 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       media: media,
       published: true,
     };
-  }
-
-  /**
-   * Helper method to extract text from a localized string object.
-   * Tries to get the English text first, then falls back to any available language.
-   *
-   * @param localizedText - The localized text object
-   * @returns The extracted text string
-   */
-  private extractLocalizedText(localizedText: string | LocalizedString): string {
-    if (!localizedText) {
-      return '';
-    }
-    if (typeof localizedText === 'string') {
-      return localizedText;
-    }
-
-    // Try to get English text first
-    if (localizedText.en) {
-      return localizedText.en;
-    }
-
-    // Fall back to any available language
-    const availableLanguages = Object.keys(localizedText) as Array<keyof LocalizedString>;
-    if (availableLanguages.length > 0) {
-      const firstKey = availableLanguages[0];
-      return localizedText[firstKey];
-    }
-
-    return '';
   }
 }
 
