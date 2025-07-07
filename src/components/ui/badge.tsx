@@ -4,22 +4,20 @@ import { type VariantProps, cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'flex items-center justify-center border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden',
+  'flex items-center justify-center border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-danger-500/20 dark:aria-invalid:ring-danger-500/40 aria-invalid:border-danger-500 transition-[color,box-shadow] overflow-hidden',
   {
     variants: {
       variant: {
         default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
-        success: 'border-transparent bg-success text-white [a&]:hover:bg-success/90',
+        success: 'border-transparent bg-success-500 text-white [a&]:hover:bg-success-500/90',
         secondary: 'border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
-        warning: 'border-transparent bg-warning-500 text-white [a&]:hover:bg-warning/90',
+        warning: 'border-transparent bg-warning-500 text-white [a&]:hover:bg-warning-500/90',
         white: 'border-transparent bg-white text-primary [a&]:hover:bg-white/90',
         black: 'border-transparent bg-black text-white [a&]:hover:bg-black/90',
-        // TODO take over into globals.css as destructive variable
         destructive:
-          'border-transparent bg-[#BF0D0D] text-primary-foreground [a&]:hover:bg-[#BF0D0D]/90 focus-visible:ring-[#BF0D0D]/20 dark:focus-visible:ring-[#BF0D0D]/40 dark:bg-[#BF0D0D]/60',
+          'border-transparent bg-danger-500 text-primary-foreground [a&]:hover:bg-danger-500/90 focus-visible:ring-danger-500/20 dark:focus-visible:ring-danger-500/40 dark:bg-danger-500/60',
         outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
-        // TODO check naming from styleguide
-        promo: 'border-transparent bg-[#F7DECF] text-neutral uppercase [a&]:hover:bg-[#F7DECF]/90',
+        info: 'border-transparent bg-warning-100 text-neutral uppercase [a&]:hover:bg-warning-100/90',
       },
       rounded: {
         none: 'rounded-none',

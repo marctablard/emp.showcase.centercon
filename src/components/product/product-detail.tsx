@@ -236,7 +236,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             <div className="flex justify-between">
               <div className="flex gap-2 h-7">
                 {product.labels?.map((label) => (
-                  <Badge key={label.id} variant="promo" rounded="rounded_right">
+                  <Badge key={label.id} variant="info" rounded="rounded_right">
                     {label.name}
                   </Badge>
                 ))}

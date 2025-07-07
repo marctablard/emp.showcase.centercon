@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import ColorStyleGuide from './atoms/color';
 import TextStyleGuide from './atoms/text';
+import BadgeStyleGuide from './ui/badge';
 import BreadcrumbStyleGuide from './ui/breadcrumb';
 import ButtonStyleGuide from './ui/button';
 import DialogStyleguide from './ui/dialog';
@@ -31,6 +32,7 @@ export default function StyleGuide() {
       <ColorStyleGuide />
       <ButtonStyleGuide />
       <LinkStyleGuide />
+      <BadgeStyleGuide />
       <BreadcrumbStyleGuide />
       <PaginationStyleGuide />
       <FormFieldStyleguide />
