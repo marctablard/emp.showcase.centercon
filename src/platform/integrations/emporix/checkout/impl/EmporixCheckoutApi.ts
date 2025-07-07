@@ -4,10 +4,10 @@ import type EmporixCartApi from '../../cart/impl/EmporixCartApi';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from '../../model/checkout';
-import type { CheckoutApi } from '../CheckoutApi';
+import type { EmporixCheckoutApi as IEmporixCheckoutApi } from '../EmporixCheckoutApi';
 
 @injectable('EmporixCheckoutApi', 'Singleton')
-class EmporixCheckoutApi implements CheckoutApi {
+class EmporixCheckoutApi implements IEmporixCheckoutApi {
   private apiClient: EmporixApiClient;
   private config: EmporixConfig;
   private cartApi: EmporixCartApi;

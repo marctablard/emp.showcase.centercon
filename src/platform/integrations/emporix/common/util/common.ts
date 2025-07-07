@@ -1,11 +1,11 @@
-import { PaginatedResponse, SearchParams } from '../../model';
+import { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 
 /**
  * Translate Search Parameters to Query and Body (for POST)
  * @param params
  * @returns { body : q-Parameter for Search-Criteria, query : Query-Parameters }
  */
-export function buildSearchQuery<T>(params: SearchParams<T>): { body: string; query: string } {
+export function buildSearchQuery<T>(params: EmporixSearchParams<T>): { body: string; query: string } {
   const queryParams = new URLSearchParams();
 
   if (params.page) {
@@ -37,9 +37,9 @@ export function buildSearchQuery<T>(params: SearchParams<T>): { body: string; qu
  * @returns PaginatedResponse object
  */
 export async function buildPaginatedResponse<T>(
-  params: SearchParams<T>,
+  params: EmporixSearchParams<T>,
   response: Response,
-): Promise<PaginatedResponse<T>> {
+): Promise<EmporixPaginatedResponse<T>> {
   const total: number = Number(response.headers.get('x-total-count')) || -1;
   const data: T[] = await response.json();
   return {

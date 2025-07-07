@@ -1,9 +1,9 @@
 import { inject } from 'inversify';
 import { l10n } from '@/lib/utils';
 import { injectable } from '@/platform/core/di/injectable';
-import type { CartApi } from '@/platform/integrations/emporix/cart/CartApi';
+import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
-import { AddCartItemRequest, UpdateCartItemRequest } from '@/platform/integrations/emporix/model';
+import { EmporixAddCartItemRequest, EmporixUpdateCartItemRequest } from '@/platform/integrations/emporix/model';
 import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
 import type { CartService } from '@/platform/services/cart/CartService';
 import type { Cart, CartItem } from '@/platform/services/model/cart/cart';
@@ -19,28 +19,14 @@ import { Media } from '../../model/common';
  */
 @injectable('CartService', 'Singleton')
 class EmporixCartService implements CartService {
-  private commonUtil: EmporixCommonUtil;
-  private cartApi: CartApi;
-  private mapper: CartMapper<EmporixCart, EmporixCartItem>;
-  private priceService: PriceService;
-  private productService: ProductService;
-  private sessionService: SessionService;
-
   constructor(
-    @inject('EmporixCommonUtil') commonUtil: EmporixCommonUtil,
-    @inject('EmporixCartApi') cartApi: CartApi,
-    @inject('EmporixCartMapper') mapper: CartMapper<EmporixCart, EmporixCartItem>,
-    @inject('SessionService') sessionService: SessionService,
-    @inject('PriceService') priceService: PriceService,
-    @inject('ProductService') productService: ProductService,
-  ) {
-    this.commonUtil = commonUtil;
-    this.cartApi = cartApi;
-    this.mapper = mapper;
-    this.priceService = priceService;
-    this.productService = productService;
-    this.sessionService = sessionService;
-  }
+    @inject('EmporixCommonUtil') private commonUtil: EmporixCommonUtil,
+    @inject('EmporixCartApi') private cartApi: EmporixCartApi,
+    @inject('EmporixCartMapper') private mapper: CartMapper<EmporixCart, EmporixCartItem>,
+    @inject('SessionService') private sessionService: SessionService,
+    @inject('PriceService') private priceService: PriceService,
+    @inject('ProductService') private productService: ProductService,
+  ) {}
 
   async createCart(currency: string, siteCode: string): Promise<string> {
     // TODO extract these information to a SiteConfigService
@@ -102,7 +88,7 @@ class EmporixCartService implements CartService {
       throw new Error('Price missing');
     }
 
-    const addItemRequest: AddCartItemRequest = {
+    const addItemRequest: EmporixAddCartItemRequest = {
       siteCode: 'main',
       itemYrn: this.commonUtil.generateProductYrn(productId),
       quantity,
@@ -137,7 +123,7 @@ class EmporixCartService implements CartService {
     if (!price) {
       throw new Error('Price missing');
     }
-    const updateRequest: UpdateCartItemRequest = {
+    const updateRequest: EmporixUpdateCartItemRequest = {
       quantity,
       price: {
         effectiveAmount: price.effectiveValue,

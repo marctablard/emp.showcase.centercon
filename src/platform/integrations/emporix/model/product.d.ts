@@ -1,4 +1,4 @@
-import { EmporixLocalizedString, Media, Metadata, Mixins } from './common';
+import { EmporixLocalizedString, EmporixMedia, EmporixMetadata, EmporixMixins } from './common';
 import { EmporixMatchedPrice as EmporixPrice } from './price';
 
 export interface EmporixLabelOverlay {
@@ -13,24 +13,24 @@ export interface EmporixLabel {
   cloudinaryUrl?: string;
   overlay?: EmporixLabelOverlay;
   description: string | EmporixLocalizedString;
-  metadata?: Metadata;
+  metadata?: EmporixMetadata;
 }
 
-export interface Product {
+export interface EmporixProduct {
   id?: string;
   yrn?: string;
   code: string;
   name: string | EmporixLocalizedString;
   description?: string | EmporixLocalizedString;
-  media?: Media[];
+  media?: EmporixMedia[];
   productType?: string;
   brandId?: string;
   labelIds?: string[];
   taxClasses?: {
     [key: string]: string;
   };
-  mixins?: Mixins;
+  mixins?: EmporixMixins;
   published?: boolean;
-  metadata?: Metadata;
+  metadata?: EmporixMetadata;
   prices?: EmporixPrice[];
 }

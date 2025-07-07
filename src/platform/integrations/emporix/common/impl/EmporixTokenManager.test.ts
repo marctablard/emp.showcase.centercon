@@ -1,5 +1,4 @@
 import { inject } from 'inversify';
-import { StoredToken } from '@/platform/integrations/types/auth';
 import type { OAuthApi } from '../../oauth/OAuthApi';
 import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 

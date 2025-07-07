@@ -1,6 +1,6 @@
 import { BatteryIncludedSearchResponse, Highlight, Preset, Product, SearchParams, Suggestion } from '../model';
 
-export interface ShopApi {
+export interface BatteryIncludedShopApi {
   /**
    * Browse products with optional search query and filters
    * @param query Search query

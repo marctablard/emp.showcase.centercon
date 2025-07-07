@@ -1,4 +1,4 @@
-import { WeatherForecast } from '../model/weather';
+import { OpenMeteoWeatherForecast } from '../model/weather';
 
 export interface OpenMeteoWeatherApi {
   /**
@@ -7,5 +7,5 @@ export interface OpenMeteoWeatherApi {
    * @param longitude The longitude coordinate
    * @returns Promise with weather forecast data
    */
-  getWeatherForecast(latitude: number, longitude: number): Promise<WeatherForecast>;
+  getWeatherForecast(latitude: number, longitude: number): Promise<OpenMeteoWeatherForecast>;
 }

@@ -2,7 +2,7 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { buildCurl } from '@/platform/core/utils/curl';
 import type { EmporixConfig } from '../../config';
-import type { TokenManager } from '../TokenManager';
+import type { EmporixTokenManager } from '../EmporixTokenManager';
 
 /**
  * Main client for interacting with Emporix APIs
@@ -11,12 +11,12 @@ import type { TokenManager } from '../TokenManager';
 @injectable('EmporixApiInvoker', 'Singleton')
 class EmporixApiInvoker {
   private config: EmporixConfig;
-  private tokenManager: TokenManager;
+  private tokenManager: EmporixTokenManager;
   private debugCurl: boolean = false;
 
   constructor(
     @inject('EmporixConfig') config: EmporixConfig,
-    @inject('EmporixTokenManager') tokenManager: TokenManager,
+    @inject('EmporixTokenManager') tokenManager: EmporixTokenManager,
   ) {
     this.config = config;
     this.tokenManager = tokenManager;

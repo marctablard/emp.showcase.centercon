@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixBrand, PaginatedResponse, SearchParams } from '@/platform/integrations/emporix/model';
+import { EmporixBrand, EmporixPaginatedResponse, EmporixSearchParams } from '@/platform/integrations/emporix/model';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import { EmporixBrandApi as IEmporixBrandApi } from '../EmporixBrandApi';
@@ -11,9 +11,7 @@ import { EmporixBrandApi as IEmporixBrandApi } from '../EmporixBrandApi';
  */
 @injectable('EmporixBrandApi', 'Singleton')
 class EmporixBrandApi implements IEmporixBrandApi {
-  constructor(@inject('EmporixApiInvoker') private apiInvoker: EmporixApiInvoker) {
-    this.apiInvoker = apiInvoker;
-  }
+  constructor(@inject('EmporixApiInvoker') private apiInvoker: EmporixApiInvoker) {}
 
   /**
    * Retrieves a list of all brands with pagination support.
@@ -21,8 +19,8 @@ class EmporixBrandApi implements IEmporixBrandApi {
    * @param pageSize The number of brands per page
    * @returns A paginated response containing brand data
    */
-  async getBrands(page?: number, pageSize?: number): Promise<PaginatedResponse<EmporixBrand>> {
-    const params: SearchParams<EmporixBrand> = {
+  async getBrands(page?: number, pageSize?: number): Promise<EmporixPaginatedResponse<EmporixBrand>> {
+    const params: EmporixSearchParams<EmporixBrand> = {
       page: page || 0,
       size: pageSize || 20,
     };

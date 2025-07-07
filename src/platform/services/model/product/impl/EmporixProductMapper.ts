@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { Mixins } from '@/platform/integrations/emporix/model';
-import { Product as EmporixProduct } from '@/platform/integrations/emporix/model/product';
+import { EmporixMixins } from '@/platform/integrations/emporix/model';
+import { EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import { LocalizedString } from '@/platform/services/model/common';
 import { GroupedSpecification, Product, ProductSpecification } from '@/platform/services/model/product';
 import type { SessionService } from '@/platform/services/session';
@@ -38,7 +38,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
     // Extract localized name and description
     const name = this.extractLocalizedText(source.name);
     const description = source.description ? this.extractLocalizedText(source.description) : '';
-    const mixins = source.mixins ? (source.mixins as Mixins) : [];
+    const mixins = source.mixins ? (source.mixins as EmporixMixins) : [];
 
     const mappedSpecs =
       Array.isArray(mixins) || !mixins.specifications?.specifications

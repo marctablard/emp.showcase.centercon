@@ -8,7 +8,7 @@ import {
  * OAuth API Interface for Emporix
  * Based on the OAuth Service OpenAPI specification
  */
-export interface OAuthApi {
+export interface EmporixOAuthApi {
   /**
    * Get an anonymous token
    * Used by the storefront to access public resources with a reading scope.

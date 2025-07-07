@@ -3,7 +3,7 @@ import { TokenManager } from '../../common/TokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
-import { Product, SearchParams } from '../../model';
+import { EmporixProduct, EmporixSearchParams } from '../../model';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixProductApi from './EmporixProductApi';
 
@@ -15,7 +15,7 @@ class TestEmporixConfig implements EmporixConfig {
   clientSecret: string = process.env.NEXT_EMPORIX_TEST_CLIENT_SECRET || '';
 }
 
-const sampleSingleProduct: Product = {
+const sampleSingleProduct: EmporixProduct = {
   id: '1',
   code: 'c1',
   name: { en: 'Test Product 1 EN' },
@@ -24,7 +24,7 @@ const sampleSingleProduct: Product = {
 };
 
 // Sample product data for tests
-const sampleProductsData: Product[] = [
+const sampleProductsData: EmporixProduct[] = [
   sampleSingleProduct,
   {
     id: '2',
@@ -91,7 +91,7 @@ describe('EmporixProductApi', () => {
   describe('searchProducts', () => {
     it('should search products with provided search parameters', async () => {
       // Setup mocks
-      const searchParams: SearchParams<Product> = {
+      const searchParams: EmporixSearchParams<EmporixProduct> = {
         page: 1,
         size: 20,
         criteria: {

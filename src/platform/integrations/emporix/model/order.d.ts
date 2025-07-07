@@ -1,9 +1,10 @@
+import { EmporixCheckoutAddress } from './checkout';
 import { EmporixAddress } from './common';
 
 /**
  * Order status types
  */
-export type OrderStatus =
+export type EmporixOrderStatus =
   | 'IN_CHECKOUT'
   | 'CREATED'
   | 'CONFIRMED'
@@ -133,7 +134,7 @@ export interface EmporixOrderCustomer {
 export interface EmporixOrder {
   id: string;
   created?: string;
-  status: OrderStatus;
+  status: EmporixOrderStatus;
   lastStatusChange?: string;
   creationDate?: string;
   entries: EmporixOrderEntry[];
@@ -156,10 +157,10 @@ export interface EmporixOrder {
 /**
  * Request to create a new order
  */
-export interface CreateOrderRequest {
+export interface EmporixCreateOrderRequest {
   cartId: string;
-  billingAddress?: EmporixAddress;
-  shippingAddress?: EmporixAddress;
+  billingAddress?: EmporixCheckoutAddress;
+  shippingAddress?: EmporixCheckoutAddress;
   customerEmail?: string;
   customerNote?: string;
   payments?: EmporixPayment[];
@@ -168,7 +169,7 @@ export interface CreateOrderRequest {
 /**
  * Response from creating an order
  */
-export interface OrderCreationResponse {
+export interface EmporixOrderCreationResponse {
   orderId: string;
   resourceLocation: string;
 }
@@ -176,10 +177,10 @@ export interface OrderCreationResponse {
 /**
  * Request to update an order
  */
-export interface UpdateOrderRequest {
-  status?: OrderStatus;
-  billingAddress?: EmporixAddress;
-  shippingAddress?: EmporixAddress;
+export interface EmporixUpdateOrderRequest {
+  status?: EmporixOrderStatus;
+  billingAddress?: EmporixCheckoutAddress;
+  shippingAddress?: EmporixCheckoutAddress;
   customerEmail?: string;
   customerNote?: string;
   payments?: EmporixPayment[];
@@ -188,7 +189,7 @@ export interface UpdateOrderRequest {
 /**
  * Order status transition
  */
-export interface OrderStatusTransition {
-  status: OrderStatus;
-  availableTransitions: OrderStatus[];
+export interface EmporixOrderStatusTransition {
+  status: EmporixOrderStatus;
+  availableTransitions: EmporixOrderStatus[];
 }

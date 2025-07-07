@@ -1,4 +1,4 @@
-import { EmporixCategory, EmporixCategoryParent, EmporixCategorySubcategory, PaginatedResponse } from '../model';
+import { EmporixCategory, EmporixCategoryParent, EmporixCategorySubcategory, EmporixPaginatedResponse } from '../model';
 
 export interface EmporixCategoryQuery {
   /**
@@ -87,7 +87,7 @@ export interface EmporixCategoryApi {
    * @param query Query parameters for filtering and pagination
    * @returns A paginated response containing category data
    */
-  getCategories(query?: EmporixCategoryQuery): Promise<PaginatedResponse<EmporixCategory>>;
+  getCategories(query?: EmporixCategoryQuery): Promise<EmporixPaginatedResponse<EmporixCategory>>;
 
   /**
    * Retrieves a specific category by its ID.
@@ -114,7 +114,7 @@ export interface EmporixCategoryApi {
     categoryId: string,
     page?: number,
     pageSize?: number,
-  ): Promise<PaginatedResponse<EmporixCategorySubcategory>>;
+  ): Promise<EmporixPaginatedResponse<EmporixCategorySubcategory>>;
 
   /**
    * Retrieves a list of categories for which the reference ID is assigned.
@@ -129,7 +129,7 @@ export interface EmporixCategoryApi {
     expandSupercategoriesIds?: boolean,
     page?: number,
     pageSize?: number,
-  ): Promise<PaginatedResponse<EmporixCategory>>;
+  ): Promise<EmporixPaginatedResponse<EmporixCategory>>;
 
   /**
    * Retrieves a category tree for a root category with a given ID.

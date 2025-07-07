@@ -1,15 +1,20 @@
-import { AddCartItemRequest, CreateCartRequest, EmporixCart, UpdateCartItemRequest } from '../model';
+import {
+  EmporixAddCartItemRequest,
+  EmporixCart,
+  EmporixCreateCartRequest,
+  EmporixUpdateCartItemRequest,
+} from '../model';
 
 /**
  * Interface for Cart API operations
  */
-export interface CartApi {
+export interface EmporixCartApi {
   /**
    * Create a new cart
    * @param createCartRequest Cart creation request
    * @returns Promise with the created cart ID
    */
-  createCart(createCartRequest: CreateCartRequest): Promise<string>;
+  createCart(createCartRequest: EmporixCreateCartRequest): Promise<string>;
 
   /**
    * Get cart by ID
@@ -39,7 +44,7 @@ export interface CartApi {
    * @param item Item to add
    * @returns Promise with the created item ID
    */
-  addItemToCart(cartId: string, item: AddCartItemRequest): Promise<string>;
+  addItemToCart(cartId: string, item: EmporixAddCartItemRequest): Promise<string>;
 
   /**
    * Get all items in a cart
@@ -55,7 +60,7 @@ export interface CartApi {
    * @param updateRequest Update request with quantity and optional price information
    * @returns Promise resolving when update is complete
    */
-  updateCartItemQuantity(cartId: string, itemId: string, updateRequest: UpdateCartItemRequest): Promise<void>;
+  updateCartItemQuantity(cartId: string, itemId: string, updateRequest: EmporixUpdateCartItemRequest): Promise<void>;
 
   /**
    * Remove item from cart

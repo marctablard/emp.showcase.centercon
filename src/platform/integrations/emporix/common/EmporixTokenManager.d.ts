@@ -2,7 +2,7 @@
  * TokenManager for handling Emporix API tokens
  * Manages token caching and refreshing
  */
-export interface TokenManager {
+export interface EmporixTokenManager {
   /**
    * Get a valid anonymous token, refreshing if necessary
    * @param tenant The tenant ID

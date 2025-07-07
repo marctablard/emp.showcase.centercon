@@ -1,4 +1,4 @@
-import { EmporixLocalizedString, Media, Metadata, Mixins } from './common';
+import { EmporixLocalizedString, EmporixMedia, EmporixMetadata, EmporixMixins } from './common';
 
 export interface EmporixCategory {
   id: string;
@@ -12,9 +12,9 @@ export interface EmporixCategory {
   position?: number;
   parentId?: string;
   supercategoriesIds?: string[];
-  media?: Media[];
-  metadata?: Metadata;
-  mixins?: Mixins;
+  media?: EmporixMedia[];
+  metadata?: EmporixMetadata;
+  mixins?: EmporixMixins;
   customAttributes?: {
     [key: string]: any;
   };

@@ -5,7 +5,7 @@ import { omit } from 'lodash';
 import { injectable } from '@/platform/core/di/injectable';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import { EmporixCustomerTokenResponse } from '../../model/oauth';
-import type { OAuthApi } from '../../oauth/OAuthApi';
+import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
 import { TokenStore } from './EmporixTokenManagerAbstract';
 import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
 
@@ -13,7 +13,7 @@ import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
 class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
   private ssrToken: Record<string, TokenStore> = {};
 
-  constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
+  constructor(@inject('EmporixOAuthApi') oauthApi: EmporixOAuthApi) {
     super(oauthApi);
   }
 

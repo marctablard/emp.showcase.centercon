@@ -8,7 +8,7 @@ import type {
 /**
  * Interface for Emporix Price API
  */
-export interface PriceApi {
+export interface EmporixPriceApi {
   /**
    * Configuration for the Emporix API
    */

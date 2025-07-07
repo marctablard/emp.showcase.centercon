@@ -1,4 +1,4 @@
-import { EmporixFindSiteRequest, EmporixShippingMethod, EmporixSite } from '../model/shipping';
+import { EmporixFindSiteRequest, EmporixShippingMethod, EmporixShippingSite } from '../model/shipping';
 
 /**
  * Interface for shipping API operations
@@ -23,5 +23,5 @@ export interface EmporixShippingApi {
    * Find shipping sites based on location
    * @param request - The find site request containing postal code and country
    */
-  findSite(request: EmporixFindSiteRequest): Promise<EmporixSite[]>;
+  findSite(request: EmporixFindSiteRequest): Promise<EmporixShippingSite[]>;
 }

@@ -1,5 +1,5 @@
 import { Container } from 'inversify';
-import { TokenManager } from '../../common/TokenManager';
+import { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
@@ -36,14 +36,14 @@ describe('EmporixCustomerApi', () => {
   let customerApi: EmporixCustomerApi;
   let oauthApi: EmporixOAuthApi;
   let apiInvoker: EmporixApiInvoker;
-  let tokenManager: TokenManager;
+  let tokenManager: EmporixTokenManager;
 
   // Set up the DI container and create instances before all tests
   beforeAll(() => {
     // Create a new container for dependency injection
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').toConstantValue(new TestEmporixConfig());
-    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager).inSingletonScope();
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager).inSingletonScope();
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker).inSingletonScope();
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi).inSingletonScope();
     container.bind<EmporixCustomerApi>('EmporixCustomerApi').to(EmporixCustomerApi).inSingletonScope();
@@ -52,7 +52,7 @@ describe('EmporixCustomerApi', () => {
     customerApi = container.get<EmporixCustomerApi>('EmporixCustomerApi');
     oauthApi = container.get<EmporixOAuthApi>('EmporixOAuthApi');
     apiInvoker = container.get<EmporixApiInvoker>('EmporixApiInvoker');
-    tokenManager = container.get<TokenManager>('EmporixTokenManager');
+    tokenManager = container.get<EmporixTokenManager>('EmporixTokenManager');
 
     // Clear any existing tokens to ensure a fresh session
     tokenManager.clearTokens(tenant);
@@ -126,7 +126,6 @@ describe('EmporixCustomerApi', () => {
 
         // Store the ID for cleanup or further tests
         const addressId = result.id;
-        console.log(`Created test address with ID: ${addressId}`);
 
         // Step 2: Verify the address was added by retrieving all addresses
         const addresses = await customerApi.getCustomerAddresses();
@@ -142,7 +141,6 @@ describe('EmporixCustomerApi', () => {
         let deleteError = null;
         try {
           await customerApi.deleteCustomerAddress(addressId);
-          console.log('Address deletion executed successfully');
         } catch (error) {
           console.log('Error deleting address:', error);
           deleteError = error;
@@ -153,8 +151,6 @@ describe('EmporixCustomerApi', () => {
         const addressesAfterDelete = await customerApi.getCustomerAddresses();
         const addressExists = addressesAfterDelete.some((addr) => addr.id === addressId);
         expect(addressExists).toBe(false);
-
-        console.log(`Successfully deleted test address with ID: ${addressId}`);
       } catch (error) {
         console.error('Error in address creation/deletion test:', error);
         throw error;
@@ -175,7 +171,6 @@ describe('EmporixCustomerApi', () => {
         expect(createResult).toBeDefined();
         expect(createResult.id).toBeDefined();
         const addressId = createResult.id;
-        console.log(`Created test address for update with ID: ${addressId}`);
 
         // Step 2: Update the address
         const updatedData: Partial<EmporixCustomerAddress> = {
@@ -189,7 +184,6 @@ describe('EmporixCustomerApi', () => {
         };
 
         await customerApi.updateCustomerAddress(addressId, updatedData);
-        console.log(`Updated address with ID: ${addressId}`);
 
         // Step 3: Verify the update was successful
         const addresses = await customerApi.getCustomerAddresses();
@@ -221,8 +215,6 @@ describe('EmporixCustomerApi', () => {
         const addressesAfterDelete = await customerApi.getCustomerAddresses();
         const addressExists = addressesAfterDelete.some((addr) => addr.id === addressId);
         expect(addressExists).toBe(false);
-
-        console.log(`Successfully completed address update test for ID: ${addressId}`);
       } catch (error) {
         console.error('Error in address update test:', error);
         throw error;
@@ -263,7 +255,8 @@ describe('EmporixCustomerApi', () => {
       console.log('Tokens cleared after tests');
     }, 10000);
 
-    it('should change password and then revert back to original', async () => {
+    // TODO needs rework, since it must use a temporary Customer for this to not interfere with other Tests
+    it.skip('should change password and then revert back to original', async () => {
       // Skip this test if we don't have valid credentials
       if (!originalUsername || !originalPassword) {
         console.warn('Skipping password change test due to missing credentials');
@@ -280,7 +273,6 @@ describe('EmporixCustomerApi', () => {
         };
 
         await customerApi.changePassword(firstChangeData);
-        console.log('Successfully changed password to temporary password');
 
         // Step 2: Verify we can login with the new password
         // First clear the token to force a new login
@@ -288,7 +280,6 @@ describe('EmporixCustomerApi', () => {
 
         // Try logging in with the new password
         await customerApi.login(originalUsername, tempPassword);
-        console.log('Successfully verified login with temporary password');
 
         // Step 3: Change password back to original
         const secondChangeData: PasswordChangeDto = {
@@ -297,7 +288,6 @@ describe('EmporixCustomerApi', () => {
         };
 
         await customerApi.changePassword(secondChangeData);
-        console.log('Successfully reverted password to original');
 
         // Step 4: Verify we can login with the original password again
         // Clear token to force a new login
@@ -305,7 +295,6 @@ describe('EmporixCustomerApi', () => {
 
         // Try logging in with the original password
         await customerApi.login(originalUsername, originalPassword);
-        console.log('Successfully verified login with original password');
       } catch (error) {
         console.error('Error in password change test:', error);
 
@@ -321,7 +310,6 @@ describe('EmporixCustomerApi', () => {
             newPassword: originalPassword,
           };
           await customerApi.changePassword(emergencyChangeData);
-          console.log('Emergency password restoration completed');
         } catch (restoreError) {
           console.error('Failed emergency password restoration:', restoreError);
         }
@@ -349,12 +337,10 @@ describe('EmporixCustomerApi', () => {
 
         // Login with the test credentials
         await customerApi.login(username, password);
-        console.log('Successfully logged in for profile management tests');
         isAuthenticated = true;
 
         // Get original profile data to restore later
         originalProfile = await customerApi.getCustomerProfile();
-        console.log('Original profile data saved for restoration');
       } catch (error) {
         console.error('Error during profile test setup:', error);
         throw error;
@@ -373,7 +359,6 @@ describe('EmporixCustomerApi', () => {
             company: originalProfile.company,
             preferredLanguage: originalProfile.preferredLanguage,
           });
-          console.log('Original profile data restored');
         } catch (error) {
           console.error('Error restoring original profile data:', error);
         }
@@ -381,7 +366,6 @@ describe('EmporixCustomerApi', () => {
 
       // Clear tokens
       await tokenManager.clearTokens(tenant);
-      console.log('Tokens cleared after profile tests');
     }, 10000);
 
     it('should update customer profile and verify changes', async () => {
@@ -391,8 +375,6 @@ describe('EmporixCustomerApi', () => {
       }
 
       try {
-        console.log('Starting profile update test...');
-
         // Step 1: Create profile update data
         const timestamp = Date.now();
         const updateData = {
@@ -405,7 +387,6 @@ describe('EmporixCustomerApi', () => {
 
         // Step 2: Update the profile
         await customerApi.updateCustomerProfile(updateData);
-        console.log('Profile update request completed');
 
         // Step 3: Verify the profile was updated by retrieving it
         const updatedProfile = await customerApi.getCustomerProfile();
@@ -416,8 +397,6 @@ describe('EmporixCustomerApi', () => {
         expect(updatedProfile.contactPhone).toBe(updateData.contactPhone);
         expect(updatedProfile.company).toBe(updateData.company);
         expect(updatedProfile.preferredLanguage).toBe(updateData.preferredLanguage);
-
-        console.log('Successfully verified profile updates');
       } catch (error) {
         console.error('Error in profile update test:', error);
         fail(`Profile update test failed: ${error}`);

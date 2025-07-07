@@ -1,4 +1,4 @@
-import { EmporixLocalizedString, Metadata } from './common';
+import { EmporixLocalizedString, EmporixMetadata } from './common';
 
 export interface EmporixBrand {
   id: string;
@@ -8,5 +8,5 @@ export interface EmporixBrand {
   localizedDescription?: EmporixLocalizedString;
   image?: string;
   cloudinaryUrl?: string;
-  metadata?: Metadata;
+  metadata?: EmporixMetadata;
 }

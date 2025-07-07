@@ -1,5 +1,10 @@
 import { EmporixLocalizedString, EmporixMonetaryAmount } from './common';
 
+export interface EmporixShippingSite {
+  id: string;
+  zones: EmporixShippingZone[];
+}
+
 export interface EmporixShippingZone {
   id: string;
   name: EmporixLocalizedString;
@@ -22,18 +27,4 @@ export interface EmporixShippingMethod {
   name: EmporixLocalizedString;
   maxOrderValue?: EmporixMonetaryAmount;
   fees: EmporixShippingFee[];
-}
-
-export interface EmporixSite {
-  id: string;
-  zones: EmporixShippingZone[];
-}
-
-export interface EmporixSites {
-  items: EmporixSite[];
-}
-
-export interface EmporixFindSiteRequest {
-  postalCode: string;
-  country: string;
 }

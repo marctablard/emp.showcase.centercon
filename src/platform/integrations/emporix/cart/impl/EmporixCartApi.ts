@@ -3,18 +3,18 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import {
-  AddCartItemRequest,
-  CreateCartRequest,
-  CreatedCart,
-  CreatedCartItem,
+  EmporixAddCartItemRequest,
   EmporixCart,
   EmporixCartItem,
-  UpdateCartItemRequest,
+  EmporixCreateCartRequest,
+  EmporixCreatedCart,
+  EmporixCreatedCartItem,
+  EmporixUpdateCartItemRequest,
 } from '../../model';
-import type { CartApi } from '../CartApi';
+import type { EmporixCartApi as IEmporixCartApi } from '../EmporixCartApi';
 
 @injectable('EmporixCartApi', 'Singleton')
-class EmporixCartApi implements CartApi {
+class EmporixCartApi implements IEmporixCartApi {
   private apiClient: EmporixApiClient;
   private config: EmporixConfig;
 
@@ -26,7 +26,7 @@ class EmporixCartApi implements CartApi {
     this.config = config;
   }
 
-  async createCart(createCartRequest: CreateCartRequest): Promise<string> {
+  async createCart(createCartRequest: EmporixCreateCartRequest): Promise<string> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts`,
       {
@@ -46,7 +46,7 @@ class EmporixCartApi implements CartApi {
       throw new Error(`Failed to create cart: ${response.statusText} ${errorDetails}`);
     }
 
-    const createdCart: CreatedCart = await response.json();
+    const createdCart: EmporixCreatedCart = await response.json();
     // TODO needs to be removed when Mixin Bug is done
     await this.updateCart(createdCart.cartId, {
       mixins: {
@@ -117,7 +117,7 @@ class EmporixCartApi implements CartApi {
     return await response.json();
   }
 
-  async addItemToCart(cartId: string, item: AddCartItemRequest): Promise<string> {
+  async addItemToCart(cartId: string, item: EmporixAddCartItemRequest): Promise<string> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}/items?siteCode=${item.siteCode}`,
       {
@@ -136,7 +136,7 @@ class EmporixCartApi implements CartApi {
       throw new Error(`Failed to add item to cart: ${response.statusText} ${errorDetails}`);
     }
 
-    const createdItem: CreatedCartItem = await response.json();
+    const createdItem: EmporixCreatedCartItem = await response.json();
     return createdItem.itemId;
   }
 
@@ -155,7 +155,11 @@ class EmporixCartApi implements CartApi {
     return await response.json();
   }
 
-  async updateCartItemQuantity(cartId: string, itemId: string, updateRequest: UpdateCartItemRequest): Promise<void> {
+  async updateCartItemQuantity(
+    cartId: string,
+    itemId: string,
+    updateRequest: EmporixUpdateCartItemRequest,
+  ): Promise<void> {
     const queryParams = new URLSearchParams();
     queryParams.append('partial', 'true');
 

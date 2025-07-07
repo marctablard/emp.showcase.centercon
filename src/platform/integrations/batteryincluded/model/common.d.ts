@@ -1,4 +1,4 @@
-import { Media as EmporixMedia } from '@/platform/integrations/emporix/model/common';
+import { EmporixMedia } from '@/platform/integrations/emporix/model/common';
 
 export interface BatteryIncludedSearchParams<T> {
   query?: string;

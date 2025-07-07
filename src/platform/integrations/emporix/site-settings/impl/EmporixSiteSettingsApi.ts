@@ -3,7 +3,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
-import { PaginatedResponse, SearchParams } from '../../model';
+import { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 import { EmporixSite } from '../../model/site-settings';
 import { EmporixSiteSettingsApi as IEmporixSiteSettingsApi } from '../EmporixSiteSettingsApi';
 
@@ -18,9 +18,9 @@ class EmporixSiteSettingsApi implements IEmporixSiteSettingsApi {
   }
 
   async getSites(
-    searchParams: SearchParams<EmporixSite>,
+    searchParams: EmporixSearchParams<EmporixSite>,
     includeInactive?: boolean,
-  ): Promise<PaginatedResponse<EmporixSite>> {
+  ): Promise<EmporixPaginatedResponse<EmporixSite>> {
     const { query } = buildSearchQuery(searchParams);
     const queryParams = new URLSearchParams(query);
     if (includeInactive) {

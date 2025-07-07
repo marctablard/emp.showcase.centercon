@@ -1,4 +1,4 @@
-import { Metadata } from './common';
+import { EmporixMetadata, EmporixMixins } from './common';
 import { EmporixPaymentModeFrontend, EmporixPaymentSiteSetting } from './payment';
 
 export interface EmporixPaymentSiteSetting {
@@ -7,7 +7,7 @@ export interface EmporixPaymentSiteSetting {
   serviceType: string;
   serviceUrl?: string;
   active: boolean;
-  configuration?: Record<string, string>;
+  configuration?: EmporixMixins;
 }
 
 /**
@@ -33,6 +33,6 @@ export interface EmporixSite {
   shipToCountries?: string[];
   includesTax?: boolean;
   cartCalculationScale?: number;
-  mixins?: Record<string, any>;
-  metadata?: Metadata;
+  mixins?: EmporixMixins;
+  metadata?: EmporixMetadata;
 }
