@@ -16,7 +16,7 @@ As an example we illustrate how we handle state-management for products.
 
 ### Product Store
 
-The product store is implemented in `src/stores/product/products-store.ts` and provides the following functionality:
+The product store is implemented in `src/stores/products-store.ts` and provides the following functionality:
 
 ```typescript
 export type ProductState = {
