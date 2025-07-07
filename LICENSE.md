@@ -77,8 +77,11 @@ This license is governed by the laws of Switzerland, without regard to conflict 
 For questions, please contact:
 
 Emporix AG
+
 Bundesplatz 16
+
 6300 Zug
+
 Switzerland
 
 Website: https://www.emporix.com
@@ -86,4 +89,4 @@ Contact: info@emporix.com
 
 ---
 
-© [Year] [Your Company Name]. All rights reserved.
+© 2025 Emporix AG. All rights reserved.
