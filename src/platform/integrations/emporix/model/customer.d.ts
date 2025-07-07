@@ -1,4 +1,4 @@
-import type { EmporixAddress } from './common';
+import type { EmporixAddress, EmporixMetadata, EmporixMixins } from './common';
 
 /**
  * Customer domain model
@@ -16,13 +16,13 @@ export interface EmporixCustomer {
   preferredLanguage?: string;
   preferredCurrency?: string;
   preferredSite?: string;
-  accounts?: AccountId[];
+  accounts?: EmporixAccountId[];
   addresses?: EmporixAddress[];
   defaultAddress?: EmporixAddress;
   businessModel?: 'B2B' | 'B2C';
   b2b?: EmporixB2Binfo;
-  mixins?: Record<string, any>;
-  metadata?: DefaultDtoMetadata;
+  mixins?: EmporixMixins;
+  metadata?: EmporixMetadata;
   lastLogin?: string;
 }
 
@@ -33,12 +33,9 @@ export interface EmporixSignupRequest {
   customerAddress?: EmporixAddress;
 }
 
-/**
- * Account identifier
- */
-export interface AccountId {
-  id: string;
-  providerId?: string;
+export interface EmporixPasswordChangeRequest {
+  token: string;
+  password: string;
 }
 
 /**
@@ -61,6 +58,11 @@ export interface EmporixLegalEntity {
   contactAssignmentId: string;
 }
 
+export interface EmporixAccountId {
+  id: string;
+  providerId?: string;
+}
+
 export interface EmporixCustomerSignupDto {
   email: string;
   password: string;
@@ -73,7 +75,73 @@ export interface EmporixCustomerSignupDto {
   preferredCurrency?: string;
   preferredSite?: string;
   businessModel?: 'B2B' | 'B2C';
-  b2b?: {
-    companyRegistrationId?: string;
-  };
+  b2b?: Omit<EmporixB2Binfo, 'legalEntities'>;
+}
+
+export interface EmporixLegalEntity {
+  id?: string;
+  name: string;
+  type: 'COMPANY' | 'SUBSIDIARY';
+  parentId?: string;
+  accountLimit?: EmporixAccountLimit;
+  legalInfo?: EmporixLegalInfo;
+  customerGroups?: EmporixCustomerGroup[];
+  entitiesAddresses?: EmporixResourceId[];
+  approvalGroup?: EmporixResourceId[];
+  metadata?: EmporixMetadata;
+  mixins?: EmporixMixins;
+}
+
+export interface EmporixContactAssignment {
+  id?: string;
+  legalEntity: EmporixResourceId;
+  customer: EmporixResourceId;
+  type: 'PRIMARY' | 'BILLING' | 'LOGISTICS';
+  primary?: boolean;
+  metadata?: EmporixMetadata;
+  mixins?: EmporixMixins;
+}
+
+export interface EmporixLocation {
+  id?: string;
+  name: string;
+  type: 'HEADQUARTER' | 'WAREHOUSE' | 'OFFICE';
+  contactDetails: EmporixContactDetails;
+  metadata?: EmporixMetadata;
+  mixins?: EmporixMixins;
+}
+
+export interface EmporixAccountLimit {
+  currency: string;
+  value: number;
+}
+
+export interface EmporixLegalInfo {
+  legalName: string;
+  registrationDate: string;
+  taxRegistrationNumber: string;
+  registrationAgency: string;
+  countryOfRegistration: string;
+  registrationId: string;
+}
+
+export interface EmporixCustomerGroup {
+  id: string;
+  name: EmporixLocalizedString;
+}
+
+export interface EmporixResourceId {
+  id: string;
+}
+
+export interface EmporixContactDetails {
+  emails?: string[];
+  phones?: string[];
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postcode?: string;
+  countryCode?: string;
+  tags?: string[];
 }

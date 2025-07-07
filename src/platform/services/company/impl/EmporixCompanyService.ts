@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { CustomerManagementApi } from '@/platform/integrations/emporix/customer/CustomerManagementApi';
+import type { EmporixCustomerManagementApi } from '@/platform/integrations/emporix/customer/EmporixCustomerManagementApi';
 import type { CustomerService } from '../../customer/CustomerService';
 import { Company } from '../../model/company/company';
 import type { CompanyService } from '../CompanyService';
@@ -9,7 +9,7 @@ import type { CompanyService } from '../CompanyService';
 export class EmporixCompanyService implements CompanyService {
   constructor(
     @inject('EmporixCustomerManagementApi')
-    private readonly customerManagementApi: CustomerManagementApi,
+    private readonly customerManagementApi: EmporixCustomerManagementApi,
     @inject('CustomerService')
     private readonly customerService: CustomerService,
   ) {}

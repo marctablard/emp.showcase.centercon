@@ -7,13 +7,13 @@ import type {
   EmporixMatchPricesRequest,
   EmporixMatchedPrice,
 } from '../../model/price';
-import type { PriceApi } from '../PriceApi';
+import type { EmporixPriceApi as IEmporixPriceApi } from '../EmporixPriceApi';
 
 /**
  * Implementation of the Emporix Price API
  */
 @injectable('EmporixPriceApi', 'Singleton')
-class EmporixPriceApi implements PriceApi {
+class EmporixPriceApi implements IEmporixPriceApi {
   readonly config: EmporixConfig;
   private apiClient: EmporixApiInvoker;
 

@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import type { CustomerApi } from '@/platform/integrations/emporix/customer/CustomerApi';
+import type { EmporixCustomerApi } from '@/platform/integrations/emporix/customer/EmporixCustomerApi';
 import { EmporixAddress } from '@/platform/integrations/emporix/model';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
@@ -16,7 +16,7 @@ const ANONYMOUS_CUSTOMER_ID = '00000000';
 @injectable('CustomerService', 'Singleton')
 export class EmporixCustomerService implements CustomerService {
   constructor(
-    @inject('EmporixCustomerApi') private customerApi: CustomerApi,
+    @inject('EmporixCustomerApi') private customerApi: EmporixCustomerApi,
     @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,
     @inject('EmporixAddressMapper') private addressMapper: EmporixAddressMapper,
   ) {}

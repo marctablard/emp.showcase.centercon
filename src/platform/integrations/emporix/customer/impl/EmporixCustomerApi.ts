@@ -3,12 +3,17 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
 import type { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import type { EmporixConfig } from '../../config';
-import type { EmporixCustomer, EmporixCustomerAddress, EmporixSignupRequest } from '../../model/customer';
+import type {
+  EmporixCustomer,
+  EmporixCustomerAddress,
+  EmporixPasswordChangeRequest,
+  EmporixSignupRequest,
+} from '../../model/customer';
 import { EmporixSessionContext } from '../../model/session-context';
-import { CustomerApi, PasswordChangeDto } from '../CustomerApi';
+import type { EmporixCustomerApi as IEmporixCustomerApi } from '../EmporixCustomerApi';
 
 @injectable('EmporixCustomerApi', 'Singleton')
-class EmporixCustomerApi implements CustomerApi {
+class EmporixCustomerApi implements IEmporixCustomerApi {
   constructor(
     @inject('EmporixTokenManager') private readonly tokenManager: EmporixTokenManager,
     @inject('EmporixApiInvoker') private readonly apiInvoker: EmporixApiInvoker,
@@ -288,7 +293,7 @@ class EmporixCustomerApi implements CustomerApi {
     return response.json();
   }
 
-  async changePassword(passwordData: PasswordChangeDto): Promise<void> {
+  async changePassword(passwordData: EmporixPasswordChangeRequest): Promise<void> {
     const url = `customer/${this.config.tenant}/password/change`;
 
     const response = await this.apiInvoker.authenticatedFetch(

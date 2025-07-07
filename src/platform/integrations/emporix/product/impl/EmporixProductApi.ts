@@ -4,17 +4,14 @@ import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
 import { EmporixPaginatedResponse, EmporixProduct, EmporixSearchParams } from '../../model';
-import { ProductApi } from '../ProductApi';
+import { EmporixProductApi as IEmporixProductApi } from '../EmporixProductApi';
 
 @injectable('EmporixProductApi', 'Singleton')
-class EmporixProductApi implements ProductApi {
+class EmporixProductApi implements IEmporixProductApi {
   constructor(
     @inject('EmporixApiInvoker') private apiClient: EmporixApiClient,
     @inject('EmporixConfig') private config: EmporixConfig,
-  ) {
-    this.apiClient = apiClient;
-    this.config = config;
-  }
+  ) {}
 
   async getProducts(page?: number, pageSize?: number): Promise<EmporixPaginatedResponse<EmporixProduct>> {
     const params: EmporixSearchParams<EmporixProduct> = {

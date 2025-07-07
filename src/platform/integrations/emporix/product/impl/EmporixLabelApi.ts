@@ -11,9 +11,7 @@ import { EmporixLabelApi as IEmporixLabelApi } from '../EmporixLabelApi';
  */
 @injectable('EmporixLabelApi', 'Singleton')
 class EmporixLabelApi implements IEmporixLabelApi {
-  constructor(@inject('EmporixApiInvoker') private apiInvoker: EmporixApiInvoker) {
-    this.apiInvoker = apiInvoker;
-  }
+  constructor(@inject('EmporixApiInvoker') private apiInvoker: EmporixApiInvoker) {}
 
   /**
    * Retrieves a list of all labels with pagination support.

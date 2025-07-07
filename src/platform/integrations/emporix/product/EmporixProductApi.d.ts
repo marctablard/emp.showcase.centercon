@@ -1,6 +1,6 @@
 import { PaginatedResponse, Product } from './model';
 
-export interface ProductApi {
+export interface EmporixProductApi {
   /**
    * Retrieves a specified product's details.
    * @link https://developer.emporix.io/docs/openapi/product/#operation/GET-product-retrieve-product

@@ -2,27 +2,17 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import type {
-  ContactAssignment,
-  ContactAssignmentCreate,
-  ContactAssignmentUpdate,
-  CustomerManagementApi,
-  LegalEntity,
-  LegalEntityCreate,
-  LegalEntityUpdate,
-  Location,
-  LocationCreate,
-  LocationUpdate,
-} from '../CustomerManagementApi.d';
+import { EmporixContactAssignment, EmporixLegalEntity, EmporixLocation } from '../../model';
+import type { EmporixCustomerManagementApi as IEmporixCustomerManagementApi } from '../EmporixCustomerManagementApi';
 
 @injectable('EmporixCustomerManagementApi', 'Singleton')
-class EmporixCustomerManagementApi implements CustomerManagementApi {
+class EmporixCustomerManagementApi implements IEmporixCustomerManagementApi {
   constructor(
     @inject('EmporixApiInvoker') private readonly apiClient: EmporixApiClient,
     @inject('EmporixConfig') private readonly config: EmporixConfig,
   ) {}
 
-  async getContactAssignmentsByCustomerId(customerId: string): Promise<ContactAssignment[]> {
+  async getContactAssignmentsByCustomerId(customerId: string): Promise<EmporixContactAssignment[]> {
     const url = `/${this.config.tenant}/contact-assignments?customerId=${encodeURIComponent(customerId)}`;
     const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'session');
     if (!response.ok)
@@ -30,7 +20,7 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
     return response.json();
   }
 
-  async createLegalEntity(data: LegalEntityCreate): Promise<LegalEntity> {
+  async createLegalEntity(data: EmporixLegalEntity): Promise<EmporixLegalEntity> {
     const url = `/${this.config.tenant}/legal-entities`;
     const response = await this.apiClient.authenticatedFetch(
       url,
@@ -41,21 +31,21 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
     return response.json();
   }
 
-  async getLegalEntities(): Promise<LegalEntity[]> {
+  async getLegalEntities(): Promise<EmporixLegalEntity[]> {
     const url = `/${this.config.tenant}/legal-entities`;
     const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'session');
     if (!response.ok) throw new Error(`Failed to retrieve legal entities: ${response.statusText}`);
     return response.json();
   }
 
-  async getLegalEntityById(legalEntityId: string): Promise<LegalEntity> {
+  async getLegalEntityById(legalEntityId: string): Promise<EmporixLegalEntity> {
     const url = `customer-management/${this.config.tenant}/legal-entities/${legalEntityId}`;
     const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'service');
     if (!response.ok) throw new Error(`Failed to retrieve legal entity: ${response.statusText}`);
     return response.json();
   }
 
-  async updateLegalEntity(id: string, legalEntity: LegalEntityUpdate): Promise<LegalEntity> {
+  async updateLegalEntity(id: string, legalEntity: EmporixLegalEntity): Promise<EmporixLegalEntity> {
     const url = `/${this.config.tenant}/legal-entities/${id}`;
     const response = await this.apiClient.authenticatedFetch(
       url,
@@ -73,7 +63,7 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
       throw new Error(`Failed to delete legal entity: ${response.statusText}`);
   }
 
-  async createContactAssignment(data: ContactAssignmentCreate): Promise<ContactAssignment> {
+  async createContactAssignment(data: EmporixContactAssignment): Promise<EmporixContactAssignment> {
     const url = `/${this.config.tenant}/contact-assignments`;
     const response = await this.apiClient.authenticatedFetch(
       url,
@@ -84,14 +74,14 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
     return response.json();
   }
 
-  async getContactAssignments(): Promise<ContactAssignment[]> {
+  async getContactAssignments(): Promise<EmporixContactAssignment[]> {
     const url = `/${this.config.tenant}/contact-assignments`;
     const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'session');
     if (!response.ok) throw new Error(`Failed to retrieve contact assignments: ${response.statusText}`);
     return response.json();
   }
 
-  async getContactAssignmentById(contactAssignmentId: string): Promise<ContactAssignment> {
+  async getContactAssignmentById(contactAssignmentId: string): Promise<EmporixContactAssignment> {
     const url = `/${this.config.tenant}/contact-assignments/${contactAssignmentId}`;
     const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'session');
     if (!response.ok) throw new Error(`Failed to retrieve contact assignment: ${response.statusText}`);
@@ -100,8 +90,8 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
 
   async updateContactAssignment(
     contactAssignmentId: string,
-    data: ContactAssignmentUpdate,
-  ): Promise<ContactAssignment> {
+    data: EmporixContactAssignment,
+  ): Promise<EmporixContactAssignment> {
     const url = `/${this.config.tenant}/contact-assignments/${contactAssignmentId}`;
     const response = await this.apiClient.authenticatedFetch(
       url,
@@ -119,7 +109,7 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
       throw new Error(`Failed to delete contact assignment: ${response.statusText}`);
   }
 
-  async createLocation(data: LocationCreate): Promise<Location> {
+  async createLocation(data: EmporixLocation): Promise<EmporixLocation> {
     const url = `/${this.config.tenant}/locations`;
     const response = await this.apiClient.authenticatedFetch(
       url,
@@ -130,7 +120,7 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
     return response.json();
   }
 
-  async getLocations(): Promise<Location[]> {
+  async getLocations(): Promise<EmporixLocation[]> {
     const url = `/${this.config.tenant}/locations`;
     const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'session');
     if (!response.ok) throw new Error(`Failed to retrieve locations: ${response.statusText}`);
@@ -144,7 +134,7 @@ class EmporixCustomerManagementApi implements CustomerManagementApi {
     return response.json();
   }
 
-  async updateLocation(locationId: string, data: LocationUpdate): Promise<Location> {
+  async updateLocation(locationId: string, data: EmporixLocation): Promise<EmporixLocation> {
     const url = `/${this.config.tenant}/locations/${locationId}`;
     const response = await this.apiClient.authenticatedFetch(
       url,

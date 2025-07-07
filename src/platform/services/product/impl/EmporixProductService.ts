@@ -4,7 +4,7 @@ import { EmporixLabel } from '@/platform/integrations/emporix/model';
 import { EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import type { EmporixBrandApi } from '@/platform/integrations/emporix/product/EmporixBrandApi';
 import type { EmporixLabelApi } from '@/platform/integrations/emporix/product/EmporixLabelApi';
-import type { ProductApi } from '@/platform/integrations/emporix/product/ProductApi';
+import type { EmporixProductApi } from '@/platform/integrations/emporix/product/EmporixProductApi';
 import type { Paginated } from '@/platform/services/model/common';
 import type { Product, ProductLabel } from '@/platform/services/model/product';
 import type { ProductService } from '@/platform/services/product/ProductService';
@@ -20,7 +20,7 @@ import type { ProductMapper } from '../../model/product/ProductMapper';
 class EmporixProductService implements ProductService {
   constructor(
     @inject('EmporixProductMapper') private productMapper: ProductMapper<EmporixProduct>,
-    @inject('EmporixProductApi') private productApi: ProductApi,
+    @inject('EmporixProductApi') private productApi: EmporixProductApi,
     @inject('EmporixBrandApi') private brandApi: EmporixBrandApi,
     @inject('EmporixLabelApi') private labelApi: EmporixLabelApi,
     @inject('CategoryService') private categoryService: CategoryService,

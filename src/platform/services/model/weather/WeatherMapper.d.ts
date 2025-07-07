@@ -1,7 +1,4 @@
-import {
-  WeatherData as OpenMeteoWeatherData,
-  WeatherForecast as OpenMeteoWeatherForecast,
-} from '@/platform/integrations/openmeteo/model/weather';
+import { OpenMeteoWeatherData, OpenMeteoWeatherForecast } from '@/platform/integrations/openmeteo/model/weather';
 import { Mapper } from '../Mapper';
 import { Weather, WeatherForecast } from './index';
 
