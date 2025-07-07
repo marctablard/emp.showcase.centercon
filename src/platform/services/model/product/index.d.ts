@@ -23,10 +23,11 @@ export interface ProductSpecification {
 }
 
 export interface GroupedSpecification {
-  groupName: string;
+  groupName: string | LocalizedString;
   item: Array<{
-    label: string;
-    value: string;
+    label: string | LocalizedString;
+    value: string | LocalizedString;
+    unit: string | LocalizedString;
   }>;
 }
 
