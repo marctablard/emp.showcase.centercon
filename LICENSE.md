@@ -76,15 +76,12 @@ This license is governed by the laws of Switzerland, without regard to conflict 
 
 For questions, please contact:
 
-Emporix AG
-
-Bundesplatz 16
-
-6300 Zug
-
+Emporix AG  
+Bundesplatz 16  
+6300 Zug  
 Switzerland
 
-Website: https://www.emporix.com
+Website: https://www.emporix.com  
 Contact: info@emporix.com
 
 ---
