@@ -196,6 +196,48 @@ The watch mode feature:
 2. Uses the Chokidar library for reliable file monitoring
 3. Only regenerates containers when actual changes are detected
 
+## Using Services in Client Components
+
+To access services from the DI container in client components or hooks, use the `getService` helper function:
+
+```typescript
+// src/hooks/example/useMyHook.ts
+'use client';
+
+import { getService } from '@/lib/client/service';
+import type { MyService } from '@/platform/services/my-service/MyService';
+
+export function useMyHook() {
+  // Get the service from the DI container
+  const myService = getService<MyService>('MyService');
+  
+  // Use the service
+  const result = myService.doSomething();
+  
+  return { result };
+}
+```
+
+The `getService` function is a simple wrapper around the client container's `get` method:
+
+```typescript
+// src/lib/client/service.ts
+'use client';
+
+import client from '@/platform/client';
+
+export const getService = <T>(serviceId: string): T => {
+  return client.get<T>(serviceId);
+};
+```
+
+This approach ensures that:
+
+1. The correct implementation is used based on the execution environment
+2. Services are properly instantiated and managed by the DI container
+3. Singleton services are shared across the application
+4. Dependencies are automatically injected into services
+
 ## Best Practices
 
 1. **Always define interfaces**: Create clear contracts for your services.
