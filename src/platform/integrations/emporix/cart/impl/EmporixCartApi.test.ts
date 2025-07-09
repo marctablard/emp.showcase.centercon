@@ -1,6 +1,6 @@
 import { Container, inject } from 'inversify';
 import { StoredToken } from '@/platform/integrations/types/auth';
-import { TokenManager } from '../../common/TokenManager';
+import type { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
 import { EmporixConfig } from '../../config';
@@ -10,7 +10,6 @@ import {
   EmporixCreateCartRequest,
   EmporixUpdateCartItemRequest,
 } from '../../model';
-import type { OAuthApi } from '../../oauth/OAuthApi';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixCartApi from './EmporixCartApi';
 
@@ -25,7 +24,7 @@ class TestEmporixConfig implements EmporixConfig {
 }
 
 class TestTokenManager extends EmporixTokenManagerAbstract {
-  constructor(@inject('EmporixOAuthApi') oauthApi: OAuthApi) {
+  constructor(@inject('EmporixOAuthApi') oauthApi: EmporixOAuthApi) {
     super(oauthApi);
   }
   protected readTokens(): Promise<TokenStore> {
@@ -104,7 +103,7 @@ describe('EmporixCartApi', () => {
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<TokenManager>('EmporixTokenManager').to(TestTokenManager);
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(TestTokenManager);
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
     container.bind<EmporixCartApi>('EmporixCartApi').to(EmporixCartApi);
 
