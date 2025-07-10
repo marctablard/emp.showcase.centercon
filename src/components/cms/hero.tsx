@@ -37,8 +37,8 @@ const Hero = ({ blok }: HeroProps) => {
     return null;
   }
 
-  const button = blok.main_button[0];
-  const text = blok.text.content[0].content[0].text;
+  const button = blok.main_button?.[0];
+  const text = blok.text?.content?.[0]?.content?.[0].text;
 
   const isVideo = false; /* needs to be removed when video functionality is working */
 
@@ -90,7 +90,7 @@ const Hero = ({ blok }: HeroProps) => {
             <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
             <p className=" text-base lg:text-xl text-neutral-800">{text}</p>
 
-            {blok.main_button && <Button blok={button} />}
+            {button && <Button blok={button} />}
           </div>
         </div>
         {isVideo && blok.video_url && (
