@@ -54,8 +54,8 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           </div>
         </div>
         <CartAction />
-        <div className="grid grid-cols-1 lg:grid-cols-10 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-8 mb-11">
-          <div className="col-span-1 lg:col-span-6 xl:col-span-2 2xl:col-span-3" ref={leftContent}>
+        <div className="grid grid-cols-1 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-8 mb-11">
+          <div className="col-span-1 xl:col-span-2 2xl:col-span-3" ref={leftContent}>
             {false && customer && <CartDelivery />}
             <CartItemList cart={cart} />
           </div>

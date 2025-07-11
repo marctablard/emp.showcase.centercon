@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -6,12 +6,12 @@ import { Cart, CartUpdate } from '@platform/services/model/cart';
 import { MessageCircleWarning, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Spinner } from '@/components/ui/spinner';
+import { MiniCartContent, Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useL10n } from '@/hooks/useL10n';
-import { formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { useNotificationStore } from '@/stores/notification-store';
 
 interface HeaderCartButtonProps {
@@ -21,37 +21,19 @@ interface HeaderCartButtonProps {
 
 export default function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
   const t = useTranslations('cart');
-  const { addNotification, hasNotification } = useNotificationStore();
+  const { hasNotification } = useNotificationStore();
   const { l10n } = useL10n();
   const router = useRouter();
   const [cartUpdate, setCartUpdate] = useState<CartUpdate | undefined>(undefined);
   const { cartTotal, shippingCosts, currency } = useCartTotal();
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
-  const [isOpen, setIsOpen] = useState(false);
-  const onOpen = () => {
-    if (window.innerWidth > 1024) {
-      return isOpen ? setIsOpen(false) : setIsOpen(true);
-    }
-  };
-  const onClose = () => {
-    setIsOpen(false);
-    router.push('/cart');
-  };
+  const [scrollHeight, setScrollHeight] = useState(false);
+  const scrollContainer = useRef<HTMLDivElement>(null);
 
   const buildCartUpdateKey = (cart: Cart, cartUpdate: CartUpdate) => {
     return 'cart-' + cart.id + '-' + cartUpdate.itemId + '-' + cartUpdate.updatedAt;
   };
-
-  const handleOpen = useCallback(() => {
-    if (cart && cartUpdate) {
-      addNotification(buildCartUpdateKey(cart, cartUpdate));
-    }
-  }, [cart, cartUpdate, addNotification]);
-
-  const handleClose = useCallback(() => {
-    setCartUpdate(undefined);
-  }, []);
 
   useEffect(() => {
     if (cart && cart.processUpdate && cart.processUpdate.itemId) {
@@ -61,48 +43,47 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
     }
   }, [cart, setCartUpdate, hasNotification]);
 
+  const openChange = () => {
+    setTimeout(() => {
+      if (scrollContainer?.current?.offsetHeight && scrollContainer?.current?.offsetHeight >= 300) {
+        setScrollHeight(true);
+      } else {
+        setScrollHeight(false);
+      }
+    }, 100);
+  };
+
   return (
-    <Popover
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (open) handleOpen();
-        else handleClose();
-        setIsOpen(open);
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center" onClick={onOpen}>
-          {showSum && (
-            <span className="text-white text-xl hidden md:inline-block">
-              {formatCurrency(cartTotal || 0.0, currency)}
-            </span>
-          )}
-          <div className="flex items-center w-[43px] h-[35px] relative">
-            {cartUpdate && !isOpen ? (
-              <Badge
-                variant="warning"
-                className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
-              >
-                <MessageCircleWarning />
-              </Badge>
-            ) : (
-              <Badge
-                variant="white"
-                className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
-              >
-                {loading ? <Spinner color="primary" variant="xs" /> : cart?.items.length || 0}
-              </Badge>
-            )}
-            <ShoppingCart width="32" height="32" />
-          </div>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-[600px] mt-4 -mr-6 pt-0 pr-0 bg-white/85 pointer-events:none border-none shadow-xl parent:backdrop-blur-xs @apply backdrop-blur-xs"
-        align="end"
-        side="bottom"
-        sideOffset={8}
+    <Tooltip onOpenChange={openChange}>
+      <TooltipTrigger
+        className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 gap-4 self-center cursor-pointer bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-sm 'cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base/6 tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-neutral-100 disabled:text-neutral-600 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        onClick={() => router.push('/cart')}
       >
+        {showSum && (
+          <span className="text-white text-xl hidden md:inline-block">
+            {formatCurrency(cartTotal || 0.0, currency)}
+          </span>
+        )}
+        <div className="flex items-center w-[43px] h-[35px] relative">
+          {cartUpdate ? (
+            <Badge
+              variant="warning"
+              className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
+            >
+              <MessageCircleWarning />
+            </Badge>
+          ) : (
+            <Badge
+              variant="white"
+              className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
+            >
+              {loading ? <Spinner color="primary" variant="xs" /> : cart?.items.length || 0}
+            </Badge>
+          )}
+          <ShoppingCart width="32" height="32" />
+        </div>
+      </TooltipTrigger>
+      <MiniCartContent sideOffset={24}>
         {loading ? (
           <div className="p-4 flex items-center justify-center">
             <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary"></div>
@@ -112,10 +93,13 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
             <p className="text-muted-foreground">{t('emptyCart')}</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 justify-center">
-            <div className="overflow-y-scroll max-h-[300px] pr-4">
+          <div className="flex flex-col gap-4 justify-center rounded-md pt-4">
+            <div
+              className={cn(scrollHeight ? 'overflow-y-scroll pr-0.5' : 'pr-4', 'max-h-[300px]')}
+              ref={scrollContainer}
+            >
               {cart.items.map((item) => (
-                <div key={item.id} className={`py-4 border-b flex items-end justify-between gap-3`}>
+                <div key={item.id} className={`pt-4 first:pt-0 pb-4 border-b flex items-end justify-between gap-3`}>
                   <div className="flex gap-4">
                     <div className="rounded-ss-xl rounded-ee-xl w-[100px] h-[65px] object-fit overflow-hidden">
                       {item.product && item.product.images?.length ? (
@@ -197,13 +181,13 @@ export default function HeaderCartButton({ initialCart, showSum = true }: Header
               </div>
             )}
             <div className="pr-4">
-              <Button className="w-full" onClick={onClose}>
+              <Button className="w-full" onClick={() => router.push('/cart')}>
                 {t('viewCart')}
               </Button>
             </div>
           </div>
         )}
-      </PopoverContent>
-    </Popover>
+      </MiniCartContent>
+    </Tooltip>
   );
 }
