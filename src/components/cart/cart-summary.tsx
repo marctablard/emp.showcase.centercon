@@ -23,7 +23,7 @@ export function CartSummary({ cart, boundingContent }: CartSummaryProps) {
   const { isFixed, isFixedToTop, isContainerBottom } = useElementScroll(fixedContainer, topPosition, boundingContent);
   const { cartTotal, shippingCosts, currency } = useCartTotal();
   return (
-    <div className="col-span-1 lg:col-span-4 xl:col-span-1 mb-6 flex">
+    <div className="col-span-1 xl:col-span-1 mb-6 flex">
       <div className={cn('flex flex-col w-full', isContainerBottom ? 'justify-end' : 'justify-start')}>
         <div
           className={cn(
