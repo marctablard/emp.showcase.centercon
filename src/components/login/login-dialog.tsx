@@ -44,7 +44,7 @@ export default function LoginDialog({
   redirectAfterLogin = false,
 }: LoginProps) {
   const t = useTranslations('login');
-  const { login, loading } = useAuthentication();
+  const { login, loading, isAuthenticated } = useAuthentication();
   const [isOpen, setOpen] = useState(defaultOpen);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,9 +58,9 @@ export default function LoginDialog({
   async function onSubmit(values: LoginData) {
     setError(null);
 
-    const response = await login(values.username, values.password, false, callbackUrl);
+    await login(values.username, values.password, redirectAfterLogin, callbackUrl);
 
-    if (response && response.ok) {
+    if (isAuthenticated) {
       const titleMessage = t('welcomeMessage', { username: values.username });
       notify({
         title: titleMessage,
@@ -74,20 +74,9 @@ export default function LoginDialog({
 
       setOpen(false);
 
-      if (response.url && redirectAfterLogin) {
-        router.push(response.url);
-      }
-
       form.resetField('username', { defaultValue: '' });
       form.resetField('password', { defaultValue: '' });
-    } else if (response && !response.ok) {
-      if (response.error === 'CredentialsSignin') {
-        setError(t('invalidCredentials'));
-      } else {
-        setError(t('loginError'));
-      }
-      form.resetField('password', { defaultValue: '' });
-    } else if (!response) {
+    } else if (!isAuthenticated) {
       setError(t('loginError'));
       form.resetField('password', { defaultValue: '' });
     }

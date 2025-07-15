@@ -1,20 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { SignInResponse } from 'next-auth/react';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import useCustomer from '../customer/useCustomer';
+import { useRouter } from '@/i18n/navigation';
 
 interface AuthenticationHook {
   isAuthenticated: boolean;
   error: Error | null;
   loading: boolean;
-  login: (
-    username: string,
-    password: string,
-    redirect?: boolean,
-    callbackUrl?: string,
-  ) => Promise<SignInResponse | undefined>;
+  login: (username: string, password: string, redirect?: boolean, callbackUrl?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -23,7 +17,6 @@ interface AuthenticationHook {
  * @returns Authentication state and functions
  */
 export const useAuthentication = (): AuthenticationHook => {
-  const { fetchCustomer } = useCustomer();
   const session = useSession({
     required: true,
     onUnauthenticated: () => {
@@ -36,6 +29,7 @@ export const useAuthentication = (): AuthenticationHook => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(session.status === 'authenticated');
   const [loading, setLoading] = useState<boolean>(session.status === 'loading');
   const [error, setError] = useState<Error | null>(null);
+  const router = useRouter();
 
   // Update authentication state when session status changes
   useEffect(() => {
@@ -48,27 +42,24 @@ export const useAuthentication = (): AuthenticationHook => {
     password: string,
     redirect: boolean = true,
     callbackUrl: string = '/account',
-  ): Promise<SignInResponse | undefined> => {
+  ): Promise<void> => {
     setLoading(true);
     try {
       const response = await signIn('credentials', {
         username,
         password,
-        redirect,
-        callbackUrl,
+        redirect: false,
       });
-      if (response?.ok) {
-        await fetchCustomer();
+      if (response?.error) {
+        setError(new Error(response.error));
+      } else {
+        setIsAuthenticated(true);
+        if (redirect) {
+          router.push(callbackUrl);
+        }
       }
-      return response;
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log in'));
-      return {
-        ok: false,
-        error: 'UnknownError',
-        status: 500,
-        url: null,
-      };
     } finally {
       setLoading(false);
     }

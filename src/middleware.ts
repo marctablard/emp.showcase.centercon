@@ -1,10 +1,12 @@
-import { withAuth } from 'next-auth/middleware';
+import { NextAuthRequest } from 'next-auth';
+import NextAuth from 'next-auth';
 import createIntlMiddleware from 'next-intl/middleware';
-import { NextRequest } from 'next/server';
+import authConfig from './auth/auth.config';
 
 const locales = ['en', 'de'];
 const defaultLocale = 'en';
 const securedPages = ['/account'];
+const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(\/.*)?/?$`, 'i');
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -12,41 +14,18 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'as-needed',
 });
 
-const authMiddleware = withAuth(
-  // Note that this callback is only invoked if
-  // the `authorized` callback has returned `true`
-  // and not for pages listed in `pages`.
-  function onSuccess(req) {
-    return intlMiddleware(req);
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => token != null,
-    },
-    pages: {
-      signIn: '/login',
-      error: '/login',
-    },
-  },
-);
+// Simplified Instance of NextAuth for Edge Middleware (cannot use server context)
+const { auth } = NextAuth(authConfig);
 
-export default function middleware(req: NextRequest) {
-  /**
-   * RegExplanation:
-   * - `^` : Start of the string
-   * - `(/(${locales.join('|')}))?` : Optional locale prefix
-   * - `(${securedPages.join('|')})` : One of the secured pages (MUST match, no question mark!)
-   * - `(\/.*)?` : Optional path parameters after secured page
-   * - `/?$` : Optional trailing slash
-   */
-  const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(\/.*)?/?$`, 'i');
-  const isSecuredPage = securedPathnameRegex.test(req.nextUrl.pathname);
-  if (!isSecuredPage) {
-    return intlMiddleware(req);
-  } else {
-    return (authMiddleware as any)(req);
+export default auth((req: NextAuthRequest) => {
+  if (!req.auth?.user) {
+    const isSecuredPage = securedPathnameRegex.test(req.nextUrl.pathname);
+    if (isSecuredPage) {
+      return Response.redirect(new URL('/', req.url));
+    }
   }
-}
+  return intlMiddleware(req);
+});
 
 export const config = {
   matcher: ['/((?!api|_next|.*\\..*).*)'],

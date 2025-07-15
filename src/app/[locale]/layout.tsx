@@ -1,15 +1,15 @@
 import { ReactNode } from 'react';
-import { getServerSession } from 'next-auth';
+import { SessionProvider as AuthSessionProvider } from 'next-auth/react';
 import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
+import { auth } from '@/auth/auth';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
 import { getSite } from '@/lib/ssr/site';
-import CustomerSessionProvider from '@/providers/CustomerSessionProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import '../globals.css';
@@ -54,7 +54,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  const [authSession, shopSession] = await Promise.all([getServerSession(), getSession()]);
+  const [authSession, shopSession] = await Promise.all([auth(), getSession()]);
   if (shopSession && shopSession.language != locale) {
     // ensure that languages are aligned
     await setSessionLanguage(locale);
@@ -67,7 +67,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} className={`${ubuntu.variable} ${openSans.variable} ${ubuntu.className} ${openSans.className}`}>
       <body className="flex h-full flex-col font-body">
-        <CustomerSessionProvider session={authSession}>
+        <AuthSessionProvider session={authSession}>
           <NextIntlClientProvider locale={locale}>
             <StoreProvider shopSession={shopSession} site={site}>
               <StoryblokProvider>
@@ -77,7 +77,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               </StoryblokProvider>
             </StoreProvider>
           </NextIntlClientProvider>
-        </CustomerSessionProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );
