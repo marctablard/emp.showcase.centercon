@@ -108,7 +108,7 @@ const extractDimensions = (attributes: Record<string, string>) => {
 
 export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyword }: ProductTileProps) {
   const [image] = product.images || [];
-  const clickable_id = product.id.replaceAll(/<\/?mark>/g, '');
+  const clickable_id = product.id ? product.id.replaceAll(/<\/?mark>/g, '') : '';
   return (
     <Link href={`/product/${clickable_id}`} onClick={onProductClick}>
       <div className="flex">
