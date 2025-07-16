@@ -74,3 +74,7 @@ export interface Product {
   templateAttributes?: Record<string, string>;
   variantAttributes?: Record<string, string>;
 }
+
+export interface ProductRecommendations {
+  products: Product[];
+}

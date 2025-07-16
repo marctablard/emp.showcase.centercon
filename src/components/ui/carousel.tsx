@@ -25,8 +25,14 @@ type CarouselContextProps = {
   scrollNext: () => void;
   canScrollPrev: boolean;
   canScrollNext: boolean;
+  selectedIndex: number;
+  scrollTo: (index: number) => void;
 } & CarouselProps;
 
+interface CarouselItemProps extends React.ComponentProps<'div'> {
+  className?: string;
+  size?: string;
+}
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 
 function useCarousel() {
@@ -57,11 +63,13 @@ function Carousel({
   );
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   const onSelect = React.useCallback((api: CarouselApi) => {
     if (!api) return;
     setCanScrollPrev(api.canScrollPrev());
     setCanScrollNext(api.canScrollNext());
+    setSelectedIndex(api.selectedScrollSnap());
   }, []);
 
   const scrollPrev = React.useCallback(() => {
@@ -83,6 +91,13 @@ function Carousel({
       }
     },
     [scrollPrev, scrollNext],
+  );
+
+  const scrollTo = React.useCallback(
+    (index: number) => {
+      api?.scrollTo(index);
+    },
+    [api],
   );
 
   React.useEffect(() => {
@@ -112,6 +127,8 @@ function Carousel({
         scrollNext,
         canScrollPrev,
         canScrollNext,
+        scrollTo,
+        selectedIndex,
       }}
     >
       <div
@@ -138,7 +155,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function CarouselItem({ className, ...props }: React.ComponentProps<'div'>) {
+function CarouselItem({ size, className, ...props }: CarouselItemProps) {
   const { orientation } = useCarousel();
 
   return (
@@ -146,9 +163,41 @@ function CarouselItem({ className, ...props }: React.ComponentProps<'div'>) {
       role="group"
       aria-roledescription="slide"
       data-slot="carousel-item"
-      className={cn('min-w-0 shrink-0 grow-0 basis-full', orientation === 'horizontal' ? 'pl-4' : 'pt-4', className)}
+      className={cn(
+        'min-w-0 shrink-0 grow-0',
+        size ? size : 'basis-full',
+        orientation === 'horizontal' ? 'pl-4' : 'pt-4',
+        className,
+      )}
       {...props}
     />
+  );
+}
+
+function CarouselDots({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  const { selectedIndex, scrollTo, api } = useCarousel();
+
+  return (
+    <div
+      data-slot="carousel-dots"
+      className={cn('mb-2 flex w-[calc(100vw-16px)] items-center justify-center gap-4', className)}
+      {...props}
+    >
+      {api
+        ?.scrollSnapList()
+        .map((_, index) => (
+          <button
+            key={index}
+            className={cn(
+              'cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+              index === selectedIndex
+                ? 'h-4 w-4 bg-linear-to-t from-primary-700 to-primary-500 hover:to-primary-700 hover:border hover:border-primary-500'
+                : 'h-3 w-3 bg-white border border-primary-500 hover:bg-primary-50 hover:border-primary-700 disabled:bg-none disabled:bg-neutral-400 disabled:pointer-events-none ',
+            )}
+            onClick={() => scrollTo(index)}
+          ></button>
+        ))}
+    </div>
   );
 }
 
@@ -200,4 +249,4 @@ function CarouselNext({
   );
 }
 
-export { type CarouselApi, Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext };
+export { type CarouselApi, Carousel, CarouselContent, CarouselItem, CarouselDots, CarouselPrevious, CarouselNext };

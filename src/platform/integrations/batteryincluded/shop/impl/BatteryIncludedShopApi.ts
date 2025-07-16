@@ -101,8 +101,7 @@ class BatteryIncludedShopApi implements IBatteryIncludedShopApi {
       headers: { Accept: 'application/json' },
     });
 
-    const data = await response.json();
-    return data.recommendations || [];
+    return await response.json();
   }
 
   /**

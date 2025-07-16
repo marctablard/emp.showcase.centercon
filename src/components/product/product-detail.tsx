@@ -9,10 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProduct } from '@/hooks/product/useProduct';
+// import { useRecommendations } from '@/hooks/recommendations/useRecommendations';
 import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
+import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
 import { H1, H2, H3, H4 } from '../ui/h';
 import UiLink from '../ui/link';
@@ -33,11 +35,15 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   const { l10n } = useL10n(locale);
   const t = useTranslations('product');
   const currentLocale = useLocale();
+  //   const { recommendations, loading: recLoading } = useRecommendations(product?.id);
 
   useEffect(() => {
-    // set as current Product, when we display the details
-    setAsCurrent();
-  }, [setAsCurrent]);
+    if (product) {
+      setAsCurrent();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product]);
+
   if (loading) {
     return <div>Loading</div>;
   }
@@ -47,10 +53,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   return (
     <>
       <div
-        className={cn(
-          'grid grid-cols-1 gap-y-4 gap-x-4 lg:gap-x-6 lg:gap-y-6 lg:gap-x-10 xl:gap-x-29 lg:gap-y-6 lg:grid-cols-2',
-          className,
-        )}
+        className={cn('grid grid-cols-1 gap-y-4 gap-x-4 lg:gap-x-6 lg:gap-y-6 xl:gap-x-29 lg:grid-cols-2', className)}
       >
         <>
           <Card variant="gray" className="row-start-3 lg:col-start-1 lg:row-start-1 lg:row-end-4">
@@ -139,7 +142,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             <div className="my-6">
               <H4>{t('otherVariants')}</H4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded rounded-sm border-2 border-primary-500">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-primary-500">
                   <div className="col-start-1 bg-neutral-50 p-4">
                     <div className="w-[108px] h-[68px]">
                       {product.images && product.images.length > 0 && (
@@ -161,7 +164,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                     <p className="text-xs text-neutral-500">459.99 €</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3  rounded rounded-sm border-2 border-neutral-50">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
                   <div className="col-start-1 bg-neutral-50 p-4">
                     <div className="w-[108px] h-[68px]">
                       {product.images && product.images.length > 0 && (
@@ -183,7 +186,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                     <p className="text-xs text-neutral-500">429.99 €</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3  rounded rounded-sm border-2 border-neutral-50">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
                   <div className="col-start-1 bg-neutral-50 p-4">
                     <div className="w-[108px] h-[68px]">
                       {product.images && product.images.length > 0 && (
@@ -205,7 +208,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                     <p className="text-xs text-neutral-500">400.00 €</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3  rounded rounded-sm border-2 border-neutral-50">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
                   <div className="col-start-1 bg-neutral-50 p-4">
                     <div className="w-[108px] h-[68px]">
                       {product.images && product.images.length > 0 && (
@@ -340,6 +343,15 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           </div>
         </div>
       )}
+
+      <Recommendations
+        blok={{
+          productId: product.id,
+          locale,
+          overline: t('productRecommendations.overline'),
+          headline: t('productRecommendations.headline'),
+        }}
+      />
     </>
   );
 }

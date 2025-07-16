@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { cn } from '@/lib/utils';
+import { Headline } from '../ui/headline';
 import Button, { ButtonData } from './button';
 import { TextEditorData } from './hero';
 
@@ -80,8 +81,16 @@ const MediaText = ({ blok }: MediaTextProps) => {
             blok.image_position === ImagePosition.Right && 'md:col-start-1 me-4 md:me-0 ms-4 lg:ms-8',
           )}
         >
-          <p className="text-primary-500 font-bold uppercase pb-3">{blok.overline}</p>
-          <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines ">{blok.headline}</h1>
+          {blok.overline && (
+            <Headline variant="overline" as="h4" className="mb-3">
+              {blok.overline}
+            </Headline>
+          )}
+          {blok.headline && (
+            <Headline variant="h2" as="h3">
+              {blok.headline}
+            </Headline>
+          )}
         </div>
         <div
           className={cn(

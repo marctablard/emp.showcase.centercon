@@ -14,9 +14,11 @@ export type ProductState = {
 
 export type ProductActions = {
   getProduct: (id: string) => Product | null;
+  getProducts: (ids: string[]) => Product[];
   getCurrentProduct: () => Product | null;
   setCurrentProduct: (product: Product) => void;
   addProduct: (product: Product) => void;
+  addProducts: (products: Product[]) => void;
 };
 
 export type ProductStore = ProductState & ProductActions;
@@ -49,6 +51,16 @@ export const createProductStore = (initState: ProductState = defaultState) => {
         }
         return state;
       }),
+    addProducts: (products: Product[]) =>
+      set((state) => {
+        const newProducts = { ...state.products };
+        products.forEach((product) => {
+          if (product) {
+            newProducts[product.id] = product;
+          }
+        });
+        return { ...state, products: newProducts };
+      }),
     getCurrentProduct: () => {
       const state = get();
       return state.currentProductId ? state.products[state.currentProductId] : null;
@@ -56,6 +68,10 @@ export const createProductStore = (initState: ProductState = defaultState) => {
     getProduct: (id: string) => {
       const state = get();
       return state.products[id] || null;
+    },
+    getProducts: (ids: string[]) => {
+      const state = get();
+      return ids.map((id) => state.products[id]).filter(Boolean) as Product[];
     },
   }));
 };

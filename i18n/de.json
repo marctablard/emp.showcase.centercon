@@ -90,6 +90,10 @@
             "specs": "Spezifikationen",
             "downloads": "Downloads",
             "reviews": "Bewertungen"
+        },
+        "productRecommendations": {
+            "overline": "mehr zu entdecken",
+            "headline": "Diese Produkte könnten auch interessant sein"
         }
     },
     "header": {

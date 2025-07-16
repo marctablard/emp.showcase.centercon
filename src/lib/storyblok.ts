@@ -12,6 +12,7 @@ import MediaText from '@/components/cms/media-text';
 import Navigation from '@/components/cms/navigation';
 import Page from '@/components/cms/page';
 import QuickEntry from '@/components/cms/quick-entry';
+import Recommendations from '@/components/cms/recommendations';
 import Segment from '@/components/cms/segment';
 import Teaser from '@/components/cms/teaser';
 
@@ -39,5 +40,6 @@ export const getStoryblokApi = storyblokInit({
     hero: Hero,
     quick_entry: QuickEntry,
     media_text: MediaText,
+    recommendations: Recommendations,
   },
 });

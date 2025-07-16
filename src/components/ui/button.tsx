@@ -47,7 +47,11 @@ function Button({
   return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
 }
 
-function BackToTopButton({ className, ...props }: React.ComponentProps<'button'>) {
+function BackToTopButton({
+  className,
+  icon: Icon = ChevronsUp,
+  ...props
+}: React.ComponentProps<'button'> & { icon?: React.ElementType | null }) {
   return (
     <button
       className={cn(
@@ -56,7 +60,7 @@ function BackToTopButton({ className, ...props }: React.ComponentProps<'button'>
       )}
       {...props}
     >
-      <ChevronsUp />
+      {Icon ? <Icon /> : null}
     </button>
   );
 }
