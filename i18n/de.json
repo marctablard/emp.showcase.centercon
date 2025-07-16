@@ -823,6 +823,12 @@
                 "required": "Passwort ist erforderlich"
             }
         },
+        "password": {
+            "email": {
+                "required": "E-Mail ist erforderlich",
+                "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+            }
+        },
         "register": {
             "registrationType": {
                 "required": "Registrierungstyp ist erforderlich"
@@ -922,14 +928,15 @@
         "sendResetLink": "Anfrage senden",
         "processing": "Wird verarbeitet...",
         "resetEmailSent": "Wenn Ihre E-Mail-Adresse in unserem System vorhanden ist, erhalten Sie einen Passwort-Reset-Link.",
-        "backToLogin": "Zurück zur Login-Seite",
+        "backToLogin": "Anmelden",
         "createNewPassword": "Neues Passwort erstellen",
         "createNewPasswordDescription": "Bitte geben Sie Ihr neues Passwort unten ein.",
         "newPassword": "Neues Passwort",
         "confirmPassword": "Passwort bestätigen",
         "updatePassword": "Passwort aktualisieren",
         "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
-        "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet."
+        "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet.",
+        "error": "Fehler"
     },
     "Weather": {
         "loading": "Wetterdaten werden geladen...",

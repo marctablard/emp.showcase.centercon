@@ -4,12 +4,14 @@ import { useTranslations } from 'next-intl';
 import { Gauge, Pin, Search, User, UserCheck } from 'lucide-react';
 import HeaderIconButton from '@/components/header/common/header-icon-button';
 import HeaderIconLink from '@/components/header/common/header-icon-link';
+import useAuthDialog from '@/hooks/auth/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
-import LoginDialog from '../../login/login-dialog';
 
 export default function HeaderActions({ className }: { className?: string }) {
   const t = useTranslations('header');
   const { isAuthenticated, loading } = useAuthentication();
+  const { openDialog } = useAuthDialog();
+
   if (loading) {
     return null;
   }
@@ -23,7 +25,7 @@ export default function HeaderActions({ className }: { className?: string }) {
       {isAuthenticated ? (
         <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
       ) : (
-        <LoginDialog trigger={<HeaderIconButton icon={User} text={t('signIn')} />} />
+        <HeaderIconButton icon={User} text={t('signIn')} onClick={() => openDialog('login')} />
       )}
 
       <div className="hidden md:flex gap-5">

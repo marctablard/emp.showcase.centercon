@@ -822,6 +822,12 @@
                 "required": "Password is required"
             }
         },
+        "password": {
+            "email": {
+                "required": "Email is required",
+                "invalid": "Please enter a valid email address"
+            }
+        },
         "register": {
             "registrationType": {
                 "required": "Registration type is required"
@@ -921,7 +927,7 @@
         "sendResetLink": "Send Reset Link",
         "processing": "Processing...",
         "resetEmailSent": "If your email exists in our system, you will receive a password reset link shortly.",
-        "backToLogin": "Back to Login",
+        "backToLogin": "Log in",
         "createNewPassword": "Create New Password",
         "createNewPasswordDescription": "Please enter your new password below.",
         "newPassword": "New Password",

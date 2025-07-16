@@ -47,7 +47,7 @@ const Hero = ({ blok }: HeroProps) => {
       <div className="w-full flex justify-end">
         <div className="mb-25 sm:mb-25 md:mb-0 h-120 sm:h-145 lg:h-185">
           {blok.image && (
-            <svg className="h-[100%] " viewBox="0 0 1573 735">
+            <svg className="h-full" viewBox="0 0 1573 735">
               <defs>
                 <clipPath id="shape">
                   <path

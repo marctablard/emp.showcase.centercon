@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -21,7 +21,8 @@ import { H4, H5 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { ToastType, notify } from '@/components/ui/toast-notification';
-import { useAuthentication } from '@/hooks/authentication/useAuthentication';
+import useAuthDialog from '@/hooks/auth/useAuthDialog';
+import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { useRouter } from '@/i18n/navigation';
 
@@ -35,25 +36,46 @@ type LoginProps = {
   trigger?: ReactNode;
   defaultOpen?: boolean;
   redirectAfterLogin?: boolean;
+  email?: string;
+  open?: boolean;
+  onCloseAction?: () => void;
+  onResetPasswordAction?: (email: string) => void;
 };
 
 export default function LoginDialog({
   trigger,
-  defaultOpen = false,
   callbackUrl,
   redirectAfterLogin = false,
+  email,
+  open = false,
+  onCloseAction,
+  onResetPasswordAction,
 }: LoginProps) {
   const t = useTranslations('login');
   const { login, loading, isAuthenticated } = useAuthentication();
-  const [isOpen, setOpen] = useState(defaultOpen);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { activeDialog } = useAuthDialog();
 
-  const { form } = useValidator('LoginValidationService', {
-    username: '',
-    password: '',
-  });
+  const { form } = useValidator(
+    'LoginValidationService',
+    {
+      username: email || '',
+      password: '',
+    },
+    'onChange',
+  );
+
+  // Reset form when dialog changes or closes
+  useEffect(() => {
+    // Reset form fields and errors when dialog changes
+    if (form) {
+      form.reset({ username: email || '' });
+      setError(null);
+      setShowPassword(false);
+    }
+  }, [activeDialog, email, form]);
 
   async function onSubmit(values: LoginData) {
     setError(null);
@@ -72,7 +94,7 @@ export default function LoginDialog({
         },
       });
 
-      setOpen(false);
+      onCloseAction?.();
 
       form.resetField('username', { defaultValue: '' });
       form.resetField('password', { defaultValue: '' });
@@ -85,17 +107,17 @@ export default function LoginDialog({
   const handleOpenChange = (open: boolean) => {
     // If the dialog is being closed and we're on the login page, redirect to home, because the login page is empty an only for SSR
     if (!open && window.location.pathname.endsWith('/login')) {
-      setOpen(false);
       router.push('/');
+      onCloseAction?.();
       return;
     }
 
     // Normal behavior for all other pages
-    setOpen(open);
+    if (!open) onCloseAction?.();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogContent className="sm:max-w-[639px]">
@@ -123,7 +145,7 @@ export default function LoginDialog({
                 <FormItem className="relative">
                   <FormLabel htmlFor="username">{t('username')}</FormLabel>
                   <FormControl>
-                    <Input type="text" id="username" startIcon={User} {...field} />
+                    <Input type="email" id="username" startIcon={User} {...field} />
                   </FormControl>
                   <div className="absolute top-full left-0 mt-0.5">
                     <FormMessage />
@@ -156,19 +178,17 @@ export default function LoginDialog({
                   </FormItem>
                 )}
               />
-              <DialogClose asChild>
-                <UiLink
-                  className="self-end"
-                  type="Link"
-                  href={`/password-reset${form.watch('username') ? `?email=${encodeURIComponent(form.watch('username'))}` : ''}`}
-                >
-                  {t('forgotPassword')}
-                </UiLink>
-              </DialogClose>
+              <UiLink
+                className="self-end"
+                type="Button"
+                onClick={() => onResetPasswordAction?.(form.getValues('username'))}
+              >
+                {t('forgotPassword')}
+              </UiLink>
             </div>
 
             <DialogFooter className="flex flex-col sm:flex sm:flex-col gap-6 w-full">
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || !form.formState.isValid}>
                 {loading ? t('loggingIn') : t('logIn')}
               </Button>
 

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { LoginDialog } from '@/components/login';
+import LoginPageClient from '@/components/auth/login-page-client';
 import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -17,6 +17,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function LoginPage() {
-  return <LoginDialog defaultOpen={true} callbackUrl="/" redirectAfterLogin={true} />;
+export default function LoginPage() {
+  return (
+    <>
+      {/* Client component that handles opening the login dialog */}
+      <LoginPageClient />
+    </>
+  );
 }

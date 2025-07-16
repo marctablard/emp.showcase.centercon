@@ -30,7 +30,7 @@ export default async function PasswordUpdatePage({ params }: { params: Promise<P
 
   // If no token is provided, return 404
   if (!token) {
-    redirect({ href: '/password-reset', locale });
+    redirect({ href: '/', locale });
     return;
   }
 

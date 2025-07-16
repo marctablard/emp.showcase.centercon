@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth/auth';
+import AuthDialogManager from '@/components/auth/auth-dialog-manager';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
@@ -71,6 +72,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <NextIntlClientProvider locale={locale}>
             <StoreProvider shopSession={shopSession} site={site}>
               <StoryblokProvider>
+                <AuthDialogManager />
                 {children}
                 <Toaster />
                 <Notification />
