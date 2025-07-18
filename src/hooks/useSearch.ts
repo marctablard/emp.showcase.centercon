@@ -40,86 +40,115 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   });
 
   /**
+   * Update the browser URL with search parameters without causing a page reload
+   * Uses the already built URL parameters but adapts them for the browser URL
+   */
+  const updateBrowserUrl = useCallback(
+    (apiSearchParams: URLSearchParams) => {
+      // Create a new URLSearchParams for the browser URL
+      const browserSearchParams = new URLSearchParams();
+
+      apiSearchParams.forEach((value, key) => {
+        // Replace 'query' with 'q' in the browser URL for consistency
+        if (key === 'query') {
+          browserSearchParams.set('q', value);
+        }
+        // Copy all other parameters as is
+        else {
+          browserSearchParams.append(key, value);
+        }
+      });
+
+      const newUrl = `${pathname}?${browserSearchParams.toString()}`;
+      router.push(newUrl, { scroll: false });
+    },
+    [pathname, router],
+  );
+
+  /**
    * Search for products with the given parameters
    */
-  const search = useCallback(async (params: SearchParams<T>) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const search = useCallback(
+    async (params: SearchParams<T>) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Build the URL with query parameters
-      const url = new URL('/api/search', window.location.origin);
+        // Build the URL with query parameters
+        const url = new URL('/api/search', window.location.origin);
 
-      // Add basic parameters
-      if (params.query) {
-        url.searchParams.append('query', params.query);
-        setCurrentQuery(params.query);
+        // Add basic parameters
+        if (params.query) {
+          url.searchParams.append('query', params.query);
+          setCurrentQuery(params.query);
+        }
+
+        if (params.page !== undefined) {
+          url.searchParams.append('page', params.page.toString());
+          setCurrentPage(params.page);
+        }
+
+        if (params.size !== undefined) {
+          url.searchParams.append('size', params.size.toString());
+          setPageSize(params.size);
+        }
+
+        if (params.sort) {
+          url.searchParams.append('sort', params.sort);
+          setCurrentSort(params.sort);
+        }
+
+        // Add filters if present
+        if (params.filters) {
+          Object.entries(params.filters).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+              value.forEach((val) => {
+                url.searchParams.append(`filters[${key}][]`, val);
+              });
+            } else if (typeof value === 'object' && value !== null) {
+              // Handle nested objects like range filters
+              Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+                url.searchParams.append(`filters[${key}][${nestedKey}]`, String(nestedValue));
+              });
+            } else {
+              url.searchParams.append(`filters[${key}]`, String(value));
+            }
+          });
+          setActiveFilters(params.filters);
+        }
+
+        // Save the search params for pagination
+        lastSearchParams.current = params;
+
+        // Update browser URL with the same parameters (but with 'q' instead of 'query')
+        updateBrowserUrl(url.searchParams);
+
+        // Fetch the search results
+        const response = await fetch(url.toString());
+
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.statusText}`);
+        }
+
+        const data: SearchResult<T> = await response.json();
+
+        // Update state with the search results
+        setData(data.items);
+        setTotal(data.total);
+        setCurrentPage(data.page);
+        setPageSize(data.pageSize);
+
+        if (data.availableFilters) {
+          setFacets(data.availableFilters);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
       }
-
-      if (params.page !== undefined) {
-        url.searchParams.append('page', params.page.toString());
-        setCurrentPage(params.page);
-      }
-
-      if (params.size !== undefined) {
-        url.searchParams.append('size', params.size.toString());
-        setPageSize(params.size);
-      }
-
-      if (params.sort) {
-        url.searchParams.append('sort', params.sort);
-        setCurrentSort(params.sort);
-      }
-
-      // Add filters if present
-      if (params.filters) {
-        Object.entries(params.filters).forEach(([key, value]) => {
-          if (Array.isArray(value)) {
-            value.forEach((val) => {
-              url.searchParams.append(`filters[${key}][]`, val);
-            });
-          } else if (typeof value === 'object' && value !== null) {
-            // Handle nested objects like range filters
-            Object.entries(value).forEach(([nestedKey, nestedValue]) => {
-              url.searchParams.append(`filters[${key}][${nestedKey}]`, String(nestedValue));
-            });
-          } else {
-            url.searchParams.append(`filters[${key}]`, String(value));
-          }
-        });
-        setActiveFilters(params.filters);
-      }
-
-      // Save the search params for pagination
-      lastSearchParams.current = params;
-
-      // Update browser URL with the same parameters (but with 'q' instead of 'query')
-      updateBrowserUrl(url.searchParams);
-
-      // Fetch the search results
-      const response = await fetch(url.toString());
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.statusText}`);
-      }
-
-      const data: SearchResult<T> = await response.json();
-
-      // Update state with the search results
-      setData(data.items);
-      setTotal(data.total);
-      setCurrentPage(data.page);
-      setPageSize(data.pageSize);
-
-      if (data.availableFilters) {
-        setFacets(data.availableFilters);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [updateBrowserUrl],
+  );
 
   /**
    * Apply a facet filter to the search
@@ -281,32 +310,6 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       });
     },
     [search],
-  );
-
-  /**
-   * Update the browser URL with search parameters without causing a page reload
-   * Uses the already built URL parameters but adapts them for the browser URL
-   */
-  const updateBrowserUrl = useCallback(
-    (apiSearchParams: URLSearchParams) => {
-      // Create a new URLSearchParams for the browser URL
-      const browserSearchParams = new URLSearchParams();
-
-      apiSearchParams.forEach((value, key) => {
-        // Replace 'query' with 'q' in the browser URL for consistency
-        if (key === 'query') {
-          browserSearchParams.set('q', value);
-        }
-        // Copy all other parameters as is
-        else {
-          browserSearchParams.append(key, value);
-        }
-      });
-
-      const newUrl = `${pathname}?${browserSearchParams.toString()}`;
-      router.push(newUrl, { scroll: false });
-    },
-    [pathname, router],
   );
 
   useEffect(() => {

@@ -226,7 +226,7 @@
         "selectShippingAddress": "Lieferadresse auswählen"
     },
     "Notification": {
-        "close" : "Schliessen",
+        "close": "Schliessen",
         "company": {
             "onboarding": {
                 "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
@@ -443,6 +443,8 @@
         "myOrders": "Meine Bestellungen",
         "showAllOrders": "Alle Bestellungen anzeigen",
         "orderNumber": "Bestellnummer",
+        "trackOrder": "Sendung verfolgen",
+        "returnOrder": "Bestellung zurücksenden",
         "orderDate": "Bestelldatum",
         "payment": "Zahlung",
         "paymentMethod": "Zahlungsmethode",
@@ -1020,6 +1022,29 @@
         "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
         "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet.",
         "error": "Fehler"
+    },
+    "Tracking": {
+        "trackingInformation": "Sendungsverfolgung",
+        "carrier": "Versanddienstleister",
+        "trackingNumber": "Sendungsnummer",
+        "estimatedDelivery": "Voraussichtliche Lieferung",
+        "trackingHistory": "Sendungsverlauf",
+        "lastUpdated": "Zuletzt aktualisiert",
+        "viewOnCarrierWebsite": "Dienstleister Seite anzeigen",
+        "errorFetchingTracking": "Fehler beim Sendungsverfolgungsabruf",
+        "between": "zwischen",
+        "pending": "In Bearbeitung",
+        "in_transit": "In Zustellung",
+        "out_for_delivery": "Wird zugestellt",
+        "delivered": "Zugestellt",
+        "exception": "Zustellproblem",
+        "orderProcessed": "Bestellung bearbeitet",
+        "packageReceived": "Paket erhalten",
+        "inTransit": "In Zustellung",
+        "outForDelivery": "Wird zugestellt",
+        "inTransitNextCarrier": "An nächsten Transporteur übergeben",
+        "inTransitCarrierFacility": "Im Verteilzentrum eingetroffen",
+        "exceptionNoRecipient": "Zustellung versucht - niemand angetroffen"
     },
     "Weather": {
         "loading": "Wetterdaten werden geladen...",

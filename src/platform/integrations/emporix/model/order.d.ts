@@ -1,5 +1,5 @@
 import { EmporixCheckoutAddress } from './checkout';
-import { EmporixAddress } from './common';
+import { EmporixAddress, EmporixMixins } from './common';
 
 /**
  * Order status types

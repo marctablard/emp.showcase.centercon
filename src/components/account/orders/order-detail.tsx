@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { Ban, RotateCcw } from 'lucide-react';
+import { Ban, RotateCcw, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { H2 } from '@/components/ui/h';
@@ -11,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useOrder } from '@/hooks/order/useOrder';
 import { Order } from '@/platform/services/model/order/order';
 import { OrderStatusBadge } from './order-status-badge';
+import { TrackingDialog } from './tracking-dialog';
 
 /**
  * Determines if the cancel button should be shown based on order status
@@ -33,6 +35,7 @@ function shouldShowReturnButton(status: Order['status']): boolean {
 export function OrderDetail({ orderId, initialOrder }: { orderId: string; initialOrder?: Order | null }) {
   const tOrder = useTranslations('Orders');
   const tPaymentModes = useTranslations('PaymentModes');
+  const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
 
   const { order, loading, error, cancelOrder, returnOrder } = useOrder({ orderId, initialOrder });
 
@@ -193,12 +196,16 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
           </div>
         </CardContent>
         {/* Order action buttons at the bottom */}
-        {(shouldShowCancelButton(order.status) || shouldShowReturnButton(order.status)) && (
+        {(shouldShowCancelButton(order.status) ||
+          shouldShowReturnButton(order.status) ||
+          ['PROCESSING', 'READY_FOR_SHIPPING', 'READY_FOR_PICKUP', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(
+            order.status,
+          )) && (
           <CardFooter className="flex flex-col items-start pt-6 border-t">
             <H2 variant="h5" className="mb-3">
               {tOrder('orderActions')}
             </H2>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {shouldShowCancelButton(order.status) && cancelOrder && (
                 <Button
                   variant="secondary"
@@ -233,10 +240,27 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                   {tOrder('returnOrder')}
                 </Button>
               )}
+              {[
+                'PROCESSING',
+                'READY_FOR_SHIPPING',
+                'READY_FOR_PICKUP',
+                'SHIPPED',
+                'OUT_FOR_DELIVERY',
+                'DELIVERED',
+                'COMPLETED',
+              ].includes(order.status) && (
+                <Button variant="secondary" size="small" onClick={() => setTrackingDialogOpen(true)}>
+                  <Truck className="mr-2 h-4 w-4" />
+                  {tOrder('trackOrder')}
+                </Button>
+              )}
             </div>
           </CardFooter>
         )}
       </Card>
+
+      {/* Tracking Dialog */}
+      <TrackingDialog orderId={orderId} open={trackingDialogOpen} onOpenChange={setTrackingDialogOpen} />
     </div>
   );
 }
