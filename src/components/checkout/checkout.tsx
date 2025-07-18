@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useCustomer } from '@/hooks/customer/useCustomer';
+import { createApproval } from '@/lib/client/approval';
 import { H1 } from '../ui/h';
 import { Spinner } from '../ui/spinner';
 import { CheckoutItemlist } from './checkout-itemlist';
@@ -22,7 +23,7 @@ interface CheckoutProps {
  * Combines all checkout steps into a single form
  */
 const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
-  const { loading, error, orderResponse, checkoutCart, processCheckout } = useCheckout();
+  const { loading, error, orderResponse, checkoutCart, createCheckoutData, processCheckout } = useCheckout();
   const { customer } = useCustomer();
   const router = useRouter();
   const t = useTranslations('Checkout');
@@ -30,6 +31,40 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
 
   // We don't need local state anymore as we're using the checkout store via useCheckout
   const [formErrors] = useState<Record<string, string>>({});
+
+  const onSubmit = async (approvalData?: { approverId: string; comment: string }) => {
+    if (!checkoutCart) {
+      return;
+    }
+
+    if (approvalData) {
+      const checkoutData = createCheckoutData();
+      if (!checkoutData) {
+        return;
+      }
+      // Handle approval data
+      await createApproval({
+        resourceType: 'CART' as const,
+        resourceId: checkoutCart.id,
+        action: 'CHECKOUT' as const,
+        approver: {
+          userId: approvalData.approverId,
+        },
+        comment: approvalData.comment,
+        details: {
+          currency: checkoutCart.currency,
+          addresses: checkoutData.addresses,
+          paymentMethods: [checkoutData.paymentMethod],
+          shipping: checkoutData.shipping,
+        },
+      });
+      // Navigate to confirmation page
+      router.push(`/confirmation/Approval%20Requested`);
+    } else {
+      // Proceed with checkout
+      await processCheckout();
+    }
+  };
 
   // Handle successful checkout
   useEffect(() => {
@@ -104,7 +139,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
             )}
           </div>
           <div className="col-span-1 mb-6 flex">
-            <CheckoutSummary leftContent={leftContent} onSubmit={processCheckout} />
+            <CheckoutSummary leftContent={leftContent} onSubmit={onSubmit} />
           </div>
         </div>
       </div>

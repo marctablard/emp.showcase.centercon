@@ -22,7 +22,7 @@ export interface EmporixAddress {
 }
 
 export interface EmporixLocalizedString {
-  [key: string]: string;
+  [locale: string]: string;
 }
 
 export interface EmporixSearchParams<T> {
@@ -30,6 +30,8 @@ export interface EmporixSearchParams<T> {
   page?: number;
   size?: number;
   sort?: string;
+  expand?: string[];
+
   criteria?: Partial<T>;
 }
 

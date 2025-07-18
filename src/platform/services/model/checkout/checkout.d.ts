@@ -42,6 +42,7 @@ export interface ContactData {
  * Payment method for checkout
  */
 export interface CheckoutPaymentMethod extends PaymentMode {
+  provider: string;
   amount?: number;
   customAttributes?: Record<string, any>;
 }
@@ -49,7 +50,7 @@ export interface CheckoutPaymentMethod extends PaymentMode {
 /**
  * Shipping information for checkout
  */
-export interface CheckoutShipping {
+export interface OrderShipping {
   methodId: string;
   zoneId: string;
   methodName: string;
@@ -62,7 +63,7 @@ export interface CheckoutShipping {
  */
 export interface CheckoutRequest extends BaseCheckoutRequest {
   cartId: string;
-  shipping: CheckoutShipping;
+  shipping: OrderShipping;
   addresses: CheckoutAddress[];
   customer: ContactData | null;
   paymentMethod: CheckoutPaymentMethod;

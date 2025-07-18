@@ -5,11 +5,11 @@ import {
   EmporixCartCheckoutRequest,
   EmporixCheckoutCustomer,
   EmporixCheckoutPaymentMethod,
-  EmporixShipping,
 } from '@/platform/integrations/emporix/model';
 import EmporixPaymentGatewayApi from '@/platform/integrations/emporix/payment/impl/EmporixPaymentGatewayApi';
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import { CheckoutPaymentMethod, CheckoutRequest, CheckoutResponse, QuoteCheckoutRequest } from '../../model/checkout';
+import EmporixCheckoutMapper from '../../model/checkout/impl/EmporixCheckoutMapper';
 import { CheckoutService } from '../CheckoutService';
 import type { CheckoutValidator } from '../validation/CheckoutValidator';
 
@@ -24,6 +24,7 @@ class EmporixCheckoutService implements CheckoutService {
     @inject('EmporixPaymentGatewayApi') private paymentGatewayApi: EmporixPaymentGatewayApi,
     @inject('CustomerService') private customerService: CustomerService,
     @inject('CheckoutValidator') private checkoutValidator: CheckoutValidator,
+    @inject('EmporixCheckoutMapper') private checkoutMapper: EmporixCheckoutMapper,
   ) {}
 
   async checkout(request: CheckoutRequest): Promise<CheckoutResponse> {
@@ -64,29 +65,13 @@ class EmporixCheckoutService implements CheckoutService {
         guest: false,
       };
     }
+    const paymentMethods = [await this.getCheckoutPaymentMethod(request.paymentMethod)];
+    const checkoutRequest: EmporixCartCheckoutRequest = this.checkoutMapper.mapCartCheckoutToSource(
+      request,
+      emporixCustomer,
+      paymentMethods,
+    );
 
-    const addresses = request.addresses.map((address) => ({
-      ...address,
-      contactName: address.contactName || emporixCustomer.firstName + ' ' + emporixCustomer.lastName,
-      contactPhone: address.contactPhone || '',
-      type: address.type || 'SHIPPING',
-    }));
-    // TODO implement support for multiple paymentMethods in Frontend
-    const paymentMethods: CheckoutPaymentMethod[] = [request.paymentMethod];
-
-    const shipping: EmporixShipping = {
-      methodId: request.shipping.methodId,
-      methodName: request.shipping.methodName,
-      amount: request.shipping.amount,
-      zoneId: request.shipping.zoneId,
-    };
-    const checkoutRequest: EmporixCartCheckoutRequest = {
-      cartId: request.cartId,
-      customer: emporixCustomer,
-      addresses: addresses,
-      shipping: shipping,
-      paymentMethods: await Promise.all(paymentMethods.map((pm) => this.getCheckoutPaymentMethod(pm))),
-    };
     if (emporixCustomer.guest) {
       return this.checkoutApi.guestCheckout(checkoutRequest);
     } else {

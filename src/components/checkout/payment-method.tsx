@@ -25,7 +25,11 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
   const { form } = useValidator('PaymentValidationService', paymentMethod, 'onChange', (value) => {
     const mode = paymentModes?.find((mode) => mode.id === value.id);
     if (mode) {
-      submitPaymentMethod(mode);
+      // TODO handle Provider
+      submitPaymentMethod({
+        ...mode,
+        provider: 'none',
+      });
     }
   });
 

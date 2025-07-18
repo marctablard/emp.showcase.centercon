@@ -23,7 +23,7 @@ async function readCartCookie(): Promise<CartCookie> {
 export async function getCartIdFromCookie(
   siteCode: string,
   currency: string,
-  channel: string = 'storefront',
+  channel?: string,
   legalEntityId?: string,
 ): Promise<string | undefined> {
   const cart = await getCartCookie(siteCode, currency, channel, legalEntityId);
@@ -33,12 +33,15 @@ export async function getCartIdFromCookie(
 export async function getCartCookie(
   siteCode: string,
   currency: string,
-  channel: string = 'storefront',
+  channel?: string,
   legalEntityId?: string,
 ): Promise<CartCookieEntry | undefined> {
   const cartCookie: CartCookie = await readCartCookie();
   return cartCookie[siteCode]?.find(
-    (cart) => cart.currency === currency && cart.legalEntityId === legalEntityId && cart.channel === channel,
+    (cart) =>
+      cart.currency === currency &&
+      (!legalEntityId || cart.legalEntityId === legalEntityId) &&
+      (!channel || cart.channel === channel),
   );
 }
 

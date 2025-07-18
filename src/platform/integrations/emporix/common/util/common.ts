@@ -5,7 +5,10 @@ import { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
  * @param params
  * @returns { body : q-Parameter for Search-Criteria, query : Query-Parameters }
  */
-export function buildSearchQuery<T>(params: EmporixSearchParams<T>): { body: string; query: string } {
+export function buildSearchQuery<T>(
+  params: EmporixSearchParams<T>,
+  filterAsQuery: boolean = false,
+): { body: string; query: string } {
   const queryParams = new URLSearchParams();
 
   if (params.page) {
@@ -17,17 +20,24 @@ export function buildSearchQuery<T>(params: EmporixSearchParams<T>): { body: str
   if (params.sort) {
     queryParams.append('sort', params.sort);
   }
+  if (params.expand) {
+    queryParams.append('expand', params.expand.join(','));
+  }
   let query: string = '';
   if (params.criteria) {
     Object.entries(params.criteria).forEach(([key, value]) => {
-      if (query.length > 0) {
-        query += ' ';
+      if (filterAsQuery) {
+        queryParams.append(key, '' + value);
+      } else {
+        if (query.length > 0) {
+          query += ' ';
+        }
+        query += `${key}:${value}`;
       }
-      query += `${key}:${value}`;
     });
   }
 
-  return { body: query, query: queryParams.toString() };
+  return { body: query, query: filterAsQuery ? queryParams.toString() : queryParams.toString() };
 }
 
 /**

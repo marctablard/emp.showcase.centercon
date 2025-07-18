@@ -8,6 +8,8 @@ class EmporixConfig implements IEmporixConfig {
   tenant: string = process.env.NEXT_PUBLIC_EMPORIX_TENANT || '';
   clientId: string = process.env.NEXT_PUBLIC_EMPORIX_CLIENT_ID || '';
   clientSecret: string = process.env.NEXT_PUBLIC_EMPORIX_CLIENT_SECRET || '';
+  serverClientId?: string = process.env.NEXT_EMPORIX_CLIENT_ID;
+  serverClientSecret?: string = process.env.NEXT_EMPORIX_CLIENT_SECRET;
 }
 
 export default EmporixConfig;

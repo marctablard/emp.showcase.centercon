@@ -1,6 +1,6 @@
 import { Container } from 'inversify';
 import EmporixCartApi from '../../cart/impl/EmporixCartApi';
-import { TokenManager } from '../../common/TokenManager';
+import { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
@@ -132,7 +132,7 @@ describe('EmporixCheckoutApi', () => {
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
     container.bind<EmporixCartApi>('EmporixCartApi').to(EmporixCartApi);
     container.bind<EmporixCheckoutApi>('EmporixCheckoutApi').to(EmporixCheckoutApi);
@@ -292,10 +292,55 @@ describe('EmporixCheckoutApi', () => {
       // Perform the checkout
       const response = await checkoutApi.checkout(checkoutRequest);
 
+      // Expect the checkout to fail
+      await expect(checkoutApi.checkout(checkoutRequest)).rejects.toThrow();
       // Verify the checkout response
       expect(response).toBeDefined();
       expect(response.orderId).toBeDefined();
       expect(typeof response.orderId).toBe('string');
+    }, 20000);
+  });
+
+  describe('Customer Checkout with Approval Required', () => {
+    // Helper function to set up customer token
+    const username = 'benjamin.blue@alaba.ma';
+    async function setupCustomerToken() {
+      try {
+        // Login with test customer credentials
+        const password = 'Test1234';
+
+        // Use the customer API to login
+        await customerApi.login(username, password);
+      } catch (error) {
+        console.error('Error setting up customer token for approval flow:', error);
+        throw error;
+      }
+    }
+    let customerCartId: string;
+
+    beforeEach(async () => {
+      // Set up a customer token with test user credentials
+      await setupCustomerToken();
+
+      // Create a cart
+      customerCartId = await cartApi.createCart(sampleCreateCartRequest);
+      expect(customerCartId).toBeDefined();
+
+      // Add an item to the cart
+      const itemId = await cartApi.addItemToCart(customerCartId, sampleAddItemRequest);
+      expect(itemId).toBeDefined();
+    }, 15000);
+
+    afterEach(async () => {
+      // Delete the cart
+      await cartApi.deleteCart(customerCartId);
+    }, 15000);
+
+    it('should fail trying to perform checkout with approval required', async () => {
+      // Create a checkout request for the cart
+      const checkoutRequest = createSampleCheckoutRequest(customerCartId, false, username, '13360633');
+      // Verify the checkout response
+      await expect(checkoutApi.checkout(checkoutRequest)).rejects.toThrow();
     }, 20000);
   });
 });

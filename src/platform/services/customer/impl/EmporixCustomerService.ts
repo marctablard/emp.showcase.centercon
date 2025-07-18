@@ -1,7 +1,9 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCustomerApi } from '@/platform/integrations/emporix/customer/EmporixCustomerApi';
+import type { EmporixIamApi } from '@/platform/integrations/emporix/iam/EmporixIamApi';
 import { EmporixAddress } from '@/platform/integrations/emporix/model';
+import { EmporixGroup } from '@/platform/integrations/emporix/model/iam';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { Customer, CustomerAddress } from '../../model/customer/customer';
@@ -19,6 +21,7 @@ export class EmporixCustomerService implements CustomerService {
     @inject('EmporixCustomerApi') private customerApi: EmporixCustomerApi,
     @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,
     @inject('EmporixAddressMapper') private addressMapper: EmporixAddressMapper,
+    @inject('EmporixIamApi') private iamApi: EmporixIamApi,
   ) {}
 
   /**
@@ -35,6 +38,13 @@ export class EmporixCustomerService implements CustomerService {
       if (!response || response.id == ANONYMOUS_CUSTOMER_ID) {
         return null;
       }
+      const iamResponse = await this.iamApi.getUserGroups(response.id);
+      // TODO more finegrained role-management
+      const roles = iamResponse.items
+        .filter((group: EmporixGroup) => group.code)
+        .map((group: EmporixGroup) => group.code);
+      roles.push('CUSTOMER');
+      roles.push(response.businessModel ? 'B2B' : 'B2C');
       return {
         id: response.id,
         email: response.contactEmail || '',
@@ -47,6 +57,7 @@ export class EmporixCustomerService implements CustomerService {
         businessModel: response.businessModel,
         lastLogin: response.lastLogin ? new Date(response.lastLogin) : undefined,
         legalEntityId: response.b2b?.legalEntities?.[0]?.id,
+        roles: roles,
       };
     } catch (error) {
       console.error('Error fetching customer:', error);

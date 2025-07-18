@@ -34,8 +34,8 @@ export interface EmporixSignupRequest {
 }
 
 export interface EmporixPasswordChangeRequest {
-  token: string;
-  password: string;
+  currentPassword: string;
+  newPassword: string;
 }
 
 /**

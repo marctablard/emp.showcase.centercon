@@ -45,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: customerNamingService.getFullName(customer),
             email: customer.email,
             businessModel: customer.businessModel,
+            roles: [],
           };
         } catch (error) {
           console.error('NextAuth authorize error:', error);

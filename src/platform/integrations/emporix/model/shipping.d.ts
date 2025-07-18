@@ -27,4 +27,5 @@ export interface EmporixShippingMethod {
   name: EmporixLocalizedString;
   maxOrderValue?: EmporixMonetaryAmount;
   fees: EmporixShippingFee[];
+  shippingTaxCode?: string;
 }

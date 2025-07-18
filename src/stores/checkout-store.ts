@@ -6,8 +6,8 @@ import { Cart } from '@/platform/services/model/cart/cart';
 import {
   CheckoutAddress,
   CheckoutPaymentMethod,
-  CheckoutShipping,
   ContactData,
+  OrderShipping,
 } from '@/platform/services/model/checkout/checkout';
 
 export interface CheckoutState {
@@ -17,7 +17,7 @@ export interface CheckoutState {
   shippingAddress: CheckoutAddress | null;
   billingAddress: CheckoutAddress | null;
   paymentMethod: CheckoutPaymentMethod | null;
-  shippingMethod: CheckoutShipping | null;
+  shippingMethod: OrderShipping | null;
 }
 
 interface CheckoutActions {
@@ -29,7 +29,7 @@ interface CheckoutActions {
   setShippingAddress: (address: CheckoutAddress | null) => void;
   setBillingAddress: (address: CheckoutAddress | null) => void;
   setPaymentMethod: (paymentMethod: CheckoutPaymentMethod | null) => void;
-  setShippingMethod: (shippingMethod: CheckoutShipping | null) => void;
+  setShippingMethod: (shippingMethod: OrderShipping | null) => void;
 }
 
 export type CheckoutStore = CheckoutState & CheckoutActions;
@@ -74,7 +74,7 @@ export const createCheckoutStore = (initState: CheckoutState = defaultState) => 
         setPaymentMethod: (paymentMethod: CheckoutPaymentMethod | null) => {
           set({ paymentMethod });
         },
-        setShippingMethod: (shippingMethod: CheckoutShipping | null) => {
+        setShippingMethod: (shippingMethod: OrderShipping | null) => {
           set({ shippingMethod });
         },
       }),

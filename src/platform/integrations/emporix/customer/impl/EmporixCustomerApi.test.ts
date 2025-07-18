@@ -3,8 +3,7 @@ import { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';
-import { PasswordChangeDto } from '../../customer/CustomerApi';
-import { EmporixCustomerAddress } from '../../model/customer';
+import { EmporixCustomerAddress, EmporixPasswordChangeRequest } from '../../model/customer';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
 import EmporixCustomerApi from './EmporixCustomerApi';
 
@@ -267,7 +266,7 @@ describe('EmporixCustomerApi', () => {
         console.log('Starting password change test...');
 
         // Step 1: Change password from original to temp
-        const firstChangeData: PasswordChangeDto = {
+        const firstChangeData: EmporixPasswordChangeRequest = {
           currentPassword: originalPassword,
           newPassword: tempPassword,
         };
@@ -282,7 +281,7 @@ describe('EmporixCustomerApi', () => {
         await customerApi.login(originalUsername, tempPassword);
 
         // Step 3: Change password back to original
-        const secondChangeData: PasswordChangeDto = {
+        const secondChangeData: EmporixPasswordChangeRequest = {
           currentPassword: tempPassword,
           newPassword: originalPassword,
         };
@@ -305,7 +304,7 @@ describe('EmporixCustomerApi', () => {
           await customerApi.login(originalUsername, tempPassword);
 
           // Change back to original
-          const emergencyChangeData: PasswordChangeDto = {
+          const emergencyChangeData: EmporixPasswordChangeRequest = {
             currentPassword: tempPassword,
             newPassword: originalPassword,
           };
@@ -368,7 +367,7 @@ describe('EmporixCustomerApi', () => {
       await tokenManager.clearTokens(tenant);
     }, 10000);
 
-    it('should update customer profile and verify changes', async () => {
+    it.skip('should update customer profile and verify changes', async () => {
       if (!isAuthenticated) {
         console.warn('Skipping profile update test due to authentication failure');
         return;

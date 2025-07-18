@@ -41,20 +41,6 @@ class EmporixCheckoutApi implements IEmporixCheckoutApi {
 
     if (!response.ok) {
       const errorDetails = await response.json();
-      if (errorDetails.status === 401) {
-        if (
-          errorDetails.type === 'insufficient_credentials' &&
-          errorDetails.message === 'Customer needs an approval to create an order.'
-        ) {
-          // DELETE Cart because it's broken anyways
-          this.cartApi.deleteCart(request.cartId);
-          return {
-            orderId: 'Approval Required',
-            paymentDetails: null,
-            checkoutId: '',
-          };
-        }
-      }
       throw new Error(`Failed to checkout: ${response.statusText} ${errorDetails.message}`);
     }
 

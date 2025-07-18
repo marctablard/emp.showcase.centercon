@@ -64,7 +64,6 @@ class EmporixShippingService implements ShippingService {
           }
         }
       }
-
       return methods;
     } catch (error) {
       console.error('Error getting shipping methods:', error);

@@ -4,6 +4,7 @@ import {
   BookOpen,
   Building2,
   CalendarDays,
+  ClipboardCheck,
   CreditCard,
   FileText,
   Gauge,
@@ -93,6 +94,11 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
           counter: 1,
         },
 
+        {
+          href: '/account/approvals',
+          title: t('sidebar.items.approvals'),
+          icon: <ClipboardCheck className="h-6 w-6" />,
+        },
         {
           href: '/account/quick-order',
           title: t('sidebar.items.quickOrder'),

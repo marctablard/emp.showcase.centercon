@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { checkout } from '@/lib/client/checkout';
+import { PaymentMode } from '@/platform/services/model';
 import { Cart } from '@/platform/services/model/cart/cart';
 import type {
   CheckoutAddress,
   CheckoutPaymentMethod,
+  CheckoutRequest,
   CheckoutResponse,
-  CheckoutShipping,
   ContactData,
+  OrderShipping,
 } from '@/platform/services/model/checkout';
 import { ShippingMethod } from '@/platform/services/model/shipping';
 import { useCheckoutStore } from '@/providers/StoreProvider';
@@ -28,7 +30,7 @@ interface UseCheckout {
   billingAddress: CheckoutAddress | null;
   shippingAddress: CheckoutAddress | null;
   orderResponse: CheckoutResponse | null;
-  shippingMethod: CheckoutShipping | null;
+  shippingMethod: OrderShipping | null;
   paymentMethod: CheckoutPaymentMethod | null;
   availableShippingMethods: ShippingMethod[];
   shippingMethodsLoading: boolean;
@@ -39,6 +41,7 @@ interface UseCheckout {
   submitPaymentMethod: (method: CheckoutPaymentMethod) => void;
   submitShippingMethod: (method: ShippingMethod) => void;
   // Operations
+  createCheckoutData: () => CheckoutRequest | null;
   processCheckout: () => Promise<CheckoutResponse | null>;
   processQuoteCheckout: (quoteId: string, paymentMethod: CheckoutPaymentMethod) => Promise<CheckoutResponse | null>;
   reset: () => void;
@@ -57,7 +60,6 @@ export const useCheckout = (): UseCheckout => {
     shippingAddress,
     paymentMethod,
     shippingMethod,
-
     setContactData,
     setBillingAddress,
     setShippingAddress,
@@ -124,15 +126,13 @@ export const useCheckout = (): UseCheckout => {
         zoneId: method.zoneId,
         methodName: method.name,
         amount: method.cost?.amount || 0,
+        taxCode: method.taxCode,
       });
     },
     [setShippingMethod],
   );
 
-  /**
-   * Process a checkout for the current cart
-   */
-  const processCheckout = async (): Promise<CheckoutResponse | null> => {
+  const createCheckoutData = () => {
     if (!checkoutCart) {
       setError(new Error('No cart available for checkout'));
       return null;
@@ -163,20 +163,30 @@ export const useCheckout = (): UseCheckout => {
       return null;
     }
 
+    return {
+      cartId: checkoutCart.id,
+      shipping: shippingMethod,
+      addresses: [billingAddress, shippingAddress],
+      customer: contactData,
+      paymentMethod: paymentMethod,
+      summary: {
+        termsAndConditions: true,
+      },
+    };
+  };
+
+  /**
+   * Process a checkout for the current cart
+   */
+  const processCheckout = async (): Promise<CheckoutResponse | null> => {
     try {
       setLoading(true);
       setError(null);
 
-      const checkoutData = {
-        cartId: checkoutCart.id,
-        shipping: shippingMethod,
-        addresses: [billingAddress, shippingAddress],
-        customer: contactData,
-        paymentMethod: paymentMethod,
-        summary: {
-          termsAndConditions: true,
-        },
-      };
+      const checkoutData = createCheckoutData();
+      if (!checkoutData) {
+        throw new Error('Failed to create checkout data');
+      }
 
       const checkoutResponse = await checkout(checkoutData);
 
@@ -261,14 +271,17 @@ export const useCheckout = (): UseCheckout => {
 
   useEffect(() => {
     if (checkoutCart && paymentModes && paymentModes.length > 0) {
-      let newPaymentMethod: CheckoutPaymentMethod | null = null;
+      let newPaymentMethod: PaymentMode | null = null;
       if (paymentMethod) {
         newPaymentMethod = paymentModes.find((method) => method.id === paymentMethod.id) || null;
       }
       if (!newPaymentMethod) {
         newPaymentMethod = paymentModes[0];
       }
-      submitPaymentMethod(newPaymentMethod);
+      submitPaymentMethod({
+        ...newPaymentMethod,
+        provider: 'none',
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentModes, checkoutCart, submitPaymentMethod]);
@@ -322,6 +335,7 @@ export const useCheckout = (): UseCheckout => {
     submitBillingAddress,
     submitPaymentMethod,
     submitShippingMethod,
+    createCheckoutData,
     processCheckout,
     processQuoteCheckout,
     reset,

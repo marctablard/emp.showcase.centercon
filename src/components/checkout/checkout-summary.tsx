@@ -1,9 +1,10 @@
 'use client';
 
-import React, { RefObject, useRef, useState } from 'react';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { LockKeyhole } from 'lucide-react';
+import { useApprovalCheckout } from '@/hooks/approval/useApprovalCheckout';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useElementScroll } from '@/hooks/ui/useElementScroll';
@@ -14,11 +15,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card
 import { Checkbox } from '../ui/checkbox';
 import { FormControl, FormField, FormItem } from '../ui/form';
 import { H2 } from '../ui/h';
+import { ApprovalModal } from './approval-modal';
 
 interface OrderSummaryProps {
   isReadOnly?: boolean;
   leftContent: RefObject<HTMLDivElement | null>;
-  onSubmit: () => void;
+  onSubmit: (approvalData?: { approverId: string; comment: string }) => void;
 }
 
 /**
@@ -26,14 +28,28 @@ interface OrderSummaryProps {
  * Displays cart items, subtotal, shipping, and total
  */
 const CheckoutSummaryComponent: React.FC<OrderSummaryProps> = ({ leftContent, onSubmit }) => {
-  const { checkoutCart: cart, loading } = useCheckout();
+  const { checkoutCart: cart, loading: checkoutLoading } = useCheckout();
+  const { requiresApproval, loading: approvalLoading, setCartId } = useApprovalCheckout(cart?.id?.toString());
+  const loading = checkoutLoading || approvalLoading;
   const t = useTranslations('Checkout.summary');
   const [isSubmitting] = useState(false);
   const [disabled, setDisabled] = useState(true);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
 
   const onValidationSuccess = (data: any) => {
     setDisabled(!data.termsAndConditions);
   };
+
+  const approvalSubmit = (approverId: string, comment: string) => {
+    onSubmit({ approverId, comment });
+    setIsApprovalModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (cart) {
+      setCartId(cart.id);
+    }
+  }, [cart, setCartId]);
 
   const { form } = useValidator(
     'SummaryValidationService',
@@ -134,19 +150,40 @@ const CheckoutSummaryComponent: React.FC<OrderSummaryProps> = ({ leftContent, on
 
               <Button
                 type="submit"
-                onClick={onSubmit}
-                disabled={disabled || isSubmitting || loading}
+                onClick={(e) => {
+                  if (requiresApproval) {
+                    e.preventDefault();
+                    setIsApprovalModalOpen(true);
+                  } else {
+                    onSubmit();
+                  }
+                }}
+                disabled={disabled || isSubmitting || loading || approvalLoading}
                 className="w-full"
               >
-                {isSubmitting || loading ? t('processing') : t('submitOrder')}
+                {isSubmitting || loading
+                  ? t('processing')
+                  : requiresApproval
+                    ? t('inquireForApproval')
+                    : t('submitOrder')}
               </Button>
             </FormProvider>
             <div className="flex align-center gap-2 text-neutral-600 pt-4">
               <div>
                 <LockKeyhole width={12} />
               </div>
-              <div className="text-sm leading-6">{t('dataTransmittedSecure')}</div>
+              <div className="text-xs">{t('dataTransmittedSecure')}</div>
             </div>
+
+            {/* Approval Modal */}
+            {cart && (
+              <ApprovalModal
+                isOpen={isApprovalModalOpen}
+                onClose={() => setIsApprovalModalOpen(false)}
+                cartId={cart.id}
+                approvalSubmit={approvalSubmit}
+              />
+            )}
           </CardFooter>
         </Card>
       </div>

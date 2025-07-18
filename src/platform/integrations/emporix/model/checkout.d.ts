@@ -52,7 +52,7 @@ export interface EmporixCheckoutPaymentMethod {
     paymentType?: string;
     [key: string]: any;
   };
-  method?: string;
+  method: string;
   amount?: number;
 }
 

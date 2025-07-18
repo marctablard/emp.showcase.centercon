@@ -21,6 +21,7 @@ class EmporixShippingMapper implements ShippingMapper {
       description: '',
       cost: cost,
       zoneId: zoneId,
+      taxCode: emporixMethod.shippingTaxCode,
     };
   }
 
