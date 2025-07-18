@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import useHistory from '@/hooks/history/useHistory';
 import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
@@ -12,6 +13,8 @@ type SearchParams<T> = Omit<BaseSearchParams<T>, 'filters'> & {
 
 export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: SearchResult<T>) {
   const { addSearchQuery } = useHistory();
+  const router = useRouter();
+  const pathname = usePathname();
   const [data, setData] = useState<T[]>(initialResult?.items || []);
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -89,6 +92,9 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
 
       // Save the search params for pagination
       lastSearchParams.current = params;
+
+      // Update browser URL with the same parameters (but with 'q' instead of 'query')
+      updateBrowserUrl(url.searchParams);
 
       // Fetch the search results
       const response = await fetch(url.toString());
@@ -275,6 +281,32 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       });
     },
     [search],
+  );
+
+  /**
+   * Update the browser URL with search parameters without causing a page reload
+   * Uses the already built URL parameters but adapts them for the browser URL
+   */
+  const updateBrowserUrl = useCallback(
+    (apiSearchParams: URLSearchParams) => {
+      // Create a new URLSearchParams for the browser URL
+      const browserSearchParams = new URLSearchParams();
+
+      apiSearchParams.forEach((value, key) => {
+        // Replace 'query' with 'q' in the browser URL for consistency
+        if (key === 'query') {
+          browserSearchParams.set('q', value);
+        }
+        // Copy all other parameters as is
+        else {
+          browserSearchParams.append(key, value);
+        }
+      });
+
+      const newUrl = `${pathname}?${browserSearchParams.toString()}`;
+      router.push(newUrl, { scroll: false });
+    },
+    [pathname, router],
   );
 
   useEffect(() => {

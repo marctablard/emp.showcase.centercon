@@ -113,7 +113,6 @@ class BatteryIncludedProductMapper implements ProductMapper<BatteryIncludedProdu
       item.hits.forEach((hit: any) => {
         if (hit && hit.highlighted) {
           const product = this.mapToService(hit.highlighted);
-          product.id = hit.highlighted.availability?.productId;
           if (hit.highlighted.prices) {
             let lowestPrice: { amount: number; currency: string } | undefined = undefined;
             hit.highlighted.prices.forEach((price: any) => {

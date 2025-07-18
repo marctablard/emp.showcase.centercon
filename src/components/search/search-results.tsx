@@ -47,12 +47,57 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
   const [visiblePagination, setVisiblePagination] = useState<number[]>([]);
 
   useEffect(() => {
-    search({
-      query: searchParams.get('q') ?? '',
-      page: currentPage,
-      size: pageSize,
+    // Parse URL parameters to restore search state
+    const query = searchParams.get('q') ?? '';
+    const page = parseInt(searchParams.get('page') ?? '0', 10);
+    const size = parseInt(searchParams.get('size') ?? String(pageSize), 10);
+    const sort = searchParams.get('sort') ?? undefined;
+
+    const filters: Record<string, string | string[] | Record<string, string>> = {};
+
+    searchParams.forEach((value, key) => {
+      const filterRegex = /^filters\[(.*?)\](\[\]|\[(.*?)\])?$/;
+      const match = key.match(filterRegex);
+
+      if (match) {
+        const filterKey = match[1];
+        const isArray = match[2] === '[]';
+        const nestedKey = match[3];
+
+        // Handle nested filters like filters[price][from]
+        if (nestedKey) {
+          if (!filters[filterKey] || typeof filters[filterKey] !== 'object' || Array.isArray(filters[filterKey])) {
+            filters[filterKey] = {};
+          }
+
+          (filters[filterKey] as Record<string, string>)[nestedKey] = value;
+        }
+        // Handle array filters like filters[category][]
+        else if (isArray) {
+          if (!filters[filterKey]) {
+            filters[filterKey] = [];
+          } else if (!Array.isArray(filters[filterKey])) {
+            filters[filterKey] = [filters[filterKey] as string];
+          }
+
+          (filters[filterKey] as string[]).push(value);
+        }
+        // Handle simple filters like filters[inStock]
+        else {
+          filters[filterKey] = value;
+        }
+      }
     });
-  }, [searchParams, currentPage, pageSize, search]);
+
+    // Perform search with parameters from URL
+    search({
+      query: query,
+      page: page,
+      size: size, // Use the size from URL parameters
+      sort: sort,
+      filters: Object.keys(filters).length > 0 ? filters : undefined,
+    });
+  }, [searchParams, pageSize, search]);
 
   useEffect(() => {
     const totalPages = Math.ceil(total / pageSize);
