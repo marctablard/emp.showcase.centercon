@@ -23,12 +23,12 @@ export default function HeaderActions({ className }: { className?: string }) {
     return (
       <div className={`flex items-center gap-5 text-nowrap ${className}`}>
         <div className="hidden md:block lg:hidden">
-          <HeaderIconLink icon={Search} text="Search" href={'/#'} />
+          <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />
         </div>
-        <HeaderIconButton icon={User} text="Sign In" onClick={() => {}} />
+        <HeaderIconButton icon={User} text={t('signIn')} onClick={() => {}} />
         <div className="hidden md:flex gap-5">
-          <HeaderIconLink icon={Gauge} text="Quick Order" href="/#" />
-          <HeaderIconLink icon={Pin} text="Wishlists" href="/#" />
+          <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
+          <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
         </div>
       </div>
     );
