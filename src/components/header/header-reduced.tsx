@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
+import { HeaderCartButton } from '@/components/header/common/header-cart-button';
 import { Link } from '@/i18n/navigation';
-import { HeaderCartButton } from './common/header-cart-button';
 
 export function HeaderReduced() {
   return (

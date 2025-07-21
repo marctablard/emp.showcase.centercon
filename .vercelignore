@@ -1,7 +1,9 @@
 .github
 .husky
 .idea
-certificats
+.windsurf
+certificates
 docs
+e2e
 playwright-report
 test-results

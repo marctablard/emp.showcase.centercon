@@ -5,41 +5,16 @@ import { HeaderCollapsed } from '@/components/header/collapsed/header-collapsed'
 import { HeaderExpanded } from '@/components/header/expanded/header-expanded';
 import { HeaderMobile } from '@/components/header/mobile/header-mobile';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { useHeaderScroll } from '@/hooks/useHeaderScroll';
 
 export function Header() {
   const isMediumScreen = useBreakpoint('md');
-  const isLargeScreen = useBreakpoint('lg');
-  const [scrolled, setScrolled] = useState(false);
+  const { scrolled, getHeaderHeight } = useHeaderScroll();
   const [isMounted, setIsMounted] = useState(false);
-  const scrollThreshold = isLargeScreen ? 100 : 60;
 
   useEffect(() => {
     setIsMounted(true);
-
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > scrollThreshold;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [scrollThreshold, scrolled]);
-
-  function getHeaderHeight() {
-    if (!scrolled) {
-      if (isLargeScreen) return 'h-[169px]';
-      return 'h-[111px]';
-    }
-
-    return '';
-  }
+  }, []);
 
   // SSR-Fallback: Shows the desktop variant on first render
   if (!isMounted) {
