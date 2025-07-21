@@ -56,14 +56,12 @@ export function HeaderMiniCartItemList({ cart, cartUpdate }: HeaderMiniCartItemL
             </div>
           </div>
           <div>
-            {cartUpdate && cartUpdate?.itemId === item.id && (
+            {cartUpdate?.itemId === item.id && (
               <Badge variant="warning" className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal">
                 <MessageCircleWarning />
               </Badge>
             )}
-            <p
-              className={`font-bold font-headlines ${cartUpdate && cartUpdate?.itemId === item.id ? 'bg-orange-100/75' : ''}`}
-            >
+            <p className={`font-bold font-headlines ${cartUpdate?.itemId === item.id ? 'bg-orange-100/75' : ''}`}>
               {formatCurrency(item.price.amount, item.price.currency)}
             </p>
           </div>
