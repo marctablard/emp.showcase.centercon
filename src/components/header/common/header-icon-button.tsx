@@ -6,7 +6,7 @@ interface HeaderIconButtonProps {
   onClick?: () => void;
 }
 
-export default function HeaderIconButton({ icon: Icon, text, onClick }: HeaderIconButtonProps) {
+export function HeaderIconButton({ icon: Icon, text, onClick }: HeaderIconButtonProps) {
   return (
     <button
       onClick={onClick}

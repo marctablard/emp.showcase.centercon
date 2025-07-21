@@ -9,7 +9,7 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 
-export default function HeaderNavigation() {
+export function HeaderNavigation() {
   const t = useTranslations('header');
 
   return (

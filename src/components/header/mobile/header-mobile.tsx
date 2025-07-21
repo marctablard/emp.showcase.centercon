@@ -1,13 +1,13 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Gauge, LayoutGrid, Menu, Pin, Search } from 'lucide-react';
-import HeaderActions from '@/components/header/common/header-actions';
-import HeaderCartButton from '@/components/header/common/header-cart-button';
-import HeaderIconLink from '@/components/header/common/header-icon-link';
+import { HeaderActions } from '@/components/header/common/header-actions';
+import { HeaderCartButton } from '@/components/header/common/header-cart-button';
+import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 
-export default function HeaderMobile() {
+export function HeaderMobile() {
   const t = useTranslations('header');
   return (
     <>

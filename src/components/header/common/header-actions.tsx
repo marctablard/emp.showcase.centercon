@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Gauge, Pin, Search, User, UserCheck } from 'lucide-react';
-import HeaderIconButton from '@/components/header/common/header-icon-button';
-import HeaderIconLink from '@/components/header/common/header-icon-link';
+import { HeaderIconButton } from '@/components/header/common/header-icon-button';
+import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import useAuthDialog from '@/hooks/auth/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 
-export default function HeaderActions({ className }: { className?: string }) {
+export function HeaderActions({ className }: { className?: string }) {
   const t = useTranslations('header');
   const { isAuthenticated, loading } = useAuthentication();
   const { openDialog } = useAuthDialog();

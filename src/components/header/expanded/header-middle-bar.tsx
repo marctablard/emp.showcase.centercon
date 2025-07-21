@@ -1,10 +1,10 @@
 import Image from 'next/image';
-import HeaderActions from '@/components/header/common/header-actions';
-import HeaderSearch from '@/components/header/common/search/header-search';
+import { HeaderActions } from '@/components/header/common/header-actions';
+import { HeaderSearch } from '@/components/header/common/search/header-search';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
 
-export default function HeaderMiddleBar() {
+export function HeaderMiddleBar() {
   const isExtraLargeScreen = useBreakpoint('xl');
 
   return (

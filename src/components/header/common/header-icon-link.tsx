@@ -7,7 +7,7 @@ interface HeaderIconLinkProps {
   href: string;
 }
 
-export default function HeaderIconLink({ icon: Icon, text, href }: HeaderIconLinkProps) {
+export function HeaderIconLink({ icon: Icon, text, href }: HeaderIconLinkProps) {
   return (
     <Link
       href={href}

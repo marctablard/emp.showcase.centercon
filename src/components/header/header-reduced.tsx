@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
-import HeaderCartButton from './common/header-cart-button';
+import { HeaderCartButton } from './common/header-cart-button';
 
 export function HeaderReduced() {
   return (

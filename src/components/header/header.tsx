@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import HeaderCollapsed from '@/components/header/collapsed/header-collapsed';
-import HeaderExpanded from '@/components/header/expanded/header-expanded';
-import HeaderMobile from '@/components/header/mobile/header-mobile';
+import { HeaderCollapsed } from '@/components/header/collapsed/header-collapsed';
+import { HeaderExpanded } from '@/components/header/expanded/header-expanded';
+import { HeaderMobile } from '@/components/header/mobile/header-mobile';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export function Header() {

@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { CurrencySwitcher } from '../common/header-currency-switcher';
 import { RegionSwitcher } from '../common/header-region-switcher';
 
-export default function HeaderTopBanner() {
+export function HeaderTopBanner() {
   const t = useTranslations('header');
   return (
     <div className="bg-primary text-white shadow-sm rounded-2xl flex items-center -mx-2 lg:-mx-4 -mt-1 h-8 px-8 lg:px-10">

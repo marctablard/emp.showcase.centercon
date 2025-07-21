@@ -1,12 +1,12 @@
 import Image from 'next/image';
-import HeaderMenu from '@/components/header/collapsed/header-menu';
-import HeaderActions from '@/components/header/common/header-actions';
-import HeaderCartButton from '@/components/header/common/header-cart-button';
-import HeaderSearch from '@/components/header/common/search/header-search';
+import { HeaderMenu } from '@/components/header/collapsed/header-menu';
+import { HeaderActions } from '@/components/header/common/header-actions';
+import { HeaderCartButton } from '@/components/header/common/header-cart-button';
+import { HeaderSearch } from '@/components/header/common/search/header-search';
 import { Link } from '@/i18n/navigation';
-import HeaderNavigation from '../common/header-navigation';
+import { HeaderNavigation } from '../common/header-navigation';
 
-export default function HeaderCollapsed() {
+export function HeaderCollapsed() {
   return (
     <>
       <div className="flex gap-8 items-center">

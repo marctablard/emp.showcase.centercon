@@ -19,7 +19,7 @@ interface HeaderCartButtonProps {
   showSum?: boolean;
 }
 
-export default function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
+export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
   const t = useTranslations('cart');
   const { hasNotification } = useNotificationStore();
   const { l10n } = useL10n();
