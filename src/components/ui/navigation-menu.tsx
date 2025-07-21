@@ -42,7 +42,7 @@ function NavigationMenuItem({ className, ...props }: React.ComponentProps<typeof
 }
 
 const navigationMenuTriggerStyle = cva(
-  'group inline-flex h-12 w-max items-center justify-center rounded-md py-2 text-xl text-headlines font-normal hover:font-bold focus:font-bold disabled:pointer-events-none disabled:opacity-50 outline-none transition-[color,box-shadow]',
+  'group inline-flex h-12 w-max items-center justify-center rounded-md py-2 text-xl text-headlines font-normal hover:text-primary-700 hover:underline focus:text-primary-500 focus:underline disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-primary-500 outline-none transition-all focus-visible:rounded-sm focus-visible:ring-[2px]',
 );
 
 function NavigationMenuTrigger({
