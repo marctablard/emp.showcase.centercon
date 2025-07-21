@@ -16,7 +16,7 @@ import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
-import { H1, H2, H3, H4, H5 } from '../ui/h';
+import { H1, H2, H3, H5 } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
 import ProductAddToCart from './product-add-to-cart';
@@ -52,7 +52,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   }
   return (
     <>
-      <div className={cn('grid grid-cols-1 gap-x-4 lg:gap-x-6 xl:gap-x-29 lg:grid-cols-2 lg:pr-29', className)}>
+      <div className={cn('grid grid-cols-1 gap-x-4 lg:gap-x-12 2xl:gap-x-29 lg:grid-cols-2', className)}>
         <>
           <Card variant="gray" className="row-start-3 lg:col-start-1 lg:row-start-1 lg:row-end-4 p-8 mb-6">
             <CardContent className="px-0">

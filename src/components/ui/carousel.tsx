@@ -13,6 +13,7 @@ type CarouselPlugin = UseCarouselParameters[1];
 
 type CarouselProps = {
   opts?: CarouselOptions;
+  loop?: boolean;
   plugins?: CarouselPlugin;
   orientation?: 'horizontal' | 'vertical';
   setApi?: (api: CarouselApi) => void;
@@ -46,7 +47,8 @@ function useCarousel() {
 }
 
 function Carousel({
-  orientation = 'horizontal',
+  orientation,
+  loop,
   opts,
   setApi,
   plugins,
@@ -57,12 +59,13 @@ function Carousel({
   const [carouselRef, api] = useEmblaCarousel(
     {
       ...opts,
+      loop: loop,
       axis: orientation === 'horizontal' ? 'x' : 'y',
     },
     plugins,
   );
-  const [canScrollPrev, setCanScrollPrev] = React.useState(true);
-  const [canScrollNext, setCanScrollNext] = React.useState(true);
+  const [canScrollPrev, setCanScrollPrev] = React.useState(false);
+  const [canScrollNext, setCanScrollNext] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   const onSelect = React.useCallback((api: CarouselApi) => {
@@ -149,7 +152,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
+    <div ref={carouselRef} className="overflow-hidden w-full" data-slot="carousel-content">
       <div className={cn('flex', orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col', className)} {...props} />
     </div>
   );
@@ -216,6 +219,7 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={classes}
+      disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
