@@ -4,7 +4,7 @@ import { Control } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { H5 } from '@/components/ui/h';
+import { H2 } from '@/components/ui/h';
 import { Separator } from '@/components/ui/separator';
 
 interface EmailSignupSectionProps {
@@ -18,9 +18,9 @@ export function EmailSignupSection({ control, number }: EmailSignupSectionProps)
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <H5>
+        <H2 variant="h5">
           {number}. {t('emailSignup')}
-        </H5>
+        </H2>
         <Separator />
       </div>
       <div className="space-y-4">
@@ -32,7 +32,9 @@ export function EmailSignupSection({ control, number }: EmailSignupSectionProps)
               <FormControl>
                 <Checkbox id="newsletter" checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormLabel htmlFor="newsletter">{t('newsletter')}</FormLabel>
+              <FormLabel className="font-normal" htmlFor="newsletter">
+                {t('newsletter')}
+              </FormLabel>
               <FormMessage />
             </FormItem>
           )}
@@ -45,7 +47,9 @@ export function EmailSignupSection({ control, number }: EmailSignupSectionProps)
               <FormControl>
                 <Checkbox id="dealsAlerts" checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormLabel htmlFor="dealsAlerts">{t('dealsAlerts')}</FormLabel>
+              <FormLabel className="font-normal" htmlFor="dealsAlerts">
+                {t('dealsAlerts')}
+              </FormLabel>
               <FormMessage />
             </FormItem>
           )}

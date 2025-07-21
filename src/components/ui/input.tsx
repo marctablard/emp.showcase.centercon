@@ -77,7 +77,7 @@ function Input({ className, type, startIcon, endIcon, isButton, onEndIconClick, 
     >
       {StartIcon && (
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-          <StartIcon size={20} />
+          <StartIcon size={24} />
         </div>
       )}
       <input
@@ -107,7 +107,7 @@ function Input({ className, type, startIcon, endIcon, isButton, onEndIconClick, 
           tabIndex={onEndIconClick ? 0 : undefined}
           aria-label={onEndIconClick ? 'Toggle visibility' : undefined}
         >
-          <EndIcon size={20} />
+          <EndIcon size={24} />
         </div>
       )}
     </div>

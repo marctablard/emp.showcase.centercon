@@ -1,7 +1,7 @@
 import { Control } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { H5 } from '@/components/ui/h';
+import { H2 } from '@/components/ui/h';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -16,9 +16,9 @@ export default function AdditionalInformationSection({ control, number }: Additi
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <H5>
+        <H2 variant="h5">
           {number}. {t('additionalInformation')}
-        </H5>
+        </H2>
         <Separator />
       </div>
       <FormField

@@ -5,7 +5,7 @@ import { Control } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Eye, EyeOff } from 'lucide-react';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { H5 } from '@/components/ui/h';
+import { H2 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { PasswordCriteria } from './password-criteria';
@@ -23,17 +23,17 @@ export function AccountSettingsSection({ control, number }: AccountSettingsAccor
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <H5>
+        <H2 variant="h5">
           {number}. {t('accountSettings')}
-        </H5>
+        </H2>
         <Separator />
       </div>
-      <div className="space-y-4">
+      <div className="space-y-6">
         <FormField
           control={control}
           name="password"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="relative">
               <FormLabel htmlFor="password">{t('password')}</FormLabel>
               <FormControl>
                 <Input
@@ -54,7 +54,7 @@ export function AccountSettingsSection({ control, number }: AccountSettingsAccor
           control={control}
           name="passwordConfirmation"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="relative">
               <FormLabel htmlFor="passwordConfirmation">{t('passwordConfirmation')}</FormLabel>
               <FormControl>
                 <Input
@@ -67,7 +67,9 @@ export function AccountSettingsSection({ control, number }: AccountSettingsAccor
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
+              <div className="absolute top-full left-0 mt-0.5">
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />

@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Control } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { H5 } from '@/components/ui/h';
+import { H2 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -23,6 +23,13 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
   const { l10n } = useL10n();
   const t = useTranslations('register');
 
+  // useWatch auf oberster Ebene der Komponente verwenden
+  const businessType = useWatch({
+    control,
+    name: 'businessType',
+  });
+  const isB2C = businessType === 'B2C';
+
   useEffect(() => {
     if (!countries) {
       fetchSiteData();
@@ -36,22 +43,27 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <H5>
+        <H2 variant="h5">
           {number}. {t('addressInfo')}
-        </H5>
+        </H2>
         <Separator />
       </div>
-      <div className="space-y-4">
+      <div className="space-y-6">
         <FormField
           control={control}
           name="companyName"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel htmlFor="companyName">{t('companyName')}</FormLabel>
+            <FormItem className="relative">
+              <FormLabel htmlFor="companyName" className="flex flex-nowrap">
+                {t('companyName')}
+                {isB2C && <span className="text-neutral-300 text-xs ml-1"> {t('optional')}</span>}
+              </FormLabel>
               <FormControl>
                 <Input id="companyName" type="text" {...field} />
               </FormControl>
-              <FormMessage />
+              <div className="absolute top-full left-0 mt-0.5">
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />
@@ -74,12 +86,17 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
           control={control}
           name="vatNumber"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel htmlFor="vatNumber">{t('vatNumber')}</FormLabel>
+            <FormItem className="relative">
+              <FormLabel htmlFor="vatNumber" className="flex flex-nowrap">
+                {t('vatNumber')}
+                {isB2C && <span className="text-neutral-300 text-xs ml-1"> {t('optional')}</span>}
+              </FormLabel>
               <FormControl>
                 <Input id="vatNumber" type="text" {...field} />
               </FormControl>
-              <FormMessage />
+              <div className="absolute top-full left-0 mt-0.5">
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />
@@ -88,12 +105,14 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             control={control}
             name="street"
             render={({ field }) => (
-              <FormItem className="w-2/3 md:w-3/4">
+              <FormItem className="w-2/3 md:w-3/4 relative">
                 <FormLabel htmlFor="street">{t('street')}</FormLabel>
                 <FormControl>
                   <Input id="street" type="text" required {...field} />
                 </FormControl>
-                <FormMessage />
+                <div className="absolute top-full left-0 mt-0.5">
+                  <FormMessage />
+                </div>
               </FormItem>
             )}
           />
@@ -101,14 +120,16 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             control={control}
             name="houseNumber"
             render={({ field }) => (
-              <FormItem className="w-1/3 md:w-1/4">
+              <FormItem className="w-1/3 md:w-1/4 relative">
                 <FormLabel htmlFor="houseNumber" className="overflow-hidden">
                   <p className="text-nowrap whitespace-nowrap overflow-ellipsis overflow-hidden">{t('houseNumber')}</p>
                 </FormLabel>
                 <FormControl>
                   <Input id="houseNumber" type="text" required {...field} />
                 </FormControl>
-                <FormMessage className="text-nowrap overflow-hidden overflow-ellipsis" />
+                <div className="absolute top-full left-0 mt-0.5">
+                  <FormMessage className="text-nowrap overflow-hidden overflow-ellipsis" />
+                </div>
               </FormItem>
             )}
           />
@@ -118,14 +139,16 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             control={control}
             name="postalCode"
             render={({ field }) => (
-              <FormItem className="w-1/3 md:w-1/4">
+              <FormItem className="w-1/3 md:w-1/4 relative">
                 <FormLabel htmlFor="postalCode" className="overflow-hidden">
                   <p className="text-nowrap whitespace-nowrap overflow-ellipsis overflow-hidden">{t('postalCode')}</p>
                 </FormLabel>
                 <FormControl>
                   <Input id="postalCode" type="text" required {...field} />
                 </FormControl>
-                <FormMessage className="text-nowrap overflow-hidden overflow-ellipsis" />
+                <div className="absolute top-full left-0 mt-0.5">
+                  <FormMessage className="text-nowrap overflow-hidden overflow-ellipsis" />
+                </div>
               </FormItem>
             )}
           />
@@ -133,12 +156,14 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             control={control}
             name="city"
             render={({ field }) => (
-              <FormItem className="w-2/3 md:w-3/4">
+              <FormItem className="w-2/3 md:w-3/4 relative">
                 <FormLabel htmlFor="city">{t('city')}</FormLabel>
                 <FormControl>
                   <Input id="city" type="text" required {...field} />
                 </FormControl>
-                <FormMessage />
+                <div className="absolute top-full left-0 mt-0.5">
+                  <FormMessage />
+                </div>
               </FormItem>
             )}
           />
@@ -147,7 +172,7 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
           control={control}
           name="country"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="relative">
               <FormLabel htmlFor="country">{t('country')}</FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -163,7 +188,9 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
                   </SelectContent>
                 </Select>
               </FormControl>
-              <FormMessage />
+              <div className="absolute top-full left-0 mt-0.5">
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />
@@ -175,7 +202,9 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
               <FormControl>
                 <Checkbox id="shippingSameAsBilling" checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormLabel htmlFor="shippingSameAsBilling">{t('shippingSameAsBilling')}</FormLabel>
+              <FormLabel className="font-normal" htmlFor="shippingSameAsBilling">
+                {t('shippingSameAsBilling')}
+              </FormLabel>
               <FormMessage />
             </FormItem>
           )}

@@ -34,11 +34,20 @@ export const RegistrationSchema = z
   })
   .refine(
     (data) => {
-      return data.businessType == 'B2C' || (data.companyName && data.companyName.length > 0);
+      return data.businessType === 'B2C' || (data.companyName && data.companyName.length > 0);
     },
     {
       message: 'register.companyName.required',
       path: ['companyName'],
+    },
+  )
+  .refine(
+    (data) => {
+      return data.businessType === 'B2C' || (data.vatNumber && data.vatNumber.length > 0);
+    },
+    {
+      message: 'register.vatNumber.required',
+      path: ['vatNumber'],
     },
   );
 

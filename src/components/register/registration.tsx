@@ -4,14 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { H1, H5 } from '@/components/ui/h';
+import { H1, H2 } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
+import useAuthDialog from '@/hooks/auth/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useRegistration } from '@/hooks/registration/useRegistration';
 import useCurrency from '@/hooks/useCurrency';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { RegistrationData } from '@/platform/services/validation/impl/EmporixRegistrationValidationService';
-import LoginDialog from '../login/login-dialog';
 import { Spinner } from '../ui/spinner';
 import { AccountSettingsSection } from './account-settings-section';
 import { AddressInfoSection } from './address-info-section';
@@ -27,6 +27,7 @@ export default function Registration() {
   const top = useRef<HTMLDivElement>(null);
   const locale = useLocale();
   const { currency } = useCurrency();
+  const { openDialog } = useAuthDialog();
 
   useEffect(() => {
     if (formError && top.current) {
@@ -43,7 +44,7 @@ export default function Registration() {
       email: '',
       emailConfirmation: '',
       companyName: '',
-      businessType: '',
+      businessType: 'B2B',
       street: '',
       houseNumber: '',
       postalCode: '',
@@ -57,7 +58,7 @@ export default function Registration() {
       newsletter: false,
       dealsAlerts: false,
     },
-    'onBlur',
+    'onChange',
   );
 
   async function onSubmit(values: RegistrationData) {
@@ -132,7 +133,9 @@ export default function Registration() {
         <H1 variant="h4">{t('title')}</H1>
         <p>
           {t('alreadyHaveAccount')}{' '}
-          <LoginDialog redirectAfterLogin={true} trigger={<UiLink type="Button">{t('logIn')}</UiLink>} />
+          <UiLink type="Button" onClick={() => openDialog('login')}>
+            {t('logIn')}
+          </UiLink>
         </p>
       </div>
 
@@ -140,7 +143,9 @@ export default function Registration() {
         <form id="register-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
           {(formError || error) && (
             <div className="flex flex-col gap-2">
-              <H5 className="text-danger-500">{t('error')}</H5>
+              <H2 variant="h5" className="text-danger-500">
+                {t('error')}
+              </H2>
               <span className="text-danger-500">{formError || error}</span>
             </div>
           )}
@@ -158,20 +163,26 @@ export default function Registration() {
         <p>
           {t.rich('termsNotice', {
             privacyPolicy: (chunks) => (
-              <UiLink type="Link" href="/#">
+              <UiLink type="Link" href="/privacy-policy">
                 {chunks}
               </UiLink>
             ), // Todo set correct link
             termsOfUse: (chunks) => (
-              <UiLink type="Link" href="/#">
+              <UiLink type="Link" href="/terms-and-conditions">
                 {chunks}
               </UiLink>
             ), // Todo: set correct link
           })}
         </p>
-        <Button type="submit" form="register-form" className="w-full" disabled={loading}>
+        <Button type="submit" form="register-form" className="w-full" disabled={loading || !form.formState.isValid}>
           {loading ? t('registering') : t('registerButton')}
         </Button>
+        <p>
+          {t('alreadyHaveAccount')}{' '}
+          <UiLink type="Button" onClick={() => openDialog('login')}>
+            {t('logIn')}
+          </UiLink>
+        </p>
       </div>
     </div>
   );
