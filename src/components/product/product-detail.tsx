@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { CheckCircle2, FlipHorizontal, LucideArrowDown, LucideCopy, Pin, Share2, Sun } from 'lucide-react';
+import { CheckCircle2, FlipHorizontal2, LucideArrowDown, LucideCopy, Pin, Share2, Sun } from 'lucide-react';
 import { ProductCarousel } from '@/components/product/product-carousel';
 import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
@@ -16,7 +16,7 @@ import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
-import { H1, H2, H3, H4 } from '../ui/h';
+import { H1, H2, H3, H4, H5 } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
 import ProductAddToCart from './product-add-to-cart';
@@ -52,12 +52,10 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   }
   return (
     <>
-      <div
-        className={cn('grid grid-cols-1 gap-y-4 gap-x-4 lg:gap-x-6 lg:gap-y-6 xl:gap-x-29 lg:grid-cols-2', className)}
-      >
+      <div className={cn('grid grid-cols-1 gap-x-4 lg:gap-x-6 xl:gap-x-29 lg:grid-cols-2 lg:pr-29', className)}>
         <>
-          <Card variant="gray" className="row-start-3 lg:col-start-1 lg:row-start-1 lg:row-end-4">
-            <CardContent>
+          <Card variant="gray" className="row-start-3 lg:col-start-1 lg:row-start-1 lg:row-end-4 p-8 mb-6">
+            <CardContent className="px-0">
               {/* Product Image Carousel */}
               <div className="overflow-hidden">
                 {product.images && product.images.length > 0 ? (
@@ -71,16 +69,17 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             </CardContent>
           </Card>
           <div className="lg:col-start-1">
-            <Card variant="primary" className="p-4 lg:p-6">
+            <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6">
               <CardContent className="p-0">
                 <div className="flex flex-col gap-6">
-                  <h2 className="text-white text-3xl font-bold font-headlines">{t('keySpecs')}</h2>
-                  <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-6">
+                  <h2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</h2>
+                  <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
                     <BulletPoint
                       className="font-bold"
                       label="Nominal Power"
                       variant="white"
                       iconColor="white"
+                      iconSize={'lg'}
                       value={product.mixins?.productVariantAttributes?.['nominal-power']}
                     />
                     <BulletPoint
@@ -88,6 +87,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Length"
                       variant="white"
                       iconColor="white"
+                      iconSize={'lg'}
                       value={product.mixins?.productTemplateAttributes?.['length']}
                     />
                     <BulletPoint
@@ -95,6 +95,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Solar Panel Type"
                       variant="white"
                       iconColor="white"
+                      iconSize={'lg'}
                       value="Solar Panel"
                     />
                     <BulletPoint
@@ -102,6 +103,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Width"
                       variant="white"
                       iconColor="white"
+                      iconSize={'lg'}
                       value={product.mixins?.productTemplateAttributes?.['width']}
                     />
                     <BulletPoint
@@ -109,6 +111,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Cell Type"
                       variant="white"
                       iconColor="white"
+                      iconSize={'lg'}
                       value={product.mixins?.productTemplateAttributes?.['cell-type']}
                     />
                     <BulletPoint
@@ -116,6 +119,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       label="Height"
                       variant="white"
                       iconColor="white"
+                      iconSize={'lg'}
                       value={product.mixins?.productTemplateAttributes?.['height']}
                     />
                   </div>
@@ -131,7 +135,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
 
                   <div className="flex items-center mt-2">
                     <span className="text-white font-bold">{t('itemNumber')}:</span>
-                    <span className="text-primary ml-2 bg-white bg-opacity-20 p-2 rounded flex items-center">
+                    <span className="text-primary ml-2 bg-white bg-opacity-20 py-2 px-3 rounded flex items-center">
                       <p className="me-2">{product.id}</p>
                       <LucideCopy aria-label={t('copy')} />
                     </span>
@@ -140,7 +144,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               </CardContent>
             </Card>
             <div className="my-6">
-              <H4>{t('otherVariants')}</H4>
+              <H5>{t('otherVariants')}</H5>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-primary-500">
                   <div className="col-start-1 bg-neutral-50 p-4">
@@ -234,19 +238,19 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             </div>
           </div>
         </>
-        <div className="lg:col-start-2 row-start-1">
+        <div className="lg:col-start-2 row-start-1 h-6">
           <div>
             <div className="flex justify-between">
-              <div className="flex gap-2 h-7">
+              <div className="flex gap-2">
                 {product.labels?.map((label) => (
-                  <Badge key={label.id} variant="info" rounded="rounded_right">
+                  <Badge key={label.id} variant="info" rounded="rounded_right" className="h-7">
                     {label.name}
                   </Badge>
                 ))}
               </div>
               <div className="flex gap-2">
                 <Button size="icon" variant="secondary" aria-label="icon">
-                  <FlipHorizontal />
+                  <FlipHorizontal2 />
                 </Button>
                 <Button size="icon" variant="secondary" aria-label="icon">
                   <Pin />
@@ -269,7 +273,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                   </Overline>
                 )}
               </div> */}
-          <p className="mb-2 text-primary-500 font-bold">Bluetti</p>
+          <p className="mb-2 text-primary-500 font-bold font-headlines">Bluetti</p>
           <H1>{l10n(product.name)}</H1>
           <div className="flex gap-2 items-center">
             <p className="text-neutral-600 font-bold">4.6</p>
@@ -289,11 +293,11 @@ export default function ProductDetail({ product: initialProduct, price, classNam
 
         <div className="row-start-5 lg:col-start-2 lg:row-start-4">
           <div
-            className="text-lg text-neutral lg:mt-10"
+            className="text-xl text-neutral lg:mt-6"
             dangerouslySetInnerHTML={{ __html: l10n(product.description) }}
           />
           {product.mixins.highlights.highlights && (
-            <div className="mt-10">
+            <div className="mt-16">
               <H2 variant="h3" className="text-primary mb-8">
                 {t('productHighlights')}
               </H2>
@@ -309,7 +313,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                           variant="default"
                           size="lg"
                           icon={Sun}
-                          className="mb-6"
+                          className="mb-6 gap-4"
                         />
                       ),
                   ),

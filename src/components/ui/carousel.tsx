@@ -61,8 +61,8 @@ function Carousel({
     },
     plugins,
   );
-  const [canScrollPrev, setCanScrollPrev] = React.useState(false);
-  const [canScrollNext, setCanScrollNext] = React.useState(false);
+  const [canScrollPrev, setCanScrollPrev] = React.useState(true);
+  const [canScrollNext, setCanScrollNext] = React.useState(true);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   const onSelect = React.useCallback((api: CarouselApi) => {
@@ -216,7 +216,6 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={classes}
-      disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >

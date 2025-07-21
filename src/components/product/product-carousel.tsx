@@ -50,9 +50,9 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
     );
   }
   return (
-    <div className="flex">
+    <div className="flex gap-8">
       {/* Main Carousel */}
-      <div className="w-full lg:w-4/5 relative">
+      <div className="w-full lg:w-4/5 relative p-6">
         <Carousel className="w-full " orientation="horizontal" setApi={setMainApi}>
           <CarouselContent>
             {images.map((image, index) => (
@@ -77,10 +77,10 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="right-14 bottom-1 h-8 w-8 rounded-full bg-white border-primary">
+          <CarouselPrevious className="right-14 bottom-1 rounded-full bg-white border-primary w-10 h-10 mr-2">
             <LucideChevronLeft className="h-6 w-6 text-primary" />
           </CarouselPrevious>
-          <CarouselNext className="right-4 bottom-1 h-8 w-8 rounded-full bg-white border-primary">
+          <CarouselNext className="right-4 bottom-1 rounded-full bg-white border-primary w-10 h-10">
             <LucideChevronRight className="h-6 w-6 text-primary" />
           </CarouselNext>
         </Carousel>
@@ -90,22 +90,22 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
       <div className="w-1/5 hidden lg:block">
         <div className="h-[500px] overflow-hidden">
           <Carousel className="h-full" orientation="vertical" setApi={setThumbApi}>
-            <CarouselContent className="h-full flex-col !-mt-0 gap-2 p-1">
+            <CarouselContent className="h-full flex-col my-1 gap-3 p-0">
               {images.map((image, index) => (
                 <CarouselItem
                   key={index}
-                  className="basis-1/5 min-h-0 cursor-pointer !pt-0 flex items-center justify-center"
+                  className="basis-1/5 min-h-0 cursor-pointer pt-0 flex items-center justify-center"
                   onClick={() => mainApi?.scrollTo(index)}
                 >
                   <div
-                    className={`aspect-[4/3] w-full h-full relative rounded-md overflow-hidden ${activeIndex === index ? 'ring-2 ring-primary' : 'border border-gray-200'}`}
+                    className={`aspect-[4/3] w-[120px] h-[80px] relative rounded-md overflow-hidden ${activeIndex === index ? 'ring-2 ring-primary' : 'border border-gray-200'}`}
                   >
                     <Image
                       src={image.url}
                       alt={image.altText ? l10n(image.altText) : `Thumbnail ${index + 1}`}
                       fill
                       sizes={imageSizes}
-                      className="object-cover object-center"
+                      className="p-1.5 object-cover object-center"
                     />
                     {image.contentType?.startsWith('video/') && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">

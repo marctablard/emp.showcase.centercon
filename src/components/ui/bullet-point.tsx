@@ -57,7 +57,7 @@ export function BulletPoint({
         className={cn(
           'flex-shrink-0',
           iconColor === 'default' ? 'text-foreground' : iconColor === 'primary' ? 'text-primary' : 'text-white',
-          iconSize === 'sm' ? 'h-4 w-4' : iconSize === 'lg' ? 'h-6 w-6' : 'h-5 w-5',
+          iconSize === 'sm' ? 'h-4 w-4' : iconSize === 'md' ? 'h-5 w-5' : iconSize === 'lg' ? 'h-6 w-6' : 'h-8 w-8',
         )}
       />
       <div className="flex-grow">{label}</div>

@@ -50,7 +50,7 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
     ];
   }
   return (
-    <div className="mt-4 flex gap-6">
+    <div className="flex gap-6">
       <div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{t('yourPrice')}</span>
