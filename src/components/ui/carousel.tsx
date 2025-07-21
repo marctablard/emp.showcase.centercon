@@ -180,7 +180,7 @@ function CarouselDots({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
   return (
     <div
       data-slot="carousel-dots"
-      className={cn('mb-2 flex w-[calc(100vw-16px)] items-center justify-center gap-4', className)}
+      className={cn('mb-2 flex w-full items-center justify-center gap-4', className)}
       {...props}
     >
       {api
