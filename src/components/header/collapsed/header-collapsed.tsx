@@ -16,7 +16,7 @@ export default function HeaderCollapsed() {
         <Link className="lg:hidden" href="/">
           <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108] min-h-[16]" />
         </Link>
-        <div className="hidden xl:block">
+        <div className="hidden 2xl:block mr-8">
           <HeaderNavigation />
         </div>
       </div>
@@ -26,7 +26,7 @@ export default function HeaderCollapsed() {
         </div>
         <HeaderActions />
         <HeaderCartButton />
-        <div className="xl:hidden transition-all duration-300 group-focus-within:w-0 group-focus-within:opacity-0">
+        <div className="2xl:hidden transition-all duration-300 group-focus-within:w-0 group-focus-within:opacity-0">
           <HeaderMenu />
         </div>
       </div>
