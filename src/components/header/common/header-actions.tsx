@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Gauge, Pin, Search, User, UserCheck } from 'lucide-react';
 import HeaderIconButton from '@/components/header/common/header-icon-button';
@@ -11,6 +12,27 @@ export default function HeaderActions({ className }: { className?: string }) {
   const t = useTranslations('header');
   const { isAuthenticated, loading } = useAuthentication();
   const { openDialog } = useAuthDialog();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // SSR-Fallback: Shows a static version on first render
+  if (!isMounted) {
+    return (
+      <div className={`flex items-center gap-5 text-nowrap ${className}`}>
+        <div className="hidden md:block lg:hidden">
+          <HeaderIconLink icon={Search} text="Search" href={'/#'} />
+        </div>
+        <HeaderIconButton icon={User} text="Sign In" onClick={() => {}} />
+        <div className="hidden md:flex gap-5">
+          <HeaderIconLink icon={Gauge} text="Quick Order" href="/#" />
+          <HeaderIconLink icon={Pin} text="Wishlists" href="/#" />
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return null;
