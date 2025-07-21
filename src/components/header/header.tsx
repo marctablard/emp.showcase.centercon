@@ -7,6 +7,7 @@ import HeaderMobile from '@/components/header/mobile/header-mobile';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export function Header() {
+  const isMediumScreen = useBreakpoint('md');
   const isLargeScreen = useBreakpoint('lg');
   const [scrolled, setScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -57,29 +58,30 @@ export function Header() {
 
   return (
     <div className="has-[.search]:fixed has-[.search]:backdrop-blur-xs has-[.search]:z-60 h-full w-full relative">
-      {/* Desktop & Tablet */}
-      <div className="hidden md:block fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
-        <header
-          className={`bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl relative transition-all duration-200 ease-in-out mx-4 lg:mx-9 ${scrolled ? 'h-16' : getHeaderHeight()}`}
-        >
-          <div
-            className={`transition-all duration-200 ease-in-out absolute top-0 left-0 right-0 w-full ${scrolled ? 'opacity-0 pointer-events-none transform -translate-y-4 -z-1' : 'opacity-100 z-2'}`}
+      {isMediumScreen ? (
+        /* Desktop & Tablet */
+        <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
+          <header
+            className={`bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl relative transition-[height] duration-200 ease-in-out mx-4 lg:mx-9 ${scrolled ? 'h-16' : getHeaderHeight()}`}
           >
-            <HeaderExpanded />
-          </div>
-
-          <div
-            className={`flex justify-between items-center transition-all duration-200 ease-in-out absolute top-0 left-0 right-0 h-[64px] px-6 ${scrolled ? 'opacity-100 transform translate-y-0 z-2' : 'opacity-0 pointer-events-none transform translate-y-4 -z-1'}`}
-          >
-            <HeaderCollapsed />
-          </div>
-        </header>
-      </div>
-
-      {/* Mobile */}
-      <div className="md:hidden w-full">
-        <HeaderMobile />
-      </div>
+            {/* Render only one header component based on scroll state */}
+            {!scrolled ? (
+              <div className="transition-[height] duration-200 ease-in-out absolute top-0 left-0 right-0 w-full opacity-100 z-2">
+                <HeaderExpanded />
+              </div>
+            ) : (
+              <div className="flex justify-between items-center transition-[height] duration-200 ease-in-out absolute top-0 left-0 right-0 h-[64px] px-6 opacity-100 transform translate-y-0 z-2">
+                <HeaderCollapsed />
+              </div>
+            )}
+          </header>
+        </div>
+      ) : (
+        /* Mobile */
+        <div className="w-full">
+          <HeaderMobile />
+        </div>
+      )}
     </div>
   );
 }
