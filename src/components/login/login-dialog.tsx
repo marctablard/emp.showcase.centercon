@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Eye, EyeOff, LockKeyhole, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ type LoginProps = {
   open?: boolean;
   onCloseAction?: () => void;
   onResetPasswordAction?: (email: string) => void;
+  guestCheckout?: boolean;
 };
 
 export default function LoginDialog({
@@ -50,13 +52,15 @@ export default function LoginDialog({
   open = false,
   onCloseAction,
   onResetPasswordAction,
+  guestCheckout = false,
 }: LoginProps) {
   const t = useTranslations('login');
-  const { login, loading, isAuthenticated } = useAuthentication();
+  const { login, loading, error: errorAuthentication } = useAuthentication();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { activeDialog } = useAuthDialog();
+  const [submitting, setSubmitting] = useState(false);
 
   const { form } = useValidator(
     'LoginValidationService',
@@ -79,28 +83,34 @@ export default function LoginDialog({
 
   async function onSubmit(values: LoginData) {
     setError(null);
+    if (submitting) return; // Prevent double submit
+    setSubmitting(true);
 
-    await login(values.username, values.password, redirectAfterLogin, callbackUrl);
+    try {
+      await login(values.username, values.password, redirectAfterLogin, callbackUrl);
 
-    if (isAuthenticated) {
-      const titleMessage = t('welcomeMessage', { username: values.username });
-      notify({
-        title: titleMessage,
-        duration: 3000,
-        type: ToastType.Success,
-        button: {
-          label: t('close'),
-          onClick: () => {},
-        },
-      });
+      if (errorAuthentication) {
+        setError(t('loginError'));
+        form.resetField('password', { defaultValue: '' });
+      } else {
+        const titleMessage = t('welcomeMessage', { username: form.getValues('username') });
+        notify({
+          title: titleMessage,
+          duration: 3000,
+          type: ToastType.Success,
+          button: {
+            label: t('close'),
+            onClick: () => {},
+          },
+        });
 
-      onCloseAction?.();
+        onCloseAction?.();
 
-      form.resetField('username', { defaultValue: '' });
-      form.resetField('password', { defaultValue: '' });
-    } else if (!isAuthenticated) {
-      setError(t('loginError'));
-      form.resetField('password', { defaultValue: '' });
+        form.resetField('username', { defaultValue: '' });
+        form.resetField('password', { defaultValue: '' });
+      }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -145,7 +155,14 @@ export default function LoginDialog({
                 <FormItem className="relative">
                   <FormLabel htmlFor="username">{t('username')}</FormLabel>
                   <FormControl>
-                    <Input type="email" id="username" startIcon={User} {...field} />
+                    <Input
+                      placeholder={t('username')}
+                      type="email"
+                      autoComplete="username"
+                      id="username"
+                      startIcon={User}
+                      {...field}
+                    />
                   </FormControl>
                   <div className="absolute top-full left-0 mt-0.5">
                     <FormMessage />
@@ -163,7 +180,9 @@ export default function LoginDialog({
                     <FormLabel htmlFor="password">{t('password')}</FormLabel>
                     <FormControl>
                       <Input
+                        placeholder={t('password')}
                         type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
                         id="password"
                         startIcon={LockKeyhole}
                         endIcon={showPassword ? Eye : EyeOff}
@@ -188,9 +207,19 @@ export default function LoginDialog({
             </div>
 
             <DialogFooter className="flex flex-col sm:flex sm:flex-col gap-6 w-full">
-              <Button type="submit" disabled={loading || !form.formState.isValid}>
-                {loading ? t('loggingIn') : t('logIn')}
+              <Button type="submit" disabled={loading || submitting || !form.formState.isValid}>
+                {loading || submitting ? t('loggingIn') : t('logIn')}
               </Button>
+
+              {guestCheckout && (
+                <DialogClose asChild>
+                  <Link href="/checkout">
+                    <Button variant="secondary" className="w-full">
+                      {t('guestCheckout')}
+                    </Button>
+                  </Link>
+                </DialogClose>
+              )}
 
               <div className="flex flex-col gap-2 mx-auto items-center">
                 <p>{t('noAccountYet')}</p>

@@ -241,6 +241,7 @@
         "password": "Passwort",
         "forgotPassword": "Passwort vergessen?",
         "logIn": "Anmelden",
+        "guestCheckout": "Als Gast bestellen",
         "invalidCredentials": "Ungültige E-Mail oder Passwort",
         "loginError": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
         "loggingIn": "Anmeldung läuft...",

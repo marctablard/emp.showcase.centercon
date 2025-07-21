@@ -20,6 +20,7 @@ export default function AuthDialogManager() {
         callbackUrl={dialogOptions.callbackUrl}
         redirectAfterLogin={dialogOptions.redirectAfterLogin}
         email={dialogOptions.email}
+        guestCheckout={dialogOptions.guestCheckout}
       />
       <PasswordResetDialog
         open={activeDialog === 'reset'}

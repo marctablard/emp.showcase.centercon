@@ -8,6 +8,7 @@ export interface DialogOptions {
   callbackUrl?: string;
   redirectAfterLogin?: boolean;
   email?: string;
+  guestCheckout?: boolean;
 }
 
 export interface AuthDialogState {
