@@ -1,4 +1,4 @@
-import { HeaderCartButton } from '@/components/header/common/header-cart-button';
+import { HeaderCartButton } from '@/components/header/common/cart/header-cart-button';
 import { HeaderNavigation } from '@/components/header/common/header-navigation';
 
 export function HeaderBottomBar() {

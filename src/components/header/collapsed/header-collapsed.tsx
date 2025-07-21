@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { HeaderMenu } from '@/components/header/collapsed/header-menu';
+import { HeaderCartButton } from '@/components/header/common/cart/header-cart-button';
 import { HeaderActions } from '@/components/header/common/header-actions';
-import { HeaderCartButton } from '@/components/header/common/header-cart-button';
 import { HeaderSearch } from '@/components/header/common/search/header-search';
 import { Link } from '@/i18n/navigation';
 import { HeaderNavigation } from '../common/header-navigation';
