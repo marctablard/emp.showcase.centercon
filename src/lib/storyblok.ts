@@ -15,6 +15,7 @@ import QuickEntry from '@/components/cms/quick-entry';
 import Recommendations from '@/components/cms/recommendations';
 import Segment from '@/components/cms/segment';
 import Teaser from '@/components/cms/teaser';
+import Video from '@/components/cms/video';
 
 /**
  * Initialize Storyblok client with the access token from environment variables
@@ -41,5 +42,6 @@ export const getStoryblokApi = storyblokInit({
     quick_entry: QuickEntry,
     media_text: MediaText,
     recommendations: Recommendations,
+    video: Video,
   },
 });

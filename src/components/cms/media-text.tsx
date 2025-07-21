@@ -1,9 +1,14 @@
+'use client';
+
+import { useRef } from 'react';
 import Image from 'next/image';
 import { storyblokEditable } from '@storyblok/react/rsc';
+import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Headline } from '../ui/headline';
 import Button, { ButtonData } from './button';
 import { TextEditorData } from './hero';
+import Video, { VideoData } from './video';
 
 export enum ImagePosition {
   Right = 'Right',
@@ -20,7 +25,7 @@ interface MediaTextProps {
       filename: string;
       alt?: string;
     };
-    video_url?: string;
+    video?: VideoData[];
     has_background?: boolean;
     image_position: ImagePosition;
   };
@@ -29,8 +34,17 @@ interface MediaTextProps {
 const MediaText = ({ blok }: MediaTextProps) => {
   const button = blok.main_button ? blok.main_button[0] : null;
   const text = blok.text.content[0].content[0].text;
+  const video = blok.video?.[0];
+  const videoContainer = useRef<HTMLDivElement>(null);
+  const videoPlayer = useRef<HTMLDivElement>(null);
+  const videoControls = useRef<HTMLDivElement>(null);
 
-  const isVideo = false; /* needs to be removed when video functionality is working */
+  const handleVideoPlay = () => {
+    videoPlayer?.current?.querySelector('video')?.play();
+    videoContainer?.current?.querySelector('img')?.classList.add('hidden');
+    videoPlayer?.current?.classList.remove('hidden');
+    videoControls?.current?.classList.add('hidden');
+  };
 
   return (
     <div
@@ -56,8 +70,8 @@ const MediaText = ({ blok }: MediaTextProps) => {
           )}
         >
           {blok.image && (
-            <div className="h-full m-auto rounded-[inherit]">
-              {!isVideo && (
+            <div className="w-full m-auto rounded-[inherit] relative overflow-hidden" ref={videoContainer}>
+              {!video?.autoplay && (
                 <Image
                   src={blok.image.filename}
                   alt={blok.image.alt || ''}
@@ -66,9 +80,18 @@ const MediaText = ({ blok }: MediaTextProps) => {
                   height={1000}
                 />
               )}
-              {isVideo && blok.video_url && (
-                <div className="h-full rounded-[inherit]">
-                  <iframe src={blok.video_url} className="w-full h-[500px] rounded-[inherit]" />
+              {video && (
+                <div className="hidden" ref={videoPlayer}>
+                  <Video blok={video} controls={true} />
+                </div>
+              )}
+              {video && video?.controls && !video?.autoplay && (
+                <div
+                  className="absolute flex rounded-[50%] shadow-xl w-40 h-40 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer me-9 mb-14 p-3 text-white bg-primary-500 transition hover:bg-primary-700"
+                  onClick={handleVideoPlay}
+                  ref={videoControls}
+                >
+                  <Play className="w-full h-full p-6" />
                 </div>
               )}
             </div>
