@@ -140,7 +140,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               </CardContent>
             </Card>
             <div className="my-6">
-              <H4>{t('otherVariants')}</H4>
+              <H2>{t('otherVariants')}</H2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-primary-500">
                   <div className="col-start-1 bg-neutral-50 p-4">
@@ -161,7 +161,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       <p>410W</p>
                       <CheckCircle2 className="text-success-500 w-4 h-4" />
                     </div>
-                    <p className="text-xs text-neutral-500">459.99 €</p>
+                    <p className="text-xs text-neutral-600">459.99 €</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
@@ -183,7 +183,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       <p>380W</p>
                       <CheckCircle2 className="text-success-500 w-4 h-4" />
                     </div>
-                    <p className="text-xs text-neutral-500">429.99 €</p>
+                    <p className="text-xs text-neutral-600">429.99 €</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
@@ -205,7 +205,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       <p>350W</p>
                       <CheckCircle2 className="text-success-500 w-4 h-4" />
                     </div>
-                    <p className="text-xs text-neutral-500">400.00 €</p>
+                    <p className="text-xs text-neutral-600">400.00 €</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
@@ -227,7 +227,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                       <p>300W</p>
                       <CheckCircle2 className="text-success-500 w-4 h-4" />
                     </div>
-                    <p className="text-xs text-neutral-500">349.99 €</p>
+                    <p className="text-xs text-neutral-600">349.99 €</p>
                   </div>
                 </div>
               </div>
@@ -245,13 +245,13 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 ))}
               </div>
               <div className="flex gap-2">
-                <Button size="icon" variant="secondary" aria-label="icon">
+                <Button size="icon" variant="secondary" title={t('compare')}>
                   <FlipHorizontal />
                 </Button>
-                <Button size="icon" variant="secondary" aria-label="icon">
+                <Button size="icon" variant="secondary" title={t('addToWishlist')}>
                   <Pin />
                 </Button>
-                <Button size="icon" variant="secondary" aria-label="icon">
+                <Button size="icon" variant="secondary" title={t('share')}>
                   <Share2 />
                 </Button>
               </div>

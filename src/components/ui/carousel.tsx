@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
 import { LucideChevronLeft, LucideChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -175,7 +176,8 @@ function CarouselItem({ size, className, ...props }: CarouselItemProps) {
 }
 
 function CarouselDots({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  const { selectedIndex, scrollTo, api } = useCarousel();
+  const { api, selectedIndex, scrollTo } = useCarousel();
+  const t = useTranslations('UI.Carousel');
 
   return (
     <div
@@ -188,6 +190,7 @@ function CarouselDots({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
         .map((_, index) => (
           <button
             key={index}
+            title={t('pageTitle', { index: index + 1 })}
             className={cn(
               'cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white',
               index === selectedIndex
@@ -208,6 +211,7 @@ function CarouselPrevious({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { scrollPrev, canScrollPrev } = useCarousel();
+  const t = useTranslations('UI.Carousel');
   const classes = cn('absolute size-8 rounded-full', className);
 
   return (
@@ -218,6 +222,7 @@ function CarouselPrevious({
       className={classes}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
+      title={t('prev')}
       {...props}
     >
       <LucideChevronLeft aria-label="Previous slide" />
@@ -232,6 +237,7 @@ function CarouselNext({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { scrollNext, canScrollNext } = useCarousel();
+  const t = useTranslations('UI.Carousel');
   const classes = cn('absolute size-8 rounded-full', className);
 
   return (
@@ -242,6 +248,7 @@ function CarouselNext({
       className={classes}
       disabled={!canScrollNext}
       onClick={scrollNext}
+      title={t('next')}
       {...props}
     >
       <LucideChevronRight aria-label="Next slide" />
