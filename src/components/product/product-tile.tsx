@@ -8,7 +8,7 @@ import { ProductTag } from '@/components/product/product-tag';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { H5, H6, Heading } from '@/components/ui/h';
+import { Heading } from '@/components/ui/h';
 import { useCart } from '@/hooks/cart/useCart';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';

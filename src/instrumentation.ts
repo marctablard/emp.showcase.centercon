@@ -16,7 +16,6 @@ export function register() {
 
 // Add type declaration to make TypeScript happy
 declare global {
-  // eslint-disable-next-line no-var
   var EMP: {
     platform: {
       ssr: Container;

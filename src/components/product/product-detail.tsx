@@ -16,7 +16,7 @@ import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
-import { H1, H2, H3, H4 } from '../ui/h';
+import { H1, H2, H3 } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
 import ProductAddToCart from './product-add-to-cart';
