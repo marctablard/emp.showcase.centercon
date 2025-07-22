@@ -12,10 +12,10 @@ export function HeaderCollapsed() {
   return (
     <>
       <div className="flex gap-8 items-center">
-        <Link className="hidden lg:block" href="/" title={t('home')}>
+        <Link className="hidden 2xl:block" href="/" title={t('home')}>
           <Image src="/images/logo_small.svg" alt="Logo" width="25" height="22" className="min-w-[25px] min-h-[22px]" />
         </Link>
-        <Link className="lg:hidden" href="/" title={t('home')}>
+        <Link className="2xl:hidden mr-8" href="/" title={t('home')}>
           <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108] min-h-[16]" />
         </Link>
         <div className="hidden 2xl:block mr-8">
