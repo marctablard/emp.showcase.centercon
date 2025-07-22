@@ -3,12 +3,11 @@ import Image from 'next/image';
 import { FlipHorizontal2, Pin, Share2 } from 'lucide-react';
 import { useProduct } from '@/hooks/product/useProduct';
 import { useL10n } from '@/hooks/useL10n';
-import { l10n } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
 import { Button } from '../ui/button';
 import ProductAddToCart from './product-add-to-cart';
-import { ProductDetailProps } from './product-detail';
 import { ProductPriceComponent } from './product-price';
 
 export default function ProductAddToCartBar({
@@ -20,12 +19,12 @@ export default function ProductAddToCartBar({
   price?: ProductPrice | null;
   className?: string;
 }) {
-  const { product, loading: productLoading, error: productError } = useProduct(initialProduct);
+  const { product } = useProduct(initialProduct);
   const locale = useLocale();
   const { l10n } = useL10n(locale);
   return (
-    <div className="hidden md:block fixed top-0 left-0 right-0 mt-20 pt-4 z-50 max-w-6xl mx-auto">
-      <div className="bg-primary shadow-xl rounded-2xl overflow-hidden relative transition-all duration-200 ease-in-out flex justify-between mx-4 lg:mx-9 h-16">
+    <div className={cn('fixed top-0 left-0 right-0 mt-20 pt-4 z-50 max-w-6xl mx-auto hidden lg:block', className)}>
+      <div className="bg-primary shadow-xl rounded-2xl overflow-hidden relative flex justify-between mx-4 lg:mx-9 h-16">
         {product && (
           <div className="flex items-center gap-6">
             {product.images && product.images.length > 0 && (

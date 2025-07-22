@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { CheckCircle2, FlipHorizontal2, LucideArrowDown, LucideCopy, Pin, Share2, Sun } from 'lucide-react';
@@ -38,6 +38,9 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   const t = useTranslations('product');
   const currentLocale = useLocale();
   const isDesktopScreen = useBreakpoint('lg');
+  const addToCartButton = useRef<HTMLDivElement>(null);
+  const addToCartBar = useRef<HTMLDivElement>(null);
+  const [opacity, setOpacity] = React.useState(false);
   //   const { recommendations, loading: recLoading } = useRecommendations(product?.id);
 
   useEffect(() => {
@@ -46,6 +49,30 @@ export default function ProductDetail({ product: initialProduct, price, classNam
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
+
+  useEffect(() => {
+    if (addToCartButton.current !== null && isDesktopScreen) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setOpacity(false);
+            } else {
+              setOpacity(true);
+            }
+          });
+        },
+        {
+          root: null,
+          rootMargin: '0px',
+          threshold: 1.0,
+        },
+      );
+
+      // Observe an element
+      observer.observe(addToCartButton.current);
+    }
+  });
 
   if (loading) {
     return <div>Loading</div>;
@@ -287,7 +314,10 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           </div>
         </div>
         <div className="row-start-4 lg:col-start-2 lg:row-start-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 lg:grid-cols-3 xl:grid-cols-4"
+            ref={addToCartButton}
+          >
             <div className="col-start-1 md:row-start-1 lg:col-end-4 xl-col-end-5">
               {price && <ProductPriceComponent price={price} />}
             </div>
@@ -308,8 +338,12 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           )}
           <ProductShippingInfo />
         </div>
-
-        <ProductAddToCartBar product={product} price={price} />
+        <div
+          className={cn(opacity ? 'opacity-100' : 'opacity-0', 'transition-opacity ease-in-out delay-150 duration-300')}
+          ref={addToCartBar}
+        >
+          <ProductAddToCartBar product={product} price={price} />
+        </div>
 
         <div className="row-start-5 lg:col-start-2 lg:row-start-4 mt-8 lg:mt-0">
           <div
