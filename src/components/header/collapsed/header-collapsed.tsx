@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import HeaderMenu from '@/components/header/collapsed/header-menu';
 import HeaderActions from '@/components/header/common/header-actions';
@@ -7,13 +8,14 @@ import { Link } from '@/i18n/navigation';
 import HeaderNavigation from '../common/header-navigation';
 
 export default function HeaderCollapsed() {
+  const t = useTranslations('header');
   return (
     <>
       <div className="flex gap-8 items-center">
-        <Link className="hidden lg:block" href="/">
+        <Link className="hidden lg:block" href="/" title={t('home')}>
           <Image src="/images/logo_small.svg" alt="Logo" width="25" height="22" className="min-w-[25px] min-h-[22px]" />
         </Link>
-        <Link className="lg:hidden" href="/">
+        <Link className="lg:hidden" href="/" title={t('home')}>
           <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108] min-h-[16]" />
         </Link>
         <div className="hidden xl:block">

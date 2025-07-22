@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import ColorStyleGuide from './atoms/color';
+import ShadowStyleGuide from './atoms/shadow';
 import TextStyleGuide from './atoms/text';
 import BadgeStyleGuide from './ui/badge';
 import BreadcrumbStyleGuide from './ui/breadcrumb';
@@ -30,6 +31,7 @@ export default function StyleGuide() {
       </p>
       <TextStyleGuide />
       <ColorStyleGuide />
+      <ShadowStyleGuide />
       <ButtonStyleGuide />
       <LinkStyleGuide />
       <BadgeStyleGuide />

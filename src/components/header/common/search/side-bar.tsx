@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import { Headline } from '@/components/ui/headline';
+import React from 'react';
+import { Heading } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
 import { SearchSuggestions } from '@/platform/services/model/search';
 import { MarkedText } from './marked-text';
@@ -34,9 +34,9 @@ export function SideBar({ categories, query }: SideBarProps) {
     <div className="flex flex-col">
       {categories?.length > 0 && (
         <>
-          <Headline className="mb-4" variant={'h5'}>
+          <Heading className="mb-4" variant="h5" as="div">
             Categories
-          </Headline>
+          </Heading>
           {categories.map(({ name, count }) => (
             <UiLink className="mb-3" key={name + count} type="Link" href={'href'} variant="secondary">
               <MarkedText text={name} keyword={query} />
@@ -46,9 +46,9 @@ export function SideBar({ categories, query }: SideBarProps) {
       )}
       {links.map(({ headline, links }) => (
         <div className="flex flex-col" key={headline}>
-          <Headline key={headline} className="mb-4" variant={'h5'}>
+          <Heading key={headline} className="mb-4" variant="h5" as="div">
             {headline}
-          </Headline>
+          </Heading>
           {links.map(({ text, href }) => (
             <UiLink className="mb-3" key={text} type="Link" href={href} variant="secondary">
               {text}

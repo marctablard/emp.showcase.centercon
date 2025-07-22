@@ -118,11 +118,12 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
           onFocus={handleInput}
           ref={inputRef}
           onKeyDown={(e) => e.key === 'Enter' && redirectToBrowse(e)}
-          className={`h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700 ${hasInputFocus ? 'drop-shadow-md' : ''}`}
+          className={`h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-700 text-neutral-700 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700 ${hasInputFocus ? 'drop-shadow-md' : ''}`}
         />
 
         <Button
           type="submit"
+          title={t('searchButton')}
           className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer"
           variant={'link'}
         >

@@ -6,9 +6,11 @@ import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import AuthDialogManager from '@/components/auth/auth-dialog-manager';
+import { CartWrapper } from '@/components/cart/cart-wrapper';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
+import { getCurrentCart } from '@/lib/ssr/carts';
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
 import { getSite } from '@/lib/ssr/site';
 import { StoreProvider } from '@/providers/StoreProvider';
@@ -55,7 +57,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  const [authSession, shopSession] = await Promise.all([auth(), getSession()]);
+  const [authSession, shopSession, currentCart] = await Promise.all([auth(), getSession(), getCurrentCart()]);
   if (shopSession && shopSession.language != locale) {
     // ensure that languages are aligned
     await setSessionLanguage(locale);
@@ -72,10 +74,12 @@ export default async function LocaleLayout({ children, params }: Props) {
           <NextIntlClientProvider locale={locale}>
             <StoreProvider shopSession={shopSession} site={site}>
               <StoryblokProvider>
-                <AuthDialogManager />
-                {children}
-                <Toaster />
-                <Notification />
+                <CartWrapper initialCart={currentCart}>
+                  <AuthDialogManager />
+                  {children}
+                  <Toaster />
+                  <Notification />
+                </CartWrapper>
               </StoryblokProvider>
             </StoreProvider>
           </NextIntlClientProvider>

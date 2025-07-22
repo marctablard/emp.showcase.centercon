@@ -21,6 +21,9 @@
     },
     "product": {
         "addToCart": "Add to cart",
+        "addToWishlist": "Add to Shopping List",
+        "share": "Share",
+        "compare": "Compare",
         "noImage": "No image available",
         "noDescription": "No description available.",
         "productId": "Product ID",
@@ -97,12 +100,14 @@
         }
     },
     "header": {
+        "home": "Home",
         "featuredProduct": "Featured Product",
         "signIn": "Login",
         "register": "Register",
         "account": "Account",
         "search": "Enter keyword, item, model or part number",
         "shortSearch": "Search",
+        "searchButton": "Open Search",
         "suggestedProducts": "Suggested Products",
         "lastSeenProducts": "Last seen Products",
         "blog": "Blog",
@@ -413,6 +418,7 @@
         "saveForCheckout": "Save for Checkout",
         "fromAddressbook": "Select from Addressbook",
         "approval": {
+            "loadingApprovers": "Loading Approvers...",
             "selectApprover": "Select Approver",
             "searchApprovers": "Search Approvers",
             "searchApproversPlaceholder": "Enter name or email to search",
@@ -1005,6 +1011,11 @@
     "UI": {
         "spinner": {
             "loading": "Loading..."
+        },
+        "Carousel": {
+            "pageTitle": "Page {index}",
+            "prev": "Previous",
+            "next": "Next"
         }
     },
     "Password": {

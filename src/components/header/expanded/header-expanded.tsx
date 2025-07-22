@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import HeaderMenu from '@/components/header/collapsed/header-menu';
 import HeaderActions from '@/components/header/common/header-actions';
@@ -8,6 +9,7 @@ import HeaderTopBanner from '@/components/header/expanded/header-top-banner';
 import { Link } from '@/i18n/navigation';
 
 export default function HeaderExpanded() {
+  const t = useTranslations('header');
   return (
     <>
       <HeaderTopBanner />
@@ -20,7 +22,7 @@ export default function HeaderExpanded() {
       {/* Tablet */}
       <div className="lg:hidden flex justify-between items-center px-6 pt-6">
         <div className="flex items-center">
-          <Link href="/">
+          <Link href="/" title={t('home')}>
             <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108px] min-h-[16px]" />
           </Link>
         </div>

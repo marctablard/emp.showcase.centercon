@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import * as z from 'zod';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import useAuthDialog from '@/hooks/auth/useAuthDialog';
 import { Link } from '@/i18n/navigation';
 
 const formSchema = z
@@ -28,16 +29,16 @@ const formSchema = z
     path: ['confirmPassword'],
   });
 
-interface PasswordUpdateFormProps {
-  token: string;
-}
-
-export function PasswordUpdateForm({ token }: PasswordUpdateFormProps) {
+export function PasswordUpdateForm() {
   const t = useTranslations('Password');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { openDialog } = useAuthDialog();
+
+  const token = searchParams.get('token');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,6 +84,13 @@ export function PasswordUpdateForm({ token }: PasswordUpdateFormProps) {
       }, 3000);
     }
   }, [isSuccess, router]);
+
+  useEffect(() => {
+    if (!token) {
+      // re-open reset-dialog if no token was supplied
+      openDialog('reset');
+    }
+  }, [token, openDialog]);
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -148,7 +156,9 @@ export function PasswordUpdateForm({ token }: PasswordUpdateFormProps) {
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" asChild>
-          <Link href="/login">{t('backToLogin')}</Link>
+          <Link href="#" onClick={() => openDialog('login')}>
+            {t('backToLogin')}
+          </Link>
         </Button>
       </CardFooter>
     </Card>
