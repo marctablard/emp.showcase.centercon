@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { useApproverSearch } from '@/hooks/approval/useApproverSearch';
 import { useToast } from '@/hooks/ui/useToast';
-import { searchApprovalUsers } from '@/lib/client/approval';
 import type { ApprovalUser } from '@/platform/services/model/approval';
 
 interface ApprovalModalProps {
@@ -23,7 +23,13 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
   const t = useTranslations('Checkout.approval');
   const { toast } = useToast();
 
-  const [approvers, setApprovers] = useState<ApprovalUser[]>([]);
+  // Use the new hook to fetch approvers
+  const { approvers, loading, refetch } = useApproverSearch({
+    resourceType: 'CART',
+    resourceId: cartId,
+    action: 'CHECKOUT',
+  });
+
   const [selectedApprover, setSelectedApprover] = useState<ApprovalUser | null>(null);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,23 +64,12 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
     }
   };
 
+  // Fetch approvers when the component mounts or when cartId changes
   useEffect(() => {
-    const fetchApprovers = async () => {
-      try {
-        const approvers = await searchApprovalUsers('CART', cartId, 'CHECKOUT');
-        setApprovers(approvers);
-      } catch (error) {
-        console.error('Error fetching approvers:', error);
-        toast({
-          title: t('errorFetchingApprovers'),
-          description: t('errorFetchingApproversDescription'),
-          variant: 'destructive',
-        });
-      }
-    };
-
-    fetchApprovers();
-  }, [cartId, t, toast]);
+    if (isOpen && cartId && !loading && !approvers) {
+      refetch();
+    }
+  }, [isOpen, cartId, refetch, loading, approvers]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -83,7 +78,7 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
           <DialogTitle>{t('selectApprover')}</DialogTitle>
         </DialogHeader>
 
-        {approvers.length > 0 && (
+        {approvers && approvers.length > 0 && (
           <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-md p-2">
             {approvers.map((approver) => (
               <div
@@ -109,7 +104,15 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
           </div>
         )}
 
-        {approvers.length === 0 && <p className="text-center text-muted-foreground py-2">{t('noApproversFound')}</p>}
+        {loading && (
+          <div className="text-center py-2">
+            <Spinner className="mr-2 h-4 w-4 inline" /> {t('loadingApprovers')}
+          </div>
+        )}
+
+        {!loading && approvers?.length === 0 && (
+          <div className="text-center text-muted-foreground py-2">{t('noApproversFound')}</div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="approval-comment">{t('comment')}</Label>

@@ -94,14 +94,14 @@ export const useCheckout = (): UseCheckout => {
     (address: CheckoutAddress) => {
       // TODO validation!
       if (
-        checkoutCart &&
+        checkoutCart?.id &&
         (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode)
       ) {
         updateShippingInfo(address.country, address.zipCode);
       }
       setShippingAddress(address);
     },
-    [checkoutCart, shippingAddress, setShippingAddress, updateShippingInfo],
+    [checkoutCart?.id, shippingAddress, setShippingAddress, updateShippingInfo],
   );
 
   const submitBillingAddress = useCallback(
