@@ -1,6 +1,7 @@
 'use client';
 
 import { storyblokEditable } from '@storyblok/react/rsc';
+import { Heading } from '../ui/h';
 
 /**
  * Feature component for Storyblok
@@ -16,7 +17,9 @@ interface FeatureProps {
 const Feature = ({ blok }: FeatureProps) => {
   return (
     <div {...storyblokEditable(blok)} className="p-6 border rounded-lg shadow-sm">
-      <h3 className="text-xl font-bold mb-2">{blok.name}</h3>
+      <Heading variant="h3" as="div">
+        {blok.name}
+      </Heading>
       <p className="text-neutral-600">{blok.description}</p>
     </div>
   );

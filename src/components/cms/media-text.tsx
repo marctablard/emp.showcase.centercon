@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Headline } from '../ui/headline';
+import { Heading } from '../ui/h';
 import Button, { ButtonData } from './button';
 import { TextEditorData } from './hero';
 import Video, { VideoData } from './video';
@@ -105,14 +105,14 @@ const MediaText = ({ blok }: MediaTextProps) => {
           )}
         >
           {blok.overline && (
-            <Headline variant="overline" as="h4" className="mb-3">
+            <Heading variant="overline" as="div" className="mb-3">
               {blok.overline}
-            </Headline>
+            </Heading>
           )}
           {blok.headline && (
-            <Headline variant="h2" as="h3">
+            <Heading variant="h2" as="div">
               {blok.headline}
-            </Headline>
+            </Heading>
           )}
         </div>
         <div

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Headline } from '@/components/ui/headline';
+import { Heading } from '@/components/ui/h';
 import { SearchSuggestions } from '@/platform/services/model/search';
 
 export interface NoResultsProps {
@@ -11,9 +11,9 @@ export interface NoResultsProps {
 export function NoResults({ queryCompletions }: NoResultsProps) {
   return (
     <div className="">
-      <Headline variant={'h5'} className="pb-6">
+      <Heading variant={'h5'} className="pb-6">
         We&apos;re sorry – there are no product matches for your search.
-      </Headline>
+      </Heading>
       <p className="text-md pb-6">
         Double-check your search for any typos or spelling mistakes, or try using a different search term.
       </p>

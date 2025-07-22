@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { H4, H5 } from '@/components/ui/h';
+import { Heading } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { ToastType, notify } from '@/components/ui/toast-notification';
@@ -138,12 +138,16 @@ export default function LoginDialog({
                 <DialogTitle />
                 <DialogDescription />
               </VisuallyHidden>
-              <H4>{t('title')}</H4>
+              <Heading variant="h4" as="div">
+                {t('title')}
+              </Heading>
             </DialogHeader>
 
             {error && (
               <div className="flex flex-col gap-2">
-                <H5 className="text-danger-500">{t('error')}</H5>
+                <Heading variant="h5" as="div" className="text-danger-500">
+                  {t('error')}
+                </Heading>
                 <span className="text-danger-500">{error}</span>
               </div>
             )}

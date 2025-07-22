@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import useAuthDialog from '@/hooks/auth/useAuthDialog';
-import { Link, redirect } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 
 const formSchema = z
   .object({
@@ -156,7 +156,9 @@ export function PasswordUpdateForm() {
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" asChild>
-          <Link href="/login">{t('backToLogin')}</Link>
+          <Link href="#" onClick={() => openDialog('login')}>
+            {t('backToLogin')}
+          </Link>
         </Button>
       </CardFooter>
     </Card>
