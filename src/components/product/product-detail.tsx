@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProduct } from '@/hooks/product/useProduct';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 // import { useRecommendations } from '@/hooks/recommendations/useRecommendations';
 import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   const { l10n } = useL10n(locale);
   const t = useTranslations('product');
   const currentLocale = useLocale();
+  const isDesktopScreen = useBreakpoint('lg');
   //   const { recommendations, loading: recLoading } = useRecommendations(product?.id);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
     <>
       <div className={cn('grid grid-cols-1 gap-x-4 lg:gap-x-12 2xl:gap-x-29 lg:grid-cols-2', className)}>
         <>
-          <Card variant="gray" className="row-start-3 lg:col-start-1 lg:row-start-1 lg:row-end-4 p-8 mb-6">
+          <Card variant="gray" className="row-start-3 lg:col-start-1 lg:row-start-1 lg:row-end-4 p-6 lg:p-8 mb-6">
             <CardContent className="px-0">
               {/* Product Image Carousel */}
               <div className="overflow-hidden">
@@ -69,7 +71,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             </CardContent>
           </Card>
           <div className="lg:col-start-1">
-            <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6">
+            <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6 mb-10 lg:mb-0">
               <CardContent className="p-0">
                 <div className="flex flex-col gap-6">
                   <h2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</h2>
@@ -248,17 +250,19 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                   </Badge>
                 ))}
               </div>
-              <div className="flex gap-2">
-                <Button size="icon" variant="secondary" aria-label="icon">
-                  <FlipHorizontal2 />
-                </Button>
-                <Button size="icon" variant="secondary" aria-label="icon">
-                  <Pin />
-                </Button>
-                <Button size="icon" variant="secondary" aria-label="icon">
-                  <Share2 />
-                </Button>
-              </div>
+              {isDesktopScreen && (
+                <div className="flex gap-2">
+                  <Button size="icon" variant="secondary" aria-label="icon">
+                    <FlipHorizontal2 />
+                  </Button>
+                  <Button size="icon" variant="secondary" aria-label="icon">
+                    <Pin />
+                  </Button>
+                  <Button size="icon" variant="secondary" aria-label="icon">
+                    <Share2 />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -273,9 +277,9 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                   </Overline>
                 )}
               </div> */}
-          <p className="mb-2 text-primary-500 font-bold font-headlines">Bluetti</p>
+          <p className="mb-2 mt-4 lg:mt-0 text-primary-500 font-bold font-headlines">Bluetti</p>
           <H1>{l10n(product.name)}</H1>
-          <div className="flex gap-2 items-center">
+          <div className="mb-6 lg:md-0 flex gap-2 items-center">
             <p className="text-neutral-600 font-bold">4.6</p>
             <RatingStarRow starsCount={5} filledCount={4} className="py-2" />
             <p className="text-neutral-600 text-sm">(114)</p>
@@ -288,20 +292,33 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             </div>
             <ProductAddToCart product={product} price={price} className="mt-6" />
           </div>
+          {!isDesktopScreen && (
+            <div className="flex justify-center gap-2 mt-6">
+              <Button size="icon" variant="secondary" aria-label="icon">
+                <FlipHorizontal2 />
+              </Button>
+              <Button size="icon" variant="secondary" aria-label="icon">
+                <Pin />
+              </Button>
+              <Button size="icon" variant="secondary" aria-label="icon">
+                <Share2 />
+              </Button>
+            </div>
+          )}
           <ProductShippingInfo />
         </div>
 
-        <div className="row-start-5 lg:col-start-2 lg:row-start-4">
+        <div className="row-start-5 lg:col-start-2 lg:row-start-4 mt-8 lg:mt-0">
           <div
             className="text-xl text-neutral lg:mt-6"
             dangerouslySetInnerHTML={{ __html: l10n(product.description) }}
           />
           {product.mixins.highlights.highlights && (
-            <div className="mt-16">
+            <div className="mt-10 lg:mt-16">
               <H2 variant="h3" className="text-primary mb-8">
                 {t('productHighlights')}
               </H2>
-              <div className="">
+              <div className="mb-10 lg:mb-0">
                 {product.mixins.highlights.highlights.map((highlight: any) =>
                   highlight.map(
                     (hl: any) =>
