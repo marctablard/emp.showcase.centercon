@@ -31,10 +31,18 @@ export function HeaderTopBanner() {
           </UiLink>
         </div>
         <div className="flex grow basis-0 shrink-0 justify-end items-center gap-6 text-nowrap">
-          <Link href="/blog">{t('blog')}</Link>
-          <Link href="/newsletter">{t('newsletter')}</Link>
-          <Link href="/offer-request">{t('offerRequest')}</Link>
-          <Link href="/contact">{t('contact')}</Link>
+          <Link title={t('blog')} href="/blog">
+            {t('blog')}
+          </Link>
+          <Link title={t('newsletter')} href="/newsletter">
+            {t('newsletter')}
+          </Link>
+          <Link title={t('offerRequest')} href="/offer-request">
+            {t('offerRequest')}
+          </Link>
+          <Link title={t('contact')} href="/contact">
+            {t('contact')}
+          </Link>
         </div>
       </div>
     </div>
