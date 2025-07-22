@@ -3,14 +3,15 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatCurrencyToParts } from '@/lib/utils';
+import { cn, formatCurrency, formatCurrencyToParts } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 
 interface ProductPriceProps {
   price: ProductPrice;
+  isAddToCartBar?: boolean;
 }
 
-export function ProductPriceComponent({ price }: ProductPriceProps) {
+export function ProductPriceComponent({ price, isAddToCartBar }: ProductPriceProps) {
   const t = useTranslations('product.price');
   const parts = formatCurrencyToParts(price.effectiveValue, price.currency);
   let priceFragment: React.ReactNode[];
@@ -65,11 +66,29 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
         </div>
 
         <div className="flex items-baseline gap-4">
-          <div className="font-bold text-neutral-900 font-headlines">{priceFragment}</div>
+          <div className={cn('font-bold font-headlines', isAddToCartBar ? 'text-white' : 'text-neutral-900')}>
+            {priceFragment}
+          </div>
+          {price.tax && isAddToCartBar && (
+            <>
+              {price.includesTax ? (
+                <>
+                  {t('includingTax', { taxRate: price.tax.taxRate })} /{' '}
+                  {formatCurrency(price.tax.netValue, price.currency)} {t('net')}
+                </>
+              ) : (
+                <>
+                  {t('excludingTax', { taxRate: price.tax.taxRate })} /{' '}
+                  {formatCurrency(price.tax.grossValue, price.currency)} {t('gross')}
+                </>
+              )}
+            </>
+          )}
         </div>
+
         {price.tax && (
-          <div className="text-sm text-neutral-600 mb-2">
-            {price.includesTax ? (
+          <div className={cn('text-sm mb-2', isAddToCartBar ? 'text-white' : 'text-neutral-600')}>
+            {!isAddToCartBar && price.includesTax ? (
               <>
                 {t('includingTax', { taxRate: price.tax.taxRate })} /{' '}
                 {formatCurrency(price.tax.netValue, price.currency)} {t('net')}
@@ -88,7 +107,9 @@ export function ProductPriceComponent({ price }: ProductPriceProps) {
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium">{t('listPrice')}</span>
             <div>
-              <div className="text-neutral-600 line-through">{formatCurrency(price.originalValue, price.currency)}</div>
+              <div className={cn('line-through', isAddToCartBar ? 'text-white text-xl' : 'text-neutral-600')}>
+                {formatCurrency(price.originalValue, price.currency)}
+              </div>
             </div>
           </div>
         )}

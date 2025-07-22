@@ -21,6 +21,7 @@ import { H1, H2, H3, H5 } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
 import ProductAddToCart from './product-add-to-cart';
+import ProductAddToCartBar from './product-add-to-cart-bar';
 import { ProductPriceComponent } from './product-price';
 import { ProductShippingInfo } from './product-shipping-info';
 
@@ -307,6 +308,8 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           )}
           <ProductShippingInfo />
         </div>
+
+        <ProductAddToCartBar product={product} price={price} />
 
         <div className="row-start-5 lg:col-start-2 lg:row-start-4 mt-8 lg:mt-0">
           <div
