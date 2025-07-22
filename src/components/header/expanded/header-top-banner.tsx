@@ -23,6 +23,7 @@ export function HeaderTopBanner() {
           </div>
           <CurrencySwitcher />
         </div>
+        {/* Todo: add storyblok component */}
         <div className="hidden xl:flex justify-center items-center font-bold">
           Here is space for you top banner&nbsp;
           <UiLink type="Link" className="text-white hover:text-white" iconAfter={<ArrowUpRight className="w-4 h-4" />}>

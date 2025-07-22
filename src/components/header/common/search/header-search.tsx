@@ -124,6 +124,7 @@ export function HeaderSearch({ small = false }: HeaderSearchProps) {
             type="submit"
             className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer"
             variant={'link'}
+            aria-label={t('searchProducts')}
           >
             <Search className="text-primary-600" width="28" height="28" />
           </Button>
@@ -151,6 +152,7 @@ export function HeaderSearch({ small = false }: HeaderSearchProps) {
           type="submit"
           className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer"
           variant={'link'}
+          aria-label={t('searchProducts')}
         >
           <Search className="text-primary-600" width="28" height="28" />
         </Button>
