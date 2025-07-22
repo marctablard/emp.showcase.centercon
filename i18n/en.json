@@ -417,6 +417,7 @@
         "saveForCheckout": "Save for Checkout",
         "fromAddressbook": "Select from Addressbook",
         "approval": {
+            "loadingApprovers": "Loading Approvers...",
             "selectApprover": "Select Approver",
             "searchApprovers": "Search Approvers",
             "searchApproversPlaceholder": "Enter name or email to search",

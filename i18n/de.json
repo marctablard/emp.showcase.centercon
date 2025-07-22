@@ -412,6 +412,7 @@
         "saveForCheckout": "Speichern für Einkauf",
         "fromAddressbook": "Aus dem Adressbuch wählen",
         "approval": {
+            "loadingApprovers": "Bestellprüfer werden geladen...",
             "selectApprover": "Bestellprüfer auswählen",
             "searchApprovers": "Bestellprüfer suchen",
             "searchApproversPlaceholder": "Name oder E-Mailadresse eingeben",
