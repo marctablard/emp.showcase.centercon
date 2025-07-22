@@ -21,6 +21,9 @@
     },
     "product": {
         "addToCart": "In den Warenkorb",
+        "addToWishlist": "Produkt Merken",
+        "share": "Teilen",
+        "compare": "Vergleichen",
         "noImage": "Kein Bild verfügbar",
         "noDescription": "Keine Beschreibung verfügbar.",
         "productId": "Produkt-ID",
@@ -97,12 +100,14 @@
         }
     },
     "header": {
+        "home": "Startseite",
         "featuredProduct": "Ausgewähltes Produkt",
         "signIn": "Login",
         "register": "Registrieren",
         "account": "Konto",
         "search": "Schlüsselwort, Artikel oder Teilenummer eingeben",
         "shortSearch": "Suche",
+        "searchButton": "Suche öffnen",
         "suggestedProducts": "Vorgeschlagene Produkte",
         "lastSeenProducts": "Zuletzt angesehene Produkte",
         "blog": "Blog",
@@ -120,7 +125,6 @@
         "menu": "Menü",
         "close": "Schließen",
         "viewCart": "Warenkorb anzeigen",
-        "goToHomepage": "Zur Startseite",
         "searchProducts": "Produkte suchen"
     },
     "footer": {
@@ -1009,6 +1013,11 @@
     "UI": {
         "spinner": {
             "loading": "Wird geladen..."
+        },
+        "Carousel": {
+            "pageTitle": "Seite {index}",
+            "prev": "Zurück",
+            "next": "Weiter"
         }
     },
     "Password": {

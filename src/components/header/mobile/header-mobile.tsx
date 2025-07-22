@@ -15,7 +15,7 @@ export function HeaderMobile() {
       <div className="fixed top-0 left-0 right-0 z-50 w-full">
         <header className="bg-white/95 backdrop-blur-sm shadow-xl px-4 py-2 h-17">
           <div className="flex h-full justify-between items-center">
-            <Link href="/" aria-label={t('goToHomepage')}>
+            <Link href="/" title={t('home')}>
               <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108px] min-h-[16px]" />
             </Link>
             <div className="flex gap-2">

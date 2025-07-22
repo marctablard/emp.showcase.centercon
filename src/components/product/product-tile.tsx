@@ -8,7 +8,7 @@ import { ProductTag } from '@/components/product/product-tag';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { H5, H6 } from '@/components/ui/h';
+import { Heading } from '@/components/ui/h';
 import { useCart } from '@/hooks/cart/useCart';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
@@ -69,17 +69,22 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
             {l10n(
               product.brand?.name ||
                 product.specifications?.find((spec) => spec.key === 'manufacturer')?.value ||
-                'Allen Key Type',
+                '...',
             )}
           </CardDescription>
           <CardTitle className="flex gap-2 justify-between">
-            <H5 className="lg:hidden">
+            <Heading variant="h5" as="div" className="lg:hidden">
               <p className="line-clamp-3">{l10n(product.name)}</p>
-            </H5>
-            <H6 className="hidden lg:block">
+            </Heading>
+            <Heading variant="h6" as="div" className="hidden lg:block">
               <p className="line-clamp-2">{l10n(product.name)}</p>
-            </H6>
-            <Button variant="secondary" size="icon" className="h-[50px] w-[50px] flex-shrink-0">
+            </Heading>
+            <Button
+              variant="secondary"
+              size="icon"
+              title={t('addToWishlist')}
+              className="h-[50px] w-[50px] flex-shrink-0"
+            >
               <Pin width="24" height="24" />
             </Button>
           </CardTitle>
@@ -151,12 +156,12 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
 
         <CardFooter>
           <div className="flex flex-col gap-1 w-full">
-            <div className="flex gap-2 text-success-500 text-sm items-center">
+            <div className="flex gap-2 text-success-600 text-sm items-center">
               {/* Todo: read availability from product */}
               <Truck />
               <p>{t('shipping.onlineAvailable')}</p>
             </div>
-            <div className="flex gap-2 text-success-500 text-sm items-center">
+            <div className="flex gap-2 text-success-600 text-sm items-center">
               {/* Todo: read pickup availability from product */}
               <MapPin />
               <p>{t('shipping.canBeReservedExample')}</p>
@@ -186,6 +191,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                 size="icon"
                 className="h-[50px] w-[50px] self-end"
                 onClick={(e) => handleAddToCart(e)}
+                title={t('addToCart')}
                 disabled={cartLoading}
               >
                 <ShoppingCart width="24" height="24" />

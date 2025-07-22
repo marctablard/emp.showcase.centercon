@@ -101,7 +101,7 @@ export function FooterLinks() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 lg:gap-6 ml-4 mr-4 lg:ml-6 lg:mr-6 py-4 lg:py-6 border-b border-b-neutral-200">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <p className="text-xl mb-1">{t('products')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           {t('solarPanels')}
@@ -119,7 +119,7 @@ export function FooterLinks() {
           {t('solarAccessories')}
         </UiLink>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <p className="text-xl mb-1">{t('services')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           {t('solarSolutions')}
@@ -134,7 +134,7 @@ export function FooterLinks() {
           {t('techServices')}
         </UiLink>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <p className="text-xl mb-1">{t('solutions')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           {t('installationPlanning')}
@@ -143,10 +143,10 @@ export function FooterLinks() {
           {t('regularMaintenance')}
         </UiLink>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <p className="text-xl mb-1">{t('onlinePlanner')}</p>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <p className="text-xl mb-1">{t('aboutUs')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           <Linkedin />
