@@ -7,9 +7,11 @@ interface HeaderIconLinkProps {
   href: string;
 }
 
-export default function HeaderIconLink({ icon: Icon, text, href }: HeaderIconLinkProps) {
+export function HeaderIconLink({ icon: Icon, text, href }: HeaderIconLinkProps) {
   return (
     <Link
+      role="button"
+      title={text}
       href={href}
       className="flex flex-col text-primary-600 items-center min-w-12 rounded-sm p-0.5 hover:bg-primary hover:text-white transition-colors focus-visible:outline-2 focus:outline-primary"
     >

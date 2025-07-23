@@ -1,8 +1,8 @@
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
-import HeaderIconLink from '@/components/header/common/header-icon-link';
+import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 
-export default function HeaderMenu() {
+export function HeaderMenu() {
   const t = useTranslations('header');
 
   return (
