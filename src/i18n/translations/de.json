@@ -15,33 +15,6 @@
       "subjectPlaceholder": "Betreff eingeben",
       "messagePlaceholder": "Beschreiben Sie Ihr Anliegen hier..."
     },
-    "Address": {
-      "title": "Adressverwaltung",
-      "description": "Adressen anzeigen und verwalten",
-      "shippingAddresses": "Versandadressen",
-      "manageShippingAddresses": "Versandadressen verwalten",
-      "shippingAddressesDescription": "Versandadressen anzeigen und verwalten",
-      "billingAddresses": "Rechnungsadressen",
-      "manageBillingAddresses": "Rechnungsadressen verwalten",
-      "billingAddressesDescription": "Rechnungsadressen anzeigen und verwalten",
-      "noAddresses": "Keine Adressen gefunden",
-      "addNewAddress": "Neu Adresse hinzufügen",
-      "addShippingAddress": "Versandadresse hinzufügen",
-      "addBillingAddress": "Rechnungsadresse hinzufügen",
-      "addressFormDescription": "Füllen Sie die Adresse aus",
-      "saveAddress": "Adresse speichern",
-      "cancel": "Abbrechen",
-      "default": "Standart",
-      "deleteAddress": "Adresse löschen",
-      "editAddress": "Adresse bearbeiten",
-      "saving": "Wird gespeichert...",
-      "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
-      "success": "Das hat geklappt",
-      "addressDeleted": "Adresse gelöscht",
-      "addressManagement": "Adressverwaltung",
-      "manageAddresses": "Adressen verwalten"
-    },
-    "dashboard": "Dashboard",
     "profile": {
       "title": "Profileinstellungen",
       "description": "Aktualisieren Sie Ihre persönlichen Daten",
@@ -113,7 +86,7 @@
     "customize": "Anpassen",
     "title": "Service Portal",
     "hello": "Hallo",
-    "welcomeBack": "Willkommen, {name}",
+    "dashboard": "Dashboard",
     "sidebar": {
       "dashboard": "Dashboard",
       "groups": {
@@ -139,7 +112,8 @@
         "productsMaintenance": "Produkte & Wartung",
         "contractsAgreements": "Verträge & Vereinbarungen",
         "personalData": "Persönliche Daten",
-        "accountSettings": "Kontoeinstellungen"
+        "accountSettings": "Kontoeinstellungen",
+        "approvals": "Freigaben"
       }
     },
     "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
@@ -169,14 +143,22 @@
     "noOrders": "Keine Bestellungen gefunden",
     "orderApproval": "Bestellfreigabe",
     "quoteApproval": "Angebotsfreigabe",
-    "returnApproval": "Retourenfreigabe",
-    "requestedBy": "Angefordert von",
+    "password": "Passwort ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Neues Passwort bestätigen",
+    "passwordChangeSuccess": "Ihr Passwort wurde erfolgreich geändert. Sie werden zur Kontoübersicht weitergeleitet...",
+    "changing": "Wird geändert...",
+    "changePassword": "Passwort ändern",
     "estimatedOutput": "Geschätzte Leistung",
     "installationSize": "Anlagengröße: {size}",
     "solarOutput": "Solaranlagenleistung",
     "solarOutputError": "Solarleistungsdaten konnten nicht geladen werden",
     "weatherDataUnavailable": "Wetterdaten nicht verfügbar",
+    "returnApproval": "Retourenfreigabe",
+    "requestedBy": "Angefordert von",
     "viewAllApprovals": "Alle Freigaben anzeigen",
+    "companySettings": "Unternehmenseinstellungen",
     "viewAllOrders": "Alle Bestellungen anzeigen",
     "companyPageDescription": "Unternehmensinformationen anzeigen und verwalten",
     "companyPagePlaceholder": "Unternehmensinformationen werden hier angezeigt",
@@ -186,6 +168,53 @@
     "quotesPagePlaceholder": "Angebote werden hier angezeigt",
     "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
     "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt",
+    "Address": {
+      "title": "Adressverwaltung",
+      "description": "Adressen anzeigen und verwalten",
+      "shippingAddresses": "Versandadressen",
+      "manageShippingAddresses": "Versandadressen verwalten",
+      "shippingAddressesDescription": "Versandadressen anzeigen und verwalten",
+      "billingAddresses": "Rechnungsadressen",
+      "manageBillingAddresses": "Rechnungsadressen verwalten",
+      "billingAddressesDescription": "Rechnungsadressen anzeigen und verwalten",
+      "noAddresses": "Keine Adressen gefunden",
+      "addNewAddress": "Neu Adresse hinzufügen",
+      "addShippingAddress": "Versandadresse hinzufügen",
+      "addBillingAddress": "Rechnungsadresse hinzufügen",
+      "addressFormDescription": "Füllen Sie die Adresse aus",
+      "saveAddress": "Adresse speichern",
+      "cancel": "Abbrechen",
+      "default": "Standart",
+      "deleteAddress": "Adresse löschen",
+      "editAddress": "Adresse bearbeiten",
+      "saving": "Wird gespeichert...",
+      "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
+      "success": "Das hat geklappt",
+      "addressDeleted": "Adresse gelöscht",
+      "addressManagement": "Adressverwaltung",
+      "manageAddresses": "Adressen verwalten"
+    },
+    "AddressForm": {
+      "fullName": "Vollständiger Name",
+      "street": "Straße",
+      "streetNumber": "Nr.",
+      "zipCode": "Postleitzahl",
+      "city": "Stadt",
+      "country": "Land",
+      "state": "Adresszusatz",
+      "phoneNumber": "Telefonnummer",
+      "companyName": "Firmenname",
+      "noCountriesAvailable": "Keine Länder verfügbar",
+      "loading": "Adressdaten werden geladen...",
+      "selectAnAddress": "Adresse auswählen",
+      "selectShippingAddress": "Lieferadresse auswählen",
+      "selectBillingAddress": "Rechnungsadresse auswählen",
+      "noAddresses": "Keine Adressen gefunden",
+      "addAddress": "Adresse hinzufügen",
+      "shipping": "Lieferung",
+      "billing": "Rechnung",
+      "default": "Standard"
+    },
     "Notifications": {
       "title": "Benachrichtigungen",
       "viewAll": "Alle anzeigen",
@@ -266,7 +295,22 @@
       "denseFreezingDrizzle": "Starker gefrierender Nieselregen",
       "slightRain": "Leichter Regen",
       "moderateRain": "Mäßiger Regen",
-      "heavyRain": "Starker Regen"
+      "heavyRain": "Starker Regen",
+      "lightFreezingRain": "Leichter gefrierender Regen",
+      "heavyFreezingRain": "Starker gefrierender Regen",
+      "slightSnowFall": "Leichter Schneefall",
+      "moderateSnowFall": "Mäßiger Schneefall",
+      "heavySnowFall": "Starker Schneefall",
+      "snowGrains": "Schneegriesel",
+      "slightRainShowers": "Leichte Regenschauer",
+      "moderateRainShowers": "Mäßige Regenschauer",
+      "violentRainShowers": "Starke Regenschauer",
+      "slightSnowShowers": "Leichte Schneeschauer",
+      "heavySnowShowers": "Starke Schneeschauer",
+      "thunderstorm": "Gewitter",
+      "thunderstormWithSlightHail": "Gewitter mit leichtem Hagel",
+      "thunderstormWithHeavyHail": "Gewitter mit starkem Hagel",
+      "unknown": "Unbekannte Wetterbedingung"
     }
   },
   "auth": {
@@ -276,6 +320,7 @@
       "password": "Passwort",
       "forgotPassword": "Passwort vergessen?",
       "logIn": "Anmelden",
+      "guestCheckout": "Als Gast bestellen",
       "invalidCredentials": "Ungültige E-Mail oder Passwort",
       "loginError": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
       "loggingIn": "Anmeldung läuft...",
@@ -339,14 +384,15 @@
       "sendResetLink": "Anfrage senden",
       "processing": "Wird verarbeitet...",
       "resetEmailSent": "Wenn Ihre E-Mail-Adresse in unserem System vorhanden ist, erhalten Sie einen Passwort-Reset-Link.",
-      "backToLogin": "Zurück zur Login-Seite",
+      "backToLogin": "Anmelden",
       "createNewPassword": "Neues Passwort erstellen",
       "createNewPasswordDescription": "Bitte geben Sie Ihr neues Passwort unten ein.",
       "newPassword": "Neues Passwort",
       "confirmPassword": "Passwort bestätigen",
       "updatePassword": "Passwort aktualisieren",
       "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
-      "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet."
+      "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet.",
+      "error": "Fehler"
     }
   },
   "cart": {
@@ -366,7 +412,49 @@
     "continueShopping": "Weiter einkaufen",
     "checkout": "Zur Kasse",
     "orderSummary": "Bestellübersicht",
-    "saveCart": "Warenkorb speichern"
+    "saveCart": "Warenkorb speichern",
+    "loadCart": "Warenkorb laden",
+    "share": "Teilen",
+    "backToShop": "Zum Shop",
+    "deliveryMethod": "Liefermethode",
+    "ship": "Versand",
+    "pickup": "Abholung",
+    "shipTo": "Liefere an",
+    "change": "Ändern",
+    "summary": {
+      "title": "Bestellübersicht",
+      "subtotal": "Zwischensumme",
+      "total": "Gesamtsumme",
+      "valueOfGoods": "Warenwert",
+      "netValueOfGoods": "Netto-Warenwert",
+      "vat": "Steuersatz",
+      "shippingCosts": "Versandkosten",
+      "fees": "Zusatzkosten",
+      "untilFreeShipping": " € bis gratis Versand",
+      "freeShippingOn": "Gratisversand bei Bestellungen über 400.00 €!",
+      "promoCodeInfo": "Promo Codes können im Checkout-Prozess eingegeben werden.",
+      "goToCheckout": "Zur Kasse",
+      "calculatedAtCheckout": "im Checkout ermittelt",
+      "dataTransmittedSecure": "Ihre Daten werden verschlüsselt und sicher transportiert"
+    },
+    "requestQuote": "Angebot anfragen",
+    "requestQuoteTitle": "Für ein Angebot werden die Produkte in Ihrem Warenkorb übermittelt:",
+    "requestQuotestep1": "Melden Sie in ihrem Kundenkonto an",
+    "requestQuotestep2": "Beginne mit der Erstellung Ihres Angebots mit einem Klick auf \"Angebot anfragen\"",
+    "requestQuotestep3": "Unser Personal kontaktiert Sie so schnell wie möglich.",
+    "requestQuoteButton": "Ein Angebot anfragen",
+    "itemNumber": "Artikelnummer: ",
+    "available": "Online Verfügbar",
+    "availableInWeeks": "Verfügbar in 4-6 Wochen",
+    "addToWishlist": "Zu Wunschliste hinzufügen",
+    "net": "Net ",
+    "hours": "Stunden: ",
+    "phone": "Telefon: ",
+    "cartEmpty": "Oh nein, Ihr Warenkorb ist gerade leer!",
+    "cartEmptyText": "Produkte hinzufügen oder anmelden, um einen gespeicherten Warenkorb zu laden.",
+    "cartEmptyLogin": "Anmelden",
+    "cartEmptyLinkText": "Jetzt Einkaufen",
+    "selectShippingAddress": "Lieferadresse auswählen"
   },
   "checkout": {
     "title": "Zur Kasse",
@@ -398,7 +486,104 @@
       "address": "Rechnungsadresse",
       "billingAddressSameAsShipping": "Die Rechnungsadresse ist gleich der Lieferadresse",
       "errorLoadingPaymentMethods": "Fehler beim Laden der Zahlungsmethoden. Bitte versuchen Sie es erneut.",
-      "noPaymentMethodsAvailable": "Derzeit sind keine Zahlungsmethoden verfügbar."
+      "noPaymentMethodsAvailable": "Derzeit sind keine Zahlungsmethoden verfügbar.",
+      "cardEndingIn": "Karte endend auf",
+      "selectedPaymentMethod": "Ausgewählte Zahlungsmethode",
+      "cardNumber": "Kartennummer",
+      "cardHolder": "Karteninhaber",
+      "expiryDate": "Ablaufdatum",
+      "cvv": "Prüfnummer",
+      "paypalRedirect": "Sie werden zu PayPal weitergeleitet, um Ihre Zahlung abzuschließen, nachdem Sie Ihre Bestellung überprüft haben.",
+      "invoiceTerms": "Sie erhalten eine Rechnung für diese Bestellung. Die Zahlung ist innerhalb von 30 Tagen fällig.",
+      "additionalInvoice": "Zusätzlicher Rechnungsempfänger per E-Mail"
+    },
+    "shipping": {
+      "title": "Versand",
+      "close": "Schließen",
+      "change": "Ändern",
+      "fromAddressbook": "Aus dem Adressbuch wählen",
+      "address": "Lieferadresse",
+      "shippingMethod": "Versandart",
+      "loading": "Versandarten werden geladen...",
+      "noShippingMethodsAvailable": "Keine Versandarten für Ihren Standort verfügbar",
+      "enterShippingAddressFirst": "Bitte geben Sie zuerst Ihre Lieferadresse ein",
+      "freeShipping": "Kostenloser Versand",
+      "estimatedDelivery": "Voraussichtliche Lieferung: 3-5 Werktage",
+      "multiplePackages": "Um Ihnen Ihre Produkte so schnell wie möglich zu liefern, können wir Ihre Bestellung in mehreren Paketen versenden, die an verschiedenen Tagen ankommen.",
+      "billingAddressSameAsShipping": "Die Rechnungsadresse ist gleich der Lieferadresse"
+    },
+    "validation": {
+      "emailRequired": "Die E-Mail-Adresse ist erforderlich",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "phoneRequired": "Die Telefonnummer ist erforderlich",
+      "firstNameRequired": "Vorname ist erforderlich",
+      "lastNameRequired": "Nachname ist erforderlich",
+      "companyNameRequired": "Firmenname ist erforderlich",
+      "fullNameRequired": "Voller Name ist erforderlich",
+      "streetRequired": "Straße ist erforderlich",
+      "houseNumberRequired": "Hausnummer ist erforderlich",
+      "postalCodeRequired": "Postleitzahl ist erforderlich",
+      "cityRequired": "Stadt ist erforderlich",
+      "countryRequired": "Land ist erforderlich",
+      "stateRequired": "Bundesland ist erforderlich",
+      "shippingMethodRequired": "Versandart ist erforderlich",
+      "paymentMethodRequired": "Zahlungsmethode ist erforderlich"
+    },
+    "summary": {
+      "title": "Bestellzusammenfassung",
+      "vat": "Steuern",
+      "shippingCosts": "Versandkosten",
+      "fees": "Zusatzkosten",
+      "valueOfGoods": "Warenwert",
+      "netValueOfGoods": "Netto-Warenwert",
+      "promoCode": "Promo Code",
+      "apply": "Anwenden",
+      "subtotal": "Zwischensumme",
+      "total": "Gesamt",
+      "calculatedAtCheckout": "Versandart wählen",
+      "submitOrder": "Bestellung aufgeben",
+      "inquireForApproval": "Freigabe anfragen",
+      "processing": "Wird verarbeitet...",
+      "dataTransmittedSecure": "Ihre Daten werden verschlüsselt und sicher transportiert",
+      "agreePolicy": "Ja, ich stimme den Nutzungsbedingungen zu. Unsere Datenschutzrichtlinie finden Sie hier.",
+      "termsAndConditions": "Ja, ich stimme den Allgemeinen Geschäftsbedingungen zu. Unsere Datenschutzerklärung finden Sie hier."
+    },
+    "products": "Produkte",
+    "step3": "Persönliche Notizen",
+    "step4": "Kontakt",
+    "change": "Ändern",
+    "address": "Adresse",
+    "freightShipping": "Fracht Versand",
+    "invoiceAddress": "Rechnungsadresse",
+    "personalOrderNumber": "Persönliche Bestellnummer",
+    "orderNotes": "Bestellnotizen",
+    "close": "Schließen",
+    "freightInfo": "Nach Abschluss Ihrer Bestellung wird das beauftragte Versandunternehmen Sie mit weiteren Informationen kontaktieren.",
+    "cancel": "Abbrechen",
+    "saveChanges": "Speichern",
+    "continueToPayment": "Weiter zur Zahlung",
+    "continueToContact": "Weiter zu Kontakt",
+    "saveForCheckout": "Speichern für Einkauf",
+    "fromAddressbook": "Aus dem Adressbuch wählen",
+    "approval": {
+      "loadingApprovers": "Bestellprüfer werden geladen...",
+      "selectApprover": "Bestellprüfer auswählen",
+      "searchApprovers": "Bestellprüfer suchen",
+      "searchApproversPlaceholder": "Name oder E-Mailadresse eingeben",
+      "noApproversFound": "Keine Bestellprüfer gefunden",
+      "comment": "Kommentar",
+      "commentPlaceholder": "Fügen Sie einen Kommentar für den Bestellprüfer hinzu (optional)",
+      "cancel": "Abbrechen",
+      "submitApprovalRequest": "Freigabe anfragen",
+      "submitting": "Freigabe wird abgegeben...",
+      "approvalRequestSuccess": "Freigabe anfragen",
+      "approvalRequestSent": "Ihre Freigabeanfrage wurde erfolgreich gesendet.",
+      "approvalRequestError": "Fehler beim Senden der Freigabeanfrage",
+      "errorCreatingApprovalRequest": "Fehler beim Erstellen der Freigabeanfrage",
+      "validationError": "Validierungsfehler",
+      "selectApproverRequired": "Bitte wählen Sie einen Bestellprüfer aus.",
+      "searchError": "Fehler beim Suchen",
+      "errorSearchingApprovers": "Es gab einen Fehler beim Suchen von Bestellprüfern"
     },
     "PaymentModes": {
       "creditCard": "Kreditkarte",
@@ -431,17 +616,34 @@
     "UI": {
       "spinner": {
         "loading": "Wird geladen..."
+      },
+      "Carousel": {
+        "pageTitle": "Seite {index}",
+        "prev": "Zurück",
+        "next": "Weiter"
+      }
+    },
+    "Notification": {
+      "close": "Schliessen",
+      "company": {
+        "onboarding": {
+          "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+          "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+          "approved": "Congratulations! Your company has been approved. You can now start shopping."
+        }
       }
     }
   },
   "layout": {
     "header": {
+      "home": "Startseite",
       "featuredProduct": "Ausgewähltes Produkt",
       "signIn": "Login",
       "register": "Registrieren",
       "account": "Konto",
       "search": "Schlüsselwort, Artikel oder Teilnummer eingeben",
       "shortSearch": "Suche",
+      "searchButton": "Suche öffnen",
       "suggestedProducts": "Vorgeschlagene Produkte",
       "lastSeenProducts": "Zuletzt angesehene Produkte",
       "blog": "Blog",
@@ -457,7 +659,10 @@
       "onlinePlaner": "Online Planer",
       "aboutUs": "Über uns",
       "menu": "Menü",
-      "close": "Schließen"
+      "close": "Schließen",
+      "viewCart": "Warenkorb anzeigen",
+      "goToHomepage": "Zur Startseite",
+      "searchProducts": "Produkte suchen"
     },
     "footer": {
       "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",
@@ -480,7 +685,7 @@
       "sales": "Sales"
     },
     "footerLegal": {
-      "copyright": "© 2025 Emporix. Alle Rechte vorbehalten.",
+      "copyright": " 2025 Emporix. Alle Rechte vorbehalten.",
       "termsAndConditions": "Geschäftsbedingungen",
       "imprint": "Impressum",
       "privacyPolicy": "Datenschutz"
@@ -505,46 +710,67 @@
     }
   },
   "orders": {
-    "Orders": {
-      "title": "Bestellungen",
-      "myOrders": "Meine Bestellungen",
-      "orderDetails": "Bestelldetails",
-      "orderNumber": "Bestellnummer",
-      "orderDate": "Bestelldatum",
-      "search": {
-        "placeholder": "Bestellungen durchsuchen..."
-      },
-      "columns": {
-        "orderNumber": "Bestell-Nr.",
-        "status": "Status",
-        "customer": "Kunde",
-        "orderDate": "Bestelldatum",
-        "deliveryDate": "Lieferdatum",
-        "deliveryAddress": "Lieferadresse",
-        "payment": "Zahlungsart",
-        "orderValue": "Bestellwert"
-      },
-      "status": {
-        "in_checkout": "Im Warenkorb",
-        "created": "Erstellt",
-        "confirmed": "Bestätigt",
-        "processing": "In Bearbeitung",
-        "ready_for_pickup": "Abholbereit",
-        "ready_for_shipping": "Versandbereit",
-        "shipped": "Versendet",
-        "delivered": "Geliefert",
-        "completed": "Abgeschlossen",
-        "cancelled": "Storniert"
-      },
-      "paymentTypes": {
-        "creditcard": "Kreditkarte",
-        "paypal": "PayPal",
-        "invoice": "Rechnung",
-        "prepayment": "Vorkasse"
-      },
-      "orderActions": "Bestellaktionen",
-      "cancelOrder": "Bestellung stornieren"
+    "previous": "Vorherige",
+    "next": "Nächste",
+    "title": "Bestellungen",
+    "myOrders": "Meine Bestellungen",
+    "showAllOrders": "Alle Bestellungen anzeigen",
+    "orderNumber": "Bestellnummer",
+    "trackOrder": "Sendung verfolgen",
+    "returnOrder": "Bestellung zurücksenden",
+    "orderDate": "Bestelldatum",
+    "payment": "Zahlung",
+    "paymentMethod": "Zahlungsmethode",
+    "shippingMethod": "Versandart",
+    "orderItems": "Bestellte Artikel",
+    "product": "Produkt",
+    "price": "Preis",
+    "quantity": "Menge",
+    "subtotal": "Zwischensumme",
+    "shipping": "Versand",
+    "free": "Kostenlos",
+    "discount": "Rabatt",
+    "total": "Gesamt",
+    "email": "E-Mail",
+    "loading": "Bestellungen werden geladen...",
+    "noOrders": "Keine Bestellungen gefunden",
+    "ordersTotal": "Bestellungen insgesamt",
+    "billingAddress": "Rechnungsadresse",
+    "shippingAddress": "Lieferadresse",
+    "search": {
+      "placeholder": "Bestellungen durchsuchen..."
     },
+    "columns": {
+      "orderNumber": "Bestell-Nr.",
+      "status": "Status",
+      "customer": "Kunde",
+      "orderDate": "Bestelldatum",
+      "deliveryDate": "Lieferdatum",
+      "deliveryAddress": "Lieferadresse",
+      "payment": "Zahlungsart",
+      "orderValue": "Bestellwert"
+    },
+    "status": {
+      "in_checkout": "Im Warenkorb",
+      "created": "Erstellt",
+      "confirmed": "Bestätigt",
+      "processing": "In Bearbeitung",
+      "ready_for_pickup": "Abholbereit",
+      "ready_for_shipping": "Versandbereit",
+      "shipped": "Versendet",
+      "delivered": "Geliefert",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "paymentTypes": {
+      "creditcard": "Kreditkarte",
+      "paypal": "PayPal",
+      "invoice": "Rechnung",
+      "prepayment": "Vorkasse"
+    },
+    "orderActions": "Bestellaktionen",
+    "cancelOrder": "Bestellung stornieren",
+    "orderDetails": "Bestelldetails",
     "Invoices": {
       "title": "Rechnungen",
       "showAllInvoices": "Alle Rechnungen anzeigen",
@@ -578,22 +804,104 @@
     },
     "Confirmation": {
       "title": "Bestellbestätigung",
-      "thankYou": "Vielen Dank für Ihre Bestellung!",
-      "orderNumber": "Bestellnummer",
-      "orderDate": "Bestelldatum",
-      "orderSummary": "Bestellübersicht",
-      "shippingAddress": "Lieferadresse",
-      "billingAddress": "Rechnungsadresse",
-      "paymentMethod": "Zahlungsmethode",
-      "shippingMethod": "Versandmethode",
-      "orderTotal": "Gesamtbetrag",
-      "orderDetails": "Bestelldetails",
-      "viewOrderDetails": "Bestelldetails anzeigen",
-      "continueShopping": "Weiter einkaufen"
+      "description": "Vielen Dank für Ihre Bestellung",
+      "orderConfirmed": "Bestellung bestätigt!",
+      "waitingForApproval": "Ihre Bestellung muss noch bestätigt werden!",
+      "thankYou": "Vielen Dank für Ihren Einkauf. Ihre Bestellung wurde entgegengenommen.",
+      "emailConfirmation": "Eine Bestätigungs-E-Mail wurde gesendet an",
+      "continueShopping": "Weiter einkaufen",
+      "viewOrders": "Meine Bestellungen anzeigen"
+    },
+    "Approval": {
+      "approvals": "Freigaben",
+      "approval": "Freigabe",
+      "approvalsList": "Freigabenliste",
+      "approvalsListDescription": "Alle Freigabeanfragen anzeigen und verwalten",
+      "approvalDetails": "Freigabedetails",
+      "approvalDetailsDescription": "Details der Freigabeanfrage anzeigen und verwalten",
+      "loading": "Wird geladen...",
+      "errorLoadingApprovals": "Fehler beim Laden der Freigaben",
+      "errorLoadingApproval": "Fehler beim Laden der Freigabe",
+      "tryAgain": "Erneut versuchen",
+      "noApprovalsFound": "Keine Freigaben gefunden",
+      "approvalNotFound": "Freigabe nicht gefunden",
+      "filter": "Filter",
+      "clearFilter": "Löschen",
+      "filterByStatus": "Nach Status filtern",
+      "filterByResourceType": "Nach Ressourcentyp filtern",
+      "allStatuses": "Alle Status",
+      "id": "ID",
+      "resourceType": "Ressourcentyp",
+      "resourceId": "Ressourcen-ID",
+      "action": "Aktion",
+      "status": "Status",
+      "requestor": "Anforderer",
+      "requestorId": "Anforderer-ID",
+      "approver": "Genehmiger",
+      "approverId": "Genehmiger-ID",
+      "createdAt": "Erstellt am",
+      "updatedAt": "Aktualisiert am",
+      "actions": "Aktionen",
+      "view": "Anzeigen",
+      "back": "Zurück",
+      "delete": "Löschen",
+      "confirmDeleteApproval": "Sind Sie sicher, dass Sie diese Freigabe löschen möchten?",
+      "approvalSuccessfullyDeleted": "Freigabe erfolgreich gelöscht",
+      "requestorComment": "Kommentar des Anforderers",
+      "approverComment": "Kommentar des Genehmigers",
+      "noRequestorComment": "Kein Kommentar des Anforderers",
+      "noApproverComment": "Kein Kommentar des Genehmigers",
+      "approvalActions": "Freigabeaktionen",
+      "approve": "Genehmigen",
+      "decline": "Ablehnen",
+      "approvalSuccessfullyApproved": "Freigabe erfolgreich genehmigt",
+      "approvalSuccessfullyDeclined": "Freigabe erfolgreich abgelehnt",
+      "addComment": "Kommentar hinzufügen",
+      "enterComment": "Kommentar eingeben...",
+      "saveComment": "Kommentar speichern",
+      "commentUpdated": "Kommentar aktualisiert",
+      "success": "Erfolg",
+      "error": "Fehler"
+    },
+    "ApprovalAction": {
+      "CHECKOUT": "Bestellung"
+    },
+    "ApprovalStatus": {
+      "PENDING": "Ausstehend",
+      "APPROVED": "Genehmigt",
+      "DECLINED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen",
+      "CLOSED": "Geschlossen"
+    },
+    "Tracking": {
+      "trackingInformation": "Sendungsverfolgung",
+      "carrier": "Versanddienstleister",
+      "trackingNumber": "Sendungsnummer",
+      "estimatedDelivery": "Voraussichtliche Lieferung",
+      "trackingHistory": "Sendungsverlauf",
+      "lastUpdated": "Zuletzt aktualisiert",
+      "viewOnCarrierWebsite": "Dienstleister Seite anzeigen",
+      "errorFetchingTracking": "Fehler beim Sendungsverfolgungsabruf",
+      "between": "zwischen",
+      "pending": "In Bearbeitung",
+      "in_transit": "In Zustellung",
+      "out_for_delivery": "Wird zugestellt",
+      "delivered": "Zugestellt",
+      "exception": "Zustellproblem",
+      "orderProcessed": "Bestellung bearbeitet",
+      "packageReceived": "Paket erhalten",
+      "inTransit": "In Zustellung",
+      "outForDelivery": "Wird zugestellt",
+      "inTransitNextCarrier": "An nächsten Transporteur übergeben",
+      "inTransitCarrierFacility": "Im Verteilzentrum eingetroffen",
+      "exceptionNoRecipient": "Zustellung versucht - niemand angetroffen"
     }
   },
   "product": {
     "addToCart": "In den Warenkorb",
+    "addToWishlist": "Produkt Merken",
+    "share": "Teilen",
+    "compare": "Vergleichen",
     "noImage": "Kein Bild verfügbar",
     "noDescription": "Keine Beschreibung verfügbar.",
     "productId": "Produkt-ID",
@@ -663,6 +971,10 @@
       "specs": "Spezifikationen",
       "downloads": "Downloads",
       "reviews": "Bewertungen"
+    },
+    "productRecommendations": {
+      "overline": "mehr zu entdecken",
+      "headline": "Diese Produkte könnten auch interessant sein"
     }
   },
   "search": {
@@ -683,111 +995,115 @@
     "storeName": "Emporix Showcase Store"
   },
   "validation": {
-    "Validation": {
-      "contactData": {
-        "email": {
-          "required": "Die E-Mail-Adresse ist erforderlich",
-          "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
-        },
-        "firstName": {
-          "required": "Vorname ist erforderlich"
-        },
-        "lastName": {
-          "required": "Nachname ist erforderlich"
-        }
+    "contactData": {
+      "email": {
+        "required": "Die E-Mail-Adresse ist erforderlich",
+        "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
       },
-      "address": {
-        "contactName": {
-          "required": "Name ist erforderlich"
-        },
-        "street": {
-          "required": "Straße ist erforderlich"
-        },
-        "streetNumber": {
-          "required": "Hausnummer ist erforderlich"
-        },
-        "zipCode": {
-          "required": "Postleitzahl ist erforderlich"
-        },
-        "city": {
-          "required": "Stadt ist erforderlich"
-        },
-        "country": {
-          "required": "Land ist erforderlich"
-        },
-        "state": {
-          "required": "Bundesland/Region ist erforderlich"
-        }
+      "firstName": {
+        "required": "Vorname ist erforderlich"
       },
-      "shipping": {
-        "method": {
-          "required": "Versandart ist erforderlich"
-        }
+      "lastName": {
+        "required": "Nachname ist erforderlich"
+      }
+    },
+    "address": {
+      "contactName": {
+        "required": "Name ist erforderlich"
       },
-      "payment": {
-        "method": {
-          "required": "Zahlungsmethode ist erforderlich"
-        }
+      "street": {
+        "required": "Straße ist erforderlich"
       },
-      "login": {
-        "username": {
-          "required": "E-Mail ist erforderlich",
-          "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
-        },
-        "password": {
-          "required": "Passwort ist erforderlich"
-        }
+      "streetNumber": {
+        "required": "Hausnummer ist erforderlich"
       },
-      "register": {
-        "registrationType": {
-          "required": "Registrierungstyp ist erforderlich"
-        },
-        "firstName": {
-          "required": "Vorname ist erforderlich"
-        },
-        "lastName": {
-          "required": "Nachname ist erforderlich"
-        },
-        "email": {
-          "required": "E-Mail-Adresse ist erforderlich",
-          "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-          "mismatch": "Die E-Mail-Adressen stimmen nicht überein"
-        },
-        "emailConfirmation": {
-          "required": "Bitte bestätigen Sie Ihre E-Mail-Adresse"
-        },
-        "companyName": {
-          "required": "Firmenname ist erforderlich"
-        },
-        "vatNumber": {
-          "required": "Umsatzsteuer-ID ist erforderlich"
-        },
-        "street": {
-          "required": "Straße ist erforderlich"
-        },
-        "houseNumber": {
-          "required": "Hausnummer ist erforderlich"
-        },
-        "postalCode": {
-          "required": "Postleitzahl ist erforderlich"
-        },
-        "city": {
-          "required": "Stadt ist erforderlich"
-        },
-        "country": {
-          "required": "Land ist erforderlich"
-        },
-        "password": {
-          "mismatch": "Die Passwörter stimmen nicht überein"
-        },
-        "passwordConfirmation": {
-          "required": "Bitte bestätigen Sie Ihr Passwort"
-        },
-        "general": {
-          "emailExists": "Diese E-Mail-Adresse ist bereits registriert. Bitte verwenden Sie eine andere E-Mail-Adresse oder versuchen Sie sich anzumelden.",
-          "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
-          "serverError": "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut."
-        }
+      "zipCode": {
+        "required": "Postleitzahl ist erforderlich"
+      },
+      "city": {
+        "required": "Stadt ist erforderlich"
+      },
+      "country": {
+        "required": "Land ist erforderlich"
+      },
+      "state": {
+        "required": "Bundesland/Region ist erforderlich"
+      }
+    },
+    "shipping": {
+      "method": {
+        "required": "Versandart ist erforderlich"
+      }
+    },
+    "payment": {
+      "method": {
+        "required": "Zahlungsmethode ist erforderlich"
+      }
+    },
+    "login": {
+      "username": {
+        "required": "E-Mail ist erforderlich",
+        "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+      },
+      "password": {
+        "required": "Passwort ist erforderlich"
+      }
+    },
+    "password": {
+      "email": {
+        "required": "E-Mail ist erforderlich",
+        "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+      }
+    },
+    "register": {
+      "registrationType": {
+        "required": "Registrierungstyp ist erforderlich"
+      },
+      "firstName": {
+        "required": "Vorname ist erforderlich"
+      },
+      "lastName": {
+        "required": "Nachname ist erforderlich"
+      },
+      "email": {
+        "required": "E-Mail-Adresse ist erforderlich",
+        "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+        "mismatch": "Die E-Mail-Adressen stimmen nicht überein"
+      },
+      "emailConfirmation": {
+        "required": "Bitte bestätigen Sie Ihre E-Mail-Adresse"
+      },
+      "companyName": {
+        "required": "Firmenname ist erforderlich"
+      },
+      "vatNumber": {
+        "required": "Umsatzsteuer-ID ist erforderlich"
+      },
+      "street": {
+        "required": "Straße ist erforderlich"
+      },
+      "houseNumber": {
+        "required": "Hausnummer ist erforderlich"
+      },
+      "postalCode": {
+        "required": "Postleitzahl ist erforderlich"
+      },
+      "city": {
+        "required": "Stadt ist erforderlich"
+      },
+      "country": {
+        "required": "Land ist erforderlich"
+      },
+      "password": {
+        "mismatch": "Die Passwörter stimmen nicht überein"
+      },
+      "passwordConfirmation": {
+        "required": "Bitte bestätigen Sie Ihr Passwort"
+      },
+      "general": {
+        "emailExists": "Diese E-Mail-Adresse ist bereits registriert. Bitte verwenden Sie eine andere E-Mail-Adresse oder versuchen Sie sich anzumelden.",
+        "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "serverError": "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut."
       }
     }
   }

@@ -78,5 +78,5 @@
     "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
     "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet.",
     "error": "Fehler"
-  },
+  }
 }

@@ -23,7 +23,10 @@
     "onlinePlaner": "Online Planer",
     "aboutUs": "Über uns",
     "menu": "Menü",
-    "close": "Schließen"
+    "close": "Schließen",
+    "viewCart": "Warenkorb anzeigen",
+    "goToHomepage": "Zur Startseite",
+    "searchProducts": "Produkte suchen"
   },
   "footer": {
     "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",
@@ -46,7 +49,7 @@
     "sales": "Sales"
   },
   "footerLegal": {
-    "copyright": "© 2025 Emporix. Alle Rechte vorbehalten.",
+    "copyright": " 2025 Emporix. Alle Rechte vorbehalten.",
     "termsAndConditions": "Geschäftsbedingungen",
     "imprint": "Impressum",
     "privacyPolicy": "Datenschutz"

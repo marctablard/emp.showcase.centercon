@@ -6,7 +6,7 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
 
 export function HeaderMiddleBar() {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
   const isExtraLargeScreen = useBreakpoint('xl');
 
   return (

@@ -10,6 +10,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: loadI18nTranslations('src/i18n/translations', locale, true),
+    messages: loadI18nTranslations('./src/i18n/translations', locale, true),
   };
 });

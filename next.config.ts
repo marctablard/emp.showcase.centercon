@@ -55,7 +55,7 @@ let nextConfig: NextConfig = {
 };
 
 // add i18n Logic to Next-Configuration
-const withNextIntlSplit = createNextIntlSplitPlugin('src/i18n/translations');
+const withNextIntlSplit = createNextIntlSplitPlugin('./src/i18n/translations');
 
 // Apply plugins in sequence
 nextConfig = withNextIntlSplit(nextConfig);

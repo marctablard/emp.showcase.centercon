@@ -41,6 +41,27 @@
       "addressManagement": "Address Management",
       "manageAddresses": "Manage Addresses"
     },
+    "AddressForm": {
+      "fullName": "Full Name",
+      "street": "Street",
+      "streetNumber": "No.",
+      "zipCode": "Zip Code",
+      "city": "City",
+      "country": "Country",
+      "state": "Address Supplement",
+      "phoneNumber": "Phone Number",
+      "companyName": "Company Name",
+      "noCountriesAvailable": "No countries available",
+      "loading": "Loading address data...",
+      "selectAnAddress": "Select an Address",
+      "selectShippingAddress": "Select Shipping Address",
+      "selectBillingAddress": "Select Billing Address",
+      "noAddresses": "No addresses found",
+      "addAddress": "Add Address",
+      "shipping": "Shipping",
+      "billing": "Billing",
+      "default": "Default"
+    },
     "dashboard": "Dashboard",
     "profile": {
       "title": "User Profile",
@@ -139,7 +160,8 @@
         "productsMaintenance": "Products & Maintenance",
         "contractsAgreements": "Contracts & Agreements",
         "personalData": "Personal Data",
-        "accountSettings": "Account Settings"
+        "accountSettings": "Account Settings",
+        "approvals": "Approvals"
       }
     },
     "accountDashboardDescription": "Manage your account, orders, and company information",
@@ -265,7 +287,22 @@
       "denseFreezingDrizzle": "Heavy Freezing Drizzle",
       "slightRain": "Light Rain",
       "moderateRain": "Moderate Rain",
-      "heavyRain": "Heavy Rain"
+      "heavyRain": "Heavy Rain",
+      "lightFreezingRain": "Light Freezing Rain",
+      "heavyFreezingRain": "Heavy Freezing Rain",
+      "slightSnowFall": "Light Snow",
+      "moderateSnowFall": "Moderate Snow",
+      "heavySnowFall": "Heavy Snow",
+      "snowGrains": "Snow Grains",
+      "slightRainShowers": "Light Rain Showers",
+      "moderateRainShowers": "Moderate Rain Showers",
+      "violentRainShowers": "Heavy Rain Showers",
+      "slightSnowShowers": "Light Snow Showers",
+      "heavySnowShowers": "Heavy Snow Showers",
+      "thunderstorm": "Thunderstorm",
+      "thunderstormWithSlightHail": "Thunderstorm with Light Hail",
+      "thunderstormWithHeavyHail": "Thunderstorm with Heavy Hail",
+      "unknown": "Unknown Weather Condition"
     }
   },
   "auth": {
@@ -275,6 +312,7 @@
       "password": "Password",
       "forgotPassword": "Forgot password?",
       "logIn": "Log in",
+      "guestCheckout": "Order as a guest",
       "invalidCredentials": "Invalid email or password",
       "loginError": "An error occurred during login. Please try again.",
       "loggingIn": "Logging in...",
@@ -306,7 +344,7 @@
       "city": "City",
       "country": "Country",
       "vatNumber": "VAT Number",
-      "shippingSameAsBilling": "Shipping Address Same as Billing",
+      "shippingSameAsBilling": "Shipping address same as billing",
       "accountSettings": "Account Settings",
       "password": "Password",
       "passwordConfirmation": "Confirm Password",
@@ -320,11 +358,11 @@
       },
       "emailSignup": "Email Signup",
       "newsletter": "Newsletter",
-      "dealsAlerts": "Deals Alerts",
+      "dealsAlerts": "Deal Alerts",
       "termsNotice": "By clicking \"Register\" you agree to our <privacyPolicy>Privacy Policy</privacyPolicy> and <termsOfUse>Terms of Use</termsOfUse>",
       "registerButton": "Register",
       "registering": "Registering...",
-      "alreadyHaveAccount": "Already have an Account?",
+      "alreadyHaveAccount": "Already have an account?",
       "logIn": "Log In",
       "additionalInformation": "Additional Information",
       "additionalInformationDescription": "Describe the services or products your business is interessted in",
@@ -338,7 +376,7 @@
       "sendResetLink": "Send Reset Link",
       "processing": "Processing...",
       "resetEmailSent": "If your email exists in our system, you will receive a password reset link shortly.",
-      "backToLogin": "Back to Login",
+      "backToLogin": "Log in",
       "createNewPassword": "Create New Password",
       "createNewPasswordDescription": "Please enter your new password below.",
       "newPassword": "New Password",
@@ -365,7 +403,52 @@
     "continueShopping": "Continue Shopping",
     "checkout": "Go to Checkout",
     "orderSummary": "Order Summary",
-    "saveCart": "Save cart"
+    "saveCart": "Save cart",
+    "loadCart": "Load cart",
+    "share": "Share",
+    "backToShop": "Back to Shop",
+    "deliveryMethod": "Delivery method",
+    "ship": "Ship",
+    "pickup": "Pickup",
+    "shipTo": "Ship to",
+    "change": "Change",
+    "summary": {
+      "title": "Summary",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "valueOfGoods": "Value of goods",
+      "netValueOfGoods": "Net value of goods",
+      "vat": "VAT.",
+      "shippingCosts": "Shipping costs",
+      "untilFreeShipping": " until free shipping",
+      "promoCodeInfo": "Promo Codes can be entered in the checkout process.",
+      "freeShippingOn": "Free shipping on orders over 400.00 €!",
+      "goToCheckout": "Go to Checkout",
+      "calculatedAtCheckout": "Calculated at checkout",
+      "dataTransmittedSecure": "Your data is transmitted securely and encrypted.",
+      "inquireForApproval": "Inquire for Approval",
+      "processing": "Processing...",
+      "submitOrder": "Submit Order",
+      "termsAndConditions": "I agree to the terms and conditions"
+    },
+    "requestQuote": "Request Quote",
+    "requestQuoteTitle": "For a quote request, the products in your cart will be submitted:",
+    "requestQuotestep1": "Log in to your customer account",
+    "requestQuotestep2": "Start your quote creation with just one click on \"Request a quote\"",
+    "requestQuotestep3": "Our staff will contact you as soon as possible.",
+    "requestQuoteButton": "Request a quote",
+    "itemNumber": "Item number: ",
+    "available": "Online Available",
+    "availableInWeeks": "Available in 4-6 weeks",
+    "addToWishlist": "Add to wishlist",
+    "net": "Net ",
+    "hours": "Hours: ",
+    "phone": "Phone: ",
+    "cartEmpty": "Oh no, your shopping cart is currently empty!",
+    "cartEmptyText": "Add products or log in to load a saved cart.",
+    "cartEmptyLogin": "Login",
+    "cartEmptyLinkText": "Shop now",
+    "selectShippingAddress": "Select Shipping Address"
   },
   "checkout": {
     "title": "Checkout",
@@ -401,7 +484,102 @@
       "paymentMethod": "Payment Method",
       "billingAddressSameAsShipping": "Billing address same as shipping",
       "errorLoadingPaymentMethods": "Error loading payment methods. Please try again.",
-      "noPaymentMethodsAvailable": "No payment methods are available at this time."
+      "noPaymentMethodsAvailable": "No payment methods are available at this time.",
+      "cardEndingIn": "Card ending in",
+      "selectedPaymentMethod": "Selected payment method",
+      "cardNumber": "Card Number",
+      "cardHolder": "Card Holder",
+      "expiryDate": "Expiry Date",
+      "cvv": "CVV",
+      "paypalRedirect": "You will be redirected to PayPal to complete your payment after reviewing your order.",
+      "invoiceTerms": "You will receive an invoice for this order. Payment is due within 30 days.",
+      "additionalInvoice": "Additional invoice recipient via email"
+    },
+    "shipping": {
+      "title": "Delivery",
+      "close": "Close",
+      "change": "Change",
+      "fromAddressbook": "Select from Addressbook",
+      "address": "Shipping Address",
+      "shippingMethod": "Shipping Method",
+      "loading": "Loading shipping methods...",
+      "noShippingMethodsAvailable": "No shipping methods available for your location",
+      "enterShippingAddressFirst": "Please enter your shipping address first",
+      "freeShipping": "Free Shipping",
+      "estimatedDelivery": "Estimated delivery: 3-5 business days",
+      "orderNotes": "Order Notes",
+      "multiplePackages": "To get you your products as fast as possible, we may ship your order in multiple packages that arrive on different days.",
+      "billingAddressSameAsShipping": "Billing address same as shipping"
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "invalidEmail": "Please enter a valid email address",
+      "phoneRequired": "Phone",
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "companyNameRequired": "Company is required",
+      "fullNameRequired": "Full name is required",
+      "streetRequired": "Street is required",
+      "houseNumberRequired": "House number is required",
+      "postalCodeRequired": "Zip/Postal code is required",
+      "cityRequired": "City is required",
+      "countryRequired": "Country is required",
+      "stateRequired": "State/Province is required",
+      "shippingMethodRequired": "Shipping method is required",
+      "paymentMethodRequired": "Payment method is required"
+    },
+    "summary": {
+      "title": "Order Summary",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "valueOfGoods": "Value of goods",
+      "netValueOfGoods": "Net value of goods",
+      "vat": "statutory VAT.",
+      "shippingCosts": "Shipping costs",
+      "fees": "Fees",
+      "submitOrder": "Submit Order",
+      "inquireForApproval": "Inquire for Approval",
+      "processing": "Processing...",
+      "calculatedAtCheckout": "Pick shipping method",
+      "dataTransmittedSecure": "Your data is transmitted securely and encrypted.",
+      "termsAndConditions": "Yes, I agree to the terms and conditions. You can find our privacy policy here."
+    },
+    "promoCode": "Promo Code",
+    "apply": "Apply",
+    "agreePolicy": "Yes, I agree to the terms and conditions. You can find our privacy policy here.",
+    "products": "Products",
+    "address": "Address",
+    "freightShipping": "Freight Shipping",
+    "invoiceAddress": "Invoice Address",
+    "personalOrderNumber": "Personal Order Number",
+    "change": "Change",
+    "close": "Close",
+    "freightInfo": "After the order is completed, the contracted shipping company will contact you with further information.",
+    "cancel": "Cancel",
+    "saveChanges": "Save changes",
+    "continueToPayment": "Continue to Payment",
+    "continueToContact": "Continue to Contact",
+    "saveForCheckout": "Save for Checkout",
+    "fromAddressbook": "Select from Addressbook",
+    "approval": {
+      "loadingApprovers": "Loading Approvers...",
+      "selectApprover": "Select Approver",
+      "searchApprovers": "Search Approvers",
+      "searchApproversPlaceholder": "Enter name or email to search",
+      "noApproversFound": "No approvers found",
+      "comment": "Comment",
+      "commentPlaceholder": "Add a comment for the approver (optional)",
+      "cancel": "Cancel",
+      "submitApprovalRequest": "Submit Request",
+      "submitting": "Submitting...",
+      "approvalRequestSuccess": "Request Submitted",
+      "approvalRequestSent": "Your approval request has been sent successfully.",
+      "approvalRequestError": "Request Failed",
+      "errorCreatingApprovalRequest": "There was an error creating your approval request. Please try again.",
+      "validationError": "Validation Error",
+      "selectApproverRequired": "Please select an approver to continue.",
+      "searchError": "Search Error",
+      "errorSearchingApprovers": "There was an error searching for approvers. Please try again."
     },
     "PaymentModes": {
       "creditCard": "Credit Card",
@@ -434,17 +612,34 @@
     "UI": {
       "spinner": {
         "loading": "Loading..."
+      },
+      "Carousel": {
+        "pageTitle": "Page {index}",
+        "prev": "Previous",
+        "next": "Next"
+      }
+    },
+    "Notification": {
+      "close": "Close",
+      "company": {
+        "onboarding": {
+          "rejected": "Your company has not been approved. If you think this is an error, please contact us.",
+          "pending": "Your company is currently being reviewed. You will not be able to make purchases until it's complete.",
+          "approved": "Congratulations! Your company has been approved. You can now start shopping."
+        }
       }
     }
   },
   "layout": {
     "header": {
+      "home": "Home",
       "featuredProduct": "Featured Product",
       "signIn": "Login",
       "register": "Register",
-      "search": "Enter keyword, item, model or part number",
       "account": "Account",
+      "search": "Enter keyword, item, model or part number",
       "shortSearch": "Search",
+      "searchButton": "Open Search",
       "suggestedProducts": "Suggested Products",
       "lastSeenProducts": "Last seen Products",
       "blog": "Blog",
@@ -460,7 +655,10 @@
       "onlinePlaner": "Online Planer",
       "aboutUs": "About us",
       "menu": "Menu",
-      "close": "Close"
+      "close": "Close",
+      "viewCart": "View shopping cart",
+      "goToHomepage": "Go to homepage",
+      "searchProducts": "Search products"
     },
     "footer": {
       "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",
@@ -483,7 +681,7 @@
       "sales": "Sales"
     },
     "footerLegal": {
-      "copyright": "© 2025 Emporix. All Rights Reserved.",
+      "copyright": " 2025 Emporix. All Rights Reserved.",
       "termsAndConditions": "Terms and Conditions",
       "imprint": "Imprint",
       "privacyPolicy": "Privacy Policy"
@@ -513,6 +711,34 @@
     "orderDetails": "Order Details",
     "orderNumber": "Order Number",
     "orderDate": "Order Date",
+    "email": "Email",
+    "payment": "Payment",
+    "trackOrder": "Track Order",
+    "returnOrder": "Return Order",
+    "paymentMethod": "Payment Method",
+    "shippingMethod": "Shipping Method",
+    "orderItems": "Order Items",
+    "product": "Product",
+    "price": "Price",
+    "quantity": "Quantity",
+    "total": "Total",
+    "previous": "Previous",
+    "next": "Next",
+    "showAllOrders": "Show all orders",
+    "billingAddress": "Billing address",
+    "shippingAddress": "Shipping address",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "free": "Free",
+    "discount": "Discount",
+    "loading": "Loading orders...",
+    "deliveryDate": "Delivery Date",
+    "deliveryAddress": "Delivery Address",
+    "orderValue": "Order Value",
+    "noOrders": "No orders found",
+    "ordersTotal": "Total orders",
+    "orderActions": "Order Actions",
+    "cancelOrder": "Cancel Order",
     "search": {
       "placeholder": "Search orders..."
     },
@@ -577,22 +803,104 @@
     },
     "Confirmation": {
       "title": "Order Confirmation",
-      "thankYou": "Thank you for your order!",
-      "orderNumber": "Order Number",
-      "orderDate": "Order Date",
-      "orderSummary": "Order Summary",
-      "shippingAddress": "Shipping Address",
-      "billingAddress": "Billing Address",
-      "paymentMethod": "Payment Method",
-      "shippingMethod": "Shipping Method",
-      "orderTotal": "Order Total",
-      "orderDetails": "Order Details",
-      "viewOrderDetails": "View Order Details",
-      "continueShopping": "Continue Shopping"
+      "description": "Thank you for your order",
+      "orderConfirmed": "Order Confirmed!",
+      "waitingForApproval": "Your Order is waiting for Approval!",
+      "thankYou": "Thank you for your purchase. Your order has been received.",
+      "emailConfirmation": "A confirmation email has been sent to",
+      "continueShopping": "Continue Shopping",
+      "viewOrders": "View Orders"
+    },
+    "Approval": {
+      "approvals": "Approvals",
+      "approval": "Approval",
+      "approvalsList": "Approvals List",
+      "approvalsListDescription": "View and manage all approval requests",
+      "approvalDetails": "Approval Details",
+      "approvalDetailsDescription": "View and manage approval request details",
+      "loading": "Loading...",
+      "errorLoadingApprovals": "Error loading approvals",
+      "errorLoadingApproval": "Error loading approval",
+      "tryAgain": "Try Again",
+      "noApprovalsFound": "No approvals found",
+      "approvalNotFound": "Approval not found",
+      "filter": "Filter",
+      "clearFilter": "Clear",
+      "filterByStatus": "Filter by Status",
+      "filterByResourceType": "Filter by Resource Type",
+      "allStatuses": "All Statuses",
+      "id": "ID",
+      "resourceType": "Resource Type",
+      "resourceId": "Resource ID",
+      "action": "Action",
+      "status": "Status",
+      "requestor": "Requestor",
+      "requestorId": "Requestor ID",
+      "approver": "Approver",
+      "approverId": "Approver ID",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "actions": "Actions",
+      "view": "View",
+      "back": "Back",
+      "delete": "Delete",
+      "confirmDeleteApproval": "Are you sure you want to delete this approval?",
+      "approvalSuccessfullyDeleted": "Approval successfully deleted",
+      "requestorComment": "Requestor Comment",
+      "approverComment": "Approver Comment",
+      "noRequestorComment": "No requestor comment",
+      "noApproverComment": "No approver comment",
+      "approvalActions": "Approval Actions",
+      "approve": "Approve",
+      "decline": "Decline",
+      "approvalSuccessfullyApproved": "Approval successfully approved",
+      "approvalSuccessfullyDeclined": "Approval successfully declined",
+      "addComment": "Add Comment",
+      "enterComment": "Enter comment...",
+      "saveComment": "Save Comment",
+      "commentUpdated": "Comment updated",
+      "success": "Success",
+      "error": "Error"
+    },
+    "ApprovalAction": {
+      "CHECKOUT": "Order"
+    },
+    "ApprovalStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "DECLINED": "Declined",
+      "EXPIRED": "Expired",
+      "CLOSED": "Closed"
+    },
+    "Tracking": {
+      "trackingInformation": "Tracking Information",
+      "carrier": "Carrier",
+      "trackingNumber": "Tracking Number",
+      "estimatedDelivery": "Estimated Delivery",
+      "trackingHistory": "Tracking History",
+      "lastUpdated": "Last Updated",
+      "viewOnCarrierWebsite": "View on Carrier Website",
+      "errorFetchingTracking": "Error fetching tracking information",
+      "between": "between",
+      "pending": "Pending",
+      "in_transit": "In Transit",
+      "out_for_delivery": "Out for Delivery",
+      "delivered": "Delivered",
+      "exception": "Delivery Exception",
+      "orderProcessed": "Order Processed",
+      "packageReceived": "Package Received",
+      "inTransit": "In Transit",
+      "outForDelivery": "Out for Delivery",
+      "inTransitNextCarrier": "Transferred to next carrier",
+      "inTransitCarrierFacility": "Arrived at carrier facility",
+      "exceptionNoRecipient": "Delivery attempted - no recipient available"
     }
   },
   "product": {
     "addToCart": "Add to cart",
+    "addToWishlist": "Add to Shopping List",
+    "share": "Share",
+    "compare": "Compare",
     "noImage": "No image available",
     "noDescription": "No description available.",
     "productId": "Product ID",
@@ -662,6 +970,10 @@
       "specs": "Specs",
       "downloads": "Downloads",
       "reviews": "Reviews"
+    },
+    "productRecommendations": {
+      "overline": "more to explore",
+      "headline": "You might also be interested in"
     }
   },
   "search": {
@@ -682,111 +994,115 @@
     "storeName": "Emporix Showcase Store"
   },
   "validation": {
-    "Validation": {
-      "contactData": {
-        "email": {
-          "required": "Email is required",
-          "invalid": "Please enter a valid email address"
-        },
-        "firstName": {
-          "required": "First name is required"
-        },
-        "lastName": {
-          "required": "Last name is required"
-        }
+    "contactData": {
+      "email": {
+        "required": "Email is required",
+        "invalid": "Please enter a valid email address"
       },
-      "address": {
-        "contactName": {
-          "required": "Contact Name is required"
-        },
-        "street": {
-          "required": "Street is required"
-        },
-        "streetNumber": {
-          "required": "Street Number is required"
-        },
-        "zipCode": {
-          "required": "Zip Code is required"
-        },
-        "city": {
-          "required": "City is required"
-        },
-        "country": {
-          "required": "Country is required"
-        },
-        "state": {
-          "required": "State/Province is required"
-        }
+      "firstName": {
+        "required": "First name is required"
       },
-      "shipping": {
-        "method": {
-          "required": "Shipping method is required"
-        }
+      "lastName": {
+        "required": "Last name is required"
+      }
+    },
+    "address": {
+      "contactName": {
+        "required": "Contact Name is required"
       },
-      "payment": {
-        "method": {
-          "required": "Payment method is required"
-        }
+      "street": {
+        "required": "Street is required"
       },
-      "login": {
-        "username": {
-          "required": "Email is required",
-          "invalid": "Please enter a valid email address"
-        },
-        "password": {
-          "required": "Password is required"
-        }
+      "streetNumber": {
+        "required": "Street Number is required"
       },
-      "register": {
-        "registrationType": {
-          "required": "Registration type is required"
-        },
-        "firstName": {
-          "required": "First name is required"
-        },
-        "lastName": {
-          "required": "Last name is required"
-        },
-        "email": {
-          "required": "Email address is required",
-          "invalid": "Please enter a valid email address",
-          "mismatch": "Email addresses don't match"
-        },
-        "emailConfirmation": {
-          "required": "Please confirm your email address"
-        },
-        "companyName": {
-          "required": "Company name is required"
-        },
-        "vatNumber": {
-          "required": "VAT number is required"
-        },
-        "street": {
-          "required": "Street is required"
-        },
-        "houseNumber": {
-          "required": "House number is required"
-        },
-        "postalCode": {
-          "required": "Postal code is required"
-        },
-        "city": {
-          "required": "City is required"
-        },
-        "country": {
-          "required": "Country is required"
-        },
-        "password": {
-          "mismatch": "Passwords don't match"
-        },
-        "passwordConfirmation": {
-          "required": "Please confirm your password"
-        },
-        "general": {
-          "emailExists": "This email is already registered. Please use a different email or try to log in.",
-          "registrationFailed": "Registration failed. Please try again.",
-          "serverError": "A server error occurred. Please try again later."
-        }
+      "zipCode": {
+        "required": "Zip Code is required"
+      },
+      "city": {
+        "required": "City is required"
+      },
+      "country": {
+        "required": "Country is required"
+      },
+      "state": {
+        "required": "State/Province is required"
+      }
+    },
+    "shipping": {
+      "method": {
+        "required": "Shipping method is required"
+      }
+    },
+    "payment": {
+      "method": {
+        "required": "Payment method is required"
+      }
+    },
+    "login": {
+      "username": {
+        "required": "Email is required",
+        "invalid": "Please enter a valid email address"
+      },
+      "password": {
+        "required": "Password is required"
+      }
+    },
+    "password": {
+      "email": {
+        "required": "Email is required",
+        "invalid": "Please enter a valid email address"
+      }
+    },
+    "register": {
+      "registrationType": {
+        "required": "Registration type is required"
+      },
+      "firstName": {
+        "required": "First name is required"
+      },
+      "lastName": {
+        "required": "Last name is required"
+      },
+      "email": {
+        "required": "Email address is required",
+        "invalid": "Please enter a valid email address",
+        "mismatch": "Email addresses don't match"
+      },
+      "emailConfirmation": {
+        "required": "Please confirm your email address"
+      },
+      "companyName": {
+        "required": "Company name is required"
+      },
+      "vatNumber": {
+        "required": "VAT number is required"
+      },
+      "street": {
+        "required": "Street is required"
+      },
+      "houseNumber": {
+        "required": "House number is required"
+      },
+      "postalCode": {
+        "required": "Postal code is required"
+      },
+      "city": {
+        "required": "City is required"
+      },
+      "country": {
+        "required": "Country is required"
+      },
+      "password": {
+        "mismatch": "Passwords don't match"
+      },
+      "passwordConfirmation": {
+        "required": "Please confirm your password"
+      },
+      "general": {
+        "emailExists": "This email is already registered. Please use a different email or try to log in.",
+        "registrationFailed": "Registration failed. Please try again.",
+        "serverError": "A server error occurred. Please try again later."
       }
     }
   }

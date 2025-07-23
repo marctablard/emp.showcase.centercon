@@ -18,7 +18,7 @@ interface HeaderCartButtonProps {
 }
 
 export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
   const { hasNotification } = useNotificationStore();
   const router = useRouter();
   const [cartUpdate, setCartUpdate] = useState<CartUpdate | undefined>(undefined);
