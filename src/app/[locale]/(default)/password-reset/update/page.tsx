@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import { PasswordUpdateForm } from '@/components/password/password-update-form';
-import { redirect } from '@/i18n/navigation';
 import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -23,21 +22,13 @@ interface PageParams {
 }
 
 export default async function PasswordUpdatePage({ params }: { params: Promise<PageParams> }) {
-  const { locale, searchParams } = await params;
-  const t = await getTranslations({ locale, namespace: 'Password' });
-
-  const token = searchParams.token;
-
-  // If no token is provided, return 404
-  if (!token) {
-    redirect({ href: '/', locale });
-    return;
-  }
+  const p = await params;
+  const t = await getTranslations({ locale: p.locale, namespace: 'Password' });
 
   return (
     <div className="container max-w-4xl py-10 mx-auto">
       <h1 className="text-2xl font-bold text-center mb-6">{t('createNewPassword')}</h1>
-      <PasswordUpdateForm token={token} />
+      <PasswordUpdateForm />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, forwardRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { ProductTileFlyOut } from '@/components/product/product-tile-fly-out';
-import { Headline } from '@/components/ui/headline';
+import { Heading } from '@/components/ui/h';
 import useHistory from '@/hooks/history/useHistory';
 import { SearchSuggestions } from '@/platform/services/model/search';
 import { NoResults } from './no-results';
@@ -45,9 +45,9 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
         <div className="grid auto-rows-max grid-cols-subgrid gap-4 col-start-2 col-end-6 grid-cols-2 lg:grid-cols-3 ">
           {productsShow.length ? (
             <>
-              <Headline className="col-span-full" variant={'h5'}>
+              <Heading className="col-span-full" variant={'h5'} as="div">
                 {isProductsShown ? t('suggestedProducts') : t('lastSeenProducts')}
-              </Headline>
+              </Heading>
               {productsShow.map((product) => (
                 <ProductTileFlyOut
                   key={product.id}

@@ -8,7 +8,7 @@ import { Product } from '@/platform/services/model/product';
 import { ProductTile } from '../product/product-tile';
 import { ProductTileSkeleton } from '../product/product-tile-skeleton';
 import { Carousel, CarouselContent, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
-import { Headline } from '../ui/headline';
+import { Heading } from '../ui/h';
 
 interface RecommendationsProps {
   blok: {
@@ -44,17 +44,17 @@ const Recommendations = ({ blok }: RecommendationsProps) => {
   return (
     <div {...storyblokEditable(blok)} className="py-8 max-w-6xl mx-auto px-4 lg:px-9">
       {blok.overline && (
-        <Headline variant="overline" as="h4" className="mb-3">
+        <Heading variant="overline" as="div" className="mb-3">
           {blok.overline}
-        </Headline>
+        </Heading>
       )}
 
       <div className="w-full relative">
         <Carousel className="w-full " orientation="horizontal">
           {blok.headline && (
-            <Headline variant="h2" as="h4" className="md:pr-36">
+            <Heading variant="h2" as="div" className="md:pr-36">
               {blok.headline}
-            </Headline>
+            </Heading>
           )}
 
           <CarouselContent className="mt-8 mb-8">
