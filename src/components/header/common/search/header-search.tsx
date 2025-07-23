@@ -9,15 +9,16 @@ import { Product } from '@/platform/services/model/product';
 import { SearchFlyOut } from './search-fly-out';
 
 export interface HeaderSearchProps {
-  small: boolean;
+  small?: boolean;
 }
 
-export default function HeaderSearch({ small }: HeaderSearchProps) {
+export function HeaderSearch({ small = false }: HeaderSearchProps) {
   const t = useTranslations('header');
   const router = useRouter();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasInitialSearch, setHasInitialSearch] = useState(false);
   const [hasInputFocus, setHasInputFocus] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Get the current locale
   const locale = useLocale();
@@ -30,6 +31,10 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
   const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // redirect to /browse with the search terms
   const redirectToBrowse = (e: React.FormEvent) => {
@@ -106,6 +111,28 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
     };
   }, [handleClickOutside]);
 
+  // SSR-Fallback: Always shows the large variant on first render
+  if (!isMounted) {
+    return (
+      <div className="hidden z-50 lg:block relative transition-all transition-discrete duration-350 w-full max-w-180">
+        <form>
+          <Input
+            placeholder={t('search')}
+            className="h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100"
+          />
+          <Button
+            type="submit"
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer"
+            variant={'link'}
+            aria-label={t('searchProducts')}
+          >
+            <Search className="text-primary-600" width="28" height="28" />
+          </Button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`hidden z-50 lg:block relative transition-all transition-discrete duration-350 w-full ${hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180'}`}
@@ -126,6 +153,7 @@ export default function HeaderSearch({ small }: HeaderSearchProps) {
           title={t('searchButton')}
           className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer"
           variant={'link'}
+          aria-label={t('searchProducts')}
         >
           <Search className="text-primary-600" width="28" height="28" />
         </Button>

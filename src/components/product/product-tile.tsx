@@ -63,7 +63,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
 
   return (
     <Link href={`/product/${product.id}`} className="h-full block">
-      <Card shadow="default" className="gap-4 h-full flex flex-col hover:shadow-xl transition">
+      <Card shadow="default" className="border-0 gap-4 h-full flex flex-col hover:shadow-xl transition">
         <CardHeader className="flex-shrink-0 no-underline">
           <CardDescription className="font-normal text-base text-neutral-800">
             {l10n(
