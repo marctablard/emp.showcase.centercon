@@ -1,7 +1,7 @@
-import HeaderCartButton from '@/components/header/common/header-cart-button';
-import HeaderNavigation from '@/components/header/common/header-navigation';
+import { HeaderCartButton } from '@/components/header/common/cart/header-cart-button';
+import { HeaderNavigation } from '@/components/header/common/header-navigation';
 
-export default function HeaderBottomBar() {
+export function HeaderBottomBar() {
   return (
     <div className="flex justify-between pt-3">
       <HeaderNavigation />

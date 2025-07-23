@@ -1,13 +1,13 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Gauge, LayoutGrid, Menu, Pin, Search } from 'lucide-react';
-import HeaderActions from '@/components/header/common/header-actions';
-import HeaderCartButton from '@/components/header/common/header-cart-button';
-import HeaderIconLink from '@/components/header/common/header-icon-link';
+import { HeaderCartButton } from '@/components/header/common/cart/header-cart-button';
+import { HeaderActions } from '@/components/header/common/header-actions';
+import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 
-export default function HeaderMobile() {
+export function HeaderMobile() {
   const t = useTranslations('layout.header');
   return (
     <>
@@ -15,7 +15,7 @@ export default function HeaderMobile() {
       <div className="fixed top-0 left-0 right-0 z-50 w-full">
         <header className="bg-white/95 backdrop-blur-sm shadow-xl px-4 py-2 h-17">
           <div className="flex h-full justify-between items-center">
-            <Link href="/">
+            <Link href="/" title={t('home')}>
               <Image src="/images/logo.svg" alt="Logo" width="108" height="16" className="min-w-[108px] min-h-[16px]" />
             </Link>
             <div className="flex gap-2">

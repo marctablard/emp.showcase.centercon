@@ -9,7 +9,7 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 
-export default function HeaderNavigation() {
+export function HeaderNavigation() {
   const t = useTranslations('layout.header');
 
   return (
@@ -24,7 +24,9 @@ export default function HeaderNavigation() {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink href="/services">{t('services')}</NavigationMenuLink>
+          <NavigationMenuLink href="/services" className={navigationMenuTriggerStyle()}>
+            {t('services')}
+          </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink href="/solutions" className={navigationMenuTriggerStyle()}>
