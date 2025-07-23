@@ -25,7 +25,7 @@ export default function DashboardControls({
   isCustomizableInitial,
   onIsCustomizableChanged,
 }: DashboardControlsProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const [isCustomizable, setIsCustomizable] = useState(isCustomizableInitial);
   const { resetLayouts } = useConfigStore();
 

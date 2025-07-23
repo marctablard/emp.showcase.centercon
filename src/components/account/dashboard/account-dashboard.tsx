@@ -16,7 +16,7 @@ interface AccountDashboardProps {
 }
 
 export default function AccountDashboard({ initialCustomer }: AccountDashboardProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { setLayouts, getLayouts } = useConfigStore();
   const { customer } = useCustomer(initialCustomer);
   const [isCustomizable, setIsCustomizable] = useState(false);

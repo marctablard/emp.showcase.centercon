@@ -79,7 +79,7 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({ description, className = 'h-1
 };
 
 export function WeatherCard({ className, title, subtitle, ...props }: WeatherCardProps) {
-  const t = useTranslations('Weather');
+  const t = useTranslations('account.Weather');
   const state = useLocalDashboardStore();
   const [grid, setGrid] = useState({ cols: 1, rows: 1 });
   const { weather, loading, changeLocation } = useWeather();

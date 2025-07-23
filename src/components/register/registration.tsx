@@ -19,7 +19,7 @@ import { EmailSignupSection } from './email-signup-section';
 import { RegistrationInfoSection } from './registration-info-section';
 
 export default function Registration() {
-  const t = useTranslations('register');
+  const t = useTranslations('auth.register');
 
   const { loading: loginLoading, login } = useAuthentication();
   const { register, loading, error } = useRegistration();

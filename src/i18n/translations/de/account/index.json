@@ -1,0 +1,314 @@
+{
+  "shippingAddresses": "Lieferadressen",
+  "shippingAddressesDescription": "Verwalten Sie Ihre Lieferadressen für Produktlieferungen",
+  "manageShippingAddresses": "Lieferadressen verwalten",
+  "billingAddresses": "Rechnungsadressen",
+  "billingAddressesDescription": "Verwalten Sie Ihre Rechnungsadressen für die Rechnungsstellung",
+  "manageBillingAddresses": "Rechnungsadressen verwalten",
+  "newServiceTicket": "Neues Service-Ticket",
+  "serviceTicketDialog": {
+    "title": "Service-Ticket erstellen",
+    "subject": "Betreff",
+    "message": "Nachricht",
+    "send": "Ticket senden",
+    "subjectPlaceholder": "Betreff eingeben",
+    "messagePlaceholder": "Beschreiben Sie Ihr Anliegen hier..."
+  },
+  "profile": {
+    "title": "Profileinstellungen",
+    "description": "Aktualisieren Sie Ihre persönlichen Daten",
+    "form": {
+      "titleLabel": "Anrede",
+      "firstNameLabel": "Vorname",
+      "lastNameLabel": "Nachname",
+      "emailLabel": "E-Mail",
+      "phoneLabel": "Telefon",
+      "preferredLanguage": "Bevorzugte Sprache",
+      "preferredCurrency": "Bevorzugte Währung",
+      "selectTitle": "Anrede auswählen",
+      "selectLanguage": "Sprache auswählen",
+      "selectCurrency": "Währung auswählen",
+      "saveProfile": "Profil speichern",
+      "saving": "Wird gespeichert...",
+      "updateSuccess": "Ihre Profildaten wurden erfolgreich aktualisiert.",
+      "updateError": "Fehler beim Aktualisieren des Profils",
+      "mustBeLoggedIn": "Sie müssen angemeldet sein, um Ihr Profil zu bearbeiten.",
+      "unknownError": "Ein unbekannter Fehler ist aufgetreten.",
+      "firstName": {
+        "required": "Bitte geben Sie Ihren Vornamen ein."
+      },
+      "lastName": {
+        "required": "Bitte geben Sie Ihren Nachnamen ein."
+      },
+      "email": {
+        "required": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
+        "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+      },
+      "phone": {
+        "invalid": "Bitte geben Sie eine gültige Telefonnummer ein."
+      },
+      "language": {
+        "de": "Deutsch",
+        "en": "English"
+      }
+    }
+  },
+  "Password": {
+    "title": "Passwort ändern",
+    "description": "Passwortänderung für Ihr Konto",
+    "form": {
+      "currentPasswordLabel": "Aktuelles Passwort",
+      "newPasswordLabel": "Neues Passwort",
+      "confirmPasswordLabel": "Bestätigung des neuen Passworts",
+      "changePasswordLabel": "Passwort ändern",
+      "currentPassword": {
+        "required": "Bitte geben Sie Ihr aktuelles Passwort ein."
+      },
+      "newPassword": {
+        "required": "Bitte geben Sie Ihr neues Passwort ein."
+      },
+      "confirmPassword": {
+        "mismatch": "Die Passwörter stimmen nicht überein.",
+        "required": "Bitte bestätigen Sie Ihr Passwort."
+      },
+      "saving": "Wird gespeichert...",
+      "success": "Erfolgreich",
+      "error": "Fehler",
+      "showPassword": "Passwort anzeigen",
+      "hidePassword": "Passwort verbergen"
+    }
+  },
+  "loading": "Dashboard wird geladen...",
+  "resetLayout": "Layout zurücksetzen",
+  "settings": "Einstellungen",
+  "dashboardSettings": "Dashboard-Einstellungen",
+  "customize": "Anpassen",
+  "title": "Service Portal",
+  "hello": "Hallo",
+  "dashboard": "Dashboard",
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "groups": {
+      "selfService": "Self Service",
+      "orderManagement": "Bestellverwaltung",
+      "myOrganisation": "Meine Organisation",
+      "myAccount": "Mein Konto"
+    },
+    "items": {
+      "supportTickets": "Support-Tickets",
+      "serviceCalendar": "Service-Kalender",
+      "trainingMaterial": "Schulungsmaterial",
+      "orderHistory": "Bestellhistorie",
+      "invoicesPayments": "Rechnungen & Zahlungen",
+      "quotes": "Angebote",
+      "returnsClaims": "Retouren & Reklamationen",
+      "quickOrder": "Schnellbestellung",
+      "companyManagement": "Unternehmensverwaltung",
+      "addressManagement": "Adressverwaltung",
+      "userManagement": "Benutzerverwaltung",
+      "paymentOptions": "Zahlungsoptionen",
+      "wishlists": "Wunschlisten",
+      "productsMaintenance": "Produkte & Wartung",
+      "contractsAgreements": "Verträge & Vereinbarungen",
+      "personalData": "Persönliche Daten",
+      "accountSettings": "Kontoeinstellungen",
+      "approvals": "Freigaben"
+    }
+  },
+  "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
+  "accountDetails": "Kontodaten",
+  "profileSettings": "Profileinstellungen",
+  "company": "Unternehmen",
+  "ordersAndReturns": "Bestellungen & Retouren",
+  "quotes": "Angebote",
+  "shoppingLists": "Einkaufslisten",
+  "logout": "Abmelden",
+  "revenue": "Umsatz",
+  "orders": "Bestellungen",
+  "returns": "Retouren",
+  "approvals": "Freigaben",
+  "ordersInProgress": "{count} in Bearbeitung",
+  "returnsOpen": "{count} offen",
+  "approvalsDescription": "Ausstehende Freigaben",
+  "budgetOverview": "Budgetübersicht",
+  "totalBudget": "Gesamtbudget",
+  "remainingBudget": "Verbleibendes Budget",
+  "budgetUsed": "Genutztes Budget",
+  "inbox": "Posteingang",
+  "noMessages": "Keine Nachrichten",
+  "viewAllMessages": "Alle Nachrichten anzeigen",
+  "pendingApprovals": "Ausstehende Freigaben",
+  "noApprovals": "Keine ausstehenden Freigaben",
+  "noOrders": "Keine Bestellungen gefunden",
+  "orderApproval": "Bestellfreigabe",
+  "quoteApproval": "Angebotsfreigabe",
+  "password": "Passwort ändern",
+  "currentPassword": "Aktuelles Passwort",
+  "newPassword": "Neues Passwort",
+  "confirmPassword": "Neues Passwort bestätigen",
+  "passwordChangeSuccess": "Ihr Passwort wurde erfolgreich geändert. Sie werden zur Kontoübersicht weitergeleitet...",
+  "changing": "Wird geändert...",
+  "changePassword": "Passwort ändern",
+  "estimatedOutput": "Geschätzte Leistung",
+  "installationSize": "Anlagengröße: {size}",
+  "solarOutput": "Solaranlagenleistung",
+  "solarOutputError": "Solarleistungsdaten konnten nicht geladen werden",
+  "weatherDataUnavailable": "Wetterdaten nicht verfügbar",
+  "returnApproval": "Retourenfreigabe",
+  "requestedBy": "Angefordert von",
+  "viewAllApprovals": "Alle Freigaben anzeigen",
+  "companySettings": "Unternehmenseinstellungen",
+  "viewAllOrders": "Alle Bestellungen anzeigen",
+  "companyPageDescription": "Unternehmensinformationen anzeigen und verwalten",
+  "companyPagePlaceholder": "Unternehmensinformationen werden hier angezeigt",
+  "ordersPageDescription": "Bestellungen und Retouren anzeigen und verwalten",
+  "ordersPagePlaceholder": "Bestellungen und Retouren werden hier angezeigt",
+  "quotesPageDescription": "Angebote anzeigen und verwalten",
+  "quotesPagePlaceholder": "Angebote werden hier angezeigt",
+  "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
+  "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt",
+  "Address": {
+    "title": "Adressverwaltung",
+    "description": "Adressen anzeigen und verwalten",
+    "shippingAddresses": "Versandadressen",
+    "manageShippingAddresses": "Versandadressen verwalten",
+    "shippingAddressesDescription": "Versandadressen anzeigen und verwalten",
+    "billingAddresses": "Rechnungsadressen",
+    "manageBillingAddresses": "Rechnungsadressen verwalten",
+    "billingAddressesDescription": "Rechnungsadressen anzeigen und verwalten",
+    "noAddresses": "Keine Adressen gefunden",
+    "addNewAddress": "Neu Adresse hinzufügen",
+    "addShippingAddress": "Versandadresse hinzufügen",
+    "addBillingAddress": "Rechnungsadresse hinzufügen",
+    "addressFormDescription": "Füllen Sie die Adresse aus",
+    "saveAddress": "Adresse speichern",
+    "cancel": "Abbrechen",
+    "default": "Standart",
+    "deleteAddress": "Adresse löschen",
+    "editAddress": "Adresse bearbeiten",
+    "saving": "Wird gespeichert...",
+    "confirmDeleteAddress": "Möchten Sie die Adresse wirklich löschen?",
+    "success": "Das hat geklappt",
+    "addressDeleted": "Adresse gelöscht",
+    "addressManagement": "Adressverwaltung",
+    "manageAddresses": "Adressen verwalten"
+  },
+  "AddressForm": {
+    "fullName": "Vollständiger Name",
+    "street": "Straße",
+    "streetNumber": "Nr.",
+    "zipCode": "Postleitzahl",
+    "city": "Stadt",
+    "country": "Land",
+    "state": "Adresszusatz",
+    "phoneNumber": "Telefonnummer",
+    "companyName": "Firmenname",
+    "noCountriesAvailable": "Keine Länder verfügbar",
+    "loading": "Adressdaten werden geladen...",
+    "selectAnAddress": "Adresse auswählen",
+    "selectShippingAddress": "Lieferadresse auswählen",
+    "selectBillingAddress": "Rechnungsadresse auswählen",
+    "noAddresses": "Keine Adressen gefunden",
+    "addAddress": "Adresse hinzufügen",
+    "shipping": "Lieferung",
+    "billing": "Rechnung",
+    "default": "Standard"
+  },
+  "Notifications": {
+    "title": "Benachrichtigungen",
+    "viewAll": "Alle anzeigen",
+    "newInvoices": "neue Rechnungen",
+    "overdueInvoices": "überfällige Rechnungen",
+    "pendingOffers": "Angebote warten auf Ihre Genehmigung",
+    "tasksToComplete": "Aufgaben zu erledigen",
+    "openReturns": "offene Rückgaben",
+    "unreadDocuments": "ungelesene Dokumente"
+  },
+  "Documents": {
+    "title": "Dokumente für Ihre Organisation",
+    "categories": {
+      "contracts": "Verträge & Vereinbarungen",
+      "company": "Meine Firmendokumente",
+      "manuals": "Produkthandbücher & technische Datenblätter",
+      "warranty": "Garantieunterlagen"
+    }
+  },
+  "AiHelper": {
+    "title": "KI-Dashboard-Assistent",
+    "placeholder": "Stellen Sie Ihre Frage an den KI-Agenten",
+    "buttonText": "LOS!",
+    "suggestions": {
+      "openInvoices": "Wie viele Rechnungen sind offen?",
+      "availableOffers": "Welche Angebote sind aktuell verfügbar?",
+      "recentPurchases": "Welche Produkte wurden kürzlich gekauft?"
+    }
+  },
+  "Tickets": {
+    "title": "Support-Tickets",
+    "viewAll": "Alle Tickets anzeigen",
+    "search": {
+      "placeholder": "Tickets durchsuchen..."
+    },
+    "columns": {
+      "ticketNumber": "Ticket-Nr.",
+      "subject": "Betreff",
+      "status": "Status",
+      "date": "Datum",
+      "priority": "Priorität"
+    },
+    "status": {
+      "open": "Offen",
+      "pending": "In Bearbeitung",
+      "closed": "Geschlossen"
+    },
+    "priority": {
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig"
+    },
+    "sampleTicketSubjects": {
+      "delivery": "Frage zur Lieferzeit",
+      "invoice": "Problem mit Rechnung #INV-87634",
+      "product": "Produktinformationsanfrage",
+      "return": "Rückgabeanforderung für Bestellung #ORD-28746"
+    }
+  },
+  "Weather": {
+    "loading": "Wetterdaten werden geladen...",
+    "precipitation": "Niederschlag",
+    "humidity": "Luftfeuchtigkeit",
+    "wind": "Wind",
+    "mainLocation": "Ihr Hauptstandort",
+    "changeLocation": "Standort ändern",
+    "error": "Fehler beim Laden der Wetterdaten",
+    "clearSky": "Klarer Himmel",
+    "mainlyClear": "Überwiegend klar",
+    "partlyCloudy": "Teilweise bewölkt",
+    "overcast": "Bedeckt",
+    "fog": "Nebel",
+    "depositingRimeFog": "Gefrierender Nebel",
+    "lightDrizzle": "Leichter Nieselregen",
+    "moderateDrizzle": "Mäßiger Nieselregen",
+    "denseDrizzle": "Starker Nieselregen",
+    "lightFreezingDrizzle": "Leichter gefrierender Nieselregen",
+    "denseFreezingDrizzle": "Starker gefrierender Nieselregen",
+    "slightRain": "Leichter Regen",
+    "moderateRain": "Mäßiger Regen",
+    "heavyRain": "Starker Regen",
+    "lightFreezingRain": "Leichter gefrierender Regen",
+    "heavyFreezingRain": "Starker gefrierender Regen",
+    "slightSnowFall": "Leichter Schneefall",
+    "moderateSnowFall": "Mäßiger Schneefall",
+    "heavySnowFall": "Starker Schneefall",
+    "snowGrains": "Schneegriesel",
+    "slightRainShowers": "Leichte Regenschauer",
+    "moderateRainShowers": "Mäßige Regenschauer",
+    "violentRainShowers": "Starke Regenschauer",
+    "slightSnowShowers": "Leichte Schneeschauer",
+    "heavySnowShowers": "Starke Schneeschauer",
+    "thunderstorm": "Gewitter",
+    "thunderstormWithSlightHail": "Gewitter mit leichtem Hagel",
+    "thunderstormWithHeavyHail": "Gewitter mit starkem Hagel",
+    "unknown": "Unbekannte Wetterbedingung"
+  }
+}

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/navigation-menu';
 
 export default function HeaderNavigation() {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
 
   return (
     <NavigationMenu viewport={false}>

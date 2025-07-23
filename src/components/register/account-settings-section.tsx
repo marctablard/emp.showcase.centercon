@@ -16,7 +16,7 @@ interface AccountSettingsAccordionProps {
 }
 
 export function AccountSettingsSection({ control, number }: AccountSettingsAccordionProps) {
-  const t = useTranslations('register');
+  const t = useTranslations('auth.register');
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
 

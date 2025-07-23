@@ -13,7 +13,7 @@ interface EmailSignupSectionProps {
 }
 
 export function EmailSignupSection({ control, number }: EmailSignupSectionProps) {
-  const t = useTranslations('register');
+  const t = useTranslations('auth.register');
 
   return (
     <div className="space-y-6">

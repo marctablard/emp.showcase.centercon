@@ -5,7 +5,7 @@ import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Account' });
+  const t = await getTranslations({ locale, namespace: 'account' });
 
   return {
     title: await getPageTitle(t('ordersAndReturns'), locale),
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function OrdersPage({ params }: { params: Promise<{ locale: string }> }) {
   // Fetch order data during SSR
   const { locale } = await params;
-  const [tAccount] = await Promise.all([getTranslations({ locale, namespace: 'Account' })]);
+  const [tAccount] = await Promise.all([getTranslations({ locale, namespace: 'account' })]);
   const breadcrumbs = [
     {
       href: '/account',

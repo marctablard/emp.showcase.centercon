@@ -20,7 +20,7 @@ type AiHelperFormData = {
  * Shows AI-assisted helper prompts for common questions
  */
 function AiHelperCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('AiHelper');
+  const t = useTranslations('account.AiHelper');
   const { form } = useValidator('AiHelperValidationService', {
     question: '',
   });

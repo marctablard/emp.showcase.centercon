@@ -34,7 +34,7 @@ interface TicketCardProps extends Omit<DashboardCardProps, 'children'> {
 }
 
 export function TicketCard({ className, title, items: customItems, ...props }: TicketCardProps) {
-  const t = useTranslations('Tickets');
+  const t = useTranslations('account.Tickets');
 
   const { form } = useValidator('TicketSearchValidationService', {
     searchQuery: '',

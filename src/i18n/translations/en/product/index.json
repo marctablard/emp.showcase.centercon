@@ -1,0 +1,80 @@
+{
+  "addToCart": "Add to cart",
+  "addToWishlist": "Add to Shopping List",
+  "share": "Share",
+  "compare": "Compare",
+  "noImage": "No image available",
+  "noDescription": "No description available.",
+  "productId": "Product ID",
+  "quantity": "Quantity",
+  "increment": "Increase quantity",
+  "decrement": "Decrease quantity",
+  "buyNow": "Buy Now",
+  "addedToCart": "Added to Cart",
+  "addedToCartDescription": "has been added to your cart",
+  "errorAddingToCart": "Error Adding to Cart",
+  "itemNumber": "Item number",
+  "copy": "Copy",
+  "sku": "SKU",
+  "productHighlights": "Product Highlights",
+  "keySpecs": "Key specifications",
+  "more": "More product features",
+  "technicalInformation": "Technical Information",
+  "otherVariants": "Other variants",
+  "shipping": {
+    "deliveryDetails": "Delivery Details",
+    "deliverable": "Deliverable {min} - {max} days",
+    "shipping": "Shipping",
+    "freeShipping": "Free Shipping",
+    "canBeReserved": "Can be reserved {location}, {postalCode}",
+    "canBeReservedExample": "Can be reserved London, NW1 6XE",
+    "yourUsps": "Your Emporix USPs",
+    "warranty": "{years} years warranty",
+    "returnRight": "{days} day right of return",
+    "onlineAvailable": "Online Available"
+  },
+  "price": {
+    "yourPrice": "Your Price",
+    "listPrice": "Listpreis",
+    "including": "incl",
+    "notAvailable": "N/A",
+    "priceNotAvailable": "Price not available",
+    "includingTax": "incl. {taxRate}% VAT",
+    "excludingTax": "excl. {taxRate}% VAT",
+    "net": "net",
+    "gross": "gross"
+  },
+  "filters": {
+    "mixins": {
+      "productVariantAttributes": {
+        "capacity": "Capacity",
+        "nominal-power": "Nominal Power"
+      },
+      "productTemplateAttributes": {
+        "length": "Product Length",
+        "width": "Product Width",
+        "height": "Product Height",
+        "cell-type": "Cell Type"
+      }
+    },
+    "prices": {
+      "effectiveAmount": "Effective Amount"
+    },
+    "categoryAssignments": {
+      "name": "Category name"
+    },
+    "filterButton": "Filter",
+    "clearFilter": "Clear Filter",
+    "applyFilters": "Apply Filters"
+  },
+  "tabs": {
+    "description": "Description",
+    "specs": "Specs",
+    "downloads": "Downloads",
+    "reviews": "Reviews"
+  },
+  "productRecommendations": {
+    "overline": "more to explore",
+    "headline": "You might also be interested in"
+  }
+}

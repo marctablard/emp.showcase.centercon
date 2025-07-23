@@ -4,7 +4,7 @@ import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Password' });
+  const t = await getTranslations({ locale, namespace: 'auth.Password' });
 
   return {
     title: await getPageTitle(t('updatePassword'), locale),
@@ -23,7 +23,7 @@ interface PageParams {
 
 export default async function PasswordUpdatePage({ params }: { params: Promise<PageParams> }) {
   const p = await params;
-  const t = await getTranslations({ locale: p.locale, namespace: 'Password' });
+  const t = await getTranslations({ locale: p.locale, namespace: 'auth.Password' });
 
   return (
     <div className="container max-w-4xl py-10 mx-auto">

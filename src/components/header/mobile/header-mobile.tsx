@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 
 export default function HeaderMobile() {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
   return (
     <>
       {/* Top */}

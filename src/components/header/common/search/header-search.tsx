@@ -13,7 +13,7 @@ export interface HeaderSearchProps {
 }
 
 export default function HeaderSearch({ small }: HeaderSearchProps) {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
   const router = useRouter();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasInitialSearch, setHasInitialSearch] = useState(false);

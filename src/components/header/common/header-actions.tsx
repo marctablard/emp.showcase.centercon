@@ -8,7 +8,7 @@ import useAuthDialog from '@/hooks/auth/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 
 export default function HeaderActions({ className }: { className?: string }) {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
   const { isAuthenticated, loading } = useAuthentication();
   const { openDialog } = useAuthDialog();
 
