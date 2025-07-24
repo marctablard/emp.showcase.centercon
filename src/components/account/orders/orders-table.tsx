@@ -12,7 +12,7 @@ import { OrderStatusBadge } from './order-status-badge';
  * Displays a table of orders with their details
  */
 export function OrdersTable({ orders }: { orders: Order[] }) {
-  const tOrder = useTranslations('Orders');
+  const tOrder = useTranslations('orders');
 
   return (
     <Table>

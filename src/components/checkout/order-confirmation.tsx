@@ -24,10 +24,10 @@ interface OrderConfirmationProps {
  * Displays confirmation details after a successful checkout
  */
 const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialOrder, customerEmail }) => {
-  const t = useTranslations('Confirmation');
-  const tOrder = useTranslations('Orders');
-  const tOrderStatus = useTranslations('OrderStatus');
-  const tPayment = useTranslations('PaymentModes');
+  const t = useTranslations('orders.Confirmation');
+  const tOrder = useTranslations('orders');
+  const tOrderStatus = useTranslations('orders.OrderStatus');
+  const tPayment = useTranslations('checkout.PaymentModes');
   const { customer } = useCustomer();
   const { order, loading, error } = useOrder({ orderId, initialOrder });
 

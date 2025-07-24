@@ -9,7 +9,7 @@ import { extractFiltersFromSearchParams } from '@/utils/filterUtils';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'searchResults' });
+  const t = await getTranslations({ locale, namespace: 'search.searchResults' });
 
   return {
     title: await getPageTitle('Product Browse', locale),

@@ -55,6 +55,7 @@ cypress/videos/**/*
 *.pem
 certificates
 .windsurf
+*.iml
 
 # debug
 npm-debug.log*

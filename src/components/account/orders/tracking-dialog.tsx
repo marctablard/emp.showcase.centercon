@@ -21,7 +21,7 @@ interface TrackingDialogProps {
  * Dialog component that displays tracking information for an order
  */
 export function TrackingDialog({ orderId, open, onOpenChange }: TrackingDialogProps) {
-  const tTracking = useTranslations('Tracking');
+  const tTracking = useTranslations('orders.Tracking');
   // Only fetch tracking data when dialog is open to prevent unnecessary re-renders
   const { trackingInfo, loading, error, refetch } = useTracking({ orderId });
 

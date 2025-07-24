@@ -43,7 +43,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
   });
 
   const t = useTranslations('Checkout.payment');
-  const tPayment = useTranslations('PaymentModes');
+  const tPayment = useTranslations('checkout.PaymentModes');
 
   return (
     <FormProvider {...form}>

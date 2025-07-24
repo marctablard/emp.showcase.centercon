@@ -3,7 +3,7 @@ import { Menu } from 'lucide-react';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 
 export function HeaderMenu() {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
 
   return (
     <div className="flex justify-end items-center">

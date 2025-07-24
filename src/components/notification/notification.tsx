@@ -8,7 +8,7 @@ import { useNotificationStore } from '@/stores/notification-store';
 import { ToastType, notify } from '../ui/toast-notification';
 
 export function Notification() {
-  const t = useTranslations('Notification');
+  const t = useTranslations('common.Notification');
   const { addNotification, hasNotification } = useNotificationStore();
   const { company, refresh: refreshCompany } = useCompany();
   const { start: startCompany, stop: stopCompany } = usePolling(() => {

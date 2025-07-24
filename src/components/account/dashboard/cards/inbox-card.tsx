@@ -12,7 +12,7 @@ import { DashboardCard, DashboardCardProps } from './dashboard-card';
 interface InboxCardProps extends Omit<DashboardCardProps, 'children'> {}
 
 export function InboxCard({ className, title, ...props }: InboxCardProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { messages, loading: isMessagesLoading } = useMessages();
 
   if (isMessagesLoading) {

@@ -12,7 +12,7 @@ interface ConfirmationPageProps {
 export async function generateMetadata({ params }: { params: Promise<ConfirmationPageProps> }): Promise<Metadata> {
   const { locale } = await params;
 
-  const t = await getTranslations({ locale, namespace: 'Confirmation' });
+  const t = await getTranslations({ locale, namespace: 'orders.Confirmation' });
 
   return {
     title: t('title'),

@@ -8,7 +8,7 @@ import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Account' });
+  const t = await getTranslations({ locale, namespace: 'account' });
 
   return {
     title: await getPageTitle(t('Password.title'), locale),
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function PasswordChangePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Account' });
+  const t = await getTranslations({ locale, namespace: 'account' });
 
   const customer = await getCurrentCustomer();
 

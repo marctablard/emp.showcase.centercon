@@ -22,7 +22,7 @@ interface NotificationCardProps extends Omit<DashboardCardProps, 'children'> {
 }
 
 export function NotificationCard({ className, title, items: customItems, ...props }: NotificationCardProps) {
-  const t = useTranslations('Notifications');
+  const t = useTranslations('account.Notifications');
 
   // Default notification items if none provided
   const defaultItems: NotificationItem[] = [

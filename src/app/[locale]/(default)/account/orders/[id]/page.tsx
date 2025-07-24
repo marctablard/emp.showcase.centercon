@@ -6,7 +6,7 @@ import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params;
-  const t = await getTranslations({ locale, namespace: 'Orders' });
+  const t = await getTranslations({ locale, namespace: 'orders' });
 
   return {
     title: await getPageTitle(`${t('orderDetails')} #${id}`, locale),
@@ -26,8 +26,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const { id, locale } = await params;
   const [initialOrder, tOrders, tAccount] = await Promise.all([
     getOrderById(id),
-    getTranslations({ locale, namespace: 'Orders' }),
-    getTranslations({ locale, namespace: 'Account' }),
+    getTranslations({ locale, namespace: 'orders' }),
+    getTranslations({ locale, namespace: 'account' }),
   ]);
   const breadcrumbs = [
     {

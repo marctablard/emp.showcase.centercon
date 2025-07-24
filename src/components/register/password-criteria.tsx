@@ -18,7 +18,7 @@ type CriteriaState = {
 };
 
 export function PasswordCriteria({ control, passwordField }: PasswordCriteriaProps) {
-  const t = useTranslations('register.passwordCriteria');
+  const t = useTranslations('auth.register.passwordCriteria');
   const password = useWatch({
     control,
     name: passwordField,

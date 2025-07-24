@@ -8,7 +8,7 @@ import { Link } from '@/i18n/navigation';
 import { HeaderNavigation } from '../common/header-navigation';
 
 export function HeaderCollapsed() {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
   return (
     <>
       <div className="flex gap-8 items-center">
