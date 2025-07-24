@@ -88,3 +88,7 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Generated translation files
+/src/i18n/translations/de.json
+/src/i18n/translations/en.json

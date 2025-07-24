@@ -42,7 +42,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
     cvv: '',
   });
 
-  const t = useTranslations('Checkout.payment');
+  const t = useTranslations('checkout.payment');
   const tPayment = useTranslations('checkout.PaymentModes');
 
   return (
