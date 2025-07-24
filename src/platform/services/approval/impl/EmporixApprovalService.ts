@@ -16,6 +16,7 @@ import {
   ApprovalUser,
 } from '@/platform/services/model/approval';
 import { EmporixApprovalMapper } from '@/platform/services/model/approval/impl/EmporixApprovalMapper';
+import type { CustomerService } from '../../customer/CustomerService';
 import { ApprovalService } from '../ApprovalService';
 
 /**
@@ -27,6 +28,7 @@ export class EmporixApprovalService implements ApprovalService {
     @inject('EmporixIamApi') private iamApi: EmporixIamApi,
     @inject('EmporixApprovalApi') private approvalApi: EmporixApprovalApi,
     @inject('EmporixApprovalMapper') private approvalMapper: EmporixApprovalMapper,
+    @inject('CustomerService') private customerService: CustomerService,
   ) {}
 
   /**
@@ -178,6 +180,12 @@ export class EmporixApprovalService implements ApprovalService {
    * @returns Promise with the requires approval result
    */
   async requiresApproval(cartId: string): Promise<boolean> {
+    const customer = await this.customerService.getCustomer();
+    if (!customer || customer.businessModel == 'B2C') {
+      // Guests and B2C Customers don't require Approval.
+      return false;
+    }
+
     const permitted = await this.approvalApi.checkApprovalPermitted({
       resourceType: 'CART',
       resourceId: cartId,
