@@ -12,7 +12,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import { getCurrentCart } from '@/lib/ssr/carts';
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
-import { getSite } from '@/lib/ssr/site';
+import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import '../globals.css';
@@ -34,6 +34,7 @@ const openSans = Open_Sans({
 type Props = {
   children: ReactNode;
   params: Promise<{ locale: Locale }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 export function generateStaticParams() {
@@ -63,8 +64,8 @@ export default async function LocaleLayout({ children, params }: Props) {
     await setSessionLanguage(locale);
     shopSession.language = locale;
   }
-  // TODO read from query parameter to allow swtiching
-  const site = await getSite(shopSession?.siteCode || defaultSiteCode);
+  const siteCode = shopSession?.siteCode || defaultSiteCode;
+  const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
   // Enable static rendering
   setRequestLocale(locale);
   return (
@@ -72,7 +73,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       <body className="flex h-full flex-col font-body">
         <AuthSessionProvider session={authSession}>
           <NextIntlClientProvider locale={locale}>
-            <StoreProvider shopSession={shopSession} site={site}>
+            <StoreProvider shopSession={shopSession} site={site} availableSites={availableSites}>
               <StoryblokProvider>
                 <CartWrapper initialCart={currentCart}>
                   <AuthDialogManager />

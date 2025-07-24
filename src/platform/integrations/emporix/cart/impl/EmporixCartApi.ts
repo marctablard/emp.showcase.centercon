@@ -233,6 +233,64 @@ class EmporixCartApi implements IEmporixCartApi {
       throw new Error(`Failed to update cart: ${response.statusText} ${errorDetails}`);
     }
   }
+
+  async changeCurrency(cartId: string, currency: string): Promise<void> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/cart/${this.config.tenant}/carts/${cartId}/changeCurrency`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ currency }),
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to change cart currency: ${response.statusText} ${errorDetails}`);
+    }
+  }
+
+  async changeSite(cartId: string, siteCode: string): Promise<void> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/cart/${this.config.tenant}/carts/${cartId}/changeSite`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ siteCode }),
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to change cart site: ${response.statusText} ${errorDetails}`);
+    }
+  }
+
+  async refreshCart(cartId: string): Promise<void> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/cart/${this.config.tenant}/carts/${cartId}/refresh`,
+      {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to refresh cart: ${response.statusText} ${errorDetails}`);
+    }
+  }
 }
 
 export default EmporixCartApi;

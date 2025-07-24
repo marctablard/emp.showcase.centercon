@@ -1,10 +1,8 @@
-import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixMixins } from '@/platform/integrations/emporix/model';
 import { EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import { LocalizedString } from '@/platform/services/model/common';
 import { GroupedSpecification, Product, ProductSpecification } from '@/platform/services/model/product';
-import type { SessionService } from '@/platform/services/session';
 import { ProductMapper } from '../ProductMapper';
 
 /**
@@ -13,10 +11,7 @@ import { ProductMapper } from '../ProductMapper';
  */
 @injectable('EmporixProductMapper', 'Singleton')
 export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
-  constructor(
-    @inject('SessionService')
-    private readonly sessionService: SessionService,
-  ) {}
+  constructor() {}
   /**
    * Maps an Emporix product to the internal Product model.
    *

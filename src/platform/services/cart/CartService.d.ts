@@ -63,4 +63,18 @@ export interface CartService {
    * @param zipCode The zip code for the shipping address
    */
   updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void>;
+
+  /**
+   * Updates the currency for a cart
+   * @param cartId The ID of the cart
+   * @param currency The new currency code
+   */
+  updateCurrency(cartId: string, currency: string): Promise<void>;
+
+  /**
+   * Updates the site for a cart
+   * @param cartId The ID of the cart
+   * @param siteCode The new site code
+   */
+  updateSite(cartId: string, siteCode: string): Promise<void>;
 }

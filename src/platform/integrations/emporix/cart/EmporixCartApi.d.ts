@@ -84,4 +84,27 @@ export interface EmporixCartApi {
    * @returns Promise resolving when update is complete
    */
   updateCart(cartId: string, cart: Partial<EmporixCart>): Promise<void>;
+
+  /**
+   * Change cart currency
+   * @param cartId Cart ID
+   * @param currency New currency code
+   * @returns Promise resolving when currency change is complete
+   */
+  changeCurrency(cartId: string, currency: string): Promise<void>;
+
+  /**
+   * Change cart site
+   * @param cartId Cart ID
+   * @param siteCode New site code
+   * @returns Promise resolving when site change is complete
+   */
+  changeSite(cartId: string, siteCode: string): Promise<void>;
+
+  /**
+   * Refresh cart
+   * @param cartId Cart ID
+   * @returns Promise resolving when refresh is complete
+   */
+  refreshCart(cartId: string): Promise<void>;
 }

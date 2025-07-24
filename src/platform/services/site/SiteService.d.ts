@@ -13,6 +13,12 @@ export interface SiteService {
   getSite(code?: string): Promise<Site | null>;
 
   /**
+   * Get all available sites
+   * @returns List of available sites
+   */
+  getAvailableSites(): Promise<Site[]>;
+
+  /**
    * Get all countries
    * @returns List of countries
    */

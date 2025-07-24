@@ -25,7 +25,7 @@ class EmporixSiteService implements SiteService {
     @inject('PaymentService') private paymentService: PaymentService,
   ) {}
 
-  async getSite(code: string): Promise<Site | null> {
+  async getSite(code?: string): Promise<Site | null> {
     if (!code) {
       const sites = await this.siteSettingsApi.getSites({}, false);
       // TODO we could be faster, by using this result below
@@ -43,10 +43,30 @@ class EmporixSiteService implements SiteService {
         this.getRegions(),
         this.paymentService.getPaymentModes(),
       ]);
-      return emporixSite ? this.mapSite(emporixSite, currencies, countries, regions, paymentModes) : null;
+      // Get Default Site as fallback
+      if (!emporixSite) {
+        return await this.getSite(process.env.NEXT_PUBLIC_DEFAULT_SITE);
+      }
+
+      return this.mapSite(emporixSite, currencies, countries, regions, paymentModes);
     } catch (error) {
       console.error(`Error getting site ${code}:`, error);
       return null;
+    }
+  }
+
+  async getAvailableSites(): Promise<Site[]> {
+    try {
+      const config = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
+      const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
+      if (config.length === 0 || config.findIndex((c) => c === defaultSite) === -1) {
+        config.push(defaultSite);
+      }
+      const sites = await Promise.all(config.map(async (code) => this.getSite(code)));
+      return sites.filter((site) => site !== null) as Site[];
+    } catch (error) {
+      console.error('Error getting available sites:', error);
+      return [];
     }
   }
   // Map EmporixSite to Site

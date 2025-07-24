@@ -10,7 +10,8 @@ import { useSiteStore } from '@/providers/StoreProvider';
  * Hook for accessing site data like countries, regions, and currencies
  */
 export function useSite(id?: string) {
-  const { setLoading, getLoading, setSite, getSite, reset, loading, site } = useSiteStore();
+  const { setLoading, getLoading, setSite, getSite, setAvailableSites, availableSites, reset, loading, site } =
+    useSiteStore();
   if (id && site && site.code != id) {
     // id mismatch, that's a client-side site-switch
     reset();
@@ -26,14 +27,15 @@ export function useSite(id?: string) {
     setError(null);
     try {
       const data = await apiGetSite();
-      setSite(data);
+      setSite(data.current);
+      setAvailableSites(data.available);
     } catch (error) {
       console.error('Error fetching site data:', error);
       setError(error instanceof Error ? error : new Error('Failed to fetch site data'));
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setError, setSite]);
+  }, [setLoading, setError, setSite, setAvailableSites]);
 
   useEffect(() => {
     if (site) {
@@ -49,13 +51,15 @@ export function useSite(id?: string) {
     } else if (site === undefined && !getLoading()) {
       fetchSiteData();
     }
-  }, [getSite, getLoading, fetchSiteData, site]);
+  }, [getLoading, fetchSiteData, site]);
 
   return {
+    site,
     countries,
     regions,
     currencies,
     paymentModes,
+    availableSites,
     loading,
     error,
     fetchSiteData,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { addCartToCookie, getCartCookie, removeCartFromCookie } from '@/lib/server/utils';
 import { CartService } from '@/platform/services/cart';
 import type { Cart } from '@/platform/services/model/cart';
+import { SessionService } from '@/platform/services/session';
 
 const CART_COOKIE_ID = process.env.NEXT_PUBLIC_CART_COOKIE || 'emp-cart';
 const DEFAULT_CURRENCY = 'EUR';
@@ -20,9 +21,13 @@ export async function GET(request: NextRequest) {
     const create = searchParams.get('create') === 'true'; // Default to false if not specified
 
     const cartService = globalThis.EMP.platform.server.get<CartService>('CartService');
+    const sessionService = globalThis.EMP.platform.server.get<SessionService>('SessionService');
+    const session = await sessionService.getCurrent();
+    const site = session?.siteCode || DEFAULT_SITE_CODE;
+    const currency = session?.currency || DEFAULT_CURRENCY;
     let removeCartId: string | undefined;
     // Check for cart ID in cookies
-    const cartCookie = await getCartCookie(DEFAULT_SITE_CODE, DEFAULT_CURRENCY);
+    const cartCookie = await getCartCookie(site, currency);
     let cart: Cart | null | undefined;
     if (cartCookie) {
       // Try to get existing cart
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
     // If we don't have a cart and shouldCreate is false, return 204 (intentionally empty)
     if (!cart && create) {
       // Create a new cart
-      const newCartId = await cartService.createCart(DEFAULT_CURRENCY, DEFAULT_SITE_CODE);
+      const newCartId = await cartService.createCart(currency, site);
       if (!newCartId) {
         return NextResponse.json({ error: 'Failed to create cart' }, { status: 500 });
       }

@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
 import { CurrencySwitcher } from '../common/header-currency-switcher';
-import { RegionSwitcher } from '../common/header-region-switcher';
+import { SiteSwitcher } from '../common/header-site-switcher';
 
 export function HeaderTopBanner() {
   const t = useTranslations('layout.header');
@@ -14,7 +14,7 @@ export function HeaderTopBanner() {
     <div className="bg-primary text-white shadow-sm rounded-2xl flex items-center -mx-2 lg:-mx-4 -mt-1 h-8 px-8 lg:px-10">
       <div className="flex justify-between items-center self-stretch w-full">
         <div className="flex grow basis-0 shrink-0 items-center gap-2">
-          <RegionSwitcher />
+          <SiteSwitcher />
           <div className="h-6">
             <Separator orientation="vertical" decorative />
           </div>

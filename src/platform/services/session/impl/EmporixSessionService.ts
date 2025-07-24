@@ -28,13 +28,15 @@ class EmporixSessionService implements SessionService {
   ) {}
 
   async setRegion(region: string): Promise<void> {
-    this.sessionContextApi.addOwnSessionContextAttribute({
+    // TODO propagate Region Switch via Event-System
+    await this.sessionContextApi.addOwnSessionContextAttribute({
       key: 'region',
       value: region,
     });
   }
 
   async setLanguage(language: string): Promise<void> {
+    // TODO propagate Language Switch via Event-System
     this.sessionContextApi.addOwnSessionContextAttribute({
       key: 'language',
       value: language,
@@ -46,7 +48,7 @@ class EmporixSessionService implements SessionService {
     if (!session) {
       return;
     }
-    this.sessionContextApi.updateOwnSessionContext({
+    await this.sessionContextApi.updateOwnSessionContext({
       currency: currency,
       metadata: {
         version: session.metadata?.version || 1,
@@ -59,7 +61,8 @@ class EmporixSessionService implements SessionService {
     if (!session) {
       return;
     }
-    this.sessionContextApi.updateOwnSessionContext({
+    // TODO propagate Country Switch via Event-System
+    await this.sessionContextApi.updateOwnSessionContext({
       targetLocation: country,
       metadata: {
         version: session.metadata?.version || 1,
@@ -72,7 +75,7 @@ class EmporixSessionService implements SessionService {
     if (!session) {
       return;
     }
-    this.sessionContextApi.updateOwnSessionContext({
+    await this.sessionContextApi.updateOwnSessionContext({
       siteCode: site,
       metadata: {
         version: session.metadata?.version || 1,
