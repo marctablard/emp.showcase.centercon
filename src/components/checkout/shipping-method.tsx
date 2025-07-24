@@ -34,7 +34,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ isReadOnly = false, var
       submitShippingMethod(option);
     }
   });
-  const t = useTranslations('Checkout.shipping');
+  const t = useTranslations('checkout.shipping');
   return (
     <FormProvider {...form}>
       <div className="bg-white">
