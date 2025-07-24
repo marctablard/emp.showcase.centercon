@@ -36,7 +36,7 @@ export function AddressSelector({
   addressType,
   className,
 }: AddressSelectorProps) {
-  const t = useTranslations('Address');
+  const t = useTranslations('account.AddressForm');
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>(selectedAddressId);
   const { addresses, loading } = useAddresses();

@@ -22,7 +22,7 @@ interface AccountDashboardProps {
 }
 
 export default function AccountDashboard({ initialCustomer, breadcrumbs }: AccountDashboardProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { customer, loading: isCustomerLoading } = useCustomer(initialCustomer);
 
   const handleTicketSubmit = (data: SupportTicketData) => {

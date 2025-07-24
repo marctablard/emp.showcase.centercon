@@ -24,7 +24,7 @@ interface AddressCardProps {
  * Individual address card component
  */
 export function AddressCard({ address, isDeleting = false, onEdit, onDelete }: AddressCardProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
 
   return (
     <Card className="h-full">
@@ -80,7 +80,7 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentAddress, setCurrentAddress] = useState<Address | null>(null);
   const [deletingAddressId, setDeletingAddressId] = useState<string | null>(null);
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { toast } = useToast();
   const { addresses, loading, error, fetchAddresses, deleteAddress } = useAddresses();
 

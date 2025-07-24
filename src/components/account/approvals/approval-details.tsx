@@ -19,8 +19,8 @@ interface ApprovalDetailsProps {
 }
 
 export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetailsProps) {
-  const t = useTranslations('Approval');
-  const tStatus = useTranslations('ApprovalStatus');
+  const t = useTranslations('orders.Approval');
+  const tStatus = useTranslations('orders.ApprovalStatus');
   const { customer, loading: customerLoading } = useCustomer();
   const [comment, setComment] = useState<string>('');
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);

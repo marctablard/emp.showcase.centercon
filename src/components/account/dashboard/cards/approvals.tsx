@@ -11,7 +11,7 @@ import { DashboardCard, DashboardCardProps } from './dashboard-card';
 import { StatCard } from './stat-card';
 
 export function ApprovalsSummaryCard({}: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { getApprovalCountsThisMonth } = useCompany();
 
   const { pending, total } = getApprovalCountsThisMonth();
@@ -27,7 +27,7 @@ export function ApprovalsSummaryCard({}: Omit<DashboardCardProps, 'children'>) {
 }
 
 export function ApprovalsCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { getPendingApprovals } = useCompany();
 
   const pendingApprovals = getPendingApprovals();

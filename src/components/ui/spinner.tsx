@@ -15,7 +15,7 @@ interface SpinnerProps {
  * Spinner component for loading states
  */
 export const Spinner: React.FC<SpinnerProps> = ({ loadingText, variant = 'md', color = 'default', className }) => {
-  const t = useTranslations('UI.spinner');
+  const t = useTranslations('common.UI.spinner');
   const variants = {
     xs: 'h-2 w-2 border-1',
     sm: 'h-4 w-4 border-2',

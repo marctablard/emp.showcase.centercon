@@ -12,7 +12,7 @@ import { Spinner } from '../../ui/spinner';
 export function RegionSwitcher() {
   const { session, loading: sessionLoading, setRegion } = useSession();
   const locale = useLocale();
-  const t = useTranslations('Regions');
+  const t = useTranslations('common.Regions');
   const { regions, loading: siteLoading } = useSite();
   let initialRegion = undefined;
   if (session && regions) {

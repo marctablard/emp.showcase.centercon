@@ -6,7 +6,7 @@ import { HeaderCartButton } from '@/components/header/common/cart/header-cart-bu
 import { Link } from '@/i18n/navigation';
 
 export function HeaderReduced() {
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
 
   return (
     <>

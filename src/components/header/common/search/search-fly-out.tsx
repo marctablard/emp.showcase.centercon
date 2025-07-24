@@ -34,7 +34,7 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
     ref,
   ) => {
     const { lastSeenProducts } = useHistory();
-    const t = useTranslations('header');
+    const t = useTranslations('layout.header');
     const isProductsShown = query.length > 2;
     const productsShow = isProductsShown ? products : lastSeenProducts;
 

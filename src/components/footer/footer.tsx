@@ -11,7 +11,7 @@ import { InputButton } from '../ui/input';
 import UiLink from '../ui/link';
 
 export default function Footer({ reduced = false }: { reduced?: boolean }) {
-  const t = useTranslations('footer');
+  const t = useTranslations('layout.footer');
   const { form } = useNewsletterForm();
 
   return (
@@ -97,7 +97,7 @@ export default function Footer({ reduced = false }: { reduced?: boolean }) {
 }
 
 export function FooterLinks() {
-  const t = useTranslations('footerLinks');
+  const t = useTranslations('layout.footerLinks');
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 lg:gap-6 ml-4 mr-4 lg:ml-6 lg:mr-6 py-4 lg:py-6 border-b border-b-neutral-200">
@@ -185,7 +185,7 @@ export function FooterWrapper({ className, ...props }: React.ComponentProps<'div
 }
 
 export function LegalFooter() {
-  const t = useTranslations('footerLegal');
+  const t = useTranslations('layout.footerLegal');
 
   return (
     <div className="flex-grow">

@@ -177,7 +177,7 @@ function CarouselItem({ size, className, ...props }: CarouselItemProps) {
 
 function CarouselDots({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   const { api, selectedIndex, scrollTo } = useCarousel();
-  const t = useTranslations('UI.Carousel');
+  const t = useTranslations('common.UI.Carousel');
 
   return (
     <div
@@ -211,7 +211,7 @@ function CarouselPrevious({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { scrollPrev, canScrollPrev } = useCarousel();
-  const t = useTranslations('UI.Carousel');
+  const t = useTranslations('common.UI.Carousel');
   const classes = cn('absolute size-8 rounded-full', className);
 
   return (
@@ -237,7 +237,7 @@ function CarouselNext({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { scrollNext, canScrollNext } = useCarousel();
-  const t = useTranslations('UI.Carousel');
+  const t = useTranslations('common.UI.Carousel');
   const classes = cn('absolute size-8 rounded-full', className);
 
   return (

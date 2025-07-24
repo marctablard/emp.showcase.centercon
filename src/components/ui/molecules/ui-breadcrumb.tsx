@@ -26,7 +26,7 @@ interface UiBreadcrumbProps extends React.ComponentProps<'nav'> {
 }
 
 export function UiBreadcrumb({ items, maxItems = 2, className, ...props }: UiBreadcrumbProps) {
-  const t = useTranslations('Breadcrumb');
+  const t = useTranslations('common.Breadcrumb');
 
   // If items array is empty, don't render anything
   if (!items || items.length === 0) {

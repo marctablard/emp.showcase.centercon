@@ -40,7 +40,7 @@ interface MyInvoicesCardProps extends Omit<DashboardCardProps, 'children'> {
 }
 
 export function MyInvoicesCard({ className, title, ...props }: MyInvoicesCardProps) {
-  const t = useTranslations('Invoices');
+  const t = useTranslations('orders.Invoices');
 
   const { form } = useValidator('InvoiceSearchValidationService', {
     defaultValues: {

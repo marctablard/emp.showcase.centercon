@@ -143,7 +143,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
 }
 
 function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
-  const t = useTranslations('Validation');
+  const t = useTranslations('validation');
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message ? t(error.message) : '') : props.children;
 

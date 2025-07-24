@@ -21,7 +21,7 @@ interface AddressInfoAccordionProps {
 export function AddressInfoSection({ control, number }: AddressInfoAccordionProps) {
   const { loading, countries, fetchSiteData } = useSite();
   const { l10n } = useL10n();
-  const t = useTranslations('register');
+  const t = useTranslations('auth.register');
 
   // useWatch auf oberster Ebene der Komponente verwenden
   const businessType = useWatch({

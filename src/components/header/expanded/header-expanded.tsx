@@ -11,7 +11,7 @@ import { Link } from '@/i18n/navigation';
 
 export function HeaderExpanded() {
   const isLargeScreen = useBreakpoint('lg');
-  const t = useTranslations('header');
+  const t = useTranslations('layout.header');
 
   return (
     <>

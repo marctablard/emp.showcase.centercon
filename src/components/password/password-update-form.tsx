@@ -30,7 +30,7 @@ const formSchema = z
   });
 
 export function PasswordUpdateForm() {
-  const t = useTranslations('Password');
+  const t = useTranslations('auth.Password');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);

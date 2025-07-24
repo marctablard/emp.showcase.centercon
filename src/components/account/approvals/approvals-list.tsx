@@ -16,9 +16,9 @@ interface ApprovalsListProps {
 }
 
 export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
-  const t = useTranslations('Approval');
-  const tStatus = useTranslations('ApprovalStatus');
-  const tAction = useTranslations('ApprovalAction');
+  const t = useTranslations('orders.Approval');
+  const tStatus = useTranslations('orders.ApprovalStatus');
+  const tAction = useTranslations('orders.ApprovalAction');
   const [filterStatus, setFilterStatus] = useState<ApprovalStatus | '_ALL_'>('_ALL_');
   const { approvals, loading, error, filterApprovals, refreshApprovals } = useApprovals(initialApprovals);
 
