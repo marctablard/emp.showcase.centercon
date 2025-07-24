@@ -25,8 +25,8 @@ export default async function ApprovalsPage({ params }: { params: Promise<{ loca
   // Fetch approvals data during SSR
   const { locale } = await params;
   const [tAccount, tApproval, approvals] = await Promise.all([
-    getTranslations({ locale, namespace: 'Account' }),
-    getTranslations({ locale, namespace: 'Approval' }),
+    getTranslations({ locale, namespace: 'account' }),
+    getTranslations({ locale, namespace: 'orders.Approval' }),
     getApprovals(),
   ]);
 

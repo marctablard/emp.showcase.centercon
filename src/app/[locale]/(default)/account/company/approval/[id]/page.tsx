@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params;
-  const t = await getTranslations({ locale, namespace: 'Approval' });
+  const t = await getTranslations({ locale, namespace: 'orders.Approval' });
 
   return {
     title: await getPageTitle(t('approvalDetails') + ' #' + id, locale),
@@ -28,8 +28,8 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
 
   // Get translations
   const [tAccount, tApproval, approval] = await Promise.all([
-    getTranslations({ locale, namespace: 'Account' }),
-    getTranslations({ locale, namespace: 'Approval' }),
+    getTranslations({ locale, namespace: 'account' }),
+    getTranslations({ locale, namespace: 'orders.Approval' }),
     getApprovalById(id),
   ]);
 
