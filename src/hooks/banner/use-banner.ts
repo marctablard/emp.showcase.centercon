@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { ISbStoriesParams, StoryblokClient } from '@storyblok/react/rsc';
 import { getStoryblokApi } from '@/lib/storyblok';
-import { useBannerStore } from './banner-store';
+import { useBannerStore } from '@/stores/banner-store';
 
 interface TopBannerAnnouncementContent {
   title: string;
