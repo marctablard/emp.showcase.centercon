@@ -6,7 +6,6 @@ import {
   EmporixApprovalSearchUsersRequest,
   EmporixApprovalUpdateRequest,
 } from '@/platform/integrations/emporix/model/approval';
-import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import {
   Approval,
   ApprovalCreateRequest,
