@@ -6,7 +6,6 @@ import {
   EmporixApprovalSearchUsersRequest,
   EmporixApprovalUpdateRequest,
 } from '@/platform/integrations/emporix/model/approval';
-import { EmporixGroup } from '@/platform/integrations/emporix/model/iam';
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import {
   Approval,
@@ -29,7 +28,6 @@ export class EmporixApprovalService implements ApprovalService {
     @inject('EmporixIamApi') private iamApi: EmporixIamApi,
     @inject('EmporixApprovalApi') private approvalApi: EmporixApprovalApi,
     @inject('EmporixApprovalMapper') private approvalMapper: EmporixApprovalMapper,
-    @inject('CustomerService') private customerService: CustomerService,
   ) {}
 
   /**
@@ -180,21 +178,13 @@ export class EmporixApprovalService implements ApprovalService {
    * @param cartId The ID of the cart
    * @returns Promise with the requires approval result
    */
-  async requiresApproval(_cartId: string): Promise<boolean> {
-    const customer = await this.customerService.getCustomer();
-    if (!customer || customer.businessModel == 'B2C') {
-      // Guests and B2C Customers don't require Approval.
-      return false;
-    }
-    // get all groups for the current user
-    const groups = await this.iamApi.getUserGroups(customer.id, { size: 99999 });
-    const userIsAdmin = groups.items.some((group: EmporixGroup) => group.code === 'B2B_ADMIN');
-    if (userIsAdmin) {
-      return false;
-    }
-    // TODO check cart for Budget in case of Buyer,
-    // currently we simplify by always requiring approval if not admin
-    return true;
+  async requiresApproval(cartId: string): Promise<boolean> {
+    const permitted = await this.approvalApi.checkApprovalPermitted({
+      resourceType: 'CART',
+      resourceId: cartId,
+      action: 'CHECKOUT',
+    });
+    return !permitted.permitted;
   }
 }
 export default EmporixApprovalService;
