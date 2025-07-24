@@ -37,6 +37,7 @@ interface LinkProps {
   children?: React.ReactNode | undefined;
   className?: string;
   onClick?: () => void;
+  target?: string;
 }
 
 export default function UiLink({
@@ -48,6 +49,7 @@ export default function UiLink({
   href = '#',
   className,
   onClick,
+  target,
   ...props
 }: LinkProps &
   VariantProps<typeof linkVariants> & {
@@ -57,7 +59,7 @@ export default function UiLink({
   switch (type) {
     case 'Link':
       return (
-        <Link href={href} className={classes} onClick={onClick} {...props}>
+        <Link href={href} target={target} className={classes} onClick={onClick} {...props}>
           {iconBefore}
           {props.children}
           {iconAfter}
@@ -65,7 +67,7 @@ export default function UiLink({
       );
     case 'A':
       return (
-        <a href={href} className={classes} onClick={onClick} {...props}>
+        <a href={href} target={target} className={classes} onClick={onClick} {...props}>
           {iconBefore}
           {props.children}
           {iconAfter}
