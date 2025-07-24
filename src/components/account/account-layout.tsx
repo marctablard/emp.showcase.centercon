@@ -32,7 +32,7 @@ interface AccountLayoutProps {
 }
 
 export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
 
   // Dashboard (standalone item)
   const sidebarItems = [

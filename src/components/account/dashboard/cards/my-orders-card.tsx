@@ -23,7 +23,7 @@ interface MyOrdersCardProps extends Omit<DashboardCardProps, 'children'> {
 }
 
 export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) {
-  const t = useTranslations('Orders');
+  const t = useTranslations('orders');
 
   const { form } = useValidator('OrderSearchValidationService', {
     searchQuery: '',

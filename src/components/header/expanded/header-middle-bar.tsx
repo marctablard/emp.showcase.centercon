@@ -1,12 +1,12 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import HeaderActions from '@/components/header/common/header-actions';
-import HeaderSearch from '@/components/header/common/search/header-search';
+import { HeaderActions } from '@/components/header/common/header-actions';
+import { HeaderSearch } from '@/components/header/common/search/header-search';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
 
-export default function HeaderMiddleBar() {
-  const t = useTranslations('header');
+export function HeaderMiddleBar() {
+  const t = useTranslations('layout.header');
   const isExtraLargeScreen = useBreakpoint('xl');
 
   return (

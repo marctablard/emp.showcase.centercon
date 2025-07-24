@@ -12,7 +12,7 @@ interface CheckoutPageProps {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Checkout' });
+  const t = await getTranslations({ locale, namespace: 'checkout' });
 
   return {
     title: await getPageTitle(t('title'), locale),

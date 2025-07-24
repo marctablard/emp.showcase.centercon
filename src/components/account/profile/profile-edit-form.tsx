@@ -33,7 +33,7 @@ const LANGUAGES = ['de', 'en'];
 const CURRENCIES = ['EUR', 'USD', 'GBP'];
 
 export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const router = useRouter();
 
   const [error, setError] = useState<string | null>(null);

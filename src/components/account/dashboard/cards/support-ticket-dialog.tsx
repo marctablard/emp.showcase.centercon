@@ -18,7 +18,7 @@ export interface SupportTicketDialogProps {
 }
 
 export function SupportTicketDialog({ onSubmit }: SupportTicketDialogProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
 

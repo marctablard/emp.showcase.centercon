@@ -20,7 +20,7 @@ interface DocumentsCardProps {
 }
 
 export const DocumentsCard: FC<DocumentsCardProps> = ({ className, title, ...props }) => {
-  const t = useTranslations('Documents');
+  const t = useTranslations('account.Documents');
 
   const documentCategories: DocumentCategory[] = [
     {

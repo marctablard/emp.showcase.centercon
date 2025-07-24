@@ -35,7 +35,7 @@ export function MyOrdersTable({
   onNextPage,
   getStatusBadge,
 }: MyOrdersTableProps) {
-  const t = useTranslations('Orders');
+  const t = useTranslations('orders');
 
   // Format date in the current locale
   const formatDate = (dateString: string | undefined) => {

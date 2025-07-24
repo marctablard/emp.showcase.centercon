@@ -39,7 +39,7 @@ export function PasswordResetDialog({
   onCloseAction,
   onBackToLoginAction,
 }: PasswordResetProps) {
-  const t = useTranslations('Password');
+  const t = useTranslations('auth.Password');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { activeDialog } = useAuthDialog();

@@ -13,7 +13,7 @@ import CheckoutAddress from './checkout-address';
 import ShippingMethod from './shipping-method';
 
 export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
-  const t = useTranslations('Checkout.shipping');
+  const t = useTranslations('checkout.shipping');
   const { addresses } = useAddresses();
   const { shippingAddress, shippingMethod, submitShippingAddress } = useCheckout();
   const [isShippingEdit, setIsShippingEdit] = useState(initialEdit || !shippingAddress || !shippingMethod);

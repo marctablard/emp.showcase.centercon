@@ -35,7 +35,7 @@ const emptyAddress = {
  * Can be used for both shipping and billing addresses
  */
 const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialData, onDataChange }) => {
-  const t = useTranslations('Address');
+  const t = useTranslations('account.AddressForm');
   const { form } = useValidator(
     'AddressValidationService',
     { ...emptyAddress, ...initialData },

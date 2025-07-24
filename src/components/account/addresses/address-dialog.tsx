@@ -36,7 +36,7 @@ export function AddressDialog({
   addressType = 'SHIPPING',
   title,
 }: AddressDialogProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const [formData, setFormData] = useState<Address | undefined>(initialData);
   const [isSaving, setIsSaving] = useState(false);
   const { createAddress, updateAddress } = useAddresses();

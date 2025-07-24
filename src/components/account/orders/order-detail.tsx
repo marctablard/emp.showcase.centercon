@@ -33,8 +33,8 @@ function shouldShowReturnButton(status: Order['status']): boolean {
  * Displays detailed information for a single order
  */
 export function OrderDetail({ orderId, initialOrder }: { orderId: string; initialOrder?: Order | null }) {
-  const tOrder = useTranslations('Orders');
-  const tPaymentModes = useTranslations('PaymentModes');
+  const tOrder = useTranslations('orders');
+  const tPaymentModes = useTranslations('checkout.PaymentModes');
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
 
   const { order, loading, error, cancelOrder, returnOrder } = useOrder({ orderId, initialOrder });

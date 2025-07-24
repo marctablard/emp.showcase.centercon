@@ -11,7 +11,7 @@ interface AdditionalInformationSectionProps {
 }
 
 export default function AdditionalInformationSection({ control, number }: AdditionalInformationSectionProps) {
-  const t = useTranslations('register');
+  const t = useTranslations('auth.register');
 
   return (
     <div className="space-y-6">
