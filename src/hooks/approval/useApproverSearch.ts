@@ -31,7 +31,7 @@ export function useApproverSearch({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const t = useTranslations('Checkout.approval');
+  const t = useTranslations('checkout.approval');
   const { toast } = useToast();
 
   const fetchApprovers = useCallback(async () => {

@@ -30,7 +30,7 @@ const emptyContactData = {
  * Collects basic customer information (email, name)
  */
 const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefined }) => {
-  const t = useTranslations('Checkout.contactData');
+  const t = useTranslations('checkout.contactData');
   const { submitContactData, contactData } = useCheckout();
   const { form } = useValidator(
     'ContactDataValidationService',
