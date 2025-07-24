@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Approval' });
+  const t = await getTranslations({ locale, namespace: 'orders.Approval' });
 
   return {
     title: await getPageTitle(t('approvals'), locale),
@@ -25,8 +25,8 @@ export default async function ApprovalsPage({ params }: { params: Promise<{ loca
   // Fetch approvals data during SSR
   const { locale } = await params;
   const [tAccount, tApproval, approvals] = await Promise.all([
-    getTranslations({ locale, namespace: 'Account' }),
-    getTranslations({ locale, namespace: 'Approval' }),
+    getTranslations({ locale, namespace: 'account' }),
+    getTranslations({ locale, namespace: 'orders.Approval' }),
     getApprovals(),
   ]);
 
