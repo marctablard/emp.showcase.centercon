@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { LucideMinus, LucidePlus, LucideShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/cart/useCart';
 import { useProduct } from '@/hooks/product/useProduct';
+import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
@@ -22,6 +23,8 @@ export default function ProductAddToCart({
   price?: ProductPrice | null;
   className?: string;
 }) {
+  const locale = useLocale();
+  const { l10n } = useL10n(locale);
   const t = useTranslations('product');
   const { product, loading: productLoading, error: productError } = useProduct(initialProduct);
   const { addItem, cart } = useCart();
@@ -59,8 +62,9 @@ export default function ProductAddToCart({
       setAdding(true);
       await addItem(product.id, quantity);
 
+      console.log('Product name : ', product.name);
       toast.success(t('addedToCart'), {
-        description: `${quantity} × ${product.name} ${t('addedToCartDescription')}`,
+        description: `${quantity} × ${l10n(product.name)} ${t('addedToCartDescription')}`,
       });
     } catch (error) {
       console.error('Error adding to cart:', error);

@@ -15,6 +15,7 @@ import QuickEntry from '@/components/cms/quick-entry';
 import Recommendations from '@/components/cms/recommendations';
 import Segment from '@/components/cms/segment';
 import Teaser from '@/components/cms/teaser';
+import TopBannerAnnouncement from '@/components/cms/top-banner-announcement';
 import Video from '@/components/cms/video';
 
 /**
@@ -43,5 +44,6 @@ export const getStoryblokApi = storyblokInit({
     media_text: MediaText,
     recommendations: Recommendations,
     video: Video,
+    top_banner_announcement: TopBannerAnnouncement,
   },
 });
