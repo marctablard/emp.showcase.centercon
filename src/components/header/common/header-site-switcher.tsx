@@ -10,7 +10,7 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { Spinner } from '../../ui/spinner';
 
 export function SiteSwitcher() {
-  const t = useTranslations('Regions');
+  const t = useTranslations('common.Regions');
   const { setSite } = useSession();
   const { site, availableSites, loading: siteLoading } = useSite();
   const locale = useLocale();
