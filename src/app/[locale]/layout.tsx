@@ -4,6 +4,7 @@ import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import AuthDialogManager from '@/components/auth/auth-dialog-manager';
 import { CartWrapper } from '@/components/cart/cart-wrapper';
@@ -59,13 +60,22 @@ export default async function LocaleLayout({ children, params }: Props) {
     notFound();
   }
   const [authSession, shopSession, currentCart] = await Promise.all([auth(), getSession(), getCurrentCart()]);
+
+  const siteCode = shopSession?.siteCode || defaultSiteCode;
+  const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
+
+  if (site && !hasLocale(site.languages, locale)) {
+    // ensure that languages are aligned
+    const newLocale = site.languages[0];
+    await setSessionLanguage(newLocale);
+    redirect(`/${newLocale}`);
+  }
   if (shopSession && shopSession.language != locale) {
     // ensure that languages are aligned
     await setSessionLanguage(locale);
     shopSession.language = locale;
   }
-  const siteCode = shopSession?.siteCode || defaultSiteCode;
-  const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
+
   // Enable static rendering
   setRequestLocale(locale);
   return (
