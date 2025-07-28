@@ -99,80 +99,56 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             </CardContent>
           </Card>
           <div className="lg:col-start-1">
-            <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6 mb-10 lg:mb-0">
-              <CardContent className="p-0">
-                <div className="flex flex-col gap-6">
-                  <h2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</h2>
-                  <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
-                    <BulletPoint
-                      className="font-bold"
-                      label="Nominal Power"
-                      variant="white"
-                      iconColor="white"
-                      iconSize={'lg'}
-                      value={product.mixins?.productVariantAttributes?.['nominal-power']}
-                    />
-                    <BulletPoint
-                      className="font-bold"
-                      label="Length"
-                      variant="white"
-                      iconColor="white"
-                      iconSize={'lg'}
-                      value={product.mixins?.productTemplateAttributes?.['length']}
-                    />
-                    <BulletPoint
-                      className="font-bold"
-                      label="Solar Panel Type"
-                      variant="white"
-                      iconColor="white"
-                      iconSize={'lg'}
-                      value="Solar Panel"
-                    />
-                    <BulletPoint
-                      className="font-bold"
-                      label="Width"
-                      variant="white"
-                      iconColor="white"
-                      iconSize={'lg'}
-                      value={product.mixins?.productTemplateAttributes?.['width']}
-                    />
-                    <BulletPoint
-                      className="font-bold"
-                      label="Cell Type"
-                      variant="white"
-                      iconColor="white"
-                      iconSize={'lg'}
-                      value={product.mixins?.productTemplateAttributes?.['cell-type']}
-                    />
-                    <BulletPoint
-                      className="font-bold"
-                      label="Height"
-                      variant="white"
-                      iconColor="white"
-                      iconSize={'lg'}
-                      value={product.mixins?.productTemplateAttributes?.['height']}
-                    />
-                  </div>
+            {(product.variantAttributes || product.templateAttributes) && (
+              <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6 mb-10 lg:mb-0">
+                <CardContent className="p-0">
+                  <div className="flex flex-col gap-6">
+                    <h2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</h2>
+                    <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
+                      {Object.keys(product.variantAttributes || {}).map((attribute: string) => (
+                        <BulletPoint
+                          key={attribute}
+                          className="font-bold"
+                          label={t(`filters.mixins.productVariantAttributes.${attribute}`, { defaultValue: attribute })}
+                          variant="white"
+                          iconColor="white"
+                          value={product.variantAttributes?.[attribute]}
+                        />
+                      ))}
+                      {Object.keys(product.templateAttributes || {}).map((attribute: string) => (
+                        <BulletPoint
+                          className="font-bold"
+                          key={attribute}
+                          label={t(`filters.mixins.productTemplateAttributes.${attribute}`, {
+                            defaultValue: attribute,
+                          })}
+                          variant="white"
+                          iconColor="white"
+                          value={product.templateAttributes?.[attribute]}
+                        />
+                      ))}
+                    </div>
 
-                  <div className="flex items-center mt-2">
-                    <button className="text-white flex items-center gap-1">
-                      <UiLink type="Link" className="text-white hover:text-white">
-                        {t('more')}
-                      </UiLink>
-                      <LucideArrowDown />
-                    </button>
-                  </div>
+                    <div className="flex items-center mt-2">
+                      <button className="text-white flex items-center gap-1">
+                        <UiLink type="Link" className="text-white hover:text-white">
+                          {t('more')}
+                        </UiLink>
+                        <LucideArrowDown />
+                      </button>
+                    </div>
 
-                  <div className="flex items-center mt-2">
-                    <span className="text-white font-bold">{t('itemNumber')}:</span>
-                    <span className="text-primary ml-2 bg-white bg-opacity-20 py-2 px-3 rounded flex items-center">
-                      <p className="me-2">{product.id}</p>
-                      <LucideCopy aria-label={t('copy')} />
-                    </span>
+                    <div className="flex items-center mt-2">
+                      <span className="text-white font-bold">{t('itemNumber')}:</span>
+                      <span className="text-primary ml-2 bg-white bg-opacity-20 py-2 px-3 rounded flex items-center">
+                        <p className="me-2">{product.id}</p>
+                        <LucideCopy aria-label={t('copy')} />
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
             <div className="my-6">
               <H5>{t('otherVariants')}</H5>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
@@ -350,34 +326,30 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             className="text-xl text-neutral lg:mt-6"
             dangerouslySetInnerHTML={{ __html: l10n(product.description) }}
           />
-          {product.mixins.highlights.highlights && (
+          {product.highlights && (
             <div className="mt-10 lg:mt-16">
               <H2 variant="h3" className="text-primary mb-8">
                 {t('productHighlights')}
               </H2>
               <div className="mb-10 lg:mb-0">
-                {product.mixins.highlights.highlights.map((highlight: any) =>
-                  highlight.map(
-                    (hl: any) =>
-                      hl.language === currentLocale && (
-                        <BulletPoint
-                          key={hl.value}
-                          label={hl.value}
-                          iconColor="primary"
-                          variant="default"
-                          size="lg"
-                          icon={Sun}
-                          className="mb-6 gap-4"
-                        />
-                      ),
-                  ),
-                )}
+                {product.highlights &&
+                  product.highlights[currentLocale]?.map((highlight: string) => (
+                    <BulletPoint
+                      key={highlight}
+                      label={highlight}
+                      iconColor="primary"
+                      variant="default"
+                      size="lg"
+                      icon={Sun}
+                      className="mb-6"
+                    />
+                  ))}
               </div>
             </div>
           )}
         </div>
       </div>
-      {product?.groupedSpecifications && (
+      {product?.groupedSpecifications?.length && (
         <div className={cn(className)}>
           <H3 className="my-6"> {t('technicalInformation')}</H3>
           <div className="grid grid-cols-1 gap-y-6 lg:gap-y-16 gap-x-6 lg:grid-cols-2 xl:grid-cols-4 mb-16">
