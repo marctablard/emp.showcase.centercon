@@ -65,6 +65,10 @@ export interface EmporixGroup {
   userType?: 'CUSTOMER' | 'EMPLOYEE';
   mixins?: EmporixMixins;
   metadata?: EmporixMetadata;
+  b2b?: {
+    role?: string;
+    legalEntityId?: string;
+  };
 }
 
 /**

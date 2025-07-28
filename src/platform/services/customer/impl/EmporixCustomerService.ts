@@ -45,6 +45,17 @@ export class EmporixCustomerService implements CustomerService {
         .map((group: EmporixGroup) => group.code);
       roles.push('CUSTOMER');
       roles.push(response.businessModel ? 'B2B' : 'B2C');
+
+      // Check if the user is a B2B Admin
+      if (response.businessModel === 'B2B') {
+        const isB2BAdmin = iamResponse.items.some((group: EmporixGroup) => {
+          return group.b2b && group.b2b.role === 'Admin';
+        });
+
+        if (isB2BAdmin) {
+          roles.push('B2B_ADMIN');
+        }
+      }
       return {
         id: response.id,
         email: response.contactEmail || '',
