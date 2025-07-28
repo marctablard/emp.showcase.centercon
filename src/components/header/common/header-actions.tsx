@@ -7,12 +7,15 @@ import { HeaderIconButton } from '@/components/header/common/header-icon-button'
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import useAuthDialog from '@/hooks/auth/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export function HeaderActions({ className }: { className?: string }) {
   const t = useTranslations('layout.header');
   const { isAuthenticated, loading } = useAuthentication();
   const { openDialog } = useAuthDialog();
   const [isMounted, setIsMounted] = useState(false);
+  const isMediumScreen = useBreakpoint('md');
+  const isLargeScreen = useBreakpoint('lg');
 
   useEffect(() => {
     setIsMounted(true);
@@ -40,9 +43,7 @@ export function HeaderActions({ className }: { className?: string }) {
 
   return (
     <div className={`flex items-center gap-5 text-nowrap ${className}`}>
-      <div className="hidden md:block lg:hidden">
-        <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />
-      </div>
+      {isMediumScreen && !isLargeScreen && <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />}
 
       {isAuthenticated ? (
         <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
@@ -50,10 +51,12 @@ export function HeaderActions({ className }: { className?: string }) {
         <HeaderIconButton icon={User} text={t('signIn')} onClick={() => openDialog('login')} />
       )}
 
-      <div className="hidden md:flex gap-5">
-        <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
-        <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
-      </div>
+      {isMediumScreen && (
+        <div className="flex gap-5">
+          <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
+          <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
+        </div>
+      )}
     </div>
   );
 }

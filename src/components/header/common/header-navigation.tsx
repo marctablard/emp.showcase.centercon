@@ -9,11 +9,15 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 
-export function HeaderNavigation() {
+interface HeaderNavigationProps {
+  className?: string;
+}
+
+export function HeaderNavigation({ className }: HeaderNavigationProps) {
   const t = useTranslations('layout.header');
 
   return (
-    <NavigationMenu viewport={false}>
+    <NavigationMenu viewport={false} className={className}>
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger>{t('allProducts')}</NavigationMenuTrigger>

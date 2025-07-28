@@ -1,12 +1,17 @@
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
+import { cn } from '@/lib/utils';
 
-export function HeaderMenu() {
+interface HeaderMenuProps {
+  className?: string;
+}
+
+export function HeaderMenu({ className }: HeaderMenuProps) {
   const t = useTranslations('layout.header');
 
   return (
-    <div className="flex justify-end items-center">
+    <div className={cn('flex justify-end items-center', className)}>
       <HeaderIconLink icon={Menu} text={t('menu')} href="/#" />
     </div>
   );

@@ -1,9 +1,8 @@
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
+import { Logo } from '@/components/common/logo/logo';
 import { HeaderActions } from '@/components/header/common/header-actions';
 import { HeaderSearch } from '@/components/header/common/search/header-search';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { Link } from '@/i18n/navigation';
 
 export function HeaderMiddleBar() {
   const t = useTranslations('layout.header');
@@ -14,9 +13,7 @@ export function HeaderMiddleBar() {
       className={`flex self-stretch w-full pt-6 items-center justify-between has-[.search]:[&_.hide-on-focus]:opacity-0 has-[.search]:[&_.hide-on-focus]:w-0`}
     >
       <div className="w-[223px] transition-all duration-300 hide-on-focus">
-        <Link href="/" title={t('home')}>
-          <Image src="/images/logo.svg" alt="Logo" width="148" height="24" />
-        </Link>
+        <Logo width={148} height={24} className="min-w-[148px] min-h-[24px]" title={t('home')} />
       </div>
 
       <HeaderSearch small={!isExtraLargeScreen} />

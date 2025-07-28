@@ -9,6 +9,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { MiniCartTooltipContent, Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { formatCurrency } from '@/lib/utils';
 import { useNotificationStore } from '@/stores/notification-store';
 
@@ -27,6 +28,7 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
   const { cart, loading } = useCart(initialCart);
   const [scrollHeight, setScrollHeight] = useState(false);
   const scrollContainer = useRef<HTMLDivElement>(null);
+  const isMediumScreen = useBreakpoint('md');
 
   const buildCartUpdateKey = (cart: Cart, cartUpdate: CartUpdate) => {
     return 'cart-' + cart.id + '-' + cartUpdate.itemId + '-' + cartUpdate.updatedAt;
@@ -57,10 +59,8 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
         className="pl-[11px] md:pl-4 pr-1 pb-2 pt-1 md:py-1 self-center bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-sm cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base/6 tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-neutral-100 disabled:text-neutral-600 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         onClick={() => router.push('/cart')}
       >
-        {showSum && (
-          <span className="text-white text-xl hidden md:inline-block">
-            {formatCurrency(cartTotal || 0.0, currency)}
-          </span>
+        {showSum && isMediumScreen && (
+          <span className="text-white text-xl">{formatCurrency(cartTotal || 0.0, currency)}</span>
         )}
         <div className="flex items-center w-[43px] h-[35px] relative">
           {cartUpdate ? (

@@ -4,21 +4,25 @@ import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useSearch } from '@/hooks/useSearch';
+import { cn } from '@/lib/utils';
 import { Product } from '@/platform/services/model/product';
 import { SearchFlyOut } from './search-fly-out';
 
 export interface HeaderSearchProps {
   small?: boolean;
+  className?: string;
 }
 
-export function HeaderSearch({ small = false }: HeaderSearchProps) {
+export function HeaderSearch({ small = false, className }: HeaderSearchProps) {
   const t = useTranslations('layout.header');
   const router = useRouter();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasInitialSearch, setHasInitialSearch] = useState(false);
   const [hasInputFocus, setHasInputFocus] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const isLargeScreen = useBreakpoint('lg');
 
   // Get the current locale
   const locale = useLocale();
@@ -114,7 +118,7 @@ export function HeaderSearch({ small = false }: HeaderSearchProps) {
   // SSR-Fallback: Always shows the large variant on first render
   if (!isMounted) {
     return (
-      <div className="hidden z-50 lg:block relative transition-all transition-discrete duration-350 w-full max-w-180">
+      <div className="z-50 relative transition-all transition-discrete duration-350 w-full max-w-180">
         <form>
           <Input
             placeholder={t('search')}
@@ -133,9 +137,16 @@ export function HeaderSearch({ small = false }: HeaderSearchProps) {
     );
   }
 
+  if (!isLargeScreen) {
+    return null;
+  }
+
   return (
     <div
-      className={`hidden z-50 lg:block relative transition-all transition-discrete duration-350 w-full ${hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180'}`}
+      className={cn(
+        `z-50 relative transition-all transition-discrete duration-350 w-full ${hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180'}`,
+        className,
+      )}
     >
       <form onSubmit={(e) => redirectToBrowse(e)}>
         <Input
