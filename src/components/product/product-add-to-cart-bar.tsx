@@ -1,4 +1,4 @@
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { FlipHorizontal2, Pin, Share2 } from 'lucide-react';
 import { useProduct } from '@/hooks/product/useProduct';
@@ -21,6 +21,7 @@ export default function ProductAddToCartBar({
 }) {
   const { product } = useProduct(initialProduct);
   const locale = useLocale();
+  const t = useTranslations('product');
   const { l10n } = useL10n(locale);
   return (
     <div className={cn('fixed top-0 left-0 right-0 mt-20 pt-4 z-50 max-w-6xl mx-auto hidden lg:block', className)}>
@@ -54,13 +55,13 @@ export default function ProductAddToCartBar({
           </div>
 
           <div className="flex justify-center gap-2">
-            <Button size="icon" variant="primary" aria-label="icon" className="border-white">
+            <Button size="icon" variant="primary" aria-label={t('compare')} className="border-white">
               <FlipHorizontal2 />
             </Button>
-            <Button size="icon" variant="primary" aria-label="icon" className="border-white">
+            <Button size="icon" variant="primary" aria-label={t('addToWishlist')} className="border-white">
               <Pin />
             </Button>
-            <Button size="icon" variant="primary" aria-label="icon" className="border-white">
+            <Button size="icon" variant="primary" aria-label={t('share')} className="border-white">
               <Share2 />
             </Button>
           </div>

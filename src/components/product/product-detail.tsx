@@ -17,7 +17,7 @@ import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
-import { H1, H2, H3, H5 } from '../ui/h';
+import { Heading } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
 import ProductAddToCart from './product-add-to-cart';
@@ -103,7 +103,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6 mb-10 lg:mb-0">
                 <CardContent className="p-0">
                   <div className="flex flex-col gap-6">
-                    <h2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</h2>
+                    <Heading className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</Heading>
                     <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
                       {Object.keys(product.variantAttributes || {}).map((attribute: string) => (
                         <BulletPoint
@@ -150,7 +150,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               </Card>
             )}
             <div className="my-6">
-              <H5>{t('otherVariants')}</H5>
+              <Heading variant="h5">{t('otherVariants')}</Heading>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-primary-500">
                   <div className="col-start-1 bg-neutral-50 p-4">
@@ -256,13 +256,13 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               </div>
               {isDesktopScreen && (
                 <div className="flex gap-2">
-                  <Button size="icon" variant="secondary" title={t('compare')}>
+                  <Button size="icon" variant="secondary" aria-label={t('compare')}>
                     <FlipHorizontal2 />
                   </Button>
-                  <Button size="icon" variant="secondary" title={t('addToWishlist')}>
+                  <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
                     <Pin />
                   </Button>
-                  <Button size="icon" variant="secondary" title={t('share')}>
+                  <Button size="icon" variant="secondary" aria-label={t('share')}>
                     <Share2 />
                   </Button>
                 </div>
@@ -282,7 +282,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 )}
               </div> */}
           <p className="mb-2 mt-4 lg:mt-0 text-primary-500 font-bold font-headlines">Bluetti</p>
-          <H1>{l10n(product.name)}</H1>
+          <Heading variant="h1">{l10n(product.name)}</Heading>
           <div className="mb-6 lg:md-0 flex gap-2 items-center">
             <p className="text-neutral-600 font-bold">4.6</p>
             <RatingStarRow starsCount={5} filledCount={4} className="py-2" />
@@ -301,13 +301,13 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           </div>
           {!isDesktopScreen && (
             <div className="flex justify-center gap-2 mt-6">
-              <Button size="icon" variant="secondary" aria-label="icon">
+              <Button size="icon" variant="secondary" aria-label={t('compare')}>
                 <FlipHorizontal2 />
               </Button>
-              <Button size="icon" variant="secondary" aria-label="icon">
+              <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
                 <Pin />
               </Button>
-              <Button size="icon" variant="secondary" aria-label="icon">
+              <Button size="icon" variant="secondary" aria-label={t('share')}>
                 <Share2 />
               </Button>
             </div>
@@ -328,9 +328,9 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           />
           {product.highlights && (
             <div className="mt-10 lg:mt-16">
-              <H2 variant="h3" className="text-primary mb-8">
+              <Heading variant="h3" className="text-primary mb-8">
                 {t('productHighlights')}
-              </H2>
+              </Heading>
               <div className="mb-10 lg:mb-0">
                 {product.highlights &&
                   product.highlights[currentLocale]?.map((highlight: string) => (
@@ -351,7 +351,10 @@ export default function ProductDetail({ product: initialProduct, price, classNam
       </div>
       {product?.groupedSpecifications?.length && (
         <div className={cn(className)}>
-          <H3 className="my-6"> {t('technicalInformation')}</H3>
+          <Heading variant="h3" className="my-6">
+            {' '}
+            {t('technicalInformation')}
+          </Heading>
           <div className="grid grid-cols-1 gap-y-6 lg:gap-y-16 gap-x-6 lg:grid-cols-2 xl:grid-cols-4 mb-16">
             {product.groupedSpecifications.map((spec: GroupedSpecification, index) => {
               return (
