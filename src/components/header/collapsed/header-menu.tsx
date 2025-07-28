@@ -1,9 +1,9 @@
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
-import HeaderIconLink from '@/components/header/common/header-icon-link';
+import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 
-export default function HeaderMenu() {
-  const t = useTranslations('header');
+export function HeaderMenu() {
+  const t = useTranslations('layout.header');
 
   return (
     <div className="flex justify-end items-center">

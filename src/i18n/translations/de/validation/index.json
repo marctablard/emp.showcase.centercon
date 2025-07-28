@@ -1,0 +1,113 @@
+{
+  "contactData": {
+    "email": {
+      "required": "Die E-Mail-Adresse ist erforderlich",
+      "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+    },
+    "firstName": {
+      "required": "Vorname ist erforderlich"
+    },
+    "lastName": {
+      "required": "Nachname ist erforderlich"
+    }
+  },
+  "address": {
+    "contactName": {
+      "required": "Name ist erforderlich"
+    },
+    "street": {
+      "required": "Straße ist erforderlich"
+    },
+    "streetNumber": {
+      "required": "Hausnummer ist erforderlich"
+    },
+    "zipCode": {
+      "required": "Postleitzahl ist erforderlich"
+    },
+    "city": {
+      "required": "Stadt ist erforderlich"
+    },
+    "country": {
+      "required": "Land ist erforderlich"
+    },
+    "state": {
+      "required": "Bundesland/Region ist erforderlich"
+    }
+  },
+  "shipping": {
+    "method": {
+      "required": "Versandart ist erforderlich"
+    }
+  },
+  "payment": {
+    "method": {
+      "required": "Zahlungsmethode ist erforderlich"
+    }
+  },
+  "login": {
+    "username": {
+      "required": "E-Mail ist erforderlich",
+      "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+    },
+    "password": {
+      "required": "Passwort ist erforderlich"
+    }
+  },
+  "password": {
+    "email": {
+      "required": "E-Mail ist erforderlich",
+      "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+    }
+  },
+  "register": {
+    "registrationType": {
+      "required": "Registrierungstyp ist erforderlich"
+    },
+    "firstName": {
+      "required": "Vorname ist erforderlich"
+    },
+    "lastName": {
+      "required": "Nachname ist erforderlich"
+    },
+    "email": {
+      "required": "E-Mail-Adresse ist erforderlich",
+      "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "mismatch": "Die E-Mail-Adressen stimmen nicht überein"
+    },
+    "emailConfirmation": {
+      "required": "Bitte bestätigen Sie Ihre E-Mail-Adresse"
+    },
+    "companyName": {
+      "required": "Firmenname ist erforderlich"
+    },
+    "vatNumber": {
+      "required": "Umsatzsteuer-ID ist erforderlich"
+    },
+    "street": {
+      "required": "Straße ist erforderlich"
+    },
+    "houseNumber": {
+      "required": "Hausnummer ist erforderlich"
+    },
+    "postalCode": {
+      "required": "Postleitzahl ist erforderlich"
+    },
+    "city": {
+      "required": "Stadt ist erforderlich"
+    },
+    "country": {
+      "required": "Land ist erforderlich"
+    },
+    "password": {
+      "mismatch": "Die Passwörter stimmen nicht überein"
+    },
+    "passwordConfirmation": {
+      "required": "Bitte bestätigen Sie Ihr Passwort"
+    },
+    "general": {
+      "emailExists": "Diese E-Mail-Adresse ist bereits registriert. Bitte verwenden Sie eine andere E-Mail-Adresse oder versuchen Sie sich anzumelden.",
+      "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "serverError": "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+    }
+  }
+}

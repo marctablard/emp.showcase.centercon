@@ -21,8 +21,20 @@ const _setSessionLanguage = cache(async (language: string): Promise<void> => {
   }
 });
 
+const _setSessionSite = cache(async (site: string): Promise<void> => {
+  try {
+    await getSessionService().setSite(site);
+  } catch (_error) {
+    return;
+  }
+});
+
 export function setSessionLanguage(language: string): Promise<void> {
   return _setSessionLanguage(language);
+}
+
+export function setSessionSite(site: string): Promise<void> {
+  return _setSessionSite(site);
 }
 
 export function getSession(): Promise<Session | null | undefined> {

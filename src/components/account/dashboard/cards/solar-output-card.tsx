@@ -16,8 +16,8 @@ import { DashboardCard, DashboardCardProps } from './dashboard-card';
  * Shows the estimated solar panel output based on weather conditions
  */
 export function SolarOutputCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('Account');
-  const tWeather = useTranslations('Weather');
+  const t = useTranslations('account');
+  const tWeather = useTranslations('account.Weather');
   const { weather, loading, error } = useWeather();
   const { location } = useLocation();
 

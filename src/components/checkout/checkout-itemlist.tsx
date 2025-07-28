@@ -6,7 +6,7 @@ import { H2 } from '../ui/h';
 
 export function CheckoutItemlist() {
   const { checkoutCart } = useCheckout();
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
 
   return (
     <Card className="p-0 shadow-footer border-none mb-6 gap-3">

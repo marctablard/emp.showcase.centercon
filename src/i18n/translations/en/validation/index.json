@@ -1,0 +1,113 @@
+{
+  "contactData": {
+    "email": {
+      "required": "Email is required",
+      "invalid": "Please enter a valid email address"
+    },
+    "firstName": {
+      "required": "First name is required"
+    },
+    "lastName": {
+      "required": "Last name is required"
+    }
+  },
+  "address": {
+    "contactName": {
+      "required": "Contact Name is required"
+    },
+    "street": {
+      "required": "Street is required"
+    },
+    "streetNumber": {
+      "required": "Street Number is required"
+    },
+    "zipCode": {
+      "required": "Zip Code is required"
+    },
+    "city": {
+      "required": "City is required"
+    },
+    "country": {
+      "required": "Country is required"
+    },
+    "state": {
+      "required": "State/Province is required"
+    }
+  },
+  "shipping": {
+    "method": {
+      "required": "Shipping method is required"
+    }
+  },
+  "payment": {
+    "method": {
+      "required": "Payment method is required"
+    }
+  },
+  "login": {
+    "username": {
+      "required": "Email is required",
+      "invalid": "Please enter a valid email address"
+    },
+    "password": {
+      "required": "Password is required"
+    }
+  },
+  "password": {
+    "email": {
+      "required": "Email is required",
+      "invalid": "Please enter a valid email address"
+    }
+  },
+  "register": {
+    "registrationType": {
+      "required": "Registration type is required"
+    },
+    "firstName": {
+      "required": "First name is required"
+    },
+    "lastName": {
+      "required": "Last name is required"
+    },
+    "email": {
+      "required": "Email address is required",
+      "invalid": "Please enter a valid email address",
+      "mismatch": "Email addresses don't match"
+    },
+    "emailConfirmation": {
+      "required": "Please confirm your email address"
+    },
+    "companyName": {
+      "required": "Company name is required"
+    },
+    "vatNumber": {
+      "required": "VAT number is required"
+    },
+    "street": {
+      "required": "Street is required"
+    },
+    "houseNumber": {
+      "required": "House number is required"
+    },
+    "postalCode": {
+      "required": "Postal code is required"
+    },
+    "city": {
+      "required": "City is required"
+    },
+    "country": {
+      "required": "Country is required"
+    },
+    "password": {
+      "mismatch": "Passwords don't match"
+    },
+    "passwordConfirmation": {
+      "required": "Please confirm your password"
+    },
+    "general": {
+      "emailExists": "This email is already registered. Please use a different email or try to log in.",
+      "registrationFailed": "Registration failed. Please try again.",
+      "serverError": "A server error occurred. Please try again later."
+    }
+  }
+}

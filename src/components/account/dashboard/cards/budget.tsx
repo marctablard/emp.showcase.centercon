@@ -12,7 +12,7 @@ import StatCard from './stat-card';
 interface BudgetProgressProps extends Omit<DashboardCardProps, 'children'> {}
 
 export function BudgetSummaryCard() {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { loading, error, company } = useCompany();
   const { orders, loading: ordersLoading } = useOrders();
   const [revenue, setRevenue] = useState(0.0);
@@ -52,7 +52,7 @@ export function BudgetSummaryCard() {
 }
 
 export function BudgetProgress({ className, title, ...props }: BudgetProgressProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { loading, error, company } = useCompany();
   const { orders, loading: ordersLoading } = useOrders();
   const [revenue, setRevenue] = useState(0.0);

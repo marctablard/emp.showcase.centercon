@@ -14,7 +14,7 @@ export function CurrencySwitcher() {
   const { session, loading: sessionLoading, setCurrency } = useSession();
   const locale = useLocale();
   const router = useRouter();
-  const t = useTranslations('Currencies');
+  const t = useTranslations('common.Currencies');
   const { currencies, loading: siteLoading } = useSite();
   let initialCurrency = undefined;
   if (session && currencies) {

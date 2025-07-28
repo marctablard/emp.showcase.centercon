@@ -10,7 +10,7 @@ interface ApprovalStatusBadgeProps {
 }
 
 export function ApprovalStatusBadge({ status, className = '' }: ApprovalStatusBadgeProps) {
-  const t = useTranslations('ApprovalStatus');
+  const t = useTranslations('orders.ApprovalStatus');
 
   const getStatusVariant = (status: ApprovalStatus) => {
     switch (status) {

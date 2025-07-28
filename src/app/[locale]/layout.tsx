@@ -4,6 +4,7 @@ import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import AuthDialogManager from '@/components/auth/auth-dialog-manager';
 import { CartWrapper } from '@/components/cart/cart-wrapper';
@@ -12,7 +13,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import { getCurrentCart } from '@/lib/ssr/carts';
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
-import { getSite } from '@/lib/ssr/site';
+import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import '../globals.css';
@@ -34,6 +35,7 @@ const openSans = Open_Sans({
 type Props = {
   children: ReactNode;
   params: Promise<{ locale: Locale }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 export function generateStaticParams() {
@@ -58,13 +60,22 @@ export default async function LocaleLayout({ children, params }: Props) {
     notFound();
   }
   const [authSession, shopSession, currentCart] = await Promise.all([auth(), getSession(), getCurrentCart()]);
+
+  const siteCode = shopSession?.siteCode || defaultSiteCode;
+  const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
+
+  if (site && !hasLocale(site.languages, locale)) {
+    // ensure that languages are aligned
+    const newLocale = site.languages[0];
+    await setSessionLanguage(newLocale);
+    redirect(`/${newLocale}`);
+  }
   if (shopSession && shopSession.language != locale) {
     // ensure that languages are aligned
     await setSessionLanguage(locale);
     shopSession.language = locale;
   }
-  // TODO read from query parameter to allow swtiching
-  const site = await getSite(shopSession?.siteCode || defaultSiteCode);
+
   // Enable static rendering
   setRequestLocale(locale);
   return (
@@ -72,7 +83,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       <body className="flex h-full flex-col font-body">
         <AuthSessionProvider session={authSession}>
           <NextIntlClientProvider locale={locale}>
-            <StoreProvider shopSession={shopSession} site={site}>
+            <StoreProvider shopSession={shopSession} site={site} availableSites={availableSites}>
               <StoryblokProvider>
                 <CartWrapper initialCart={currentCart}>
                   <AuthDialogManager />

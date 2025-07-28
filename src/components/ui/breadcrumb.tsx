@@ -63,7 +63,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
 }
 
 function BreadcrumbBackLink({ className, href, ...props }: React.ComponentProps<'a'>) {
-  const t = useTranslations('Breadcrumb');
+  const t = useTranslations('common.Breadcrumb');
   return (
     <Link
       href={href as string}

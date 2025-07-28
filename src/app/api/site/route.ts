@@ -9,7 +9,8 @@ export async function GET() {
   try {
     const siteService = EMP.platform.server.get<SiteService>('SiteService');
     const site = await siteService.getSite();
-    return NextResponse.json(site);
+    const availableSites = await siteService.getAvailableSites();
+    return NextResponse.json({ current: site, available: availableSites });
   } catch (error) {
     console.error('Error fetching site data:', error);
     return NextResponse.json({ error: 'Failed to fetch site data' }, { status: 500 });

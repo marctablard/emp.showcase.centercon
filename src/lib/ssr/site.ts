@@ -13,6 +13,19 @@ const _getSite = cache(async (code: string): Promise<Site | null> => {
   }
 });
 
+const _getAvailableSites = cache(async (): Promise<Site[]> => {
+  try {
+    const sites = await getSiteService().getAvailableSites();
+    return sites;
+  } catch (_error) {
+    return [];
+  }
+});
+
 export function getSite(code: string): Promise<Site | null> {
   return _getSite(code);
+}
+
+export function getAvailableSites(): Promise<Site[]> {
+  return _getAvailableSites();
 }

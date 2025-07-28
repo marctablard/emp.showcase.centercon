@@ -3,7 +3,7 @@ import { Binary, NotepadText } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../ui/card';
 
 export function CheckoutNotes() {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
 
   return (
     <Card className="p-0 shadow-footer border-none mb-6">

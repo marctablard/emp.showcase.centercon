@@ -20,7 +20,7 @@ interface ApprovalModalProps {
 }
 
 export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: ApprovalModalProps) {
-  const t = useTranslations('Checkout.approval');
+  const t = useTranslations('checkout.approval');
   const { toast } = useToast();
 
   // Use the new hook to fetch approvers

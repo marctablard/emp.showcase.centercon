@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-import createNextIntlPlugin from 'next-intl/plugin';
+import createNextIntlSplitPlugin from 'next-intl-split/plugin';
 
 let nextConfig: NextConfig = {
   images: {
@@ -55,9 +55,9 @@ let nextConfig: NextConfig = {
 };
 
 // add i18n Logic to Next-Configuration
-const withNextIntl = createNextIntlPlugin();
+const withNextIntlSplit = createNextIntlSplitPlugin('./src/i18n/translations');
 
 // Apply plugins in sequence
-nextConfig = withNextIntl(nextConfig);
+nextConfig = withNextIntlSplit(nextConfig);
 
 export default nextConfig;

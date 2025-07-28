@@ -26,7 +26,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   const { loading, error, orderResponse, checkoutCart, createCheckoutData, processCheckout } = useCheckout();
   const { customer } = useCustomer();
   const router = useRouter();
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
   const leftContent = useRef<HTMLDivElement>(null);
 
   // We don't need local state anymore as we're using the checkout store via useCheckout

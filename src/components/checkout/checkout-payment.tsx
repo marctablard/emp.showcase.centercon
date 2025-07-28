@@ -13,8 +13,8 @@ import CheckoutAddress from './checkout-address';
 import PaymentMethodComponent from './payment-method';
 
 export function CheckoutPayment({ initialEdit }: { initialEdit: boolean }) {
-  const t = useTranslations('Checkout.payment');
-  const tPayment = useTranslations('PaymentModes');
+  const t = useTranslations('checkout.payment');
+  const tPayment = useTranslations('checkout.PaymentModes');
   const { addresses } = useAddresses();
   const { billingAddress, shippingAddress, paymentMethod, submitBillingAddress } = useCheckout();
   const [isPaymentEdit, setIsPaymentEdit] = useState(

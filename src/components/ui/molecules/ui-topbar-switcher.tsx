@@ -23,7 +23,7 @@ export default function TopBarSwitcher({
   onSelected?: (code: string) => void;
   icon?: React.ReactNode;
 }) {
-  if (!options || options.length <= 1 || !current) {
+  if (!options || options.length === 0 || !current) {
     return null;
   }
 

@@ -43,9 +43,10 @@ export interface StoreProviderProps {
   children: ReactNode;
   shopSession?: Session | null;
   site?: Site | null;
+  availableSites?: Site[];
 }
 
-export const StoreProvider = ({ children, shopSession, site }: StoreProviderProps) => {
+export const StoreProvider = ({ children, shopSession, site, availableSites }: StoreProviderProps) => {
   const productStoreRef = useRef<ProductStoreApi | null>(null);
   if (productStoreRef.current === null) {
     productStoreRef.current = createProductStore();
@@ -60,7 +61,7 @@ export const StoreProvider = ({ children, shopSession, site }: StoreProviderProp
   }
   const siteStoreRef = useRef<SiteStoreApi | null>(null);
   if (siteStoreRef.current === null) {
-    siteStoreRef.current = createSiteStore({ site, loading: false, error: null });
+    siteStoreRef.current = createSiteStore({ site, availableSites, loading: false, error: null });
   }
   const shippingMethodsStoreRef = useRef<ShippingMethodsStoreApi | null>(null);
   if (shippingMethodsStoreRef.current === null) {

@@ -15,7 +15,7 @@ export type SiteData = {
  * Get all countries from the API
  * @returns Promise with array of countries
  */
-export async function getSite(id?: string): Promise<Site> {
+export async function getSite(id?: string): Promise<{ current: Site; available: Site[] }> {
   const response = await fetch('/api/site/' + (id ? id : ''));
 
   if (!response.ok) {

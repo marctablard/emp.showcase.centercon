@@ -24,7 +24,7 @@ type PasswordFormData = {
 };
 
 export default function PasswordChangeForm({ customer }: PasswordChangeFormProps) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const router = useRouter();
 
   const [error, setError] = useState<string | null>(null);

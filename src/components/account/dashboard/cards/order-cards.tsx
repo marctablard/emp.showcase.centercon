@@ -24,7 +24,7 @@ import { StatCard } from './stat-card';
  * Shows the total number of orders and orders in progress
  */
 function OrderSummaryCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('Account');
+  const t = useTranslations('account');
   const { orders, loading } = useOrders();
 
   if (!orders || loading) {
@@ -54,8 +54,8 @@ function OrderSummaryCard({ className, title, ...props }: Omit<DashboardCardProp
  * Shows the most recent orders with their status
  */
 function RecentOrdersCard({ className, title, ...props }: Omit<DashboardCardProps, 'children'>) {
-  const t = useTranslations('Account');
-  const tOrder = useTranslations('Orders');
+  const t = useTranslations('account');
+  const tOrder = useTranslations('orders');
   const { orders, loading } = useOrders();
 
   if (!orders || loading) {
@@ -117,8 +117,8 @@ function RecentOrdersCard({ className, title, ...props }: Omit<DashboardCardProp
  * Displays a table of all orders with their details
  */
 function OrdersList() {
-  const t = useTranslations('Account');
-  const tOrder = useTranslations('Orders');
+  const t = useTranslations('account');
+  const tOrder = useTranslations('orders');
   const { orders, loading, error } = useOrders();
 
   if (loading) {
@@ -179,8 +179,8 @@ function OrdersList() {
  * Displays detailed information for a single order
  */
 function OrderDetail({ orderId }: { orderId: string }) {
-  const tOrder = useTranslations('Orders');
-  const tPaymentModes = useTranslations('PaymentModes');
+  const tOrder = useTranslations('orders');
+  const tPaymentModes = useTranslations('checkout.PaymentModes');
   const { order, loading, error } = useOrder({ orderId });
 
   if (loading) {

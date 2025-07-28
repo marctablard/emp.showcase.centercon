@@ -14,7 +14,7 @@ interface RegistrationInfoAccordionProps {
 }
 
 export function RegistrationInfoSection({ control, number }: RegistrationInfoAccordionProps) {
-  const t = useTranslations('register');
+  const t = useTranslations('auth.register');
 
   return (
     <div className="space-y-6">

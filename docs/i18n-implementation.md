@@ -54,6 +54,7 @@ This provides locale-aware navigation utilities that respect our routing configu
 import { hasLocale } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
 import { routing } from './routing';
+import { loadI18nTranslations } from 'next-intl-split/load';
 
 export default getRequestConfig(async ({ requestLocale }) => {
   // Typically corresponds to the `[locale]` segment
@@ -62,7 +63,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: (await import(`../../i18n/${locale}.json`)).default,
+    messages: loadI18nTranslations('src/i18n/translations', locale, true),
   };
 });
 ```
@@ -71,18 +72,47 @@ This handles loading the correct translation messages based on the requested loc
 
 ## Translation Files
 
-Our translations are stored in JSON files at the root of the i18n directory:
+Our translations are organized in a structured directory hierarchy by locale and namespace:
 
-- `i18n/en.json`: English translations
-- `i18n/de.json`: German translations
+```
+src/i18n/translations/
+├── en/
+│   ├── account/
+│   │   └── index.json
+│   ├── auth/
+│   │   └── index.json
+│   ├── cart/
+│   │   └── index.json
+│   ├── checkout/
+│   │   └── index.json
+│   ├── common/
+│   │   └── index.json
+│   ├── layout/
+│   │   └── index.json
+│   ├── orders/
+│   │   └── index.json
+│   ├── product/
+│   │   └── index.json
+│   ├── search/
+│   │   └── index.json
+│   ├── seo/
+│   │   └── index.json
+│   └── validation/
+│       └── index.json
+└── de/
+    └── (similar structure)
+```
 
-Example translation file structure:
+Example translation file structure (e.g., `src/i18n/translations/en/account/index.json`):
 
 ```json
 {
-  "hello": {
-    "world": "Hello World",
-    "friend": "Hey Friend"
+  "title": "Service Portal",
+  "welcomeBack": "Welcome, {name}",
+  "dashboard": "Dashboard",
+  "profile": {
+    "title": "User Profile",
+    "description": "View and edit your personal details"
   }
 }
 ```

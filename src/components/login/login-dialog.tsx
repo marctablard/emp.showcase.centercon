@@ -54,7 +54,7 @@ export default function LoginDialog({
   onResetPasswordAction,
   guestCheckout = false,
 }: LoginProps) {
-  const t = useTranslations('login');
+  const t = useTranslations('auth.login');
   const { login, loading, error: errorAuthentication } = useAuthentication();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
