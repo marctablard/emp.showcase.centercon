@@ -63,9 +63,8 @@ export interface Product {
   images?: Media[];
   taxType?: TaxType;
   usp?: string | LocalizedString;
-  highlights?: string[];
+  highlights?: { [locale: string]: string[] };
   documents?: Media[];
-  mixins: Mixins;
 
   // Additional fields from mixins
   specifications?: ProductSpecification[];

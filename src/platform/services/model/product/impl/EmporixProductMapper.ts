@@ -1,5 +1,4 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixMixins } from '@/platform/integrations/emporix/model';
 import { EmporixProduct } from '@/platform/integrations/emporix/model/product';
 import { LocalizedString } from '@/platform/services/model/common';
 import { GroupedSpecification, Product, ProductSpecification } from '@/platform/services/model/product';
@@ -33,42 +32,51 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
     // Extract localized name and description
     const name = source.name || ''; // Add null/empty check
     const description = source.description || '';
-    const mixins = source.mixins ? (source.mixins as EmporixMixins) : [];
-
-    const mappedSpecs =
-      Array.isArray(mixins) || !mixins.specifications?.specifications
-        ? []
-        : mixins.specifications.specifications.map((spec: any) => ({
-            key: spec.key,
-            group: spec.group,
-            groupLabel: spec.groupLabel
-              ? spec.groupLabel.reduce((acc: LocalizedString, item: any) => {
+    const templateAttributes = source.mixins?.productTemplateAttributes;
+    const variantAttributes = source.mixins?.productVariantAttributes;
+    // Group highlights by language
+    const highlights: { [locale: string]: string[] } = {};
+    source.mixins?.highlights?.highlights?.forEach((highlightGroup: any) => {
+      highlightGroup.forEach((hl: any) => {
+        if (hl.value && hl.language) {
+          highlights[hl.language] = highlights[hl.language] || [];
+          highlights[hl.language].push(hl.value);
+        }
+      });
+    });
+    const mappedSpecs = !source.mixins?.specifications?.specifications
+      ? []
+      : source.mixins?.specifications?.specifications.map((spec: any) => ({
+          key: spec.key,
+          group: spec.group,
+          groupLabel: spec.groupLabel
+            ? spec.groupLabel.reduce((acc: LocalizedString, item: any) => {
+                acc[item.language] = item.value;
+                return acc;
+              }, {} as any)
+            : {},
+          label:
+            spec.label && Array.isArray(spec.label)
+              ? spec.label.reduce((acc: LocalizedString, item: any) => {
                   acc[item.language] = item.value;
                   return acc;
                 }, {} as any)
-              : {},
-            label:
-              spec.label && Array.isArray(spec.label)
-                ? spec.label.reduce((acc: LocalizedString, item: any) => {
-                    acc[item.language] = item.value;
-                    return acc;
-                  }, {} as any)
-                : { en: spec.key || '' },
-            value:
-              spec.value && Array.isArray(spec.value)
-                ? spec.value.reduce((acc: LocalizedString, item: any) => {
-                    acc[item.language] = item.value;
-                    return acc;
-                  }, {} as any)
-                : { en: '' },
-            ...(spec.unit &&
-              Array.isArray(spec.unit) && {
-                unit: spec.unit.reduce((acc: LocalizedString, item: any) => {
+              : { en: spec.key || '' },
+          value:
+            spec.value && Array.isArray(spec.value)
+              ? spec.value.reduce((acc: LocalizedString, item: any) => {
                   acc[item.language] = item.value;
                   return acc;
-                }, {} as any),
-              }),
-          }));
+                }, {} as any)
+              : { en: '' },
+          ...(spec.unit &&
+            Array.isArray(spec.unit) && {
+              unit: spec.unit.reduce((acc: LocalizedString, item: any) => {
+                acc[item.language] = item.value;
+                return acc;
+              }, {} as any),
+            }),
+        }));
 
     // Also create a grouped version of specifications
     const groupedSpecifications = mappedSpecs.length > 0 ? this.groupSpecificationsByGroup(mappedSpecs) : [];
@@ -81,7 +89,9 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       images,
       specifications: mappedSpecs,
       groupedSpecifications: groupedSpecifications,
-      mixins,
+      highlights,
+      templateAttributes,
+      variantAttributes,
     };
   }
 

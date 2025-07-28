@@ -14,6 +14,7 @@ type CarouselPlugin = UseCarouselParameters[1];
 
 type CarouselProps = {
   opts?: CarouselOptions;
+  loop?: boolean;
   plugins?: CarouselPlugin;
   orientation?: 'horizontal' | 'vertical';
   setApi?: (api: CarouselApi) => void;
@@ -47,7 +48,8 @@ function useCarousel() {
 }
 
 function Carousel({
-  orientation = 'horizontal',
+  orientation,
+  loop,
   opts,
   setApi,
   plugins,
@@ -58,6 +60,7 @@ function Carousel({
   const [carouselRef, api] = useEmblaCarousel(
     {
       ...opts,
+      loop: loop,
       axis: orientation === 'horizontal' ? 'x' : 'y',
     },
     plugins,
@@ -150,7 +153,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
+    <div ref={carouselRef} className="overflow-hidden w-full" data-slot="carousel-content">
       <div className={cn('flex', orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col', className)} {...props} />
     </div>
   );

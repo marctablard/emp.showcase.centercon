@@ -50,14 +50,19 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
     );
   }
   return (
-    <div className="flex">
+    <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 relative">
       {/* Main Carousel */}
-      <div className="w-full lg:w-4/5 relative">
-        <Carousel className="w-full " orientation="horizontal" setApi={setMainApi}>
+      <div className="w-full lg:w-[calc(100%-125px)] static lg:relative p-6">
+        <Carousel
+          className="static lg:relative w-full h-full flex items-center"
+          orientation="horizontal"
+          loop={true}
+          setApi={setMainApi}
+        >
           <CarouselContent>
             {images.map((image, index) => (
               <CarouselItem key={index}>
-                <div className="relative lg:h-[500px] h-[300px] w-full">
+                <div className="relative w-[296px] sm:w-[431px] h-[255px] sm:h-[351px] lg:h-[160px] xl:h-[260px] 2xl:h-[460px] lg:w-full mx-auto">
                   <Image
                     src={image.url}
                     alt={image.altText ? l10n(image.altText) : `Product image ${index + 1}`}
@@ -77,35 +82,35 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="right-14 bottom-1 h-8 w-8 rounded-full bg-white border-primary">
+          <CarouselPrevious className="left-4 lg:left-auto lg:right-14 bottom-1 rounded-full bg-white border-primary w-10 h-10 mr-2">
             <LucideChevronLeft className="h-6 w-6 text-primary" />
           </CarouselPrevious>
-          <CarouselNext className="right-4 bottom-1 h-8 w-8 rounded-full bg-white border-primary">
+          <CarouselNext className="right-4 bottom-1 rounded-full bg-white border-primary w-10 h-10">
             <LucideChevronRight className="h-6 w-6 text-primary" />
           </CarouselNext>
         </Carousel>
       </div>
 
       {/* Thumbnail Carousel - Vertical on the right */}
-      <div className="w-1/5 hidden lg:block">
-        <div className="h-[500px] overflow-hidden">
-          <Carousel className="h-full" orientation="vertical" setApi={setThumbApi}>
-            <CarouselContent className="h-full flex-col !-mt-0 gap-2 p-1">
+      <div className="lg:min-w-[125px]">
+        <div className="lg:h-[500px] overflow-hidden">
+          <Carousel className="h-full" orientation="horizontal" setApi={setThumbApi}>
+            <CarouselContent className="h-full w-full lg:flex-col my-1 gap-2 lg:gap-3 p-0 justify-center ml-0">
               {images.map((image, index) => (
                 <CarouselItem
                   key={index}
-                  className="basis-1/5 min-h-0 cursor-pointer !pt-0 flex items-center justify-center"
+                  className="basis-1/5 min-h-0 cursor-pointer pt-0 pl-0 flex items-center justify-center max-w-[60px] lg:max-w-full"
                   onClick={() => mainApi?.scrollTo(index)}
                 >
                   <div
-                    className={`aspect-[4/3] w-full h-full relative rounded-md overflow-hidden ${activeIndex === index ? 'ring-2 ring-primary' : 'border border-gray-200'}`}
+                    className={`w-full w-[60px] h-[40px] lg:max-w-[120px] lg:h-[80px] relative rounded-md overflow-hidden ${activeIndex === index ? 'ring-2 ring-primary' : 'border border-gray-200'}`}
                   >
                     <Image
                       src={image.url}
                       alt={image.altText ? l10n(image.altText) : `Thumbnail ${index + 1}`}
                       fill
                       sizes={imageSizes}
-                      className="object-cover object-center"
+                      className="px-2 py-1 lg:p-1.5 object-cover object-center"
                     />
                     {image.contentType?.startsWith('video/') && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
