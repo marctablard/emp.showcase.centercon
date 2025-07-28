@@ -103,7 +103,9 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6 mb-10 lg:mb-0">
                 <CardContent className="p-0">
                   <div className="flex flex-col gap-6">
-                    <Heading className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</Heading>
+                    <Heading variant="h2" className="text-white text-4xl font-bold font-headlines">
+                      {t('keySpecs')}
+                    </Heading>
                     <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
                       {Object.keys(product.variantAttributes || {}).map((attribute: string) => (
                         <BulletPoint
