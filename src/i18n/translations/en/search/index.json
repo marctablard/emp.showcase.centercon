@@ -2,6 +2,8 @@
   "searchResults": {
     "showing": "Showing {start}-{end} of {total} products",
     "noProductsFound": "No products found",
-    "tryAdjusting": "Try adjusting your search or filters"
+    "tryAdjusting": "Try adjusting your search or filters",
+    "All Products": "Alle Produkte",
+    "resultsFor": "Results for \"{query}\""
   }
 }

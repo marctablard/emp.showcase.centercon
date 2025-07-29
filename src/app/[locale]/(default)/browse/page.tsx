@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { SearchResultsComponent } from '@/components/search/search-results';
+import { Heading } from '@/components/ui/h';
 import { searchProducts } from '@/lib/ssr/search';
 import { getPageTitle } from '@/lib/ssr/seo';
 import { SearchParams } from '@/platform/services/model/common';
@@ -31,6 +32,7 @@ export default async function BrowsePage({
 }) {
   const { locale } = await params;
   const rawParams = await searchParams;
+  const t = await getTranslations({ locale, namespace: 'search.searchResults' });
 
   // Extract basic search parameters
   const q = rawParams.q as string | undefined;
@@ -51,7 +53,9 @@ export default async function BrowsePage({
 
   return (
     <div className="max-w-6xl mx-auto px-4 lg:px-9 pb-32">
-      <h1 className="text-3xl font-bold mb-6">Product Search</h1>
+      <Heading variant="h2" className="text-3xl font-bold mb-6">
+        {q ? t('resultsFor', { query: q }) : t('allProducts')}
+      </Heading>
 
       {/* Client-side search wrapper */}
       <SearchResultsComponent

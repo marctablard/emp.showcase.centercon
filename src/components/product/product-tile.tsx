@@ -65,11 +65,9 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
     <Link href={`/product/${product.id}`} className="h-full block">
       <Card shadow="default" className="border-0 gap-4 h-full flex flex-col hover:shadow-xl transition">
         <CardHeader className="flex-shrink-0 no-underline">
-          <CardDescription className="font-normal text-base text-neutral-800">
+          <CardDescription className="font-normal text-base text-neutral-800 h-6">
             {l10n(
-              product.brand?.name ||
-                product.specifications?.find((spec) => spec.key === 'manufacturer')?.value ||
-                '...',
+              product.brand?.name || product.specifications?.find((spec) => spec.key === 'manufacturer')?.value || '',
             )}
           </CardDescription>
           <CardTitle className="flex gap-2 justify-between">
@@ -137,9 +135,14 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                 {product.templateAttributes &&
                   Object.entries(product.templateAttributes).map(([key, value]) => (
                     <div key={key} className="flex justify-between">
-                      <p className="text-sm capitalize">{key.replace(/-/g, ' ')}</p>
+                      <p className="text-sm">
+                        {t(`filters.mixins.productTemplateAttributes.${key}`, {
+                          defaultValue: key,
+                        })}
+                      </p>
                       <p className="text-sm font-bold capitalize">
                         {value}
+                        {/* Todo: get unit from product */}
                         {key === 'length' || key === 'width' || key === 'height' ? 'cm' : ''}
                       </p>
                     </div>

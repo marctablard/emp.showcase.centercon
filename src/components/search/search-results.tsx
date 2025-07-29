@@ -14,6 +14,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useSearch } from '@/hooks/search/useSearch';
 import { SearchParams, SearchResult } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
@@ -122,11 +123,14 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
       {/* Product Grid */}
       <div className="mt-6 w-full">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr">
-            {Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (
-              <ProductTileSkeleton key={i} />
-            ))}
-          </div>
+          <>
+            <Skeleton className="h-5 w-[180px] mb-4" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr">
+              {Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (
+                <ProductTileSkeleton key={i} />
+              ))}
+            </div>
+          </>
         ) : (
           <>
             {products.length === 0 ? (

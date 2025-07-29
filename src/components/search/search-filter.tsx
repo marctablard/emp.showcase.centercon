@@ -261,7 +261,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
 
       {/* Submit button */}
       <Button type="submit" className="w-full mt-4">
-        Apply Filters
+        {t('filters.applyFilters')}
       </Button>
     </form>
   );
@@ -276,6 +276,7 @@ function SearchFilter({
   resetAllFacets,
   activeFilters,
 }: SearchFilterProps) {
+  const t = useTranslations('product');
   // Check if there are any active filters
   const hasActiveFilters = Object.keys(activeFilters).length > 0;
   // State to control if the filter offcanvas is visible
@@ -298,7 +299,7 @@ function SearchFilter({
         {hasActiveFilters && (
           <Button variant="red" onClick={resetAllFacets}>
             <Trash2 className="mr-1" />
-            Clear Filter
+            {t('filters.clearFilter')}
           </Button>
         )}
       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { formatCurrency, l10n } from '@/lib/utils';
@@ -73,17 +74,21 @@ const markText = (text: string, keyword?: string): React.ReactNode => {
 // Helper function to render product attributes
 const renderAttributes = (
   attributes: Record<string, string>,
+  t: ReturnType<typeof useTranslations>,
+  attributeType: 'productVariantAttributes' | 'productTemplateAttributes',
   maxItems?: number,
   isBold?: boolean,
   keyword?: string,
 ) => {
   const entries = Object.entries(attributes);
-
   const limitedEntries = maxItems ? entries.slice(0, maxItems) : entries;
 
   return limitedEntries.map(([key, value]) => (
     <p key={key} className={`text-sm ${isBold ? 'font-bold' : ''}`}>
-      {formatAttributeKey(key)}: {markText(value, keyword)}
+      {t(`filters.mixins.${attributeType}.${key}`, {
+        defaultValue: formatAttributeKey(key),
+      })}
+      : {markText(value, keyword)}
     </p>
   ));
 };
@@ -100,13 +105,15 @@ const extractDimensions = (attributes: Record<string, string>) => {
     if (width) dimensions.push(`W: ${formatAttributeKey(width)}`);
     if (length) dimensions.push(`L: ${formatAttributeKey(length)}`);
 
-    return dimensions.length > 0 ? dimensions.join(' ') : null;
+    // Todo: Get unit from product
+    return dimensions.length > 0 ? dimensions.join(' ') + ' cm' : null;
   }
 
   return null;
 };
 
 export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyword }: ProductTileProps) {
+  const t = useTranslations('product');
   const [image] = product.images || [];
   const clickable_id = product.id ? product.id.replaceAll(/<\/?mark>/g, '') : '';
   return (
@@ -133,18 +140,23 @@ export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyw
             )}
           </div>
         )}
-        <div id="details" className="text-md whitespace-normal">
-          <p>{markText(l10n(product.brand?.name ?? '', locale), keyword)}</p>
-          <p>{markText(l10n(product.name, locale), keyword)}</p>
-          <p className="text-sm font-bold">
-            {product.price && formatCurrency(product.price.amount, product.price.currency)}
+        <div>
+          <p className="text-[10px] text-neutral-800 h-[15px]">
+            {markText(
+              l10n(
+                product.brand?.name || product.specifications?.find((spec) => spec.key === 'manufacturer')?.value || '',
+                locale,
+              ),
+              keyword,
+            )}
           </p>
+          <p className="text-[14px] font-headlines text-neutral-800">{markText(l10n(product.name, locale), keyword)}</p>
           {(() => {
-            // TODO make this more dynamic and also localize the keys
+            // TODO make this more dynamic
             // Calculate how many attributes to show in total (max 3)
             const maxTotalAttributes = 3;
             const variantAttributes = product.variantAttributes as Record<string, string> | undefined;
-            const templateAttributes = product.variantAttributes as Record<string, string> | undefined;
+            const templateAttributes = product.templateAttributes as Record<string, string> | undefined;
 
             // Extract dimensions from template attributes if they exist
             const dimensionsLine = templateAttributes ? extractDimensions(templateAttributes) : null;
@@ -164,15 +176,32 @@ export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyw
             return (
               <>
                 {variantAttributes &&
-                  renderAttributes(variantAttributes, Math.min(maxTotalAttributes, variantCount), false, keyword)}
+                  renderAttributes(
+                    variantAttributes,
+                    t,
+                    'productVariantAttributes',
+                    Math.min(maxTotalAttributes, variantCount),
+                    false,
+                    keyword,
+                  )}
                 {dimensionsLine && <p className="text-sm">{markText(dimensionsLine, keyword)}</p>}
                 {filteredTemplateAttributes &&
                   Object.keys(filteredTemplateAttributes).length > 0 &&
                   templateCount > 0 &&
-                  renderAttributes(filteredTemplateAttributes, templateCount, false, keyword)}
+                  renderAttributes(
+                    filteredTemplateAttributes,
+                    t,
+                    'productTemplateAttributes',
+                    templateCount,
+                    false,
+                    keyword,
+                  )}
               </>
             );
           })()}
+          <p className="text-[14px] mt-2 font-headlines font-bold">
+            {product.price && formatCurrency(product.price.amount, product.price.currency)}
+          </p>
         </div>
       </div>
     </Link>

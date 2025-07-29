@@ -2,7 +2,6 @@
 
 import { useMemo, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
 import { Languages } from 'lucide-react';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { Spinner } from '@/components/ui/spinner';
@@ -18,7 +17,10 @@ export function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const params = useParams();
+
+  // Get the current search parameters to preserve them when switching languages
+  const searchParams =
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
 
   // Memoize the language options to avoid recreating objects on each render
   const languageOptions = useMemo(() => {
@@ -38,17 +40,18 @@ export function LanguageSwitcher() {
 
   const switchLocale = (newLocale: string) => {
     startTransition(() => {
+      const searchParamsString = searchParams.toString();
+      const queryString = searchParamsString ? `?${searchParamsString}` : '';
+
       if (newLocale === 'en') {
         // TODO: 'as-needed' seems to have issues working with the replacer method
-        router.push('/en' + pathname, { locale: newLocale, scroll: false });
+        router.push(`/en${pathname}${queryString}`, { locale: newLocale, scroll: false });
       } else {
-        router.replace(
-          // @ts-expect-error -- TypeScript will validate that only known `params`
-          // are used in combination with a given `pathname`. Since the two will
-          // always match for the current route, we can skip runtime checks.
-          { pathname, params: { ...params, locale: newLocale } },
-          { locale: newLocale, scroll: false },
-        );
+        const url = new URL(window.location.origin);
+        url.pathname = pathname.replace(`/${currentLocale}`, `/${newLocale}`);
+        url.search = queryString;
+
+        router.push(url.pathname + url.search, { locale: newLocale, scroll: false });
       }
     });
   };
