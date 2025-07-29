@@ -22,7 +22,7 @@ import { Heading } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { ToastType, notify } from '@/components/ui/toast-notification';
-import useAuthDialog from '@/hooks/auth/useAuthDialog';
+import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { useRouter } from '@/i18n/navigation';

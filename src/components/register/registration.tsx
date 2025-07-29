@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { H1, H2 } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
-import useAuthDialog from '@/hooks/auth/useAuthDialog';
+import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useRegistration } from '@/hooks/registration/useRegistration';
 import useCurrency from '@/hooks/useCurrency';

@@ -1,7 +1,7 @@
 'use client';
 
 import { PasswordResetDialog } from '@/components/password/password-reset-dialog';
-import useAuthDialog from '@/hooks/auth/useAuthDialog';
+import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import { LoginDialog } from '../login';
 
 /**

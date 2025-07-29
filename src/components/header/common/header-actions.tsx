@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Gauge, Pin, Search, User, UserCheck } from 'lucide-react';
 import { HeaderIconButton } from '@/components/header/common/header-icon-button';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
-import useAuthDialog from '@/hooks/auth/useAuthDialog';
+import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 

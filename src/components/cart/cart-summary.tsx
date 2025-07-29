@@ -1,7 +1,7 @@
 import { RefObject, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Info, LockKeyhole } from 'lucide-react';
-import useAuthDialog from '@/hooks/auth/useAuthDialog';
+import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useElementScroll } from '@/hooks/ui/useElementScroll';

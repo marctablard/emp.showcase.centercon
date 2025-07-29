@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import useAuthDialog from '@/hooks/auth/useAuthDialog';
+import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 
 /**
  * Client component that handles opening the login dialog
