@@ -2,7 +2,6 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Circle, DropletOff, Globe, LucideIcon, MapPin, Pin, Shield, ShoppingCart, Trees, Truck } from 'lucide-react';
-import { toast } from 'sonner';
 import { ProductCharacteristic } from '@/components/product/product-characteristic';
 import { ProductTag } from '@/components/product/product-tag';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +14,7 @@ import { useL10n } from '@/hooks/useL10n';
 import { Link } from '@/i18n/navigation';
 import { formatCurrency, imageSizes } from '@/lib/utils';
 import { Product } from '@/platform/services/model/product';
+import { ToastType, notify } from '../ui/toast-notification';
 
 interface ProductTileProps {
   product: Product;
@@ -36,13 +36,15 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
 
       await addItem(product.id, 1);
 
-      toast.success(t('addedToCart'), {
-        description: `${product.name} ${t('addedToCartDescription')}`,
+      notify({
+        title: `${l10n(product.name)} ${t('addedToCartDescription')}`,
+        type: ToastType.Success,
       });
     } catch (error) {
       console.error('Error adding to cart:', error);
-      toast.error(t('errorAddingToCart'), {
-        description: error instanceof Error ? error.message : String(error),
+      notify({
+        title: error instanceof Error ? error.message : String(error),
+        type: ToastType.Error,
       });
     }
   };
