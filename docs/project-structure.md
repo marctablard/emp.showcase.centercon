@@ -6,9 +6,8 @@ This document provides an overview of the project's directory structure and the 
 
 ```
 emporix-showcase/
-├── docs/                   # Project documentation
+├── docs/                   # Project documentation <- you are here
 ├── e2e/                    # End-to-end tests
-├── i18n/                   # Internationalization files
 ├── public/                 # Static assets
 ├── resources/              # Additional resources
 ├── scripts/                # Utility scripts
@@ -38,6 +37,7 @@ emporix-showcase/
 │   │   └── ui/             # UI components
 │   ├── hooks/              # Custom React hooks
 │   ├── i18n/               # i18n configuration
+│   |   └── translations/   # Localization files
 │   ├── lib/                # Shared libraries
 │   ├── platform/           # Core business logic
 │   │   ├── core/           # Core functionality
