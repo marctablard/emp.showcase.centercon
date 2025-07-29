@@ -47,6 +47,9 @@ export default function ProductDetail({ product: initialProduct, price, classNam
     if (product) {
       setAsCurrent();
     }
+    return () => {
+      setAsCurrent(false);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 

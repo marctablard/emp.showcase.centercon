@@ -16,7 +16,7 @@ export type ProductActions = {
   getProduct: (id: string) => Product | null;
   getProducts: (ids: string[]) => Product[];
   getCurrentProduct: () => Product | null;
-  setCurrentProduct: (product: Product) => void;
+  setCurrentProduct: (product: Product | null) => void;
   addProduct: (product: Product) => void;
   addProducts: (products: Product[]) => void;
 };
@@ -31,9 +31,9 @@ const defaultState: ProductState = {
 export const createProductStore = (initState: ProductState = defaultState) => {
   return create<ProductStore>()((set, get) => ({
     ...initState,
-    setCurrentProduct: (product: Product) =>
+    setCurrentProduct: (product: Product | null) =>
       set((state) => {
-        if (product.id == state.currentProductId) {
+        if (product?.id == state.currentProductId) {
           return state;
         }
         if (product) {

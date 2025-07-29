@@ -90,5 +90,4 @@ next-env.d.ts
 /playwright/.cache/
 
 # Generated translation files
-/src/i18n/translations/de.json
-/src/i18n/translations/en.json
+/src/i18n/translations/*.json

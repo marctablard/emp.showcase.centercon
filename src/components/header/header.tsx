@@ -18,24 +18,9 @@ export function Header() {
     setIsMounted(true);
   }, []);
 
-  // SSR-Fallback: Shows the desktop variant on first render
-  if (!isMounted) {
-    return (
-      <div className="has-[.search]:fixed has-[.search]:backdrop-blur-xs has-[.search]:z-60 h-full w-full relative">
-        <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
-          <header className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl relative transition-all duration-200 ease-in-out mx-4 lg:mx-9 h-[169px]">
-            <div className="transition-all duration-200 ease-in-out absolute top-0 left-0 right-0 w-full opacity-100 z-2">
-              <HeaderExpanded {...searchInput} />
-            </div>
-          </header>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="has-[.search]:fixed has-[.search]:backdrop-blur-xs has-[.search]:z-60 h-full w-full relative">
-      {isMediumScreen ? (
+      {!isMounted || isMediumScreen ? (
         /* Desktop & Tablet */
         <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
           <header

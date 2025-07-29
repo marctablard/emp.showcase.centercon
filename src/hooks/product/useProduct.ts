@@ -7,21 +7,26 @@ import { Product } from '@/platform/services/model/product';
 import { useProductStore } from '@/providers/StoreProvider';
 
 interface UseProductResult {
+  currentProductId: string | null;
   product: Product | null;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
-  setAsCurrent: () => void;
+  setAsCurrent: (isCurrent?: boolean) => void;
 }
 
 export const useProduct = (productOrId?: string | Product): UseProductResult => {
   const { getProduct, setCurrentProduct, addProduct, currentProductId } = useProductStore();
   let id: string | undefined;
-  if ((productOrId as Product).id) {
-    addProduct(productOrId as Product);
-    id = (productOrId as Product).id;
+  if (!productOrId) {
+    id = currentProductId || undefined;
   } else {
-    id = productOrId as string;
+    if ((productOrId as Product).id) {
+      addProduct(productOrId as Product);
+      id = (productOrId as Product).id;
+    } else {
+      id = productOrId as string;
+    }
   }
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -65,11 +70,16 @@ export const useProduct = (productOrId?: string | Product): UseProductResult => 
 
   const { addLastSeenProduct } = useHistory();
 
-  const setAsCurrent = useCallback(() => {
-    if (product) {
-      setCurrentProduct(product);
-    }
-  }, [product, setCurrentProduct]);
+  const setAsCurrent = useCallback(
+    (isCurrent: boolean = true) => {
+      if (product && isCurrent) {
+        setCurrentProduct(product);
+      } else {
+        setCurrentProduct(null);
+      }
+    },
+    [product, setCurrentProduct],
+  );
 
   useEffect(() => {
     if (currentProductId) {
@@ -88,6 +98,7 @@ export const useProduct = (productOrId?: string | Product): UseProductResult => 
   }, [id, fetchProduct]);
 
   return {
+    currentProductId,
     product,
     loading,
     error,
