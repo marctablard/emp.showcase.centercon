@@ -166,16 +166,18 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
           </div>
         )}
         <div className="col-start-2 row-start-2 md:col-start-4 md:row-start-1 md:row-end-3 lg:col-start-4 flex flex-col gap-1 ps-4 md:ps-0">
-          {isStrike && (
-            <p className={cn('line-through md:text-end', isStrike && 'text-danger-500')}>
-              {formatCurrency(item.price.amount, item.price.currency)}
+          {item.price.originalAmount && item.price.originalAmount !== item.price.amount && (
+            <p className="line-through md:text-end text-danger-500">
+              {formatCurrency(item.price.originalAmount, item.price.currency)}
             </p>
           )}
-          <div className="font-bold md:text-end">{formatCurrency(item.price.amount, item.price.currency)}</div>
+          <div className="font-bold md:text-end">
+            {formatCurrency(item.tax?.netValue || item.price.amount, item.price.currency)}
+          </div>
           {item.tax?.netValue && (
             <span className="text-xs text-neutral-300 md:text-end">
-              {t('net')}
-              {formatCurrency(item.tax?.netValue, item.price.currency)}
+              {t('gross')}
+              {formatCurrency(item.tax?.grossValue, item.price.currency)}
             </span>
           )}
         </div>
