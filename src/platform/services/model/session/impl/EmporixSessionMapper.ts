@@ -12,6 +12,8 @@ import type { Session, SessionAttribute } from '../session';
  */
 @injectable('EmporixSessionMapper', 'Singleton')
 export class EmporixSessionMapper implements SessionMapper<EmporixSessionContext, EmporixContextAttribute> {
+  private defaultCurrency = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'EUR';
+  private defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
   /**
    * Maps from integration layer SessionContext to service layer Session
    */
@@ -27,11 +29,14 @@ export class EmporixSessionMapper implements SessionMapper<EmporixSessionContext
         };
       });
     }
-
+    // adjust for default site
+    if (source.siteCode === 'default') {
+      source.siteCode = this.defaultSite;
+    }
     return {
       id: source.sessionId,
-      currency: source.currency,
-      siteCode: source.siteCode,
+      currency: source.currency || this.defaultCurrency,
+      siteCode: source.siteCode || this.defaultSite,
       language: source.context?.['language'],
       country: source.targetLocation,
       region: source.context?.['region'],

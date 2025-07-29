@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
+import { useCheckout } from '../checkout/useCheckout';
 
 interface AuthenticationHook {
   isAuthenticated: boolean;
@@ -29,6 +30,7 @@ export const useAuthentication = (): AuthenticationHook => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(session.status === 'authenticated');
   const [loading, setLoading] = useState<boolean>(session.status === 'loading');
   const [error, setError] = useState<Error | null>(null);
+  const { reset } = useCheckout();
   const router = useRouter();
 
   // Update authentication state when session status changes
@@ -67,6 +69,8 @@ export const useAuthentication = (): AuthenticationHook => {
 
   const logout = async (): Promise<void> => {
     try {
+      setLoading(true);
+      reset();
       await signOut({
         callbackUrl: '/',
       });

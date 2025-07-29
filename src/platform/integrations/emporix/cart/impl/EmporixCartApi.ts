@@ -81,12 +81,13 @@ class EmporixCartApi implements IEmporixCartApi {
     return await response.json();
   }
 
+  // TODO needs resolution of DCPS-16828
   async getCartByCriteria(
     siteCode: string,
     sessionId?: string,
     customerId?: string,
     type?: string,
-  ): Promise<EmporixCart | undefined> {
+  ): Promise<EmporixCart | null> {
     const queryParams = new URLSearchParams();
     queryParams.append('siteCode', siteCode);
 
@@ -110,13 +111,18 @@ class EmporixCartApi implements IEmporixCartApi {
 
     if (!response.ok) {
       if (response.status === 404) {
-        return undefined;
+        return null;
       }
       const errorDetails = await response.text();
       throw new Error(`Failed to get cart by criteria: ${response.statusText} ${errorDetails}`);
     }
-
-    return await response.json();
+    const cart: EmporixCart = await response.json();
+    if (cart.sessionId !== sessionId || cart.customerId !== customerId) {
+      // TODO needs resolution of DCPS-16828, known error, so this is a workaround
+      console.warn('Cart does not belong to this session, intercepted by workaround');
+      return null;
+    }
+    return cart;
   }
 
   async addItemToCart(cartId: string, item: EmporixAddCartItemRequest): Promise<string> {

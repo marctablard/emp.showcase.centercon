@@ -11,10 +11,11 @@ export interface SessionAttribute {
  */
 export interface Session {
   id: string;
-  currency?: string;
-  siteCode?: string;
+  currency: string;
+  siteCode: string;
   language?: string;
   country?: string;
   region?: string;
+  cartId?: string;
   attributes?: Record<string, SessionAttribute>;
 }

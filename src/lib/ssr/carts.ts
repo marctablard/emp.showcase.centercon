@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { CartService } from '@/platform/services/cart';
 import { Cart } from '@/platform/services/model/cart/cart';
-import { getCartIdFromCookie } from '../server/utils';
+import { getSession } from './session';
 
 /**
  * Get the cart service instance from the platform container
@@ -27,7 +27,11 @@ const getCartById = cache(async (cartId: string): Promise<Cart | null | undefine
  * This should be used in server components to get the current cart
  */
 export async function getCurrentCart(): Promise<Cart | null | undefined> {
-  const cartId = await getCartIdFromCookie('main', 'EUR');
+  const session = await getSession();
+  if (!session) {
+    return undefined;
+  }
+  const cartId = session.cartId;
   if (!cartId) {
     return undefined;
   }
