@@ -22,6 +22,16 @@ const getCartById = cache(async (cartId: string): Promise<Cart | null | undefine
   }
 });
 
+const getCart = cache(async (): Promise<Cart | null | undefined> => {
+  try {
+    const cart = await getCartService().getCart();
+    return cart;
+  } catch (_error) {
+    // on SSR we fail with undefined, so the Client can refetch if necessary
+    return undefined;
+  }
+});
+
 /**
  * Get the current cart
  * This should be used in server components to get the current cart
@@ -33,7 +43,7 @@ export async function getCurrentCart(): Promise<Cart | null | undefined> {
   }
   const cartId = session.cartId;
   if (!cartId) {
-    return undefined;
+    return getCart();
   }
 
   return getCartById(cartId);

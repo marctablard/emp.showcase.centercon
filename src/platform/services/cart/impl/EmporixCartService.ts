@@ -60,6 +60,7 @@ class EmporixCartService implements CartService {
     }
   }
 
+  // TODO Not used because of inconsistent Session/cart Handling
   async getCart(): Promise<Cart | null> {
     const session = await this.sessionContextApi.getOwnSessionContext();
     if (!session) {
@@ -75,15 +76,22 @@ class EmporixCartService implements CartService {
   }
 
   async getCartById(id: string): Promise<Cart | null> {
-    const cart = await this.cartApi.getCart(id);
     const session = await this.sessionContextApi.getOwnSessionContext();
     if (!session) {
       throw new Error('Failed to get session context');
     }
-    if (cart?.customerId != session.customerId) {
+    const cart = await this.cartApi.getCart(id);
+    if (!cart) {
+      return null;
+    }
+    if (session.customerId == 'ANONYMOUS') {
+      if (cart.customerId || cart.sessionId != session.sessionId) {
+        throw new Error('Cart does not belong to this session');
+      }
+    } else if (cart.customerId != session.customerId) {
       throw new Error('Cart does not belong to this customer');
     }
-    return cart ? this.mapper.mapToService(cart) : null;
+    return this.mapper.mapToService(cart);
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<string> {
