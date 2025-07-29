@@ -246,7 +246,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             </div>
           </div>
         </>
-        <div className="lg:col-start-2 row-start-1 h-6">
+        <div className="lg:col-start-2 row-start-1 h-[50px]">
           <div>
             <div className="flex justify-between">
               <div className="flex gap-2">

@@ -101,28 +101,31 @@ export default function ProductAddToCart({
             <Button
               variant="secondary"
               size="icon"
-              className="rounded-tr-none rounded-br-none"
+              className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm disabled:border-neutral-300 transition duration-200 ease-in-out"
               onClick={decrementQuantity}
               aria-label={t('decrement')}
               disabled={quantity <= 1}
             >
               <LucideMinus />
             </Button>
-            <Input
-              id="quantity"
-              type="number"
-              min="1"
-              aria-label={t('quantity')}
-              className="w-full text-center rounded-none lg:min-w-16 md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
-              value={quantity}
-              onChange={handleQuantityChange}
-            />
+            <div className="w-full h-13 border-y border-neutral-300">
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                aria-label={t('quantity')}
+                className="w-full h-full py-3 text-center border-none md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
+                value={quantity}
+                onChange={handleQuantityChange}
+              />
+            </div>
             <Button
               variant="secondary"
               size="icon"
-              className="rounded-tl-none rounded-bl-none"
+              className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm disabled:border-neutral-300 transition duration-200 ease-in-out"
               aria-label={t('increment')}
               onClick={incrementQuantity}
+              disabled={quantity >= 99}
             >
               <LucidePlus />
             </Button>
@@ -138,7 +141,6 @@ export default function ProductAddToCart({
           onClick={handleAddToCart}
           disabled={cart === undefined || adding || !price}
         >
-          {!isAddToCartBar && <LucideShoppingCart />}
           {t('addToCart')}
           <LucideShoppingCart className="hidden md:inline" />
         </Button>
