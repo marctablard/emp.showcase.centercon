@@ -286,3 +286,7 @@
     }
   }
 }
+
+[data-sonner-toaster][data-sonner-theme='light'] {
+  width: 100%;
+}

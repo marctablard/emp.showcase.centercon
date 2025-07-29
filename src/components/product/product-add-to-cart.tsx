@@ -1,16 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { LucideMinus, LucidePlus, LucideShoppingCart } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/cart/useCart';
 import { useProduct } from '@/hooks/product/useProduct';
+import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
+import { ToastType, notify } from '../ui/toast-notification';
 
 // Client component that uses the product signal
 export default function ProductAddToCart({
@@ -29,6 +30,8 @@ export default function ProductAddToCart({
   const { addItem, cart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
+  const locale = useLocale();
+  const { l10n } = useL10n(locale);
 
   if (productLoading) {
     return (
@@ -60,14 +63,15 @@ export default function ProductAddToCart({
       if (!product) return;
       setAdding(true);
       await addItem(product.id, quantity);
-
-      toast.success(t('addedToCart'), {
-        description: `${quantity} × ${product.name} ${t('addedToCartDescription')}`,
+      notify({
+        title: `${quantity} × ${l10n(product.name)} ${t('addedToCartDescription')}`,
+        type: ToastType.Success,
       });
     } catch (error) {
       console.error('Error adding to cart:', error);
-      toast.error(t('errorAddingToCart'), {
-        description: error instanceof Error ? error.message : String(error),
+      notify({
+        title: error instanceof Error ? error.message : String(error),
+        type: ToastType.Error,
       });
     } finally {
       setAdding(false);

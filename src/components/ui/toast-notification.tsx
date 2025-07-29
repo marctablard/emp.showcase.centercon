@@ -26,7 +26,7 @@ export interface NotificationProps {
   id: string | number;
   title: string;
   duration?: number;
-  button: {
+  button?: {
     label: string;
     onClick: () => void;
   };
@@ -57,18 +57,7 @@ function toast(toast: Omit<ToastProps, 'id'>) {
 
 function notify(toast: Omit<NotificationProps, 'id'>) {
   return sonnerToast.custom(
-    (id) => (
-      <Notification
-        id={id}
-        title={toast.title}
-        duration={toast.duration || 5000}
-        button={{
-          label: toast.button.label,
-          onClick: toast.button.onClick,
-        }}
-        type={toast.type}
-      />
-    ),
+    (id) => <Notification id={id} title={toast.title} duration={toast.duration || 5000} type={toast.type} />,
     {
       position: 'top-center',
       duration: toast.duration || 5000,
@@ -170,7 +159,7 @@ function Notification(props: NotificationProps) {
         <div
           className="flex justify-end items-center"
           onClick={() => {
-            button.onClick();
+            button?.onClick();
             sonnerToast.dismiss(id);
           }}
         >
