@@ -3,10 +3,9 @@ import React from 'react';
 export interface MarkedTextProps {
   text: string;
   keyword?: string;
-  className?: string;
 }
 
-export function MarkedText({ text, keyword = '<mark>', className }: MarkedTextProps) {
+export function MarkedText({ text, keyword = '<mark>' }: MarkedTextProps) {
   const parts = text
     .replace(new RegExp(keyword.trim().split(' ').join('|'), 'gi'), (match) => `<mark>${match}</mark>`)
     .split('<mark>')
@@ -14,7 +13,7 @@ export function MarkedText({ text, keyword = '<mark>', className }: MarkedTextPr
     .flat();
 
   return (
-    <p className={className}>
+    <>
       {parts.map((part, index) =>
         index % 2 === 0 ? (
           part
@@ -24,7 +23,7 @@ export function MarkedText({ text, keyword = '<mark>', className }: MarkedTextPr
           </span>
         ),
       )}
-    </p>
+    </>
   );
 }
 

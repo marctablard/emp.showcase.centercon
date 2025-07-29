@@ -9,13 +9,20 @@ import useAuthDialog from '@/hooks/auth/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
-export function HeaderActions({ className }: { className?: string }) {
+export function HeaderActions({
+  className,
+  onToggleSearch,
+  hideSearchIcon,
+}: {
+  className?: string;
+  onToggleSearch?: () => void;
+  hideSearchIcon?: boolean;
+}) {
   const t = useTranslations('layout.header');
   const { isAuthenticated, loading } = useAuthentication();
   const { openDialog } = useAuthDialog();
   const [isMounted, setIsMounted] = useState(false);
   const isMediumScreen = useBreakpoint('md');
-  const isLargeScreen = useBreakpoint('lg');
 
   useEffect(() => {
     setIsMounted(true);
@@ -25,7 +32,7 @@ export function HeaderActions({ className }: { className?: string }) {
   if (!isMounted) {
     return (
       <div className={`flex items-center gap-5 text-nowrap ${className}`}>
-        <div className="hidden md:block lg:hidden">
+        <div className="hidden md:block">
           <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />
         </div>
         <HeaderIconButton icon={User} text={t('signIn')} onClick={() => {}} />
@@ -43,7 +50,9 @@ export function HeaderActions({ className }: { className?: string }) {
 
   return (
     <div className={`flex items-center gap-5 text-nowrap ${className}`}>
-      {isMediumScreen && !isLargeScreen && <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />}
+      {onToggleSearch && !hideSearchIcon && isMediumScreen && (
+        <HeaderIconButton icon={Search} text={t('shortSearch')} onClick={onToggleSearch} />
+      )}
 
       {isAuthenticated ? (
         <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />

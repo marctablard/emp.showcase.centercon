@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 
-interface LogoProps {
+interface HeaderLogoProps {
   small?: boolean;
   width?: number;
   height?: number;
@@ -10,7 +10,7 @@ interface LogoProps {
   title?: string;
 }
 
-export const Logo = ({ small = false, width, height, className, title }: LogoProps) => {
+export const HeaderLogo = ({ small = false, width, height, className, title }: HeaderLogoProps) => {
   const t = useTranslations('common');
 
   // Default dimensions based on logo variant

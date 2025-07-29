@@ -113,7 +113,7 @@ export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyw
     <Link href={`/product/${clickable_id}`} onClick={onProductClick}>
       <div className="flex">
         {product.images && (
-          <div className="mr-3 bg-gray-100 w-[100px] h-[144px] rounded-tl-md rounded-br-md flex align-center justify-center">
+          <div className="mr-3 bg-gray-100 w-[100px] h-[144px] rounded-tl-md rounded-br-md flex align-center justify-center flex-shrink-0">
             {image ? (
               <Image
                 className="object-contain"
@@ -123,21 +123,19 @@ export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyw
                 alt={l10n(image?.altText || '', locale) || ''}
               />
             ) : (
-              <div className="w-[100px] h-[144px] bg-gray-100 rounded-tl-md rounded-br-md flex align-center justify-center">
-                <Image
-                  className="object-contain"
-                  src={'/images/no_image_alt.png'}
-                  height={90}
-                  width={90}
-                  alt={l10n(product.name, locale) || ''}
-                />
-              </div>
+              <Image
+                className="object-contain"
+                src={'/images/no_image_alt.png'}
+                height={90}
+                width={90}
+                alt={l10n(product.name, locale) || ''}
+              />
             )}
           </div>
         )}
-        <div id="details text-md">
+        <div id="details" className="text-md whitespace-normal">
           <p>{markText(l10n(product.brand?.name ?? '', locale), keyword)}</p>
-          <p className="text-md">{markText(l10n(product.name, locale), keyword)}</p>
+          <p>{markText(l10n(product.name, locale), keyword)}</p>
           <p className="text-sm font-bold">
             {product.price && formatCurrency(product.price.amount, product.price.currency)}
           </p>

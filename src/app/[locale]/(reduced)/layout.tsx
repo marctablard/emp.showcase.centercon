@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import Footer, { FooterWrapper, LegalFooter } from '@/components/footer/footer';
-import { HeaderReduced } from '@/components/header/header-reduced';
+import { HeaderCheckout } from '@/components/header/header-checkout';
 
 type Props = {
   children: ReactNode;
@@ -9,7 +9,7 @@ type Props = {
 export default async function LocaleLayout({ children }: Props) {
   return (
     <>
-      <HeaderReduced />
+      <HeaderCheckout />
       <main className="flex-grow mt-28">{children}</main>
       <FooterWrapper>
         <Footer reduced />

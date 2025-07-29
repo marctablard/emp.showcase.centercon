@@ -1,13 +1,17 @@
 import React, { Dispatch, SetStateAction } from 'react';
-import { History, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import UiLink from '@/components/ui/link';
 import useHistory from '@/hooks/history/useHistory';
+import MarkedText from './marked-text';
 
 export interface QueryCompletionsProps {
   isProductsShown: boolean;
   queryCompletions: string[];
   setQuery: Dispatch<SetStateAction<string>>;
   onQuerySelect?: (query: string) => void;
+  query: string;
 }
 
 export function QueryCompletions({
@@ -15,26 +19,46 @@ export function QueryCompletions({
   queryCompletions,
   setQuery,
   onQuerySelect,
+  query,
 }: QueryCompletionsProps) {
-  const { searchHistory } = useHistory();
+  const { searchHistory, clearSearchHistory } = useHistory();
   const completions = isProductsShown ? queryCompletions : searchHistory;
+  const t = useTranslations('layout.header');
+
   return (
-    <div id="query-completions" className="col-span-5">
-      {completions.map((queryCompletion) => (
-        <Button
-          onClick={() => {
-            setQuery(queryCompletion);
-            if (onQuerySelect) {
-              onQuerySelect(queryCompletion);
-            }
-          }}
-          key={queryCompletion}
-          className="p-2 bg-gray-300 rounded-xs mr-6 mb-6"
-        >
-          {isProductsShown ? <Search /> : <History />} {queryCompletion}
-        </Button>
-      ))}
-    </div>
+    completions.length > 0 && (
+      <div id="query-completions" className="col-span-5 flex flex-wrap gap-4 mb-2">
+        {completions.map((queryCompletion) => (
+          <Button
+            onClick={() => {
+              setQuery(queryCompletion);
+              if (onQuerySelect) {
+                onQuerySelect(queryCompletion);
+              }
+            }}
+            key={queryCompletion}
+            className="min-w-0 p-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 flex shrink-1 font-normal"
+          >
+            {isProductsShown ? (
+              <span className="truncate w-full max-w-full text-left md:max-w-[48ch]">
+                <MarkedText text={queryCompletion} keyword={query} />
+              </span>
+            ) : (
+              <>
+                <History />
+                <span className="truncate w-full max-w-full text-left md:max-w-[48ch]">{queryCompletion}</span>
+              </>
+            )}
+          </Button>
+        ))}
+
+        {!isProductsShown && (
+          <UiLink type="Button" className="text-neutral-900 font-normal" onClick={clearSearchHistory}>
+            {t('clearHistory')}
+          </UiLink>
+        )}
+      </div>
+    )
   );
 }
 

@@ -10,6 +10,7 @@
     "searchButton": "Open Search",
     "suggestedProducts": "Suggested Products",
     "lastSeenProducts": "Last seen Products",
+    "showAllProducts": "Show all products",
     "blog": "Blog",
     "newsletter": "Newsletter",
     "offerRequest": "Offer Request",
@@ -26,7 +27,11 @@
     "close": "Close",
     "viewCart": "View shopping cart",
     "goToHomepage": "Go to homepage",
-    "searchProducts": "Search products"
+    "searchProducts": "Search products",
+    "noResults": "We're sorry – there are no product matches for your search.",
+    "doubleCheck": "Double-check your search for any typos or spelling mistakes, or try using a different search term.",
+    "commonSearch": "Here are common search queries from other customers:",
+    "clearHistory": "delete search history"
   },
   "footer": {
     "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",

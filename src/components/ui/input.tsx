@@ -58,83 +58,84 @@ const inputVariants = cva(
   },
 );
 
-function Input({ className, type, startIcon, endIcon, isButton, onEndIconClick, ...props }: InputProps) {
-  const StartIcon = startIcon;
-  const EndIcon = endIcon;
-  const dataSuccess = 'data-success' in props ? (props['data-success'] as boolean) : false;
-  const dataDirtySuccess = 'data-dirty-success' in props ? (props['data-dirty-success'] as boolean) : false;
-  const dataDirtyError = 'data-dirty-error' in props ? (props['data-dirty-error'] as boolean) : false;
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, startIcon, endIcon, isButton, onEndIconClick, ...props }, ref) => {
+    const StartIcon = startIcon;
+    const EndIcon = endIcon;
+    const dataSuccess = 'data-success' in props ? (props['data-success'] as boolean) : false;
+    const dataDirtySuccess = 'data-dirty-success' in props ? (props['data-dirty-success'] as boolean) : false;
+    const dataDirtyError = 'data-dirty-error' in props ? (props['data-dirty-error'] as boolean) : false;
 
-  return (
-    <div
-      className={cn(
-        'w-full relative',
-        'transition hover:text-primary-700 hover:bg-white',
-        dataSuccess && 'text-success-500 border-success-500',
-        props.disabled && 'text-neutral-600 border-neutral-300 hover:text-neutral-600',
-        props['aria-invalid'] && 'border-danger-500 text-danger-500',
-      )}
-    >
-      {StartIcon && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-          <StartIcon size={24} />
-        </div>
-      )}
-      <input
-        type={type}
-        data-slot="input"
+    return (
+      <div
         className={cn(
-          inputVariants({
-            isButton: !!isButton,
-            startIcon: !!startIcon,
-            endIcon: !!endIcon,
-            dataDirtySuccess: !!dataDirtySuccess,
-            dataDirtyError: !!dataDirtyError,
-            className,
-          }),
+          'w-full relative',
+          'transition hover:text-primary-700 hover:bg-white',
+          dataSuccess && 'text-success-500 border-success-500',
+          props.disabled && 'text-neutral-600 border-neutral-300 hover:text-neutral-600',
+          props['aria-invalid'] && 'border-danger-500 text-danger-500',
         )}
-        {...props}
-      />
-
-      {EndIcon && (
-        <div
+      >
+        {StartIcon && (
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <StartIcon size={24} />
+          </div>
+        )}
+        <input
+          ref={ref}
+          type={type}
+          data-slot="input"
           className={cn(
-            'absolute right-3 top-1/2 transform -translate-y-1/2',
-            onEndIconClick && 'cursor-pointer hover:text-primary-700',
+            inputVariants({
+              isButton: !!isButton,
+              startIcon: !!startIcon,
+              endIcon: !!endIcon,
+              dataDirtySuccess: !!dataDirtySuccess,
+              dataDirtyError: !!dataDirtyError,
+              className,
+            }),
           )}
-          onClick={onEndIconClick}
-          role={onEndIconClick ? 'button' : undefined}
-          tabIndex={onEndIconClick ? 0 : undefined}
-          aria-label={onEndIconClick ? 'Toggle visibility' : undefined}
-        >
-          <EndIcon size={24} />
-        </div>
-      )}
-    </div>
-  );
-}
+          {...props}
+        />
 
-function InputButton({
-  startIcon,
-  endIcon,
-  iconButtonBefore,
-  iconButtonAfter,
-  buttonText,
-  buttonLabel,
-  ...props
-}: InputProps) {
-  const ButtonStartIcon = iconButtonBefore;
-  const ButtonEndIcon = iconButtonAfter;
-  return (
-    <div className={cn('flex items-center')}>
-      <Input startIcon={startIcon} endIcon={endIcon} isButton {...props} />
-      <Button variant="input" aria-label={buttonLabel}>
-        {ButtonStartIcon && <ButtonStartIcon />}
-        {buttonText}
-        {ButtonEndIcon && <ButtonEndIcon />}
-      </Button>
-    </div>
-  );
-}
+        {EndIcon && (
+          <div
+            className={cn(
+              'absolute right-3 top-1/2 transform -translate-y-1/2',
+              onEndIconClick && 'cursor-pointer hover:text-primary-700',
+            )}
+            onClick={onEndIconClick}
+            role={onEndIconClick ? 'button' : undefined}
+            tabIndex={onEndIconClick ? 0 : undefined}
+            aria-label={onEndIconClick ? 'Toggle visibility' : undefined}
+          >
+            <EndIcon size={24} />
+          </div>
+        )}
+      </div>
+    );
+  },
+);
+
+Input.displayName = 'Input';
+
+const InputButton = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ startIcon, endIcon, iconButtonBefore, iconButtonAfter, buttonText, buttonLabel, ...props }, ref) => {
+    const ButtonStartIcon = iconButtonBefore;
+    const ButtonEndIcon = iconButtonAfter;
+    return (
+      <div className={cn('flex items-center')}>
+        <Input ref={ref} startIcon={startIcon} endIcon={endIcon} isButton {...props} />
+        <Button variant="input" aria-label={buttonLabel}>
+          {ButtonStartIcon && <ButtonStartIcon />}
+          {buttonText}
+          {ButtonEndIcon && <ButtonEndIcon />}
+        </Button>
+      </div>
+    );
+  },
+);
+
+InputButton.displayName = 'InputButton';
 
 export { Input, InputButton, inputVariants };

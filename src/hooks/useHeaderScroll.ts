@@ -43,7 +43,7 @@ export function useHeaderScroll(options?: UseHeaderScrollOptions) {
   const getHeaderHeight = () => {
     if (!scrolled) {
       if (isLargeScreen) return 'h-[169px]';
-      return 'h-[111px]';
+      return 'h-[116px]';
     }
 
     return '';

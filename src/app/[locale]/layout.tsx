@@ -80,7 +80,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   setRequestLocale(locale);
   return (
     <html lang={locale} className={`${ubuntu.variable} ${openSans.variable} ${ubuntu.className} ${openSans.className}`}>
-      <body className="flex h-full flex-col font-body">
+      <body className="flex h-full flex-col font-body has-[.search]:overflow-hidden">
         <AuthSessionProvider session={authSession}>
           <NextIntlClientProvider locale={locale}>
             <StoreProvider shopSession={shopSession} site={site} availableSites={availableSites}>

@@ -1,28 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { useSearch } from '@/hooks/useSearch';
+import { useSearch } from '@/hooks/search/useSearch';
+import { SearchInputProps } from '@/hooks/search/useSearchInput';
 import { cn } from '@/lib/utils';
 import { Product } from '@/platform/services/model/product';
 import { SearchFlyOut } from './search-fly-out';
 
 export interface HeaderSearchProps {
-  small?: boolean;
+  small: boolean;
+  show?: boolean;
+  searchInput: SearchInputProps;
+  isCollapsedHeader?: boolean;
   className?: string;
 }
 
-export function HeaderSearch({ small = false, className }: HeaderSearchProps) {
+export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, className }: HeaderSearchProps) {
   const t = useTranslations('layout.header');
   const router = useRouter();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasInitialSearch, setHasInitialSearch] = useState(false);
-  const [hasInputFocus, setHasInputFocus] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const isLargeScreen = useBreakpoint('lg');
+  const { deactivateSearch, showSearch, hasInputFocus, setHasInputFocus } = searchInput;
 
   // Get the current locale
   const locale = useLocale();
@@ -35,17 +37,29 @@ export function HeaderSearch({ small = false, className }: HeaderSearchProps) {
   const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (hasInputFocus) {
+      const raf = requestAnimationFrame(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [hasInputFocus]);
+
   // redirect to /browse with the search terms
-  const redirectToBrowse = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push(`/browse?q=${query}`);
+  const redirectToBrowse = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    deactivateSearch();
     setShowSuggestions(false);
-    setHasInputFocus(false);
+    router.push(`/browse?q=${query}`);
     inputRef.current?.blur();
   };
 
@@ -79,22 +93,22 @@ export function HeaderSearch({ small = false, className }: HeaderSearchProps) {
     (event: MouseEvent) => {
       // Check if the click is outside both the input field and suggestions component
       if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node) &&
+        formRef.current &&
+        !formRef.current.contains(event.target as Node) &&
         (!showSuggestions || (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)))
       ) {
+        deactivateSearch();
         setShowSuggestions(false);
-        setHasInputFocus(false);
       }
     },
-    [inputRef, suggestionsRef, showSuggestions],
+    [formRef, suggestionsRef, showSuggestions, deactivateSearch],
   );
 
   // Function to close the flyout when a product is clicked
   const handleProductClick = useCallback(() => {
+    deactivateSearch();
     setShowSuggestions(false);
-    setHasInputFocus(false);
-  }, []);
+  }, [deactivateSearch]);
 
   // Function to handle query selection from suggestions
   const handleQuerySelect = useCallback(
@@ -118,7 +132,7 @@ export function HeaderSearch({ small = false, className }: HeaderSearchProps) {
   // SSR-Fallback: Always shows the large variant on first render
   if (!isMounted) {
     return (
-      <div className="z-50 relative transition-all transition-discrete duration-350 w-full max-w-180">
+      <div className="z-50 relative transition-all transition-discrete duration-200 w-full max-w-180">
         <form>
           <Input
             placeholder={t('search')}
@@ -137,37 +151,48 @@ export function HeaderSearch({ small = false, className }: HeaderSearchProps) {
     );
   }
 
-  if (!isLargeScreen) {
-    return null;
-  }
-
   return (
     <div
       className={cn(
-        `z-50 relative transition-all transition-discrete duration-350 w-full ${hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180'}`,
+        `z-50 relative transition-opacity transition-discrete duration-200 w-full ${showSearch || show ? 'block opacity-100' : 'hidden opacity-0'} ${hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180'}`,
         className,
       )}
     >
-      <form onSubmit={(e) => redirectToBrowse(e)}>
+      <form ref={formRef} onSubmit={(e) => redirectToBrowse(e)} className="relative flex items-center">
         <Input
           placeholder={small ? t('shortSearch') : t('search')}
           value={query}
           onChange={handleInput}
           onFocus={handleInput}
           ref={inputRef}
+          id="search-input"
           onKeyDown={(e) => e.key === 'Enter' && redirectToBrowse(e)}
-          className={`h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-700 text-neutral-700 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700 ${hasInputFocus ? 'drop-shadow-md' : ''}`}
+          className={`h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700 ${hasInputFocus ? 'shadow-md' : ''}`}
         />
 
         <Button
           type="submit"
           title={t('searchButton')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer"
+          className={`absolute ${hasInputFocus ? 'right-13' : 'right-0'} top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer`}
           variant={'link'}
           aria-label={t('searchProducts')}
         >
           <Search className="text-primary-600" width="28" height="28" />
         </Button>
+
+        {hasInputFocus && (
+          <Button
+            type="button"
+            variant={'link'}
+            onClick={() => {
+              setShowSuggestions(false);
+              deactivateSearch();
+            }}
+            className="cursor-pointer z-30"
+          >
+            <X className="text-primary-600" width="28" height="28" />
+          </Button>
+        )}
       </form>
       {showSuggestions && hasInitialSearch && (
         <SearchFlyOut
@@ -180,6 +205,8 @@ export function HeaderSearch({ small = false, className }: HeaderSearchProps) {
           setQuery={setQuery}
           onProductClick={handleProductClick}
           onQuerySelect={handleQuerySelect}
+          redirectToBrowse={redirectToBrowse}
+          isCollapsedHeader={isCollapsedHeader}
         />
       )}
     </div>

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
+import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/h';
@@ -6,24 +7,39 @@ import { SearchSuggestions } from '@/platform/services/model/search';
 
 export interface NoResultsProps {
   queryCompletions: SearchSuggestions['queryCompletions'];
+  setQuery: Dispatch<SetStateAction<string>>;
+  onQuerySelect?: (query: string) => void;
 }
 
-export function NoResults({ queryCompletions }: NoResultsProps) {
+export function NoResults({ queryCompletions, setQuery, onQuerySelect }: NoResultsProps) {
+  const t = useTranslations('layout.header');
+
   return (
-    <div className="">
+    <div className="whitespace-normal col-span-full">
       <Heading variant={'h5'} className="pb-6">
-        We&apos;re sorry – there are no product matches for your search.
+        {t('noResults')}
       </Heading>
-      <p className="text-md pb-6">
-        Double-check your search for any typos or spelling mistakes, or try using a different search term.
-      </p>
-      <p className="text-md">Here are common search queries from other customers:</p>
-      {queryCompletions &&
-        queryCompletions.map((completion) => (
-          <Button key={completion} className="mt-6" disabled={true}>
-            <Search /> {completion}
-          </Button>
-        ))}
+      <p className="text-md pb-6">{t('doubleCheck')}</p>
+      <p className="text-md">{t('commonSearch')}</p>
+      {queryCompletions && (
+        <div className="flex flex-wrap gap-4 mt-6">
+          {queryCompletions.map((completion) => (
+            <Button
+              onClick={() => {
+                setQuery(completion);
+                if (onQuerySelect) {
+                  onQuerySelect(completion);
+                }
+              }}
+              key={completion}
+              className="min-w-0 p-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 flex shrink-1"
+            >
+              <Search />
+              <span className="truncate w-full max-w-full text-left md:max-w-[48ch]"> {completion}</span>
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

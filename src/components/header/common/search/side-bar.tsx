@@ -31,10 +31,10 @@ export function SideBar({ categories, query }: SideBarProps) {
   ];
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col col-span-5 md:col-span-1 order-1 gap-7">
       {categories?.length > 0 && (
-        <>
-          <Heading className="mb-4" variant="h5" as="div">
+        <div className="mb-10">
+          <Heading className="mb-6" variant="h5" as="div">
             Categories
           </Heading>
           {categories.map(({ name, count }) => (
@@ -42,11 +42,11 @@ export function SideBar({ categories, query }: SideBarProps) {
               <MarkedText text={name} keyword={query} />
             </UiLink>
           ))}
-        </>
+        </div>
       )}
       {links.map(({ headline, links }) => (
         <div className="flex flex-col" key={headline}>
-          <Heading key={headline} className="mb-4" variant="h5" as="div">
+          <Heading key={headline} className="mb-6" variant="h5" as="div">
             {headline}
           </Heading>
           {links.map(({ text, href }) => (

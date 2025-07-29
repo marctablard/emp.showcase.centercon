@@ -10,6 +10,7 @@
     "searchButton": "Suche öffnen",
     "suggestedProducts": "Vorgeschlagene Produkte",
     "lastSeenProducts": "Zuletzt angesehene Produkte",
+    "showAllProducts": "Alle Produkte anzeigen",
     "blog": "Blog",
     "newsletter": "Newsletter",
     "offerRequest": "Angebot anfragen",
@@ -26,7 +27,11 @@
     "close": "Schließen",
     "viewCart": "Warenkorb anzeigen",
     "goToHomepage": "Zur Startseite",
-    "searchProducts": "Produkte suchen"
+    "searchProducts": "Produkte suchen",
+    "noResults": "Es tut uns leid – es gibt keine Produktübereinstimmungen für Ihre Suche.",
+    "doubleCheck": "Prüfen Sie Ihre Suche auf Rechtschreibung oder Tippfehler, oder versuchen Sie es mit einem anderen Suchbegriff.",
+    "commonSearch": "Hier sind häufige Suchbegriffe von anderen Kunden:",
+    "clearHistory": "Suchverlauf löschen"
   },
   "footer": {
     "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",
