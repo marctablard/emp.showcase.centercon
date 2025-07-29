@@ -76,6 +76,13 @@ class EmporixCartService implements CartService {
 
   async getCartById(id: string): Promise<Cart | null> {
     const cart = await this.cartApi.getCart(id);
+    const session = await this.sessionContextApi.getOwnSessionContext();
+    if (!session) {
+      throw new Error('Failed to get session context');
+    }
+    if (cart?.customerId != session.customerId) {
+      throw new Error('Cart does not belong to this customer');
+    }
     return cart ? this.mapper.mapToService(cart) : null;
   }
 

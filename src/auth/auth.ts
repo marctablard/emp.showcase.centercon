@@ -54,6 +54,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  events: {
+    async signOut(_message) {
+      const authService = globalThis.EMP.platform.server.get<AuthService>('AuthService');
+      await authService.logout();
+    },
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (!user) {

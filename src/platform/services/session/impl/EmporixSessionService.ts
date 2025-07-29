@@ -16,8 +16,6 @@ import { SessionService } from '../SessionService';
 @injectable('SessionService', 'Singleton')
 class EmporixSessionService implements SessionService {
   // Static default values from environment variables with fallbacks
-  private defaultCurrency = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'EUR';
-  private defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
   private defaultLanguage = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE || 'en';
   private defaultCountry = process.env.NEXT_PUBLIC_DEFAULT_COUNTRY || 'DE';
   private defaultRegion = process.env.NEXT_PUBLIC_DEFAULT_REGION || 'Europe';
@@ -94,17 +92,9 @@ class EmporixSessionService implements SessionService {
       return undefined;
     }
     const updateDefaults: Partial<EmporixSessionContext> = {};
-    if (!result.currency) {
-      updateDefaults.currency = this.defaultCurrency;
-      result.currency = this.defaultCurrency;
-    }
     if (!result.country) {
       updateDefaults.targetLocation = this.defaultCountry;
       result.country = this.defaultCountry;
-    }
-    if (!result.currency) {
-      updateDefaults.currency = this.defaultCurrency;
-      result.currency = this.defaultCurrency;
     }
     if (Object.keys(updateDefaults).length > 0) {
       updateDefaults.metadata = {
@@ -120,6 +110,7 @@ class EmporixSessionService implements SessionService {
       this.setRegion(this.defaultRegion);
       result.region = this.defaultRegion;
     }
+    result.cartId = sessionContext?.cartId;
     return result;
   }
 }

@@ -65,6 +65,7 @@ export const useCheckout = (): UseCheckout => {
     setShippingAddress,
     setPaymentMethod,
     setShippingMethod,
+    reset: storeReset,
   } = useCheckoutStore();
 
   // Get cart from cart store
@@ -243,6 +244,7 @@ export const useCheckout = (): UseCheckout => {
   const reset = () => {
     setError(null);
     setOrderResponse(null);
+    storeReset();
   };
 
   useEffect(() => {

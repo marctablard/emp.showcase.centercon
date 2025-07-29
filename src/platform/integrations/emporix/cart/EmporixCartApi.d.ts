@@ -36,7 +36,7 @@ export interface EmporixCartApi {
     sessionId?: string,
     customerId?: string,
     type?: string,
-  ): Promise<EmporixCart | undefined>;
+  ): Promise<EmporixCart | null>;
 
   /**
    * Add item to cart

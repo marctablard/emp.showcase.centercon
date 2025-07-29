@@ -19,8 +19,7 @@ export async function fetchCurrentCart(createIfNotExist: boolean = false): Promi
     throw new Error(`Failed to fetch cart: ${response.statusText}`);
   }
 
-  const cart = await response.json();
-  return cart;
+  return await response.json();
 }
 
 /**
