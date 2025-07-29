@@ -75,7 +75,11 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
               variant="white"
               className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal absolute top-0 right-0"
             >
-              {loading ? <Spinner color="primary" variant="xs" /> : cart?.items.length || 0}
+              {loading ? (
+                <Spinner color="primary" variant="xs" />
+              ) : (
+                cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0
+              )}
             </Badge>
           )}
           <ShoppingCart width="32" height="32" />
