@@ -2,6 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import AccountDashboard from '@/components/account/dashboard/account-dashboard';
+import { redirect } from '@/i18n/navigation';
 import { getCurrentCustomer } from '@/lib/ssr/customer';
 import { getPageTitle } from '@/lib/ssr/seo';
 
@@ -19,9 +20,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function AccountPage({ params: _params }: { params: Promise<{ locale: string }> }) {
+export default async function AccountPage({ params }: { params: Promise<{ locale: string }> }) {
   // Get translations and current customer
+  const { locale } = await params;
   const [customer] = await Promise.all([getCurrentCustomer()]);
-
-  return <AccountDashboard initialCustomer={customer} />;
+  if (!customer) {
+    redirect({ href: '/account/login', locale });
+    return;
+  }
+  return <AccountDashboard customer={customer} />;
 }

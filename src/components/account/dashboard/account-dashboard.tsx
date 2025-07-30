@@ -12,23 +12,21 @@ import Dashboard from './dashboard';
 import DashboardControls from './dashboard-controls';
 
 interface AccountDashboardProps {
-  initialCustomer?: Customer | null;
+  customer: Customer;
 }
 
-export default function AccountDashboard({ initialCustomer }: AccountDashboardProps) {
+export default function AccountDashboard({ customer }: AccountDashboardProps) {
   const t = useTranslations('account');
   const { setLayouts, getLayouts } = useConfigStore();
-  const { customer } = useCustomer(initialCustomer);
   const [isCustomizable, setIsCustomizable] = useState(false);
+  // preload customer data for other Dashboard Components
+  useCustomer(customer);
 
   const handleTicketSubmit = (data: SupportTicketData) => {
     console.log('Ticket submitted:', data);
     // Hier kann später die API-Integration erfolgen
   };
 
-  if (!customer) {
-    return <div className="flex justify-center items-center h-full">{t('loading')}</div>;
-  }
   return (
     <AccountLayout>
       <div className="space-y-6 mb-6">
