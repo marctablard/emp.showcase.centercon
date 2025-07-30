@@ -56,6 +56,7 @@ export const useAuthentication = (): AuthenticationHook => {
         setError(new Error(response.error));
       } else {
         setIsAuthenticated(true);
+        reset();
         if (redirect) {
           router.push(callbackUrl);
         }
