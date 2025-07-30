@@ -1,13 +1,43 @@
-# Emporix Showcase
+# Journey Aware Storefront
 
-A Next.js-based showcase application for the Emporix platform.
+Journey Aware Storefront is a journey-aware storefront that provides a seamless shopping experience for customers. It is built on top of the React/Next.js framework that provides the basis for modern composable web applications.
 
-## Prerequisites
+## Features
+
+An overview of the key features of Journey Aware Storefront.
+
+### Technical Key-Components
+
+Based on modern technologies and best practices, the goal is to provide a solid, maintainable and extensible foundation for building a storefront or e-commerce platform.
+
+- TypeScript Support
+- React/Next.js Architecture with App Router and SSR
+- Loose Coupling and Dependency Injection with InversifyJS
+- L10n (Localization) with next-intl
+- Authentication with next-auth
+- Automated Testing using Jest and Playwright
+- Component Library with Shadcn UI
+- Responsive Design with Tailwind CSS
+
+### Business Key-Components
+
+Ideal starting point for a new storefront or e-commerce platform. The Platform is specifically designed to give you a head-start while not overloading you with features you don't need. 
+
+- Separated Business and Integration Layer, allowing for easy extension and replacement of all business logic (e.g. synchronous pricing, order processing, etc.)
+- Commerce Integration (prebuilt with Emporix Platform)
+- CMS Capabilities (prebuilt with Storyblok Integration)
+- Account Management and Service Portal including adaptable Dashboard
+- Product and Checkout prebuilt
+- LightHouse Performance Scores of 90+ from the start
+
+## Getting Started
+
+Here is a quick start guide to get you started with Journey Aware Storefront.
+
+### Prerequisites
 
 - Node.js (v20+)
 - npm or yarn
-
-## Getting Started
 
 ### Installation
 
@@ -31,6 +61,36 @@ This will:
 - Run the dependency injection generator in watch mode
 - Open the application at [http://localhost:3000](http://localhost:3000)
 
+#### Note on Hot-Swapping Platform Layer
+
+The dependency injection generator is configured to run in watch mode by default. This means that it will automatically generate dependency injection files when you make changes to the dependency injection configuration files.
+
+**BUT** due to the nature of the current implementation the changes made to the platform-layer are not hot-swappable. You will need to restart the development server to apply the changes. (We are aware of this and hope to change this with the upcoming release)
+
+### Known Issues
+A list of known issues and their workarounds. (We are aware of these and will fix them in upcoming releases)
+
+- The above mentioned platform-layer changes are not hot-swappable. You will need to restart the development server to apply the changes.
+- Authorization can have issues, if Session Invalidation happens during a SSR-Moment, which causes the Client to not be aware of their lost session (then it's not possible to write cookies)
+- Dependency Injection currently loads all Containers with static imports, we are working on an approach where lazy loading is possible.
+- Cart Migration is not implemented yet
+- NextJS API-Endpoints are currently not additionally secured, since most security comes from the Emporix-Integration itself
+- CMS Components are currently  specific to Storyblok, we already have a concept for wrapping CMS-Components to make them more generic, which will be part of an upcoming release
+- There's no Caching implemented for the Integration Layer, we plan to implement this in an upcoming release
+- The Unit Tests rely on specific Test-Data for API-Endpoint Testing, you need to include them yourself for now, but we plan to create an automation to create the Test-Data in your own tenants soon. You may need to skip these tests for now.
+- The Component-Library doesn't use the Variant/Theming approach consistently as of now.
+
+### What to Expect
+To sharpen the understanding of how this Framework is intended to be used, here a few key concepts.
+
+- Not everything is pre-built, we want to give you a solid foundation, rather than a ready-to-use solution, because we know that every business has its own unique needs and requirements.
+- Account Management and Service Portal is currently covering a few Widgets in a pre-built and a dummy form, this is because the needs will be specific to your project. So you can extend and customize to your requirements.
+- Product and Checkout are currently pre-built to showcase the MVP-flow of every Storefront.
+- Site- and Currency-Switcher is not fully implemented on purpose, especially the migration of Carts to other currencies and sites, since the business cases for this vary a lot and are not always needed.
+- Pricing is currently based on the Emporix-Integration, but concepts for implementing asynchronous Pricing or Pricing from other sources are easily implemented, since the components can react to data changes
+- Approval is not fully implemented, since the concepts for it vary from business to Business
+
+
 ### Building for Production
 
 ```bash
@@ -43,67 +103,23 @@ npm run start
 
 The build process:
 
-1. Generates dependency injection files
+1. Generates dependency injection files (located in `src/platform/`)
 2. Builds the Next.js application
 
-## Available Scripts
+### Further Scripts of interest
 
 - `npm run dev` - Start development server with hot-reload
+- `npm run dev:https` - Start development server with hot-reload and HTTPS
 - `npm run build` - Build the application for production
 - `npm run start` - Start the production server
 - `npm run lint` - Run ESLint to check code quality
 - `npm run generate` - Generate dependency injection files
 - `npm run generate:watch` - Generate dependency injection files in watch mode
 
+## License
+
+The [LICENSE](LICENSE) file contains the license information for the Journey Aware Storefront.
+
 ## Documentation
 
-Detailed documentation is available in the `/docs` directory:
-
-### [Dependency Injection Framework](/docs/dependency-injection.md)
-
-- Overview of the DI framework based on InversifyJS
-- Explains separation of concerns, testability, and code reusability
-- Details on environment-specific implementations
-- Instructions for registering and using services
-
-### [Internationalization (i18n)](/docs/i18n-implementation.md)
-
-- Implementation using next-intl
-- Configuration for locale-aware routing
-- Type-safe translation system
-- Support for both server and client components
-
-### [Layered Architecture](/docs/layered-architecture.md)
-
-- Explanation of the three-layer architecture (Integrations, Services, Repositories)
-- Benefits including separation of concerns and maintainability
-- Guidelines for implementing each layer
-- Best practices for cross-layer communication
-
-### [Testing](/docs/testing-strategy.md)
-
-- Overview of testing setup and available scripts
-- Instructions for running tests
-- Details on test coverage and reporting
-
-## Project Structure
-
-```
-emporix-showcase/
-├── docs/               # Documentation files
-├── i18n/               # Internationalization resources
-├── resources/          # Static resources
-├── scripts/            # Build and utility scripts
-└── src/                # Source code
-    ├── app/            # Next.js app directory
-    ├── platform/       # Platform services and models
-    └── ui/             # UI components
-```
-
-## Technologies
-
-- [Next.js](https://nextjs.org/) - React framework
-- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
-- [InversifyJS](https://inversify.io/) - Dependency injection
-- [next-intl](https://next-intl-docs.vercel.app/) - Internationalization
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+The [docs](docs) directory contains the documentation for the Journey Aware Storefront.
