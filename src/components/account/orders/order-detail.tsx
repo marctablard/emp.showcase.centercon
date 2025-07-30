@@ -10,6 +10,7 @@ import { H2 } from '@/components/ui/h';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useOrder } from '@/hooks/order/useOrder';
+import { useRouter } from '@/i18n/navigation';
 import { Order } from '@/platform/services/model/order/order';
 import { OrderStatusBadge } from './order-status-badge';
 import { TrackingDialog } from './tracking-dialog';
@@ -36,6 +37,7 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
   const tOrder = useTranslations('orders');
   const tPaymentModes = useTranslations('checkout.PaymentModes');
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
+  const router = useRouter();
 
   const { order, loading, error, cancelOrder, returnOrder } = useOrder({ orderId, initialOrder });
 
@@ -138,7 +140,11 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
               </TableHeader>
               <TableBody>
                 {order.items.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow
+                    className="cursor-pointer hover:bg-primary-50"
+                    key={item.id}
+                    onClick={() => router.push(`/product/${item.productId}`)}
+                  >
                     <TableCell>
                       <div className="font-medium">{item.name || item.productId}</div>
                       {item.sku && <div className="text-xs text-muted-foreground">SKU: {item.sku}</div>}
