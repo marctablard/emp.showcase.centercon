@@ -1,8 +1,6 @@
 import { RefObject, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Info, LockKeyhole } from 'lucide-react';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
-import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useElementScroll } from '@/hooks/ui/useElementScroll';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -24,8 +22,6 @@ export function CartSummary({ cart, boundingContent }: CartSummaryProps) {
   const topPosition = 112;
   const { isFixed, isFixedToTop, isContainerBottom } = useElementScroll(fixedContainer, topPosition, boundingContent);
   const { cartTotal, shippingCosts, currency } = useCartTotal();
-  const { isAuthenticated } = useAuthentication();
-  const { openDialog } = useAuthDialog();
 
   return (
     <div className="col-span-1 xl:col-span-1 mb-6 flex">
@@ -93,22 +89,9 @@ export function CartSummary({ cart, boundingContent }: CartSummaryProps) {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col p-0">
-              {!isAuthenticated ? (
-                <UiLink
-                  variant="button_primary"
-                  type="Button"
-                  className="w-full"
-                  onClick={() =>
-                    openDialog('login', { guestCheckout: true, redirectAfterLogin: true, callbackUrl: '/checkout' })
-                  }
-                >
-                  {t('goToCheckout')}
-                </UiLink>
-              ) : (
-                <UiLink variant="button_primary" type="Link" href="/checkout" className="w-full">
-                  {t('goToCheckout')}
-                </UiLink>
-              )}
+              <UiLink variant="button_primary" type="Link" href="/checkout" className="w-full">
+                {t('goToCheckout')}
+              </UiLink>
               <div className="flex align-center gap-2 text-neutral-600 pt-4">
                 <div>
                   <LockKeyhole width={12} />
