@@ -71,9 +71,8 @@ export const useAuthentication = (): AuthenticationHook => {
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
-      reset();
       await signOut({
-        callbackUrl: '/',
+        redirectTo: '/?logout',
       });
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log out'));
