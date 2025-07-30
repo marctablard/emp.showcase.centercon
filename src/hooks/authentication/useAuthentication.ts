@@ -72,8 +72,9 @@ export const useAuthentication = (): AuthenticationHook => {
     try {
       setLoading(true);
       await signOut({
-        redirectTo: '/?logout',
+        redirect: false,
       });
+      router.push('/?logout');
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log out'));
     } finally {
