@@ -1,61 +1,34 @@
-import type { StoredToken } from '@/platform/integrations/types/auth';
-import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
-import { AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from '../../oauth/OAuthApi';
 import { injectable } from '@/platform/core/di/injectable';
-
-const LOCAL_STORAGE_KEY = 'emporix-token';
+import { EmporixTokenManagerAbstract, TokenStore } from './EmporixTokenManagerAbstract';
 
 /**
  * TokenManager for handling Emporix API tokens
  * Manages token caching and refreshing
  */
- @injectable('EmporixTokenManager', 'Singleton')
+@injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerClient extends EmporixTokenManagerAbstract {
-  
-
-  protected writeToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service', token: T): Promise<void> {
-    const tokenStoreString : string | null = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!tokenStoreString) {
-      return Promise.resolve();
-    }
-    const tokenStore : TokenStore = JSON.parse(tokenStoreString);
-    switch (type) {
-      case 'anonymous':
-        tokenStore.anonymousToken = token as StoredToken<AnonymousTokenResponse>;
-        break;
-      case 'customer':
-        tokenStore.customerToken = token as StoredToken<CustomerTokenResponse>;
-        break;
-      case 'service':
-        tokenStore.serviceToken = token as StoredToken<ServiceAccessTokenResponse>;
-        break;
-    }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tokenStore));
-    return Promise.resolve();
+  protected async customerAuthAllowed(): Promise<boolean> {
+    return true;
   }
 
-  protected readToken<T extends StoredToken<K>, K>(type: 'anonymous' | 'customer' | 'service'): Promise<T | undefined> {
-    const tokenStoreString : string | null = localStorage.getItem(LOCAL_STORAGE_KEY);
+  protected async readTokens(tenant: string): Promise<TokenStore> {
+    const tokenStoreString: string | null = this.buildStorageKey(tenant);
     if (!tokenStoreString) {
-      return Promise.resolve(undefined);
+      return Promise.resolve({});
     }
-    const tokenStore : TokenStore = JSON.parse(tokenStoreString);
-    switch (type) {
-      case 'anonymous':
-        return Promise.resolve(tokenStore.anonymousToken as T);
-      case 'customer':
-        return Promise.resolve(tokenStore.customerToken as T);
-      case 'service':
-        return Promise.resolve(tokenStore.serviceToken as T);
-    }
+    const tokenStore: TokenStore = JSON.parse(tokenStoreString);
+    return tokenStore;
+  }
+
+  protected async writeTokens(tokens: TokenStore, tenant: string): Promise<void> {
+    localStorage.setItem(this.buildStorageKey(tenant), JSON.stringify(tokens));
   }
 
   /**
    * Clear all stored tokens
    */
-  clearTokens(): void {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  clearTokens(tenant: string): void {
+    localStorage.removeItem(this.buildStorageKey(tenant));
   }
 }
-
 export default EmporixTokenManagerClient;

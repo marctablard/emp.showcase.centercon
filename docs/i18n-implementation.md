@@ -21,8 +21,8 @@ Our i18n setup consists of three main configuration files:
 ### 1. Routing Configuration (`src/i18n/routing.ts`)
 
 ```typescript
-import {defineRouting} from 'next-intl/routing';
- 
+import { defineRouting } from 'next-intl/routing';
+
 export const routing = defineRouting({
   // A list of all locales that are supported
   locales: ['en', 'de'],
@@ -38,13 +38,12 @@ This defines our supported locales and routing behavior. The `localePrefix: 'as-
 ### 2. Navigation Helpers (`src/i18n/navigation.ts`)
 
 ```typescript
-import {createNavigation} from 'next-intl/navigation';
-import {routing} from './routing';
- 
+import { createNavigation } from 'next-intl/navigation';
+import { routing } from './routing';
+
 // Lightweight wrappers around Next.js' navigation
 // APIs that consider the routing configuration
-export const {Link, redirect, usePathname, useRouter, getPathname} =
-  createNavigation(routing);
+export const { Link, redirect, usePathname, useRouter, getPathname } = createNavigation(routing);
 ```
 
 This provides locale-aware navigation utilities that respect our routing configuration.
@@ -52,20 +51,19 @@ This provides locale-aware navigation utilities that respect our routing configu
 ### 3. Request Configuration (`src/i18n/request.ts`)
 
 ```typescript
-import {getRequestConfig} from 'next-intl/server';
-import {hasLocale} from 'next-intl';
-import {routing} from './routing';
- 
-export default getRequestConfig(async ({requestLocale}) => {
+import { hasLocale } from 'next-intl';
+import { getRequestConfig } from 'next-intl/server';
+import { routing } from './routing';
+import { loadI18nTranslations } from 'next-intl-split/load';
+
+export default getRequestConfig(async ({ requestLocale }) => {
   // Typically corresponds to the `[locale]` segment
   const requested = await requestLocale;
-  const locale = hasLocale(routing.locales, requested)
-    ? requested
-    : routing.defaultLocale;
- 
+  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+
   return {
     locale,
-    messages: (await import(`../../i18n/${locale}.json`)).default
+    messages: loadI18nTranslations('src/i18n/translations', locale, true),
   };
 });
 ```
@@ -74,18 +72,47 @@ This handles loading the correct translation messages based on the requested loc
 
 ## Translation Files
 
-Our translations are stored in JSON files at the root of the i18n directory:
+Our translations are organized in a structured directory hierarchy by locale and namespace:
 
-- `i18n/en.json`: English translations
-- `i18n/de.json`: German translations
+```
+src/i18n/translations/
+├── en/
+│   ├── account/
+│   │   └── index.json
+│   ├── auth/
+│   │   └── index.json
+│   ├── cart/
+│   │   └── index.json
+│   ├── checkout/
+│   │   └── index.json
+│   ├── common/
+│   │   └── index.json
+│   ├── layout/
+│   │   └── index.json
+│   ├── orders/
+│   │   └── index.json
+│   ├── product/
+│   │   └── index.json
+│   ├── search/
+│   │   └── index.json
+│   ├── seo/
+│   │   └── index.json
+│   └── validation/
+│       └── index.json
+└── de/
+    └── (similar structure)
+```
 
-Example translation file structure:
+Example translation file structure (e.g., `src/i18n/translations/en/account/index.json`):
 
 ```json
 {
-  "hello": {
-    "world": "Hello World",
-    "friend": "Hey Friend"
+  "title": "Service Portal",
+  "welcomeBack": "Welcome, {name}",
+  "dashboard": "Dashboard",
+  "profile": {
+    "title": "User Profile",
+    "description": "View and edit your personal details"
   }
 }
 ```
@@ -112,35 +139,35 @@ src/
 The root layout handles locale validation and setup:
 
 ```tsx
-import {notFound} from 'next/navigation';
-import {Locale, hasLocale, NextIntlClientProvider} from 'next-intl';
-import {getTranslations, setRequestLocale} from 'next-intl/server';
-import {ReactNode} from 'react';
-import {routing} from '@/i18n/routing';
+import { ReactNode } from 'react';
+import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 type Props = {
   children: ReactNode;
-  params: Promise<{locale: Locale}>;
+  params: Promise<{ locale: Locale }>;
 };
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({locale}));
+  return routing.locales.map((locale) => ({ locale }));
 }
 
 export async function generateMetadata(props: Omit<Props, 'children'>) {
-  const {locale} = await props.params;
+  const { locale } = await props.params;
 
-  const t = await getTranslations({locale, namespace: 'hello'});
+  const t = await getTranslations({ locale, namespace: 'hello' });
 
   return {
-    title: t('world')
+    title: t('world'),
   };
 }
 
-export default async function LocaleLayout({children, params}: Props) {
+export default async function LocaleLayout({ children, params }: Props) {
   // Ensure that the incoming `locale` is valid
-  const {locale} = await params;
+  const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
@@ -151,9 +178,7 @@ export default async function LocaleLayout({children, params}: Props) {
   return (
     <html className="h-full" lang={locale}>
       <body className="flex h-full flex-col">
-        <NextIntlClientProvider>
-          {children}
-        </NextIntlClientProvider>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
   );
@@ -161,6 +186,7 @@ export default async function LocaleLayout({children, params}: Props) {
 ```
 
 Key features:
+
 - `generateStaticParams()` pre-renders pages for all supported locales
 - `generateMetadata()` creates dynamic, localized page metadata
 - `setRequestLocale()` enables static rendering with the correct locale
@@ -169,21 +195,20 @@ Key features:
 ### Page Component (`src/app/[locale]/hello/page.tsx`)
 
 ```tsx
-import { HelloWorldComponent } from "@/app/components/HelloWorldComponent";
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
+import { HelloWorldComponent } from '@/app/components/HelloWorldComponent';
 
 export default function Home() {
-    const t = useTranslations('hello');
-    return (
-        <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-            <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-                <h1>{t('friend')}</h1>
-                
-                <HelloWorldComponent />
-                
-            </main> 
-        </div>
-    );
+  const t = useTranslations('hello');
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <h1>{t('friend')}</h1>
+
+        <HelloWorldComponent />
+      </main>
+    </div>
+  );
 }
 ```
 
@@ -196,7 +221,7 @@ This demonstrates using the `useTranslations` hook to access translations in a s
 For server components, use the `useTranslations` hook:
 
 ```tsx
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
 export default function ServerComponent() {
   const t = useTranslations('namespace');
@@ -211,7 +236,7 @@ For client components, use the same `useTranslations` hook:
 ```tsx
 'use client';
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
 export default function ClientComponent() {
   const t = useTranslations('namespace');
@@ -227,12 +252,12 @@ Use `getTranslations` to create localized metadata:
 
 ```tsx
 export async function generateMetadata(props: Props) {
-  const {locale} = await props.params;
-  const t = await getTranslations({locale, namespace: 'meta'});
-  
+  const { locale } = await props.params;
+  const t = await getTranslations({ locale, namespace: 'meta' });
+
   return {
     title: t('title'),
-    description: t('description')
+    description: t('description'),
   };
 }
 ```
@@ -260,17 +285,17 @@ When working with our service layer, translations should be handled at the UI le
 
 ```tsx
 // HelloWorldComponent.tsx
-import { HelloService } from "@/integration/services/hello/HelloService";
-import services from "@/integration/services";
+import services from '@/integration/services';
+import { HelloService } from '@/integration/services/hello/HelloService';
 
 export async function HelloWorldComponent() {
-    const helloService = await services.get<HelloService>("HelloService");
-    const message = await helloService.sayHello();
-    return (
-        <div>
-            <p>{message}</p>
-        </div>
-    );
+  const helloService = await services.get<HelloService>('HelloService');
+  const message = await helloService.sayHello();
+  return (
+    <div>
+      <p>{message}</p>
+    </div>
+  );
 }
 ```
 

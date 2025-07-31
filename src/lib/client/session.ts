@@ -1,0 +1,136 @@
+import { Session } from '@/platform/services/model/session/session';
+
+/**
+ * Fetch the current session information
+ * @returns {Promise<Session|null>} The session or null if not available
+ */
+export async function fetchCurrentSession(): Promise<Session | null> {
+  try {
+    const response = await fetch('/api/session');
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch session: ${response.statusText}`);
+    }
+
+    const session = await response.json();
+    return session;
+  } catch (error) {
+    console.error('Error fetching session:', error);
+    return null;
+  }
+}
+
+/**
+ * Update the session language
+ * @param {string} language - The language code to set
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateSessionLanguage(language: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/session/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ language }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update language: ${response.statusText}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating language:', error);
+    return false;
+  }
+}
+
+/**
+ * Update the session currency
+ * @param {string} currency - The currency code to set
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateSessionCurrency(currency: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/session/currency', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currency }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update currency: ${response.statusText}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating currency:', error);
+    return false;
+  }
+}
+
+/**
+ * Update the session country
+ * @param {string} country - The country code to set
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateSessionCountry(country: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/session/country', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ country }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update country: ${response.statusText}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating country:', error);
+    return false;
+  }
+}
+
+/**
+ * Update the session site
+ * @param {string} site - The site code to set
+ * @returns {Promise<boolean>} Success status
+ */
+export async function updateSessionSite(site: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/session/site', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ site }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update site: ${response.statusText}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating site:', error);
+    return false;
+  }
+}
+
+export async function updateSessionRegion(region: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/session/region', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ region }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update region: ${response.statusText}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating region:', error);
+    return false;
+  }
+}

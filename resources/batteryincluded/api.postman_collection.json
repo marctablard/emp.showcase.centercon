@@ -1,0 +1,583 @@
+{
+	"info": {
+		"_postman_id": "0f8288a8-6a5c-4732-b564-896a8bddb264",
+		"name": "API Documentation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9006926",
+		"_collection_link": "https://www.postman.com/batteryincluded/core/collection/egs55vc/api-documentation?action=share&source=collection_link&creator=9006926"
+	},
+	"item": [
+		{
+			"name": "Sync",
+			"item": [
+				{
+					"name": "One",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-ndjson",
+								"type": "text"
+							},
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"_i18n\":{\"de\":{\"attributes\":{\"brand\":\"Samsung\"},\"categories\":[\"TV, Audio & Video\",\"TV, Audio & Video > Fernseher\"],\"description\":\"Ultra HD HDR LED-TV 75\\\" (189 cm)\",\"name\":\"Samsung 75AU7190\",\"url\":\"#\"}},\"_product\":{\"images\":[],\"ordernumber\":[\"BA35581\"],\"price\":null,\"url\":\"#\"},\"id\":\"2071850\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/import",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Many",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-ndjson",
+								"type": "text"
+							},
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"_i18n\":{\"de\":{\"attributes\":{\"brand\":\"Samsung\"},\"categories\":[\"TV, Audio & Video\",\"TV, Audio & Video > Fernseher\"],\"description\":\"Ultra HD HDR LED-TV 75\\\" (189 cm)\",\"name\":\"Samsung 75AU7190\",\"url\":\"#\"}},\"_product\":{\"images\":[],\"ordernumber\":[\"BA35581\"],\"price\":null,\"url\":\"#\"},\"id\":\"2071850\"}\n{\"_i18n\":{\"de\":{\"attributes\":{\"brand\":\"Melitta\"},\"categories\":[\"Kaffee & Espresso\",\"Kaffee & Espresso > Kaffeevollautomaten\"],\"description\":\"Kaffeevollautomat\",\"name\":\"Melitta Caffeo Solo & milk\",\"url\":\"#\"}},\"_product\":{\"images\":[],\"ordernumber\":[\"G29551\"],\"price\":null,\"url\":\"#\"},\"id\":\"1113494\"}",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/import",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Full",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-ndjson",
+								"type": "text"
+							},
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"_i18n\":{\"de\":{\"attributes\":{\"brand\":\"Samsung\"},\"categories\":[\"TV, Audio & Video\",\"TV, Audio & Video > Fernseher\"],\"description\":\"Ultra HD HDR LED-TV 75\\\" (189 cm)\",\"name\":\"Samsung 75AU7190\",\"url\":\"#\"}},\"_product\":{\"images\":[],\"ordernumber\":[\"BA35581\"],\"price\":null,\"url\":\"#\"},\"id\":\"2071850\"}\n{\"_i18n\":{\"de\":{\"attributes\":{\"brand\":\"Melitta\"},\"categories\":[\"Kaffee & Espresso\",\"Kaffee & Espresso > Kaffeevollautomaten\"],\"description\":\"Kaffeevollautomat\",\"name\":\"Melitta Caffeo Solo & milk\",\"url\":\"#\"}},\"_product\":{\"images\":[],\"ordernumber\":[\"G29551\"],\"price\":null,\"url\":\"#\"},\"id\":\"1113494\"}",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/import?full=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"import"
+							],
+							"query": [
+								{
+									"key": "full",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"2071850\", \"1113494\"]",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/delete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-ndjson",
+								"type": "text"
+							},
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"_product\":{\"price\":127.99},\"id\":\"2071850\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/update",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial update many",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-ndjson",
+								"type": "text"
+							},
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"_product\":{\"price\":127.99},\"id\":\"2071850\"}\n{\"_product\":{\"price\":42.50, \"url\": \"https://www.myurl.com/35\"},\"id\":\"1113494\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/update",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"update"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shop",
+			"item": [
+				{
+					"name": "Browse",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/browse?q=phone&v[locale]=de",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"browse"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "phone"
+								},
+								{
+									"key": "v[locale]",
+									"value": "de"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Browse with preset id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/browse?q=phone&preset=46ccce8f-a212-4868-a4f3-d11f799ee1f6",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"browse"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "phone"
+								},
+								{
+									"key": "preset",
+									"value": "46ccce8f-a212-4868-a4f3-d11f799ee1f6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/browse?q=phone&f[_i8n.de.attributes.brand][]=Samsung&f[_i8n.de.attributes.brand][]=LG&f[_i8n.de.categories]=All Unlocked Cell Phones > Unlocked Cell Phones > Cell Phones&page=2&per_page=15&sort=_product.price:desc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"browse"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "phone"
+								},
+								{
+									"key": "f[_i8n.de.attributes.brand][]",
+									"value": "Samsung"
+								},
+								{
+									"key": "f[_i8n.de.attributes.brand][]",
+									"value": "LG"
+								},
+								{
+									"key": "f[_i8n.de.categories]",
+									"value": "All Unlocked Cell Phones > Unlocked Cell Phones > Cell Phones"
+								},
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "per_page",
+									"value": "15"
+								},
+								{
+									"key": "sort",
+									"value": "_product.price:desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Suggest",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/suggest?q=phone&v[locale]=de",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"suggest"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "phone"
+								},
+								{
+									"key": "v[locale]",
+									"value": "de"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Highlights",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/highlights",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"highlights"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recommendations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/recommendations?id=AtIEhhdmVuIENhc2UgZm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"recommendations"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "AtIEhhdmVuIENhc2UgZm",
+									"description": "Product ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Presets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-BI-API-KEY",
+								"value": "{{X-BI-API-KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/collections/{{collection}}/documents/presets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"collections",
+								"{{collection}}",
+								"documents",
+								"presets"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "X-BI-API-KEY",
+			"value": "demo-key",
+			"type": "string"
+		},
+		{
+			"key": "collection",
+			"value": "demo"
+		}
+	]
+}

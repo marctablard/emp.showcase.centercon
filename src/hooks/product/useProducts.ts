@@ -1,0 +1,82 @@
+import { useCallback, useEffect, useState } from 'react';
+import { fetchProductById } from '@/lib/client/products';
+import { Product } from '@/platform/services/model/product';
+import { useProductStore } from '@/providers/StoreProvider';
+
+interface UseProductsResult {
+  products: Product[];
+  loading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+  setAsCurrent: (index: number) => void;
+}
+
+export function useProducts(productIds: Product['id'][] = []): UseProductsResult {
+  const { getProduct, addProducts } = useProductStore();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const fetchProducts = useCallback(
+    async (forceRefresh = false) => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Get products already in store (unless forceRefresh)
+        const cachedProducts = forceRefresh
+          ? []
+          : (productIds.map((id) => getProduct(id)).filter(Boolean) as Product[]);
+
+        // Find IDs that need to be fetched
+        const cachedIds = new Set(cachedProducts.map((p) => p.id));
+        const idsToFetch = productIds.filter((id) => !cachedIds.has(id));
+        const uniqueIdsToFetch = Array.from(new Set(idsToFetch));
+
+        // Fetch missing products
+        const fetchedProducts = await Promise.all(
+          uniqueIdsToFetch.map(async (id) => {
+            if (!id) return null;
+            try {
+              const fetched = await fetchProductById(id);
+              return fetched;
+            } catch (_err) {
+              // Optionally handle fetch errors per product
+              return null;
+            }
+          }),
+        );
+
+        // Add all fetched products to the store
+        const validFetched = fetchedProducts.filter(Boolean) as Product[];
+        if (validFetched.length > 0) {
+          addProducts(validFetched);
+        }
+
+        // Return products in the same order as productIds
+        const allProducts = productIds
+          .map((id) => getProduct(id) || validFetched.find((p) => p.id === id))
+          .filter(Boolean) as Product[];
+
+        setProducts(allProducts);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [productIds, getProduct, addProducts],
+  );
+
+  useEffect(() => {
+    if (productIds && productIds.length > 0) {
+      fetchProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productIds.join(',')]);
+
+  const refetch = useCallback(() => fetchProducts(true), [fetchProducts]);
+
+  // ...setAsCurrent logic as before...
+
+  return { products, loading, error, refetch, setAsCurrent: () => {} };
+}

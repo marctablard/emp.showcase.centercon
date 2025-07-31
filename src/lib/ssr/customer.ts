@@ -1,0 +1,33 @@
+'use server';
+
+import { cache } from 'react';
+import type { CustomerService } from '@/platform/services/customer/CustomerService';
+import type { Customer } from '@/platform/services/model/customer/customer';
+
+/**
+ * Get the customer service instance from the platform container
+ */
+const getCustomerService = () => globalThis.EMP.platform.ssr.get<CustomerService>('CustomerService');
+
+/**
+ * Get the current customer
+ * This function is cached to prevent multiple customer fetches in a single request
+ */
+export const getCurrentCustomer = cache(async (): Promise<Customer | null | undefined> => {
+  try {
+    const customer = await getCustomerService().getCustomer();
+    return customer;
+  } catch (_error) {
+    // on SSR we fail with undefined, so the Client can refetch if necessary
+    return undefined;
+  }
+});
+
+/**
+ * Check if a user is logged in
+ * This is a convenience method that can be used in server components
+ */
+export async function isLoggedIn(): Promise<boolean> {
+  const customer = await getCurrentCustomer();
+  return customer !== null;
+}

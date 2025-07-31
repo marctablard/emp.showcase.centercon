@@ -18,10 +18,10 @@ This module provides a TypeScript implementation of the Emporix API for use in N
 ```typescript
 // In your container configuration
 import { Container } from 'inversify';
-import { OAuthApi } from './integration/apis/emporix/types/apis/OAuthApi';
-import { DefaultEmporixOAuthApi } from './integration/apis/emporix/impl/DefaultEmporixOAuthApi';
 import { EmporixApiClient } from './integration/apis/emporix/EmporixApiClient';
 import { EmporixConfig } from './integration/apis/emporix/config';
+import { DefaultEmporixOAuthApi } from './integration/apis/emporix/impl/DefaultEmporixOAuthApi';
+import { OAuthApi } from './integration/apis/emporix/types/apis/OAuthApi';
 
 const container = new Container();
 
@@ -36,7 +36,7 @@ container.bind<EmporixConfig>('EmporixConfig').toConstantValue({
   baseUrl: 'https://api.emporix.io',
   tenant: 'your-tenant-id',
   clientId: 'your-client-id',
-  clientSecret: 'your-client-secret'
+  clientSecret: 'your-client-secret',
 });
 ```
 
@@ -49,9 +49,7 @@ import { EmporixApiClient } from './integration/apis/emporix/EmporixApiClient';
 
 @injectable()
 export class ProductService {
-  constructor(
-    @inject(EmporixApiClient) private emporixClient: EmporixApiClient
-  ) {}
+  constructor(@inject(EmporixApiClient) private emporixClient: EmporixApiClient) {}
 
   async getProducts() {
     // Get an anonymous token for public access
@@ -63,10 +61,10 @@ export class ProductService {
       {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       },
-      'anonymous' // Use anonymous token
+      'anonymous', // Use anonymous token
     );
 
     return response.json();
@@ -79,11 +77,11 @@ export class ProductService {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productData)
+        body: JSON.stringify(productData),
       },
-      'service' // Use service token
+      'service', // Use service token
     );
 
     return response.json();

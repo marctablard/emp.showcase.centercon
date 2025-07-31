@@ -1,0 +1,146 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
+import { useApproverSearch } from '@/hooks/approval/useApproverSearch';
+import { useToast } from '@/hooks/ui/useToast';
+import type { ApprovalUser } from '@/platform/services/model/approval';
+
+interface ApprovalModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  cartId: string;
+  approvalSubmit: (approverId: string, comment: string) => void;
+}
+
+export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: ApprovalModalProps) {
+  const t = useTranslations('checkout.approval');
+  const { toast } = useToast();
+
+  // Use the new hook to fetch approvers
+  const { approvers, loading, refetch } = useApproverSearch({
+    resourceType: 'CART',
+    resourceId: cartId,
+    action: 'CHECKOUT',
+  });
+
+  const [selectedApprover, setSelectedApprover] = useState<ApprovalUser | null>(null);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSelectApprover = (approver: ApprovalUser) => {
+    setSelectedApprover(approver);
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedApprover) {
+      toast({
+        title: t('validationError'),
+        description: t('selectApproverRequired'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      approvalSubmit(selectedApprover.userId, comment);
+      onClose();
+    } catch (error) {
+      console.error('Error creating approval request:', error);
+      toast({
+        title: t('approvalRequestError'),
+        description: t('errorCreatingApprovalRequest'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Fetch approvers when the component mounts or when cartId changes
+  useEffect(() => {
+    if (isOpen && cartId && !loading && !approvers) {
+      refetch();
+    }
+  }, [isOpen, cartId, refetch, loading, approvers]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{t('selectApprover')}</DialogTitle>
+        </DialogHeader>
+
+        {approvers && approvers.length > 0 && (
+          <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-md p-2">
+            {approvers.map((approver) => (
+              <div
+                key={approver.userId}
+                className={`flex items-center p-2 rounded-md cursor-pointer ${
+                  selectedApprover?.userId === approver.userId ? 'bg-primary/10' : 'hover:bg-muted'
+                }`}
+                onClick={() => handleSelectApprover(approver)}
+              >
+                <Avatar className="h-8 w-8 mr-2">
+                  <div className="bg-primary text-primary-foreground rounded-full h-full w-full flex items-center justify-center">
+                    {approver.firstName?.charAt(0) || approver.lastName?.charAt(0) || 'U'}
+                  </div>
+                </Avatar>
+                <div>
+                  <p className="font-medium">
+                    {approver.firstName} {approver.lastName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{approver.fullName}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {loading && (
+          <div className="text-center py-2">
+            <Spinner className="mr-2 h-4 w-4 inline" /> {t('loadingApprovers')}
+          </div>
+        )}
+
+        {!loading && approvers?.length === 0 && (
+          <div className="text-center text-muted-foreground py-2">{t('noApproversFound')}</div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="approval-comment">{t('comment')}</Label>
+          <Textarea
+            id="approval-comment"
+            placeholder={t('commentPlaceholder')}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows={3}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
+            {t('cancel')}
+          </Button>
+          <Button onClick={handleSubmit} disabled={!selectedApprover || isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2 h-4 w-4" />
+                {t('submitting')}
+              </>
+            ) : (
+              t('submitApprovalRequest')
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

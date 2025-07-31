@@ -1,55 +1,64 @@
-import { Product, PaginatedResponse, SearchParams } from "../../model";
-import { ProductApi } from "../ProductApi";
-import { buildPaginatedResponse, buildSearchQuery } from "../../common/util/common";
-import { inject } from "inversify";
-import type { EmporixConfig } from "../../config";
-import type EmporixApiClient from "../../common/impl/EmporixApiInvoker";
-import { injectable } from "@/platform/core/di/injectable";
+import { inject } from 'inversify';
+import { injectable } from '@/platform/core/di/injectable';
+import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
+import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
+import type { EmporixConfig } from '../../config';
+import { EmporixPaginatedResponse, EmporixProduct, EmporixSearchParams } from '../../model';
+import { EmporixProductApi as IEmporixProductApi } from '../EmporixProductApi';
 
 @injectable('EmporixProductApi', 'Singleton')
-class EmporixProductApi implements ProductApi {
-
+class EmporixProductApi implements IEmporixProductApi {
   constructor(
     @inject('EmporixApiInvoker') private apiClient: EmporixApiClient,
-    @inject('EmporixConfig') private config: EmporixConfig
-  ) {
-    
-      this.apiClient = apiClient;
-    this.config = config;
-  }
-  
-  async getProducts(page?: number, pageSize?: number): Promise<PaginatedResponse<Product>> {
-    const params: SearchParams<Product> = {
+    @inject('EmporixConfig') private config: EmporixConfig,
+  ) {}
+
+  async getProducts(page?: number, pageSize?: number): Promise<EmporixPaginatedResponse<EmporixProduct>> {
+    const params: EmporixSearchParams<EmporixProduct> = {
       page: page || 0,
       size: pageSize || 20,
-    }
+    };
     const { body: _body, query } = buildSearchQuery(params);
-    const response = await this.apiClient.authenticatedFetch(`/product/${this.config.tenant}/products?${query}`,
-      { method: 'GET' });
-
-    return buildPaginatedResponse(params, response);
-  }
-
-  async searchProducts(params: SearchParams<Product>): Promise<PaginatedResponse<Product>> {
-    const { body, query } = buildSearchQuery(params);
     const response = await this.apiClient.authenticatedFetch(
       `/product/${this.config.tenant}/products?${query}`,
+      { method: 'GET', headers: { 'X-Total-Count': 'true' } },
+      'public',
+    );
+
+    return buildPaginatedResponse(params, response);
+  }
+
+  async searchProducts(params: EmporixSearchParams<EmporixProduct>): Promise<EmporixPaginatedResponse<EmporixProduct>> {
+    const { body, query } = buildSearchQuery(params);
+    const response = await this.apiClient.authenticatedFetch(
+      `/product/${this.config.tenant}/products/search?${query}`,
       {
         method: 'POST',
-        headers: { 'Accept': 'application/json', 'X-Total-Count': 'true' },
-        body: JSON.stringify({ 'q': body })
-      }
+        headers: {
+          'X-Total-Count': 'true',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ q: body }),
+      },
+      'public',
     );
     return buildPaginatedResponse(params, response);
   }
 
-  async getProduct(id: string): Promise<Product> {
+  async getProduct(id: string): Promise<EmporixProduct | undefined> {
     const response = await this.apiClient.authenticatedFetch(
       `/product/${this.config.tenant}/products/${id}`,
-      { method: 'GET' }
+      { method: 'GET' },
+      'public',
     );
+    if (!response.ok) {
+      if (response.status == 404) {
+        return undefined;
+      } else {
+        throw new Error(`Failed to get product: ${response.statusText}`);
+      }
+    }
     return await response.json();
   }
 }
-
 export default EmporixProductApi;

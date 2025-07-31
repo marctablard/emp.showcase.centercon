@@ -1,0 +1,9 @@
+.github
+.husky
+.idea
+.windsurf
+certificates
+docs
+e2e
+playwright-report
+test-results

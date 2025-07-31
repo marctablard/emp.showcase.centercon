@@ -1,8 +1,8 @@
 import { inject } from 'inversify';
-import type { EmporixConfig } from '../../config';
-import { TokenManager } from '../TokenManager'
-import apis from '../../..';
 import { injectable } from '@/platform/core/di/injectable';
+import { buildCurl } from '@/platform/core/utils/curl';
+import type { EmporixConfig } from '../../config';
+import type { EmporixTokenManager } from '../EmporixTokenManager';
 
 /**
  * Main client for interacting with Emporix APIs
@@ -11,30 +11,23 @@ import { injectable } from '@/platform/core/di/injectable';
 @injectable('EmporixApiInvoker', 'Singleton')
 class EmporixApiInvoker {
   private config: EmporixConfig;
+  private tokenManager: EmporixTokenManager;
+  private debugCurl: boolean = false;
 
   constructor(
-    @inject('EmporixConfig') config: EmporixConfig
+    @inject('EmporixConfig') config: EmporixConfig,
+    @inject('EmporixTokenManager') tokenManager: EmporixTokenManager,
   ) {
     this.config = config;
+    this.tokenManager = tokenManager;
   }
 
   /**
    * Get an anonymous token for accessing public resources
    * @returns Promise with the token string
    */
-  async getAnonymousToken(): Promise<string> {
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    return tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
-  }
-
-  /**
-   * Get a customer token for authenticated user access
-   * @param password Customer password
-   * @returns Promise with access token and SaaS token
-   */
-  async getCustomerToken(username: string, password: string): Promise<{accessToken: string, saasToken: string}> {
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    return tokenManager.getCustomerToken(this.config.tenant, this.config.clientId, username, password);
+  async getAnonymousToken(): Promise<{ accessToken: string; sessionId: string }> {
+    return this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
   }
 
   /**
@@ -42,25 +35,18 @@ class EmporixApiInvoker {
    * @param clientSecret Optional client secret (uses config value if not provided)
    * @returns Promise with the token string
    */
-  async getServiceAccessToken(clientId?: string, clientSecret?: string): Promise<string> {
-    const cid = clientId || this.config.clientId;
-    const secret = clientSecret || this.config.clientSecret;
-    
-    if (!cid || !secret) {
-      throw new Error('Client ID and Client Secret are required for service access token');
+  async getServiceAccessToken(scopes?: string[]): Promise<string> {
+    if (!this.config.serverClientId || !this.config.serverClientSecret) {
+      throw new Error('Service Credentials not available');
     }
-
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    return tokenManager.getServiceAccessToken(this.config.tenant, cid, secret);
+    return this.tokenManager.getServiceAccessToken(
+      this.config.tenant,
+      this.config.serverClientId,
+      this.config.serverClientSecret,
+      scopes,
+    );
   }
 
-  /**
-   * Create a fetch request with the appropriate authentication headers
-   * @param url API endpoint URL
-   * @param options Fetch options
-   * @param tokenType Type of token to use for authentication
-   * @returns Promise with the fetch response
-   */
   /**
    * Create a fetch request with the appropriate authentication headers
    * @param url API endpoint URL
@@ -70,50 +56,88 @@ class EmporixApiInvoker {
    * @returns Promise with the fetch response
    */
   async authenticatedFetch(
-    url: string, 
-    options: RequestInit = {}, 
-    tokenType: 'anonymous' | 'customer' | 'service' = 'anonymous',
-    credentials?: { username: string; password: string }
+    url: string,
+    options: RequestInit = {},
+    tokenType: 'public' | 'session' | 'customer-saas' | 'service' = 'public',
+    authOptions?: {
+      credentials?: { username: string; password: string };
+      scopes?: string[];
+    },
   ): Promise<Response> {
     let token: string;
-    
+
+    // Add authorization header to the request
+    let headers = {
+      ...options.headers,
+    };
     // Get the appropriate token based on the token type
     switch (tokenType) {
-      case 'anonymous':
-        token = await this.getAnonymousToken();
+      case 'public':
+        const anonymousToken = await this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
+        token = anonymousToken.accessToken;
         break;
-      case 'customer':
-        if (!credentials) {
-          throw new Error('Customer credentials are required for customer token authentication');
+      case 'customer-saas':
+      case 'session':
+        const sessionToken = await this.tokenManager.getSessionToken(
+          this.config.tenant,
+          this.config.clientId,
+          authOptions?.credentials,
+        );
+        token = sessionToken.accessToken;
+        if (tokenType === 'customer-saas') {
+          if (sessionToken.saasToken) {
+            headers = {
+              ...headers,
+              'saas-token': `${sessionToken.saasToken}`,
+            };
+          } else {
+            throw new Error('No SaaS token available');
+          }
+        } else {
+          headers = {
+            ...headers,
+            'session-id': `${sessionToken.sessionId}`,
+          };
         }
-        const customerTokens = await this.getCustomerToken(credentials.username, credentials.password);
-        token = customerTokens.accessToken;
         break;
       case 'service':
-        token = await this.getServiceAccessToken();
+        if (!this.config.serverClientId || !this.config.serverClientSecret) {
+          throw new Error('Service Credentials not available');
+        }
+        token = await this.tokenManager.getServiceAccessToken(
+          this.config.tenant,
+          this.config.serverClientId,
+          this.config.serverClientSecret,
+        );
         break;
       default:
         throw new Error(`Unknown token type: ${tokenType}`);
     }
-    
+
     // Add authorization header to the request
-    const headers = {
-      ...options.headers,
-      'Authorization': `Bearer ${token}`
+    headers = {
+      ...headers,
+      Authorization: `Bearer ${token}`,
     };
-    // Make the authenticated request
-    return fetch(`${this.config.baseUrl}/${url}`, {
-      ...options,
-      headers
-    });
+
+    return this.fetch(url, { ...options, headers });
+  }
+
+  async fetch(url: string, options: RequestInit = {}): Promise<Response> {
+    url = `${this.config.baseUrl}/${url}`;
+
+    if (this.debugCurl) {
+      console.debug(buildCurl(url, options));
+    }
+    // no recursion, this is the globals fetch!
+    return fetch(url, options);
   }
 
   /**
- * Clear all stored tokens
- */
-async clearTokens(): Promise<void> {
-    const tokenManager = await apis.get<TokenManager>("EmporixTokenManager");
-    tokenManager.clearTokens();
+   * Clear all stored tokens
+   */
+  async clearTokens(): Promise<void> {
+    this.tokenManager.clearTokens(this.config.tenant);
   }
 }
 export default EmporixApiInvoker;

@@ -1,7 +1,7 @@
 /**
  * Represents the different layers in the application architecture
  */
-export type Layer = 'integration' | 'service' | 'repository';
+export type Layer = 'integration' | 'service' | 'repository' | 'platform';
 
 /**
  * Represents a binding that is available for registration in the container

@@ -1,5 +1,3 @@
-// @/lib/di/reflect-metadata.ts
+'use client';
 
-"use client";
-
-import "reflect-metadata";
+import 'reflect-metadata';

@@ -1,0 +1,9 @@
+node_modules
+.next
+certificates
+scripts
+playwright-report
+i18n
+docs
+resources
+test-results

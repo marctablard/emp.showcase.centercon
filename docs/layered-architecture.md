@@ -27,6 +27,7 @@ Our application is divided into three primary layers, each with its own specific
 The Integration layer serves as the entry point for external interactions with our application.
 
 **Responsibilities:**
+
 - Handling HTTP requests and responses
 - Input validation and sanitization
 - Authentication and authorization
@@ -34,6 +35,7 @@ The Integration layer serves as the entry point for external interactions with o
 - Formatting responses according to API contracts
 
 **Example Use Cases:**
+
 - REST API endpoints
 - GraphQL resolvers
 - External API clients (e.g., Emporix API integration)
@@ -45,6 +47,7 @@ The Integration layer should not contain business logic; it should delegate to t
 The service layer contains the core business logic of our application.
 
 **Responsibilities:**
+
 - Implementing business rules and workflows
 - Coordinating operations across multiple repositories
 - Transaction management
@@ -52,6 +55,7 @@ The service layer contains the core business logic of our application.
 - Transforming data between the Integration and repository layers
 
 **Example Use Cases:**
+
 - Cart management logic
 - Product search and filtering
 - User authentication workflows
@@ -68,10 +72,12 @@ Integration Layer → Service Layer ← React Application Level
 ```
 
 Each layer only communicates with adjacent layers:
+
 - Service Layer depends on the Integration layer
 - React Application layer depends on the Service layer
 
 This unidirectional dependency flow ensures that:
+
 - Higher layers can be replaced without affecting lower layers
 - Lower layers can be modified without impacting higher layers
 - Testing can be performed in isolation at each layer
@@ -82,23 +88,24 @@ Our Dependency Injection framework explicitly supports this layered architecture
 
 ```typescript
 // From di-generator-core.ts
-export const LAYER_CONFIGS: Record<Layer, { directory: string, outputFile: string }> = {
+export const LAYER_CONFIGS: Record<Layer, { directory: string; outputFile: string }> = {
   integration: {
     directory: 'src/platform/integrations',
-    outputFile: 'src/platform/integrations/index.ts'
+    outputFile: 'src/platform/integrations/index.ts',
   },
   service: {
     directory: 'src/platform/services',
-    outputFile: 'src/platform/services/index.ts'
+    outputFile: 'src/platform/services/index.ts',
   },
   repository: {
     directory: 'src/platform/repositories',
-    outputFile: 'src/platform/repositories/index.ts'
-  }
+    outputFile: 'src/platform/repositories/index.ts',
+  },
 };
 ```
 
 Each layer has:
+
 - A dedicated directory structure
 - Its own DI container
 - Auto-generated container configuration
@@ -110,24 +117,28 @@ Each layer has:
 Let's consider a get product feature:
 
 **Integration Layer** (`src/platform/integrations/product/impl/EmporixProductApi.ts`):
-   - Handles HTTP requests to Emporix API, calling https://api.emporix.io/product/{tenant}/products/{productId}
-   - Formats the request and response according to the API contract
+
+- Handles HTTP requests to Emporix API, calling https://api.emporix.io/product/{tenant}/products/{productId}
+- Formats the request and response according to the API contract
 
 **Service Layer** (`src/platform/services/product/impl/EmporixProductService.ts`):
-   - Invokes EmporixProductApi from Integration layer
-   - Handles product data transformation and validation
-   - Applies business rules (e.g., visibility, availability)
-   - Transforms raw data into domain models through Mappers
+
+- Invokes EmporixProductApi from Integration layer
+- Handles product data transformation and validation
+- Applies business rules (e.g., visibility, availability)
+- Transforms raw data into domain models through Mappers
 
 **React Application Level** (`src/app/[locale]/hello/page.ts`):
-   - Invokes EmporixProductService from Service layer either directly or through Next-API
-   - Renders the product data in the UI
+
+- Invokes EmporixProductService from Service layer either directly or through Next-API
+- Renders the product data in the UI
 
 ### Example 2: Next.js API Route
 
 Here's how our layered architecture is implemented in a Next.js API route:
 
 **Next.js API Route** (`src/app/api/products/[id]/route.ts`):
+
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
 import services from '@/platform/services';
@@ -137,35 +148,27 @@ import { ProductService } from '@/platform/services/product/ProductService';
  * API endpoint to get a specific product by ID
  * GET /api/products/[id]
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const productId = params.id;
     const productService = await services.get<ProductService>('ProductService');
-    
+
     const product = await productService.getProductById(productId);
-    
+
     if (!product) {
-      return NextResponse.json(
-        { error: `Product with ID ${productId} not found` },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: `Product with ID ${productId} not found` }, { status: 404 });
     }
-    
+
     return NextResponse.json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }
 ```
 
 This example demonstrates:
+
 - The Next.JS API route just uses the Service layer
 - It has no knowledge of the Integration layer and must only deal with the Service Layers Data Model
 - It uses our dependency injection system to get the appropriate service
@@ -180,23 +183,40 @@ Our layered architecture, combined with dependency injection, allows us to easil
 ```typescript
 // Integration Layer can have multiple implementations
 @injectable('ProductApi')
-class EmporixProductApi implements ProductApi { /* ... */ }
+class EmporixProductApi implements ProductApi {
+  /* ... */
+}
 
 @injectable('ProductApi')
-class MockProductApi implements ProductApi { /* ... */ }
+class MockProductApi implements ProductApi {
+  /* ... */
+}
 ```
 
 ### 2. Environment-Specific Code
 
 Different layers may need different implementations based on the environment:
+We can supply different implementations for each environment by Naming convention.
+- ...Client : used in Client/Browser-Context
+- ...Server : used in Server-Side-Context
+- ...SSR : used in Server-Side-Rendering-Context
 
 ```typescript
 // Service Layer with client/server variants
 @injectable('UserService')
-class UserServiceServer implements UserService { /* ... */ }
+class UserServiceServer implements UserService {
+  /* ... */
+}
 
 @injectable('UserService')
-class UserServiceClient implements UserService { /* ... */ }
+class UserServiceClient implements UserService {
+  /* ... */
+}
+
+@injectable('UserService')
+class UserServiceSSR implements UserService {
+  /* ... */
+}
 ```
 
 ### 3. Testing Simplification

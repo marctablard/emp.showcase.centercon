@@ -1,35 +1,44 @@
-import { PaginatedResponse, SearchParams } from "../../model";
+import { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 
 /**
  * Translate Search Parameters to Query and Body (for POST)
- * @param params 
- * @returns { body : q-Parameter for Search-Criteria, query : Query-Parameters } 
+ * @param params
+ * @returns { body : q-Parameter for Search-Criteria, query : Query-Parameters }
  */
-export function buildSearchQuery<T>(params: SearchParams<T>): { body: string, query: string } {
-    const queryParams = new URLSearchParams();
+export function buildSearchQuery<T>(
+  params: EmporixSearchParams<T>,
+  filterAsQuery: boolean = false,
+): { body: string; query: string } {
+  const queryParams = new URLSearchParams();
 
-    if (params.page) {
-        queryParams.append('pageNumber', params.page.toString());
-    }
-    if (params.size) {
-        queryParams.append('pageSize', params.size.toString());
-    }
-    if (params.sort) {
-        queryParams.append('sort', params.sort);
-    }
-    let query: string = '';
-    if (params.criteria) {
-        Object.entries(params.criteria).forEach(([key, value]) => {
-            if (query.length > 0) {
-                query += ' ';
-            }
-            query += (`${key}:${value}`);
-        });
-    }
+  if (params.page) {
+    queryParams.append('pageNumber', params.page.toString());
+  }
+  if (params.size) {
+    queryParams.append('pageSize', params.size.toString());
+  }
+  if (params.sort) {
+    queryParams.append('sort', params.sort);
+  }
+  if (params.expand) {
+    queryParams.append('expand', params.expand.join(','));
+  }
+  let query: string = '';
+  if (params.criteria) {
+    Object.entries(params.criteria).forEach(([key, value]) => {
+      if (filterAsQuery) {
+        queryParams.append(key, '' + value);
+      } else {
+        if (query.length > 0) {
+          query += ' ';
+        }
+        query += `${key}:${value}`;
+      }
+    });
+  }
 
-    return { body: query, query: queryParams.toString() };
+  return { body: query, query: filterAsQuery ? queryParams.toString() : queryParams.toString() };
 }
-
 
 /**
  * Builds a PaginatedResponse object from a HTTP Response object
@@ -37,23 +46,26 @@ export function buildSearchQuery<T>(params: SearchParams<T>): { body: string, qu
  * @param response HTTP response object
  * @returns PaginatedResponse object
  */
-export async function buildPaginatedResponse<T>(params: SearchParams<T>, response: Response): Promise<PaginatedResponse<T>> {
-    const total: number = Number(response.headers.get('x-total-count')) || -1;
-    const data: T[] = await response.json();
-    return {
-        items: data,
-        page: params.page || 0,
-        size: params.size || 20,
-        total: total
-    };
+export async function buildPaginatedResponse<T>(
+  params: EmporixSearchParams<T>,
+  response: Response,
+): Promise<EmporixPaginatedResponse<T>> {
+  const total: number = Number(response.headers.get('x-total-count')) || -1;
+  const data: T[] = await response.json();
+  return {
+    items: data,
+    page: params.page || 0,
+    size: params.size || 20,
+    total: total,
+  };
 }
 
-export function checkTokenValidity(token?: string, expiryAt?: number, threshold: number = 300000): boolean {
+export function checkTokenValidity(token?: string, expiryAt?: number, threshold: number = 6000): boolean {
   if (!token) {
     return false;
   }
   if (!expiryAt) {
     return true;
   }
-  return Date.now() < expiryAt - threshold;
+  return Date.now() <= expiryAt - threshold;
 }

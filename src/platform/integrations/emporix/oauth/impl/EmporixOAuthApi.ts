@@ -1,12 +1,19 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { OAuthApi, AnonymousTokenResponse, CustomerTokenResponse, ServiceAccessTokenResponse } from '../OAuthApi';
+import { buildCurl } from '@/platform/core/utils/curl';
+import {
+  EmporixAccessTokenResponse,
+  EmporixAnonymousTokenResponse,
+  EmporixCustomerTokenResponse,
+} from '../../model/oauth';
+import { EmporixOAuthApi as IEmporixOAuthApi } from '../EmporixOAuthApi';
 
 /**
  * Implementation of the Emporix OAuth API
  */
 @injectable('EmporixOAuthApi', 'Singleton')
-class EmporixOAuthApi implements OAuthApi {
+class EmporixOAuthApi implements IEmporixOAuthApi {
   private readonly baseUrl: string = 'https://api.emporix.io';
+  private debugCurl: boolean = false;
 
   /**
    * Get an anonymous token
@@ -14,23 +21,24 @@ class EmporixOAuthApi implements OAuthApi {
    * @param clientId Client ID for anonymous access
    * @returns Promise with the anonymous token response
    */
-  async getAnonymousToken(tenant: string, clientId: string): Promise<AnonymousTokenResponse> {
-    const url = `${this.baseUrl}/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
-    
-    const response = await fetch(url, {
+  async getAnonymousToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
+    const url = `/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+
+    const response = await this.fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get anonymous token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to get anonymous token: ${response.statusText} - ${message}`);
     }
 
-    return await response.json() as AnonymousTokenResponse;
+    return (await response.json()) as EmporixAnonymousTokenResponse;
   }
-  
+
   /**
    * Refresh an anonymous token
    * @param tenant The tenant ID
@@ -38,24 +46,28 @@ class EmporixOAuthApi implements OAuthApi {
    * @param clientId Client ID for anonymous access
    * @returns Promise with the refreshed anonymous token response
    */
-  async refreshAnonymousToken(tenant: string, refreshToken: string, clientId: string): Promise<AnonymousTokenResponse> {
-    const url = `${this.baseUrl}/customerlogin/auth/anonymous/refresh?tenant=${tenant}&refresh_token=${refreshToken}&client_id=${clientId}`;
-    
-    const response = await fetch(url, {
+  async refreshAnonymousToken(
+    tenant: string,
+    refreshToken: string,
+    clientId: string,
+  ): Promise<EmporixAnonymousTokenResponse> {
+    const url = `/customerlogin/auth/anonymous/refresh?tenant=${tenant}&refresh_token=${refreshToken}&client_id=${clientId}`;
+
+    const response = await this.fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to refresh anonymous token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to refresh anonymous token: ${response.statusText} - ${message}`);
     }
 
-    return await response.json() as AnonymousTokenResponse;
+    return (await response.json()) as EmporixAnonymousTokenResponse;
   }
 
- 
   /**
    * Get a customer token (and SaaS token)
    * @param tenant The tenant ID
@@ -63,49 +75,55 @@ class EmporixOAuthApi implements OAuthApi {
    * @param password Customer password
    * @returns Promise with the customer token response
    */
-  async getCustomerToken(tenant: string, accessToken: string, username: string, password: string): Promise<CustomerTokenResponse> {
-    const url = `${this.baseUrl}/customer/${tenant}/login`;
-    const response = await fetch(url, {
+  async getCustomerToken(
+    tenant: string,
+    accessToken: string,
+    username: string,
+    password: string,
+  ): Promise<EmporixCustomerTokenResponse> {
+    const url = `/customer/${tenant}/login`;
+    const response = await this.fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
-        username,
-        password
-      })
+        email: username,
+        password: password,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get customer token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to get customer token: ${response.statusText} - ${message}`);
     }
 
-    return await response.json() as CustomerTokenResponse;
+    return (await response.json()) as EmporixCustomerTokenResponse;
   }
 
-  
   /**
    * Refresh a customer token
    * @param tenant The tenant ID
    * @param refreshToken Refresh token from the original customer token response
    * @returns Promise with the refreshed customer token response
    */
-  async refreshCustomerToken(tenant: string, refreshToken: string): Promise<CustomerTokenResponse> {
-    const url = `${this.baseUrl}/customer/${tenant}/refreshauthtoken/refresh?refresh_token=${refreshToken}`;
-    
-    const response = await fetch(url, {
+  async refreshCustomerToken(tenant: string, refreshToken: string): Promise<EmporixCustomerTokenResponse> {
+    const url = `/customer/${tenant}/refreshauthtoken/refresh?refresh_token=${refreshToken}`;
+
+    const response = await this.fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to refresh customer token: ${response.statusText}`);
+      const message = await response.text();
+      throw new Error(`Failed to refresh customer token: ${response.statusText} - ${message}`);
     }
 
-    return await response.json() as CustomerTokenResponse;
+    return (await response.json()) as EmporixCustomerTokenResponse;
   }
 
   /**
@@ -115,26 +133,47 @@ class EmporixOAuthApi implements OAuthApi {
    * @param clientSecret Client secret for service access
    * @returns Promise with the service access token response
    */
-  async getServiceAccessToken(tenant: string, clientId: string, clientSecret: string): Promise<ServiceAccessTokenResponse> {
-    const url = `${this.baseUrl}/oauth/${tenant}/token`;
-    
-    // Create Basic Auth header from client ID and secret
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-    
-    const response = await fetch(url, {
+  async getServiceAccessToken(
+    tenant: string,
+    clientId: string,
+    clientSecret: string,
+    scopes?: string[],
+  ): Promise<EmporixAccessTokenResponse> {
+    // Create URL-encoded form data for OAuth token request
+    const formData = new URLSearchParams();
+    formData.append('grant_type', 'client_credentials');
+    formData.append('client_id', clientId);
+    formData.append('client_secret', clientSecret);
+    if (scopes) {
+      formData.append('scope', `tenant=${tenant}` + (scopes ? ` ${scopes.join(' ')}` : ''));
+    }
+    const response = await this.fetch('/oauth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${credentials}`
+        Accept: 'application/json',
       },
-      body: 'grant_type=client_credentials'
+      body: formData,
     });
 
     if (!response.ok) {
       throw new Error(`Failed to get service access token: ${response.statusText}`);
     }
+    return (await response.json()) as EmporixAccessTokenResponse;
+  }
 
-    return await response.json() as ServiceAccessTokenResponse;
+  /** TODO this is currently a duplicate of EmporixApiInvoker,
+   * but we need to restructure the dependencies, to make it not cyclic when using this
+   * Circular dependency : EmporixTokenManager -> EmporixOAuthApi -> EmporixApiInvoker -> EmporixTokenManager
+   */
+  async fetch(url: string, options: RequestInit = {}): Promise<Response> {
+    url = `${this.baseUrl}${url.startsWith('/') ? url : '/' + url}`;
+
+    if (this.debugCurl) {
+      console.debug(buildCurl(url, options));
+    }
+    // no recursion, this is the globals fetch!
+    return fetch(url, options);
   }
 }
 

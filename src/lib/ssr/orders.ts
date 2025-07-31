@@ -1,0 +1,51 @@
+'use server';
+
+import { cache } from 'react';
+import { Order } from '@/platform/services/model/order/order';
+import { OrderService } from '@/platform/services/order/OrderService';
+
+/**
+ * Get the order service instance from the platform container
+ */
+const getOrderService = () => globalThis.EMP.platform.ssr.get<OrderService>('OrderService');
+
+/**
+ * Get a specific order by ID
+ * This function is cached to prevent multiple order fetches in a single request
+ */
+export const getOrderById = cache(async (orderId: string): Promise<Order | null | undefined> => {
+  try {
+    const orderService = getOrderService();
+    return await orderService.getCustomerOrderById(orderId);
+  } catch (_error) {
+    return undefined;
+  }
+});
+
+/**
+ * Get all orders for the current customer with optional pagination
+ * This function is cached to prevent multiple order fetches in a single request
+ */
+export const getOrders = cache(async (pageSize?: number, pageNumber?: number): Promise<Order[] | undefined> => {
+  try {
+    const orderService = getOrderService();
+    const orders = await orderService.getCustomerOrders(pageSize, pageNumber);
+    return orders;
+  } catch (_error) {
+    return undefined;
+  }
+});
+
+/**
+ * Get available status transitions for an order
+ * This function is cached to prevent multiple API fetches in a single request
+ */
+export const getOrderStatusTransitions = cache(async (orderId: string): Promise<string[] | undefined> => {
+  try {
+    const orderService = getOrderService();
+    const statusTransitions = await orderService.getOrderStatusTransitions(orderId);
+    return statusTransitions;
+  } catch (_error) {
+    return undefined;
+  }
+});

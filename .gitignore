@@ -12,7 +12,6 @@ dist
 build
 dist-ssr
 .env
-.firebase
 
 # Editor directories and files
 .vscode/*
@@ -54,6 +53,9 @@ cypress/videos/**/*
 # misc
 .DS_Store
 *.pem
+certificates
+.windsurf
+*.iml
 
 # debug
 npm-debug.log*
@@ -75,3 +77,17 @@ next-env.d.ts
 
 # data
 /src/server-data/**/*
+
+# Generated Container-Files
+/src/platform/ssr.ts
+/src/platform/client.ts
+/src/platform/server.ts
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Generated translation files
+/src/i18n/translations/*.json
