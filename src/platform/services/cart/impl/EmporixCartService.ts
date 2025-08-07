@@ -185,6 +185,31 @@ class EmporixCartService implements CartService {
     await this.cartApi.changeSite(cartId, siteCode);
     await this.cartApi.refreshCart(cartId);
   }
+
+  /**
+   * Get cart by criteria (siteCode, sessionId, customerId, type)
+   * Useful for retrieving carts when you don't have the cart ID but have other identifiers
+   *
+   * @param siteCode - The site code to filter by
+   * @param sessionId - The session ID to filter by
+   * @param customerId - The customer ID to filter by
+   * @param type - The cart type to filter by (e.g., 'shopping')
+   * @returns The mapped cart or null if not found
+   */
+  async getCartByCriteria(
+    siteCode: string,
+    sessionId: string,
+    customerId?: string,
+    type: string = 'shopping',
+  ): Promise<Cart | null> {
+    try {
+      const cart = await this.cartApi.getCartByCriteria(siteCode, sessionId, customerId, type);
+      return cart ? this.mapper.mapToService(cart) : null;
+    } catch (error) {
+      console.error('Error getting cart by criteria:', error);
+      return null;
+    }
+  }
 }
 
 export default EmporixCartService;
