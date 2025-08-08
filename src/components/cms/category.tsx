@@ -36,7 +36,7 @@ const Category = ({ blok }: CategoryProps) => {
         <div className="relative h-48">
           <Image
             src={blok.banner.filename}
-            alt={blok.banner.alt || blok.title || 'Category'}
+            alt={blok.banner?.alt || blok.title || 'Category'}
             fill
             className="object-cover"
           />

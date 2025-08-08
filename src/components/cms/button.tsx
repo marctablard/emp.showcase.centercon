@@ -1,6 +1,5 @@
-import { storyblokEditable } from '@storyblok/react/rsc';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button as UiButton } from '../ui/button';
+import UiLink from '../ui/link';
 
 const IconVariant = {
   ArrowRight: ArrowRight,
@@ -15,25 +14,23 @@ export interface ButtonData {
 }
 
 export interface ButtonProps {
-  blok: {
-    title: string;
-    link: string;
-    iconLeft?: string;
-    iconRight?: string;
-  };
+  title: string;
+  link: string;
+  iconLeft?: string;
+  iconRight?: string;
 }
 
-const Button = ({ blok }: ButtonProps) => {
-  const IconLeft = blok.iconLeft && IconVariant[blok.iconLeft as keyof typeof IconVariant];
-  const IconRight = blok.iconRight && IconVariant[blok.iconRight as keyof typeof IconVariant];
+const Button = ({ title, link, iconLeft, iconRight }: ButtonProps) => {
+  const IconLeft = iconLeft && IconVariant[iconLeft as keyof typeof IconVariant];
+  const IconRight = iconRight && IconVariant[iconRight as keyof typeof IconVariant];
 
   return (
-    <div {...storyblokEditable(blok)}>
-      <UiButton onClick={() => (window.location.href = blok.link)}>
+    <div>
+      <UiLink type="Link" variant="button_primary" href={link}>
         {IconLeft && <IconLeft />}
-        {blok.title}
+        {title}
         {IconRight && <IconRight />}
-      </UiButton>
+      </UiLink>
     </div>
   );
 };
