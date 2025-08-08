@@ -15,4 +15,12 @@ export interface EmporixProductApi {
    * @param pageSize number
    */
   getProducts(page?: number, pageSize?: number): Promise<PaginatedResponse<Product>>;
+
+  /**
+   * Retrieves a list of products.
+   * @link https://developer.emporix.io/docs/openapi/product/#operation/GET-product-list-products
+   * @param page number
+   * @param pageSize number
+   */
+  searchProducts(params: EmporixSearchParams<EmporixProduct>): Promise<PaginatedResponse<Product>>;
 }
