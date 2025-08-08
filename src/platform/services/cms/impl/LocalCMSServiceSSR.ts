@@ -43,7 +43,7 @@ export class LocalCmsServiceSSR implements CMSService {
       }
 
       return pageData;
-    } catch (error) {
+    } catch (_error) {
       console.warn(`Error loading CMS page with slug '${slug}`);
       return {
         notfound: true,
@@ -74,7 +74,7 @@ export class LocalCmsServiceSSR implements CMSService {
       }
 
       return pageData;
-    } catch (error) {
+    } catch (_error) {
       console.warn(`Error dynamically importing CMS data for slug '${slug}`);
       return {
         notfound: true,
