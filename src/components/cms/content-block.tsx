@@ -50,7 +50,7 @@ const ContentBlock = ({ blok }: ContentBlockProps) => {
         <div className="absolute inset-0 z-0">
           <Image
             src={blok.background_image.filename}
-            alt={blok.background_image.alt || ''}
+            alt={blok.background_image?.alt || ''}
             fill
             className="object-cover"
           />
