@@ -291,6 +291,26 @@ class EmporixCartApi implements IEmporixCartApi {
       throw new Error(`Failed to refresh cart: ${response.statusText} ${errorDetails}`);
     }
   }
+
+  async mergeCarts(sourceCartId: string, targetCartId: string): Promise<void> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/cart/${this.config.tenant}/carts/${targetCartId}/merge`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ carts: [sourceCartId] }),
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to merge carts: ${response.statusText} ${errorDetails}`);
+    }
+  }
 }
 
 export default EmporixCartApi;

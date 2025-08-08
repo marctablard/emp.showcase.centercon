@@ -6,6 +6,7 @@ import { EmporixCustomer } from '@/platform/integrations/emporix/model/customer'
 import EmporixSessionContextApi from '@/platform/integrations/emporix/session/impl/EmporixSessionContextApi';
 import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import type { CartMigrationService } from '../../cart/CartMigrationService';
+import type { CartService } from '../../cart/CartService';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import type { SessionService } from '../../session';
 import { AuthService } from '../AuthService';
@@ -32,6 +33,8 @@ export class EmporixAuthService implements AuthService {
     private readonly cartMigrationService: CartMigrationService,
     @inject('SessionService')
     private readonly sessionService: SessionService,
+    @inject('CartService')
+    private readonly cartService: CartService,
   ) {}
 
   async login(credentials: Credentials): Promise<Session> {
@@ -43,7 +46,12 @@ export class EmporixAuthService implements AuthService {
       }
       const cartId = oldSession?.cartId;
       if (cartId && session.customerId) {
-        await this.cartMigrationService.migrateCartToCustomer(cartId, session.customerId);
+        const siteCode = session.siteCode || 'main';
+        const customerCart = await this.cartService.getCartByCriteria(siteCode, '', session.customerId);
+        if (!customerCart) {
+          throw new Error('Failed to get customer cart');
+        }
+        await this.cartMigrationService.mergeCarts(cartId, customerCart.id);
       }
       return {
         sessionId: session.sessionId,
