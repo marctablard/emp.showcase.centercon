@@ -1,5 +1,7 @@
+import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { CMSNoResult, CMSPage } from '../../model/cms';
+import type { SessionService } from '../../session';
 import { CMSService } from '../CMSService';
 
 /**
@@ -9,13 +11,15 @@ import { CMSService } from '../CMSService';
 @injectable('CMSService', 'Singleton')
 export class LocalCmsServiceSSR implements CMSService {
   private defaultSite: string;
+  private sessionService: SessionService;
 
   /**
    * Constructor
    * @param defaultSite Default site to use as fallback (default: '_default_')
    */
-  constructor(defaultSite: string = '_default_') {
+  constructor(@inject('SessionService') sessionService: SessionService, defaultSite: string = '_default_') {
     this.defaultSite = defaultSite;
+    this.sessionService = sessionService;
   }
 
   /**
@@ -31,7 +35,10 @@ export class LocalCmsServiceSSR implements CMSService {
       // Normalize the slug to create a valid filename
       const normalizedSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '').toLowerCase();
       const normalizedLocale = locale.toLowerCase();
-      const normalizedSite = site ? site.toLowerCase() : this.defaultSite;
+
+      const session = await this.sessionService.getCurrent();
+
+      const normalizedSite = session && session.siteCode ? session.siteCode : this.defaultSite;
 
       // Try to get the page from the requested site
       let pageData = await this.tryLoadPage(normalizedSlug, normalizedLocale, normalizedSite);
