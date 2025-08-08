@@ -101,7 +101,7 @@ import CMSPageComponent from '@/components/cms/storyblok/storyblok-cms-page';
 import CMSPageComponent from '@/components/cms/local/local-cms-page';
 ```
 
-By changing the import in these two files, you can switch the entire application between using Storyblok and the Local CMS system.
+By changing the import in these two files, you can switch the entire application between using Storyblok and the Local CMS system. A restart of the server (npm run dev) is required for the changes in the local CMS file system to get reflected.
 
 
 For more details, refer to the implementation files:
