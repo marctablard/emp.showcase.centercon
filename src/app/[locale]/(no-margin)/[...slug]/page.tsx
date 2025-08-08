@@ -1,4 +1,4 @@
-import CMSPageComponent from '@/components/cms/cms-page';
+import CMSPageComponent from '@/components/cms/local/local-cms-page';
 
 interface DynamicPageParams {
   slug: string[];

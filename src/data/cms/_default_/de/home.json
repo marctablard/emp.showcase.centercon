@@ -1,0 +1,68 @@
+{
+  "title": "E-Commerce Demo",
+  "description": "Wir bieten eine breite Palette an Produkten für Ihre Bedürfnisse. Entdecken Sie unser vielfältiges Sortiment in unserem Online-Shop.",
+  "url": "/",
+  "no_margin": true,
+  "components": [
+    {
+      "id": "hero-section",
+      "type": "hero",
+      "headline": "Willkommen in unserem Online-Shop",
+      "text": {
+        "content": [
+          {
+            "text": "Text content",
+            "type": "paragraph",
+            "content": [
+              {
+                "text": "Entdecken Sie unsere Produkte und profitieren Sie von unseren attraktiven Angeboten. Qualität und Service stehen bei uns an erster Stelle."
+              }
+            ]
+          }
+        ]
+      },
+      "main_button": [
+        {
+          "title": "PRODUKTE ENTDECKEN",
+          "link": "/products",
+          "variant": "primary",
+          "size": "lg"
+        }
+      ],
+      "image": {
+        "filename": "/images/cms/home/hero.jpg",
+        "alt": "Online-Shop Startseite"
+      }
+    },
+    {
+      "id": "quick-entry-section",
+      "type": "quick-entry",
+      "elements": [
+        {
+          "title": "Kontakt",
+          "link": "/contact",
+          "link_name": "Fragen? Schreiben Sie uns",
+          "icon": "MessageSquareQuote"
+        },
+        {
+          "title": "Produktkatalog",
+          "link": "/products",
+          "link_name": "Unser Sortiment",
+          "icon": "ScanSearch"
+        },
+        {
+          "title": "Schnellbestellung",
+          "link": "/quick-order",
+          "link_name": "Zeit sparen",
+          "icon": "ShoppingCart"
+        },
+        {
+          "title": "Versandinformationen",
+          "link": "/delivery",
+          "link_name": "Schnelle Lieferung",
+          "icon": "Gauge"
+        }
+      ]
+    }
+  ]
+}
