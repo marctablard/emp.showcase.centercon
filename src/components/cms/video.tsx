@@ -1,5 +1,3 @@
-import { storyblokEditable } from '@storyblok/react/rsc';
-
 export interface VideoData {
   video_file: {
     filename: string;
@@ -12,34 +10,31 @@ export interface VideoData {
   alt_text?: string;
 }
 export interface VideoProps {
-  blok: {
-    video_file: {
-      filename: string;
-      alt?: string;
-    };
-    autoplay: boolean;
-    loop: boolean;
-    mute: boolean;
-    controls: boolean;
-    alt_text?: string;
+  video_file: {
+    filename: string;
+    alt?: string;
   };
-  controls?: boolean;
+  autoplay: boolean;
+  loop: boolean;
+  mute: boolean;
+  controls: boolean;
+  alt_text?: string;
 }
 
-const Video = ({ blok, controls }: VideoProps) => {
+const Video = ({ video_file, autoplay, loop, mute, controls, alt_text }: VideoProps) => {
   return (
-    <div {...storyblokEditable(blok)} className="w-full h-full">
+    <div className="w-full h-full">
       <video
         height={'100%'}
         width={'100%'}
-        muted={blok.mute || blok.autoplay}
-        controls={blok.controls && controls}
-        loop={blok.loop}
-        autoPlay={blok.autoplay}
+        muted={mute || autoplay}
+        controls={controls && controls}
+        loop={loop}
+        autoPlay={autoplay}
         className="w-full h-full object-cover"
-        aria-label={blok.alt_text || blok.video_file.alt || 'Video'}
+        aria-label={alt_text || video_file?.alt || 'Video'}
       >
-        <source src={blok.video_file.filename} type="video/mp4" />
+        <source src={video_file?.filename} type="video/mp4" />
       </video>
     </div>
   );

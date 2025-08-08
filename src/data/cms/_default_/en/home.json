@@ -1,0 +1,68 @@
+{
+  "title": "E-Commerce Demo",
+  "description": "We offer a wide range of products for your needs. Discover our diverse selection in our online shop.",
+  "url": "/",
+  "no_margin": true,
+  "components": [
+    {
+      "id": "hero-section",
+      "type": "hero",
+      "headline": "Welcome to our Online Shop",
+      "text": {
+        "content": [
+          {
+            "text": "Text content",
+            "type": "paragraph",
+            "content": [
+              {
+                "text": "Discover our products and benefit from our attractive offers. Quality and service are our top priorities."
+              }
+            ]
+          }
+        ]
+      },
+      "main_button": [
+        {
+          "title": "EXPLORE PRODUCTS",
+          "link": "/products",
+          "variant": "primary",
+          "size": "lg"
+        }
+      ],
+      "image": {
+        "filename": "/images/cms/home/hero.jpg",
+        "alt": "Online Shop Homepage"
+      }
+    },
+    {
+      "id": "quick-entry-section",
+      "type": "quick-entry",
+      "elements": [
+        {
+          "title": "Contact",
+          "link": "/contact",
+          "link_name": "Questions? Write to us",
+          "icon": "MessageSquareQuote"
+        },
+        {
+          "title": "Product Catalog",
+          "link": "/products",
+          "link_name": "Our Selection",
+          "icon": "ScanSearch"
+        },
+        {
+          "title": "Quick Order",
+          "link": "/quick-order",
+          "link_name": "Save Time",
+          "icon": "ShoppingCart"
+        },
+        {
+          "title": "Shipping Information",
+          "link": "/delivery",
+          "link_name": "Fast Delivery",
+          "icon": "Gauge"
+        }
+      ]
+    }
+  ]
+}
