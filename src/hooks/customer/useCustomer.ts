@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { fetchCurrentCustomer } from '@/lib/client/customer';
 import type { Customer } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
@@ -19,6 +20,7 @@ interface CustomerHook {
  */
 export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => {
   const { customer, loading, getLoading, setLoading, setCustomer, getCustomer, reset } = useCustomerStore();
+  const { status } = useSession();
   if (initialCustomer && getCustomer() === undefined) {
     setCustomer(initialCustomer);
   }
@@ -26,6 +28,13 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
 
   const fetchCustomer = useCallback(async () => {
     try {
+      // Only fetch when authenticated
+      if (status !== 'authenticated') {
+        if (getLoading()) {
+          setLoading(false);
+        }
+        return;
+      }
       setLoading(true);
       setError(null);
       const data = await fetchCurrentCustomer();
@@ -36,21 +45,28 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setCustomer]);
+  }, [setLoading, setCustomer, status, getLoading]);
 
   // Initialize customer on first render if not already initialized
   useEffect(() => {
+    // Do not fetch when unauthenticated or during session loading
+    if (status !== 'authenticated') {
+      if (getLoading()) {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (customer === undefined && !getLoading()) {
       setLoading(true);
       // check without state-effect
       if (getCustomer() !== undefined) {
         setLoading(false);
       } else {
-        setLoading(true);
         fetchCustomer();
       }
     }
-  }, [customer, getCustomer, getLoading, setLoading, fetchCustomer]);
+  }, [customer, getCustomer, getLoading, setLoading, fetchCustomer, status]);
 
   return {
     customer,
