@@ -329,6 +329,7 @@ export const useCheckout = (): UseCheckout => {
     submitBillingAddress,
     submitShippingAddress,
     setLoading,
+    searchParams,
   ]);
 
   return {
