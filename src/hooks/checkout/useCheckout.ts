@@ -298,7 +298,9 @@ export const useCheckout = (): UseCheckout => {
   }, [paymentModes, checkoutCart, submitPaymentMethod]);
 
   useEffect(() => {
-    if (!addressesLoading) {
+    // Only load default addresses if we're not on the logout page
+    // This prevents re-populating addresses after logout
+    if (!addressesLoading && !searchParams.has('logout')) {
       if (!shippingAddress) {
         const defaultShippingAddress = getDefaultAddress('SHIPPING');
         if (defaultShippingAddress) {
