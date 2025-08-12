@@ -170,10 +170,22 @@ class EmporixCartService implements CartService {
   }
 
   async updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
+    // TODO Not used because of inconsistent Session/cart Handling
+    // Get the session cart and update it
+    const cart = await this.cartApi.getCart(cartId);
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
     await this.cartApi.updateCart(cartId, {
+      ...cart,
+      metadata: {
+        ...cart.metadata,
+        version: (cart.metadata?.version ?? 0) + 1,
+      },
       countryCode,
       zipCode,
     });
+    await this.cartApi.refreshCart(cartId);
   }
 
   async updateCurrency(cartId: string, currency: string): Promise<void> {

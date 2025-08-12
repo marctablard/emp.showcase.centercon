@@ -40,25 +40,36 @@ export class EmporixAuthService implements AuthService {
   async login(credentials: Credentials): Promise<Session> {
     try {
       const oldSession = await this.sessionService.getCurrent();
+      if (!oldSession) {
+        throw new Error('Failed to get session context');
+      }
+      const siteCode = oldSession.siteCode || 'main';
+      const oldSessionId = oldSession.id || '';
+      const anonymousCart = await this.cartService.getCartByCriteria(siteCode, oldSessionId, undefined);
+      if (!anonymousCart) {
+        throw new Error('Failed to get anonymous cart');
+      }
+
       const session = await this.emporixCustomerApi.login(credentials.username, credentials.password);
       if (!session) {
         throw new Error('Failed to get session context');
       }
-      const cartId = oldSession?.cartId;
-      if (cartId && session.customerId) {
-        const siteCode = session.siteCode || 'main';
+      // Capture the resulting customer cart id for the return value
+      let customerCartId: string | undefined;
+      if (anonymousCart.id && session.customerId) {
         const customerCart = await this.cartService.getCartByCriteria(siteCode, '', session.customerId);
         if (!customerCart) {
           throw new Error('Failed to get customer cart');
         }
-        await this.cartMigrationService.mergeCarts(cartId, customerCart.id);
+        await this.cartMigrationService.mergeCarts(anonymousCart.id, customerCart.id);
+        customerCartId = customerCart.id;
       }
       return {
         sessionId: session.sessionId,
         customerId: session.customerId,
         siteCode: session.siteCode,
         currency: session.currency,
-        cartId: cartId || undefined,
+        cartId: customerCartId,
         country: session.targetLocation,
       };
     } catch (error) {
