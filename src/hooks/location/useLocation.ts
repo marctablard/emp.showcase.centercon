@@ -76,7 +76,7 @@ export function useLocation(): UseLocationResult {
               postalCode: '',
               timezone: 'Europe/Berlin',
             });
-          } catch (err) {
+          } catch (_err) {
             reject(new Error('Failed to process browser geolocation'));
           }
         },
