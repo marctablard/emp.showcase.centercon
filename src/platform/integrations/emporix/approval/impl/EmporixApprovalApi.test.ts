@@ -231,7 +231,15 @@ describe('EmporixApprovalApi', () => {
       if (approvalId) {
         try {
           await setupApproverToken();
-          await approvalApi.deleteApproval(approvalId);
+          try {
+            await approvalApi.deleteApproval(approvalId);
+          } catch (deleteError: any) {
+            if (deleteError.message && deleteError.message.includes('404')) {
+              console.log(`Approval ${approvalId} not found`);
+            } else {
+              throw deleteError;
+            }
+          }
         } catch (error) {
           console.error('Error cleaning up approval:', error);
         }
@@ -239,7 +247,15 @@ describe('EmporixApprovalApi', () => {
       if (customerCartId) {
         try {
           await setupCustomerToken();
-          await cartApi.deleteCart(customerCartId);
+          try {
+            await cartApi.deleteCart(customerCartId);
+          } catch (deleteError: any) {
+            if (deleteError.message && deleteError.message.includes('404')) {
+              console.log(`Cart ${customerCartId} not found`);
+            } else {
+              throw deleteError;
+            }
+          }
         } catch (error) {
           console.error('Error cleaning up cart:', error);
         }
