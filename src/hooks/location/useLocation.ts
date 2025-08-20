@@ -53,22 +53,60 @@ export function useLocation(): UseLocationResult {
       }
 
       navigator.geolocation.getCurrentPosition(
-        async () => {
+        async (position) => {
           try {
-            // In a real implementation, this would be a reverse geocoding API call
-            // For now, we'll mock the response
-            throw new Error('Not implemented');
-          } catch (_err) {
-            reject(new Error('Failed to reverse geocode coordinates'));
+            // Get coordinates from browser
+            const { latitude, longitude } = position.coords;
+
+            // In a real implementation, we would do a reverse geocoding API call
+            // to get city, country, etc. based on coordinates
+            // For now, we'll return just the coordinates with default values for other fields
+
+            resolve({
+              city: '',
+              country: {
+                code: 'DE',
+                name: 'Germany',
+              },
+              geoLocation: {
+                latitude,
+                longitude,
+              },
+              state: '',
+              postalCode: '',
+              timezone: 'Europe/Berlin',
+            });
+          } catch (err) {
+            reject(new Error('Failed to process browser geolocation'));
           }
         },
         (err) => {
           reject(new Error(`Geolocation permission denied: ${err.message}`));
         },
-        { timeout: 10000, enableHighAccuracy: false },
+        { timeout: 10000, enableHighAccuracy: false, maximumAge: 0 },
       );
     });
   }, []);
+
+  /**
+   * Maps GeoIP API response to LocationData format
+   */
+  const mapGeoIPToLocationData = (geoIPData: any): LocationData => {
+    return {
+      city: geoIPData.city || '',
+      country: {
+        code: geoIPData.countryCode || '',
+        name: geoIPData.country || '',
+      },
+      geoLocation: {
+        latitude: geoIPData.latitude || 0,
+        longitude: geoIPData.longitude || 0,
+      },
+      state: geoIPData.region || '',
+      postalCode: geoIPData.postalCode || '',
+      timezone: geoIPData.timezone || 'Europe/Berlin',
+    };
+  };
 
   const fetchLocationFromGeoIP = useCallback(async (): Promise<LocationData> => {
     try {
@@ -79,7 +117,7 @@ export function useLocation(): UseLocationResult {
       }
 
       const data = await response.json();
-      return data as LocationData;
+      return mapGeoIPToLocationData(data);
     } catch (err) {
       console.error('Error fetching from GeoIP API:', err);
       throw new Error('Failed to fetch location from GeoIP');
