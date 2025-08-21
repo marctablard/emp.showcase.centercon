@@ -1,18 +1,19 @@
 import { Container } from 'inversify';
-import server from './platform/server';
-import ssr from './platform/ssr';
 import { withCsrf } from './utils/csrf';
 
-export function register() {
-  // TODO for EDGE-Runtime we might need to supply different Containers,
-  // since they aren't running on the actual NodeJS Server
-  // Declare EMP object at globalThis
-  globalThis.EMP = {
-    platform: {
-      ssr: ssr,
-      server: server,
-    },
-  };
+export async function register() {
+  // Declare no EMP object at globalThis for edge
+  // TODO: Will be refactored anyways, since the global Object is of little to no benefit
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const server = await import('./platform/server');
+    const ssr = await import('./platform/ssr');
+    globalThis.EMP = {
+      platform: {
+        ssr: ssr.default,
+        server: server.default,
+      },
+    };
+  }
 
   // Only override fetch in the browser environment
   if (typeof window !== 'undefined') {
