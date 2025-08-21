@@ -1,4 +1,4 @@
-import CMSPageComponent from '@/components/cms/local/local-cms-page';
+import CMSPageComponent from '@/components/cms/storyblok/storyblok-cms-page';
 
 interface DynamicPageParams {
   slug: string[];

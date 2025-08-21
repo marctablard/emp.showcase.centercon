@@ -1,5 +1,4 @@
 import { inject } from 'inversify';
-import { injectable } from '@/platform/core/di/injectable';
 import { EmporixPaginatedResponse, EmporixProduct } from '@/platform/integrations/emporix/model';
 import type { EmporixProductApi } from '@/platform/integrations/emporix/product/EmporixProductApi';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
@@ -13,7 +12,6 @@ import type { SearchSuggestions } from '../../model/search';
  * Maps between BatteryIncluded API product format and internal Product model.
  */
 
-@injectable('SearchService', 'Singleton')
 class EmporixSearchService implements SearchService {
   private productApi: EmporixProductApi;
   private productMapper: ProductMapper<EmporixProduct>;

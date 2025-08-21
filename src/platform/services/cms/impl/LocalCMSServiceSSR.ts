@@ -30,7 +30,7 @@ export class LocalCmsServiceSSR implements CMSService {
    * @param site The site identifier
    * @returns Promise with the page or CMSNoResult if not found
    */
-  async getPage(slug: string, locale: string, site: string): Promise<CMSPage | CMSNoResult> {
+  async getPage(slug: string, locale: string, _site: string): Promise<CMSPage | CMSNoResult> {
     try {
       // Normalize the slug to create a valid filename
       const normalizedSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '').toLowerCase();
