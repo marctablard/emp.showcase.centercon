@@ -10,12 +10,6 @@ const defaultLocale = 'en';
 const securedPages = ['/account'];
 const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
 
-const csrfProtectedPages = ['/cart', '/checkout', '/account/profile', '/account/addresses'];
-const csrfPathnameRegex = RegExp(
-  `^(/(${locales.join('|')}))?(${csrfProtectedPages.join('|').replace(/\//g, '\\/')})(/.*)?/?$`,
-  'i',
-);
-
 // Rate limiting configuration
 const rateLimit = 60;
 const rateWindow = 60;
@@ -39,16 +33,18 @@ const { auth } = NextAuth(authConfig);
  * @returns Response if CSRF validation fails, undefined otherwise
  */
 function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
-  if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-    const isCsrfProtectedPage = csrfPathnameRegex.test(req.nextUrl.pathname);
+  // Skip CSRF validation for safe methods
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return undefined;
+  }
+  const isApiRoute = req.nextUrl.pathname.startsWith('/api/');
 
-    if (isCsrfProtectedPage) {
-      const csrfToken = req.headers.get('x-csrf-token');
-      const storedToken = req.cookies.get('csrf-token')?.value;
+  if (isApiRoute) {
+    const csrfToken = req.headers.get('x-csrf-token');
+    const storedToken = req.cookies.get('csrf-token')?.value;
 
-      if (!csrfToken || !storedToken || csrfToken !== storedToken) {
-        return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
-      }
+    if (!csrfToken || !storedToken || csrfToken !== storedToken) {
+      return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
     }
   }
   return undefined;
@@ -123,9 +119,12 @@ function applySecurityHeaders(response: Response | NextResponse): Response | Nex
 }
 
 export default auth(async (req: NextAuthRequest) => {
+  if (req.nextUrl.pathname === '/api/csrf') {
+    return NextResponse.next();
+  }
+
   let response: Response | NextResponse;
 
-  // Check CSRF protection first
   const csrfResult = validateCsrf(req);
   if (csrfResult) {
     return applySecurityHeaders(csrfResult);
@@ -149,5 +148,5 @@ export default auth(async (req: NextAuthRequest) => {
 });
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)'],
+  matcher: ['/((?!_next|.*\\..*).*)', '/api/:path*'],
 };

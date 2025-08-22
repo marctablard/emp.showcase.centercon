@@ -13,7 +13,7 @@ function generateCsrfToken(): string {
  * API endpoint to generate and set a CSRF token
  * GET /api/csrf
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const token = generateCsrfToken();
 
   // Create the response with the token
