@@ -17,7 +17,7 @@ import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
-import { H1, H2, H3 } from '../ui/h';
+import { H1, H2 } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
 import ProductAddToCart from './product-add-to-cart';
@@ -36,7 +36,6 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   const locale = useLocale();
   const { l10n } = useL10n(locale);
   const t = useTranslations('product');
-  const currentLocale = useLocale();
   const isDesktopScreen = useBreakpoint('lg');
   const addToCartButton = useRef<HTMLDivElement>(null);
   const addToCartBar = useRef<HTMLDivElement>(null);
@@ -105,9 +104,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6 mb-10 lg:mb-0">
                 <CardContent className="p-0">
                   <div className="flex flex-col gap-6">
-                    <H2 className="text-white text-4xl font-bold font-headlines">
-                      {t('keySpecs')}
-                    </H2>
+                    <H2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</H2>
                     <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
                       {Object.keys(product.variantAttributes || {}).map((attribute: string) => (
                         <BulletPoint
@@ -153,7 +150,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 </CardContent>
               </Card>
             )}
-        
+
             <div className="my-6">
               <H2 variant="h5">{t('otherVariants')}</H2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
@@ -337,17 +334,18 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 {t('productHighlights')}
               </H2>
               <div className="mb-10 lg:mb-0">
-                {product.highlights.map((highlight) => (
-                  <BulletPoint
-                    key={highlight}
-                    label={highlight}
-                    iconColor="primary"
-                    variant="default"
-                    size="lg"
-                    icon={Sun}
-                    className="mb-6"
-                  />
-                ))}
+                {product.highlights[locale]?.length > 0 &&
+                  product.highlights[locale].map((highlight) => (
+                    <BulletPoint
+                      key={highlight}
+                      label={highlight}
+                      iconColor="primary"
+                      variant="default"
+                      size="lg"
+                      icon={Sun}
+                      className="mb-6"
+                    />
+                  ))}
               </div>
             </div>
           )}
