@@ -17,7 +17,7 @@ import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
-import { Heading } from '../ui/h';
+import { H1, H2 } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
 import ProductAddToCart from './product-add-to-cart';
@@ -36,13 +36,11 @@ export default function ProductDetail({ product: initialProduct, price, classNam
   const locale = useLocale();
   const { l10n } = useL10n(locale);
   const t = useTranslations('product');
-  const currentLocale = useLocale();
   const isDesktopScreen = useBreakpoint('lg');
   const addToCartButton = useRef<HTMLDivElement>(null);
   const addToCartBar = useRef<HTMLDivElement>(null);
   const [opacity, setOpacity] = React.useState(false);
   //   const { recommendations, loading: recLoading } = useRecommendations(product?.id);
-
   useEffect(() => {
     if (product) {
       setAsCurrent();
@@ -106,9 +104,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               <Card variant="primary" className="p-4 lg:px-8 lg:pb-8 lg:pt-6 mb-10 lg:mb-0">
                 <CardContent className="p-0">
                   <div className="flex flex-col gap-6">
-                    <Heading variant="h2" className="text-white text-4xl font-bold font-headlines">
-                      {t('keySpecs')}
-                    </Heading>
+                    <H2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</H2>
                     <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
                       {Object.keys(product.variantAttributes || {}).map((attribute: string) => (
                         <BulletPoint
@@ -154,8 +150,9 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 </CardContent>
               </Card>
             )}
+
             <div className="my-6">
-              <Heading variant="h5">{t('otherVariants')}</Heading>
+              <H2 variant="h5">{t('otherVariants')}</H2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-primary-500">
                   <div className="col-start-1 bg-neutral-50 p-4">
@@ -287,7 +284,7 @@ export default function ProductDetail({ product: initialProduct, price, classNam
                 )}
               </div> */}
           <p className="mb-2 mt-4 lg:mt-0 text-primary-500 font-bold font-headlines">Bluetti</p>
-          <Heading variant="h1">{l10n(product.name)}</Heading>
+          <H1>{l10n(product.name)}</H1>
           <div className="mb-6 lg:md-0 flex gap-2 items-center">
             <p className="text-neutral-600 font-bold">4.6</p>
             <RatingStarRow starsCount={5} filledCount={4} className="py-2" />
@@ -333,12 +330,12 @@ export default function ProductDetail({ product: initialProduct, price, classNam
           />
           {product.highlights && (
             <div className="mt-10 lg:mt-16">
-              <Heading variant="h3" className="text-primary mb-8">
+              <H2 variant="h3" className="text-primary mb-8">
                 {t('productHighlights')}
-              </Heading>
+              </H2>
               <div className="mb-10 lg:mb-0">
-                {product.highlights &&
-                  product.highlights[currentLocale]?.map((highlight: string) => (
+                {product.highlights[locale]?.length > 0 &&
+                  product.highlights[locale].map((highlight) => (
                     <BulletPoint
                       key={highlight}
                       label={highlight}
@@ -356,10 +353,10 @@ export default function ProductDetail({ product: initialProduct, price, classNam
       </div>
       {product?.groupedSpecifications?.length && (
         <div className={cn(className)}>
-          <Heading variant="h3" className="my-6">
+          <H2 variant="h3" className="my-6">
             {' '}
             {t('technicalInformation')}
-          </Heading>
+          </H2>
           <div className="grid grid-cols-1 gap-y-6 lg:gap-y-16 gap-x-6 lg:grid-cols-2 xl:grid-cols-4 mb-16">
             {product.groupedSpecifications.map((spec: GroupedSpecification, index) => {
               return (
