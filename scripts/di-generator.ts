@@ -1,10 +1,12 @@
 #!/usr/bin/env ts-node
 import * as fs from 'fs';
 import * as path from 'path';
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
 import * as ts from 'typescript';
 import type { Node, ClassDeclaration, Decorator } from 'typescript';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
+import { baseUrl } from '../src/lib/utils';
 
 // Configuration
 const DEBUG = process.env.DEBUG === 'true';
@@ -314,16 +316,19 @@ function watchForChanges() {
     watcher.on('change', async (filePath) => {
       console.log(`File changed: ${filePath}`);
       await generateContainerFiles(layer);
+      await reloadContainers();
     });
     
     watcher.on('add', async (filePath) => {
       console.log(`File added: ${filePath}`);
       await generateContainerFiles(layer);
+      await reloadContainers();
     });
     
     watcher.on('unlink', async (filePath) => {
       console.log(`File deleted: ${filePath}`);
       await generateContainerFiles(layer);
+      await reloadContainers();
     });
   });
 }
@@ -345,3 +350,15 @@ const watchMode = args.includes('--watch');
   console.error('Error:', error);
   process.exit(1);
 });
+
+async function reloadContainers() {
+  if (process.env.NODE_ENV === "development") {
+    try {
+      await fetch(`${baseUrl}/api/reload-di`, { method: 'POST' });
+      if (DEBUG) console.debug('Sent reload-di POST');
+    } catch (err) {
+      if (DEBUG) console.debug('Could not reach reload-di API:', err);
+    }
+  }
+}
+
