@@ -65,7 +65,6 @@ export interface Product {
   usp?: string | LocalizedString;
   highlights?: { [locale: string]: string[] };
   documents?: Media[];
-
   // Additional fields from mixins
   specifications?: ProductSpecification[];
   groupedSpecifications?: GroupedSpecification[];
