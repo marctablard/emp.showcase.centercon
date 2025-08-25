@@ -15,7 +15,7 @@ const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shippin
 const rateLimit = parseInt(process.env.RATE_LIMIT ?? '', 10) || 60;
 const rateWindow = parseInt(process.env.RATE_WINDOW ?? '', 10) || 60;
 
-const rateLimitedPaths = ['/api/auth/callback/credentials', '/api/auth/register', '/api/password-reset', '/api/cart/'];
+const rateLimitedPaths = ['/api/auth/callback/credentials', '/api/auth/register', '/api/password-reset'];
 const apiBypassPrefixes = ['/api/auth', '/api/csrf'];
 const rateLimiters = new Map<string, RateLimiterMemory>();
 

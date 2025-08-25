@@ -109,7 +109,7 @@ export function setupCsrfFetch() {
       const mergedInit = { ...init, ...enhancedInit };
 
       return originalFetch(input, mergedInit);
-    } catch (csrfError) {
+    } catch (_csrfError) {
       return originalFetch(input, init);
     }
   };
