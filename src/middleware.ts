@@ -7,16 +7,19 @@ import authConfig from './auth/auth.config';
 
 const locales = ['en', 'de'];
 const defaultLocale = 'en';
-const securedPages = ['/account'];
+const securedPages = ['/account', '/checkout', '/confirmation'];
 const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
+const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shipping'));
 
-// Rate limiting configuration
-const rateLimit = 60;
-const rateWindow = 60;
+// Rate limiting configuration (configurable via env)
+const rateLimit = parseInt(process.env.RATE_LIMIT ?? '', 10) || 60;
+const rateWindow = parseInt(process.env.RATE_WINDOW ?? '', 10) || 60;
 
-const rateLimitedPaths = ['/api/auth/login', '/api/auth/register', '/api/password-reset'];
-
+const rateLimitedPaths = ['/api/auth/callback/credentials', '/api/auth/register', '/api/password-reset', '/api/cart/'];
+const apiBypassPrefixes = ['/api/auth', '/api/csrf'];
 const rateLimiters = new Map<string, RateLimiterMemory>();
+
+const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -33,21 +36,16 @@ const { auth } = NextAuth(authConfig);
  * @returns Response if CSRF validation fails, undefined otherwise
  */
 function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
-  // Skip CSRF validation for safe methods
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
     return undefined;
   }
-  const isApiRoute = req.nextUrl.pathname.startsWith('/api/');
 
-  if (isApiRoute) {
-    const csrfToken = req.headers.get('x-csrf-token');
-    const storedToken = req.cookies.get('csrf-token')?.value;
+  const csrfToken = req.headers.get('x-csrf-token');
+  const storedToken = req.cookies.get('csrf-token')?.value;
 
-    if (!csrfToken || !storedToken || csrfToken !== storedToken) {
-      return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
-    }
+  if (!csrfToken || !storedToken || csrfToken !== storedToken) {
+    return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
   }
-  return undefined;
 }
 
 /**
@@ -55,20 +53,7 @@ function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
  * @param req NextRequest object
  * @returns Response if rate limit exceeded, undefined otherwise
  */
-async function checkRateLimit(req: NextRequest): Promise<Response | NextResponse | undefined> {
-  // Only check API routes
-  if (!req.nextUrl.pathname.startsWith('/api')) {
-    return undefined;
-  }
-
-  const matchingPath = rateLimitedPaths.find((path) => req.nextUrl.pathname.startsWith(path));
-
-  if (!matchingPath) {
-    return undefined;
-  }
-
-  const rateLimiterKey = matchingPath;
-
+async function checkRateLimit(req: NextRequest, rateLimiterKey: string): Promise<Response | NextResponse | undefined> {
   if (!rateLimiters.has(rateLimiterKey)) {
     rateLimiters.set(
       rateLimiterKey,
@@ -106,8 +91,8 @@ async function checkRateLimit(req: NextRequest): Promise<Response | NextResponse
 function applySecurityHeaders(response: Response | NextResponse): Response | NextResponse {
   // Set security headers
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Cross-Origin-Resource-Policy', 'same-site');
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  response.headers.set('Cross-Origin-Resource-Policy', process.env.CROSS_ORIGIN_RESOURCE_POLICY || 'same-site');
+  response.headers.set('Cross-Origin-Opener-Policy', process.env.CROSS_ORIGIN_OPENER_POLICY || 'same-origin');
   response.headers.set('Referrer-Policy', 'no-referrer');
   response.headers.set('X-XSS-Protection', '1; mode=block');
 
@@ -119,32 +104,44 @@ function applySecurityHeaders(response: Response | NextResponse): Response | Nex
 }
 
 export default auth(async (req: NextAuthRequest) => {
-  if (req.nextUrl.pathname === '/api/csrf') {
-    return NextResponse.next();
-  }
+  const { pathname } = req.nextUrl;
 
-  let response: Response | NextResponse;
+  if (pathname.startsWith('/api/')) {
+    // 1) Enforce rate limiting for selected API paths first
+    const limitedMatch = rateLimitedPaths.find((p) => pathname.startsWith(p));
+    if (limitedMatch) {
+      const rateLimitResult = await checkRateLimit(req, limitedMatch);
+      if (rateLimitResult) return applySecurityHeaders(rateLimitResult);
+    }
 
-  const csrfResult = validateCsrf(req);
-  if (csrfResult) {
-    return applySecurityHeaders(csrfResult);
-  }
+    // 2) Bypass certain API prefixes (e.g., NextAuth and CSRF endpoint) after rate limit check
+    if (startsWithAny(pathname, apiBypassPrefixes)) {
+      return applySecurityHeaders(NextResponse.next());
+    }
 
-  const rateLimitResult = await checkRateLimit(req);
-  if (rateLimitResult) {
-    return applySecurityHeaders(rateLimitResult);
+    // 3) Require auth for secured API prefixes (return 401 for unauthenticated)
+    if (!req.auth?.user && startsWithAny(pathname, securedApiPrefixes)) {
+      return applySecurityHeaders(NextResponse.redirect(new URL('/login', req.url)));
+    }
+
+    // 4) Apply CSRF validation for remaining API requests
+    const csrfResult = validateCsrf(req);
+    if (csrfResult) return applySecurityHeaders(csrfResult);
   }
 
   if (!req.auth?.user) {
-    const isSecuredPage = securedPathnameRegex.test(req.nextUrl.pathname);
+    const isSecuredPage = securedPathnameRegex.test(pathname);
     if (isSecuredPage) {
-      response = Response.redirect(new URL('/login', req.url));
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(NextResponse.redirect(new URL('/login', req.url)));
     }
   }
 
-  response = intlMiddleware(req);
-  return applySecurityHeaders(response);
+  //Successfully process the api request
+  if (pathname.startsWith('/api/')) {
+    return applySecurityHeaders(NextResponse.next());
+  }
+
+  return applySecurityHeaders(intlMiddleware(req) ?? NextResponse.next());
 });
 
 export const config = {
