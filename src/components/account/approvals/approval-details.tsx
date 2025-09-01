@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ApprovalSummary } from '@/components/account/approvals/approval-summary';
+import { ProductListResolver } from '@/components/product/product-list-resolver';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +13,10 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useApproval } from '@/hooks/approval/useApproval';
 import useCustomer from '@/hooks/customer/useCustomer';
+import { useToast } from '@/hooks/ui/useToast';
+import { checkoutApproval as checkoutApi } from '@/lib/client/checkout';
 import { Approval } from '@/platform/services/model/approval';
+import type { CheckoutRequest } from '@/platform/services/model/checkout';
 import { ApprovalStatusBadge } from './approval-status-badge';
 
 interface ApprovalDetailsProps {
@@ -21,10 +27,13 @@ interface ApprovalDetailsProps {
 export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetailsProps) {
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
+  const router = useRouter();
+  const { toast } = useToast();
   const { customer, loading: customerLoading } = useCustomer();
   const [comment, setComment] = useState<string>('');
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const {
     approval,
@@ -37,26 +46,34 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     refreshApproval,
   } = useApproval(approvalId, initialApproval);
 
+  const isRequestor = approval?.requestor.userId === customer?.id;
+
   const handleApprove = async () => {
-    if (approval?.requestor.userId == customer?.id || !customer?.roles?.find((role) => role === 'B2B_ADMIN')) {
+    if (isRequestor || !customer?.roles?.find((role) => role === 'B2B_ADMIN')) {
       return;
     }
     try {
+      if (isProcessing) return;
       setActionError(null);
-      await updateApprovalStatus('APPROVED');
-      setActionSuccess(t('approvalSuccessfullyApproved'));
 
-      if (comment) {
-        await updateApproverComment(comment);
-        setComment('');
+      setIsProcessing(true);
+      const checkoutResponse = await handleSubmitOrder();
+      if (!checkoutResponse) {
+        throw new Error('Checkout failed');
       }
+
+      // Navigate after successful approve + checkout
+      toast({ title: t('success'), description: t('orderSuccessfullySubmitted'), variant: 'success' });
+      router.push(`/account/approvals`);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleDecline = async () => {
-    if (approval?.requestor.userId == customer?.id || !customer?.roles?.find((role) => role === 'B2B_ADMIN')) {
+    if (isRequestor || !customer?.roles?.find((role) => role === 'B2B_ADMIN')) {
       return;
     }
     try {
@@ -65,7 +82,7 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
       setActionSuccess(t('approvalSuccessfullyDeclined'));
 
       if (comment) {
-        if (approval?.requestor.userId == customer?.id) {
+        if (isRequestor) {
           await updateRequestorComment(comment);
         } else {
           await updateApproverComment(comment);
@@ -80,7 +97,11 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
   const handleComment = async () => {
     try {
       setActionError(null);
-      await updateRequestorComment(comment);
+      if (isRequestor) {
+        await updateRequestorComment(comment);
+      } else {
+        await updateApproverComment(comment);
+      }
       setActionSuccess(t('requestorCommentUpdated'));
       setComment('');
     } catch (err) {
@@ -97,6 +118,56 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
       } catch (err) {
         setActionError(err instanceof Error ? err.message : String(err));
       }
+    }
+  };
+
+  const handleSubmitOrder = async () => {
+    if (!approval) return;
+    try {
+      setActionError(null);
+
+      const cartId = approval.resource.id;
+      const details = approval.details;
+      const customer = approval.requestor;
+
+      if (!details) {
+        throw new Error('Missing approval details for checkout');
+      }
+
+      if (!details.addresses || details.addresses.length < 2) {
+        throw new Error('Both shipping and billing addresses are required');
+      }
+
+      if (!details.shipping) {
+        throw new Error('Missing shipping details');
+      }
+
+      if (!details.paymentMethods || details.paymentMethods.length === 0) {
+        throw new Error('Missing payment method');
+      }
+
+      const request: CheckoutRequest = {
+        cartId,
+        addresses: details.addresses,
+        shipping: details.shipping,
+        paymentMethod: details.paymentMethods[0],
+        customer: {
+          userId: customer.userId,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          emailConfirmation: customer.email,
+        },
+        summary: { termsAndConditions: true },
+        currency: details.currency,
+      };
+
+      const response = await checkoutApi(request);
+
+      return response;
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : String(err));
+      throw err;
     }
   };
 
@@ -149,7 +220,9 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
   }
 
   const canApprove = approval.status === 'PENDING' && customer?.roles?.includes('B2B_ADMIN');
-  const canComment = approval.status !== 'CLOSED' && approval.status !== 'EXPIRED';
+  const canSubmitOrder = approval.status === 'APPROVED';
+  const canComment = approval.status === 'PENDING';
+  const canDelete = approval.status === 'PENDING' && isRequestor;
 
   return (
     <Card>
@@ -222,6 +295,20 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
 
         <Separator />
 
+        <ApprovalSummary approval={approval} />
+
+        {approval.resource.items && approval.resource.items.length > 0 && (
+          <ProductListResolver
+            items={approval.resource.items.map((it) => ({
+              productId: it.productId,
+              itemYrn: it.itemYrn,
+              quantity: it.quantity,
+              unitPrice: it.itemPrice.amount,
+              currency: it.itemPrice.currency,
+            }))}
+          />
+        )}
+
         <div>
           <h3 className="text-sm font-medium mb-2">{t('requestorComment')}</h3>
           {approval.comment ? (
@@ -247,16 +334,31 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
             <div>
               <h3 className="text-sm font-medium mb-2">{t('approvalActions')}</h3>
               <div className="flex gap-2">
-                <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
+                <Button onClick={handleApprove} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
                   {t('approve')}
                 </Button>
-                <Button onClick={handleDecline} variant="secondary">
+                <Button onClick={handleDecline} disabled={isProcessing} variant="secondary">
                   {t('decline')}
                 </Button>
               </div>
             </div>
           </>
         )}
+
+        {/* {canSubmitOrder && (
+          <>
+            <Separator />
+
+            <div>
+              <h3 className="text-sm font-medium mb-2">{t('approvalActions')}</h3>
+              <div className="flex gap-2">
+                <Button onClick={handleSubmitOrder} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
+                  {t('submitOrder')}
+                </Button>
+              </div>
+            </div>
+          </>
+        )} */}
 
         {canComment && (
           <>
@@ -281,9 +383,11 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
         <Button variant="neutral" onClick={() => window.history.back()}>
           {t('back')}
         </Button>
-        <Button variant="secondary" onClick={handleDelete}>
-          {t('delete')}
-        </Button>
+        {canDelete && (
+          <Button variant="secondary" onClick={handleDelete}>
+            {t('delete')}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
