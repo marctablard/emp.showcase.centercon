@@ -170,10 +170,22 @@ class EmporixCartService implements CartService {
   }
 
   async updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
+    // TODO Not used because of inconsistent Session/cart Handling
+    // Get the session cart and update it
+    const cart = await this.cartApi.getCart(cartId);
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
     await this.cartApi.updateCart(cartId, {
+      ...cart,
+      metadata: {
+        ...cart.metadata,
+        version: (cart.metadata?.version ?? 0) + 1,
+      },
       countryCode,
       zipCode,
     });
+    await this.cartApi.refreshCart(cartId);
   }
 
   async updateCurrency(cartId: string, currency: string): Promise<void> {
@@ -184,6 +196,31 @@ class EmporixCartService implements CartService {
   async updateSite(cartId: string, siteCode: string): Promise<void> {
     await this.cartApi.changeSite(cartId, siteCode);
     await this.cartApi.refreshCart(cartId);
+  }
+
+  /**
+   * Get cart by criteria (siteCode, sessionId, customerId, type)
+   * Useful for retrieving carts when you don't have the cart ID but have other identifiers
+   *
+   * @param siteCode - The site code to filter by
+   * @param sessionId - The session ID to filter by
+   * @param customerId - The customer ID to filter by
+   * @param type - The cart type to filter by (e.g., 'shopping')
+   * @returns The mapped cart or null if not found
+   */
+  async getCartByCriteria(
+    siteCode: string,
+    sessionId: string,
+    customerId?: string,
+    type: string = 'shopping',
+  ): Promise<Cart | null> {
+    try {
+      const cart = await this.cartApi.getCartByCriteria(siteCode, sessionId, customerId, type);
+      return cart ? this.mapper.mapToService(cart) : null;
+    } catch (error) {
+      console.error('Error getting cart by criteria:', error);
+      return null;
+    }
   }
 }
 

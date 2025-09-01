@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
+import { useCartStore, useCustomerStore } from '@/providers/StoreProvider';
+import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
+import { useAddresses } from '../customer/useAddresses';
 
 interface AuthenticationHook {
   isAuthenticated: boolean;
@@ -32,6 +35,7 @@ export const useAuthentication = (): AuthenticationHook => {
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
   const router = useRouter();
+  const { fetchAddresses } = useAddresses();
 
   // Update authentication state when session status changes
   useEffect(() => {
@@ -57,6 +61,7 @@ export const useAuthentication = (): AuthenticationHook => {
       } else {
         setIsAuthenticated(true);
         reset();
+        await fetchAddresses();
         if (redirect) {
           router.push(callbackUrl);
         }
@@ -68,12 +73,24 @@ export const useAuthentication = (): AuthenticationHook => {
     }
   };
 
+  const cartStore = useCartStore();
+  const customerStore = useCustomerStore();
+
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
+
       await signOut({
         redirect: false,
       });
+
+      // After signOut is complete, clear all stores
+      cartStore.clearCart();
+      customerStore.reset();
+
+      // Clear all persisted store data
+      clearAllPersistedStores();
+
       router.push('/?logout');
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log out'));

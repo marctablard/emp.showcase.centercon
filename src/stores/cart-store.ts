@@ -17,6 +17,12 @@ export interface CartState {
   error: Error | null;
   lastModification: Date | null;
   pollingActive: boolean;
+  // Track last shipping update to prevent duplicates
+  lastShippingUpdate: {
+    countryCode?: string;
+    zipCode?: string;
+    timestamp: number;
+  } | null;
 }
 
 interface CartActions {
@@ -46,6 +52,7 @@ const defaultState: CartState = {
   error: null,
   lastModification: null,
   pollingActive: false,
+  lastShippingUpdate: null,
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
@@ -173,7 +180,31 @@ export const createCartStore = (initState: CartState = defaultState) => {
 
     updateShippingInfo: async (countryCode?: string, zipCode?: string) => {
       try {
-        set({ loading: true, error: null });
+        // Check if we've recently updated with the same values to prevent duplicate calls to avoid conflict error
+        const { lastShippingUpdate } = get();
+        const now = Date.now();
+        const DEBOUNCE_TIME = 2000;
+
+        if (
+          lastShippingUpdate &&
+          lastShippingUpdate.countryCode === countryCode &&
+          lastShippingUpdate.zipCode === zipCode &&
+          now - lastShippingUpdate.timestamp < DEBOUNCE_TIME
+        ) {
+          console.log('Skipping duplicate shipping info update');
+          return;
+        }
+
+        set({
+          loading: true,
+          error: null,
+          lastShippingUpdate: {
+            countryCode,
+            zipCode,
+            timestamp: now,
+          },
+        });
+
         const { currentCart } = get();
         if (!currentCart) {
           await get().fetchCart();
@@ -197,7 +228,15 @@ export const createCartStore = (initState: CartState = defaultState) => {
     },
 
     clearCart: () => {
-      set({ currentCart: undefined });
+      // Reset all cart-related state to ensure proper cleanup
+      set({
+        currentCart: null,
+        loading: false,
+        error: null,
+        lastModification: null,
+        pollingActive: false,
+        lastShippingUpdate: null,
+      });
     },
   }));
 };

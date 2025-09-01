@@ -116,13 +116,7 @@ class EmporixCartApi implements IEmporixCartApi {
       const errorDetails = await response.text();
       throw new Error(`Failed to get cart by criteria: ${response.statusText} ${errorDetails}`);
     }
-    const cart: EmporixCart = await response.json();
-    if (cart.sessionId !== sessionId || cart.customerId !== customerId) {
-      // TODO needs resolution of DCPS-16828, known error, so this is a workaround
-      console.warn('Cart does not belong to this session, intercepted by workaround');
-      return null;
-    }
-    return cart;
+    return await response.json();
   }
 
   async addItemToCart(cartId: string, item: EmporixAddCartItemRequest): Promise<string> {
@@ -295,6 +289,26 @@ class EmporixCartApi implements IEmporixCartApi {
     if (!response.ok) {
       const errorDetails = await response.text();
       throw new Error(`Failed to refresh cart: ${response.statusText} ${errorDetails}`);
+    }
+  }
+
+  async mergeCarts(sourceCartId: string, targetCartId: string): Promise<void> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/cart/${this.config.tenant}/carts/${targetCartId}/merge`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ carts: [sourceCartId] }),
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to merge carts: ${response.statusText} ${errorDetails}`);
     }
   }
 }

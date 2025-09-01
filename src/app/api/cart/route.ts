@@ -26,10 +26,15 @@ export async function GET(request: NextRequest) {
     }
     // Check for cart ID in cookies
     let cart: Cart | null | undefined;
-    if (session.cartId) {
+
+    const siteCode = session.siteCode || 'main';
+    const sessionId = session.id || '';
+    const customerId = session.customerId !== 'ANONYMOUS' ? session.customerId : undefined;
+
+    if (sessionId || customerId) {
       // Try to get existing cart
       try {
-        cart = await cartService.getCartById(session.cartId);
+        cart = await cartService.getCartByCriteria(siteCode, sessionId, customerId);
         if (cart == null) {
           throw new Error('Cookie Cart is gone');
         }
