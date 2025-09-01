@@ -197,7 +197,14 @@ export const createCartStore = (initState: CartState = defaultState) => {
     },
 
     clearCart: () => {
-      set({ currentCart: undefined });
+      // Reset all cart-related state to ensure proper cleanup
+      set({
+        currentCart: null,
+        loading: false,
+        error: null,
+        lastModification: null,
+        pollingActive: false,
+      });
     },
   }));
 };

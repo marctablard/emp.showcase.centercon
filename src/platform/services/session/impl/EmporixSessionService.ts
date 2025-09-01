@@ -111,6 +111,7 @@ class EmporixSessionService implements SessionService {
       result.region = this.defaultRegion;
     }
     result.cartId = sessionContext?.cartId;
+    result.customerId = sessionContext?.customerId;
     return result;
   }
 }

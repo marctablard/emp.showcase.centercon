@@ -116,13 +116,7 @@ class EmporixCartApi implements IEmporixCartApi {
       const errorDetails = await response.text();
       throw new Error(`Failed to get cart by criteria: ${response.statusText} ${errorDetails}`);
     }
-    const cart: EmporixCart = await response.json();
-    if (cart.sessionId !== sessionId || cart.customerId !== customerId) {
-      // TODO needs resolution of DCPS-16828, known error, so this is a workaround
-      console.warn('Cart does not belong to this session, intercepted by workaround');
-      return null;
-    }
-    return cart;
+    return await response.json();
   }
 
   async addItemToCart(cartId: string, item: EmporixAddCartItemRequest): Promise<string> {

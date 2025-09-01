@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Cart, CartUpdate } from '@platform/services/model/cart';
@@ -22,13 +23,17 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
   const t = useTranslations('layout.header');
   const { hasNotification } = useNotificationStore();
   const router = useRouter();
+  const { status: sessionStatus } = useSession();
   const [cartUpdate, setCartUpdate] = useState<CartUpdate | undefined>(undefined);
   const { cartTotal, currency } = useCartTotal();
   // Pass initialCart directly to useCart to skip loading
-  const { cart, loading } = useCart(initialCart);
+  const { cart, loading, refetch } = useCart(initialCart);
   const [scrollHeight, setScrollHeight] = useState(false);
   const scrollContainer = useRef<HTMLDivElement>(null);
   const isMediumScreen = useBreakpoint('md');
+
+  // Track previous session status to detect changes
+  const prevSessionStatusRef = useRef(sessionStatus);
 
   const buildCartUpdateKey = (cart: Cart, cartUpdate: CartUpdate) => {
     return 'cart-' + cart.id + '-' + cartUpdate.itemId + '-' + cartUpdate.updatedAt;
@@ -41,6 +46,14 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
       }
     }
   }, [cart, setCartUpdate, hasNotification]);
+
+  useEffect(() => {
+    if (prevSessionStatusRef.current !== sessionStatus) {
+      // Force refetch cart data to ensure UI is updated
+      refetch();
+      prevSessionStatusRef.current = sessionStatus;
+    }
+  }, [sessionStatus, refetch]);
 
   const openChange = () => {
     setTimeout(() => {
