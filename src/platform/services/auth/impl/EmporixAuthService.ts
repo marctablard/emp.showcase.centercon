@@ -46,22 +46,21 @@ export class EmporixAuthService implements AuthService {
       const siteCode = oldSession.siteCode || 'main';
       const oldSessionId = oldSession.id || '';
       const anonymousCart = await this.cartService.getCartByCriteria(siteCode, oldSessionId, undefined);
-      if (!anonymousCart) {
-        throw new Error('Failed to get anonymous cart');
-      }
 
       const session = await this.emporixCustomerApi.login(credentials.username, credentials.password);
       if (!session) {
         throw new Error('Failed to get session context');
       }
+      const anonymousCartId = anonymousCart?.id;
       // Capture the resulting customer cart id for the return value
       let customerCartId: string | undefined;
-      if (anonymousCart.id && session.customerId) {
+      if (anonymousCartId && session.customerId) {
+        const siteCode = session.siteCode || 'main';
         const customerCart = await this.cartService.getCartByCriteria(siteCode, '', session.customerId);
         if (!customerCart) {
           throw new Error('Failed to get customer cart');
         }
-        await this.cartMigrationService.mergeCarts(anonymousCart.id, customerCart.id);
+        await this.cartMigrationService.mergeCarts(anonymousCartId, customerCart.id);
         customerCartId = customerCart.id;
       }
       return {
