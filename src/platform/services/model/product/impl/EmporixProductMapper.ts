@@ -34,16 +34,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
     const description = source.description || '';
     const templateAttributes = source.mixins?.productTemplateAttributes;
     const variantAttributes = source.mixins?.productVariantAttributes;
-    // Group highlights by language
-    const highlights: { [locale: string]: string[] } = {};
-    source.mixins?.highlights?.highlights?.forEach((highlightGroup: any) => {
-      highlightGroup.forEach((hl: any) => {
-        if (hl.value && hl.language) {
-          highlights[hl.language] = highlights[hl.language] || [];
-          highlights[hl.language].push(hl.value);
-        }
-      });
-    });
+    const highlights = source.mixins?.highlights?.highlights?.map((highlight: any) => highlight.value);
     const mappedSpecs = !source.mixins?.specifications?.specifications
       ? []
       : source.mixins?.specifications?.specifications.map((spec: any) => ({

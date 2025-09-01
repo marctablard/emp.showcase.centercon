@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { checkout } from '@/lib/client/checkout';
 import { PaymentMode } from '@/platform/services/model';
@@ -84,6 +85,7 @@ export const useCheckout = (): UseCheckout => {
   } = useShippingMethods();
   const { paymentModes } = useSite();
   const searchParams = useSearchParams();
+  const { status } = useSession();
 
   // Check for logout query parameter and reset store if present
   useEffect(() => {
@@ -300,7 +302,7 @@ export const useCheckout = (): UseCheckout => {
   useEffect(() => {
     // Only load default addresses if we're not on the logout page
     // This prevents re-populating addresses after logout
-    if (!addressesLoading && !searchParams.has('logout')) {
+    if (!addressesLoading && status === 'authenticated') {
       if (!shippingAddress) {
         const defaultShippingAddress = getDefaultAddress('SHIPPING');
         if (defaultShippingAddress) {
@@ -329,7 +331,7 @@ export const useCheckout = (): UseCheckout => {
     submitBillingAddress,
     submitShippingAddress,
     setLoading,
-    searchParams,
+    status,
   ]);
 
   return {

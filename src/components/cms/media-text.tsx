@@ -74,7 +74,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
               {!video?.autoplay && (
                 <Image
                   src={blok.image.filename}
-                  alt={blok.image.alt || ''}
+                  alt={blok.image?.alt || ''}
                   className="w-full h-auto rounded-[inherit]"
                   width={1000}
                   height={1000}
@@ -82,7 +82,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
               )}
               {video && (
                 <div className="hidden" ref={videoPlayer}>
-                  <Video blok={video} controls={true} />
+                  <Video {...video} controls={true} />
                 </div>
               )}
               {video && video?.controls && !video?.autoplay && (
@@ -123,7 +123,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
           )}
         >
           <p className=" text-base lg:text-xl text-neutral-800 pb-4">{text}</p>
-          {button && <Button blok={button} />}
+          {button && <Button {...button} />}
         </div>
       </div>
     </div>
