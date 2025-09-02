@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth/auth';
 import AuthDialogManager from '@/components/auth/auth-dialog-manager';
 import { CartWrapper } from '@/components/cart/cart-wrapper';
+import { CsrfProvider } from '@/components/csrf/CsrfProvider';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
@@ -86,6 +87,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <StoreProvider shopSession={shopSession} site={site} availableSites={availableSites}>
               <StoryblokProvider>
                 <CartWrapper initialCart={currentCart}>
+                  <CsrfProvider />
                   <AuthDialogManager />
                   {children}
                   <Toaster />
