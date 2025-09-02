@@ -107,4 +107,12 @@ export interface EmporixCartApi {
    * @returns Promise resolving when refresh is complete
    */
   refreshCart(cartId: string): Promise<void>;
+
+  /**
+   * Merge two carts into one
+   * @param sourceCartId The ID of the source cart
+   * @param targetCartId The ID of the target cart
+   * @returns Promise resolving when the carts are merged
+   */
+  mergeCarts(sourceCartId: string, targetCartId: string): Promise<void>;
 }

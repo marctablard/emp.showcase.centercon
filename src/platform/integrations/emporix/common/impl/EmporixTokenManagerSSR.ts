@@ -98,6 +98,10 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     const cookieStore = await cookies();
     const tokenCookie: RequestCookie | undefined = cookieStore.get(this.buildStorageKey(tenant));
     if (!tokenCookie) {
+      // Clear the in-memory cache when cookie is missing (e.g., after logout)
+      if (this.ssrToken[tenant]) {
+        this.ssrToken[tenant] = {};
+      }
       return {};
     }
     const b64Token = tokenCookie.value;

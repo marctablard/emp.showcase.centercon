@@ -9,18 +9,20 @@ import { getSession } from './session';
 const getCartService = () => globalThis.EMP.platform.ssr.get<CartService>('CartService');
 
 /**
- * Get the current cart by ID from cookie
+ * Get the current cart by criteria from cookie
  * This function is cached to prevent multiple cart fetches in a single request
  */
-const getCartById = cache(async (cartId: string): Promise<Cart | null | undefined> => {
-  try {
-    const cart = await getCartService().getCartById(cartId);
-    return cart;
-  } catch (_error) {
-    // on SSR we fail with undefined, so the Client can refetch if necessary
-    return undefined;
-  }
-});
+const getCartByCriteria = cache(
+  async (siteCode: string, sessionId: string, customerId?: string): Promise<Cart | null | undefined> => {
+    try {
+      const cart = await getCartService().getCartByCriteria(siteCode, sessionId, customerId);
+      return cart;
+    } catch (_error) {
+      // on SSR we fail with undefined, so the Client can refetch if necessary
+      return undefined;
+    }
+  },
+);
 
 const getCart = cache(async (): Promise<Cart | null | undefined> => {
   try {
@@ -41,10 +43,16 @@ export async function getCurrentCart(): Promise<Cart | null | undefined> {
   if (!session) {
     return undefined;
   }
-  const cartId = session.cartId;
-  if (!cartId) {
+
+  // If we have a session but no cartId or customerId, use the default getCart method
+  if (!session.cartId && !session.customerId) {
     return getCart();
   }
 
-  return getCartById(cartId);
+  // For anonymous users, use cartId; for authenticated users, use customerId
+  const siteCode = session.siteCode || 'main';
+  const sessionId = session.id || '';
+  const customerId = session.customerId !== 'ANONYMOUS' ? session.customerId : undefined;
+
+  return getCartByCriteria(siteCode, sessionId, customerId);
 }

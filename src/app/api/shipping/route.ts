@@ -32,15 +32,12 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * GET /api/shipping/[methodId]
- * Get a specific shipping method by ID
+ * POST /api/shipping
+ * Get a specific shipping method by ID and zone (expects JSON body: { methodId, zoneId })
  */
-export async function POST(
-  _request: NextRequest,
-  { params }: { params: Promise<{ methodId: string; zoneId: string }> },
-) {
+export async function POST(request: NextRequest) {
   try {
-    const { methodId, zoneId } = await params;
+    const { methodId, zoneId } = await request.json();
 
     if (!methodId || !zoneId) {
       return NextResponse.json({ error: 'Missing required parameters: methodId and zoneId' }, { status: 400 });
