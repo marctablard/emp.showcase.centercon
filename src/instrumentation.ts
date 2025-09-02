@@ -13,6 +13,8 @@ export async function register() {
       },
     };
   }
+
+  // Client-side fetch override is now in lib/client/csrf-fetch.ts
 }
 
 // Add type declaration to make TypeScript happy

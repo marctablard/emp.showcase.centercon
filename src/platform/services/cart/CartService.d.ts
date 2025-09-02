@@ -77,4 +77,16 @@ export interface CartService {
    * @param siteCode The new site code
    */
   updateSite(cartId: string, siteCode: string): Promise<void>;
+
+  /**
+   * Get cart by criteria (siteCode, sessionId, customerId, type)
+   * Useful for retrieving carts when you don't have the cart ID but have other identifiers
+   *
+   * @param siteCode - The site code to filter by
+   * @param sessionId - The session ID to filter by
+   * @param customerId - The customer ID to filter by
+   * @param type - The cart type to filter by (e.g., 'shopping')
+   * @returns The mapped cart or null if not found
+   */
+  getCartByCriteria(siteCode: string, sessionId: string, customerId?: string, type?: string): Promise<Cart | null>;
 }
