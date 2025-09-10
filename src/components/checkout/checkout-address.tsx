@@ -39,7 +39,7 @@ const CheckoutAddress: React.FC<CheckoutAddressProps> = ({ address, isReadOnly =
   const handleSameAddressToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     setIsSame(isChecked);
-    if (sameAs && onAddressChange) {
+    if (isChecked && sameAs && onAddressChange) {
       onAddressChange(sameAs.referenceAddress);
     }
   };

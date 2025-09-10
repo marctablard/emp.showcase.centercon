@@ -60,7 +60,9 @@ export class EmporixAuthService implements AuthService {
         if (!customerCart) {
           throw new Error('Failed to get customer cart');
         }
-        await this.cartMigrationService.mergeCarts(anonymousCartId, customerCart.id);
+        if (anonymousCartId !== customerCart.id) {
+          await this.cartMigrationService.mergeCarts(anonymousCartId, customerCart.id);
+        }
         customerCartId = customerCart.id;
       }
       return {

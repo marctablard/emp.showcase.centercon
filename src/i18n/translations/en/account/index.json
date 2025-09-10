@@ -204,6 +204,32 @@
   "ordersPagePlaceholder": "Orders and returns will be displayed here",
   "quotesPageDescription": "View and manage your quotes",
   "quotesPagePlaceholder": "Quotes will be displayed here",
+  "quotesList": {
+    "title": "Quotes",
+    "sortBy": "Sort by",
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "filter": "Filter",
+    "quoteReference": "Quote Reference",
+    "status": "Status",
+    "quotationDate": "Quotation Date",
+    "requestedBy": "Requested By",
+    "authorization": "Authorization",
+    "totalAmount": "Total amount",
+    "numberOfProducts": "Number of Products",
+    "products": "Products",
+    "statusLabels": {
+      "REQUESTED": "Requested",
+      "AVAILABLE": "Available",
+      "CHANGE_REQUESTED": "Change requested",
+      "REJECTED": "Rejected",
+      "ACCEPTED": "Accepted",
+      "ORDER_CREATED": "Order created",
+      "CLOSED": "Closed"
+    },
+    "noQuotes": "You don't have any quotes yet",
+    "viewQuote": "View quote"
+  },
   "shoppingListsPageDescription": "View and manage your shopping lists",
   "shoppingListsPagePlaceholder": "Shopping lists will be displayed here",
   "Notifications": {
