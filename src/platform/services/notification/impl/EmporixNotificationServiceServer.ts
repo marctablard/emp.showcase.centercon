@@ -145,9 +145,13 @@ export class EmporixNotificationServiceServer implements INotificationService {
   /**
    * Get a notification by ID
    */
-  async getNotification(notificationId: string): Promise<StorefrontNotification> {
+  async getNotification(notificationId: string): Promise<StorefrontNotification | null> {
     try {
       const response = await this.schemaApi.getCustomEntity(this.NOTIFICATION_TYPE, notificationId);
+      if (!response) {
+        console.warn(`Notification ${notificationId} not found`);
+        return null;
+      }
       return this.mapNotificationToService(response);
     } catch (error) {
       console.error(`Failed to get notification ${notificationId}:`, error);
@@ -291,13 +295,11 @@ export class EmporixNotificationServiceServer implements INotificationService {
 
   async sendPushNotification(notificationId: string): Promise<void> {
     try {
-      const sourceNotification = await this.schemaApi.getCustomEntity(this.NOTIFICATION_TYPE, notificationId);
-      if (!sourceNotification) {
+      const notification = await this.getNotification(notificationId);
+      if (!notification) {
         console.warn(`Notification ${notificationId} not found`);
         return;
       }
-      // NOTE: In Production one might want to add a check for the source (adding the Host to the Custom Entity)
-      const notification = this.mapNotificationToService(sourceNotification);
       const subscriptions = await this.getSubscriptionsForNotification(notification);
 
       await Promise.all(
