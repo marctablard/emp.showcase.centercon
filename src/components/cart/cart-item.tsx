@@ -82,7 +82,8 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
     if (item.quantity != quantity) {
       setQuantity(item.quantity);
     }
-  }, [item.quantity, quantity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.quantity]);
 
   // Handle quantity update
   const handleUpdateQuantity = async (newQuantity: number) => {
