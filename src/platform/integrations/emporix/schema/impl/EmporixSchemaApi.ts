@@ -85,7 +85,7 @@ class EmporixSchemaApi implements IEmporixSchemaApi {
     return buildPaginatedResponse(searchParams, response);
   }
 
-  async getCustomEntity(type: string, instanceId: string): Promise<EmporixCustomEntity> {
+  async getCustomEntity(type: string, instanceId: string): Promise<EmporixCustomEntity | null> {
     const response = await this.apiClient.authenticatedFetch(
       `/schema/${this.config.tenant}/custom-entities/${type}/instances/${instanceId}`,
       { method: 'GET' },
@@ -93,6 +93,9 @@ class EmporixSchemaApi implements IEmporixSchemaApi {
     );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
       const errorDetails = await response.text();
       throw new Error(`Failed to get custom instance: ${response.statusText} ${errorDetails}`);
     }

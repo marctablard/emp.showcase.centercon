@@ -293,7 +293,8 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       const sourceNotification = await this.schemaApi.getCustomEntity(this.NOTIFICATION_TYPE, notificationId);
       if (!sourceNotification) {
-        throw new Error(`Notification ${notificationId} not found`);
+        console.warn(`Notification ${notificationId} not found`);
+        return;
       }
       // NOTE: In Production one might want to add a check for the source (adding the Host to the Custom Entity)
       const notification = this.mapNotificationToService(sourceNotification);

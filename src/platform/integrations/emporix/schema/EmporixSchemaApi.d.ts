@@ -30,7 +30,7 @@ export interface EmporixSchemaApi {
    * @param instanceId Custom instance ID
    * @returns Promise with the custom instance details
    */
-  getCustomEntity(type: string, instanceId: string): Promise<EmporixCustomEntity>;
+  getCustomEntity(type: string, instanceId: string): Promise<EmporixCustomEntity | null>;
 
   /**
    * Update custom instance
