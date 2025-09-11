@@ -16,6 +16,7 @@ self.addEventListener('push', function (event) {
     console.log('Received push notification payload:', payload);
 
     const options = {
+      tag: payload.id,
       body: payload.body || '',
       icon: payload.icon || '/images/logo_small.svg',
       badge: payload.badge || '/images/logo.svg',
