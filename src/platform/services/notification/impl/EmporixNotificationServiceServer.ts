@@ -323,22 +323,25 @@ export class EmporixNotificationServiceServer implements INotificationService {
           ) {
             throw new Error('VAPID configuration is missing');
           }
-
-          // Send the notification with the augmented payload
-          await webpush.sendNotification(
-            {
-              endpoint: subscription.endpoint,
-              keys: subscription.keys,
-            },
-            JSON.stringify(payload),
-            {
-              vapidDetails: {
-                subject: process.env.VAPID_CONTACT,
-                publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-                privateKey: process.env.VAPID_PRIVATE_KEY,
+          try {
+            // Send the notification with the augmented payload
+            await webpush.sendNotification(
+              {
+                endpoint: subscription.endpoint,
+                keys: subscription.keys,
               },
-            },
-          );
+              JSON.stringify(payload),
+              {
+                vapidDetails: {
+                  subject: process.env.VAPID_CONTACT,
+                  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+                  privateKey: process.env.VAPID_PRIVATE_KEY,
+                },
+              },
+            );
+          } catch (_error) {
+            // Fail silently
+          }
         }),
       );
     } catch (error) {
