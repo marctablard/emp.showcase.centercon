@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
 import { Button } from '../ui/button';
-import ProductAddToCart from './product-add-to-cart';
+import ProductAddToCartButton from './product-add-to-cart-button';
 import { ProductPriceComponent } from './product-price';
 
 export default function ProductAddToCartBar({
@@ -48,7 +48,11 @@ export default function ProductAddToCartBar({
               <div className="text-white">{price && <ProductPriceComponent price={price} isAddToCartBar />}</div>
               {product && (
                 <div className="px-6">
-                  <ProductAddToCart product={product} price={price} isAddToCartBar className="mt-6" />
+                  <ProductAddToCartButton
+                    product={product}
+                    price={price}
+                    className="h-14 bg-white text-primary-500 hover:bg-white hover:text-primary-700"
+                  />
                 </div>
               )}
             </div>

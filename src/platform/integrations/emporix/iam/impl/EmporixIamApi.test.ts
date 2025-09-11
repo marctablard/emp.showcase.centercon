@@ -47,7 +47,6 @@ describe('EmporixIamApi', () => {
     try {
       // Use the customer API to login
       const sessionContext = await customerApi.login(username, password);
-      console.log(`Successfully authenticated as ${username} for IAM API tests`);
       isAuthenticated = true;
       return sessionContext;
     } catch (error) {
@@ -339,10 +338,6 @@ describe('EmporixIamApi', () => {
         // Verify the response
         expect(scopes).toBeDefined();
         expect(userId).toBeDefined();
-
-        // Log scopes for debugging
-        console.log(`Benjamin Blue scopes: ${JSON.stringify(scopes)}`);
-
         // Benjamin Blue should have customer scopes but not approver scopes
         expect(typeof scopes === 'string').toBe(true);
         expect(scopes.includes('customer')).toBe(true);

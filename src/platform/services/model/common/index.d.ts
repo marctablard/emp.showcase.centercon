@@ -91,10 +91,13 @@ export interface SearchResult<T> extends Paginated<T> {
   availableFilters: Filter[];
 }
 
-export interface SearchParams<T> {
-  query?: string;
+export interface PaginationQuery {
   page?: number;
   size?: number;
+}
+
+export interface SearchParams<T> extends PaginationQuery {
+  query?: string;
   sort?: string;
   criteria?: Partial<T>;
   filters?: Record<string, string | string[]>;

@@ -7,7 +7,7 @@ import authConfig from './auth/auth.config';
 
 const locales = ['en', 'de'];
 const defaultLocale = 'en';
-const securedPages = ['/account', '/checkout', '/confirmation'];
+const securedPages = ['/account'];
 const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
 const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shipping'));
 
@@ -16,7 +16,7 @@ const rateLimit = parseInt(process.env.RATE_LIMIT ?? '', 10) || 60;
 const rateWindow = parseInt(process.env.RATE_WINDOW ?? '', 10) || 60;
 
 const rateLimitedPaths = ['/api/auth/callback/credentials', '/api/auth/register', '/api/password-reset'];
-const apiBypassPrefixes = ['/api/auth', '/api/csrf'];
+const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications'];
 const rateLimiters = new Map<string, RateLimiterMemory>();
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));

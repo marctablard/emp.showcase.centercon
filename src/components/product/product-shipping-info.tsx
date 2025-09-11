@@ -36,8 +36,12 @@ export function ProductShippingInfo({
           <h2 className="font-headlines font-bold text-neutral text-md mb-4">{t('deliveryDetails')}</h2>
 
           <div className="flex items-center gap-2 text-sm text-neutral mb-2">
-            <LucidePackage className="text-success-500" />
-            <span>{t('deliverable', { min: deliveryDays[0], max: deliveryDays[1] })}</span>
+            <LucidePackage className={deliveryDays[0] === 0 ? 'text-success-500' : 'text-warning-500'} />
+            {deliveryDays[0] === 0 ? (
+              <span>{t('immediatelyDeliverable')}</span>
+            ) : (
+              <span>{t('deliverable', { min: deliveryDays[0], max: deliveryDays[1] })}</span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 text-sm text-neutral mb-2 ml-8">

@@ -300,7 +300,7 @@ describe('EmporixApprovalApi', () => {
 
         await approvalApi.updateApproval(approval.id, [
           {
-            op: 'REPLACE',
+            op: 'replace',
             path: '/status',
             value: 'APPROVED',
           },
@@ -367,12 +367,12 @@ describe('EmporixApprovalApi', () => {
       // Update the approval to approve it
       const updateOperations: EmporixApprovalUpdateRequest[] = [
         {
-          op: 'REPLACE',
+          op: 'replace',
           path: '/status',
           value: 'APPROVED',
         },
         {
-          op: 'ADD',
+          op: 'add',
           path: '/approverComment',
           value: 'Order approved',
         },
@@ -466,12 +466,12 @@ describe('EmporixApprovalApi', () => {
       // Update the approval to decline it
       const updateOperations: EmporixApprovalUpdateRequest[] = [
         {
-          op: 'REPLACE',
+          op: 'replace',
           path: '/status',
           value: 'DECLINED',
         },
         {
-          op: 'ADD',
+          op: 'add',
           path: '/approverComment',
           value: 'Order declined due to budget constraints',
         },

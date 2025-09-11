@@ -1,8 +1,11 @@
 import { cache } from 'react';
 import { Product } from '@/platform/services/model/product';
 import { ProductService } from '@/platform/services/product';
+import { StockService } from '@/platform/services/stock/StockService';
+import { StockAvailability } from '@/platform/services/stock/StockService';
 
 const getProductService = () => globalThis.EMP.platform.ssr.get<ProductService>('ProductService');
+const getStockService = () => globalThis.EMP.platform.ssr.get<StockService>('StockService');
 
 const _getProduct = cache(async (id: string): Promise<Product | null | undefined> => {
   try {
@@ -12,6 +15,19 @@ const _getProduct = cache(async (id: string): Promise<Product | null | undefined
     return undefined;
   }
 });
+
+const _getAvailability = cache(async (site: string, id: string): Promise<StockAvailability | null | undefined> => {
+  try {
+    const availability = await getStockService().getStockAvailability(site, id);
+    return availability || null;
+  } catch (_error) {
+    return undefined;
+  }
+});
+
+export function getAvailability(site: string, id: string): Promise<StockAvailability | null | undefined> {
+  return _getAvailability(site, id);
+}
 
 export function getProductById(id: string): Promise<Product | null | undefined> {
   return _getProduct(id);

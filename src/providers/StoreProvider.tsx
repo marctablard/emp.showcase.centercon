@@ -4,6 +4,7 @@ import { type ReactNode, createContext, useContext, useRef } from 'react';
 import { useStore } from 'zustand/react';
 import { Site } from '@/platform/services/model/common/site';
 import { Session } from '@/platform/services/model/session';
+import { createAvailabilityStore } from '@/stores/availability-store';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';
 import { createCustomerStore } from '@/stores/customer-store';
@@ -38,6 +39,8 @@ export type SessionStoreApi = ReturnType<typeof createSessionStore>;
 export const SessionStoreContext = createContext<SessionStoreApi | null>(null);
 export type NotificationStoreApi = ReturnType<typeof createNotificationStore>;
 export const NotificationStoreContext = createContext<NotificationStoreApi | null>(null);
+export type AvailabilityStoreApi = ReturnType<typeof createAvailabilityStore>;
+export const AvailabilityStoreContext = createContext<AvailabilityStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
@@ -91,6 +94,10 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
   if (notificationStoreRef.current === null) {
     notificationStoreRef.current = createNotificationStore();
   }
+  const availabilityStoreRef = useRef<AvailabilityStoreApi | null>(null);
+  if (availabilityStoreRef.current === null) {
+    availabilityStoreRef.current = createAvailabilityStore();
+  }
   /**
    * The order is relevant, because store data can only depend on one another,
    * when nested properly.
@@ -115,7 +122,9 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
                     <DashboardStoreContext.Provider value={dashboardStoreRef.current}>
                       <SessionStoreContext.Provider value={sessionStoreRef.current}>
                         <NotificationStoreContext.Provider value={notificationStoreRef.current}>
-                          {children}
+                          <AvailabilityStoreContext.Provider value={availabilityStoreRef.current}>
+                            {children}
+                          </AvailabilityStoreContext.Provider>
                         </NotificationStoreContext.Provider>
                       </SessionStoreContext.Provider>
                     </DashboardStoreContext.Provider>
@@ -214,6 +223,14 @@ export const useNotificationStore = () => {
   const storeContext = useContext(NotificationStoreContext);
   if (!storeContext) {
     throw new Error('useNotificationStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useAvailabilityStore = () => {
+  const storeContext = useContext(AvailabilityStoreContext);
+  if (!storeContext) {
+    throw new Error('useAvailabilityStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

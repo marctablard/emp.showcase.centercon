@@ -1,17 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { Coins, Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { UINotification } from '@/components/ui/molecules/ui-notification';
 import { useCart } from '@/hooks/cart/useCart';
+import { useNotifications } from '@/hooks/notifications/useNotifications';
+import { useAvailability } from '@/hooks/product/useAvailability';
 import { useL10n } from '@/hooks/useL10n';
 import { cn, formatCurrency } from '@/lib/utils';
-import { Cart, CartItem } from '@/platform/services/model/cart/cart.d';
+import { Cart, CartItem, CartItemPriceChange, CartItemSubstitution } from '@/platform/services/model/cart/cart.d';
+import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 import { Input } from '../ui/input';
 import { Spinner } from '../ui/spinner';
+import { SubstitutionModal } from './substitution-modal';
 
 interface CartItemProps {
   cart: Cart;
@@ -27,6 +32,57 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(item.quantity);
   const isStrike = false;
+  const { registerNotificationListener, unregisterNotificationListener, markNotificationAsRead } = useNotifications();
+  const [substitution, setSubstitution] = useState<CartItemSubstitution | null>(null);
+  const [substitutionNotificationId, setSubstitutionNotificationId] = useState<string | null>(null);
+  const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
+  const [priceChange, setPriceChange] = useState<CartItemPriceChange | null>(null);
+  const { availability } = useAvailability(item.product?.id);
+
+  // Handler for cart notifications
+  const handleCartNotification = useCallback(
+    (notification: StorefrontNotification | string) => {
+      if (typeof notification === 'string') {
+        if (notification === substitutionNotificationId) {
+          setShowSubstitutionModal(false);
+          setSubstitutionNotificationId(null);
+          setSubstitution(null);
+        }
+        return;
+      }
+      if (notification.code === 'SUBSTITUTION_AVAILABLE') {
+        const substitution = notification.data_json as CartItemSubstitution;
+        console.log('ITEM: Substitution available:', substitution);
+        if (substitution.productId === item.product?.id) {
+          console.log('ITEM: Substitution available:', substitution);
+          setSubstitution(substitution);
+          setSubstitutionNotificationId(notification.id);
+        }
+      } else if (notification.code === 'ITEM_PRICE_CHANGE') {
+        const priceChange = notification.data_json as CartItemPriceChange;
+        if (priceChange.productId === item.product?.id) {
+          console.log('ITEM: Price change detected:', priceChange);
+          setPriceChange(priceChange);
+        }
+      }
+      return false;
+    },
+    [item.product?.id, substitutionNotificationId],
+  );
+
+  // Register for cart notifications on mount
+  useEffect(() => {
+    const subscriptionId = registerNotificationListener('CART', handleCartNotification);
+    return () => {
+      unregisterNotificationListener(subscriptionId);
+    };
+  }, [handleCartNotification, registerNotificationListener, unregisterNotificationListener, item.product?.id, cart.id]);
+
+  useEffect(() => {
+    if (item.quantity != quantity) {
+      setQuantity(item.quantity);
+    }
+  }, [item.quantity, quantity]);
 
   // Handle quantity update
   const handleUpdateQuantity = async (newQuantity: number) => {
@@ -57,6 +113,15 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
     setTimeout(() => {
       handleUpdateQuantity(parseInt(e.target.value));
     }, 500);
+  };
+
+  const onSubstitutionDone = () => {
+    if (substitutionNotificationId) {
+      markNotificationAsRead(substitutionNotificationId);
+      setSubstitutionNotificationId(null);
+      setSubstitution(null);
+    }
+    setShowSubstitutionModal(false);
   };
 
   return (
@@ -109,10 +174,58 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
             </p>
           )}
           <div className="flex items-center gap-1">
-            <div className="text-success-500">
-              <Package className="h-4 w-4" />
-            </div>
-            <p className="text-sm text-success-500">{t('available')}</p>
+            {availability ? (
+              availability.availableQuantity >= item.quantity ? (
+                // Fully available
+                <>
+                  <div className="text-success-500">
+                    <Package className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm text-success-500">{t('available')}</p>
+                </>
+              ) : availability.availableQuantity > 0 ? (
+                // Partially available
+                <>
+                  <div className="text-warning-500">
+                    <Package className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm text-warning-500">
+                    {t('substitution.availableDescription', {
+                      available: availability.availableQuantity,
+                      total: item.quantity,
+                    })}
+                  </p>
+                </>
+              ) : availability.availableInDays ? (
+                // Available in X days
+                <>
+                  <div className="text-warning-500">
+                    <Package className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm text-warning-500">
+                    {t('substitution.availableInDays', { days: availability.availableInDays })}
+                  </p>
+                </>
+              ) : (
+                // Not available
+                <>
+                  <div className="text-error-500">
+                    <Package className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm text-error-500">
+                    {t('substitution.availableDescription', { available: 0, total: item.quantity })}
+                  </p>
+                </>
+              )
+            ) : (
+              // Loading or no availability data
+              <>
+                <div className="text-success-500">
+                  <Package className="h-4 w-4" />
+                </div>
+                <p className="text-sm text-success-500">{t('available')}</p>
+              </>
+            )}
           </div>
           {showQty && (
             <Button variant="link" size="small" className="normal-case text-sm tracking-normal p-0 justify-start">
@@ -150,7 +263,14 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
                     <Spinner color="primary" variant="sm" />
                   </div>
                 ) : (
-                  <Input value={quantity} className="py-3 text-center border-none" onChange={(e) => onChangeQty(e)} />
+                  <div className="relative">
+                    <Input value={quantity} className="py-3 text-center border-none" onChange={(e) => onChangeQty(e)} />
+                    {substitution && (
+                      <div className="cursor-pointer" onClick={() => setShowSubstitutionModal(true)}>
+                        <UINotification icon={Package} iconSize={24} animate="pulse" className="absolute" />
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
               <Button
@@ -171,8 +291,18 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
               {formatCurrency(item.price.originalAmount, item.price.currency)}
             </p>
           )}
-          <div className="font-bold md:text-end">
+          <div className="font-bold md:text-end relative">
             {formatCurrency(item.tax?.netValue || item.price.amount, item.price.currency)}
+            {priceChange && (
+              <div className="cursor-pointer">
+                <UINotification
+                  icon={Coins}
+                  iconSize={18}
+                  className="bottom-[-38px] right-[-12px] absolute"
+                  animate="pulse"
+                />
+              </div>
+            )}
           </div>
           {item.tax?.netValue && (
             <span className="text-xs text-neutral-300 md:text-end">
@@ -182,6 +312,17 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
           )}
         </div>
       </div>
+
+      {/* Substitution Modal */}
+      {showSubstitutionModal && substitution && (
+        <SubstitutionModal
+          isOpen={showSubstitutionModal}
+          onClose={() => setShowSubstitutionModal(false)}
+          cartItem={item}
+          substitution={substitution}
+          onDone={onSubstitutionDone}
+        />
+      )}
     </div>
   );
 }

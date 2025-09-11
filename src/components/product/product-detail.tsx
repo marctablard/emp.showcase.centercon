@@ -15,6 +15,7 @@ import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product } from '@/platform/services/model/product';
+import { StockAvailability } from '@/platform/services/stock/StockService';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
 import { H1, H2 } from '../ui/h';
@@ -28,10 +29,11 @@ import { ProductShippingInfo } from './product-shipping-info';
 export interface ProductDetailProps {
   product?: Product;
   price?: ProductPrice | null;
+  availability?: StockAvailability | null;
   className?: string;
 }
 
-export default function ProductDetail({ product: initialProduct, price, className }: ProductDetailProps) {
+export default function ProductDetail({ product: initialProduct, price, availability, className }: ProductDetailProps) {
   const { product, loading, setAsCurrent } = useProduct(initialProduct);
   const locale = useLocale();
   const { l10n } = useL10n(locale);
@@ -299,8 +301,8 @@ export default function ProductDetail({ product: initialProduct, price, classNam
             <div className="col-start-1 md:row-start-1 lg:col-end-4 xl-col-end-5">
               {price && <ProductPriceComponent price={price} />}
             </div>
-            <ProductAddToCart product={product} price={price} className="mt-6" />
           </div>
+          <ProductAddToCart product={product} price={price} className="mt-6" />
           {!isDesktopScreen && (
             <div className="flex justify-center gap-2 mt-6">
               <Button size="icon" variant="secondary" aria-label={t('compare')}>
@@ -314,7 +316,13 @@ export default function ProductDetail({ product: initialProduct, price, classNam
               </Button>
             </div>
           )}
-          <ProductShippingInfo />
+          <ProductShippingInfo
+            deliveryDays={
+              availability?.isAvailable
+                ? [0, 0]
+                : [availability?.availableInDays || 1, (availability?.availableInDays || 1) + 2]
+            }
+          />
         </div>
         <div
           className={cn(opacity ? 'opacity-100' : 'opacity-0', 'transition-opacity ease-in-out delay-150 duration-300')}

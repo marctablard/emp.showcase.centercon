@@ -10,6 +10,7 @@
   "products": " Products",
   "details": "Details",
   "price": "Price",
+  "pricePerUnit": "Price per unit",
   "quantity": "Quantity",
   "subtotal": "Subtotal",
   "continueShopping": "Continue Shopping",
@@ -62,5 +63,42 @@
   "cartEmptyTextLoggedIn": "Add products to your cart.",
   "cartEmptyLogin": "Login",
   "cartEmptyLinkText": "Shop now",
-  "selectShippingAddress": "Select Shipping Address"
+  "selectShippingAddress": "Select Shipping Address",
+  "savedCarts": {
+    "title": "Saved Carts",
+    "mySavedCarts": "My Saved Carts",
+    "showAllSavedCarts": "Show All Saved Carts",
+    "search": {
+      "placeholder": "Search saved carts..."
+    },
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "date": "Date",
+      "items": "Items",
+      "total": "Total",
+      "actions": "Actions"
+    },
+    "empty": "No saved carts found",
+    "loadCart": "Load Cart",
+    "deleteCart": "Delete",
+    "confirmDelete": "Are you sure you want to delete this saved cart?",
+    "loadingMessage": "Loading saved carts...",
+    "errorMessage": "Failed to load saved carts"
+  },
+  "substitution": {
+    "title": "Substitutions Available",
+    "originalProduct": "Your selected Product",
+    "availableSubstitutions": "Available Substitutions",
+    "selectAlternative": "Please select an alternative product from the options below:",
+    "keepBackorder": "Keep Backorder",
+    "addSubstitution": "Add Substitution",
+    "reduceAmount": "Reduce Order Amount",
+    "availableQty": "Available Qty",
+    "availableDescription": "{available} of {total} available",
+    "availableInDays": "Backorder available in {days} days",
+    "sustainabilityClaim": "For a greener Commerce",
+    "sustainabilityNote": "Avoiding Backorders helps to reduce CO2 emissions, by reducing the need for additional production and transportation.",
+    "poweredBy": "Powered by"
+  }
 }

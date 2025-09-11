@@ -21,8 +21,20 @@
   "more": "More product features",
   "technicalInformation": "Technical Information",
   "otherVariants": "Other variants",
+  "addToCartResult": {
+    "successTitle": "Added to Cart",
+    "pendingTitle": "Processing Your Request",
+    "addedMessage": "{quantity} {productName} has been added to your cart",
+    "insufficientStockMessage": "The requested quantity exceeds our current stock. We're looking for a solution in the background. You'll receive a notification.",
+    "continueShopping": "Continue Shopping",
+    "viewCart": "View Cart",
+    "saveCart": "Save Cart",
+    "productAdded": "Your selected product",
+    "quantityAdded": "Added Quantity"
+  },
   "shipping": {
     "deliveryDetails": "Delivery Details",
+    "immediatelyDeliverable": "Immediately available",
     "deliverable": "Deliverable {min} - {max} days",
     "shipping": "Shipping",
     "freeShipping": "Free Shipping",
