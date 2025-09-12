@@ -1,5 +1,7 @@
+import { getLocationOrigin, getURL } from 'next/dist/shared/lib/utils';
 import { inject } from 'inversify';
 import webpush from 'web-push';
+import { baseUrl } from '@/lib/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixPaginatedResponse } from '@/platform/integrations/emporix/model';
 import { EmporixCustomEntity } from '@/platform/integrations/emporix/model/schema';
@@ -184,6 +186,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
         criteria: {
           'mixins.PUSH_SUBSCRIPTION_DATA.p256dh_key': subscription.keys.p256dh,
           'mixins.PUSH_SUBSCRIPTION_DATA.endpoint': subscription.endpoint,
+          'mixins.PUSH_SUBSCRIPTION_DATA.origin': baseUrl,
         },
       });
       let subscriptionId: string | undefined;
@@ -212,6 +215,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
       }
       if (!subscriptionId) {
         const storefrontSubscription: Omit<StorefrontNotificationSubscription, 'id'> = {
+          origin: baseUrl,
           keys: subscription.keys,
           endpoint: subscription.endpoint,
           recipient: {
@@ -255,12 +259,18 @@ export class EmporixNotificationServiceServer implements INotificationService {
       switch (notification.recipient_type) {
         case 'SESSION':
           subscriptions = await this.schemaApi.getCustomEntities(this.SUBSCRIPTION_TYPE, {
-            criteria: { 'mixins.PUSH_SUBSCRIPTION_DATA.recipient_session_id': notification.recipient_id },
+            criteria: {
+              'mixins.PUSH_SUBSCRIPTION_DATA.recipient_session_id': notification.recipient_id,
+              'mixins.PUSH_SUBSCRIPTION_DATA.origin': baseUrl,
+            },
           });
           break;
         case 'CUSTOMER':
           subscriptions = await this.schemaApi.getCustomEntities(this.SUBSCRIPTION_TYPE, {
-            criteria: { 'mixins.PUSH_SUBSCRIPTION_DATA.recipient_customer_id': notification.recipient_id },
+            criteria: {
+              'mixins.PUSH_SUBSCRIPTION_DATA.recipient_customer_id': notification.recipient_id,
+              'mixins.PUSH_SUBSCRIPTION_DATA.origin': baseUrl,
+            },
           });
           break;
         case 'CART_OWNER':
@@ -270,11 +280,17 @@ export class EmporixNotificationServiceServer implements INotificationService {
           }
           if (cart.customerId) {
             subscriptions = await this.schemaApi.getCustomEntities(this.SUBSCRIPTION_TYPE, {
-              criteria: { 'mixins.PUSH_SUBSCRIPTION_DATA.recipient_customer_id': cart.customerId },
+              criteria: {
+                'mixins.PUSH_SUBSCRIPTION_DATA.recipient_customer_id': cart.customerId,
+                'mixins.PUSH_SUBSCRIPTION_DATA.origin': baseUrl,
+              },
             });
           } else {
             subscriptions = await this.schemaApi.getCustomEntities(this.SUBSCRIPTION_TYPE, {
-              criteria: { 'mixins.PUSH_SUBSCRIPTION_DATA.recipient_session_id': cart.sessionId },
+              criteria: {
+                'mixins.PUSH_SUBSCRIPTION_DATA.recipient_session_id': cart.sessionId,
+                'mixins.PUSH_SUBSCRIPTION_DATA.origin': baseUrl,
+              },
             });
           }
           break;
@@ -417,6 +433,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
     }
     return {
       id: response.id,
+      origin: subscription.origin,
       keys: {
         p256dh: subscription.p256dh_key,
         auth: subscription.auth_key,
@@ -434,6 +451,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
       type: this.SUBSCRIPTION_TYPE,
       mixins: {
         PUSH_SUBSCRIPTION_DATA: {
+          origin: baseUrl,
           auth_key: subscription.keys.auth,
           p256dh_key: subscription.keys.p256dh,
           endpoint: subscription.endpoint,

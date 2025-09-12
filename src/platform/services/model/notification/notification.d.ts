@@ -84,6 +84,7 @@ export interface WebPushSubscriptionRegistration {
 
 export interface StorefrontNotificationSubscription extends WebPushSubscriptionRegistration {
   id: string;
+  origin: string;
   recipient: {
     sessionId: string;
     customerId?: string;

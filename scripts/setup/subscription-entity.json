@@ -30,6 +30,19 @@
       },
       "attributes": [
         {
+          "key": "origin",
+          "name": {
+            "en": "Origin"
+          },
+          "description": {
+            "en": "Origin of the push subscription e.g. https://emporix-showcase.com/demo"
+          },
+          "type": "TEXT",
+          "metadata": {
+            "required": true
+          }
+        },
+        {
           "key": "endpoint",
           "name": {
             "en": "Endpoint"
