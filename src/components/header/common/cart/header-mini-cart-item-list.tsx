@@ -1,21 +1,68 @@
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Cart, CartUpdate } from '@platform/services/model/cart';
-import { MessageCircleWarning, ShoppingCart } from 'lucide-react';
+import { Cart, CartItem } from '@platform/services/model/cart';
+import { Coins, Package, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useL10n } from '@/hooks/useL10n';
 import { formatCurrency } from '@/lib/utils';
+import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 
 interface HeaderMiniCartItemListProps {
   cart?: Cart | null;
-  cartUpdate?: CartUpdate;
 }
 
-export function HeaderMiniCartItemList({ cart, cartUpdate }: HeaderMiniCartItemListProps) {
+export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
   const t = useTranslations('cart');
+  const { registerNotificationListener, unregisterNotificationListener } = useNotifications();
   const { l10n } = useL10n();
   const router = useRouter();
+  const [notifications, setNotifications] = useState<StorefrontNotification[]>([]);
+  // Handler for cart notifications
+  const handleCartNotification = useCallback(
+    (notification: StorefrontNotification | string) => {
+      console.log('Cart notification received:', notification);
+      if (typeof notification === 'string') {
+        // Remove notification with matching ID from state
+        setNotifications((prev) => prev.filter((item) => item.id !== notification));
+        return true;
+      }
+      if (notification.recipient_id !== cart?.id) {
+        return false;
+      }
+      setNotifications((prev) => [...prev, notification]);
+      // Mark as consumed to prevent toast display
+      //markNotificationAsConsumed(notification.id);
+
+      // Return true to indicate this notification was consumed
+      return false;
+    },
+    [cart?.id, setNotifications],
+  );
+
+  const getCartItemSubstitutions = (cartItem: CartItem) => {
+    return notifications.filter(
+      (notification) =>
+        notification.code === 'SUBSTITUTION_AVAILABLE' && notification.data_json.productId === cartItem.product?.id,
+    );
+  };
+
+  const getCartItemPriceChanges = (cartItem: CartItem) => {
+    return notifications.filter(
+      (notification) =>
+        notification.code === 'ITEM_PRICE_CHANGE' && notification.data_json.productId === cartItem.product?.id,
+    );
+  };
+
+  // Register for cart notifications on mount
+  useEffect(() => {
+    const subscriptionId = registerNotificationListener('CART', handleCartNotification);
+    return () => {
+      unregisterNotificationListener(subscriptionId);
+    };
+  }, [registerNotificationListener, unregisterNotificationListener, handleCartNotification]);
 
   return (
     <>
@@ -52,16 +99,23 @@ export function HeaderMiniCartItemList({ cart, cartUpdate }: HeaderMiniCartItemL
                 <p className="text-xs pl-4">
                   {t('qty')}: {item.quantity}
                 </p>
+                {getCartItemSubstitutions(item).length > 0 && (
+                  <Badge variant="warning" className="h-5 min-w-5 ml-2 rounded-full px-1 tabular-nums tracking-normal">
+                    <Package />
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
           <div>
-            {cartUpdate?.itemId === item.id && (
+            {getCartItemPriceChanges(item).length > 0 && (
               <Badge variant="warning" className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal">
-                <MessageCircleWarning />
+                <Coins />
               </Badge>
             )}
-            <p className={`font-bold font-headlines ${cartUpdate?.itemId === item.id ? 'bg-orange-100/75' : ''}`}>
+            <p
+              className={`font-bold font-headlines ${getCartItemPriceChanges(item).length > 0 ? 'bg-orange-100/75' : ''}`}
+            >
               {formatCurrency(item.price.amount, item.price.currency)}
             </p>
           </div>

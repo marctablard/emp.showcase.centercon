@@ -80,13 +80,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   }, [orderResponse, onComplete, router]);
 
   if (customer === undefined || loading || orderResponse) {
+    console.log(customer, loading, orderResponse);
     return (
       <div className="mx-4 xl:mx-9">
-        <div className="flex gap-3 align-end mb-8">
-          <H1 variant="h3" className="text-5xl font-bold">
-            {t('title')}
-          </H1>
-        </div>
         <div className="flex flex-col items-center justify-center py-12">
           <Spinner variant="lg" />
         </div>

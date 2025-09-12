@@ -51,6 +51,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
   useEffect(() => {
     // Do not fetch when unauthenticated or during session loading
     if (status !== 'authenticated') {
+      setCustomer(null);
       if (getLoading()) {
         setLoading(false);
       }
@@ -66,7 +67,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
         fetchCustomer();
       }
     }
-  }, [customer, getCustomer, getLoading, setLoading, fetchCustomer, status]);
+  }, [customer, setCustomer, getCustomer, getLoading, setLoading, fetchCustomer, status]);
 
   return {
     customer,

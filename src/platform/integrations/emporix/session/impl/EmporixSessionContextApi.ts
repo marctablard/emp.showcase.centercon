@@ -47,6 +47,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sessionContext),
       },
+      'service',
     );
 
     if (!response.ok) {
@@ -64,6 +65,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(attribute),
       },
+      'service',
     );
 
     if (!response.ok) {
@@ -76,6 +78,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/context/${sessionId}/attributes/${attributeName}`,
       { method: 'DELETE' },
+      'service',
     );
 
     if (!response.ok) {

@@ -81,6 +81,32 @@ class EmporixSessionService implements SessionService {
     });
   }
 
+  async setCart(cartId: string): Promise<void> {
+    const session = await this.sessionContextApi.getOwnSessionContext();
+    if (!session) {
+      return;
+    }
+    this.sessionContextApi.addOwnSessionContextAttribute({
+      key: 'currentCart',
+      value: cartId,
+    });
+    /*
+    // Needs to be done with Service Authorization!
+    await this.sessionContextApi.updateSessionContext(session.sessionId, {
+      cartId: cartId,
+      metadata: {
+        version: session.metadata?.version || 1,
+      },
+    });
+    */
+  }
+
+  async getById(id: string): Promise<Session | undefined> {
+    const sessionContext = await this.sessionContextApi.getSessionContext(id);
+    const result = sessionContext ? this.mapper.mapToService(sessionContext) : undefined;
+    return result;
+  }
+
   /**
    * Get the current session context
    */
@@ -110,8 +136,6 @@ class EmporixSessionService implements SessionService {
       this.setRegion(this.defaultRegion);
       result.region = this.defaultRegion;
     }
-    result.cartId = sessionContext?.cartId;
-    result.customerId = sessionContext?.customerId;
     return result;
   }
 }

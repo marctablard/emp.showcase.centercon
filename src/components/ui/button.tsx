@@ -18,6 +18,8 @@ const buttonVariants = cva(
         link: 'text-primary disabled:bg-transparent hover:text-primary-700 rounded-sm ',
         link_foreground: 'text-primary-foreground disabled:bg-transparent hover:text-primary-foreground/80 rounded-sm ',
         input: 'bg-primary-500 text-white border border-transparent hover:bg-primary-700 rounded-r-lg',
+        warning:
+          'border border-warning-500 bg-transparent text-warning-500 disabled:border-neutral-600 hover:border-warning-700 hover:bg-warning-100 hover:text-warning-700 rounded-sm ',
       },
       size: {
         small: 'px-2 py-1',

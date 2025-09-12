@@ -91,6 +91,9 @@ export function buildCanonicalUrl(locale: string, path: string): string {
  * @returns The localized string
  */
 export function l10n(input: string | LocalizedString, locale: string): string {
+  if (!input) {
+    return '';
+  }
   // If input is a simple string, return it directly
   if (typeof input === 'string') {
     return input;

@@ -41,6 +41,7 @@ export class EmporixSessionMapper implements SessionMapper<EmporixSessionContext
       language: source.context?.['language'],
       country: source.targetLocation,
       region: source.context?.['region'],
+      cartId: source.context?.['currentCart'],
       attributes,
     };
   }

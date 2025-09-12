@@ -10,6 +10,7 @@
   "products": " Produkte",
   "details": "Details",
   "price": "Einheitspreis",
+  "pricePerUnit": "Preis pro Einheit",
   "quantity": "Menge",
   "subtotal": "Zwischensumme",
   "continueShopping": "Weiter einkaufen",
@@ -25,20 +26,20 @@
   "shipTo": "Liefere an",
   "change": "Ändern",
   "summary": {
-      "title": "Bestellübersicht",
-      "subtotal": "Zwischensumme",
-      "total": "Gesamtsumme",
-      "valueOfGoods": "Warenwert",
-      "netValueOfGoods": "Netto-Warenwert",
-      "vat": "Steuersatz",
-      "shippingCosts": "Versandkosten",
-      "fees": "Zusatzkosten",
-      "untilFreeShipping": " € bis gratis Versand",
-      "freeShippingOn": "Gratisversand bei Bestellungen über 400.00 €!",
-      "promoCodeInfo": "Promo Codes können im Checkout-Prozess eingegeben werden.",
-      "goToCheckout": "Zur Kasse",
-      "calculatedAtCheckout": "im Checkout ermittelt",
-      "dataTransmittedSecure": "Ihre Daten werden verschlüsselt und sicher transportiert"
+    "title": "Bestellübersicht",
+    "subtotal": "Zwischensumme",
+    "total": "Gesamtsumme",
+    "valueOfGoods": "Warenwert",
+    "netValueOfGoods": "Netto-Warenwert",
+    "vat": "Steuersatz",
+    "shippingCosts": "Versandkosten",
+    "fees": "Zusatzkosten",
+    "untilFreeShipping": " € bis gratis Versand",
+    "freeShippingOn": "Gratisversand bei Bestellungen über 400.00 €!",
+    "promoCodeInfo": "Promo Codes können im Checkout-Prozess eingegeben werden.",
+    "goToCheckout": "Zur Kasse",
+    "calculatedAtCheckout": "im Checkout ermittelt",
+    "dataTransmittedSecure": "Ihre Daten werden verschlüsselt und sicher transportiert"
   },
   "requestQuote": "Angebot anfragen",
   "requestQuoteTitle": "Für ein Angebot werden die Produkte in Ihrem Warenkorb übermittelt:",
@@ -59,5 +60,42 @@
   "cartEmptyTextLoggedIn": "Fügen Sie Produkte zu Ihrem Warenkorb hinzu.",
   "cartEmptyLogin": "Anmelden",
   "cartEmptyLinkText": "Jetzt Einkaufen",
-  "selectShippingAddress": "Lieferadresse auswählen"
+  "selectShippingAddress": "Lieferadresse auswählen",
+  "savedCarts": {
+    "title": "Gespeicherte Warenkörbe",
+    "mySavedCarts": "Meine gespeicherten Warenkörbe",
+    "showAllSavedCarts": "Alle gespeicherten Warenkörbe anzeigen",
+    "search": {
+      "placeholder": "Gespeicherte Warenkörbe suchen..."
+    },
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "date": "Datum",
+      "items": "Artikel",
+      "total": "Gesamtsumme",
+      "actions": "Aktionen"
+    },
+    "empty": "Keine gespeicherten Warenkörbe gefunden",
+    "loadCart": "Warenkorb laden",
+    "deleteCart": "Löschen",
+    "confirmDelete": "Sind Sie sicher, dass Sie diesen gespeicherten Warenkorb löschen möchten?",
+    "loadingMessage": "Gespeicherte Warenkörbe werden geladen...",
+    "errorMessage": "Fehler beim Laden der gespeicherten Warenkörbe"
+  },
+  "substitution": {
+    "title": "Ersatzprodukt verfügbar",
+    "originalProduct": "Ihr gewähltes Produkt",
+    "availableSubstitutions": "Verfügbare Ersatzprodukte",
+    "selectAlternative": "Bitte wählen Sie ein alternatives Produkt aus den folgenden Optionen:",
+    "keepBackorder": "Rückstand behalten",
+    "addSubstitution": "Ersatz hinzufügen",
+    "reduceAmount": "Bestellmenge reduzieren",
+    "availableQty": "Verfügbare Menge",
+    "availableDescription": "{available} von {total} verfügbar",
+    "availableInDays": "Rückstand verfügbar in {days} Tagen",
+    "sustainabilityClaim": "Für ein grüneres Commerce",
+    "sustainabilityNote": "Das Vermeiden von Nachlieferungen hilft, CO2-Emissionen zu reduzieren, indem die Notwendigkeit für zusätzliche Produktion und Transport reduziert wird.",
+    "poweredBy": "Powered by"
+  }
 }

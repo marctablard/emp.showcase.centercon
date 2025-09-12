@@ -1,37 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
-import { LucideMinus, LucidePlus, LucideShoppingCart } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { LucideMinus, LucidePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useCart } from '@/hooks/cart/useCart';
 import { useProduct } from '@/hooks/product/useProduct';
-import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { Product } from '@/platform/services/model/product';
-import { ToastType, notify } from '../ui/toast-notification';
+import ProductAddToCartButton from './product-add-to-cart-button';
 
 // Client component that uses the product signal
 export default function ProductAddToCart({
   product: initialProduct,
   price,
-  isAddToCartBar,
   className,
 }: {
   product?: Product;
   price?: ProductPrice | null;
-  isAddToCartBar?: boolean;
   className?: string;
 }) {
   const t = useTranslations('product');
   const { product, loading: productLoading, error: productError } = useProduct(initialProduct);
-  const { addItem, cart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [adding, setAdding] = useState(false);
-  const locale = useLocale();
-  const { l10n } = useL10n(locale);
 
   if (productLoading) {
     return (
@@ -58,93 +50,60 @@ export default function ProductAddToCart({
     );
   }
 
-  const handleAddToCart = async () => {
-    try {
-      if (!product) return;
-      setAdding(true);
-      await addItem(product.id, quantity);
-      notify({
-        title: `${quantity} × ${l10n(product.name)} ${t('addedToCartDescription')}`,
-        type: ToastType.Success,
-      });
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      notify({
-        title: error instanceof Error ? error.message : String(error),
-        type: ToastType.Error,
-      });
-    } finally {
-      setAdding(false);
-    }
-  };
-
   const incrementQuantity = () => {
-    if (quantity < 99) setQuantity(quantity + 1);
+    setQuantity(quantity + 1);
   };
 
   const decrementQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
+    setQuantity(Math.max(quantity - 1, 1));
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 1 && value <= 99) {
+    if (!isNaN(value) && value >= 1) {
       setQuantity(value);
     }
   };
 
   return (
-    <>
-      {!isAddToCartBar && (
-        <div className="col-start-1 row-start-2 md:col-start-2 md:row-start-1 md:content-end lg:row-start-2 lg:col-start-1">
-          <div className="flex items-center w-full">
-            <Button
-              variant="secondary"
-              size="icon"
-              className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm disabled:border-neutral-300 transition duration-200 ease-in-out"
-              onClick={decrementQuantity}
-              aria-label={t('decrement')}
-              disabled={quantity <= 1}
-            >
-              <LucideMinus />
-            </Button>
-            <div className="w-full h-13 border-y border-neutral-300">
-              <Input
-                id="quantity"
-                type="number"
-                min="1"
-                aria-label={t('quantity')}
-                className="w-full h-full py-3 text-center border-none md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
-                value={quantity}
-                onChange={handleQuantityChange}
-              />
-            </div>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm disabled:border-neutral-300 transition duration-200 ease-in-out"
-              aria-label={t('increment')}
-              onClick={incrementQuantity}
-              disabled={quantity >= 99}
-            >
-              <LucidePlus />
-            </Button>
-          </div>
-        </div>
-      )}
-      <div className="col-start-1 row-start-3 md:row-start-2 md:col-end-3 lg:col-start-2 lg:col-end-5 lg-row-start-2 gap-4 lg:ps-4 xl:ps-0">
+    <div className="flex flex-col md:flex-row md:items-center md:gap-2 w-full">
+      <div className="flex items-center md:w-auto md:flex-shrink-0">
         <Button
-          className={cn(
-            'flex-1 w-full mt-4 md:mt-0',
-            isAddToCartBar && 'h-14 bg-white text-primary-500 hover:bg-white hover:text-primary-700',
-          )}
-          onClick={handleAddToCart}
-          disabled={cart === undefined || adding || !price}
+          variant="secondary"
+          size="icon"
+          className="p-3 h-13 border-neutral-300 rounded-none rounded-ss-sm rounded-es-sm disabled:border-neutral-300 transition duration-200 ease-in-out"
+          onClick={decrementQuantity}
+          aria-label={t('decrement')}
+          disabled={quantity <= 1}
         >
-          {t('addToCart')}
-          <LucideShoppingCart className="hidden md:inline" />
+          <LucideMinus />
+        </Button>
+        <Input
+          id="quantity"
+          type="number"
+          min="1"
+          max="999"
+          aria-label={t('quantity')}
+          className="text-center min-w-[14] w-full h-13 border-y border-neutral-300 rounded-none md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
+          value={quantity}
+          onChange={handleQuantityChange}
+        />
+        <Button
+          variant="secondary"
+          size="icon"
+          className="p-3 h-13 border-neutral-300 rounded-none rounded-ee-sm rounded-se-sm disabled:border-neutral-300 transition duration-200 ease-in-out"
+          aria-label={t('increment')}
+          onClick={incrementQuantity}
+        >
+          <LucidePlus />
         </Button>
       </div>
-    </>
+      <ProductAddToCartButton
+        product={product}
+        price={price}
+        quantity={quantity}
+        className="flex-1 w-full h-[52px] mt-4 md:mt-0 md:flex-grow"
+      />
+    </div>
   );
 }

@@ -87,6 +87,8 @@ export class EmporixCartMapper implements CartMapper<EmporixCart, EmporixCartIte
     }
     return {
       id: emporixCart.id,
+      customerId: emporixCart.customerId,
+      sessionId: emporixCart.sessionId,
       currency: emporixCart.currency,
       site: emporixCart.siteCode,
       legalEntity: emporixCart.legalEntityId,
