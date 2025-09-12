@@ -1,4 +1,3 @@
-import { getLocationOrigin, getURL } from 'next/dist/shared/lib/utils';
 import { inject } from 'inversify';
 import webpush from 'web-push';
 import { baseUrl } from '@/lib/utils';
