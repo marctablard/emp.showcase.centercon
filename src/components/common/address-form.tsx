@@ -52,20 +52,18 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
 
   return (
     <FormProvider {...form}>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div>
           <FormField
             control={form.control}
             name="companyName"
             render={({ field }) => (
-              <FormItem className="relative">
+              <FormItem>
                 <FormLabel htmlFor="companyName">{t('companyName')}*</FormLabel>
                 <FormControl>
                   <Input id="companyName" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
-                <div className="absolute top-full left-0 mt-0.5">
-                  <FormMessage />
-                </div>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -75,14 +73,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             control={form.control}
             name="contactName"
             render={({ field }) => (
-              <FormItem className="relative">
+              <FormItem>
                 <FormLabel htmlFor="contactName">{t('fullName')}*</FormLabel>
                 <FormControl>
                   <Input id="contactName" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
-                <div className="absolute top-full left-0 mt-0.5">
-                  <FormMessage />
-                </div>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -94,14 +90,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               control={form.control}
               name="street"
               render={({ field }) => (
-                <FormItem className="relative">
+                <FormItem>
                   <FormLabel htmlFor="street">{t('street')}*</FormLabel>
                   <FormControl>
                     <Input id="street" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
-                  <div className="absolute top-full left-0 mt-0.5">
-                    <FormMessage />
-                  </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -113,14 +107,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
                 control={form.control}
                 name="streetNumber"
                 render={({ field }) => (
-                  <FormItem className="relative">
+                  <FormItem>
                     <FormLabel htmlFor="streetNumber">{t('streetNumber')}*</FormLabel>
                     <FormControl>
                       <Input id="streetNumber" type="text" {...field} disabled={isReadOnly} />
                     </FormControl>
-                    <div className="absolute top-full left-0 mt-0.5">
-                      <FormMessage />
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -128,20 +120,18 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 space-y-4">
           <div>
             <FormField
               control={form.control}
               name="zipCode"
               render={({ field }) => (
-                <FormItem className="relative">
+                <FormItem>
                   <FormLabel htmlFor="zipCode">{t('zipCode')}*</FormLabel>
                   <FormControl>
                     <Input id="zipCode" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
-                  <div className="absolute top-full left-0 mt-0.5">
-                    <FormMessage />
-                  </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -152,14 +142,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               control={form.control}
               name="city"
               render={({ field }) => (
-                <FormItem className="relative">
+                <FormItem>
                   <FormLabel htmlFor="city">{t('city')}*</FormLabel>
                   <FormControl>
                     <Input id="city" type="text" {...field} disabled={isReadOnly} />
                   </FormControl>
-                  <div className="absolute top-full left-0 mt-0.5">
-                    <FormMessage />
-                  </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -171,14 +159,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             control={form.control}
             name="state"
             render={({ field }) => (
-              <FormItem className="relative">
+              <FormItem>
                 <FormLabel htmlFor="state">{t('state')}</FormLabel>
                 <FormControl>
                   <Input id="state" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
-                <div className="absolute top-full left-0 mt-0.5">
-                  <FormMessage />
-                </div>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -189,14 +175,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             control={form.control}
             name="phoneNumber"
             render={({ field }) => (
-              <FormItem className="relative">
+              <FormItem>
                 <FormLabel htmlFor="phoneNumber">{t('phoneNumber')}</FormLabel>
                 <FormControl>
                   <Input id="phoneNumber" type="text" {...field} disabled={isReadOnly} />
                 </FormControl>
-                <div className="absolute top-full left-0 mt-0.5">
-                  <FormMessage />
-                </div>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -212,7 +196,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
               control={form.control}
               name="country"
               render={({ field }) => (
-                <FormItem className="relative">
+                <FormItem>
                   <FormLabel>{t('country')}*</FormLabel>
                   <FormControl>
                     {/*trigger field change AND form validation */}
@@ -228,7 +212,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
                       </SelectTrigger>
                       <SelectContent>
                         {countries.map((country) => (
-                          <SelectItem key={country.code} value={country.code} className="px-2">
+                          <SelectItem key={country.code} value={country.code}>
                             {typeof country.name === 'string'
                               ? country.name
                               : country.name.en || Object.values(country.name)[0]}
@@ -237,9 +221,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <div className="absolute top-full left-0 mt-0.5">
-                    <FormMessage />
-                  </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
