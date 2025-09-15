@@ -1,31 +1,18 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import AccountLayout from '@/components/account/account-layout';
 import { QuotesTable } from '@/components/account/quotes/quotes-table';
-import useCustomer from '@/hooks/customer/useCustomer';
 import { useQuotes } from '@/hooks/quotes/useQuotes';
 
 export default function QuotesPage() {
   const t = useTranslations('account.quotesList');
-  const { customer } = useCustomer();
-
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const quotesPerPage = 5;
 
-  // Format the query string to filter quotes by customer ID
-  // Using useMemo to stabilize the reference and prevent infinite API calls
-  const searchParams = useMemo(() => {
-    return customer?.id
-      ? {
-          query: `customer.customerId:${customer.id}`,
-        }
-      : undefined;
-  }, [customer?.id]); // Only recreate if customer ID changes
-
-  const { quotes, loading, error } = useQuotes(searchParams);
+  const { quotes, loading, error } = useQuotes();
 
   // Pagination handlers
   const handlePreviousPage = () => {
