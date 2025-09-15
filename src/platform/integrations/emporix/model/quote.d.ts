@@ -1,5 +1,6 @@
 import { LocalizedString } from '@/platform/services/model/common';
 import type { EmporixCart, EmporixCartProduct } from './cart';
+import { EmporixMetadata } from './common';
 
 // Full manual quote creation request (with items)
 export interface EmporixCreateQuoteManualRequest {
@@ -160,6 +161,16 @@ export interface EmporixQuote {
   validTo?: string;
   totalPrice: EmporixPrice;
   subtotalPrice?: EmporixPrice;
+  shipping?: {
+    value?: number;
+    grossValue?: number;
+    methodId?: string;
+    zoneId?: string;
+    methodName?: {
+      [key: string]: string;
+    };
+    shippingTaxCode?: string;
+  };
   taxAggregate?: {
     lines: Array<{
       name: string;
@@ -186,4 +197,22 @@ export type EmporixCreateQuoteRequest = EmporixCreateQuoteManualRequest | Empori
 
 export interface EmporixQuoteCreationResponse {
   quoteId: string;
+}
+
+export interface EmporixQuoteReason {
+  id: string;
+  code: string;
+  message: LocalizedString;
+  type: string;
+  metadata: EmporixMetadata;
+}
+
+export interface EmporixCreateQuoteReasonRequest {
+  code: string;
+  type: string;
+  message: LocalizedString;
+}
+
+export interface EmporixQuoteReasonCreationResponse {
+  id: string;
 }

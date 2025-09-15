@@ -41,40 +41,68 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
     submitBillingAddress({ ...address, type: 'BILLING' });
   };
 
+  // Create a payload using EmporixCreateQuoteFromCartRequest
+  const _createFromCartPayload = () => {
+    if (!checkoutCart?.id) {
+      throw new Error('Cart ID is required for quote from cart');
+    }
+
+    //TODO : For cart payload currently for B2B customers we could only pass the address ids of the legal entity
+
+    return {
+      cartId: checkoutCart.id,
+      billingAddressId: billingAddress?.id,
+      shippingAddressId: shippingAddress?.id,
+      shipping: shippingMethod
+        ? {
+            value: shippingMethod.amount,
+            methodId: shippingMethod.methodId,
+            zoneId: shippingMethod.zoneId,
+            shippingTaxCode: shippingMethod.taxCode,
+          }
+        : undefined,
+    } as const;
+  };
+
+  // Create manual quote payload
+  const createManualPayload = () => {
+    const items = (checkoutCart?.items || [])
+      .map((item) => {
+        const productId = item.product?.id;
+        if (!productId) return null;
+        const quantity = item.quantity;
+        return {
+          quantity: {
+            quantity,
+          },
+          product: { productId },
+        };
+      })
+      .filter((x): x is any => Boolean(x));
+
+    return {
+      customerId: customer?.id,
+      siteCode: checkoutCart?.site,
+      currency: checkoutCart?.currency,
+      billingAddressId: billingAddress?.id,
+      shippingAddressId: shippingAddress?.id,
+      shipping: shippingMethod
+        ? {
+            value: shippingMethod.amount,
+            methodId: shippingMethod.methodId,
+            zoneId: shippingMethod.zoneId,
+            shippingTaxCode: shippingMethod.taxCode,
+          }
+        : undefined,
+      items,
+      reference: reference || undefined,
+      comment: comment || undefined,
+    } as const;
+  };
+
   const sendQuote = async () => {
     try {
-      // Build full manual QuoteCreateRequest (not from cart)
-      const items = (checkoutCart?.items || [])
-        .map((item) => {
-          const productId = item.product?.id;
-          if (!productId) return null;
-          const quantity = item.quantity;
-          return {
-            quantity: {
-              quantity,
-            },
-            product: { productId },
-          };
-        })
-        .filter((x): x is any => Boolean(x));
-
-      const payload = {
-        customerId: customer?.id,
-        siteCode: checkoutCart?.site,
-        currency: checkoutCart?.currency,
-        billingAddressId: billingAddress?.id,
-        shippingAddressId: shippingAddress?.id,
-        shipping: {
-          value: shippingMethod?.amount,
-          methodId: shippingMethod?.methodId,
-          zoneId: shippingMethod?.zoneId,
-          shippingTaxCode: shippingMethod?.taxCode,
-        },
-        items,
-        status: { value: 'OPEN' },
-        reference: reference || undefined,
-        comment: comment || undefined,
-      } as const;
+      const payload = createManualPayload();
 
       const res = await fetch('/api/quote', {
         method: 'POST',

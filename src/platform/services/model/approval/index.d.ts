@@ -43,7 +43,7 @@ export interface ApprovalResourceItem {
   itemPrice: ApprovalPrice;
   itemYrn: string;
   productId?: string;
-  productName?: string;
+  productName?: string | LocalizedString;
 }
 
 export interface ApprovalResource {

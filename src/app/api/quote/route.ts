@@ -13,8 +13,15 @@ export async function POST(request: NextRequest) {
     const quoteService = EMP.platform.server.get<QuoteService>('QuoteService');
     const priceService = EMP.platform.server.get<PriceService>('PriceService');
 
-    // If items present (manual quote creation), enrich each item with mandatory price details
     const items = Array.isArray(body?.items) ? body.items : undefined;
+    if (body.shippingMethod) {
+      body.shipping = body.shipping || {};
+      body.shipping.methodId = body.shippingMethod.id;
+      if (body.shippingMethod.cost) {
+        body.shipping.value = body.shippingMethod.cost;
+      }
+    }
+
     if (items && items.length > 0) {
       const defaultUnitCode = process.env.NEXT_PUBLIC_EMPORIX_DEFAULT_UNIT_CODE || 'piece';
 
@@ -29,7 +36,6 @@ export async function POST(request: NextRequest) {
           const matched = await priceService.getProductPrice(productId, quantity);
           if (!matched) return { ...item, quantity: { quantity, unitCode } };
 
-          console.log('Matched prices : ', matched);
           const unitPrice = matched.effectiveValue;
           const taxClass = matched.tax?.taxClass ?? 'STANDARD';
           const taxRate = matched.tax?.taxRate ?? 0;

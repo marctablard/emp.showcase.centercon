@@ -2,20 +2,32 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatDate } from '@/lib/date-utils';
+import { cn } from '@/lib/utils';
 import { Quote } from '@/platform/services/model/quote';
 import { QuoteStatusBadge } from './quote-status-badge';
 
 interface QuotesTableProps {
   quotes: Quote[];
   loading?: boolean;
+  currentPage?: number;
+  quotesPerPage?: number;
+  onPreviousPage?: () => void;
+  onNextPage?: () => void;
 }
 
-export function QuotesTable({ quotes, loading = false }: QuotesTableProps) {
+export function QuotesTable({
+  quotes,
+  loading = false,
+  currentPage = 1,
+  quotesPerPage = 5,
+  onPreviousPage,
+  onNextPage,
+}: QuotesTableProps) {
   const t = useTranslations('account.quotesList');
   const [sortOrder, setSortOrder] = useState<string>('latest');
 
@@ -27,7 +39,8 @@ export function QuotesTable({ quotes, loading = false }: QuotesTableProps) {
     return sortOrder === 'latest' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
   });
 
-  // Function to format price with currency
+  const visibleQuotes = sortedQuotes.slice((currentPage - 1) * quotesPerPage, currentPage * quotesPerPage);
+
   const formatPrice = (price: number, currency: string) => {
     try {
       return new Intl.NumberFormat('de', {
@@ -36,7 +49,7 @@ export function QuotesTable({ quotes, loading = false }: QuotesTableProps) {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(price);
-    } catch (error) {
+    } catch (_error) {
       return `${price.toFixed(2)} ${currency}`;
     }
   };
@@ -68,13 +81,12 @@ export function QuotesTable({ quotes, loading = false }: QuotesTableProps) {
               <TableHead className="whitespace-nowrap">{t('authorization')}</TableHead>
               <TableHead className="whitespace-nowrap text-right">{t('totalAmount')}</TableHead>
               <TableHead className="whitespace-nowrap text-right">{t('numberOfProducts')}</TableHead>
-              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   <div className="flex items-center justify-center">
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
                   </div>
@@ -82,30 +94,33 @@ export function QuotesTable({ quotes, loading = false }: QuotesTableProps) {
               </TableRow>
             ) : sortedQuotes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   {t('noQuotes')}
                 </TableCell>
               </TableRow>
             ) : (
-              sortedQuotes.map((quote) => (
-                <TableRow key={quote.id}>
-                  <TableCell className="font-medium">{quote.reference || quote.id}</TableCell>
-                  <TableCell>
+              visibleQuotes.map((quote, index) => (
+                <TableRow
+                  key={quote.id}
+                  className={cn('hover:bg-neutral-50 text-base', index % 2 === 0 ? 'bg-white' : 'bg-neutral-50')}
+                >
+                  <TableCell className="font-medium px-2 py-4">
+                    <a href={`/account/quotes/${quote.id}`} className="text-primary-500 hover:underline">
+                      {quote.reference || '#' + quote.id}
+                    </a>
+                  </TableCell>
+                  <TableCell className="px-2 py-4">
                     <QuoteStatusBadge status={quote.status} />
                   </TableCell>
-                  <TableCell>{formatDate(quote.submittedDate)}</TableCell>
-                  <TableCell>{quote.customerName || quote.customerId}</TableCell>
-                  <TableCell>{quote.approverName || '-'}</TableCell>
-                  <TableCell className="text-right">{formatPrice(quote.totalGross, quote.currency)}</TableCell>
-                  <TableCell className="text-right">
-                    {quote.items?.length || 0} {t('products')}
+                  <TableCell className="px-2 py-4">{formatDate(quote.submittedDate)}</TableCell>
+                  <TableCell className="px-2 py-4">{quote.customerName || quote.customerId}</TableCell>
+                  <TableCell className="px-2 py-4">{quote.approverName || '-'}</TableCell>
+                  <TableCell className="text-right px-2 py-4 font-medium">
+                    {formatPrice(quote.totalGross, quote.currency)}
                   </TableCell>
-                  <TableCell>
-                    <Link href={`/account/quotes/${quote.id}`}>
-                      <Button variant="secondary" size="small">
-                        {t('viewQuote')}
-                      </Button>
-                    </Link>
+                  <TableCell className="text-right px-2 py-4">
+                    {quote.items?.reduce((total, item) => total + (item.quantity.quantity || 0), 0) || 0}{' '}
+                    {t('products')}
                   </TableCell>
                 </TableRow>
               ))
@@ -113,6 +128,28 @@ export function QuotesTable({ quotes, loading = false }: QuotesTableProps) {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination controls */}
+      {quotes && quotes.length > quotesPerPage && (
+        <div className="flex items-center justify-end p-3">
+          <div className="flex items-center space-x-6">
+            {currentPage > 1 && onPreviousPage && (
+              <Button variant="neutral" size="small" onClick={onPreviousPage}>
+                <ChevronLeft className="h-4 w-4" />
+                {t('previous')}
+              </Button>
+            )}
+            <span className="text-sm">
+              {Math.min(currentPage * quotesPerPage, quotes.length)} / {quotes?.length || 0}
+            </span>
+            {currentPage < Math.ceil(quotes.length / quotesPerPage) && onNextPage && (
+              <Button variant="neutral" size="small" onClick={onNextPage}>
+                {t('next')} <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

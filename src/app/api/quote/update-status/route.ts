@@ -1,0 +1,26 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { QuoteService } from '@/platform/services/quote/QuoteService';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { quoteId, status, comment, locale } = body;
+
+    if (!quoteId) {
+      return NextResponse.json({ error: 'Quote ID is required' }, { status: 400 });
+    }
+
+    if (!status) {
+      return NextResponse.json({ error: 'Status is required' }, { status: 400 });
+    }
+
+    const quoteService = EMP.platform.server.get<QuoteService>('QuoteService');
+    await quoteService.updateQuoteStatus(quoteId, status, comment, locale);
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error('Error updating quote status:', error);
+    const message = error instanceof Error ? error.message : 'Failed to update quote status';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

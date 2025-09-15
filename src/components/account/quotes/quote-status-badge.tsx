@@ -1,7 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 // Define QuoteStatus enum directly here to avoid import issues
 export enum QuoteStatus {
@@ -22,32 +22,33 @@ interface QuoteStatusBadgeProps {
  * Badge component for displaying quote status with appropriate styling
  */
 export function QuoteStatusBadge({ status }: QuoteStatusBadgeProps) {
-  const getStatusColor = (status: QuoteStatus): string => {
+  const t = useTranslations('account.quoteStatus');
+
+  // Get the appropriate status badge variant similar to order badges
+  const getStatusVariant = (status: QuoteStatus) => {
     switch (status) {
       case QuoteStatus.REQUESTED:
-        return 'bg-neutral-100 text-neutral-900 border-neutral-300';
+        return { variant: 'outline' as const };
       case QuoteStatus.AVAILABLE:
-        return 'bg-blue-100 text-blue-900 border-blue-300';
+        return { variant: 'secondary' as const };
       case QuoteStatus.CHANGE_REQUESTED:
-        return 'bg-amber-100 text-amber-900 border-amber-300';
+        return { variant: 'warning' as const };
       case QuoteStatus.REJECTED:
-        return 'bg-danger-100 text-danger-900 border-danger-300';
+        return { variant: 'destructive' as const };
       case QuoteStatus.ACCEPTED:
-        return 'bg-success-100 text-success-900 border-success-300';
+        return { variant: 'success' as const };
       case QuoteStatus.ORDER_CREATED:
-        return 'bg-green-100 text-green-900 border-green-300';
+        return { variant: 'success' as const };
       case QuoteStatus.CLOSED:
-        return 'bg-neutral-100 text-neutral-900 border-neutral-300';
+        return { variant: 'outline' as const };
       default:
-        return 'bg-neutral-100 text-neutral-900 border-neutral-300';
+        return { variant: 'outline' as const };
     }
   };
 
   return (
-    <Badge
-      className={cn('px-2 py-1 uppercase text-xs font-semibold rounded-sm whitespace-nowrap', getStatusColor(status))}
-    >
-      {status}
+    <Badge variant={getStatusVariant(status).variant} className="uppercase">
+      {t(status.toLowerCase())}
     </Badge>
   );
 }

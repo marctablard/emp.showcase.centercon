@@ -50,7 +50,7 @@ export function useQuotes(params?: SearchParams<Quote>) {
             queryParams.append('sort', params.sort);
           }
           if (params.query !== undefined) {
-            queryParams.append('query', params.query);
+            queryParams.append('q', params.query);
           }
           // Add criteria filters if present
           if (params.filters) {
@@ -65,8 +65,6 @@ export function useQuotes(params?: SearchParams<Quote>) {
         }
 
         const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
-
-        // Fetch quotes from API
         const res = await fetch(`/api/quotes${queryString}`);
 
         if (!res.ok) {
@@ -74,8 +72,6 @@ export function useQuotes(params?: SearchParams<Quote>) {
         }
 
         const response: SearchResult<Quote> = await res.json();
-
-        console.log('Quotes response : ', response);
 
         if (isMounted) {
           setQuotes(response.items || []);

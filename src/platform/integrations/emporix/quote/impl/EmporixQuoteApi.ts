@@ -4,7 +4,14 @@ import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
 import { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
-import { EmporixCreateQuoteRequest, EmporixQuote, EmporixQuoteCreationResponse } from '../../model/quote';
+import {
+  EmporixCreateQuoteReasonRequest,
+  EmporixCreateQuoteRequest,
+  EmporixQuoteCreationResponse,
+  EmporixQuoteReason,
+  EmporixQuoteReasonCreationResponse,
+} from '../../model/quote';
+import { EmporixQuote } from '../../model/quote';
 import type { EmporixQuoteApi as IEmporixQuoteApi } from '../EmporixQuoteApi';
 
 @injectable('EmporixQuoteApi', 'Singleton')
@@ -25,7 +32,9 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
         },
         body: JSON.stringify(createQuoteRequest),
       },
-      'session',
+      //TODO: Changed to service now as the customer cannot create quotes with cartId and without company addresses.
+      // Should be reverted to session later.
+      'service',
     );
 
     if (!response.ok) {
@@ -47,7 +56,7 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
           Accept: 'application/json',
         },
       },
-      'session',
+      'service',
     );
 
     if (!response.ok) {
@@ -56,7 +65,6 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
     }
 
     const paginatedResponse = await buildPaginatedResponse(params, response);
-    console.log('Paginated Response : ', paginatedResponse);
     return paginatedResponse;
   }
 
@@ -75,6 +83,81 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
     if (!response.ok) {
       const errorDetails = await response.text();
       throw new Error(`Failed to fetch quote ${quoteId}: ${response.statusText} ${errorDetails}`);
+    }
+
+    return await response.json();
+  }
+
+  async updateQuoteStatus(quoteId: string, status: string, comment?: string, quoteReasonId?: string): Promise<void> {
+    const updateRequest = {
+      op: 'replace',
+      path: '/status',
+      value: {
+        value: status,
+        comment: comment || '',
+        quoteReasonId: quoteReasonId || '',
+      },
+    };
+
+    const response = await this.apiClient.authenticatedFetch(
+      `/quote/${this.config.tenant}/quotes/${quoteId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(updateRequest),
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to update quote status: ${response.statusText} ${errorDetails}`);
+    }
+  }
+
+  async getQuoteReason(quoteReasonId: string): Promise<EmporixQuoteReason> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/quote/${this.config.tenant}/quote-reasons/${quoteReasonId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: '*/*',
+        },
+      },
+      'session',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to fetch quote reason ${quoteReasonId}: ${response.statusText} ${errorDetails}`);
+    }
+
+    return await response.json();
+  }
+
+  async createQuoteReason(
+    createQuoteReasonRequest: EmporixCreateQuoteReasonRequest,
+  ): Promise<EmporixQuoteReasonCreationResponse> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/quote/${this.config.tenant}/quote-reasons`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(createQuoteReasonRequest),
+      },
+      'service',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to create quote reason: ${response.statusText} ${errorDetails}`);
     }
 
     return await response.json();

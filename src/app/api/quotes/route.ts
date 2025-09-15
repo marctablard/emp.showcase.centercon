@@ -11,14 +11,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Parse query parameters
     const searchParams = req.nextUrl.searchParams;
     const query = searchParams.get('query') || undefined;
-    const page = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 0;
-    const size = searchParams.get('size') ? parseInt(searchParams.get('size')!) : 20;
     const sort = searchParams.get('sort') || undefined;
 
     // Get quotes with filters
     const response = await quoteService.getQuotes({
-      page,
-      size,
       sort,
       query,
     });

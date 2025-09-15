@@ -1,8 +1,8 @@
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixQuote } from '@/platform/integrations/emporix/model/quote';
+import { SiteService } from '@/platform/services/site/SiteService';
 import { Quote } from '..';
-import { LocalizedString } from '../../common';
-import { QuoteMapper } from './QuoteMapper';
+import type { QuoteMapper } from './QuoteMapper';
 
 /**
  * Implementation of QuoteMapper for Emporix quotes.
@@ -10,7 +10,13 @@ import { QuoteMapper } from './QuoteMapper';
  */
 @injectable('QuoteMapper', 'Singleton')
 export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
-  mapToService(emporixQuote: EmporixQuote): Quote {
+  private siteService: SiteService;
+
+  constructor() {
+    this.siteService = EMP.platform.server.get<SiteService>('SiteService');
+  }
+
+  async mapToService(emporixQuote: EmporixQuote): Promise<Quote> {
     const customerName = `${emporixQuote.customer.firstName || ''} ${emporixQuote.customer.lastName || ''}`.trim();
 
     const approverName = emporixQuote.employee
@@ -18,6 +24,16 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
       : undefined;
 
     const status = emporixQuote.status?.value;
+
+    const shippingAddress = emporixQuote.shippingAddress;
+
+    let countryName = 'Germany';
+    if (shippingAddress?.countryCode) {
+      const country = await this.siteService.getCountry(shippingAddress.countryCode);
+      if (country) {
+        countryName = typeof country.name === 'string' ? country.name : Object.values(country.name)[0] || countryName;
+      }
+    }
 
     return {
       id: emporixQuote.id,
@@ -37,12 +53,29 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
         product: {
           id: item.product.productId,
           name: item.product.name,
+          quantity: item.quantity.quantity,
+          itemPrice: {
+            amount: item.price?.tax?.prices?.grossValue || 0,
+            currency: emporixQuote.currency,
+            baseAmount: item.price?.totalNetValue || 0,
+            tax: (item.price?.tax?.prices?.grossValue || 0) - (item.price?.totalNetValue || 0),
+          },
         },
         quantity: {
           quantity: item.quantity.quantity,
           unitCode: item.quantity.unitCode,
         },
       })),
+      shippingAddress: {
+        type: 'SHIPPING',
+        contactName: shippingAddress?.name || '',
+        street: shippingAddress?.addressLine1 + ' ' + shippingAddress?.addressLine2,
+        zipCode: shippingAddress?.postcode || '',
+        city: shippingAddress?.city || '',
+        country: countryName, // Using resolved country name instead of country code
+      },
+      shippingCost: emporixQuote.shipping?.value || 0,
+      shippingMethod: emporixQuote.shipping?.methodId || '',
     };
   }
 }

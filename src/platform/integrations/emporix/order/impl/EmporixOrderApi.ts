@@ -3,6 +3,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import {
+  EmporixCreateOrderFromQuoteRequest,
   EmporixCreateOrderRequest,
   EmporixOrder,
   EmporixOrderCreationResponse,
@@ -26,7 +27,9 @@ class EmporixOrderApi implements IEmporixOrderApi {
    * @param createOrderRequest Order creation request
    * @returns Promise with the created order ID
    */
-  async createOrder(createOrderRequest: EmporixCreateOrderRequest): Promise<EmporixOrderCreationResponse> {
+  async createOrder(
+    createOrderRequest: EmporixCreateOrderRequest | EmporixCreateOrderFromQuoteRequest,
+  ): Promise<EmporixOrderCreationResponse> {
     const response = await this.apiClient.authenticatedFetch(
       `/order-v2/${this.config.tenant}/salesorders`,
       {

@@ -9,5 +9,5 @@ export interface QuoteMapper<T> {
    * @param sourceQuote External quote data
    * @returns Mapped Quote entity
    */
-  mapToService(sourceQuote: T): Quote;
+  mapToService(sourceQuote: T): Promise<Quote> | Quote;
 }

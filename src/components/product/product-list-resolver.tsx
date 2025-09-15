@@ -37,7 +37,6 @@ export function ProductListResolver({ items, className }: ProductListResolverPro
     const brand: string | undefined = l10n(
       product?.brand?.name || product?.specifications?.find((spec) => spec.key === 'manufacturer')?.value || '',
     );
-    console.log('Product details : ', pid, product, name, brand);
     return {
       id: pid || `${it.itemYrn || idx}`,
       name,

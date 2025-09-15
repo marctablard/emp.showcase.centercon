@@ -1,0 +1,349 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import { QuoteStatusBadge } from '@/components/account/quotes/quote-status-badge';
+import { QuoteSummary } from '@/components/account/quotes/quote-summary';
+import { ProductListResolver } from '@/components/product/product-list-resolver';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { useQuote } from '@/hooks/quotes/useQuotes';
+import { formatDate } from '@/lib/date-utils';
+import { Quote } from '@/platform/services/model/quote';
+
+interface QuoteDetailsProps {
+  quoteId: string;
+  initialQuote?: Quote;
+}
+
+export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
+  const t = useTranslations('account.quoteDetails');
+  const router = useRouter();
+
+  // State for confirmation dialogs
+  const [showAcceptConfirmation, setShowAcceptConfirmation] = useState(false);
+  const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
+  const [comment, setComment] = useState('');
+  const maxCommentLength = 500;
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [_processError, setProcessError] = useState<string | null>(null);
+  const locale = useLocale();
+
+  const updateQuoteStatus = async (quoteId: string, status: string, comment?: string): Promise<void> => {
+    const statusResponse = await fetch('/api/quote/update-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quoteId,
+        status,
+        comment,
+        locale,
+      }),
+    });
+
+    if (!statusResponse.ok) {
+      const errorData = await statusResponse.json();
+      throw new Error(errorData.error || 'Failed to update quote status');
+    }
+
+    // After successfully updating status, refresh the page to show updated status
+    window.location.reload();
+  };
+
+  // Use the hook to fetch the quote if not provided as initialQuote
+  const { quote: fetchedQuote, loading, error } = useQuote(initialQuote ? undefined : quoteId);
+
+  // Use initialQuote if provided, otherwise use fetched quote
+  const quote = initialQuote || fetchedQuote;
+
+  const formatPrice = (price: number | undefined, currency: string | undefined) => {
+    if (price === undefined || currency === undefined) return '-';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+    }).format(price);
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('title')}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center py-8">
+          <div className="flex flex-col items-center space-y-2">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+            <div>{t('loading')}</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Error state
+  if (error || !quote) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('title')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-destructive/10 p-4 rounded-md text-destructive">{error?.message || 'Quote not found'}</div>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={() => router.back()}>{t('backToQuotes')}</Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <CardTitle className="text-3xl font-bold">{quote.reference || `#${quoteId}`}</CardTitle>
+              <QuoteStatusBadge status={quote.status} />
+            </div>
+            <CardDescription className="text-xl mt-1">{t('title')}</CardDescription>
+          </div>
+          {/* Only show action buttons when confirmation dialogs are not visible and quote status is not ACCEPTED or DECLINED */}
+          {!showAcceptConfirmation &&
+            !showRejectConfirmation &&
+            quote.status !== 'ACCEPTED' &&
+            quote.status !== 'DECLINED' && (
+              <div className="flex space-x-2">
+                <Button
+                  variant="red"
+                  size="small"
+                  disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
+                  onClick={() => {
+                    // Show rejection confirmation dialog
+                    setShowRejectConfirmation(true);
+                  }}
+                >
+                  {t('reject')}
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="small"
+                  disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
+                  onClick={() => {
+                    // Handle request change action
+                    console.log('Request change for quote', quoteId);
+                  }}
+                >
+                  {t('requestChange')}
+                </Button>
+
+                <Button
+                  variant="primary"
+                  size="small"
+                  disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
+                  onClick={() => {
+                    setShowAcceptConfirmation(true);
+                  }}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {t('accept')}
+                </Button>
+              </div>
+            )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {/* Quote acceptance confirmation dialog */}
+        {showAcceptConfirmation && (
+          <div className="bg-blue-50 p-6 mb-6 rounded-lg border border-blue-100">
+            <h3 className="text-lg font-medium mb-2">{t('confirmationTitle')}</h3>
+            <p className="text-sm text-gray-600 mb-4">{t('confirmationDescription')}</p>
+
+            <div className="mb-4">
+              <label htmlFor="accept-comment" className="block text-sm font-medium mb-1">
+                {t('yourComment')}
+              </label>
+              <Textarea
+                id="accept-comment"
+                placeholder={t('commentPlaceholder')}
+                className="w-full h-32 resize-none"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                maxLength={maxCommentLength}
+              />
+              <div className="text-xs text-right mt-1 text-gray-500">
+                {comment.length}/{maxCommentLength}
+              </div>
+            </div>
+
+            <div className="text-sm text-gray-600 mb-4">
+              {t('termsAgreement')}{' '}
+              <a href="#" className="text-blue-600 hover:underline">
+                {t('privacyPolicy')}
+              </a>{' '}
+              and{' '}
+              <a href="#" className="text-blue-600 hover:underline">
+                {t('termsOfUse')}
+              </a>
+            </div>
+
+            <div className="flex space-x-3">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowAcceptConfirmation(false);
+                  setComment('');
+                }}
+              >
+                {t('cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={isProcessing}
+                onClick={async () => {
+                  try {
+                    setProcessError(null);
+                    setIsProcessing(true);
+
+                    await updateQuoteStatus(quoteId, 'ACCEPTED', comment);
+
+                    setShowAcceptConfirmation(false);
+                    setComment('');
+                  } catch (error) {
+                    console.error('Failed to process quote:', error);
+                    setProcessError(error instanceof Error ? error.message : 'Failed to process quote');
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+              >
+                {isProcessing ? t('creating') : t('createOrder')}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Quote rejection confirmation dialog */}
+        {showRejectConfirmation && (
+          <div className="bg-red-50 p-6 mb-6 rounded-lg border border-red-100">
+            <h3 className="text-lg font-medium mb-2">
+              {t('rejectConfirmationTitle') || 'Do you want to reject the quote?'}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {t('rejectConfirmationDescription') ||
+                'If you wish, you can leave a comment to let us know why you are declining this quote. Your feedback helps us improve our offers.'}
+            </p>
+
+            <div className="mb-4">
+              <label htmlFor="reject-comment" className="block text-sm font-medium mb-1">
+                {t('yourComment')}
+              </label>
+              <Textarea
+                id="reject-comment"
+                placeholder={t('rejectCommentPlaceholder') || 'Placeholder'}
+                className="w-full h-32 resize-none"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                maxLength={maxCommentLength}
+              />
+              <div className="text-xs text-right mt-1 text-gray-500">
+                {comment.length}/{maxCommentLength}
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowRejectConfirmation(false);
+                  setComment('');
+                }}
+              >
+                {t('cancel')}
+              </Button>
+              <Button
+                variant="red"
+                disabled={isProcessing}
+                onClick={async () => {
+                  try {
+                    setProcessError(null);
+                    setIsProcessing(true);
+
+                    await updateQuoteStatus(quoteId, 'DECLINED', comment);
+
+                    setShowRejectConfirmation(false);
+                    setComment('');
+                  } catch (error) {
+                    console.error('Failed to reject quote:', error);
+                    setProcessError(error instanceof Error ? error.message : 'Failed to reject quote');
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+              >
+                {isProcessing ? t('rejecting') || 'REJECTING...' : t('rejectQuote') || 'REJECT QUOTE'}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Quote details grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">{t('quotationDate')}</h3>
+            <p className="mt-2 text-neutral-900">{formatDate(quote.submittedDate)}</p>
+          </div>
+
+          {quote.customerId && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground">{t('requestedBy')}</h3>
+              <p className="mt-2 text-neutral-900">{quote.customerName || quote.customerId}</p>
+            </div>
+          )}
+
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">{t('totalAmount')}</h3>
+            <p className="mt-2 text-neutral-900 font-semibold">{formatPrice(quote.totalGross, quote.currency)}</p>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Quote Summary Cards */}
+        <QuoteSummary quote={quote} />
+
+        <Separator />
+
+        {
+          <ProductListResolver
+            items={quote.items.map((it) => ({
+              productId: it.product.id,
+              quantity: it.quantity.quantity, // Extract just the numeric quantity value
+              unitPrice: it.product.itemPrice.amount,
+              currency: it.product.itemPrice.currency,
+            }))}
+          />
+        }
+      </CardContent>
+
+      <CardFooter>
+        <Button variant="neutral" onClick={() => router.back()}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t('backToQuotes')}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}

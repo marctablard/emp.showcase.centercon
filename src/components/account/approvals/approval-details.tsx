@@ -220,7 +220,6 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
   }
 
   const canApprove = approval.status === 'PENDING' && customer?.roles?.includes('B2B_ADMIN');
-  const canSubmitOrder = approval.status === 'APPROVED';
   const canComment = approval.status === 'PENDING';
   const canDelete = approval.status === 'PENDING' && isRequestor;
 

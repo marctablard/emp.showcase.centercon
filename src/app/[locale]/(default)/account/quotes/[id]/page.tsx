@@ -1,85 +1,63 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 import AccountLayout from '@/components/account/account-layout';
-import { QuoteStatusBadge } from '@/components/account/quotes/quote-status-badge';
-import { Button } from '@/components/ui/button';
-import { useQuote } from '@/hooks/quotes/useQuotes';
-import { formatDate } from '@/lib/date-utils';
+import { QuoteDetails } from '@/components/account/quotes/quote-details';
+import { getQuoteById } from '@/lib/client/quote';
+import { getPageTitle } from '@/lib/ssr/seo';
 
-export default function QuoteDetailPage() {
-  const t = useTranslations('account.quotes');
-  const params = useParams<{ id: string }>();
-  const { quote, loading, error } = useQuote(params.id);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale, id } = await params;
+  const t = await getTranslations({ locale, namespace: 'account.quoteDetails' });
 
-  const formatPrice = (price: number | undefined, currency: string | undefined) => {
-    if (price === undefined || currency === undefined) return '-';
-    return `${price.toFixed(2)} ${currency}`;
+  return {
+    title: await getPageTitle(t('title') + ' #' + id, locale),
+    description: t('title'),
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
+}
+
+export default async function QuoteDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
+  // Get quote ID from params
+  const { locale, id } = await params;
+
+  // Get translations
+  const [tAccount, tQuote, quote] = await Promise.all([
+    getTranslations({ locale, namespace: 'account' }),
+    getTranslations({ locale, namespace: 'account.quoteDetails' }),
+    getQuoteById(id),
+  ]);
+
+  // If quote not found, return 404
+  if (!quote) {
+    notFound();
+  }
+
+  const breadcrumbs = [
+    {
+      href: '/account',
+      label: tAccount('title'),
+    },
+    {
+      href: '/account/quotes',
+      label: tQuote('title'),
+    },
+    {
+      href: `/account/quotes/${id}`,
+      label: `${tQuote('title')} #${id}`,
+    },
+  ];
 
   return (
-    <AccountLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">{quote?.reference || t('title')}</h1>
-          <Link href="/account/quotes">
-            <Button variant="secondary" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              {t('title')}
-            </Button>
-          </Link>
-        </div>
-
-        {error ? (
-          <div className="bg-danger-50 border border-danger-200 text-danger-800 px-4 py-3 rounded">{error.message}</div>
-        ) : loading ? (
-          <div className="flex items-center justify-center h-40">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-          </div>
-        ) : quote ? (
-          <div className="space-y-8">
-            {/* Quote header information */}
-            <div className="grid md:grid-cols-3 gap-6 bg-white p-6 rounded-md border">
-              <div>
-                <h3 className="text-sm font-medium text-neutral-500">{t('status')}</h3>
-                <div className="mt-2">
-                  <QuoteStatusBadge status={quote.status} />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-neutral-500">{t('quotationDate')}</h3>
-                <p className="mt-2 text-neutral-900">{formatDate(quote.submittedDate)}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-neutral-500">{t('totalAmount')}</h3>
-                <p className="mt-2 text-neutral-900 font-semibold">{formatPrice(quote.totalGross, quote.currency)}</p>
-              </div>
-            </div>
-
-            {/* Quote items */}
-            <div className="bg-white p-6 rounded-md border">
-              <h2 className="text-lg font-semibold mb-4">
-                {t('numberOfProducts')}: {quote.items.length}
-              </h2>
-              <div className="divide-y">
-                {quote.items.map((item, index) => (
-                  <div key={index} className="py-4 flex justify-between">
-                    <div>
-                      <p className="font-medium">{item.product.name || item.product.id}</p>
-                      <p className="text-sm text-neutral-500">
-                        {`${item.quantity.quantity} ${item.quantity.unitCode}`}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </div>
+    <AccountLayout breadcrumbs={breadcrumbs}>
+      <QuoteDetails quoteId={id} initialQuote={quote} />
     </AccountLayout>
   );
 }
