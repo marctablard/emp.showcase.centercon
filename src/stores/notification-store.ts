@@ -23,9 +23,9 @@ export interface NotificationSubscription {
 
 export interface NotificationState {
   // Push notification support
-  isPushSupported: boolean | undefined;
+  isPushSupported?: boolean;
   subscription: 'SUBSCRIBED' | 'UNSUBSCRIBED' | 'PENDING';
-  permissionState: NotificationPermission | undefined;
+  permissionState?: NotificationPermission | null;
   error: string | null;
   notifications: StorefrontNotification[];
 }
@@ -151,11 +151,8 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     // Check if push notifications are supported
     checkSupport: async (): Promise<boolean> => {
       const { isPushSupported, permissionState } = get();
-      if (isPushSupported !== undefined) {
-        if (isPushSupported && permissionState !== undefined) {
-          return Promise.resolve(isPushSupported && permissionState === 'granted');
-        }
-        return Promise.resolve(false);
+      if (isPushSupported !== undefined && permissionState !== undefined) {
+        return Promise.resolve(isPushSupported && permissionState === 'granted');
       }
       try {
         // Check if push notifications are disabled via environment variable
@@ -173,6 +170,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
         if (!browserSupport) {
           set({
             isPushSupported: false,
+            permissionState: null,
           });
           return false;
         }
