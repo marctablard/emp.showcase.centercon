@@ -60,7 +60,10 @@
         "mixins": {
             "productVariantAttributes": {
                 "capacity": "Kapazität",
-                "nominal-power": "Nennleistung"
+                "nominal-power": "Nennleistung",
+                "color": "Farbe",
+                "ampere": "Ampere",
+                "length": "Länge"
             },
             "productTemplateAttributes": {
                 "length": "Produktlänge",
@@ -88,5 +91,7 @@
     "productRecommendations": {
         "overline": "mehr zu entdecken",
         "headline": "Diese Produkte könnten auch interessant sein"
-    }
+    },
+    "loadingVariants": "Varianten werden geladen...",
+    "variantSelectPlaceholder": "Variante auswählen"
 }

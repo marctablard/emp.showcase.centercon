@@ -120,7 +120,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 space-y-4">
           <div>
             <FormField
               control={form.control}

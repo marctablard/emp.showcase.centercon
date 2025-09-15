@@ -47,7 +47,7 @@ class EmporixProductApi implements IEmporixProductApi {
 
   async getProduct(id: string): Promise<EmporixProduct | undefined> {
     const response = await this.apiClient.authenticatedFetch(
-      `/product/${this.config.tenant}/products/${id}`,
+      `/product/${this.config.tenant}/products/${id}?expand=parentVariant,template`,
       { method: 'GET' },
       'public',
     );

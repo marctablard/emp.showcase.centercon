@@ -3,7 +3,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { CheckCircle2, FlipHorizontal2, LucideArrowDown, LucideCopy, Pin, Share2, Sun } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { FlipHorizontal2, LucideArrowDown, LucideCopy, Pin, Share2, Sun } from 'lucide-react';
 import { ProductCarousel } from '@/components/product/product-carousel';
 import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
@@ -14,7 +15,7 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
-import { GroupedSpecification, Product } from '@/platform/services/model/product';
+import { GroupedSpecification, Product, ProductVariantAttribute } from '@/platform/services/model/product';
 import { StockAvailability } from '@/platform/services/stock/StockService';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
@@ -25,6 +26,7 @@ import ProductAddToCart from './product-add-to-cart';
 import ProductAddToCartBar from './product-add-to-cart-bar';
 import { ProductPriceComponent } from './product-price';
 import { ProductShippingInfo } from './product-shipping-info';
+import ProductVariantSelector from './product-variant-selector';
 
 export interface ProductDetailProps {
   product?: Product;
@@ -80,12 +82,14 @@ export default function ProductDetail({ product: initialProduct, price, availabi
   if (loading) {
     return <div>Loading</div>;
   }
+
   if (!product) {
-    return <div>Product not found</div>;
+    return notFound();
   }
+
   return (
     <>
-      <div className={cn('grid grid-cols-1 gap-x-4 lg:gap-x-12 2xl:gap-x-29 lg:grid-cols-2', className)}>
+      <div className={cn('grid grid-cols-1 gap-x-4 lg:gap-x-12 2xl:gap-x-29 lg:grid-cols-2 mb-6', className)}>
         <>
           <Card variant="gray" className="row-start-3 lg:col-start-1 lg:row-start-1 lg:row-end-4 p-6 lg:p-8 mb-6">
             <CardContent className="px-0">
@@ -108,14 +112,19 @@ export default function ProductDetail({ product: initialProduct, price, availabi
                   <div className="flex flex-col gap-6">
                     <H2 className="text-white text-4xl font-bold font-headlines">{t('keySpecs')}</H2>
                     <div className="grid grid-cols-1 grid-rows-3 xl:grid-cols-2 gap-y-6 gap-x-12">
-                      {Object.keys(product.variantAttributes || {}).map((attribute: string) => (
+                      {product.variantAttributes?.map((attribute: ProductVariantAttribute) => (
                         <BulletPoint
-                          key={attribute}
+                          key={attribute.key}
                           className="font-bold"
-                          label={t(`filters.mixins.productVariantAttributes.${attribute}`, { defaultValue: attribute })}
+                          label={l10n(
+                            attribute.name ??
+                              t(`filters.mixins.productVariantAttributes.${attribute.key}`, {
+                                defaultValue: attribute.key,
+                              }),
+                          )}
                           variant="white"
                           iconColor="white"
-                          value={product.variantAttributes?.[attribute]}
+                          value={l10n(attribute.values?.find((value) => value.selected)?.name ?? '')}
                         />
                       ))}
                       {Object.keys(product.templateAttributes || {}).map((attribute: string) => (
@@ -127,7 +136,7 @@ export default function ProductDetail({ product: initialProduct, price, availabi
                           })}
                           variant="white"
                           iconColor="white"
-                          value={product.templateAttributes?.[attribute]}
+                          value={l10n(product.templateAttributes?.[attribute] ?? '')}
                         />
                       ))}
                     </div>
@@ -152,100 +161,6 @@ export default function ProductDetail({ product: initialProduct, price, availabi
                 </CardContent>
               </Card>
             )}
-
-            <div className="my-6">
-              <H2 variant="h5">{t('otherVariants')}</H2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-primary-500">
-                  <div className="col-start-1 bg-neutral-50 p-4">
-                    <div className="w-[108px] h-[68px]">
-                      {product.images && product.images.length > 0 && (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.images[0].altText ? l10n(product.images[0].altText) : `Product image`}
-                          width="100"
-                          height="50"
-                          className="object-center w-full h-full"
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-start2 p-6 flex flex-col justify-center">
-                    <div className="flex gap-2 items-center">
-                      <p>410W</p>
-                      <CheckCircle2 className="text-success-500 w-4 h-4" />
-                    </div>
-                    <p className="text-xs text-neutral-600">459.99 €</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
-                  <div className="col-start-1 bg-neutral-50 p-4">
-                    <div className="w-[108px] h-[68px]">
-                      {product.images && product.images.length > 0 && (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.images[0].altText ? l10n(product.images[0].altText) : `Product image`}
-                          width="100"
-                          height="50"
-                          className="object-center w-full h-full"
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-start2 p-6 flex flex-col justify-center">
-                    <div className="flex gap-2 items-center">
-                      <p>380W</p>
-                      <CheckCircle2 className="text-success-500 w-4 h-4" />
-                    </div>
-                    <p className="text-xs text-neutral-600">429.99 €</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
-                  <div className="col-start-1 bg-neutral-50 p-4">
-                    <div className="w-[108px] h-[68px]">
-                      {product.images && product.images.length > 0 && (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.images[0].altText ? l10n(product.images[0].altText) : `Product image`}
-                          width="100"
-                          height="50"
-                          className="object-center w-full h-full"
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-start2 p-6 flex flex-col justify-center">
-                    <div className="flex gap-2 items-center">
-                      <p>350W</p>
-                      <CheckCircle2 className="text-success-500 w-4 h-4" />
-                    </div>
-                    <p className="text-xs text-neutral-600">400.00 €</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50">
-                  <div className="col-start-1 bg-neutral-50 p-4">
-                    <div className="w-[108px] h-[68px]">
-                      {product.images && product.images.length > 0 && (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.images[0].altText ? l10n(product.images[0].altText) : `Product image`}
-                          width="100"
-                          height="50"
-                          className="object-center w-full h-full"
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-start2 p-6 flex flex-col justify-center">
-                    <div className="flex gap-2 items-center">
-                      <p>300W</p>
-                      <CheckCircle2 className="text-success-500 w-4 h-4" />
-                    </div>
-                    <p className="text-xs text-neutral-600">349.99 €</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </>
         <div className="lg:col-start-2 row-start-1 h-[50px]">
@@ -258,19 +173,17 @@ export default function ProductDetail({ product: initialProduct, price, availabi
                   </Badge>
                 ))}
               </div>
-              {isDesktopScreen && (
-                <div className="flex gap-2">
-                  <Button size="icon" variant="secondary" aria-label={t('compare')}>
-                    <FlipHorizontal2 />
-                  </Button>
-                  <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
-                    <Pin />
-                  </Button>
-                  <Button size="icon" variant="secondary" aria-label={t('share')}>
-                    <Share2 />
-                  </Button>
-                </div>
-              )}
+              <div className="hidden lg:flex gap-2">
+                <Button size="icon" variant="secondary" aria-label={t('compare')}>
+                  <FlipHorizontal2 />
+                </Button>
+                <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
+                  <Pin />
+                </Button>
+                <Button size="icon" variant="secondary" aria-label={t('share')}>
+                  <Share2 />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -303,19 +216,18 @@ export default function ProductDetail({ product: initialProduct, price, availabi
             </div>
           </div>
           <ProductAddToCart product={product} price={price} className="mt-6" />
-          {!isDesktopScreen && (
-            <div className="flex justify-center gap-2 mt-6">
-              <Button size="icon" variant="secondary" aria-label={t('compare')}>
-                <FlipHorizontal2 />
-              </Button>
-              <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
-                <Pin />
-              </Button>
-              <Button size="icon" variant="secondary" aria-label={t('share')}>
-                <Share2 />
-              </Button>
-            </div>
-          )}
+          <div className="flex lg:hidden justify-center gap-2 mt-6">
+            <Button size="icon" variant="secondary" aria-label={t('compare')}>
+              <FlipHorizontal2 />
+            </Button>
+            <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
+              <Pin />
+            </Button>
+            <Button size="icon" variant="secondary" aria-label={t('share')}>
+              <Share2 />
+            </Button>
+          </div>
+          {product.variantAttributes && <ProductVariantSelector product={product} className="mt-6" />}
           <ProductShippingInfo
             deliveryDays={
               availability?.isAvailable
@@ -359,7 +271,7 @@ export default function ProductDetail({ product: initialProduct, price, availabi
           )}
         </div>
       </div>
-      {product?.groupedSpecifications?.length && (
+      {product?.groupedSpecifications?.length ? (
         <div className={cn(className)}>
           <H2 variant="h3" className="my-6">
             {' '}
@@ -385,7 +297,7 @@ export default function ProductDetail({ product: initialProduct, price, availabi
             })}
           </div>
         </div>
-      )}
+      ) : null}
 
       <Recommendations
         blok={{

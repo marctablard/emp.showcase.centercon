@@ -74,7 +74,7 @@ export default function ProductAddToCartButton({
       <Button
         className={cn('flex-1 w-full', className)}
         onClick={handleAddToCart}
-        disabled={cart === undefined || adding || !price}
+        disabled={cart === undefined || product.purchasable === false || adding || !price}
       >
         {t('addToCart')}
         <LucideShoppingCart className="hidden md:inline" />

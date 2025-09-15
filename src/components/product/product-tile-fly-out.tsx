@@ -155,7 +155,7 @@ export function ProductTileFlyOut({ product, locale = 'de', onProductClick, keyw
             // TODO make this more dynamic
             // Calculate how many attributes to show in total (max 3)
             const maxTotalAttributes = 3;
-            const variantAttributes = product.variantAttributes as Record<string, string> | undefined;
+            const variantAttributes = product.variantAttributeValues as Record<string, string> | undefined;
             const templateAttributes = product.templateAttributes as Record<string, string> | undefined;
 
             // Extract dimensions from template attributes if they exist
