@@ -166,7 +166,6 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
           'PushManager' in window &&
           'Notification' in window;
 
-        let permissionState;
         if (!browserSupport) {
           set({
             isPushSupported: false,
@@ -180,13 +179,10 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
           console.log('Requesting notification permission');
           await Notification.requestPermission();
         }
-        permissionState = Notification.permission as NotificationPermission;
+        const permissionState = Notification.permission as NotificationPermission;
         console.log('Permission state:', permissionState);
         set({
-          permissionState,
-        });
-        set({
-          isPushSupported: false,
+          isPushSupported: true,
           permissionState,
         });
         return permissionState === 'granted';
