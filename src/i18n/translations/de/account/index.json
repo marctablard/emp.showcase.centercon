@@ -218,6 +218,26 @@
     "rejectQuote": "ANGEBOT ABLEHNEN",
     "rejecting": "WIRD ABGELEHNT..."
   },
+  
+  "quotesList": {
+    "title": "Angebote",
+    "sortBy": "Sortieren nach",
+    "latest": "Neueste",
+    "oldest": "Altste",
+    "filter": "Filter",
+    "quoteReference": "Angebotsreferenz",
+    "status": "Status",
+    "quotationDate": "Angebotsdatum",
+    "requestedBy": "Angefordert von",
+    "authorization": "Autorisierung",
+    "totalAmount": "Gesamtbetrag",
+    "numberOfProducts": "Anzahl der Produkte",
+    "products": "Produkte",
+    "noQuotes": "Sie haben noch keine Angebote",
+    "viewQuote": "Angebotsansicht",
+    "next": "Weiter",
+    "previous": "Zurück"
+  },
   "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
   "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt",
   "Address": {

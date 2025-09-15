@@ -3,6 +3,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import { EmporixPaginatedResponse } from '@/platform/integrations/emporix/model';
 import type { EmporixQuote } from '@/platform/integrations/emporix/model/quote';
 import type { EmporixQuoteApi } from '@/platform/integrations/emporix/quote/EmporixQuoteApi';
+import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import type {
   CreateQuoteInput,
   CreateQuoteReasonRequest,
@@ -18,6 +19,7 @@ import { SearchParams, SearchResult } from '../../model/common';
 class EmporixQuoteService implements QuoteService {
   constructor(
     @inject('EmporixQuoteApi') private quoteApi: EmporixQuoteApi,
+    @inject('CustomerService') private customerService: CustomerService,
     @inject('QuoteMapper') private quoteMapper: QuoteMapper<EmporixQuote>,
   ) {}
 
@@ -27,10 +29,17 @@ class EmporixQuoteService implements QuoteService {
   }
 
   async getQuotes(params: SearchParams<Quote>): Promise<SearchResult<Quote>> {
+    const customer = await this.customerService.getCustomer();
+    if (!customer) {
+      throw new Error('Customer not found');
+    }
     const searchResult: EmporixPaginatedResponse<EmporixQuote> = await this.quoteApi.getQuotes({
       page: (params.page || 0) + 1,
       size: params.size,
       query: params.query,
+      criteria: {
+        'customer.id': customer.id,
+      },
       sort: params.sort,
     });
 

@@ -47,7 +47,7 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
   }
 
   async getQuotes(params: EmporixSearchParams<EmporixQuote>): Promise<EmporixPaginatedResponse<EmporixQuote>> {
-    const { body: _body, query } = buildSearchQuery(params);
+    const { body: _body, query } = buildSearchQuery(params, true);
     const response = await this.apiClient.authenticatedFetch(
       `/quote/${this.config.tenant}/quotes?${query}`,
       {
@@ -77,7 +77,7 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
           Accept: 'application/json',
         },
       },
-      'session',
+      'service',
     );
 
     if (!response.ok) {
