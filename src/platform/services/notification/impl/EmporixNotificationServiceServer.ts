@@ -94,8 +94,8 @@ export class EmporixNotificationServiceServer implements INotificationService {
         return dateB - dateA;
       });
     } catch (error) {
-      console.error('Failed to get context notifications:', error);
-      throw new Error(`Failed to get context notifications: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn('Failed to get context notifications, most likely a call that happened during Logout');
+      return [];
     }
   }
 
