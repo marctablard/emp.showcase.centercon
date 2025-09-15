@@ -2,7 +2,7 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { redirect, useRouter } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useCartStore, useCustomerStore } from '@/providers/StoreProvider';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
