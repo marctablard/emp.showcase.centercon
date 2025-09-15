@@ -45,6 +45,12 @@ export interface ProductUSP {
   description: LocalizedString;
 }
 
+export interface ProductVariantAttribute {
+  key: string;
+  name?: string | LocalizedString;
+  values: { key: string; name?: string | LocalizedString; selected: boolean }[];
+}
+
 export interface Product {
   id: string;
   name: string | LocalizedString;
@@ -54,6 +60,7 @@ export interface Product {
     name: string | LocalizedString;
     logo?: Media;
   };
+  parentVariantId?: string;
   primaryCategory?: Category;
   categories?: Category[];
   labels?: ProductLabel[];
@@ -69,8 +76,10 @@ export interface Product {
   specifications?: ProductSpecification[];
   groupedSpecifications?: GroupedSpecification[];
   usps?: ProductUSP[];
+  purchasable: boolean;
   templateAttributes?: Record<string, string>;
-  variantAttributes?: Record<string, string>;
+  variantAttributes?: ProductVariantAttribute[];
+  variantAttributeValues?: Record<string, string>;
 }
 
 export interface ProductRecommendations {

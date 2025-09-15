@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Cart, CartUpdate } from '@platform/services/model/cart';
+import { Cart } from '@platform/services/model/cart';
 import { HeaderMiniCartItemList } from '@/components/header/common/cart/header-mini-cart-item-list';
 import { Button } from '@/components/ui/button';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
@@ -12,16 +12,9 @@ interface HeaderMiniCartContentProps {
   cart?: Cart | null;
   scrollHeight: boolean;
   scrollContainer: RefObject<HTMLDivElement | null>;
-  cartUpdate?: CartUpdate;
 }
 
-export function HeaderMiniCartContent({
-  loading,
-  cart,
-  scrollHeight,
-  scrollContainer,
-  cartUpdate,
-}: HeaderMiniCartContentProps) {
+export function HeaderMiniCartContent({ loading, cart, scrollHeight, scrollContainer }: HeaderMiniCartContentProps) {
   const t = useTranslations('cart');
   const { cartTotal, shippingCosts, currency } = useCartTotal();
   const router = useRouter();
@@ -42,7 +35,7 @@ export function HeaderMiniCartContent({
             className={cn(scrollHeight ? 'overflow-y-scroll pr-0.5' : 'pr-4', 'max-h-[300px]')}
             ref={scrollContainer}
           >
-            <HeaderMiniCartItemList cart={cart} cartUpdate={cartUpdate} />
+            <HeaderMiniCartItemList cart={cart} />
           </div>
           {cart && (
             <div className="flex flex-col gap-2 pr-4">

@@ -13,6 +13,7 @@ export interface InputProps extends React.ComponentProps<'input'> {
   buttonText?: string;
   buttonLabel?: string;
   onEndIconClick?: () => void;
+  endIconLabel?: string;
 }
 
 const inputVariants = cva(
@@ -59,7 +60,7 @@ const inputVariants = cva(
 );
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, startIcon, endIcon, isButton, onEndIconClick, ...props }, ref) => {
+  ({ className, type, startIcon, endIcon, isButton, onEndIconClick, endIconLabel, ...props }, ref) => {
     const StartIcon = startIcon;
     const EndIcon = endIcon;
     const dataSuccess = 'data-success' in props ? (props['data-success'] as boolean) : false;
@@ -98,17 +99,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
 
-        {EndIcon && (
+        {EndIcon && onEndIconClick && (
           <div
             className={cn(
               'absolute right-3 top-1/2 transform -translate-y-1/2',
-              onEndIconClick && 'cursor-pointer hover:text-primary-700',
+              'cursor-pointer hover:text-primary-700',
             )}
             onClick={onEndIconClick}
-            role={onEndIconClick ? 'button' : undefined}
-            tabIndex={onEndIconClick ? 0 : undefined}
-            aria-label={onEndIconClick ? 'Toggle visibility' : undefined}
+            tabIndex={0}
+            role="button"
+            aria-label={endIconLabel}
           >
+            <EndIcon size={24} />
+          </div>
+        )}
+        {EndIcon && !onEndIconClick && (
+          <div className={cn('absolute right-3 top-1/2 transform -translate-y-1/2')}>
             <EndIcon size={24} />
           </div>
         )}

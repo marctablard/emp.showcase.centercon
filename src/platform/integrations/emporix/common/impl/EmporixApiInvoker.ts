@@ -120,6 +120,10 @@ class EmporixApiInvoker {
       Authorization: `Bearer ${token}`,
     };
 
+    if (url.startsWith('/')) {
+      url = url.substring(1);
+    }
+
     return this.fetch(url, { ...options, headers });
   }
 

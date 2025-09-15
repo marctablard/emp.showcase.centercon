@@ -43,13 +43,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Add item to cart
-    const itemId = await cartService.addItemToCart(cartId, productId, quantity);
+    const result = await cartService.addItemToCart(cartId, productId, quantity);
 
     // Get updated cart
     const updatedCart = await cartService.getCartById(cartId);
 
     return NextResponse.json({
-      itemId,
+      ...result,
       cart: updatedCart,
     });
   } catch (error) {

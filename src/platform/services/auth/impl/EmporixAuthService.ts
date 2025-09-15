@@ -45,26 +45,31 @@ export class EmporixAuthService implements AuthService {
       }
       const siteCode = oldSession.siteCode || 'main';
       const oldSessionId = oldSession.id || '';
-      const anonymousCart = await this.cartService.getCartByCriteria(siteCode, oldSessionId, undefined);
-
+      const oldCart = await this.cartService.getCartByCriteria(siteCode, oldSessionId, undefined);
       const session = await this.emporixCustomerApi.login(credentials.username, credentials.password);
       if (!session) {
         throw new Error('Failed to get session context');
       }
-      const anonymousCartId = anonymousCart?.id;
-      // Capture the resulting customer cart id for the return value
       let customerCartId: string | undefined;
-      if (anonymousCartId && session.customerId) {
-        const siteCode = session.siteCode || 'main';
-        const customerCart = await this.cartService.getCartByCriteria(siteCode, '', session.customerId);
-        if (!customerCart) {
-          throw new Error('Failed to get customer cart');
+      // only merge carts if the old cart is anonymous
+      if (oldCart && !oldCart.customerId) {
+        // Capture the resulting customer cart id for the return value
+        if (session.customerId) {
+          const customerCart = await this.cartService.getCart();
+          let customerCartId: string;
+          if (!customerCart) {
+            customerCartId = await this.cartService.createCart(siteCode, session.customerId);
+          } else {
+            customerCartId = customerCart.id;
+          }
+          try {
+            await this.cartMigrationService.mergeCarts(oldCart.id, customerCartId);
+          } catch (error) {
+            console.error('Failed to merge carts:', error);
+          }
         }
-        if (anonymousCartId !== customerCart.id) {
-          await this.cartMigrationService.mergeCarts(anonymousCartId, customerCart.id);
-        }
-        customerCartId = customerCart.id;
       }
+
       return {
         sessionId: session.sessionId,
         customerId: session.customerId,

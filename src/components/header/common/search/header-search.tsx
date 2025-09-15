@@ -136,6 +136,12 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
         <form>
           <Input
             placeholder={t('search')}
+            value={query}
+            onChange={handleInput}
+            onFocus={handleInput}
+            ref={inputRef}
+            id="search-input"
+            onKeyDown={(e) => e.key === 'Enter' && redirectToBrowse(e)}
             className="h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100"
           />
           <Button

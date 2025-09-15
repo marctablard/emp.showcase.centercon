@@ -130,7 +130,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        'w-full relative divide-y',
+        'p-3 w-full relative divide-y',
         disabled && 'bg-neutral-100 border-neutral-300 text-neutral-600 pointer-events-none',
         'transition-all hover:text-primary-700 hover:bg-primary-50 hover:border-primary-500',
         disabled && 'hover:bg-neutral-400 hover:text-white',

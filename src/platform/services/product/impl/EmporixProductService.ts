@@ -67,6 +67,16 @@ class EmporixProductService implements ProductService {
     return mappedProduct;
   }
 
+  async getVariantProducts(parentId: string): Promise<Product[]> {
+    const paginated = await this.productApi.searchProducts({
+      expand: ['parentVariant', 'template'],
+      criteria: { parentVariantId: parentId },
+      page: 0,
+      size: 100,
+    });
+    return paginated.items.map((product: EmporixProduct) => this.productMapper.mapToService(product));
+  }
+
   async getProducts(page?: number, pageSize?: number): Promise<Paginated<Product>> {
     const paginated = await this.productApi.getProducts(page, pageSize);
 
