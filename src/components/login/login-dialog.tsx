@@ -47,7 +47,7 @@ type LoginProps = {
 export default function LoginDialog({
   trigger,
   callbackUrl,
-  redirectAfterLogin = false,
+  redirectAfterLogin = true,
   email,
   open = false,
   onCloseAction,

@@ -63,7 +63,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (!user) {
-        const authService = globalThis.EMP.platform.server.get<AuthService>('AuthService');
+        // Must fail silently when no CustomerSession is present, using SSR-Scope
+        const authService = globalThis.EMP.platform.ssr.get<AuthService>('AuthService');
         const session = await authService.getCurrentSession();
         if (!session || session.customerId != token.user?.id) {
           return null;

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { useRouter } from '@/i18n/navigation';
+import { redirect, useRouter } from '@/i18n/navigation';
 import { useCartStore, useCustomerStore } from '@/providers/StoreProvider';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
@@ -54,6 +54,7 @@ export const useAuthentication = (): AuthenticationHook => {
       const response = await signIn('credentials', {
         username,
         password,
+        redirectTo: callbackUrl,
         redirect: false,
       });
       if (response?.error) {
@@ -79,19 +80,19 @@ export const useAuthentication = (): AuthenticationHook => {
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
-
       await signOut({
         redirect: false,
       });
+      startTransition(() => {
+        // After signOut is complete, clear all stores
+        cartStore.clearCart();
+        customerStore.reset();
 
-      // After signOut is complete, clear all stores
-      cartStore.clearCart();
-      customerStore.reset();
-
-      // Clear all persisted store data
-      clearAllPersistedStores();
-
-      router.push('/?logout');
+        // Clear all persisted store data
+        clearAllPersistedStores();
+        // Redirect to logout page
+        window.location.href = '/?logout';
+      });
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log out'));
     } finally {
