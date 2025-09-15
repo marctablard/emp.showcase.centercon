@@ -209,9 +209,11 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
 
       try {
         console.log('Registering service worker');
+        /*
         if (navigator.serviceWorker.controller) {
           return navigator.serviceWorker.ready;
         }
+          */
         const registration = await navigator.serviceWorker.register('/notification-worker.js');
         return registration;
       } catch (error) {

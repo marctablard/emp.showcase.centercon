@@ -36,7 +36,6 @@ self.addEventListener('push', function (event) {
     // Display the notification
     event.waitUntil(
       Promise.all([
-        self.registration.showNotification(title, options),
         // Notify all clients about the new notification
         self.clients.matchAll().then((clients) => {
           clients.forEach((client) => {
@@ -46,6 +45,7 @@ self.addEventListener('push', function (event) {
             });
           });
         }),
+        self.registration.showNotification(title, options),
       ]),
     );
   } catch (error) {
@@ -85,24 +85,12 @@ self.addEventListener('notificationclick', function (event) {
     urlToOpen = event.notification.data?.url || '/';
   }
 
-  // Mark notification as read via API
-  const notificationId = event.notification.data?.id;
-  if (notificationId) {
-    fetch(`/api/notifications/${notificationId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ read: true }),
-    }).catch((error) => console.error('Error marking notification as read:', error));
-  }
-
   // Open the URL in the existing window/tab if possible
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((clientList) => {
       // Check if there's already a window/tab open with the target URL
       for (const client of clientList) {
-        if (client.url.includes(urlToOpen) && 'focus' in client) {
+        if ('focus' in client && client.url.includes(urlToOpen)) {
           return client.focus();
         }
       }

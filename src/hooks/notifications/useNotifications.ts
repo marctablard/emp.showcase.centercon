@@ -34,6 +34,7 @@ export function useNotifications(): UseNotificationsReturn {
   // Listen for messages from the service worker
   useEffect(() => {
     const handleServiceWorkerMessage = (event: MessageEvent) => {
+      console.log('Received message from service worker:', event.data);
       // Check if the message is a notification update
       if (event.data && event.data.type === 'NEW_NOTIFICATION') {
         // Trigger a refetch of notifications
