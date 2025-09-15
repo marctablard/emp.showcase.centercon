@@ -25,7 +25,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   const [customer] = await Promise.all([getCurrentCustomer()]);
   if (!customer) {
-    redirect({ href: '/account/login', locale });
+    redirect({ href: '/login', locale });
     return;
   }
   return <AccountDashboard customer={customer} />;

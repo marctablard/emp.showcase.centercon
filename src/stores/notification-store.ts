@@ -86,16 +86,20 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
       started = true;
       get()
         .checkSupport()
-        .then(() => {
-          get()
-            .registerServiceWorker()
-            .then((registration) => {
-              if (registration) {
-                get().subscribe();
-              } else {
-                get().startPolling();
-              }
-            });
+        .then((supported) => {
+          if (supported) {
+            get()
+              .registerServiceWorker()
+              .then((registration) => {
+                if (registration) {
+                  get().subscribe();
+                } else {
+                  get().startPolling();
+                }
+              });
+          } else {
+            get().startPolling();
+          }
         });
     },
     // Reference type subscriptions - stored in memory only, not persisted
@@ -152,7 +156,8 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     checkSupport: async (): Promise<boolean> => {
       const { isPushSupported, permissionState } = get();
       if (isPushSupported !== undefined && permissionState !== undefined) {
-        return Promise.resolve(isPushSupported && permissionState === 'granted');
+        console.log('Using cached result', isPushSupported, permissionState);
+        return isPushSupported == true && permissionState === 'granted';
       }
       try {
         // Check if push notifications are disabled via environment variable
@@ -182,7 +187,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
         const permissionState = Notification.permission as NotificationPermission;
         console.log('Permission state:', permissionState);
         set({
-          isPushSupported: true,
+          isPushSupported: false,
           permissionState,
         });
         return permissionState === 'granted';
