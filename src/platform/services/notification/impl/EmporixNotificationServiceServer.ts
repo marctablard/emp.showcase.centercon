@@ -93,7 +93,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
         const dateB = new Date(b.created || 0).getTime();
         return dateB - dateA;
       });
-    } catch (error) {
+    } catch (_error) {
       console.warn('Failed to get context notifications, most likely a call that happened during Logout');
       return [];
     }
