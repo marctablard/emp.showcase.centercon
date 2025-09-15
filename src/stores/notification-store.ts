@@ -23,9 +23,9 @@ export interface NotificationSubscription {
 
 export interface NotificationState {
   // Push notification support
-  isSupported: boolean | undefined;
+  isPushSupported: boolean | undefined;
   subscription: 'SUBSCRIBED' | 'UNSUBSCRIBED' | 'PENDING';
-  permissionState: NotificationPermission | '';
+  permissionState: NotificationPermission | undefined;
   error: string | null;
   notifications: StorefrontNotification[];
 }
@@ -57,9 +57,9 @@ export interface NotificationActions {
 }
 
 const defaultState: NotificationState = {
-  isSupported: undefined,
+  isPushSupported: undefined,
   subscription: 'UNSUBSCRIBED',
-  permissionState: '',
+  permissionState: undefined,
   error: null,
   notifications: [],
 };
@@ -150,45 +150,48 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
 
     // Check if push notifications are supported
     checkSupport: async (): Promise<boolean> => {
-      const { isSupported } = get();
-      if (isSupported !== undefined) {
-        return Promise.resolve(isSupported);
+      const { isPushSupported, permissionState } = get();
+      if (isPushSupported !== undefined) {
+        if (isPushSupported && permissionState !== undefined) {
+          return Promise.resolve(isPushSupported && permissionState === 'granted');
+        }
+        return Promise.resolve(false);
       }
       try {
         // Check if push notifications are disabled via environment variable
         const pushNotificationsDisabled = process.env.NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS === 'true';
 
         // Only consider push notifications supported if they're not disabled and browser supports them
-        const isSupported =
+        const browserSupport =
           !pushNotificationsDisabled &&
           typeof window !== 'undefined' &&
           'serviceWorker' in navigator &&
           'PushManager' in window &&
           'Notification' in window;
 
-        set({
-          isSupported,
-          permissionState: Notification.permission as NotificationPermission,
-        });
-
-        if (isSupported) {
-          console.log('Push notifications are supported');
-          // Request permission if needed
-          if (Notification.permission !== 'granted') {
-            console.log('Requesting notification permission');
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-              throw new Error('Notification permission denied');
-            }
-          }
-          const permissionState = Notification.permission as NotificationPermission;
-          console.log('Permission state:', permissionState);
+        let permissionState;
+        if (!browserSupport) {
           set({
-            permissionState,
+            isPushSupported: false,
           });
+          return false;
         }
-
-        return isSupported;
+        console.log('Push notifications are supported');
+        // Request permission if needed
+        if (Notification.permission !== 'granted') {
+          console.log('Requesting notification permission');
+          await Notification.requestPermission();
+        }
+        permissionState = Notification.permission as NotificationPermission;
+        console.log('Permission state:', permissionState);
+        set({
+          permissionState,
+        });
+        set({
+          isPushSupported: false,
+          permissionState,
+        });
+        return permissionState === 'granted';
       } catch (error) {
         console.error('Error checking push notification status:', error);
         set({
@@ -207,13 +210,16 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
         return null;
       }
 
+      if (!get().isPushSupported) {
+        console.log('Push notifications are not supported in this browser');
+        set({
+          error: 'Push notifications are not supported in this browser',
+        });
+        return null;
+      }
+
       try {
         console.log('Registering service worker');
-        /*
-        if (navigator.serviceWorker.controller) {
-          return navigator.serviceWorker.ready;
-        }
-          */
         const registration = await navigator.serviceWorker.register('/notification-worker.js');
         return registration;
       } catch (error) {
@@ -228,7 +234,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     // Subscribe to push notifications
     subscribe: async () => {
       // Check if push notifications are disabled via environment variable
-      if (process.env.NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS === 'true') {
+      if (!get().isPushSupported) {
         console.log('Push notifications are disabled via environment variable');
         set({
           error: 'Push notifications are currently disabled',
@@ -244,14 +250,6 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
       });
 
       try {
-        // Request notification permission if needed
-        if (Notification.permission !== 'granted') {
-          const permission = await Notification.requestPermission();
-          if (permission !== 'granted') {
-            throw new Error('Notification permission denied');
-          }
-        }
-
         // Make sure service worker is registered
         const registration = await navigator.serviceWorker.ready;
 
