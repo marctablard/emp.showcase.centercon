@@ -29,6 +29,8 @@ export interface CartItem {
 export interface CartItemPriceChange {
   itemId: string;
   productId: string;
+  oldPrice: number;
+  newPrice: number;
   updatedAt: Date;
 }
 

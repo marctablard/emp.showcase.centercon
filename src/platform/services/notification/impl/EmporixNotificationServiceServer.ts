@@ -473,10 +473,6 @@ export class EmporixNotificationServiceServer implements INotificationService {
           })),
         };
       case 'ITEM_PRICE_CHANGE':
-        return {
-          productId: notification.data_json.productId,
-          price: notification.data_json.price,
-        };
       default:
         return notification.data_json;
     }

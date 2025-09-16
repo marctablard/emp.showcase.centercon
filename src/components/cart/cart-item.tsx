@@ -16,6 +16,7 @@ import { Cart, CartItem, CartItemPriceChange, CartItemSubstitution } from '@/pla
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 import { Input } from '../ui/input';
 import { Spinner } from '../ui/spinner';
+import { ItemPriceChangeModal } from './item-price-change-modal';
 import { SubstitutionModal } from './substitution-modal';
 
 interface CartItemProps {
@@ -37,6 +38,7 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
   const [substitutionNotificationId, setSubstitutionNotificationId] = useState<string | null>(null);
   const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
   const [priceChange, setPriceChange] = useState<CartItemPriceChange | null>(null);
+  const [showPriceChangeModal, setShowPriceChangeModal] = useState(false);
   const { availability } = useAvailability(item.product?.id);
 
   // Handler for cart notifications
@@ -52,9 +54,7 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
       }
       if (notification.code === 'SUBSTITUTION_AVAILABLE') {
         const substitution = notification.data_json as CartItemSubstitution;
-        console.log('ITEM: Substitution available:', substitution);
         if (substitution.productId === item.product?.id) {
-          console.log('ITEM: Substitution available:', substitution);
           setSubstitution(substitution);
           setSubstitutionNotificationId(notification.id);
         }
@@ -295,11 +295,11 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
           <div className="font-bold md:text-end relative">
             {formatCurrency(item.tax?.netValue || item.price.amount, item.price.currency)}
             {priceChange && (
-              <div className="cursor-pointer">
+              <div className="cursor-pointer" onClick={() => setShowPriceChangeModal(true)}>
                 <UINotification
                   icon={Coins}
                   iconSize={18}
-                  className="bottom-[-38px] right-[-12px] absolute"
+                  className="bottom-[-58px] right-[52px] absolute"
                   animate="pulse"
                 />
               </div>
@@ -314,14 +314,26 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
         </div>
       </div>
 
-      {/* Substitution Modal */}
-      {showSubstitutionModal && substitution && (
+      {/* Modals */}
+      {substitution && (
         <SubstitutionModal
           isOpen={showSubstitutionModal}
           onClose={() => setShowSubstitutionModal(false)}
           cartItem={item}
           substitution={substitution}
           onDone={onSubstitutionDone}
+        />
+      )}
+      {priceChange && (
+        <ItemPriceChangeModal
+          isOpen={showPriceChangeModal}
+          onClose={() => setShowPriceChangeModal(false)}
+          cartItem={item}
+          priceChange={priceChange}
+          onDone={() => {
+            setShowPriceChangeModal(false);
+            setPriceChange(null);
+          }}
         />
       )}
     </div>
