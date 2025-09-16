@@ -38,6 +38,7 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
   const [substitutionNotificationId, setSubstitutionNotificationId] = useState<string | null>(null);
   const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
   const [priceChange, setPriceChange] = useState<CartItemPriceChange | null>(null);
+  const [priceChangeNotificationId, setPriceChangeNotificationId] = useState<string | null>(null);
   const [showPriceChangeModal, setShowPriceChangeModal] = useState(false);
   const { availability } = useAvailability(item.product?.id);
 
@@ -63,6 +64,7 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
         if (priceChange.productId === item.product?.id) {
           console.log('ITEM: Price change detected:', priceChange);
           setPriceChange(priceChange);
+          setPriceChangeNotificationId(notification.id);
         }
       }
       return false;
@@ -123,6 +125,15 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
       setSubstitution(null);
     }
     setShowSubstitutionModal(false);
+  };
+
+  const onItemPriceChangeDone = () => {
+    if (priceChangeNotificationId) {
+      markNotificationAsRead(priceChangeNotificationId);
+      setPriceChangeNotificationId(null);
+      setPriceChange(null);
+    }
+    setShowPriceChangeModal(false);
   };
 
   return (
@@ -330,10 +341,7 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
           onClose={() => setShowPriceChangeModal(false)}
           cartItem={item}
           priceChange={priceChange}
-          onDone={() => {
-            setShowPriceChangeModal(false);
-            setPriceChange(null);
-          }}
+          onDone={onItemPriceChangeDone}
         />
       )}
     </div>

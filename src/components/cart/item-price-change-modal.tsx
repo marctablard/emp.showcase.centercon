@@ -105,7 +105,7 @@ export function ItemPriceChangeModal({ isOpen, onClose, cartItem, priceChange, o
                 <div className="text-2xl text-muted-foreground">→</div>
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">{t('priceChange.newPrice')}</p>
-                  <p className="font-bold text-lg">{formatCurrency(cartItem.price.amount, cartItem.price.currency)}</p>
+                  <p className="font-bold text-lg">{formatCurrency(priceChange.newPrice, cartItem.price.currency)}</p>
                 </div>
               </div>
 
