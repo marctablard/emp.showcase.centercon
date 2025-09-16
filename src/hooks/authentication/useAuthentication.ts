@@ -64,7 +64,7 @@ export const useAuthentication = (): AuthenticationHook => {
         reset();
         await fetchAddresses();
         if (redirect) {
-          router.push(callbackUrl);
+          window.location.href = callbackUrl;
         }
       }
     } catch (error) {
