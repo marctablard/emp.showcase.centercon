@@ -2,7 +2,6 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { useRouter } from '@/i18n/navigation';
 import { useCartStore, useCustomerStore } from '@/providers/StoreProvider';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
@@ -34,7 +33,6 @@ export const useAuthentication = (): AuthenticationHook => {
   const [loading, setLoading] = useState<boolean>(session.status === 'loading');
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
-  const router = useRouter();
   const { fetchAddresses } = useAddresses();
 
   // Update authentication state when session status changes
