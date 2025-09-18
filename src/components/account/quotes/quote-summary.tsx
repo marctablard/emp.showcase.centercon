@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { ClipboardList, DollarSign, List, NotebookPen, ReceiptText, Truck } from 'lucide-react';
+import { List, NotebookPen, ReceiptText, Truck } from 'lucide-react';
 import { SummaryCard, SummaryRow } from '@/components/ui/summary-card';
 import { formatDate } from '@/lib/date-utils';
 import { Quote } from '@/platform/services/model/quote';
@@ -22,7 +22,7 @@ export const QuoteSummary: React.FC<QuoteSummaryProps> = ({ quote }) => {
   const fmt = (amount: number) => `${amount.toFixed(2)} ${currency}`;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       {/* Details Card */}
       <div className="p-6 rounded-lg bg-primary-50 shadow-sm">
         <SummaryCard
