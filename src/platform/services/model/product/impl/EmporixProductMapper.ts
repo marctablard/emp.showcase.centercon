@@ -166,10 +166,11 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       const values = variantAttributes[key].map((value) => {
         return {
           key: value.key,
-          selected: source.mixins?.productVariantAttributes[key] === value.key,
+          selected:
+            source.productType === 'VARIANT' ? source.mixins?.productVariantAttributes[key] === value.key : false,
         };
       });
-      const name = source.template?.attributes.find((attr) => attr.key === key)?.name;
+      const name = source.template?.attributes?.find((attr) => attr.key === key)?.name || key;
       return {
         key: key,
         name: name,
