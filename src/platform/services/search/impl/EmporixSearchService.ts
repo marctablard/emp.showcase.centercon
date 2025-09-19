@@ -28,9 +28,11 @@ class EmporixSearchService implements SearchService {
     const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: (params.page || 0) + 1, // normalize page
       size: params.size,
-      query: params.query,
       sort: params.sort,
       filters: params.filters,
+      criteria: {
+        name: '~' + params.query,
+      },
     });
     return {
       items: searchResult.items.map((hit) => this.productMapper.mapToService(hit)),
@@ -45,7 +47,9 @@ class EmporixSearchService implements SearchService {
     const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: 1,
       size: 10,
-      query: query,
+      criteria: {
+        name: '~' + query,
+      },
       sort: undefined,
       filters: undefined,
     });
