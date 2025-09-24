@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useQuote } from '@/hooks/quotes/useQuotes';
 import { formatDate } from '@/lib/date-utils';
+import { cn } from '@/lib/utils';
 import { Quote } from '@/platform/services/model/quote';
 
 interface QuoteDetailsProps {
@@ -71,6 +72,8 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
     }).format(price);
   };
 
+  console.log(quote);
+
   // Loading state
   if (loading) {
     return (
@@ -108,22 +111,22 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <CardTitle className="text-3xl font-bold">{quote.reference || `#${quoteId}`}</CardTitle>
+    <div>
+      <div>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col px-4 gap-6">
+            <div className="flex items-center gap-6 mb-1">
+              <div className="text-6xl font-bold">{quote.reference || `#${quoteId}`}</div>
               <QuoteStatusBadge status={quote.status} />
             </div>
-            <CardDescription className="text-xl mt-1">{t('title')}</CardDescription>
+            <div className="text-4xl font-bold">{t('title')}</div>
           </div>
           {/* Only show action buttons when confirmation dialogs are not visible and quote status is not ACCEPTED or DECLINED */}
           {!showAcceptConfirmation &&
             !showRejectConfirmation &&
             quote.status !== 'ACCEPTED' &&
             quote.status !== 'DECLINED' && (
-              <div className="flex space-x-2">
+              <div className="flex space-x-6">
                 <Button
                   variant="red"
                   size="small"
@@ -139,6 +142,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                 <Button
                   variant="secondary"
                   size="small"
+                  className={cn('disabled:border-none')}
                   disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
                   onClick={() => {
                     // Handle request change action
@@ -162,9 +166,9 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
               </div>
             )}
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 mt-6">
         {/* Quote acceptance confirmation dialog */}
         {showAcceptConfirmation && (
           <div className="bg-blue-50 p-6 mb-6 rounded-lg border border-blue-100">
@@ -319,13 +323,22 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
           </div>
         </div>
 
-        <Separator />
+        <div className="grid grid-cols-[1fr_1fr_1fr_1fr]">
+          <p className="col-start-1 font-bold font-headlines">{t('editor')}</p>
+          <p className="col-start-2 font-bold font-headlines">{t('action')}</p>
+          <p className="col-start-3 font-bold font-headlines">{t('comment')}</p>
+          <p className="col-start-4 font-bold font-headlines">{t('date')}</p>
+        </div>
+
+        <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
+          <p className="col-start-1">{quote.customerName || quote.customerId}</p>
+          <p className="col-start-2">{t('action')}</p>
+          <p className="col-start-3">{t('comment')}</p>
+          <p className="col-start-4">{t('date')}</p>
+        </div>
 
         {/* Quote Summary Cards */}
         <QuoteSummary quote={quote} />
-
-        <Separator />
-
         {
           <ProductListResolver
             items={quote.items.map((it) => ({
@@ -338,12 +351,12 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
         }
       </CardContent>
 
-      <CardFooter>
+      <div>
         <Button variant="neutral" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('backToQuotes')}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
