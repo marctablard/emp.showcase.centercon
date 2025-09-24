@@ -97,7 +97,11 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
                   {t('itemNumber')} {item.product?.id}
                 </p>
                 <p className="text-xs pl-4">
-                  {t('qty')}: {item.quantity}
+                  <span
+                    className={`${getCartItemSubstitutions(item).length > 0 ? 'bg-orange-100/75 rounded-full px-1' : ''}`}
+                  >
+                    {t('qty')}: {item.quantity}
+                  </span>
                 </p>
                 {getCartItemSubstitutions(item).length > 0 && (
                   <Badge variant="warning" className="h-5 min-w-5 ml-2 rounded-full px-1 tabular-nums tracking-normal">
@@ -108,15 +112,20 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
             </div>
           </div>
           <div>
-            {getCartItemPriceChanges(item).length > 0 && (
-              <Badge variant="warning" className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal">
-                <Coins />
-              </Badge>
-            )}
-            <p
-              className={`font-bold font-headlines ${getCartItemPriceChanges(item).length > 0 ? 'bg-orange-100/75' : ''}`}
-            >
-              {formatCurrency(item.price.amount, item.price.currency)}
+            <p className={`font-bold font-headlines`}>
+              {getCartItemPriceChanges(item).length > 0 && (
+                <Badge
+                  variant="warning"
+                  className="h-5 min-w-5 rounded-full px-1 tabular-nums tracking-normal float-left mr-2"
+                >
+                  <Coins />
+                </Badge>
+              )}
+              <span
+                className={`${getCartItemPriceChanges(item).length > 0 ? 'bg-orange-100/75 rounded-full px-1' : ''}`}
+              >
+                {formatCurrency(item.price.amount, item.price.currency)}
+              </span>
             </p>
           </div>
         </div>

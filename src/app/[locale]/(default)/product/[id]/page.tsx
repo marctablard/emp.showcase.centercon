@@ -54,7 +54,11 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
     <>
       <JsonLd jsonLd={jsonLd} />
       <div>
-        <UiBreadcrumb items={breadcrumbs} className="max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6" />
+        <UiBreadcrumb
+          items={breadcrumbs}
+          className="max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6"
+          disabledCategories={true}
+        />
         <ProductDetail
           className="max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6 2xl:pr-38"
           product={product}

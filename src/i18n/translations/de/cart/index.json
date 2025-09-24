@@ -77,6 +77,32 @@
       "failedDescription": "Bitte versuchen Sie es erneut"
     },
   "selectShippingAddress": "Lieferadresse auswählen",
+  "quote": {
+    "title": "Adresseingabe für Angebotskalkulation",
+    "subtitle": "Um Ihnen ein Angebot erstellen zu können, benötigen wir Ihre Lieferadresse und bevorzugte Versandmethode.",
+    "billingAddress": "Rechnungsadresse",
+    "sameAsShipping": "Rechnungsadresse ist dieselbe wie die Lieferadresse",
+    "referenceLabel": "Angebots-Referenz",
+    "referencePlaceholder": "z.B. Solar Projekt Hamburg #1",
+    "commentLabel": "Ihr Kommentar",
+    "commentPlaceholder": "Platzhalter",
+    "cancel": "Abbrechen",
+    "sendQuote": "Angebotsanfrage senden",
+    "submittedTitle": "Anfrage übermittelt",
+    "submittedDescription": "Unser Team wird ein Angebot erstellen und sich so schnell wie möglich bei Ihnen melden. Sie können alle Ihre Angebote jederzeit in Ihrem Konto einsehen.",
+    "failedTitle": "Übermittlung des Angebots fehlgeschlagen",
+    "failedDescription": "Bitte versuchen Sie es später erneut"
+  },
+  "priceChange": {
+    "title": "Preisänderung-Benachrichtigung",
+    "description": "Der Preis für diesen Artikel hat sich geändert, seit Sie ihn in Ihren Warenkorb gelegt haben.",
+    "oldPrice": "Vorheriger Preis",
+    "newPrice": "Neuer Preis",
+    "priceIncrease": "Preiserhöhung",
+    "priceDecrease": "Preissenkung",
+    "confirm": "Artikel zum neuen Preis behalten",
+    "removeFromCart": "Artikel aus Warenkorb entfernen"
+  },
   "savedCarts": {
     "title": "Gespeicherte Warenkörbe",
     "mySavedCarts": "Meine gespeicherten Warenkörbe",

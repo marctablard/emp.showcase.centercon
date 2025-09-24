@@ -80,6 +80,16 @@
     "failedTitle": "Failed to submit quote",
     "failedDescription": "Please try again later"
   },
+  "priceChange": {
+    "title": "Price Change Notification",
+    "description": "The price for this item has changed since you added it to your cart.",
+    "oldPrice": "Previous Price",
+    "newPrice": "New Price",
+    "priceIncrease": "Price Increase",
+    "priceDecrease": "Price Decrease",
+    "confirm": "Keep Item at New Price",
+    "removeFromCart": "Remove Item from Cart"
+  },
   "savedCarts": {
     "title": "Saved Carts",
     "mySavedCarts": "My Saved Carts",

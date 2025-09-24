@@ -38,10 +38,12 @@ class EmporixQuoteService implements QuoteService {
       size: params.size,
       query: params.query,
       criteria: {
-        'customer.id': customer.id,
+        'customer.customerId': customer.id,
       },
       sort: params.sort,
     });
+
+    // TODO fetch for quotes of subordinates
 
     // Wait for all quotes to be mapped - using Promise.all to process them in parallel
     const mappedQuotes = await Promise.all(

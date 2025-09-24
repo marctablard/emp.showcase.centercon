@@ -15,7 +15,6 @@ export interface Cart {
   totalPrice: Price;
   subTotalPrice: Price;
   tax: Tax;
-  processUpdate?: CartItemPriceChange;
 }
 
 export interface CartItem {
@@ -29,6 +28,8 @@ export interface CartItem {
 export interface CartItemPriceChange {
   itemId: string;
   productId: string;
+  oldPrice: number;
+  newPrice: number;
   updatedAt: Date;
 }
 

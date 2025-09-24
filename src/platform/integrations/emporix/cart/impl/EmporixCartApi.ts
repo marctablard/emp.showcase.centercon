@@ -50,19 +50,7 @@ class EmporixCartApi implements IEmporixCartApi {
     }
 
     const createdCart: EmporixCreatedCart = await response.json();
-    if (this.config.tenant === 'showcase') {
-      // TODO needs to be removed when Mixin Bug is done
-      await this.updateCart(createdCart.cartId, {
-        mixins: {
-          processupdate: {},
-        },
-        metadata: {
-          mixins: {
-            processupdate: 'https://res.cloudinary.com/saas-ag/raw/upload/schemata2/showcase/processupdate_v1.json',
-          },
-        },
-      });
-    }
+
     return createdCart.cartId;
   }
 

@@ -187,7 +187,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
         const permissionState = Notification.permission as NotificationPermission;
         console.log('Permission state:', permissionState);
         set({
-          isPushSupported: false,
+          isPushSupported: true,
           permissionState,
         });
         return permissionState === 'granted';

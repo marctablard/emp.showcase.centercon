@@ -48,6 +48,20 @@ export async function generateMetadata(props: Omit<Props, 'children'>) {
 
   return {
     title: t('storeName'),
+    manifest: '/manifest.json',
+    themeColor: '#192A42',
+    viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: t('storeName'),
+    },
+    other: {
+      'mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-status-bar-style': 'default',
+      'apple-mobile-web-app-title': t('storeName'),
+    },
   };
 }
 
