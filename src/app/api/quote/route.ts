@@ -37,10 +37,10 @@ export async function POST(request: NextRequest) {
           const matched = await priceService.getProductPrice(productId, quantity);
           if (!matched) return { ...item, quantity: { quantity, unitCode } };
 
-          const unitPrice = matched.effectiveValue;
-          const taxClass = matched.tax?.taxClass ?? 'STANDARD';
+          const unitPrice = matched.amount;
+          const taxClass = matched.tax?.taxCode ?? 'STANDARD';
           const taxRate = matched.tax?.taxRate ?? 0;
-          const totalNetValue = matched.totalValue;
+          const totalNetValue = matched.amount;
 
           return {
             ...item,

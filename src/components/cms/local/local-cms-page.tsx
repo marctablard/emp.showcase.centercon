@@ -76,7 +76,7 @@ export default async function CMSPageComponent({ slug, locale, site, emptyOnNoRe
         {breadcrumb.length > 0 && (
           <UiBreadcrumb items={breadcrumb} className="max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6" />
         )}
-        <CMSComponentRenderer components={page.components} />
+        <CMSComponentRenderer components={page.components} locale={locale} />
       </div>
     </>
   );
