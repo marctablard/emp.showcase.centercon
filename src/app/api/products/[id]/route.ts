@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const includeCategories = searchParams.get('categories') === 'true';
 
     const productService = server.get<ProductService>('ProductService');
-    const product = await productService.getProductById(productId);
+    const product = await productService.getProductById(productId, {
       variants: includeVariants,
       prices: includePrices,
       categories: includeCategories,
