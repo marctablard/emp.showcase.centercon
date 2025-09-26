@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import server from '@/platform/server';
 import { PriceService } from '@/platform/services/price/PriceService';
 import { QuoteService } from '@/platform/services/quote/QuoteService';
 
@@ -10,8 +11,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const quoteService = EMP.platform.server.get<QuoteService>('QuoteService');
-    const priceService = EMP.platform.server.get<PriceService>('PriceService');
+    const quoteService = server.get<QuoteService>('QuoteService');
+    const priceService = server.get<PriceService>('PriceService');
 
     const items = Array.isArray(body?.items) ? body.items : undefined;
     if (body.shippingMethod) {

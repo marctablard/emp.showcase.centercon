@@ -1,6 +1,7 @@
+import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixQuote } from '@/platform/integrations/emporix/model/quote';
-import { SiteService } from '@/platform/services/site/SiteService';
+import type { SiteService } from '@/platform/services/site/SiteService';
 import { Quote } from '..';
 import type { QuoteMapper } from './QuoteMapper';
 
@@ -10,11 +11,7 @@ import type { QuoteMapper } from './QuoteMapper';
  */
 @injectable('QuoteMapper', 'Singleton')
 export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
-  private siteService: SiteService;
-
-  constructor() {
-    this.siteService = EMP.platform.server.get<SiteService>('SiteService');
-  }
+  constructor(@inject('SiteService') private siteService: SiteService) {}
 
   async mapToService(emporixQuote: EmporixQuote): Promise<Quote> {
     const customerName = `${emporixQuote.customer.firstName || ''} ${emporixQuote.customer.lastName || ''}`.trim();
