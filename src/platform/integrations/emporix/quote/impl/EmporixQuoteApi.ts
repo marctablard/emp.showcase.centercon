@@ -64,7 +64,7 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
       throw new Error(`Failed to fetch quotes: ${response.statusText} ${errorDetails}`);
     }
 
-    const paginatedResponse = await buildPaginatedResponse(params, response);
+    const paginatedResponse = await buildPaginatedResponse<EmporixQuote>(params, response);
     return paginatedResponse;
   }
 
