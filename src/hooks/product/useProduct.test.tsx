@@ -56,8 +56,8 @@ describe('useProduct hook', () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(null);
 
-    // Verify that the API was called with the correct ID
-    expect(fetchProductById).toHaveBeenCalledWith('test-product-123');
+    // Verify that the API was called with the correct ID and options
+    expect(fetchProductById).toHaveBeenCalledWith('test-product-123', undefined);
   });
 
   /**
@@ -92,8 +92,8 @@ describe('useProduct hook', () => {
       expect(result.current.product).toBe(null);
       expect(result.current.error).toBe(mockError);
 
-      // Verify that the API was called with the correct ID
-      expect(fetchProductById).toHaveBeenCalledWith('test-product-123');
+      // Verify that the API was called with the correct ID and options
+      expect(fetchProductById).toHaveBeenCalledWith('test-product-123', undefined);
     } finally {
       // Restore the original console.error
       console.error = originalConsoleError;

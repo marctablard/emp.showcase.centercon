@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import server from '@/platform/server';
 import { PriceService } from '@/platform/services/price/PriceService';
 import { QuoteService } from '@/platform/services/quote/QuoteService';
 
@@ -10,8 +11,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const quoteService = EMP.platform.server.get<QuoteService>('QuoteService');
-    const priceService = EMP.platform.server.get<PriceService>('PriceService');
+    const quoteService = server.get<QuoteService>('QuoteService');
+    const priceService = server.get<PriceService>('PriceService');
 
     const items = Array.isArray(body?.items) ? body.items : undefined;
     if (body.shippingMethod) {
@@ -36,10 +37,10 @@ export async function POST(request: NextRequest) {
           const matched = await priceService.getProductPrice(productId, quantity);
           if (!matched) return { ...item, quantity: { quantity, unitCode } };
 
-          const unitPrice = matched.effectiveValue;
-          const taxClass = matched.tax?.taxClass ?? 'STANDARD';
+          const unitPrice = matched.amount;
+          const taxClass = matched.tax?.taxCode ?? 'STANDARD';
           const taxRate = matched.tax?.taxRate ?? 0;
-          const totalNetValue = matched.totalValue;
+          const totalNetValue = matched.amount;
 
           return {
             ...item,
