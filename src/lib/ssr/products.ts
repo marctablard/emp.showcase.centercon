@@ -3,9 +3,10 @@ import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions, ProductService } from '@/platform/services/product';
 import { StockService } from '@/platform/services/stock/StockService';
 import { StockAvailability } from '@/platform/services/stock/StockService';
+import ssr from '@/platform/ssr';
 
-const getProductService = () => globalThis.EMP.platform.ssr.get<ProductService>('ProductService');
-const getStockService = () => globalThis.EMP.platform.ssr.get<StockService>('StockService');
+const getProductService = () => ssr.get<ProductService>('ProductService');
+const getStockService = () => ssr.get<StockService>('StockService');
 
 const _getProduct = cache(async (id: string, options?: ProductFetchOptions): Promise<Product | null | undefined> => {
   try {

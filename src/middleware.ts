@@ -10,7 +10,7 @@ const securedPages = ['/account'];
 const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
 const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shipping'));
 
-const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications', '/api/reload-di'];
+const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications'];
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 

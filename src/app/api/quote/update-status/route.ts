@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import server from '@/platform/server';
 import { QuoteService } from '@/platform/services/quote/QuoteService';
 
 export async function POST(request: NextRequest) {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Status is required' }, { status: 400 });
     }
 
-    const quoteService = EMP.platform.server.get<QuoteService>('QuoteService');
+    const quoteService = server.get<QuoteService>('QuoteService');
     await quoteService.updateQuoteStatus(quoteId, status, comment, locale);
 
     return NextResponse.json({ success: true }, { status: 200 });

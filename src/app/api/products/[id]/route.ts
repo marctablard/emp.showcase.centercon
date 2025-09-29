@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import server from '@/platform/server';
 import { ProductService } from '@/platform/services/product/ProductService';
 
 /**
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const includePrices = searchParams.get('prices') === 'true';
     const includeCategories = searchParams.get('categories') === 'true';
 
-    const productService = EMP.platform.server.get<ProductService>('ProductService');
+    const productService = server.get<ProductService>('ProductService');
     const product = await productService.getProductById(productId, {
       variants: includeVariants,
       prices: includePrices,
