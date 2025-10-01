@@ -1,24 +1,69 @@
 import { NextAuthRequest } from 'next-auth';
 import NextAuth from 'next-auth';
-import createIntlMiddleware from 'next-intl/middleware';
+import { LocalePrefixMode } from 'next-intl/routing';
 import { NextRequest, NextResponse } from 'next/server';
 import authConfig from './auth/auth.config';
+import { routing } from './i18n/routing';
 
-const locales = ['en', 'de'];
-const defaultLocale = 'en';
+const availableSites = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
+const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
+if (availableSites.length === 0 || availableSites.findIndex((c) => c === defaultSite) === -1) {
+  availableSites.push(defaultSite);
+}
+const siteRouting = {
+  // A list of all locales that are supported
+  sites: availableSites,
+  // Used when no locale matches
+  defaultSite: defaultSite,
+  // Used for routing
+  sitePrefix: 'as-needed' as LocalePrefixMode,
+};
+
 const securedPages = ['/account'];
-const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
+const securedPathnameRegex = RegExp(`^(/(${routing.locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
 const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shipping'));
 
 const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications'];
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 
-const intlMiddleware = createIntlMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: 'as-needed',
-});
+/**
+ * Combine the functionality of Internationalization and Site-Detection, allowing 'default - as-needed for both'
+ * @param req
+ * @returns
+ */
+const pathParameterMiddleware = (req: NextRequest) => {
+  const { pathname } = req.nextUrl;
+  // split the pathname, assuming the format /site/locale/...
+  const segments = pathname.replace('/', '').split('/');
+  let site = defaultSite;
+  let locale = routing.defaultLocale;
+
+  // take care of site if it's not missing from url
+  if (siteRouting.sites.includes(segments[0])) {
+    site = segments[0];
+    segments.shift();
+  }
+  // handle default site without prefix
+  if (siteRouting.sitePrefix === 'never' || (site == defaultSite && siteRouting.sitePrefix === 'as-needed')) {
+    return NextResponse.rewrite(new URL(`/${defaultSite}/${segments.join('/')}`, req.url));
+  }
+
+  // take care of locale if it's not missing from url
+  if (routing.locales.includes(segments[0])) {
+    locale = segments[0];
+    segments.shift();
+  }
+  // handle default locale without prefix
+  if (routing.localePrefix === 'never' || (routing.localePrefix === 'as-needed' && locale == routing.defaultLocale)) {
+    return NextResponse.rewrite(new URL(`/${site}/${locale}/${segments.join('/')}`, req.url));
+  }
+
+  const response = NextResponse.next();
+  response.headers.set('x-site', site);
+  response.headers.set('x-locale', locale);
+  return response;
+};
 
 // Simplified Instance of NextAuth for Edge Middleware (cannot use server context)
 const { auth } = NextAuth(authConfig);
@@ -87,14 +132,9 @@ export default auth(async (req: NextAuthRequest) => {
     }
   }
 
-  //Successfully process the api request
-  if (pathname.startsWith('/api/')) {
-    return applySecurityHeaders(NextResponse.next());
-  }
-
-  return applySecurityHeaders(intlMiddleware(req) ?? NextResponse.next());
+  return applySecurityHeaders(pathParameterMiddleware(req) ?? NextResponse.next());
 });
 
 export const config = {
-  matcher: ['/((?!_next|.*\\..*).*)', '/api/:path*'],
+  matcher: ['/((?!_next|\\.well-known|.*\\..*).*)', '/api/:path*'],
 };
