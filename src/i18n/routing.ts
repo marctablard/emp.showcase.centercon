@@ -9,7 +9,5 @@ export const routingConfig = {
   localePrefix: 'as-needed' as LocalePrefixMode,
 }
 export const routing = defineRouting({
-  locales: routingConfig.locales,
-  defaultLocale: routingConfig.defaultLocale,
-  localePrefix: routingConfig.localePrefix,
+  ...routingConfig
 });
