@@ -9,8 +9,8 @@ import { QuoteSummary } from '@/components/account/quotes/quote-summary';
 import { ProductListResolver } from '@/components/product/product-list-resolver';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { useQuoteHistory } from '@/hooks/quotes/useQuoteHistory';
 import { useQuote } from '@/hooks/quotes/useQuotes';
 import { formatDate } from '@/lib/date-utils';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   // State for confirmation dialogs
   const [showAcceptConfirmation, setShowAcceptConfirmation] = useState(false);
   const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
+  const [showRequestChangeConfirmation, setShowRequestChangeConfirmation] = useState(false);
   const [comment, setComment] = useState('');
   const maxCommentLength = 500;
   const [isProcessing, setIsProcessing] = useState(false);
@@ -57,8 +58,32 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
     window.location.reload();
   };
 
+  const addQuoteComment = async (quoteId: string, comment: string): Promise<void> => {
+    const commentResponse = await fetch('/api/quote/add-comment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quoteId,
+        comment,
+      }),
+    });
+
+    if (!commentResponse.ok) {
+      const errorData = await commentResponse.json();
+      throw new Error(errorData.error || 'Failed to add comment to quote');
+    }
+
+    // After successfully adding comment, refresh the page to show updated quote
+    window.location.reload();
+  };
+
   // Use the hook to fetch the quote if not provided as initialQuote
   const { quote: fetchedQuote, loading, error } = useQuote(initialQuote ? undefined : quoteId);
+
+  // Fetch quote history
+  const { history: quoteHistory, loading: historyLoading } = useQuoteHistory(quoteId);
 
   // Use initialQuote if provided, otherwise use fetched quote
   const quote = initialQuote || fetchedQuote;
@@ -71,8 +96,6 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
       minimumFractionDigits: 2,
     }).format(price);
   };
-
-  console.log(quote);
 
   // Loading state
   if (loading) {
@@ -124,6 +147,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
           {/* Only show action buttons when confirmation dialogs are not visible and quote status is not ACCEPTED or DECLINED */}
           {!showAcceptConfirmation &&
             !showRejectConfirmation &&
+            !showRequestChangeConfirmation &&
             quote.status !== 'ACCEPTED' &&
             quote.status !== 'DECLINED' && (
               <div className="flex space-x-6">
@@ -145,8 +169,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                   className={cn('disabled:border-none')}
                   disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
                   onClick={() => {
-                    // Handle request change action
-                    console.log('Request change for quote', quoteId);
+                    setShowRequestChangeConfirmation(true);
                   }}
                 >
                   {t('requestChange')}
@@ -171,134 +194,211 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
       <CardContent className="space-y-6 mt-6">
         {/* Quote acceptance confirmation dialog */}
         {showAcceptConfirmation && (
-          <div className="bg-blue-50 p-6 mb-6 rounded-lg border border-blue-100">
-            <h3 className="text-lg font-medium mb-2">{t('confirmationTitle')}</h3>
-            <p className="text-sm text-gray-600 mb-4">{t('confirmationDescription')}</p>
+          <div className="grid grid-cols-1 mb-6 gap-6">
+            <div className="p-6 rounded-lg bg-primary-50 shadow-sm">
+              <div className="shadow-none rounded-md py-4 h-full gap-2 bg-white p-6 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">{t('confirmationTitle')}</h3>
+                <p className="text-sm text-gray-600 mb-4">{t('confirmationDescription')}</p>
 
-            <div className="mb-4">
-              <label htmlFor="accept-comment" className="block text-sm font-medium mb-1">
-                {t('yourComment')}
-              </label>
-              <Textarea
-                id="accept-comment"
-                placeholder={t('commentPlaceholder')}
-                className="w-full h-32 resize-none"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                maxLength={maxCommentLength}
-              />
-              <div className="text-xs text-right mt-1 text-gray-500">
-                {comment.length}/{maxCommentLength}
+                <div className="mb-4">
+                  <label htmlFor="accept-comment" className="block text-sm font-medium mb-1">
+                    {t('yourComment')}
+                  </label>
+                  <Textarea
+                    id="accept-comment"
+                    placeholder={t('commentPlaceholder')}
+                    className="w-full h-32 resize-none"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    maxLength={maxCommentLength}
+                  />
+                  <div className="text-xs text-right mt-1 text-gray-500">
+                    {comment.length}/{maxCommentLength}
+                  </div>
+                </div>
+
+                <div className="text-sm text-gray-600 mb-4">
+                  {t('termsAgreement')}{' '}
+                  <a href="#" className="text-blue-600 hover:underline">
+                    {t('privacyPolicy')}
+                  </a>{' '}
+                  and{' '}
+                  <a href="#" className="text-blue-600 hover:underline">
+                    {t('termsOfUse')}
+                  </a>
+                </div>
+
+                <div className="flex space-x-3">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setShowAcceptConfirmation(false);
+                      setComment('');
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    disabled={isProcessing}
+                    onClick={async () => {
+                      try {
+                        setProcessError(null);
+                        setIsProcessing(true);
+
+                        await updateQuoteStatus(quoteId, 'ACCEPTED', comment);
+
+                        setShowAcceptConfirmation(false);
+                        setComment('');
+                      } catch (error) {
+                        console.error('Failed to process quote:', error);
+                        setProcessError(error instanceof Error ? error.message : 'Failed to process quote');
+                      } finally {
+                        setIsProcessing(false);
+                      }
+                    }}
+                  >
+                    {isProcessing ? t('creating') : t('createOrder')}
+                  </Button>
+                </div>
               </div>
-            </div>
-
-            <div className="text-sm text-gray-600 mb-4">
-              {t('termsAgreement')}{' '}
-              <a href="#" className="text-blue-600 hover:underline">
-                {t('privacyPolicy')}
-              </a>{' '}
-              and{' '}
-              <a href="#" className="text-blue-600 hover:underline">
-                {t('termsOfUse')}
-              </a>
-            </div>
-
-            <div className="flex space-x-3">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setShowAcceptConfirmation(false);
-                  setComment('');
-                }}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                variant="primary"
-                disabled={isProcessing}
-                onClick={async () => {
-                  try {
-                    setProcessError(null);
-                    setIsProcessing(true);
-
-                    await updateQuoteStatus(quoteId, 'ACCEPTED', comment);
-
-                    setShowAcceptConfirmation(false);
-                    setComment('');
-                  } catch (error) {
-                    console.error('Failed to process quote:', error);
-                    setProcessError(error instanceof Error ? error.message : 'Failed to process quote');
-                  } finally {
-                    setIsProcessing(false);
-                  }
-                }}
-              >
-                {isProcessing ? t('creating') : t('createOrder')}
-              </Button>
             </div>
           </div>
         )}
 
         {/* Quote rejection confirmation dialog */}
         {showRejectConfirmation && (
-          <div className="bg-red-50 p-6 mb-6 rounded-lg border border-red-100">
-            <h3 className="text-lg font-medium mb-2">
-              {t('rejectConfirmationTitle') || 'Do you want to reject the quote?'}
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              {t('rejectConfirmationDescription') ||
-                'If you wish, you can leave a comment to let us know why you are declining this quote. Your feedback helps us improve our offers.'}
-            </p>
+          <div className="grid grid-cols-1 mb-6 gap-6">
+            <div className="p-6 rounded-lg bg-primary-50 shadow-sm">
+              <div className="shadow-none rounded-md py-4 h-full gap-2 bg-white p-6 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">
+                  {t('rejectConfirmationTitle') || 'Do you want to reject the quote?'}
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  {t('rejectConfirmationDescription') ||
+                    'If you wish, you can leave a comment to let us know why you are declining this quote. Your feedback helps us improve our offers.'}
+                </p>
 
-            <div className="mb-4">
-              <label htmlFor="reject-comment" className="block text-sm font-medium mb-1">
-                {t('yourComment')}
-              </label>
-              <Textarea
-                id="reject-comment"
-                placeholder={t('rejectCommentPlaceholder') || 'Placeholder'}
-                className="w-full h-32 resize-none"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                maxLength={maxCommentLength}
-              />
-              <div className="text-xs text-right mt-1 text-gray-500">
-                {comment.length}/{maxCommentLength}
+                <div className="mb-4">
+                  <label htmlFor="reject-comment" className="block text-sm font-medium mb-1">
+                    {t('yourComment')}
+                  </label>
+                  <Textarea
+                    id="reject-comment"
+                    placeholder={t('rejectCommentPlaceholder') || 'Placeholder'}
+                    className="w-full h-32 resize-none"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    maxLength={maxCommentLength}
+                  />
+                  <div className="text-xs text-right mt-1 text-gray-500">
+                    {comment.length}/{maxCommentLength}
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setShowRejectConfirmation(false);
+                      setComment('');
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
+                  <Button
+                    variant="red"
+                    disabled={isProcessing}
+                    onClick={async () => {
+                      try {
+                        setProcessError(null);
+                        setIsProcessing(true);
+
+                        await updateQuoteStatus(quoteId, 'DECLINED', comment);
+
+                        setShowRejectConfirmation(false);
+                        setComment('');
+                      } catch (error) {
+                        console.error('Failed to reject quote:', error);
+                        setProcessError(error instanceof Error ? error.message : 'Failed to reject quote');
+                      } finally {
+                        setIsProcessing(false);
+                      }
+                    }}
+                  >
+                    {isProcessing ? t('rejecting') || 'REJECTING...' : t('rejectQuote') || 'REJECT QUOTE'}
+                  </Button>
+                </div>
               </div>
             </div>
+          </div>
+        )}
 
-            <div className="flex space-x-3">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setShowRejectConfirmation(false);
-                  setComment('');
-                }}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                variant="red"
-                disabled={isProcessing}
-                onClick={async () => {
-                  try {
-                    setProcessError(null);
-                    setIsProcessing(true);
+        {/* Quote request change confirmation dialog */}
+        {showRequestChangeConfirmation && (
+          <div className="grid grid-cols-1 mb-6 gap-6">
+            <div className="p-6 rounded-lg bg-primary-50 shadow-sm">
+              <div className="shadow-none rounded-md py-4 h-full gap-2 bg-white p-6 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">
+                  {t('requestChangeConfirmationTitle') || 'Do you want to request a change of the quote?'}
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  {t('requestChangeConfirmationDescription') || 'Please let us know how what we can do better.'}
+                </p>
 
-                    await updateQuoteStatus(quoteId, 'DECLINED', comment);
+                <div className="mb-4">
+                  <label htmlFor="request-change-comment" className="block text-sm font-medium mb-1">
+                    {t('yourComment')}
+                  </label>
+                  <Textarea
+                    id="request-change-comment"
+                    placeholder={t('requestChangeCommentPlaceholder') || 'Placeholder'}
+                    className="w-full h-32 resize-none"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    maxLength={maxCommentLength}
+                  />
+                  <div className="text-xs text-right mt-1 text-gray-500">
+                    {comment.length}/{maxCommentLength}
+                  </div>
+                </div>
 
-                    setShowRejectConfirmation(false);
-                    setComment('');
-                  } catch (error) {
-                    console.error('Failed to reject quote:', error);
-                    setProcessError(error instanceof Error ? error.message : 'Failed to reject quote');
-                  } finally {
-                    setIsProcessing(false);
-                  }
-                }}
-              >
-                {isProcessing ? t('rejecting') || 'REJECTING...' : t('rejectQuote') || 'REJECT QUOTE'}
-              </Button>
+                <div className="flex space-x-3">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setShowRequestChangeConfirmation(false);
+                      setComment('');
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    disabled={isProcessing || !comment.trim()}
+                    onClick={async () => {
+                      try {
+                        setProcessError(null);
+                        setIsProcessing(true);
+
+                        await addQuoteComment(quoteId, comment);
+
+                        setShowRequestChangeConfirmation(false);
+                        setComment('');
+                      } catch (error) {
+                        console.error('Failed to add comment to quote:', error);
+                        setProcessError(error instanceof Error ? error.message : 'Failed to add comment to quote');
+                      } finally {
+                        setIsProcessing(false);
+                      }
+                    }}
+                  >
+                    {isProcessing
+                      ? t('requestingChange') || 'REQUESTING CHANGE...'
+                      : t('requestChange') || 'REQUEST CHANGE'}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -323,18 +423,33 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-[1fr_1fr_1fr_1fr]">
-          <p className="col-start-1 font-bold font-headlines">{t('editor')}</p>
-          <p className="col-start-2 font-bold font-headlines">{t('action')}</p>
-          <p className="col-start-3 font-bold font-headlines">{t('comment')}</p>
-          <p className="col-start-4 font-bold font-headlines">{t('date')}</p>
-        </div>
+        {/* Quote History Section */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-[1fr_1fr_1fr_1fr]">
+            <p className="col-start-1 font-bold font-headlines">{t('editor')}</p>
+            <p className="col-start-2 font-bold font-headlines">{t('action')}</p>
+            <p className="col-start-3 font-bold font-headlines">{t('comment')}</p>
+            <p className="col-start-4 font-bold font-headlines">{t('date')}</p>
+          </div>
 
-        <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
-          <p className="col-start-1">{quote.customerName || quote.customerId}</p>
-          <p className="col-start-2">{t('action')}</p>
-          <p className="col-start-3">{t('comment')}</p>
-          <p className="col-start-4">{t('date')}</p>
+          {historyLoading ? (
+            <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
+              <p className="col-start-1">Loading history...</p>
+            </div>
+          ) : quoteHistory.length > 0 ? (
+            quoteHistory.map((historyItem) => (
+              <div key={historyItem.id} className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
+                <p className="col-start-1">{historyItem.userFullName || 'Unknown User'}</p>
+                <p className="col-start-2">{t('commentAdded')}</p>
+                <p className="col-start-3">{historyItem.comment || '-'}</p>
+                <p className="col-start-4">{historyItem.modifiedAt || '-'}</p>
+              </div>
+            ))
+          ) : (
+            <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
+              <p className="col-start-1 text-muted-foreground">No comment history available</p>
+            </div>
+          )}
         </div>
 
         {/* Quote Summary Cards */}

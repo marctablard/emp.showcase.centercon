@@ -2,7 +2,7 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixQuote } from '@/platform/integrations/emporix/model/quote';
 import type { SiteService } from '@/platform/services/site/SiteService';
-import { Quote } from '..';
+import { Quote, QuoteStatus } from '..';
 import type { QuoteMapper } from './QuoteMapper';
 
 /**
@@ -20,7 +20,7 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
       ? `${emporixQuote.employee.firstName || ''} ${emporixQuote.employee.lastName || ''}`.trim()
       : undefined;
 
-    const status = emporixQuote.status?.value;
+    const status = emporixQuote.status?.value as QuoteStatus;
 
     const shippingAddress = emporixQuote.shippingAddress;
 

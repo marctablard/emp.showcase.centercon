@@ -135,6 +135,17 @@ export interface EmporixQuoteItem {
   product: EmporixQuoteProduct;
 }
 
+export interface EmporixQuoteShipping {
+  value?: number;
+  grossValue?: number;
+  methodId?: string;
+  zoneId?: string;
+  methodName?: {
+    [key: string]: string;
+  };
+  shippingTaxCode?: string;
+}
+
 /**
  * Quote response from Emporix API
  */
@@ -161,16 +172,7 @@ export interface EmporixQuote {
   validTo?: string;
   totalPrice: EmporixPrice;
   subtotalPrice?: EmporixPrice;
-  shipping?: {
-    value?: number;
-    grossValue?: number;
-    methodId?: string;
-    zoneId?: string;
-    methodName?: {
-      [key: string]: string;
-    };
-    shippingTaxCode?: string;
-  };
+  shipping?: EmporixQuoteShipping;
   taxAggregate?: {
     lines: Array<{
       name: string;
@@ -216,3 +218,36 @@ export interface EmporixCreateQuoteReasonRequest {
 export interface EmporixQuoteReasonCreationResponse {
   id: string;
 }
+
+export interface EmporixQuoteUpdateValues {
+  [key: string]: any;
+}
+
+export interface EmporixQuoteHistoryItem {
+  id: string;
+  op: 'ADD' | 'REMOVE' | 'REPLACE' | 'CREATE';
+  path:
+    | '/quote'
+    | '/status'
+    | '/validTo'
+    | '/comment'
+    | '/billingAddressId'
+    | '/shippingAddressId'
+    | '/companyName'
+    | '/customerId'
+    | '/shipping'
+    | '/items'
+    | '/items/{itemId}'
+    | '/items/{itemId}/price'
+    | '/mixins/{mixinsPath}'
+    | '/metadata/{mixinsPath}';
+  newValue?: EmporixQuoteUpdateValues;
+  previousValue?: EmporixQuoteUpdateValues;
+  userId?: string;
+  userFirstName?: string;
+  userLastName?: string;
+  userType?: 'EMPLOYEE' | 'CUSTOMER' | 'SYSTEM';
+  modifiedAt?: string;
+}
+
+export type EmporixQuoteHistory = EmporixQuoteHistoryItem[];

@@ -1,5 +1,12 @@
 import { SearchParams, SearchResult } from '../model/common';
-import { CreateQuoteInput, CreateQuoteReasonRequest, QuoteReason, QuoteReasonCreationResponse } from '../model/quote';
+import {
+  CreateQuoteInput,
+  CreateQuoteReasonRequest,
+  QuoteHistory,
+  QuoteReason,
+  QuoteReasonCreationResponse,
+  QuoteScope,
+} from '../model/quote';
 import { Quote } from '../model/quote/quote-list';
 
 export interface QuoteService {
@@ -19,20 +26,13 @@ export interface QuoteService {
   getQuote(quoteId: string): Promise<Quote>;
 
   /**
-   * Updates the status of a quote
+   * Updates a quote
    * @param quoteId - The ID of the quote to update
-   * @param status - The new status value
-   * @param comment - Optional comment to include with the status update
-   * @param locale - The user's locale (language code) to use for messages, defaults to 'en'
-   * @param quoteReasonId - Optional quote reason ID to include with the status update
+   * @param body - The quote data to update
+   * @param scope - The scope to update the quote in, defaults to 'public'
+   * @returns Promise that resolves when the update is complete
    */
-  updateQuoteStatus(
-    quoteId: string,
-    status: string,
-    comment?: string,
-    locale?: string,
-    quoteReasonId?: string,
-  ): Promise<void>;
+  updateQuote(quoteId: string, op: string, path: string, value: any, scope: QuoteScope): Promise<void>;
 
   /**
    * Get a specific quote reason by ID
@@ -47,4 +47,11 @@ export interface QuoteService {
    * @returns Promise with the ID of the created quote reason
    */
   createQuoteReason(createQuoteReasonRequest: CreateQuoteReasonRequest): Promise<QuoteReasonCreationResponse>;
+
+  /**
+   * Get quote history for a specific quote
+   * @param quoteId - The ID of the quote to get history for
+   * @returns Promise with the quote history
+   */
+  getQuoteHistory(quoteId: string): Promise<QuoteHistory>;
 }

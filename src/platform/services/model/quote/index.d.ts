@@ -1,6 +1,8 @@
 import { EmporixAddress } from '@/platform/integrations/emporix/model';
+import { EmporixMetadata } from '@/platform/integrations/emporix/model/common';
 import type { EmporixCreateQuoteRequest } from '@/platform/integrations/emporix/model/quote';
 import { CheckoutAddress } from '../checkout';
+import { LocalizedString } from '../common';
 
 /**
  * Quote entity for the application
@@ -23,6 +25,17 @@ export interface Quote {
   shippingAddress: CheckoutAddress;
   shippingCost: number;
   shippingMethod: string;
+}
+
+export interface QuoteShipping {
+  value?: number;
+  grossValue?: number;
+  methodId?: string;
+  zoneId?: string;
+  methodName?: {
+    [key: string]: string;
+  };
+  shippingTaxCode?: string;
 }
 
 /**
@@ -62,3 +75,46 @@ export interface CreateQuoteReasonRequest {
 export interface QuoteReasonCreationResponse {
   id: string;
 }
+
+export type QuoteScope = 'public' | 'session' | 'customer-saas' | 'service';
+
+export type QuoteStatus = 'CREATING' | 'OPEN' | 'IN_PROGRESS' | 'DECLINED' | 'ACCEPTED' | 'ORDER_CREATED' | 'CLOSED';
+
+export type QuoteUpdateOperation = 'ADD' | 'REMOVE' | 'REPLACE' | 'CREATE';
+
+export type QuoteUpdatePath =
+  | '/quote'
+  | '/status'
+  | '/validTo'
+  | '/comment'
+  | '/billingAddressId'
+  | '/shippingAddressId'
+  | '/companyName'
+  | '/customerId'
+  | '/shipping'
+  | '/items'
+  | '/items/{itemId}'
+  | '/items/{itemId}/price'
+  | '/mixins/{mixinsPath}'
+  | '/metadata/{mixinsPath}';
+
+export type QuoteUserType = 'EMPLOYEE' | 'CUSTOMER' | 'SYSTEM';
+
+export interface QuoteUpdateValues {
+  [key: string]: any;
+}
+
+export interface QuoteHistoryItem {
+  id: string;
+  op: QuoteUpdateOperation;
+  path: QuoteUpdatePath;
+  newValue?: QuoteUpdateValues;
+  previousValue?: QuoteUpdateValues;
+  userId?: string;
+  userFirstName?: string;
+  userLastName?: string;
+  userType?: QuoteUserType;
+  modifiedAt?: string;
+}
+
+export type QuoteHistory = QuoteHistoryItem[];

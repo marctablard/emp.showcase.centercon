@@ -15,13 +15,6 @@ export async function POST(request: NextRequest) {
     const priceService = server.get<PriceService>('PriceService');
 
     const items = Array.isArray(body?.items) ? body.items : undefined;
-    if (body.shippingMethod) {
-      body.shipping = body.shipping || {};
-      body.shipping.methodId = body.shippingMethod.id;
-      if (body.shippingMethod.cost) {
-        body.shipping.value = body.shippingMethod.cost;
-      }
-    }
 
     if (items && items.length > 0) {
       const defaultUnitCode = process.env.NEXT_PUBLIC_EMPORIX_DEFAULT_UNIT_CODE || 'piece';
@@ -57,6 +50,21 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await quoteService.createQuote(body);
+
+    if (body.shipping && result.quoteId) {
+      try {
+        await quoteService.updateQuote(
+          result.quoteId,
+          'replace',
+          '/mixins/additionalInfo',
+          { reference: body.reference },
+          'service',
+        );
+        await quoteService.updateQuote(result.quoteId, 'replace', '/shipping', body.shipping, 'service');
+      } catch (updateError) {
+        console.error('Failed to update quote :', updateError);
+      }
+    }
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

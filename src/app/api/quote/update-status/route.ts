@@ -16,7 +16,22 @@ export async function POST(request: NextRequest) {
     }
 
     const quoteService = server.get<QuoteService>('QuoteService');
-    await quoteService.updateQuoteStatus(quoteId, status, comment, locale);
+
+    let quoteReasonId = undefined;
+    if (status === 'DECLINED') {
+      quoteReasonId = await createDeclinedQuoteReason(quoteId, comment, locale, quoteService);
+    }
+    await quoteService.updateQuote(
+      quoteId,
+      'replace',
+      '/status',
+      {
+        value: status,
+        comment: comment || '',
+        quoteReasonId: quoteReasonId || '',
+      },
+      'session',
+    );
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
@@ -24,4 +39,20 @@ export async function POST(request: NextRequest) {
     const message = error instanceof Error ? error.message : 'Failed to update quote status';
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+async function createDeclinedQuoteReason(quoteId: any, comment: any, locale: any, quoteService: QuoteService) {
+  let quoteReasonId = undefined;
+  const quoteId_current = `${quoteId}_${Date.now()}`;
+  const code = `${(comment || quoteId_current).toUpperCase().replace(/\s+/g, '_')}`;
+
+  const message: Record<string, string> = {};
+  message[locale] = comment || 'Price too high';
+
+  const response = await quoteService.createQuoteReason({
+    code: code,
+    type: 'DECLINE',
+    message: message,
+  });
+  quoteReasonId = response.id;
+  return quoteReasonId;
 }

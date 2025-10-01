@@ -259,7 +259,12 @@
     "rejectConfirmationDescription": "If you wish, you can leave a comment to let us know why you are declining this quote. Your feedback helps us improve our offers.",
     "rejectCommentPlaceholder": "Please provide reasons for declining this quote...",
     "rejectQuote": "REJECT QUOTE",
-    "rejecting": "REJECTING..."
+    "rejecting": "REJECTING...",
+    "requestChangeConfirmationTitle": "Do you want to request a change of the quote?",
+    "requestChangeConfirmationDescription": "Please let us know how what we can do better.",
+    "requestChangeCommentPlaceholder": "Placeholder",
+    "requestingChange": "REQUESTING CHANGE...",
+    "commentAdded": "Comment Added"
   },
   "quotesList": {
     "title": "Quotes",
