@@ -13,6 +13,7 @@ export interface EmporixCreateQuoteManualRequest {
   status: {
     value: string;
   };
+  businessModel?: string;
   currency: string;
   validTo?: string;
   shipping?: {
@@ -41,7 +42,7 @@ export interface EmporixCreateQuoteManualRequest {
   }>;
   // Optional metadata
   reference?: string;
-  comment?: string;
+  userComment?: string;
 }
 
 // Create quote from an existing cart request
@@ -193,6 +194,12 @@ export interface EmporixQuote {
     createdAt: string;
     modifiedAt: string;
   };
+  mixins: {
+    additionalInfo?: {
+      userComment?: string;
+      reference?: string;
+    };
+  };
 }
 
 export type EmporixCreateQuoteRequest = EmporixCreateQuoteManualRequest | EmporixCreateQuoteFromCartRequest;
@@ -225,22 +232,8 @@ export interface EmporixQuoteUpdateValues {
 
 export interface EmporixQuoteHistoryItem {
   id: string;
-  op: 'ADD' | 'REMOVE' | 'REPLACE' | 'CREATE';
-  path:
-    | '/quote'
-    | '/status'
-    | '/validTo'
-    | '/comment'
-    | '/billingAddressId'
-    | '/shippingAddressId'
-    | '/companyName'
-    | '/customerId'
-    | '/shipping'
-    | '/items'
-    | '/items/{itemId}'
-    | '/items/{itemId}/price'
-    | '/mixins/{mixinsPath}'
-    | '/metadata/{mixinsPath}';
+  op: EmporixQuoteUpdateOperation;
+  path: EmporixQuoteUpdatePath;
   newValue?: EmporixQuoteUpdateValues;
   previousValue?: EmporixQuoteUpdateValues;
   userId?: string;
@@ -248,6 +241,38 @@ export interface EmporixQuoteHistoryItem {
   userLastName?: string;
   userType?: 'EMPLOYEE' | 'CUSTOMER' | 'SYSTEM';
   modifiedAt?: string;
+}
+
+export type EmporixQuoteUpdateOperation = 'ADD' | 'REMOVE' | 'REPLACE' | 'CREATE';
+export type EmporixQuoteUpdatePath =
+  | '/quote'
+  | '/status'
+  | '/validTo'
+  | '/comment'
+  | '/billingAddressId'
+  | '/shippingAddressId'
+  | '/companyName'
+  | '/customerId'
+  | '/shipping'
+  | '/items'
+  | '/items/{itemId}'
+  | '/items/{itemId}/price'
+  | '/mixins/{mixinsPath}'
+  | '/metadata/{mixinsPath}';
+
+export type EmporixQuoteStatus =
+  | 'CREATING'
+  | 'OPEN'
+  | 'IN_PROGRESS'
+  | 'DECLINED'
+  | 'ACCEPTED'
+  | 'ORDER_CREATED'
+  | 'CLOSED';
+
+export interface EmporixQuoteUpdateRequest {
+  op: EmporixQuoteUpdateOperation;
+  path: EmporixQuoteUpdatePath | string;
+  value: EmporixQuoteStatus | string | Record<string, any>;
 }
 
 export type EmporixQuoteHistory = EmporixQuoteHistoryItem[];

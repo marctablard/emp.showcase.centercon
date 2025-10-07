@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from '@/components/ui/textarea';
 import { useQuoteHistory } from '@/hooks/quotes/useQuoteHistory';
 import { useQuote } from '@/hooks/quotes/useQuotes';
-import { formatDate } from '@/lib/date-utils';
 import { cn } from '@/lib/utils';
 import { Quote } from '@/platform/services/model/quote';
 
@@ -35,7 +34,12 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   const [_processError, setProcessError] = useState<string | null>(null);
   const locale = useLocale();
 
-  const updateQuoteStatus = async (quoteId: string, status: string, comment?: string): Promise<void> => {
+  const updateQuoteStatus = async (
+    quoteId: string,
+    status: string,
+    comment?: string,
+    oldStatus?: string,
+  ): Promise<void> => {
     const statusResponse = await fetch('/api/quote/update-status', {
       method: 'POST',
       headers: {
@@ -46,6 +50,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
         status,
         comment,
         locale,
+        oldStatus: oldStatus,
       }),
     });
 
@@ -66,6 +71,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
       },
       body: JSON.stringify({
         quoteId,
+        reference: quote?.reference,
         comment,
       }),
     });
@@ -88,6 +94,15 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   // Use initialQuote if provided, otherwise use fetched quote
   const quote = initialQuote || fetchedQuote;
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
   const formatPrice = (price: number | undefined, currency: string | undefined) => {
     if (price === undefined || currency === undefined) return '-';
     return new Intl.NumberFormat('en-US', {
@@ -95,6 +110,22 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
       currency,
       minimumFractionDigits: 2,
     }).format(price);
+  };
+
+  const getHistoryAction = (fieldChanged: string) => {
+    return fieldChanged === '/comment' || fieldChanged.startsWith('/mixins/')
+      ? t('commentAdded')
+      : t('statusChanged', { currentStatus: quote?.status || 'UNKNOWN' });
+  };
+
+  const getHistoryUserName = (historyItem: { fieldChanged: string; userFullName: string }) => {
+    if (historyItem.fieldChanged === '/comment') {
+      return quote?.approverName || historyItem.userFullName;
+    }
+    if (historyItem.fieldChanged.startsWith('/mixins/')) {
+      return quote?.customerName || historyItem.userFullName;
+    }
+    return historyItem.userFullName;
   };
 
   // Loading state
@@ -154,7 +185,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                 <Button
                   variant="red"
                   size="small"
-                  disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
+                  disabled={!(quote.status === 'OPEN')}
                   onClick={() => {
                     // Show rejection confirmation dialog
                     setShowRejectConfirmation(true);
@@ -167,7 +198,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                   variant="secondary"
                   size="small"
                   className={cn('disabled:border-none')}
-                  disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
+                  disabled={!(quote.status === 'OPEN')}
                   onClick={() => {
                     setShowRequestChangeConfirmation(true);
                   }}
@@ -178,7 +209,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                 <Button
                   variant="primary"
                   size="small"
-                  disabled={!(quote.status === 'OPEN' || quote.status === 'IN_PROGRESS')}
+                  disabled={!(quote.status === 'OPEN')}
                   onClick={() => {
                     setShowAcceptConfirmation(true);
                   }}
@@ -432,23 +463,27 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
             <p className="col-start-4 font-bold font-headlines">{t('date')}</p>
           </div>
 
+          {/* Always show initial quote request as first entry */}
+          <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
+            <p className="col-start-1">{quote.customerName || 'Unknown User'}</p>
+            <p className="col-start-2">{t('initialQuoteRequest')}</p>
+            <p className="col-start-3">{'-'}</p>
+            <p className="col-start-4">{formatDate(quote.submittedDate)}</p>
+          </div>
+
           {historyLoading ? (
             <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
-              <p className="col-start-1">Loading history...</p>
+              <p className="col-start-1">{t('loadingHistory')}</p>
             </div>
-          ) : quoteHistory.length > 0 ? (
+          ) : (
             quoteHistory.map((historyItem) => (
               <div key={historyItem.id} className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
-                <p className="col-start-1">{historyItem.userFullName || 'Unknown User'}</p>
-                <p className="col-start-2">{t('commentAdded')}</p>
-                <p className="col-start-3">{historyItem.comment || '-'}</p>
-                <p className="col-start-4">{historyItem.modifiedAt || '-'}</p>
+                <p className="col-start-1">{getHistoryUserName(historyItem)}</p>
+                <p className="col-start-2">{getHistoryAction(historyItem.fieldChanged)}</p>
+                <p className="col-start-3">{historyItem.comment}</p>
+                <p className="col-start-4">{historyItem.modifiedAt}</p>
               </div>
             ))
-          ) : (
-            <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-neutral-200">
-              <p className="col-start-1 text-muted-foreground">No comment history available</p>
-            </div>
           )}
         </div>
 

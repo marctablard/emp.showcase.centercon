@@ -207,7 +207,7 @@
   "quoteStatus": {
     "requested": "Requested",
     "available": "Available",
-    "change_requested": "Change Requested",
+    "in_progress": "In progress",
     "declined": "Rejected",
     "accepted": "Accepted",
     "order_created": "Order Created",
@@ -264,7 +264,10 @@
     "requestChangeConfirmationDescription": "Please let us know how what we can do better.",
     "requestChangeCommentPlaceholder": "Placeholder",
     "requestingChange": "REQUESTING CHANGE...",
-    "commentAdded": "Comment Added"
+    "commentAdded": "Comment Added",
+    "initialQuoteRequest": "Initial Quote Request",
+    "statusChanged": "Status Changed to {currentStatus}",
+    "loadingHistory": "Loading history..."
   },
   "quotesList": {
     "title": "Quotes",

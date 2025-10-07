@@ -34,12 +34,12 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
 
     return {
       id: emporixQuote.id,
-      reference: emporixQuote.id,
       status: status,
       cartId: emporixQuote.cartId,
       submittedDate: emporixQuote.metadata.createdAt,
       customerId: emporixQuote.customer?.customerId || '',
       customerName: customerName,
+      employeeComment: emporixQuote.comment?.employeeComment,
       approverId: emporixQuote.employee?.employeeId,
       approverName: approverName,
       currency: emporixQuote.currency,
@@ -69,10 +69,12 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
         street: shippingAddress?.addressLine1 + ' ' + shippingAddress?.addressLine2,
         zipCode: shippingAddress?.postcode || '',
         city: shippingAddress?.city || '',
-        country: countryName, // Using resolved country name instead of country code
+        country: countryName,
       },
       shippingCost: emporixQuote.shipping?.value || 0,
       shippingMethod: emporixQuote.shipping?.methodId || '',
+      reference: emporixQuote.mixins?.additionalInfo?.reference,
+      userComment: emporixQuote.mixins?.additionalInfo?.userComment,
     };
   }
 }

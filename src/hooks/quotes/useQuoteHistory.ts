@@ -1,28 +1,12 @@
-import { useEffect, useState } from 'react';
-
-export interface QuoteHistoryComment {
-  id: string;
-  comment: string;
-  userFirstName: string;
-  userLastName: string;
-  userFullName: string;
-  modifiedAt: string;
-  rawModifiedAt: string;
-}
-
-export interface UseQuoteHistoryResult {
-  history: QuoteHistoryComment[];
-  loading: boolean;
-  error: Error | null;
-  refetch: () => Promise<void>;
-}
+import { useCallback, useEffect, useState } from 'react';
+import { QuoteHistory, UseQuoteHistoryResult } from '@/platform/services/model/quote';
 
 export function useQuoteHistory(quoteId: string): UseQuoteHistoryResult {
-  const [history, setHistory] = useState<QuoteHistoryComment[]>([]);
+  const [history, setHistory] = useState<QuoteHistory>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -42,13 +26,13 @@ export function useQuoteHistory(quoteId: string): UseQuoteHistoryResult {
     } finally {
       setLoading(false);
     }
-  };
+  }, [quoteId]);
 
   useEffect(() => {
     if (quoteId) {
       fetchHistory();
     }
-  }, [quoteId]);
+  }, [quoteId, fetchHistory]);
 
   return {
     history,

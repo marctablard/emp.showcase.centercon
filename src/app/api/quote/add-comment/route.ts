@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import type { QuoteService } from '@/platform/services/quote/QuoteService';
 
 export async function POST(request: NextRequest) {
@@ -12,7 +13,14 @@ export async function POST(request: NextRequest) {
     }
 
     const quoteService = server.get<QuoteService>('QuoteService');
-    await quoteService.updateQuote(quoteId, 'replace', '/comment', comment, 'service');
+    const updateList: QuoteUpdateRequest[] = [];
+    updateList.push({
+      op: 'REPLACE',
+      path: '/mixins/additionalInfo',
+      value: { reference: body.reference, userComment: comment },
+    });
+
+    await quoteService.updateQuote(quoteId, updateList, 'service');
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -11,7 +11,6 @@ import {
   EmporixQuoteHistory,
   EmporixQuoteReason,
   EmporixQuoteReasonCreationResponse,
-  EmporixQuoteShipping,
 } from '../../model/quote';
 import { EmporixQuote } from '../../model/quote';
 import type { EmporixQuoteApi as IEmporixQuoteApi } from '../EmporixQuoteApi';

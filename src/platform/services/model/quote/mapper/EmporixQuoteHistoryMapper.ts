@@ -1,5 +1,6 @@
+import { format } from 'date-fns';
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixQuoteHistory } from '@/platform/integrations/emporix/model/quote';
+import { EmporixQuoteHistory, EmporixQuoteHistoryItem } from '@/platform/integrations/emporix/model/quote';
 import { QuoteHistory } from '..';
 import type { QuoteHistoryMapper } from './QuoteHistoryMapper';
 
@@ -10,18 +11,30 @@ import type { QuoteHistoryMapper } from './QuoteHistoryMapper';
 @injectable('QuoteHistoryMapper', 'Singleton')
 export class EmporixQuoteHistoryMapper implements QuoteHistoryMapper<EmporixQuoteHistory> {
   mapToService(emporixQuoteHistory: EmporixQuoteHistory): QuoteHistory {
-    return emporixQuoteHistory.map((historyItem) => ({
-      id: historyItem.id,
-      op: historyItem.op,
-      path: historyItem.path,
-      newValue: historyItem.newValue,
-      previousValue: historyItem.previousValue,
-      userId: historyItem.userId,
-      userFirstName: historyItem.userFirstName,
-      userLastName: historyItem.userLastName,
-      userType: historyItem.userType,
-      modifiedAt: historyItem.modifiedAt,
-    }));
+    const formatDate = (dateString?: string) => {
+      if (!dateString) return '-';
+      return format(new Date(dateString), 'dd.MM.yyyy');
+    };
+    const allowedPaths = ['/comment', '/status'];
+    return emporixQuoteHistory
+      .filter((item: EmporixQuoteHistoryItem) => allowedPaths.includes(item.path) || item.path.startsWith('/mixins/'))
+      .map((item: EmporixQuoteHistoryItem) => ({
+        id: item.id,
+        userFullName: `${item.userFirstName || ''} ${item.userLastName || ''}`.trim(),
+        comment:
+          item.path === '/comment'
+            ? item.newValue?.employeeComment
+            : item.path.startsWith('/mixins/')
+              ? item.newValue?.userComment
+              : '-',
+        modifiedAt: formatDate(item.modifiedAt),
+        rawModifiedAt: item.modifiedAt,
+        fieldChanged: item.path,
+      }))
+      .sort((a: any, b: any) => {
+        if (!a.rawModifiedAt || !b.rawModifiedAt) return 0;
+        return new Date(a.rawModifiedAt).getTime() - new Date(b.rawModifiedAt).getTime();
+      });
   }
 }
 

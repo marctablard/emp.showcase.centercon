@@ -14,6 +14,7 @@ export interface Quote {
   submittedDate: string;
   customerId: string;
   customerName?: string;
+  employeeComment?: string;
   approverId?: string;
   approverName?: string;
   currency: string;
@@ -25,6 +26,7 @@ export interface Quote {
   shippingAddress: CheckoutAddress;
   shippingCost: number;
   shippingMethod: string;
+  userComment?: string;
 }
 
 export interface QuoteShipping {
@@ -66,12 +68,6 @@ export interface QuoteReason {
   metadata: EmporixMetadata;
 }
 
-export interface CreateQuoteReasonRequest {
-  code: string;
-  type: string;
-  message: LocalizedString;
-}
-
 export interface QuoteReasonCreationResponse {
   id: string;
 }
@@ -104,17 +100,26 @@ export interface QuoteUpdateValues {
   [key: string]: any;
 }
 
+export interface QuoteUpdateRequest {
+  op: QuoteUpdateOperation;
+  path: QuoteUpdatePath | string;
+  value: QuoteStatus | string | Record<string, any>;
+}
+
 export interface QuoteHistoryItem {
   id: string;
-  op: QuoteUpdateOperation;
-  path: QuoteUpdatePath;
-  newValue?: QuoteUpdateValues;
-  previousValue?: QuoteUpdateValues;
-  userId?: string;
-  userFirstName?: string;
-  userLastName?: string;
-  userType?: QuoteUserType;
-  modifiedAt?: string;
+  userFullName: string;
+  comment: string;
+  modifiedAt: string;
+  rawModifiedAt?: string;
+  fieldChanged: string;
 }
 
 export type QuoteHistory = QuoteHistoryItem[];
+
+export interface UseQuoteHistoryResult {
+  history: QuoteHistory;
+  loading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+}

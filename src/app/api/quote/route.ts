@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import { PriceService } from '@/platform/services/price/PriceService';
 import { QuoteService } from '@/platform/services/quote/QuoteService';
+import { SchemaService } from '@/platform/services/schema/SchemaService';
 
 /**
  * POST /api/quote
@@ -11,8 +13,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const quoteService = server.get<QuoteService>('QuoteService');
     const priceService = server.get<PriceService>('PriceService');
+    const quoteService = server.get<QuoteService>('QuoteService');
+    const schemaService = server.get<SchemaService>('SchemaService');
 
     const items = Array.isArray(body?.items) ? body.items : undefined;
 
@@ -33,7 +36,7 @@ export async function POST(request: NextRequest) {
           const unitPrice = matched.amount;
           const taxClass = matched.tax?.taxCode ?? 'STANDARD';
           const taxRate = matched.tax?.taxRate ?? 0;
-          const totalNetValue = matched.amount;
+          const totalNetValue = matched.amount * quantity;
 
           return {
             ...item,
@@ -51,16 +54,25 @@ export async function POST(request: NextRequest) {
 
     const result = await quoteService.createQuote(body);
 
-    if (body.shipping && result.quoteId) {
+    if (result.quoteId) {
       try {
-        await quoteService.updateQuote(
-          result.quoteId,
-          'replace',
-          '/mixins/additionalInfo',
-          { reference: body.reference },
-          'service',
-        );
-        await quoteService.updateQuote(result.quoteId, 'replace', '/shipping', body.shipping, 'service');
+        const quoteMixinSchema = await schemaService.getSchema('additionalInfo');
+        const updateList: QuoteUpdateRequest[] = [];
+
+        if (body.shipping) {
+          updateList.push({ op: 'REPLACE', path: '/shipping', value: body.shipping });
+        }
+        updateList.push({ op: 'REPLACE', path: '/comment', value: body.comment });
+        updateList.push({
+          op: 'ADD',
+          path: '/mixins/additionalInfo',
+          value: { reference: body.reference, userComment: body.userComment },
+        });
+        updateList.push({ op: 'ADD', path: '/metadata/mixins/additionalInfo', value: quoteMixinSchema.metadata?.url });
+
+        if (updateList.length > 0) {
+          await quoteService.updateQuote(result.quoteId, updateList, 'service');
+        }
       } catch (updateError) {
         console.error('Failed to update quote :', updateError);
       }

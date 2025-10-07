@@ -6,13 +6,11 @@ import type { EmporixQuoteApi } from '@/platform/integrations/emporix/quote/Empo
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import type {
   CreateQuoteInput,
-  CreateQuoteReasonRequest,
   Quote,
   QuoteHistory,
   QuoteReason,
-  QuoteReasonCreationResponse,
   QuoteScope,
-  QuoteShipping,
+  QuoteUpdateRequest,
 } from '@/platform/services/model/quote';
 import type { QuoteHistoryMapper } from '@/platform/services/model/quote/mapper/QuoteHistoryMapper';
 import type { QuoteMapper } from '@/platform/services/model/quote/mapper/QuoteMapper';
@@ -69,14 +67,8 @@ class EmporixQuoteService implements QuoteService {
     return Promise.resolve(this.quoteMapper.mapToService(quote));
   }
 
-  async updateQuote(
-    quoteId: string,
-    op: string,
-    path: string,
-    value: any,
-    scope: QuoteScope = 'public',
-  ): Promise<void> {
-    await this.quoteApi.patchQuote(quoteId, { op, path, value }, scope);
+  async updateQuote(quoteId: string, operations: QuoteUpdateRequest[], scope: QuoteScope = 'public'): Promise<void> {
+    await this.quoteApi.patchQuote(quoteId, operations, scope);
   }
 
   async getQuoteReason(quoteReasonId: string): Promise<QuoteReason> {
@@ -84,9 +76,19 @@ class EmporixQuoteService implements QuoteService {
     return emporixQuoteReason as QuoteReason;
   }
 
-  async createQuoteReason(createQuoteReasonRequest: CreateQuoteReasonRequest): Promise<QuoteReasonCreationResponse> {
-    const response = await this.quoteApi.createQuoteReason(createQuoteReasonRequest);
-    return { id: response.id };
+  async createQuoteReason(quoteId: string, comment: string, locale: string, reasonType: string) {
+    const quoteId_current = `${quoteId}_${Date.now()}`;
+    const code = `${(comment || quoteId_current).toUpperCase().replace(/\s+/g, '_')}`;
+
+    const message: Record<string, string> = {};
+    message[locale] = comment || 'Price too high';
+
+    const response = await this.quoteApi.createQuoteReason({
+      code: code,
+      type: reasonType,
+      message: message,
+    });
+    return response.id;
   }
 
   async getQuoteHistory(quoteId: string): Promise<QuoteHistory> {

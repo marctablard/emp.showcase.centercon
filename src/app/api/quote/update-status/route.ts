@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import { QuoteService } from '@/platform/services/quote/QuoteService';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { quoteId, status, comment, locale } = body;
+    const { quoteId, status, comment, locale, oldStatus } = body;
 
     if (!quoteId) {
       return NextResponse.json({ error: 'Quote ID is required' }, { status: 400 });
@@ -18,20 +19,17 @@ export async function POST(request: NextRequest) {
     const quoteService = server.get<QuoteService>('QuoteService');
 
     let quoteReasonId = undefined;
-    if (status === 'DECLINED') {
-      quoteReasonId = await createDeclinedQuoteReason(quoteId, comment, locale, quoteService);
+    if (status === 'DECLINED' || oldStatus === 'OPEN') {
+      const reasonType = status === 'DECLINED' ? 'DECLINE' : 'CHANGE';
+      quoteReasonId = await quoteService.createQuoteReason(quoteId, comment, locale, reasonType);
     }
-    await quoteService.updateQuote(
-      quoteId,
-      'replace',
-      '/status',
-      {
-        value: status,
-        comment: comment || '',
-        quoteReasonId: quoteReasonId || '',
-      },
-      'session',
-    );
+    const updateList: QuoteUpdateRequest[] = [];
+    updateList.push({
+      op: 'REPLACE',
+      path: '/status',
+      value: { value: status, comment: comment || '', quoteReasonId: quoteReasonId || '' },
+    });
+    await quoteService.updateQuote(quoteId, updateList, 'session');
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
@@ -39,20 +37,4 @@ export async function POST(request: NextRequest) {
     const message = error instanceof Error ? error.message : 'Failed to update quote status';
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-async function createDeclinedQuoteReason(quoteId: any, comment: any, locale: any, quoteService: QuoteService) {
-  let quoteReasonId = undefined;
-  const quoteId_current = `${quoteId}_${Date.now()}`;
-  const code = `${(comment || quoteId_current).toUpperCase().replace(/\s+/g, '_')}`;
-
-  const message: Record<string, string> = {};
-  message[locale] = comment || 'Price too high';
-
-  const response = await quoteService.createQuoteReason({
-    code: code,
-    type: 'DECLINE',
-    message: message,
-  });
-  quoteReasonId = response.id;
-  return quoteReasonId;
 }

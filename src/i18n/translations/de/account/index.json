@@ -168,7 +168,7 @@
   "quoteStatus": {
     "requested": "Angefordert",
     "available": "Verfügbar",
-    "change_requested": "Änderung angefordert",
+    "in_progress": "In Bearbeitung",
     "declined": "Abgelehnt",
     "accepted": "Akzeptiert",
     "order_created": "Bestellung erstellt",
@@ -225,7 +225,10 @@
     "requestChangeConfirmationDescription": "Bitte teilen Sie uns mit, was wir besser machen können.",
     "requestChangeCommentPlaceholder": "Platzhalter",
     "requestingChange": "ÄNDERUNG WIRD ANGEFORDERT...",
-    "commentAdded": "Kommentar hinzugefügt"
+    "commentAdded": "Kommentar hinzugefügt",
+    "initialQuoteRequest": "Angebotsanfrage",
+    "statusChanged": "Status geändert {currentStatus}",
+    "loadingHistory": "Verlauf wird geladen..."
   },
   "quotesList": {
     "title": "Angebote",
