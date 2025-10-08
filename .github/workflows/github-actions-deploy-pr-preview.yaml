@@ -38,7 +38,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
       - name: Install Vercel CLI
-        run: npm i -g vercel@48.0.0
+        run: npm i -g vercel
       - name: Install dependencies
         run: npm ci
       # - name: Install Playwright Browsers
