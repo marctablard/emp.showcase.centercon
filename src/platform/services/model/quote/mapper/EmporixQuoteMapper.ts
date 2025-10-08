@@ -2,7 +2,7 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixQuote } from '@/platform/integrations/emporix/model/quote';
 import type { SiteService } from '@/platform/services/site/SiteService';
-import { Quote } from '..';
+import { Quote, QuoteStatus } from '..';
 import type { QuoteMapper } from './QuoteMapper';
 
 /**
@@ -20,7 +20,7 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
       ? `${emporixQuote.employee.firstName || ''} ${emporixQuote.employee.lastName || ''}`.trim()
       : undefined;
 
-    const status = emporixQuote.status?.value;
+    const status = emporixQuote.status?.value as QuoteStatus;
 
     const shippingAddress = emporixQuote.shippingAddress;
 
@@ -34,12 +34,12 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
 
     return {
       id: emporixQuote.id,
-      reference: emporixQuote.id,
       status: status,
       cartId: emporixQuote.cartId,
       submittedDate: emporixQuote.metadata.createdAt,
       customerId: emporixQuote.customer?.customerId || '',
       customerName: customerName,
+      employeeComment: emporixQuote.comment?.employeeComment,
       approverId: emporixQuote.employee?.employeeId,
       approverName: approverName,
       currency: emporixQuote.currency,
@@ -69,10 +69,12 @@ export class EmporixQuoteMapper implements QuoteMapper<EmporixQuote> {
         street: shippingAddress?.addressLine1 + ' ' + shippingAddress?.addressLine2,
         zipCode: shippingAddress?.postcode || '',
         city: shippingAddress?.city || '',
-        country: countryName, // Using resolved country name instead of country code
+        country: countryName,
       },
       shippingCost: emporixQuote.shipping?.value || 0,
       shippingMethod: emporixQuote.shipping?.methodId || '',
+      reference: emporixQuote.mixins?.additionalInfo?.reference,
+      userComment: emporixQuote.mixins?.additionalInfo?.userComment,
     };
   }
 }
