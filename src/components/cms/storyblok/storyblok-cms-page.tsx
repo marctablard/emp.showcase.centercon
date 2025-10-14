@@ -25,7 +25,7 @@ async function fetchData(locale: string, slug: string, site?: string) {
   try {
     const storyblokApi: StoryblokClient = getStoryblokApi();
     return storyblokApi.getStory(slug, sbParams);
-  } catch (error) {
+  } catch {
     return null;
   }
 }

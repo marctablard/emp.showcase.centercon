@@ -50,7 +50,8 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(props: Omit<Props, 'children'>) {
-  const { locale, site } = await props.params;
+  // Todo: @Michael: is the site needed here? Lint failed because of that
+  const { locale /* site */ } = await props.params;
   const t = await getTranslations({ locale, namespace: 'seo' });
 
   return {
