@@ -48,19 +48,20 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     // First look for the matching routing by Domain
     const routing = resolveApplicableRouting(req.nextUrl.hostname, routingConfig);
     const { site, appPath } = resolveSite(req.nextUrl.pathname, req.cookies, req.headers, routing);
-    console.log('resolved site', site);
-    console.log('resolved appPath', appPath);
     // no routing desired or it's the defaultSite and not needed
     if (routing.prefix === 'never' || (site == routing.defaultSite && routing.prefix === 'as-needed')) {
       // we need to redirect if site is part of the actual path,
-      // since it's either not desired or not neede
+      // since it's either not desired or not needed
       if (req.nextUrl.pathname.startsWith(`/${site}`)) {
+        console.debug('redirecting to appPath, because the site should not be supplied', `/${appPath}`);
         return NextResponse.redirect(new URL(`/${appPath}`, req.url));
-      } else {
-        return NextResponse.rewrite(new URL(`/${site}/${appPath}`, req.url));
       }
-      // routing is either always or 'as-needed' and not default site
+      // url-path does not start with the site, routing is either always or 'as-needed' and not default site
     } else if (!req.nextUrl.pathname.startsWith(`/${site}`)) {
+      console.debug(
+        'redirecting to appPath, because the site should be supplied (always, or not default site)',
+        `/${site}/${appPath}`,
+      );
       return NextResponse.redirect(new URL(`/${site}/${appPath}`, req.url));
     }
     // fake a reduced path for the intlMiddleware

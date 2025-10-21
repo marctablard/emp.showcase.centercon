@@ -44,14 +44,17 @@ function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
  */
 function applySecurityHeaders(response: Response | NextResponse): Response | NextResponse {
   // Set security headers
-  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Content-Type-Options', process.env.X_CONTENT_TYPE_OPTIONS || 'nosniff');
   response.headers.set('Cross-Origin-Resource-Policy', process.env.CROSS_ORIGIN_RESOURCE_POLICY || 'same-site');
   response.headers.set('Cross-Origin-Opener-Policy', process.env.CROSS_ORIGIN_OPENER_POLICY || 'same-origin');
-  response.headers.set('Referrer-Policy', 'no-referrer');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', process.env.REFERRER_POLICY || 'no-referrer');
+  response.headers.set('X-XSS-Protection', process.env.X_XSS_PROTECTION || '1; mode=block');
 
   if (process.env.NODE_ENV === 'production') {
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    response.headers.set(
+      'Strict-Transport-Security',
+      process.env.STRICT_TRANSPORT_SECURITY || 'max-age=31536000; includeSubDomains; preload',
+    );
   }
 
   return response;

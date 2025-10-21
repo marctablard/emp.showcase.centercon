@@ -1,3 +1,5 @@
+import { LocalePrefixMode } from 'next-intl/routing';
+
 // for convenience we imitate LocalePrefixMode
 export type SitePrefixMode = LocalePrefixMode;
 
