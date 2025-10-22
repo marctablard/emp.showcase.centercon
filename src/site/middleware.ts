@@ -54,7 +54,9 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
       // since it's either not desired or not needed
       if (req.nextUrl.pathname.startsWith(`/${site}`)) {
         console.debug('redirecting to appPath, because the site should not be supplied', `/${appPath}`);
-        return NextResponse.redirect(new URL(`/${appPath}`, req.url));
+        const redirectUrl = new URL(`/${appPath}`, req.url);
+        redirectUrl.search = req.nextUrl.search;
+        return NextResponse.redirect(redirectUrl);
       }
       // url-path does not start with the site, routing is either always or 'as-needed' and not default site
     } else if (!req.nextUrl.pathname.startsWith(`/${site}`)) {
@@ -62,7 +64,9 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
         'redirecting to appPath, because the site should be supplied (always, or not default site)',
         `/${site}/${appPath}`,
       );
-      return NextResponse.redirect(new URL(`/${site}/${appPath}`, req.url));
+      const redirectUrl = new URL(`/${site}/${appPath}`, req.url);
+      redirectUrl.search = req.nextUrl.search;
+      return NextResponse.redirect(redirectUrl);
     }
     // fake a reduced path for the intlMiddleware
     req.nextUrl.pathname = appPath;
@@ -71,6 +75,10 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     if (response.status === 307) {
       const location = new URL(response.headers.get('location') || '', req.url);
       location.pathname = `/${site}${location.pathname == '/' ? '' : location.pathname}`;
+      // Preserve query parameters from the original request if not already present
+      if (!location.search && req.nextUrl.search) {
+        location.search = req.nextUrl.search;
+      }
       response.headers.set('location', location.toString());
     } else {
       const location = new URL(response.headers.get('x-middleware-rewrite') || '', req.url);
