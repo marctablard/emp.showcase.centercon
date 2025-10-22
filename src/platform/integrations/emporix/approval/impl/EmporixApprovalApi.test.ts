@@ -243,9 +243,7 @@ describe('EmporixApprovalApi', () => {
           try {
             await approvalApi.deleteApproval(approvalId);
           } catch (deleteError: any) {
-            if (deleteError.message && deleteError.message.includes('404')) {
-              console.log(`Approval ${approvalId} not found`);
-            } else {
+            if (!(deleteError.message && deleteError.message.includes('404'))) {
               throw deleteError;
             }
           }
@@ -259,9 +257,7 @@ describe('EmporixApprovalApi', () => {
           try {
             await cartApi.deleteCart(customerCartId);
           } catch (deleteError: any) {
-            if (deleteError.message && deleteError.message.includes('404')) {
-              console.log(`Cart ${customerCartId} not found`);
-            } else {
+            if (!(deleteError.message && deleteError.message.includes('404'))) {
               throw deleteError;
             }
           }

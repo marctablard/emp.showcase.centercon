@@ -14,7 +14,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "npm-run-all --parallel jest e2e",
-    "jest": "jest",
+    "jest": "jest --runInBand",
     "jest:watch": "jest --watch",
     "jest:coverage": "jest --coverage",
     "e2e": "playwright test",
