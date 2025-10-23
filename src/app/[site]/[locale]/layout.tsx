@@ -50,8 +50,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(props: Omit<Props, 'children'>) {
-  // Todo: @Michael: is the site needed here? Lint failed because of that
-  const { locale /* site */ } = await props.params;
+  const { locale } = await props.params;
   const t = await getTranslations({ locale, namespace: 'seo' });
 
   return {
@@ -68,8 +67,6 @@ export async function generateMetadata(props: Omit<Props, 'children'>) {
 export default async function LocaleLayout({ children, params }: Props) {
   // Ensure that the incoming `locale` is valid
   const { locale, site: siteCode } = await params;
-  console.log('LocaleLayout:site', siteCode);
-  console.log('LocaleLayout:locale', locale);
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
