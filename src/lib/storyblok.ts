@@ -31,6 +31,13 @@ import Video from '@/components/cms/video';
 export const getStoryblokApi = storyblokInit({
   accessToken: process.env.NEXT_PUBLIC_STORYBLOK_ACCESS_TOKEN || '',
   use: [apiPlugin],
+  bridge: true,
+  apiOptions: {
+    maxRetries: 2,
+    cache: {
+      type: 'none',
+    },
+  },
   components: {
     feature: Feature,
     teaser: Teaser,

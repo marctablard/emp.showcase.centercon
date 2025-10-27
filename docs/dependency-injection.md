@@ -359,34 +359,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 | **Server** | API routes, middleware, server utilities | `import server from '@/platform/server'`<br/>`server.get<T>(id)` | REST endpoints, authentication, server-only operations    |
 | **Client** | Client Components, browser-only code     | Injected via context providers           | Interactive UI elements, client-side state management     |
 
-## Migration from Global EMP Pattern
-
-Previously, the application used a global `EMP.platform` object to access containers. This pattern has been migrated to direct imports for better type safety and cleaner code organization.
-
-### Old Pattern (Deprecated)
-```typescript
-// ❌ Old way - no longer supported
-const productService = globalThis.EMP.platform.ssr.get<ProductService>('ProductService');
-const orderService = EMP.platform.server.get<OrderService>('OrderService');
-```
-
-### New Pattern (Current)
-```typescript
-// ✅ New way - direct imports
-import ssr from '@/platform/ssr';
-import server from '@/platform/server';
-
-const productService = ssr.get<ProductService>('ProductService');
-const orderService = server.get<OrderService>('OrderService');
-```
-
-### Benefits of the New Pattern
-- **Better Type Safety**: Direct imports provide better TypeScript intellisense and error checking
-- **Cleaner Dependencies**: Explicit imports make dependencies clear and trackable
-- **No Global State**: Eliminates reliance on global objects, making code more predictable
-- **Tree Shaking**: Bundlers can better optimize unused imports
-- **Easier Testing**: Direct imports are easier to mock and test
-
 ## Conclusion
 
 Our Dependency Injection framework provides a solid foundation for building maintainable, testable, and flexible applications. The unified platform container with environment-specific variants simplifies dependency management while maintaining the flexibility needed for a Next.js application. By following the patterns and practices outlined in this documentation, you can leverage the full power of dependency injection in your application.

@@ -1,27 +1,23 @@
 import { NextAuthRequest } from 'next-auth';
 import NextAuth from 'next-auth';
-import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import authConfig from './auth/auth.config';
+import { routing as intlRouting } from './i18n/routing';
+import { createSiteMiddleware } from './site/middleware';
+import { routing as siteRouting } from './site/routing';
 
-const locales = ['en', 'de'];
-const defaultLocale = 'en';
 const securedPages = ['/account'];
-const securedPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
+const securedPathnameRegex = RegExp(`^(/(${intlRouting.locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
 const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shipping'));
 
 const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications'];
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 
-const intlMiddleware = createIntlMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: 'as-needed',
-});
-
 // Simplified Instance of NextAuth for Edge Middleware (cannot use server context)
 const { auth } = NextAuth(authConfig);
+
+const siteMiddleware = createSiteMiddleware(siteRouting);
 
 /**
  * Validates CSRF token for protected routes
@@ -48,14 +44,17 @@ function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
  */
 function applySecurityHeaders(response: Response | NextResponse): Response | NextResponse {
   // Set security headers
-  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Content-Type-Options', process.env.X_CONTENT_TYPE_OPTIONS || 'nosniff');
   response.headers.set('Cross-Origin-Resource-Policy', process.env.CROSS_ORIGIN_RESOURCE_POLICY || 'same-site');
   response.headers.set('Cross-Origin-Opener-Policy', process.env.CROSS_ORIGIN_OPENER_POLICY || 'same-origin');
-  response.headers.set('Referrer-Policy', 'no-referrer');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', process.env.REFERRER_POLICY || 'no-referrer');
+  response.headers.set('X-XSS-Protection', process.env.X_XSS_PROTECTION || '1; mode=block');
 
   if (process.env.NODE_ENV === 'production') {
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    response.headers.set(
+      'Strict-Transport-Security',
+      process.env.STRICT_TRANSPORT_SECURITY || 'max-age=31536000; includeSubDomains; preload',
+    );
   }
 
   return response;
@@ -72,6 +71,7 @@ export default auth(async (req: NextAuthRequest) => {
 
     // 2) Require auth for secured API prefixes (return 401 for unauthenticated)
     if (!req.auth?.user && startsWithAny(pathname, securedApiPrefixes)) {
+      // TODO use appropriate path (maybe redirect on application level!)
       return applySecurityHeaders(NextResponse.redirect(new URL('/login', req.url)));
     }
 
@@ -87,14 +87,9 @@ export default auth(async (req: NextAuthRequest) => {
     }
   }
 
-  //Successfully process the api request
-  if (pathname.startsWith('/api/')) {
-    return applySecurityHeaders(NextResponse.next());
-  }
-
-  return applySecurityHeaders(intlMiddleware(req) ?? NextResponse.next());
+  return applySecurityHeaders(siteMiddleware(req) ?? NextResponse.next());
 });
 
 export const config = {
-  matcher: ['/((?!_next|.*\\..*).*)', '/api/:path*'],
+  matcher: ['/((?!_next|api|\.well-known\\.*|.*\\..*).*)'],
 };

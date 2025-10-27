@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { redirect } from 'next/navigation';
+import '@/app/globals.css';
 import { auth } from '@/auth/auth';
 import AuthDialogManager from '@/components/auth/auth-dialog-manager';
 import { CsrfProvider } from '@/components/csrf/CsrfProvider';
@@ -12,10 +13,9 @@ import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { routing } from '@/i18n/routing';
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
-import { getAvailableSites, getSite } from '@/lib/ssr/site';
+import { getAvailableSites, getSite, setRequestSite } from '@/lib/ssr/site';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
-import '../globals.css';
 
 const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
 
@@ -33,7 +33,7 @@ const openSans = Open_Sans({
 
 type Props = {
   children: ReactNode;
-  params: Promise<{ locale: Locale }>;
+  params: Promise<{ locale: Locale; site: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
 };
 
@@ -46,12 +46,11 @@ export const viewport = {
 };
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
+  return routing.locales.map((locale) => ({ locale, site: defaultSiteCode }));
 }
 
 export async function generateMetadata(props: Omit<Props, 'children'>) {
   const { locale } = await props.params;
-
   const t = await getTranslations({ locale, namespace: 'seo' });
 
   return {
@@ -67,14 +66,12 @@ export async function generateMetadata(props: Omit<Props, 'children'>) {
 
 export default async function LocaleLayout({ children, params }: Props) {
   // Ensure that the incoming `locale` is valid
-  const { locale } = await params;
-
+  const { locale, site: siteCode } = await params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
   const [authSession, shopSession] = await Promise.all([auth(), getSession()]);
 
-  const siteCode = shopSession?.siteCode || defaultSiteCode;
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
 
   if (site && !hasLocale(site.languages, locale)) {
@@ -90,7 +87,9 @@ export default async function LocaleLayout({ children, params }: Props) {
   }
 
   // Enable static rendering
+  setRequestSite(siteCode);
   setRequestLocale(locale);
+
   return (
     <html lang={locale} className={`${ubuntu.variable} ${openSans.variable} ${ubuntu.className} ${openSans.className}`}>
       <body className="flex h-full flex-col font-body has-[.search]:overflow-hidden">
