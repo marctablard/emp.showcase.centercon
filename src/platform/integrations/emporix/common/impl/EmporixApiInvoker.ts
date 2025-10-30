@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { buildCurl } from '@/platform/core/utils/curl';
+import { buildAndLogCurl, logResponse } from '@/platform/core/utils/debug-utils';
 import type { EmporixConfig } from '../../config';
 import type { EmporixTokenManager } from '../EmporixTokenManager';
 
@@ -12,7 +12,6 @@ import type { EmporixTokenManager } from '../EmporixTokenManager';
 class EmporixApiInvoker {
   private config: EmporixConfig;
   private tokenManager: EmporixTokenManager;
-  private debugCurl: boolean = false;
 
   constructor(
     @inject('EmporixConfig') config: EmporixConfig,
@@ -129,12 +128,11 @@ class EmporixApiInvoker {
 
   async fetch(url: string, options: RequestInit = {}): Promise<Response> {
     url = `${this.config.baseUrl}/${url}`;
-
-    if (this.debugCurl) {
-      console.debug(buildCurl(url, options));
-    }
-    // no recursion, this is the globals fetch!
-    return fetch(url, options);
+    const prefix = buildAndLogCurl(url, options);
+    const responsePromise = fetch(url, options);
+    responsePromise.catch((err) => console.error(`${prefix} [FETCH ERROR] ${url}`, err));
+    responsePromise.then((response) => logResponse(response, url, options, prefix));
+    return responsePromise;
   }
 
   /**
