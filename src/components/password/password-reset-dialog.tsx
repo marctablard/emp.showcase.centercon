@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -20,7 +20,6 @@ import { H1 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { ToastType, notify } from '@/components/ui/toast-notification';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { useRouter } from '@/i18n/navigation';
 
@@ -40,9 +39,7 @@ export function PasswordResetDialog({
   onBackToLoginAction,
 }: PasswordResetProps) {
   const t = useTranslations('auth.Password');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { activeDialog } = useAuthDialog();
 
   const { form } = useValidator(
     'PasswordResetValidationService',
@@ -51,19 +48,18 @@ export function PasswordResetDialog({
     },
     'onChange',
   );
+  const isSubmitting = form.formState.isSubmitting;
+  const isValid = form.formState.isValid;
 
   // Reset form when dialog changes or closes
   useEffect(() => {
     // Reset form fields and errors when dialog changes
     if (form) {
       form.reset({ email: email || '' });
-      setIsSubmitting(false);
     }
-  }, [activeDialog, form, email]);
+  }, [form, email]);
 
   async function onSubmit(values: { email: string }) {
-    setIsSubmitting(true);
-
     await fetch('/api/password-reset', {
       method: 'POST',
       headers: {
@@ -83,7 +79,6 @@ export function PasswordResetDialog({
     });
 
     onBackToLoginAction?.(form.getValues('email'));
-    setIsSubmitting(false);
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -135,7 +130,7 @@ export function PasswordResetDialog({
             />
 
             <DialogFooter className="flex flex-col sm:flex sm:flex-col gap-6 w-full items-center">
-              <Button type="submit" className="w-full" disabled={isSubmitting || !form.formState.isValid}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || !isValid}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

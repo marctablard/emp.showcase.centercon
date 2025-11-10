@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslations } from 'next-intl';
 import { CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, Cloudy, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -81,14 +81,9 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({ description, className = 'h-1
 export function WeatherCard({ className, title, subtitle, ...props }: WeatherCardProps) {
   const t = useTranslations('account.Weather');
   const state = useLocalDashboardStore();
-  const [grid, setGrid] = useState({ cols: 1, rows: 1 });
+  const grid = state.renderedLayout ? findCardLayout('weather', state.renderedLayout) : { cols: 1, rows: 1 };
   const { weather, loading, changeLocation } = useWeather();
 
-  useEffect(() => {
-    if (state.renderedLayout) {
-      setGrid(findCardLayout('weather', state.renderedLayout));
-    }
-  }, [state.renderedLayout]);
   if (loading || !weather) {
     return (
       <DashboardCard className={className} variant="primary" {...props}>

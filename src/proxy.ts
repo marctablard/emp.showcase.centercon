@@ -91,5 +91,5 @@ export default auth(async (req: NextAuthRequest) => {
 });
 
 export const config = {
-  matcher: ['/((?!_next|api|\.well-known\\.*|.*\\..*).*)'],
+  matcher: ['/((?!_next|api|.well-known\\.*|.*\\..*).*)'],
 };

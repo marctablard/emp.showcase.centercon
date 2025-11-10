@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -38,18 +38,15 @@ export function AddressSelector({
 }: AddressSelectorProps) {
   const t = useTranslations('account.AddressForm');
   const [open, setOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | undefined>(selectedAddressId);
+  const [internalSelectedId, setInternalSelectedId] = useState<string | undefined>(selectedAddressId);
   const { addresses, loading } = useAddresses();
 
-  // Update selected ID nonly when Props change
-  useEffect(() => {
-    if (selectedAddressId !== undefined) {
-      setSelectedId(selectedAddressId);
-    }
-  }, [selectedAddressId]);
+  const resolvedSelectedId = selectedAddressId ?? internalSelectedId;
 
   const handleAddressSelect = (address: Address) => {
-    setSelectedId(address.id);
+    if (selectedAddressId === undefined) {
+      setInternalSelectedId(address.id);
+    }
     onSelect(address);
     setOpen(false);
   };
@@ -68,7 +65,7 @@ export function AddressSelector({
   };
 
   // Get the selected address object based on the ID
-  const selectedAddress = selectedId ? addresses?.find((addr) => addr.id === selectedId) : undefined;
+  const selectedAddress = resolvedSelectedId ? addresses?.find((addr) => addr.id === resolvedSelectedId) : undefined;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -101,7 +98,7 @@ export function AddressSelector({
                   <div
                     key={address.id}
                     className={`p-4 my-2 border rounded-md cursor-pointer transition-colors hover:bg-gray-100 
-                    ${selectedId === address.id ? 'border-primary bg-primary/10' : 'border-gray-200'}`}
+                    ${resolvedSelectedId === address.id ? 'border-primary bg-primary/10' : 'border-gray-200'}`}
                     onClick={() => handleAddressSelect(address)}
                   >
                     <div className="flex justify-between items-start mb-1">
