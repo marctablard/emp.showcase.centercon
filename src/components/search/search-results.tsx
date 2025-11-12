@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { ProductTile } from '@/components/product/product-tile';
@@ -45,7 +45,21 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     activeFilters,
     changePage,
   } = useSearch<Product>(initialSearch, initialResults);
-  const [visiblePagination, setVisiblePagination] = useState<number[]>([]);
+  const visiblePagination = useMemo(() => {
+    if (pageSize <= 0) {
+      return [];
+    }
+
+    const totalPages = Math.ceil(total / pageSize);
+    if (totalPages === 0) {
+      return [];
+    }
+
+    const start = Math.max(0, currentPage - 2);
+    const end = Math.min(totalPages - 1, currentPage + 2);
+
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+  }, [currentPage, total, pageSize]);
 
   useEffect(() => {
     // Parse URL parameters to restore search state
@@ -99,13 +113,6 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
       filters: Object.keys(filters).length > 0 ? filters : undefined,
     });
   }, [searchParams, pageSize, search]);
-
-  useEffect(() => {
-    const totalPages = Math.ceil(total / pageSize);
-    const start = Math.max(0, currentPage - 2);
-    const end = Math.min(totalPages - 1, currentPage + 2);
-    setVisiblePagination(Array.from({ length: end - start + 1 }, (_, i) => start + i));
-  }, [currentPage, total, pageSize]);
 
   return (
     <>

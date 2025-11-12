@@ -21,9 +21,6 @@ export interface HeaderSearchProps {
 export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, className }: HeaderSearchProps) {
   const t = useTranslations('layout.header');
   const router = useRouter();
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [hasInitialSearch, setHasInitialSearch] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const { deactivateSearch, showSearch, hasInputFocus, setHasInputFocus } = searchInput;
 
   // Get the current locale
@@ -32,6 +29,9 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
   // Initialize the search hook with Product type and initial results
   const { data: _products, suggestions, loading, getSuggestions, currentQuery } = useSearch<Product>();
 
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [hasInitialSearch, setHasInitialSearch] = useState(Boolean(currentQuery));
+  const [isMounted, setIsMounted] = useState(false);
   const [query, setQuery] = useState(currentQuery || '');
 
   const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -39,7 +39,9 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // This code is also mentioned in the React docs: https://react.dev/reference/react/useEffect#displaying-different-content-on-the-server-and-the-client
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
 
@@ -76,18 +78,13 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
       // Fetch suggestions only when at least 2 characters are entered
       if (value.trim().length >= 2) {
         setShowSuggestions(true);
+        setHasInitialSearch(true);
         getSuggestions(value, locale);
       } else {
         setShowSuggestions(false);
       }
     }, 360);
   };
-
-  useEffect(() => {
-    if (loading) {
-      setHasInitialSearch(true);
-    }
-  }, [loading]);
 
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
@@ -115,6 +112,7 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
     (selectedQuery: string) => {
       // Update the query state
       setQuery(selectedQuery);
+      setHasInitialSearch(true);
 
       // Execute the search with the selected query
       getSuggestions(selectedQuery, locale);

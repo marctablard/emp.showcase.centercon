@@ -14,7 +14,9 @@ export function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const searchInput = useSearchInput();
 
+  // This code is also mentioned in the React docs: https://react.dev/reference/react/useEffect#displaying-different-content-on-the-server-and-the-client
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
 

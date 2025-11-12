@@ -53,6 +53,7 @@ export function Notification() {
     return () => {
       unregisterNotificationListener(notificationSubscription);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <></>;

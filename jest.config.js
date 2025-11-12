@@ -29,7 +29,7 @@ const customJestConfig = {
       testMatch: ['**/hooks/**/?(*.)+(spec|test).ts?(x)'],
       setupFilesAfterEnv: ['<rootDir>/jest.react.setup.js'],
       transform: {
-        '^.+\.(ts|tsx)$': [
+        '^.+\\.(ts|tsx)$': [
           '@swc/jest',
           {
             jsc: {

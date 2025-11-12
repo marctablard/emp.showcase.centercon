@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useFormState, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Check, CircleAlert, Dot } from 'lucide-react';
@@ -26,39 +26,34 @@ export function PasswordCriteria({ control, passwordField }: PasswordCriteriaPro
 
   const { touchedFields, dirtyFields } = useFormState({ control });
 
-  const [criteria, setCriteria] = useState<CriteriaState>({
-    minLength: null,
-    uppercase: null,
-    lowercase: null,
-    number: null,
-  });
-
   const isFieldTouched = touchedFields[passwordField];
   const isFieldDirty = dirtyFields[passwordField];
 
-  useEffect(() => {
+  const criteria = useMemo<CriteriaState>(() => {
     if (password) {
-      setCriteria({
+      return {
         minLength: password.length >= 8,
         uppercase: /[A-Z]/.test(password),
         lowercase: /[a-z]/.test(password),
         number: /[0-9]/.test(password),
-      });
-    } else if (isFieldTouched || isFieldDirty) {
-      setCriteria({
+      };
+    }
+
+    if (isFieldTouched || isFieldDirty) {
+      return {
         minLength: false,
         uppercase: false,
         lowercase: false,
         number: false,
-      });
-    } else {
-      setCriteria({
-        minLength: null,
-        uppercase: null,
-        lowercase: null,
-        number: null,
-      });
+      };
     }
+
+    return {
+      minLength: null,
+      uppercase: null,
+      lowercase: null,
+      number: null,
+    };
   }, [password, isFieldTouched, isFieldDirty]);
 
   return (

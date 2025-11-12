@@ -36,7 +36,7 @@ export function LanguageSwitcher() {
       code: locale,
       name: t(locale),
     }));
-  }, [site?.languages, t]);
+  }, [site, t]);
 
   const switchLocale = (newLocale: string) => {
     startTransition(() => {

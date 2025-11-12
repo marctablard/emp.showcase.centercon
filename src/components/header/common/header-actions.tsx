@@ -24,7 +24,9 @@ export function HeaderActions({
   const [isMounted, setIsMounted] = useState(false);
   const isMediumScreen = useBreakpoint('md');
 
+  // This code is also mentioned in the React docs: https://react.dev/reference/react/useEffect#displaying-different-content-on-the-server-and-the-client
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
 

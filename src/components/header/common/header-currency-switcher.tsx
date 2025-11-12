@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
@@ -16,11 +16,20 @@ export function CurrencySwitcher() {
   const router = useRouter();
   const t = useTranslations('common.Currencies');
   const { currencies, loading: siteLoading } = useSite();
-  let initialCurrency = undefined;
-  if (session && currencies) {
-    initialCurrency = currencies.find((currencies) => currencies.code == session.currency);
-  }
-  const [currentCurrency, setCurrentCurrency] = useState(initialCurrency);
+  const currentCurrency = useMemo(() => {
+    if (!currencies || currencies.length === 0) {
+      return undefined;
+    }
+
+    if (session?.currency) {
+      const matchedCurrency = currencies.find((currency) => currency.code === session.currency);
+      if (matchedCurrency) {
+        return matchedCurrency;
+      }
+    }
+
+    return currencies[0];
+  }, [currencies, session]);
 
   const switchCurrency = (currency: string) => {
     setCurrency(currency);
@@ -32,19 +41,6 @@ export function CurrencySwitcher() {
       router.refresh();
     }
   }, [session, currentCurrency, router]);
-
-  useEffect(() => {
-    if (currencies) {
-      let currency;
-      if (session) {
-        currency = currencies.find((currency) => currency.code === session.currency);
-      }
-      if (!currency) {
-        currency = currencies[0];
-      }
-      setCurrentCurrency(currency);
-    }
-  }, [session, currencies]);
 
   if (siteLoading || sessionLoading) {
     return <Spinner color="white" variant="sm" />;

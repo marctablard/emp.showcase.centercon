@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Pencil } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
@@ -24,13 +23,7 @@ export function CartDelivery() {
   };
 
   const { shippingAddress, shippingMethod, submitShippingAddress } = useCheckout();
-  const [isPickup, setIsPickup] = useState(shippingMethod?.methodId === 'pickup');
-
-  useEffect(() => {
-    if (shippingMethod?.methodId === 'pickup') {
-      setIsPickup(true);
-    }
-  }, [shippingMethod]);
+  const isPickup = shippingMethod?.methodId === 'pickup';
 
   return (
     <Card className="p-0 border-none shadow-sm mb-4 lg:mb-6">

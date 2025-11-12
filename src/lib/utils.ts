@@ -118,9 +118,8 @@ export function l10n(
         (item: any) =>
           item && typeof item === 'object' && typeof item.message === 'string' && typeof item.language === 'string',
       );
-
       return firstValidItem ? firstValidItem.message : '';
-    } catch (error) {
+    } catch {
       // Fail gracefully on any array processing error
       return '';
     }
@@ -137,7 +136,7 @@ export function l10n(
       // If all else fails, return the first available string value or an empty string
       const firstAvailableLocale = Object.keys(input).find((key) => typeof input[key] === 'string');
       return firstAvailableLocale ? input[firstAvailableLocale] : '';
-    } catch (error) {
+    } catch {
       // Fail gracefully on any object processing error
       return '';
     }

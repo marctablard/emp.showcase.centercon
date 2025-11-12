@@ -22,6 +22,7 @@ interface PaymentMethodProps {
  */
 const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = false }) => {
   const { paymentMethod, submitPaymentMethod } = useCheckout();
+  const { paymentModes, loading, error } = useSite();
   const { form } = useValidator('PaymentValidationService', paymentMethod, 'onChange', (value) => {
     const mode = paymentModes?.find((mode) => mode.id === value.id);
     if (mode) {
@@ -32,8 +33,6 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
       });
     }
   });
-
-  const { paymentModes, loading, error } = useSite();
 
   const [cardDetails] = useState({
     cardNumber: '',

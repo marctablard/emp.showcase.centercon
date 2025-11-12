@@ -1,6 +1,6 @@
 'use client';
 
-import React, { startTransition, useCallback, useEffect, useState } from 'react';
+import React, { startTransition, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { CheckCircle2 } from 'lucide-react';
@@ -33,25 +33,52 @@ export default function ProductVariantSelectorSimple({
   const t = useTranslations('product');
   const { l10n } = useL10n();
 
-  const getVariants = useCallback(async () => {
-    const variants = await fetchProductVariants(product.parentVariantId || product.id);
-    setVariants(variants);
-  }, [product]);
-
-  const getPrices = useCallback(async () => {
-    const prices = await Promise.all(variants.map((variant) => fetchProductPrice(variant.id)));
-    setVariantPrices(prices.filter((price) => price !== null) as ProductPrice[]);
-  }, [variants]);
-
   useEffect(() => {
-    getVariants();
-  }, [product, getVariants]);
+    let isCancelled = false;
 
-  useEffect(() => {
-    if (variants.length > 0 && soloVariant) {
-      getPrices();
-    }
-  }, [variants, getPrices, soloVariant]);
+    const loadVariantsAndPrices = async () => {
+      if (isCancelled) {
+        return;
+      }
+
+      try {
+        setVariantPrices(undefined);
+
+        const fetchedVariants = await fetchProductVariants(product.parentVariantId || product.id);
+
+        if (isCancelled) {
+          return;
+        }
+
+        setVariants(fetchedVariants);
+
+        if (!soloVariant || fetchedVariants.length === 0) {
+          return;
+        }
+
+        const fetchedPrices = await Promise.all(fetchedVariants.map((variant) => fetchProductPrice(variant.id)));
+
+        if (isCancelled) {
+          return;
+        }
+
+        setVariantPrices(fetchedPrices.filter((price): price is ProductPrice => price !== null));
+      } catch {
+        if (isCancelled) {
+          return;
+        }
+
+        setVariants([]);
+        setVariantPrices(undefined);
+      }
+    };
+
+    void loadVariantsAndPrices();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [product.id, product.parentVariantId, soloVariant]);
 
   // Handle variant selection via tiles
   const handleVariantTileClick = (variant: Product) => {

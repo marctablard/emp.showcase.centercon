@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { HandCoins } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
@@ -15,21 +15,8 @@ export function BudgetSummaryCard() {
   const t = useTranslations('account');
   const { loading, error, company } = useCompany();
   const { orders, loading: ordersLoading } = useOrders();
-  const [revenue, setRevenue] = useState(0.0);
-  const [currency, setCurrency] = useState('EUR');
-
-  useEffect(() => {
-    if (orders) {
-      let sum = 0.0;
-      if (orders.length > 0) {
-        setCurrency(orders[0].currency || 'EUR');
-        orders.forEach((order) => {
-          sum += order.price?.total.net || 0;
-          setRevenue(sum);
-        });
-      }
-    }
-  }, [orders, revenue]);
+  const revenue = useMemo(() => orders?.reduce((sum, order) => sum + (order.price?.total.net || 0), 0) ?? 0, [orders]);
+  const currency = orders?.[0]?.currency || 'EUR';
 
   if (loading || ordersLoading) {
     return (
@@ -55,21 +42,8 @@ export function BudgetProgress({ className, title, ...props }: BudgetProgressPro
   const t = useTranslations('account');
   const { loading, error, company } = useCompany();
   const { orders, loading: ordersLoading } = useOrders();
-  const [revenue, setRevenue] = useState(0.0);
-  const [currency, setCurrency] = useState('EUR');
-
-  useEffect(() => {
-    if (orders) {
-      let sum = 0.0;
-      if (orders.length > 0) {
-        setCurrency(orders[0].currency || 'EUR');
-        orders.forEach((order) => {
-          sum += order.price?.total.net || 0;
-          setRevenue(sum);
-        });
-      }
-    }
-  }, [orders, revenue]);
+  const revenue = useMemo(() => orders?.reduce((sum, order) => sum + (order.price?.total.net || 0), 0) ?? 0, [orders]);
+  const currency = orders?.[0]?.currency || 'EUR';
 
   if (loading || ordersLoading) {
     return (

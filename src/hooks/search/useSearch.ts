@@ -59,7 +59,14 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
         }
       });
 
-      const newUrl = `${pathname}?${browserSearchParams.toString()}`;
+      const searchString = browserSearchParams.toString();
+      const newUrl = searchString ? `${pathname}?${searchString}` : pathname;
+      const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+      if (currentUrl === newUrl) {
+        return;
+      }
+
       router.push(newUrl, { scroll: false });
     },
     [pathname, router],
