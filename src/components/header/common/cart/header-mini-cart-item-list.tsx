@@ -67,9 +67,9 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
   return (
     <>
       {cart?.items?.map((item) => (
-        <div key={item.id} className={`pt-4 first:pt-0 pb-4 border-b flex items-end justify-between gap-3`}>
+        <div key={item.id} className="pt-4 first:pt-0 pb-4 border-b flex items-end justify-between gap-3">
           <div className="flex gap-4">
-            <div className="rounded-ss-xl rounded-ee-xl w-[100px] h-[65px] object-fit overflow-hidden">
+            <div className="rounded-ss-md rounded-ee-md w-[100px] h-[65px] object-fit overflow-hidden">
               {item.product && item.product.images?.length ? (
                 <Image
                   width={100}
@@ -79,13 +79,13 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <div className="w-full h-full flex items-center justify-center text-icon-secondary">
                   <ShoppingCart className="h-6 w-6 opacity-30" />
                 </div>
               )}
             </div>
             <div className="flex-grow min-w-0">
-              <p className="text-sm">{l10n(item.product?.brand?.name || 'Brand')}</p>
+              <p className="text-sm">{l10n(item.product?.brand?.name || '')}</p>
               <p
                 className="font-bold truncate font-headlines cursor-pointer"
                 onClick={() => router.push(`/product/${item.product?.id}`)}
@@ -93,12 +93,12 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
                 {l10n(item.product?.name || 'Product')}
               </p>
               <div className="flex items-center">
-                <p className="text-xs border-r border-neutral-200 pr-4">
+                <p className="text-sm border-r border-border-primary pr-4">
                   {t('itemNumber')} {item.product?.id}
                 </p>
-                <p className="text-xs pl-4">
+                <p className="text-sm pl-4">
                   <span
-                    className={`${getCartItemSubstitutions(item).length > 0 ? 'bg-orange-100/75 rounded-full px-1' : ''}`}
+                    className={`${getCartItemSubstitutions(item).length > 0 ? 'bg-surface-warning rounded-full px-1' : ''}`}
                   >
                     {t('qty')}: {item.quantity}
                   </span>
@@ -112,7 +112,7 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
             </div>
           </div>
           <div>
-            <p className={`font-bold font-headlines`}>
+            <p className="flex items-center font-bold font-headlines">
               {getCartItemPriceChanges(item).length > 0 && (
                 <Badge
                   variant="warning"
@@ -122,7 +122,7 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
                 </Badge>
               )}
               <span
-                className={`${getCartItemPriceChanges(item).length > 0 ? 'bg-orange-100/75 rounded-full px-1' : ''}`}
+                className={`${getCartItemPriceChanges(item).length > 0 ? 'bg-surface-warning rounded-full px-1' : ''}`}
               >
                 {formatCurrency(item.price.amount, item.price.currency)}
               </span>

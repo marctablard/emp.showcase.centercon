@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useSite } from '@/hooks/site/useSite';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { Address } from '@/platform/services/model/common';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Spinner } from '../ui/spinner';
@@ -51,7 +50,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
   const { countries, loading } = useSite();
 
   return (
-    <FormProvider {...form}>
+    <Form {...form}>
       <div className="space-y-6">
         <div>
           <FormField
@@ -248,7 +247,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
           )}
         </div>
       </div>
-    </FormProvider>
+    </Form>
   );
 };
 

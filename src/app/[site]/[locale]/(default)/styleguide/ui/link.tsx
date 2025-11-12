@@ -1,10 +1,11 @@
 import { ArrowRight, Trash2 } from 'lucide-react';
+import { H4 } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
 
 export default function LinkStyleGuide() {
   return (
     <div className="py-12">
-      <h4 className="text-3xl/5 lg:text-4xl font-bold text-headlines font-headlines mb-3">Links</h4>
+      <H4 className="mb-3">Links</H4>
       <p className="text-base mb-2">
         Now there is a ui-component for links &quot;UiLink&quot;. You can either use the Link from next.js as type or A
         for HTML a-Tag and also button-Tag is possible.

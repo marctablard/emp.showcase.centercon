@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CirclePause, CirclePlay } from 'lucide-react';
+import { H1 } from '@/components/ui/h';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { cn } from '@/lib/utils';
 import Button, { ButtonData } from './button';
@@ -94,26 +95,26 @@ const Hero = ({ headline, text, main_button, image, video }: HeroProps) => {
         </div>
       </div>
       <div className="w-full max-w-6xl mx-auto">
-        <div className="ms-auto absolute bottom-0 sm:-bottom-10 md:-bottom-10 lg:bottom-20 px-4 lg:px-9">
+        <div className="ml-auto absolute bottom-0 sm:-bottom-10 md:-bottom-10 lg:bottom-20 px-4 lg:px-9">
           {video && !isDesktopScreen && (
             <div
-              className="flex rounded-3xl shadow-xl w-12 h-12 bg-white cursor-pointer ms-auto mb-4 p-3 text-primary-500 transition hover:text-primary-700"
+              className="flex rounded-full shadow-sm backdrop-blur-default w-12 h-12 bg-surface-page/85 cursor-pointer ml-auto mb-4 p-3 text-icon-action transition hover:text-icon-action-hover"
               onClick={handleVideoPlay}
             >
               {isPlaying ? <CirclePause /> : <CirclePlay />}
             </div>
           )}
-          <div className="flex flex-col gap-4 bg-white/85 md:w-1/2 xl:w-4/7 rounded-ss-2xl md:rounded-ss-4xl rounded-ee-2xl md:rounded-ee-4xl shadow-lg p-4 md:p-6 backdrop-blur-xs">
-            <h1 className="text-5xl lg:text-8xl font-bold text-headlines font-headlines">{headline}</h1>
-            <div className="w-20 h-2 bg-primary-500 rounded-xl"></div>
-            <p className=" text-base lg:text-xl text-neutral-800">{content}</p>
+          <div className="flex flex-col gap-4 bg-surface-page/85 md:w-1/2 xl:w-4/7 rounded-tl-lg md:rounded-tl-2xl rounded-br-lg md:rounded-br-2xl shadow-sm p-4 md:p-6 backdrop-blur-default">
+            <H1>{headline}</H1>
+            <div className="w-20 h-2 bg-surface-action rounded-full"></div>
+            <p className="text-base lg:text-lg text-text-body">{content}</p>
 
             {button && <Button {...button} />}
           </div>
         </div>
         {video && isDesktopScreen && (
           <div
-            className="absolute flex rounded-3xl shadow-xl w-12 h-12 bg-white right-0 bottom-0 cursor-pointer me-9 mb-14 p-3 text-primary-500 transition hover:text-primary-700"
+            className="absolute flex rounded-full shadow-sm backdrop-blur-default w-12 h-12 bg-surface-page/85 right-0 bottom-0 cursor-pointer mr-9 mb-14 p-3 text-icon-action transition hover:text-icon-action-hover"
             onClick={handleVideoPlay}
           >
             {isPlaying ? <CirclePause /> : <CirclePlay />}

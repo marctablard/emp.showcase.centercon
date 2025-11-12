@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { ArrowRight, Search } from 'lucide-react';
 import { SavedCartsTable } from '@/components/account/saved-carts/saved-carts-table';
 import { CardTitle } from '@/components/ui/card';
-import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { useCart } from '@/hooks/cart/useCart';
@@ -104,7 +103,7 @@ export function SavedCartsList({ className, title, isModal = false, onClose, ...
   if (error) {
     return (
       <DashboardCard variant="default" className={cn('py-4', className)} {...props}>
-        <div className="text-center py-4 text-destructive">{t('errorMessage')}</div>
+        <div className="text-center py-4 text-text-error">{t('errorMessage')}</div>
       </DashboardCard>
     );
   }
@@ -122,7 +121,7 @@ export function SavedCartsList({ className, title, isModal = false, onClose, ...
 
       {/* search */}
       <div className="mb-4 w-[60%]">
-        <FormProvider {...form}>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSearch)} className="w-full">
             <FormField
               control={form.control}
@@ -137,7 +136,7 @@ export function SavedCartsList({ className, title, isModal = false, onClose, ...
               )}
             />
           </form>
-        </FormProvider>
+        </Form>
       </div>
 
       <div className="flex flex-col">

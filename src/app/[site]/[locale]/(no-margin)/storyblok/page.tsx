@@ -1,4 +1,5 @@
 import { ISbStoriesParams, StoryblokClient, StoryblokStory } from '@storyblok/react/rsc';
+import { H1 } from '@/components/ui/h';
 import { getStoryblokApi } from '@/lib/storyblok';
 
 /**
@@ -22,7 +23,9 @@ export default async function StoryblokPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Storyblok Demo</h1>
+      <H1 variant="h5" className="mb-6">
+        Storyblok Demo
+      </H1>
 
       {/* If a story was found, display the content */}
       {data?.story ? (
@@ -30,7 +33,7 @@ export default async function StoryblokPage() {
           <StoryblokStory story={data.story} />
         </div>
       ) : (
-        <div className="p-4 bg-yellow-100 border border-yellow-400 rounded">
+        <div className="p-4 bg-surface-warning border border-border-warning rounded">
           <p>No content found. Please make sure that:</p>
           <ul className="list-disc ml-6 mt-2">
             <li>You have a valid Storyblok Access Token in your .env file</li>

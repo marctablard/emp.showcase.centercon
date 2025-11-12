@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { H3 } from '@/components/ui/h';
 import { Link } from '@/i18n/navigation';
 
 /**
@@ -38,12 +39,15 @@ const ImageWithHover = ({ image, className = '' }: ImageWithHoverProps) => {
         className="object-cover transition-all duration-300 group-hover:scale-105"
       />
       {/* Blue overlay on hover */}
-      <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/40 transition-all duration-300 backdrop-blur-[0px] group-hover:backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-surface-action group-hover:bg-surface-action-hover transition-all duration-300" />
       {image.title && (
         <div className="absolute bottom-4 left-4 right-4">
-          <h3 className="text-white font-bold text-lg drop-shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <H3
+            variant="h5"
+            className="text-text-on-action shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
             {image.title}
-          </h3>
+          </H3>
         </div>
       )}
     </div>

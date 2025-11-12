@@ -78,7 +78,6 @@ A list of known issues and their workarounds. (We are aware of these and will fi
 - CMS Components are currently  specific to Storyblok, we already have a concept for wrapping CMS-Components to make them more generic, which will be part of an upcoming release
 - There's no Caching implemented for the Integration Layer, we plan to implement this in an upcoming release
 - The Unit Tests rely on specific Test-Data for API-Endpoint Testing, you need to include them yourself for now, but we plan to create an automation to create the Test-Data in your own tenants soon. You may need to skip these tests for now.
-- The Component-Library doesn't use the Variant/Theming approach consistently as of now.
 
 ### What to Expect
 To sharpen the understanding of how this Framework is intended to be used, here a few key concepts.

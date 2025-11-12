@@ -37,7 +37,7 @@ export function QueryCompletions({
               }
             }}
             key={queryCompletion}
-            className="min-w-0 p-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 flex shrink-1 font-normal"
+            className="min-w-0 p-2 bg-surface-disabled hover:bg-surface-hover-grey text-text-heading flex shrink-1 font-medium"
           >
             {isProductsShown ? (
               <span className="truncate w-full max-w-full text-left md:max-w-[48ch]">
@@ -53,7 +53,7 @@ export function QueryCompletions({
         ))}
 
         {!isProductsShown && (
-          <UiLink type="Button" className="text-neutral-900 font-normal" onClick={clearSearchHistory}>
+          <UiLink type="Button" className="text-text-heading font-medium" onClick={clearSearchHistory}>
             {t('clearHistory')}
           </UiLink>
         )}

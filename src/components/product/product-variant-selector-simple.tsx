@@ -100,7 +100,7 @@ export default function ProductVariantSelectorSimple({
           <Card
             key={`skeleton-${index}`}
             variant="gray"
-            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm border-2 border-neutral-50"
+            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 border border-border-primary"
           >
             <div className="col-start-1 p-4">
               <div className="w-[108px] h-[68px]">
@@ -108,7 +108,7 @@ export default function ProductVariantSelectorSimple({
               </div>
             </div>
             <div className="col-start-2 p-6 flex flex-col justify-center gap-2">
-              <div className="flex gap-2 items-center text-muted-foreground">
+              <div className="flex gap-2 items-center text-text-placeholders">
                 <Skeleton className="h-4 w-16" />
               </div>
               <div className="flex gap-2 items-center font-bold">
@@ -132,13 +132,13 @@ export default function ProductVariantSelectorSimple({
             key={variant.id}
             variant={isSelected ? 'primary' : 'gray'}
             className={cn(
-              'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 rounded-sm',
-              isSelected ? 'border-2 border-primary-500' : 'border-2 border-neutral-50',
+              'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3',
+              isSelected ? 'border border-border-action' : 'border border-border-primary',
             )}
             onClick={() => handleVariantTileClick(variant)}
           >
             <div className="col-start-1 p-4">
-              <div className="w-[108px] h-[68px]">
+              <div className="w-[108px] h-[68px] bg-surface-image-background">
                 {variant.images && variant.images.length > 0 ? (
                   <Image
                     src={variant.images[0].url}
@@ -149,13 +149,13 @@ export default function ProductVariantSelectorSimple({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-xs text-neutral-600">No image</span>
+                    <span className="text-sm text-text-on-disabled">No image</span>
                   </div>
                 )}
               </div>
             </div>
             <div className="col-start-2 p-6 flex flex-col justify-center">
-              <div className="flex gap-2 items-center text-muted-foreground">
+              <div className="flex gap-2 items-center text-text-placeholders">
                 <p>
                   {soloVariant.name
                     ? l10n(soloVariant.name)
@@ -166,10 +166,10 @@ export default function ProductVariantSelectorSimple({
               </div>
               <div className="flex gap-2 items-center font-bold">
                 <p>{variantValue ? l10n(variantValue) : variantValue}</p>
-                {isSelected && <CheckCircle2 className="text-success-500 w-4 h-4" />}
+                {isSelected && <CheckCircle2 className="text-text-success w-4 h-4" />}
               </div>
               {variantPrices ? (
-                <p className="text-xs text-neutral-600">
+                <p className="text-sm text-text-on-disabled">
                   {getPrice(variant) ? (
                     formatCurrency(getPrice(variant)?.amount || 0, getPrice(variant)?.currency || 'EUR')
                   ) : (

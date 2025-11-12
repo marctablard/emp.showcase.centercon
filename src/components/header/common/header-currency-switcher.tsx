@@ -66,7 +66,7 @@ export function CurrencySwitcher() {
         return 'coins';
     }
   }
-  const icon = <DynamicIcon name={getIconName()} color="white" className="w-4 h-4" />;
+  const icon = <DynamicIcon name={getIconName()} className="w-4 h-4 text-icon-on-action" />;
 
   return (
     <TopBarSwitcher

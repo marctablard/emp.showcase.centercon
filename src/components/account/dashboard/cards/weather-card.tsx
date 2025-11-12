@@ -124,7 +124,7 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
           <div
             className={`text-sm ${
               grid?.cols > grid?.rows
-                ? 'border-l border-primary-600 pl-4 flex-shrink-0 flex flex-col justify-center'
+                ? 'border-l border-border-primary pl-4 flex-shrink-0 flex flex-col justify-center'
                 : 'mt-2'
             }`}
           >
@@ -145,7 +145,7 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
         <div className="mt-4">
           <Button
             variant="link"
-            className="text-white hover:text-white hover:bg-primary-600 w-full"
+            className="text-text-on-action hover:text-text-on-action hover:bg-surface-action-hover w-full"
             onClick={() => {
               const berlinLocation: LocationData = {
                 city: 'Berlin',

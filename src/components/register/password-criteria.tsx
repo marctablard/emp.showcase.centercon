@@ -35,7 +35,7 @@ export function PasswordCriteria({ control, passwordField }: PasswordCriteriaPro
         minLength: password.length >= 8,
         uppercase: /[A-Z]/.test(password),
         lowercase: /[a-z]/.test(password),
-        number: /[0-9]/.test(password),
+        number: /[\d]/.test(password),
       };
     }
 
@@ -62,12 +62,12 @@ export function PasswordCriteria({ control, passwordField }: PasswordCriteriaPro
         {criteria.minLength === null ? (
           <Dot className="h-4 w-4" />
         ) : criteria.minLength ? (
-          <Check className="h-4 w-4 text-success-500" />
+          <Check className="h-4 w-4 text-icon-success" />
         ) : (
-          <CircleAlert className="h-4 w-4 text-danger-500" />
+          <CircleAlert className="h-4 w-4 text-icon-error" />
         )}
         <span
-          className={criteria.minLength === null ? '' : criteria.minLength ? 'text-success-500' : 'text-danger-500'}
+          className={criteria.minLength === null ? '' : criteria.minLength ? 'text-text-success' : 'text-text-error'}
         >
           {t('minLength')}
         </span>
@@ -76,12 +76,12 @@ export function PasswordCriteria({ control, passwordField }: PasswordCriteriaPro
         {criteria.uppercase === null ? (
           <Dot className="h-4 w-4" />
         ) : criteria.uppercase ? (
-          <Check className="h-4 w-4 text-success-500" />
+          <Check className="h-4 w-4 text-icon-success" />
         ) : (
-          <CircleAlert className="h-4 w-4 text-danger-500" />
+          <CircleAlert className="h-4 w-4 text-icon-error" />
         )}
         <span
-          className={criteria.uppercase === null ? '' : criteria.uppercase ? 'text-success-500' : 'text-danger-500'}
+          className={criteria.uppercase === null ? '' : criteria.uppercase ? 'text-text-success' : 'text-text-error'}
         >
           {t('uppercase')}
         </span>
@@ -90,12 +90,12 @@ export function PasswordCriteria({ control, passwordField }: PasswordCriteriaPro
         {criteria.lowercase === null ? (
           <Dot className="h-4 w-4" />
         ) : criteria.lowercase ? (
-          <Check className="h-4 w-4 text-success-500" />
+          <Check className="h-4 w-4 text-icon-success" />
         ) : (
-          <CircleAlert className="h-4 w-4 text-danger-500" />
+          <CircleAlert className="h-4 w-4 text-icon-error" />
         )}
         <span
-          className={criteria.lowercase === null ? '' : criteria.lowercase ? 'text-success-500' : 'text-danger-500'}
+          className={criteria.lowercase === null ? '' : criteria.lowercase ? 'text-text-success' : 'text-text-error'}
         >
           {t('lowercase')}
         </span>
@@ -104,11 +104,11 @@ export function PasswordCriteria({ control, passwordField }: PasswordCriteriaPro
         {criteria.number === null ? (
           <Dot className="h-4 w-4" />
         ) : criteria.number ? (
-          <Check className="h-4 w-4 text-success-500" />
+          <Check className="h-4 w-4 text-icon-success" />
         ) : (
-          <CircleAlert className="h-4 w-4 text-danger-500" />
+          <CircleAlert className="h-4 w-4 text-icon-error" />
         )}
-        <span className={criteria.number === null ? '' : criteria.number ? 'text-success-500' : 'text-danger-500'}>
+        <span className={criteria.number === null ? '' : criteria.number ? 'text-text-success' : 'text-text-error'}>
           {t('number')}
         </span>
       </li>

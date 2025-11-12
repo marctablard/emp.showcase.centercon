@@ -12,7 +12,7 @@ export function StatCard({ value, description, className, ...props }: StatCardPr
   return (
     <DashboardCard variant="stat" className={`${className} h-full`} {...props}>
       <div className="text-2xl font-bold">{value}</div>
-      {description && <p className="text-xs text-muted-foreground">{description}</p>}
+      {description && <p className="text-sm text-text-placeholders">{description}</p>}
     </DashboardCard>
   );
 }

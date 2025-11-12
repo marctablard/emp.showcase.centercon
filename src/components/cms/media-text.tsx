@@ -51,7 +51,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
       {...storyblokEditable(blok)}
       className={cn(
         'flex gap-5 align-center py-8',
-        blok.has_background && 'bg-primary-50',
+        blok.has_background && 'bg-surface-action-hover-2',
         blok.has_background &&
           blok.image_position === ImagePosition.Right &&
           ' bg-[url("/images/text-media-left-bg.svg")] bg-no-repeat bg-left-top',
@@ -64,9 +64,9 @@ const MediaText = ({ blok }: MediaTextProps) => {
         <div
           className={cn(
             'row-start-2 md:row-span-2',
-            blok.image_position === ImagePosition.Left && 'md:col-start-1 me-4 md:me-0 ms-4 lg:ms-8',
-            blok.image_position === ImagePosition.Right && 'md:col-start-2 ms-4 md:ms-0 me-4 lg:me-8',
-            'content-center rounded-ss-3xl rounded-ee-3xl',
+            blok.image_position === ImagePosition.Left && 'md:col-start-1 mr-4 md:mr-0 ml-4 lg:ml-8',
+            blok.image_position === ImagePosition.Right && 'md:col-start-2 ml-4 md:ml-0 mr-4 lg:mr-8',
+            'content-center rounded-ss-2xl rounded-ee-2xl',
           )}
         >
           {blok.image && (
@@ -87,7 +87,7 @@ const MediaText = ({ blok }: MediaTextProps) => {
               )}
               {video && video?.controls && !video?.autoplay && (
                 <div
-                  className="absolute flex rounded-[50%] shadow-xl w-40 h-40 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer me-9 mb-14 p-3 text-white bg-primary-500 transition hover:bg-primary-700"
+                  className="absolute flex rounded-full shadow-sm backdrop-blur-default w-40 h-40 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer mr-9 mb-14 p-3 text-icon-on-action bg-surface-action transition hover:bg-surface-action-hover"
                   onClick={handleVideoPlay}
                   ref={videoControls}
                 >
@@ -100,8 +100,8 @@ const MediaText = ({ blok }: MediaTextProps) => {
         <div
           className={cn(
             'col-start-1 row-start-1 content-end',
-            blok.image_position === ImagePosition.Left && 'md:col-start-2 ms-4 md:ms-0 me-4 lg:me-8',
-            blok.image_position === ImagePosition.Right && 'md:col-start-1 me-4 md:me-0 ms-4 lg:ms-8',
+            blok.image_position === ImagePosition.Left && 'md:col-start-2 ml-4 md:ml-0 mr-4 lg:mr-8',
+            blok.image_position === ImagePosition.Right && 'md:col-start-1 mr-4 md:mr-0 ml-4 lg:ml-8',
           )}
         >
           {blok.overline && (
@@ -118,11 +118,11 @@ const MediaText = ({ blok }: MediaTextProps) => {
         <div
           className={cn(
             'col-start-1',
-            blok.image_position === ImagePosition.Left && 'md:col-start-2 ms-4 md:ms-0 me-4 lg:me-8',
-            blok.image_position === ImagePosition.Right && 'md:col-start-1 me-4 md:me-0 ms-4 lg:ms-8',
+            blok.image_position === ImagePosition.Left && 'md:col-start-2 ml-4 md:ml-0 mr-4 lg:mr-8',
+            blok.image_position === ImagePosition.Right && 'md:col-start-1 mr-4 md:mr-0 ml-4 lg:ml-8',
           )}
         >
-          <p className=" text-base lg:text-xl text-neutral-800 pb-4">{text}</p>
+          <p className=" text-base lg:text-lg text-text-body pb-4">{text}</p>
           {button && <Button {...button} />}
         </div>
       </div>

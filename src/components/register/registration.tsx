@@ -143,10 +143,10 @@ export default function Registration() {
         <form id="register-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
           {(formError || error) && (
             <div className="flex flex-col gap-2">
-              <H2 variant="h5" className="text-danger-500">
+              <H2 variant="h5" className="text-text-error">
                 {t('error')}
               </H2>
-              <span className="text-danger-500">{formError || error}</span>
+              <span className="text-text-error">{formError || error}</span>
             </div>
           )}
 
@@ -166,12 +166,12 @@ export default function Registration() {
               <UiLink type="Link" href="/privacy-policy">
                 {chunks}
               </UiLink>
-            ), // Todo set correct link
+            ),
             termsOfUse: (chunks) => (
               <UiLink type="Link" href="/terms-and-conditions">
                 {chunks}
               </UiLink>
-            ), // Todo: set correct link
+            ),
           })}
         </p>
         <Button type="submit" form="register-form" className="w-full" disabled={loading || !form.formState.isValid}>

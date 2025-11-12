@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Instagram, Linkedin, Mail, Youtube } from 'lucide-react';
 import { useNewsletterForm } from '@/hooks/newsletter/useNewsletterForm';
-import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { InputButton } from '../ui/input';
@@ -64,7 +63,7 @@ export default function Footer({ reduced = false }: { reduced?: boolean }) {
             </div>
           </div>
         )}
-        <div className="bg-primary-50 rounded-tl-2xl p-2 md:p-4">
+        <div className="bg-surface-action-hover-2 rounded-ss-lg p-2 md:p-4">
           <div className="bg-[url('/images/map-pinned.svg')] bg-no-repeat bg-right-top">
             <p className="font-bold">{t('companyName')}</p>
             <p>{t('street')}</p>
@@ -72,7 +71,7 @@ export default function Footer({ reduced = false }: { reduced?: boolean }) {
             <p>{t('country')}</p>
           </div>
         </div>
-        <div className="bg-primary-50 rounded-br-2xl p-2 md:p-4">
+        <div className="bg-surface-action-hover-2 rounded-ee-lg p-2 md:p-4">
           <div className="bg-[url('/images/headset.svg')] bg-no-repeat bg-right-top flex flex-col gap-2">
             <div>
               <p className="font-bold">{t('ourServiceHours')}</p>
@@ -100,9 +99,9 @@ export function FooterLinks() {
   const t = useTranslations('layout.footerLinks');
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 lg:gap-6 ml-4 mr-4 lg:ml-6 lg:mr-6 py-4 lg:py-6 border-b border-b-neutral-200">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 lg:gap-6 ml-4 mr-4 lg:ml-6 lg:mr-6 py-4 lg:py-6 border-b border-b-border-primary">
       <div className="flex flex-col gap-2">
-        <p className="text-xl mb-1">{t('products')}</p>
+        <p className="text-lg mb-1">{t('products')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           {t('solarPanels')}
         </UiLink>
@@ -120,7 +119,7 @@ export function FooterLinks() {
         </UiLink>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="text-xl mb-1">{t('services')}</p>
+        <p className="text-lg mb-1">{t('services')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           {t('solarSolutions')}
         </UiLink>
@@ -135,7 +134,7 @@ export function FooterLinks() {
         </UiLink>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="text-xl mb-1">{t('solutions')}</p>
+        <p className="text-lg mb-1">{t('solutions')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           {t('installationPlanning')}
         </UiLink>
@@ -144,10 +143,10 @@ export function FooterLinks() {
         </UiLink>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="text-xl mb-1">{t('onlinePlanner')}</p>
+        <p className="text-lg mb-1">{t('onlinePlanner')}</p>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="text-xl mb-1">{t('aboutUs')}</p>
+        <p className="text-lg mb-1">{t('aboutUs')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
           <Linkedin />
           Linkedin
@@ -172,7 +171,7 @@ export function FooterWrapper({ className, ...props }: React.ComponentProps<'div
         <div
           data-slot="footer"
           className={cn(
-            'md:ml-4 md:mr-4 lg:ml-9 lg:mr-9 shadow-footer rounded-tl-2xl rounded-tr-2xl  bg-[url("/images/footer-bg.svg")] bg-no-repeat bg-right-bottom',
+            'md:ml-4 md:mr-4 lg:ml-9 lg:mr-9 shadow-xl rounded-ss-lg rounded-se-lg  bg-[url("/images/footer-bg.svg")] bg-no-repeat bg-right-bottom',
             className,
           )}
           {...props}
@@ -192,29 +191,20 @@ export function LegalFooter() {
       <div className="max-w-6xl mx-auto md:mb-4">
         <div
           data-slot="legal-footer"
-          className="px-4 pb-16 pt-2 md:mx-2 md:px-7 md:py-0 md:h-8 bg-primary-500 md:rounded-full"
+          className="px-4 pb-16 pt-2 md:mx-2 md:px-7 md:py-0 md:h-8 bg-surface-action md:rounded-full"
         >
-          <div className="flex flex-col md:flex-row gap-2 lg:gap-6 flex-wrap text-sm/8 text-white">
+          <div className="flex flex-col md:flex-row gap-2 lg:gap-6 flex-wrap text-sm/8 text-text-on-action">
             <p className="flex-grow text-center md:text-left">{t('copyright')}</p>
             <div className="flex flex-grow gap-6 justify-between md:justify-end">
-              <Link
-                href="/privacy-policy"
-                className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-              >
+              <UiLink type="Link" variant="footerLegal" href="/privacy-policy">
                 {t('privacyPolicy')}
-              </Link>
-              <Link
-                href="/imprint"
-                className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-              >
+              </UiLink>
+              <UiLink type="Link" variant="footerLegal" href="/imprint">
                 {t('imprint')}
-              </Link>
-              <Link
-                href="/terms-and-conditions"
-                className="hover:underline outline-none focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-              >
+              </UiLink>
+              <UiLink type="Link" variant="footerLegal" href="/terms-and-conditions">
                 {t('termsAndConditions')}
-              </Link>
+              </UiLink>
             </div>
           </div>
         </div>

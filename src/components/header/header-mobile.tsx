@@ -17,7 +17,7 @@ export function HeaderMobile(props: SearchInputProps) {
     <>
       {/* Top */}
       <div className="fixed top-0 left-0 right-0 z-50 w-full">
-        <header className="bg-white/95 backdrop-blur-sm shadow-xl px-4 py-2 h-17">
+        <header className="bg-surface-page/95 backdrop-blur-default shadow-sm px-4 py-2 h-17">
           <div className="flex h-full justify-between items-center">
             <HeaderLogo small width={18} height={16} className="min-w-[18px] min-h-[16px]" title={t('home')} />
             <div className="flex gap-2">
@@ -29,7 +29,7 @@ export function HeaderMobile(props: SearchInputProps) {
       </div>
 
       {/* Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm shadow-xl h-[58px] flex justify-around items-center text-nowrap">
+      <div className="fixed bottom-0 left-0 right-0 z-50 w-full bg-surface-page/95 backdrop-blur-default shadow-sm h-[58px] flex justify-around items-center text-nowrap">
         {showSearch && (
           <div className="mx-4 w-full">
             <HeaderSearch small={false} show={showSearch} searchInput={props} />
@@ -40,11 +40,11 @@ export function HeaderMobile(props: SearchInputProps) {
             <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
             <HeaderIconButton icon={Search} text={t('shortSearch')} onClick={activateSearch} />
             {/* Todo: When clicking on Menu, toggle between below buttons */}
-            <Button className="flex flex-col w-16 h-16 min-w-12 min-h-[46px] px-3 py-1 border-0 justify-center items-center rounded-tl-lg rounded-tr-none rounded-bl-none rounded-br-lg bg-gradient-to-t from-primary-700 to-primary-500 text-white normal-case tracking-normal">
+            <Button className="flex flex-col w-16 h-16 min-w-12 min-h-[46px] px-3 py-1 border-0 justify-center items-center rounded-ss-md rounded-se-none rounded-es-none rounded-ee-md bg-gradient-to-t from-gradient-secondary-end to-gradient-secondary-start text-text-on-action normal-case tracking-normal">
               <Menu className="w-8 h-8" />
               <p className="text-sm font-bold -mt-4">{t('menu')}</p>
             </Button>
-            {/*<Button className="flex flex-col w-16 h-16 min-w-12 min-h-[46px] px-3 py-1 justify-center items-center rounded-tl-lg rounded-br-lg bg-gradient-to-t from-primary-700 to-primary-500 text-white normal-case tracking-normal">*/}
+            {/*<Button className="flex flex-col w-16 h-16 min-w-12 min-h-[46px] px-3 py-1 justify-center items-center rounded-ss-md rounded-se-none rounded-es-none rounded-ee-md bg-gradient-to-t from-gradient-secondary-end to-gradient-secondary-start text-text-text-on-action normal-case tracking-normal">*/}
             {/*  <X className="w-8 h-8" />*/}
             {/*  <p className="text-sm font-bold -mt-4">{t('close')}</p>*/}
             {/*</Button>*/}

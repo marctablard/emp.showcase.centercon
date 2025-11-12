@@ -140,7 +140,7 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
             ref={inputRef}
             id="search-input"
             onKeyDown={(e) => e.key === 'Enter' && redirectToBrowse(e)}
-            className="h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100"
+            className="h-11 py-2 pl-6 pr-[62px] placeholder:text-text-placeholders text-text-headings bg-surface-search-input hover:bg-surface-search-input border border-transparent"
           />
           <Button
             type="submit"
@@ -148,7 +148,7 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
             variant={'link'}
             aria-label={t('searchProducts')}
           >
-            <Search className="text-primary-600" width="28" height="28" />
+            <Search className="text-icon-primary-dark" width="28" height="28" />
           </Button>
         </form>
       </div>
@@ -171,7 +171,7 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
           ref={inputRef}
           id="search-input"
           onKeyDown={(e) => e.key === 'Enter' && redirectToBrowse(e)}
-          className={`h-11 py-2 pl-6 pr-[62px] placeholder:text-neutral-600 text-neutral-600 bg-neutral-100 hover:bg-neutral-100 border border-neutral-100 hover:border-primary-700 ${hasInputFocus ? 'shadow-md' : ''}`}
+          className={`h-11 py-2 pl-6 pr-[62px] placeholder:text-text-placeholders text-text-headings bg-surface-search-input hover:bg-surface-search-input border border-transparent hover:border-border-action-hover ${hasInputFocus ? 'shadow-md' : ''}`}
         />
 
         <Button
@@ -181,7 +181,7 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
           variant={'link'}
           aria-label={t('searchProducts')}
         >
-          <Search className="text-primary-600" width="28" height="28" />
+          <Search className="text-icon-primary-dark" width="28" height="28" />
         </Button>
 
         {hasInputFocus && (
@@ -194,7 +194,7 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
             }}
             className="cursor-pointer z-30"
           >
-            <X className="text-primary-600" width="28" height="28" />
+            <X className="text-icon-primary-dark" width="28" height="28" />
           </Button>
         )}
       </form>

@@ -16,11 +16,11 @@ export function NoResults({ queryCompletions, setQuery, onQuerySelect }: NoResul
 
   return (
     <div className="whitespace-normal col-span-full">
-      <Heading variant={'h5'} className="pb-6">
+      <Heading variant="h5" className="pb-6">
         {t('noResults')}
       </Heading>
-      <p className="text-md pb-6">{t('doubleCheck')}</p>
-      <p className="text-md">{t('commonSearch')}</p>
+      <p className="text-base pb-6">{t('doubleCheck')}</p>
+      <p className="text-base">{t('commonSearch')}</p>
       {queryCompletions && (
         <div className="flex flex-wrap gap-4 mt-6">
           {queryCompletions.map((completion) => (
@@ -32,7 +32,7 @@ export function NoResults({ queryCompletions, setQuery, onQuerySelect }: NoResul
                 }
               }}
               key={completion}
-              className="min-w-0 p-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 flex shrink-1"
+              className="min-w-0 p-2 bg-surface-disabled hover:bg-surface-hover-grey text-text-heading flex shrink-1"
             >
               <Search />
               <span className="truncate w-full max-w-full text-left md:max-w-[48ch]"> {completion}</span>

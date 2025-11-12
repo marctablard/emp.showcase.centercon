@@ -83,7 +83,7 @@ export function BudgetProgress({ className, title, ...props }: BudgetProgressPro
         </div>
 
         <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-sm">
             <span>{t('budgetUsed')}</span>
             <span>{budgetUsedPercentage}%</span>
           </div>

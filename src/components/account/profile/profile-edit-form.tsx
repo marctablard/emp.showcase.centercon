@@ -111,8 +111,8 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
       </CardHeader>
       <CardContent>
         {success ? (
-          <Alert className="bg-green-50 border-green-200 mb-4">
-            <AlertDescription className="text-green-800">
+          <Alert className="bg-surface-success border-border-success mb-4">
+            <AlertDescription className="text-text-body">
               {t('profile.form.updateSuccess') || 'Ihre Profildaten wurden erfolgreich aktualisiert.'}
             </AlertDescription>
           </Alert>
@@ -130,7 +130,7 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
             <div className="space-y-2">
               <Label htmlFor="title">{t('profile.form.titleLabel') || 'Anrede'}</Label>
               <Select defaultValue={initialData.title} onValueChange={(value) => form.setValue('title', value)}>
-                <SelectTrigger id="title" className={form.formState.errors.title ? 'border-red-500' : ''}>
+                <SelectTrigger id="title" className={form.formState.errors.title ? 'border-border-error' : ''}>
                   <SelectValue placeholder={t('profile.form.selectTitle') || 'Anrede auswählen'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,10 +153,10 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
                 id="firstName"
                 type="text"
                 {...form.register('firstName')}
-                className={form.formState.errors.firstName ? 'border-red-500' : ''}
+                className={form.formState.errors.firstName ? 'border-border-error' : ''}
               />
               {form.formState.errors.firstName && (
-                <p className="text-sm text-red-500 mt-1">
+                <p className="text-sm text-text-error mt-1">
                   {t('profile.form.firstName.required') || 'Bitte geben Sie Ihren Vornamen ein.'}
                 </p>
               )}
@@ -169,10 +169,10 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
                 id="lastName"
                 type="text"
                 {...form.register('lastName')}
-                className={form.formState.errors.lastName ? 'border-red-500' : ''}
+                className={form.formState.errors.lastName ? 'border-border-error' : ''}
               />
               {form.formState.errors.lastName && (
-                <p className="text-sm text-red-500 mt-1">
+                <p className="text-sm text-text-error mt-1">
                   {t('profile.form.lastName.required') || 'Bitte geben Sie Ihren Nachnamen ein.'}
                 </p>
               )}
@@ -185,10 +185,10 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
                 id="email"
                 type="email"
                 {...form.register('email')}
-                className={form.formState.errors.email ? 'border-red-500' : ''}
+                className={form.formState.errors.email ? 'border-border-error' : ''}
               />
               {form.formState.errors.email && (
-                <p className="text-sm text-red-500 mt-1">
+                <p className="text-sm text-text-error mt-1">
                   {form.formState.errors.email.message === 'profile.form.email.invalid'
                     ? t('profile.form.email.invalid') || 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'
                     : t('profile.form.email.required') || 'Bitte geben Sie Ihre E-Mail-Adresse ein.'}
@@ -203,10 +203,10 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
                 id="phone"
                 type="tel"
                 {...form.register('phone')}
-                className={form.formState.errors.phone ? 'border-red-500' : ''}
+                className={form.formState.errors.phone ? 'border-border-error' : ''}
               />
               {form.formState.errors.phone && (
-                <p className="text-sm text-red-500 mt-1">
+                <p className="text-sm text-text-error mt-1">
                   {t('profile.form.phone.invalid') || 'Bitte geben Sie eine gültige Telefonnummer ein.'}
                 </p>
               )}
@@ -221,7 +221,7 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
               >
                 <SelectTrigger
                   id="preferredLanguage"
-                  className={form.formState.errors.preferredLanguage ? 'border-red-500' : ''}
+                  className={form.formState.errors.preferredLanguage ? 'border-border-error' : ''}
                 >
                   <SelectValue placeholder={t('profile.form.selectLanguage') || 'Sprache auswählen'} />
                 </SelectTrigger>
@@ -244,7 +244,7 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
               >
                 <SelectTrigger
                   id="preferredCurrency"
-                  className={form.formState.errors.preferredCurrency ? 'border-red-500' : ''}
+                  className={form.formState.errors.preferredCurrency ? 'border-border-error' : ''}
                 >
                   <SelectValue placeholder={t('profile.form.selectCurrency') || 'Währung auswählen'} />
                 </SelectTrigger>

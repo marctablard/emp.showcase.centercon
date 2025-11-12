@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { ProductTile } from '@/components/product/product-tile';
 import { ProductTileSkeleton } from '@/components/product/product-tile-skeleton';
 import { SearchFilter } from '@/components/search/search-filter';
+import { H2 } from '@/components/ui/h';
 import {
   Pagination,
   PaginationContent,
@@ -142,13 +143,13 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
           <>
             {products.length === 0 ? (
               <div className="text-center py-12">
-                <h2 className="text-xl font-medium mb-2">{t('searchResults.noProductsFound')}</h2>
-                <p className="text-neutral-500">{t('searchResults.tryAdjusting')}</p>
+                <H2 className="mb-2">{t('searchResults.noProductsFound')}</H2>
+                <p className="text-text-placeholders">{t('searchResults.tryAdjusting')}</p>
               </div>
             ) : (
               <>
                 <div className="mb-4">
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-text-placeholders">
                     {t('searchResults.showing', {
                       start: currentPage * pageSize + 1,
                       end: currentPage * pageSize + products.length,
@@ -182,7 +183,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
                       if (currentPage > 0) changePage(currentPage - 1);
                     }}
                     aria-disabled={currentPage === 0}
-                    className={currentPage === 0 ? 'pointer-events-none opacity-50' : ''}
+                    className={currentPage === 0 ? 'pointer-events-none text-text-disabled' : ''}
                   />
                 </PaginationItem>
 
@@ -191,7 +192,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
                     <PaginationLink
                       href="#"
                       isActive={currentPage === pageNumber}
-                      className={currentPage === pageNumber ? 'bg-primary text-white' : ' '}
+                      className={currentPage === pageNumber ? 'bg-surface-action text-text-on-action' : ' '}
                       onClick={(e) => {
                         e.preventDefault();
                         changePage(pageNumber);
@@ -213,7 +214,9 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
                       }
                     }}
                     aria-disabled={currentPage === Math.ceil(total / pageSize) - 1}
-                    className={currentPage === Math.ceil(total / pageSize) - 1 ? 'pointer-events-none opacity-50' : ''}
+                    className={
+                      currentPage === Math.ceil(total / pageSize) - 1 ? 'pointer-events-none text-text-disabled' : ''
+                    }
                   />
                 </PaginationItem>
               </PaginationContent>
