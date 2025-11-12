@@ -39,7 +39,7 @@ export default function AccountDashboard({ initialCustomer, breadcrumbs }: Accou
         <div className="mb-12 flex justify-between items-start">
           <H3>
             {t('hello')}{' '}
-            <span className="text-primary">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
+            <span className="text-text-action">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
           </H3>
 
           <SupportTicketDialog onSubmit={handleTicketSubmit} />

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Cart } from '@platform/services/model/cart';
 import { HeaderMiniCartItemList } from '@/components/header/common/cart/header-mini-cart-item-list';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { cn, formatCurrency } from '@/lib/utils';
 
@@ -22,12 +23,12 @@ export function HeaderMiniCartContent({ loading, cart, scrollHeight, scrollConta
   return (
     <>
       {loading ? (
-        <div className="p-4 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary"></div>
+        <div className="pr-4 pt-4 flex items-center justify-center">
+          <Spinner color="primary" variant="md" />
         </div>
       ) : !cart || cart.items.length === 0 ? (
         <div className="p-4 text-center">
-          <p className="text-muted-foreground">{t('emptyCart')}</p>
+          <p className="text-text-placeholders">{t('emptyCart')}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-4 justify-center rounded-md pt-4">
@@ -39,7 +40,7 @@ export function HeaderMiniCartContent({ loading, cart, scrollHeight, scrollConta
           </div>
           {cart && (
             <div className="flex flex-col gap-2 pr-4">
-              <div className="flex justify-between border-b border-neutral-200 py-2">
+              <div className="flex justify-between border-b border-border-primary py-2">
                 <span className="">{t('summary.valueOfGoods')}</span>
                 <span>{formatCurrency(cart?.subTotalPrice.amount, cart?.subTotalPrice.currency)}</span>
               </div>

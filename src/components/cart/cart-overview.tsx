@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { H3 } from '@/components/ui/h';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
 import useCustomer from '@/hooks/customer/useCustomer';
@@ -48,8 +49,8 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
     <div className="max-w-6xl mx-auto mt-8">
       <div className="mx-4 xl:mx-9">
         <div className="flex gap-3 align-end mb-8">
-          <h3 className="text-5xl font-bold font-headlines">{t('title')}</h3>
-          <div className="text-neutral-300 text-xl m-0 leading-[2]">
+          <H3>{t('title')}</H3>
+          <div className="text-text-on-disabled text-lg m-0 leading-[2]">
             {cart.items.length > 1 ? cart.items.length + t('products') : cart.items.length + t('product')}
           </div>
         </div>

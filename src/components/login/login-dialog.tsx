@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -17,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Heading } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
@@ -131,7 +130,7 @@ export default function LoginDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogContent className="sm:max-w-[639px]">
-        <FormProvider {...form}>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full">
             <DialogHeader>
               <VisuallyHidden>
@@ -145,10 +144,10 @@ export default function LoginDialog({
 
             {error && (
               <div className="flex flex-col gap-2">
-                <Heading variant="h5" as="div" className="text-danger-500">
+                <Heading variant="h5" as="div" className="text-text-error">
                   {t('error')}
                 </Heading>
-                <span className="text-danger-500">{error}</span>
+                <span className="text-text-error">{error}</span>
               </div>
             )}
 
@@ -235,7 +234,7 @@ export default function LoginDialog({
               </div>
             </DialogFooter>
           </form>
-        </FormProvider>
+        </Form>
       </DialogContent>
     </Dialog>
   );

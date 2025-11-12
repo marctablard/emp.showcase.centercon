@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { LucideChevronLeft, LucideChevronRight, LucidePlay } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import {
   Carousel,
   CarouselApi,
@@ -44,8 +44,8 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
 
   if (!images || images.length === 0) {
     return (
-      <div className="bg-neutral-200 h-96 flex items-center justify-center">
-        <span className="text-neutral-500">No images available</span>
+      <div className="bg-surface-image-background h-96 flex items-center justify-center">
+        <span className="text-text-placeholders">No images available</span>
       </div>
     );
   }
@@ -73,8 +73,8 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
                   />
                   {image.contentType?.startsWith('video/') && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-white/80 rounded-full">
-                        <LucidePlay className="h-8 w-8 text-primary" />
+                      <div className="bg-surface-page/80 rounded-full">
+                        <Play className="h-8 w-8 text-icon-action" />
                       </div>
                     </div>
                   )}
@@ -82,11 +82,11 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="left-4 lg:left-auto lg:right-14 bottom-1 rounded-full bg-white border-primary w-10 h-10 mr-2">
-            <LucideChevronLeft className="h-6 w-6 text-primary" />
+          <CarouselPrevious className="left-4 lg:left-auto lg:right-14 bottom-1 w-10 h-10 mr-2">
+            <ChevronLeft className="h-6 w-6 text-icon-action" />
           </CarouselPrevious>
-          <CarouselNext className="right-4 bottom-1 rounded-full bg-white border-primary w-10 h-10">
-            <LucideChevronRight className="h-6 w-6 text-primary" />
+          <CarouselNext className="right-4 bottom-1 w-10 h-10">
+            <ChevronRight className="h-6 w-6 text-icon-action" />
           </CarouselNext>
         </Carousel>
       </div>
@@ -103,7 +103,7 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
                   onClick={() => mainApi?.scrollTo(index)}
                 >
                   <div
-                    className={`w-full w-[60px] h-[40px] lg:max-w-[120px] lg:h-[80px] relative rounded-md overflow-hidden ${activeIndex === index ? 'ring-2 ring-primary' : 'border border-gray-200'}`}
+                    className={`w-full w-[60px] h-[40px] lg:max-w-[120px] lg:h-[80px] relative rounded-md overflow-hidden ${activeIndex === index ? 'ring-2 ring-border-focus' : 'border border-transparent'}`}
                   >
                     <Image
                       src={image.url}
@@ -114,7 +114,7 @@ export function ProductCarousel({ images }: ProductCarouselProps) {
                     />
                     {image.contentType?.startsWith('video/') && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
-                        <LucidePlay className="h-4 w-4 text-white" />
+                        <Play className="h-4 w-4 text-icon-on-action" />
                       </div>
                     )}
                   </div>

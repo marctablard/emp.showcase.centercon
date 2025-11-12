@@ -39,7 +39,7 @@ function PaginationLink({ className, isActive, size = 'default', ...props }: Pag
           variant: isActive ? 'secondary' : 'link',
           size,
           className:
-            'font-normal p-0 w-10 h-10 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
+            'font-medium p-0 w-10 h-10 hover:border hover:border-border-action-hover hover:bg-surface-action-hover-2 hover:text-text-action-hover',
         }),
         className,
       )}
@@ -54,7 +54,7 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof
       aria-label="Go to previous page"
       size="default"
       className={cn(
-        'gap-1 px-2.5 sm:pl-2.5 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
+        'gap-1 px-2.5 sm:pl-2.5 hover:border hover:border-border-action-hover hover:bg-surface-action-hover-2 hover:text-text-action-hover',
         className,
       )}
       {...props}
@@ -70,7 +70,7 @@ function PaginationNext({ className, ...props }: React.ComponentProps<typeof Pag
       aria-label="Go to next page"
       size="default"
       className={cn(
-        'gap-1 px-2.5 sm:pr-2.5 hover:border hover:border-primary-700 hover:bg-primary-50 hover:text-primary-700',
+        'gap-1 px-2.5 sm:pr-2.5 hover:border hover:border-border-action-hover hover:bg-surface-action-hover-2 hover:text-text-action-hover',
         className,
       )}
       {...props}
@@ -85,7 +85,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn('flex size-9 items-center justify-center text-primary', className)}
+      className={cn('flex size-9 items-center justify-center text-text-action', className)}
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />

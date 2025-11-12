@@ -21,12 +21,12 @@ export function Header() {
   }, []);
 
   return (
-    <div className="has-[.search]:fixed has-[.search]:backdrop-blur-xs has-[.search]:z-60 h-full w-full relative">
+    <div className="has-[.search]:fixed has-[.search]:backdrop-blur-default has-[.search]:z-60 h-full w-full relative">
       {!isMounted || isMediumScreen ? (
         /* Desktop & Tablet */
         <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
           <header
-            className={`bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl relative transition-[height] duration-200 ease-in-out mx-4 lg:mx-9 ${scrolled ? 'h-16' : getHeaderHeight()}`}
+            className={`bg-surface-page/95 backdrop-blur-default shadow-sm rounded-lg relative transition-[height] duration-200 ease-in-out mx-4 lg:mx-9 ${scrolled ? 'h-16' : getHeaderHeight()}`}
           >
             {/* Render only one header component based on scroll state */}
             {!scrolled ? (

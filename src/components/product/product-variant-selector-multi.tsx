@@ -221,7 +221,7 @@ export default function ProductVariantSelectorMulti({ product, className }: Prod
         {product.variantAttributes.map((variantAttribute, index) => (
           <div key={variantAttribute.key}>
             <div className="flex flex-col gap-1">
-              <label className="text-md font-medium">{l10n(variantAttribute.name || variantAttribute.key)}</label>
+              <label className="text-base font-medium">{l10n(variantAttribute.name || variantAttribute.key)}</label>
               {variantAttribute.key === 'color' || variantAttribute.key === 'farbe' ? (
                 <div className="flex flex-wrap gap-2">
                   <style type="text/css">
@@ -237,14 +237,14 @@ export default function ProductVariantSelectorMulti({ product, className }: Prod
                         key={attributeValue.key}
                         onClick={() => handleAttributeChange(variantAttribute.key, attributeValue.key)}
                         className={cn(
-                          'tile w-8 h-8 border-2 border-neutral-500 transition-all duration-200 relative',
-                          isSelected ? 'border-primary scale-100' : 'border-neutral-500 hover:border-neutral-600',
+                          'tile w-8 h-8 border-2 transition-all duration-200 relative hover:border-border-action-hover',
+                          isSelected ? 'border-border-action scale-100' : 'border-border-primary',
                           `color-tile-${attributeValue.key}`,
                         )}
                         title={l10n(attributeValue.name || attributeValue.key)}
                       >
                         {isSelected && (
-                          <CheckCircle2 className="absolute -top-1 -right-1 w-4 h-4 text-primary bg-white rounded-full" />
+                          <CheckCircle2 className="absolute -top-1 -right-1 w-4 h-4 text-icon-action bg-surface-page rounded-full" />
                         )}
                       </button>
                     );
@@ -268,7 +268,7 @@ export default function ProductVariantSelectorMulti({ product, className }: Prod
                 </Select>
               )}
             </div>
-            {index < (product.variantAttributes?.length || 0) - 1 && <hr className="mt-6 border-gray-200" />}
+            {index < (product.variantAttributes?.length || 0) - 1 && <hr className="mt-6 border-border-primary" />}
           </div>
         ))}
       </div>

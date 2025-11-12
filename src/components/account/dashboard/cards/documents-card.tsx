@@ -63,7 +63,7 @@ export const DocumentsCard: FC<DocumentsCardProps> = ({ className, title, ...pro
             type="Button"
             href={category.href}
             className={cn(
-              'flex items-center gap-4 p-4 border-1 border-neutral-200 hover:border-primary-500 rounded-md hover:text-black hover:bg-primary-50 transition-colors text-black no-underline',
+              'flex items-center gap-4 p-4 border-1 border-border-primary hover:border-border-action-hover rounded-md hover:text-text-action-hover hover:bg-surface-action-hover-2 transition-colors text-black no-underline',
             )}
           >
             <div>

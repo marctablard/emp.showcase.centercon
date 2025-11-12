@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode, useEffect } from 'react';
-import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Loader2 } from 'lucide-react';
@@ -15,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { H1 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
@@ -98,7 +97,7 @@ export function PasswordResetDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogContent className="sm:max-w-150">
-        <FormProvider {...form}>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full">
             <DialogHeader>
               <VisuallyHidden>
@@ -145,7 +144,7 @@ export function PasswordResetDialog({
               </UiLink>
             </DialogFooter>
           </form>
-        </FormProvider>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { ArrowRight, Search } from 'lucide-react';
 import { MyOrdersTable } from '@/components/account/orders/my-orders-table';
 import { CardTitle } from '@/components/ui/card';
-import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { useOrders } from '@/hooks/order/useOrders';
@@ -100,7 +99,7 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
       </div>
       {/* search */}
       <div className="mb-4 w-[60%]">
-        <FormProvider {...form}>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSearch)} className="w-full">
             <FormField
               control={form.control}
@@ -115,7 +114,7 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
               )}
             />
           </form>
-        </FormProvider>
+        </Form>
       </div>
       <div className="flex flex-col">
         <MyOrdersTable

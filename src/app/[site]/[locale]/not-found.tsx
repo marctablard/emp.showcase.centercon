@@ -8,7 +8,7 @@ export default function NotFound() {
       <HeaderCheckout />
       <div className="flex-grow mt-17 md:mt-36 lg:mt-52 mx-auto text-center">
         <H1 className="mb-6">404</H1>
-        <UiLink href="/" type="Link" variant="button_primary">
+        <UiLink href="/" type="Link" variant="buttonPrimary">
           Return Home
         </UiLink>
       </div>

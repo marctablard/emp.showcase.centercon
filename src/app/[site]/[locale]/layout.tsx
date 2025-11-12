@@ -3,8 +3,7 @@ import { SessionProvider as AuthSessionProvider } from 'next-auth/react';
 import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
-import { notFound } from 'next/navigation';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import '@/app/globals.css';
 import { auth } from '@/auth/auth';
 import AuthDialogManager from '@/components/auth/auth-dialog-manager';
@@ -19,16 +18,16 @@ import { StoryblokProvider } from '@/providers/StoryblokProvider';
 
 const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
 
-const ubuntu = Ubuntu({
+const fontHeadlines = Ubuntu({
   subsets: ['latin'],
   weight: ['400', '500', '700'],
-  variable: '--font-ubuntu',
+  variable: '--font-headlines',
 });
 
-const openSans = Open_Sans({
+const fontBody = Open_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-open-sans',
+  variable: '--font-body',
 });
 
 type Props = {
@@ -91,7 +90,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={`${ubuntu.variable} ${openSans.variable} ${ubuntu.className} ${openSans.className}`}>
+    <html
+      lang={locale}
+      className={`${fontHeadlines.variable} ${fontBody.variable} ${fontHeadlines.className} ${fontBody.className}`}
+    >
       <body className="flex h-full flex-col font-body has-[.search]:overflow-hidden">
         <AuthSessionProvider session={authSession}>
           <NextIntlClientProvider locale={locale}>

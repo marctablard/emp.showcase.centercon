@@ -18,7 +18,7 @@ export function Notification() {
     const notificationSubscription = registerNotificationListener(
       'COMPANY',
       (notification: string | StorefrontNotification<CompanyOnboardingStatus>) => {
-        if (!(typeof notification === 'string')) {
+        if (typeof notification !== 'string') {
           if (notification.code !== 'COMPANY_ONBOARDING') {
             return;
           }

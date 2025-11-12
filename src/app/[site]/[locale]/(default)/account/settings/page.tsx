@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import AccountLayout from '@/components/account/account-layout';
 import PasswordChangeForm from '@/components/account/password/password-change-form';
+import { H1 } from '@/components/ui/h';
 import { getCurrentCustomer } from '@/lib/ssr/customer';
 import { getPageTitle } from '@/lib/ssr/seo';
 
@@ -31,8 +32,8 @@ export default async function PasswordChangePage({ params }: { params: Promise<{
   return (
     <AccountLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">{t('Password.title')}</h1>
-        <p className="text-muted-foreground">{t('Password.description')}</p>
+        <H1 variant="h5">{t('Password.title')}</H1>
+        <p className="text-text-placeholders">{t('Password.description')}</p>
 
         <PasswordChangeForm customer={customer || null} />
       </div>

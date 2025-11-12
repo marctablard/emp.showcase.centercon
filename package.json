@@ -1,6 +1,6 @@
 {
   "name": "emporix-showcase",
-  "version": "0.1.0",
+  "version": "0.9.9",
   "private": true,
   "scripts": {
     "dev": "npm-run-all --parallel generate:watch dev:next",
@@ -89,6 +89,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/eslint-plugin-next": "^15.5.6",
     "@playwright/test": "^1.56.1",
     "@swc/core": "^1.15.0",
     "@swc/jest": "^0.2.39",
@@ -96,7 +97,6 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
-    "@types/glob": "^9.0.0",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.20",
     "@types/node": "^22.19.0",

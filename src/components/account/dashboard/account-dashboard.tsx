@@ -33,7 +33,7 @@ export default function AccountDashboard({ customer }: AccountDashboardProps) {
         <div className="relative flex justify-between items-center">
           <H3>
             {t('hello')}{' '}
-            <span className="text-primary">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
+            <span className="text-text-action">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
           </H3>
           <div className="flex gap-4">
             <SupportTicketDialog onSubmit={handleTicketSubmit} />

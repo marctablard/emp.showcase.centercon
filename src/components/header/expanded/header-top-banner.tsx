@@ -11,7 +11,7 @@ export function HeaderTopBanner() {
   const t = useTranslations('layout.header');
   const isExtraLargeScreen = useBreakpoint('xl');
   return (
-    <div className="bg-primary text-white shadow-sm rounded-2xl flex items-center -mx-2 lg:-mx-4 -mt-1 h-8 px-8 lg:px-10">
+    <div className="bg-surface-action text-text-on-action shadow-sm rounded-lg flex items-center -mx-2 lg:-mx-4 -mt-1 h-8 px-8 lg:px-10">
       <div className="flex justify-between items-center self-stretch w-full">
         <div className="flex grow basis-0 shrink-0 items-center gap-2">
           <SiteSwitcher />

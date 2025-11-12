@@ -56,7 +56,7 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             <FormItem className="relative">
               <FormLabel htmlFor="companyName" className="flex flex-nowrap">
                 {t('companyName')}
-                {isB2C && <span className="text-neutral-300 text-xs ml-1"> {t('optional')}</span>}
+                {isB2C && <span className="text-text-placeholders text-sm ml-1"> {t('optional')}</span>}
               </FormLabel>
               <FormControl>
                 <Input id="companyName" type="text" {...field} />
@@ -89,7 +89,7 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
             <FormItem className="relative">
               <FormLabel htmlFor="vatNumber" className="flex flex-nowrap">
                 {t('vatNumber')}
-                {isB2C && <span className="text-neutral-300 text-xs ml-1"> {t('optional')}</span>}
+                {isB2C && <span className="text-text-placeholders text-sm ml-1"> {t('optional')}</span>}
               </FormLabel>
               <FormControl>
                 <Input id="vatNumber" type="text" {...field} />
@@ -202,7 +202,7 @@ export function AddressInfoSection({ control, number }: AddressInfoAccordionProp
               <FormControl>
                 <Checkbox id="shippingSameAsBilling" checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormLabel className="font-normal" htmlFor="shippingSameAsBilling">
+              <FormLabel className="font-medium" htmlFor="shippingSameAsBilling">
                 {t('shippingSameAsBilling')}
               </FormLabel>
               <FormMessage />

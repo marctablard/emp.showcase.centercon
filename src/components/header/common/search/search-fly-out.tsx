@@ -47,7 +47,7 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
     return (
       <section
         ref={ref}
-        className={`${isCollapsedHeader ? 'md:top-[58px] md:w-[calc(100vw-120px)]' : 'md:relative top-[calc(-100vh+55px)] md:top-[8px] md:w-auto '} absolute z-10 left-[-16px] md:left-0 w-screen md:-ml-6 md:-mr-6 p-6 bg-white/95 backdrop-blur-sm [box-shadow:inset_0_-4px_4px_0_rgba(0,0,0,0.25)] md:shadow-xl md:rounded-b-2xl`}
+        className={`${isCollapsedHeader ? 'md:top-[58px] md:w-[calc(100vw-120px)]' : 'md:relative top-[calc(-100vh+55px)] md:top-[8px] md:w-auto '} absolute z-10 left-[-16px] md:left-0 w-screen md:-ml-6 md:-mr-6 p-6 bg-surface-page/95 backdrop-blur-default [box-shadow:inset_0_-4px_4px_0_rgba(0,0,0,0.25)] md:shadow-sm md:rounded-b-lg`}
       >
         <div className="overflow-y-auto h-screen md:h-auto max-h-[calc(100vh-106px)] md:max-h-[calc(100vh-224px)] pb-4">
           <div className="grid grid-cols-5 gap-4">
@@ -60,7 +60,7 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
                 <>
                   {isProductsShown ? (
                     <div className="flex flex-col md:flex-row gap-4 col-span-full mb-2">
-                      <Heading variant={'h5'} as="div">
+                      <Heading variant="h5" as="div">
                         {t('suggestedProducts')}
                       </Heading>
                       <Button variant="neutral" size="small" className="md:ml-auto" onClick={redirectToBrowse}>
@@ -70,7 +70,7 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
                       </Button>
                     </div>
                   ) : (
-                    <Heading variant={'h5'} as="div" className="col-span-full mb-2">
+                    <Heading variant="h5" as="div" className="col-span-full mb-2">
                       {t('lastSeenProducts')}
                     </Heading>
                   )}

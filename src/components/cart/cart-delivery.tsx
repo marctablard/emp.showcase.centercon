@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Pencil } from 'lucide-react';
+import { H5 } from '@/components/ui/h';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { Address } from '@/platform/services/model/common';
 import { AddressSelector } from '../address/address-selector';
@@ -31,7 +32,7 @@ export function CartDelivery() {
         <ShippingMethod variant="slim" />
         <div className="flex flex-col gap-4 pt-4 md:ps-6 md:pt-0">
           <div className="flex justify-between">
-            <h5 className="text-3xl font-bold font-headlines">{isPickup ? t('pickup') : t('ship')}</h5>
+            <H5>{isPickup ? t('pickup') : t('ship')}</H5>
             <AddressSelector
               onSelect={(address) => submitShippingAddress({ ...address, type: 'SHIPPING' })}
               selectedAddressId={shippingAddress?.id}

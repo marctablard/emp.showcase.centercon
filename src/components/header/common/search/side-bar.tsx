@@ -38,7 +38,8 @@ export function SideBar({ categories, query }: SideBarProps) {
             Categories
           </Heading>
           {categories.map(({ name, count }) => (
-            <UiLink className="mb-3" key={name + count} type="Link" href={'href'} variant="secondary">
+            // Todo: set correct href for categories
+            <UiLink className="mb-3" key={name + count} type="Link" href="#" variant="secondary">
               <MarkedText text={name} keyword={query} />
             </UiLink>
           ))}

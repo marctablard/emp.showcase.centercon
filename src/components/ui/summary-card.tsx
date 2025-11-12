@@ -53,7 +53,7 @@ export function SummaryRow({
 }: SummaryRowProps) {
   return (
     <div className={cn('flex justify-between text-sm', strong && 'font-bold', className)} {...props}>
-      <span className={cn(mutedLabel ? 'text-muted-foreground' : undefined)}>{label}</span>
+      <span className={cn(mutedLabel ? 'text-text-on-disabled' : undefined)}>{label}</span>
       <span className={cn(valueClassName)}>{children}</span>
     </div>
   );
