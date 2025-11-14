@@ -1,6 +1,14 @@
 import type { NextConfig } from 'next';
 import createNextIntlSplitPlugin from 'next-intl-split/plugin';
 
+let outputMode = undefined;
+switch (process.env.NEXT_SERVER_OUTPUTMODE) {
+  case 'standalone':
+  case 'export':
+    outputMode = process.env.NEXT_SERVER_OUTPUTMODE;
+    break;
+}
+
 let nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -52,6 +60,7 @@ let nextConfig: NextConfig = {
     }
     return headers;
   },
+  output: outputMode,
 };
 
 // add i18n Logic to Next-Configuration
