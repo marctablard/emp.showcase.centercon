@@ -40,13 +40,13 @@ export function QueryCompletions({
             className="min-w-0 p-2 bg-surface-disabled hover:bg-surface-hover-grey text-text-heading flex shrink-1 font-medium"
           >
             {isProductsShown ? (
-              <span className="truncate w-full max-w-full text-left md:max-w-[48ch]">
+              <span className="truncate w-full max-w-full text-left sm:max-w-[48ch]">
                 <MarkedText text={queryCompletion} keyword={query} />
               </span>
             ) : (
               <>
                 <History />
-                <span className="truncate w-full max-w-full text-left md:max-w-[48ch]">{queryCompletion}</span>
+                <span className="truncate w-full max-w-full text-left sm:max-w-[48ch]">{queryCompletion}</span>
               </>
             )}
           </Button>

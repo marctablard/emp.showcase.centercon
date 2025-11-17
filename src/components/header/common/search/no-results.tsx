@@ -35,7 +35,7 @@ export function NoResults({ queryCompletions, setQuery, onQuerySelect }: NoResul
               className="min-w-0 p-2 bg-surface-disabled hover:bg-surface-hover-grey text-text-heading flex shrink-1"
             >
               <Search />
-              <span className="truncate w-full max-w-full text-left md:max-w-[48ch]"> {completion}</span>
+              <span className="truncate w-full max-w-full text-left sm:max-w-[48ch]"> {completion}</span>
             </Button>
           ))}
         </div>

@@ -50,7 +50,7 @@ function toast(toast: Omit<ToastProps, 'id'>) {
     {
       duration: 4000,
       position: 'bottom-center',
-      className: 'w-full pb-15 md:pb-2 md:px-4 md:flex md:justify-end md:[&>div]:max-w-[300px]',
+      className: 'w-full pb-15 sm:pb-2 sm:px-4 sm:flex sm:justify-end sm:[&>div]:max-w-[300px]',
     },
   );
 }
@@ -61,7 +61,7 @@ function notify(toast: Omit<NotificationProps, 'id'>) {
     {
       position: 'top-center',
       duration: toast.duration || 5000,
-      className: 'w-full mt-17 md:mt-30 lg:mt-44 md:[&>div]:mx-4 lg:[&>div]:mx-9',
+      className: 'w-full mt-17 sm:mt-30 md:mt-44 sm:[&>div]:mx-4 md:[&>div]:mx-9',
     },
   );
 }
@@ -143,7 +143,7 @@ function Notification(props: NotificationProps) {
   return (
     <div
       className={cn(
-        'flex rounded border shadow-lg w-full items-center md:p-3 p-1',
+        'flex rounded border shadow-lg w-full items-center sm:p-3 p-1',
         'top-right',
         'bg-surface-' + className[type] + ' border-border-' + className[type],
       )}

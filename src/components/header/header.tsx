@@ -9,7 +9,7 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useHeaderScroll } from '@/hooks/useHeaderScroll';
 
 export function Header() {
-  const isMediumScreen = useBreakpoint('md');
+  const isAboveSmallScreen = useBreakpoint('sm');
   const { scrolled, getHeaderHeight } = useHeaderScroll();
   const [isMounted, setIsMounted] = useState(false);
   const searchInput = useSearchInput();
@@ -22,11 +22,11 @@ export function Header() {
 
   return (
     <div className="has-[.search]:fixed has-[.search]:backdrop-blur-default has-[.search]:z-60 h-full w-full relative">
-      {!isMounted || isMediumScreen ? (
+      {!isMounted || isAboveSmallScreen ? (
         /* Desktop & Tablet */
         <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
           <header
-            className={`bg-surface-page/95 backdrop-blur-default shadow-sm rounded-lg relative transition-[height] duration-200 ease-in-out mx-4 lg:mx-9 ${scrolled ? 'h-16' : getHeaderHeight()}`}
+            className={`bg-surface-page/95 backdrop-blur-default shadow-sm rounded-lg relative transition-[height] duration-200 ease-in-out mx-4 md:mx-9 ${scrolled ? 'h-16' : getHeaderHeight()}`}
           >
             {/* Render only one header component based on scroll state */}
             {!scrolled ? (

@@ -95,12 +95,12 @@ export default function ProductVariantSelectorSimple({
   // Show loading skeleton cards while variants are being fetched
   if (variants.length === 0) {
     return (
-      <div className={cn('grid grid-cols-1 lg:grid-cols-2 gap-6', className)}>
+      <div className={cn('grid grid-cols-1 md:grid-cols-2 gap-6', className)}>
         {Array.from({ length: soloVariant.values?.length || 0 }, (_, index) => (
           <Card
             key={`skeleton-${index}`}
             variant="gray"
-            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3 border border-border-primary"
+            className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-2 lg:grid-cols-3 border border-border-primary"
           >
             <div className="col-start-1 p-4">
               <div className="w-[108px] h-[68px]">
@@ -123,7 +123,7 @@ export default function ProductVariantSelectorSimple({
   }
 
   return (
-    <div className={cn('grid grid-cols-1 lg:grid-cols-2 gap-6', className)}>
+    <div className={cn('grid grid-cols-1 md:grid-cols-2 gap-6', className)}>
       {variants.map((variant) => {
         const isSelected = variant.id === selectedVariant;
         const variantValue = variant.variantAttributes?.[0].values?.find((value) => value.selected)?.key || variant.id;
@@ -132,7 +132,7 @@ export default function ProductVariantSelectorSimple({
             key={variant.id}
             variant={isSelected ? 'primary' : 'gray'}
             className={cn(
-              'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 2xl:grid-cols-3',
+              'grid grid-cols-3 sm:grid-cols-5 md:grid-cols-2 lg:grid-cols-3',
               isSelected ? 'border border-border-action' : 'border border-border-primary',
             )}
             onClick={() => handleVariantTileClick(variant)}

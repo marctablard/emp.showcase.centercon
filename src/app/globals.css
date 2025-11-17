@@ -234,6 +234,16 @@
   --blur-*: initial;
   --blur-default: calc(var(--spacing-md) / 2);
 
+  /* Breakpoints */
+  /* mobile default */
+  /* tablet -> sm */
+  /* desktop (min) -> md */
+  /* desktop (max) -> lg */
+  --breakpoint-*: initial;
+  --breakpoint-sm: 48rem; /* 768px */
+  --breakpoint-md: 64rem; /* 1024px */
+  --breakpoint-lg: 80rem; /* 1280px */
+
   /* Chart */
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);

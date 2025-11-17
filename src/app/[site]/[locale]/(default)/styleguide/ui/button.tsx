@@ -7,7 +7,7 @@ export default function ButtonStyleGuide() {
     <div className="py-12">
       <H4 className="mb-3">Buttons</H4>
       <H5 className="mb-3">Default</H5>
-      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr] gap-6 mb-2">
+      <div className="p-4 grid grid-cols-[1fr] sm:grid-cols-[1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr] gap-6 mb-2">
         <div className="flex flex-wrap gap-3 flex-col items-start">
           <Button>
             <ArrowRight />
@@ -62,7 +62,7 @@ export default function ButtonStyleGuide() {
         </div>
       </div>
       <H5 className="mb-3">Small</H5>
-      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr] gap-6 mb-2">
+      <div className="p-4 grid grid-cols-[1fr] sm:grid-cols-[1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr] gap-6 mb-2">
         <div className="flex flex-wrap gap-3 flex-col items-start">
           <Button size="small">
             <ArrowRight />
@@ -117,7 +117,7 @@ export default function ButtonStyleGuide() {
         </div>
       </div>
       <H5 className="mb-3">Icon</H5>
-      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr] gap-6">
+      <div className="p-4 grid grid-cols-[1fr] sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr_1fr] gap-6">
         <div className="flex flex-wrap gap-3 flex-col items-start">
           <Button size="icon">
             <ArrowRight />

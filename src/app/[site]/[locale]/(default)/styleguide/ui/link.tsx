@@ -11,7 +11,7 @@ export default function LinkStyleGuide() {
         for HTML a-Tag and also button-Tag is possible.
       </p>
       <p>primary:</p>
-      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
+      <div className="p-4 grid grid-cols-[1fr] sm:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <div>
           <UiLink type="Link" href="#" variant="primary" size="s" iconBefore={<Trash2 />} iconAfter={<ArrowRight />}>
             Link S
@@ -29,7 +29,7 @@ export default function LinkStyleGuide() {
         </div>
       </div>
       <p>secondary:</p>
-      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
+      <div className="p-4 grid grid-cols-[1fr] sm:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <div>
           <UiLink type="A" href="#" variant="secondary" size="s" iconBefore={<Trash2 />} iconAfter={<ArrowRight />}>
             Link S
@@ -56,7 +56,7 @@ export default function LinkStyleGuide() {
       </div>
       <p className="text-base mb-2">You can also use as type Button and they can be disabled:</p>
       <p>primary:</p>
-      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
+      <div className="p-4 grid grid-cols-[1fr] sm:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <div>
           <UiLink
             type="Button"
@@ -98,7 +98,7 @@ export default function LinkStyleGuide() {
         </div>
       </div>
       <p>secondary:</p>
-      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
+      <div className="p-4 grid grid-cols-[1fr] sm:grid-cols-[1fr_1fr_1fr] gap-6 mb-2 items-start">
         <div>
           <UiLink
             type="Button"

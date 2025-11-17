@@ -54,7 +54,7 @@ export default async function CMSPageComponent({ slug, locale, site, emptyOnNoRe
     if (emptyOnNoResult) {
       return (
         <>
-          <div className="flex-grow mt-17 md:mt-36 lg:mt-52"></div>
+          <div className="flex-grow mt-17 sm:mt-36 md:mt-52"></div>
         </>
       );
     }
@@ -72,9 +72,9 @@ export default async function CMSPageComponent({ slug, locale, site, emptyOnNoRe
 
   return (
     <>
-      <div className="flex-grow mt-17 md:mt-36 lg:mt-52">
+      <div className="flex-grow mt-17 sm:mt-36 md:mt-52">
         {breadcrumb.length > 0 && (
-          <UiBreadcrumb items={breadcrumb} className="max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6" />
+          <UiBreadcrumb items={breadcrumb} className="max-w-6xl mx-auto px-4 md:px-9 sm:gap-x-6" />
         )}
         <CMSComponentRenderer components={page.components} locale={locale} />
       </div>

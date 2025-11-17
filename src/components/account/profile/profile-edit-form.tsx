@@ -125,7 +125,7 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
         )}
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">{t('profile.form.titleLabel') || 'Anrede'}</Label>
@@ -144,7 +144,7 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
             </div>
 
             {/* Spacer for alignment with two columns */}
-            <div className="hidden md:block"></div>
+            <div className="hidden sm:block"></div>
 
             {/* First Name */}
             <div className="space-y-2">

@@ -87,8 +87,8 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-          <div className="md:col-span-6">
+        <div className="grid grid-cols-1 sm:grid-cols-7 gap-4">
+          <div className="sm:col-span-6">
             <FormField
               control={form.control}
               name="street"
@@ -107,7 +107,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
           </div>
 
           <div>
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2">
               <FormField
                 control={form.control}
                 name="streetNumber"
@@ -127,7 +127,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-7 gap-4 space-y-4">
           <div>
             <FormField
               control={form.control}
@@ -146,7 +146,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             />
           </div>
 
-          <div className="md:col-span-6">
+          <div className="sm:col-span-6">
             <FormField
               control={form.control}
               name="city"

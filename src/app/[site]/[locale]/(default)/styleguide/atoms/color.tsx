@@ -9,7 +9,7 @@ export default function ColorStyleGuide() {
       <div className="flex flex-col gap-8">
         <section>
           <H5>Text colors</H5>
-          <div className="p-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex h-20 items-center justify-between rounded-md border border-border-primary bg-surface-primary px-4 text-text-headings">
               <span>text-text-headings</span>
               <span>Aa</span>
@@ -63,7 +63,7 @@ export default function ColorStyleGuide() {
 
         <section>
           <H5>Surface colors</H5>
-          <div className="p-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex h-20 items-center justify-between rounded-md border border-border-primary bg-surface-page px-4 text-text-body">
               <span>bg-surface-page</span>
             </div>
@@ -114,7 +114,7 @@ export default function ColorStyleGuide() {
 
         <section>
           <H5>Icon colors</H5>
-          <div className="p-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex h-20 items-center justify-between rounded-md border border-border-primary bg-surface-primary px-4 text-icon-action">
               <span>text-icon-action</span>
               <Star width={24} height={24} aria-hidden="true" />
@@ -164,7 +164,7 @@ export default function ColorStyleGuide() {
 
         <section>
           <H5>Border colors</H5>
-          <div className="p-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex h-20 items-center justify-center rounded-md border-4 border-border-primary bg-surface-primary text-sm text-text-body">
               border-border-primary
             </div>
@@ -206,7 +206,7 @@ export default function ColorStyleGuide() {
 
         <section>
           <H5>Gradients</H5>
-          <div className="p-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex h-32 items-center justify-center rounded-md bg-gradient-to-t from-gradient-secondary-end to-gradient-secondary-start text-center text-sm text-text-on-action">
               gradient-secondary-end → gradient-secondary-start
             </div>

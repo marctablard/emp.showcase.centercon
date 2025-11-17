@@ -14,7 +14,7 @@ export interface HeaderCompactProps extends SearchInputProps {
 export function HeaderCompact(props: HeaderCompactProps) {
   const { showSearch, activateSearch, isCollapsedHeader } = props;
   const t = useTranslations('layout.header');
-  const isLargeScreen = useBreakpoint('lg');
+  const isAboveSmallScreen = useBreakpoint('sm');
 
   return (
     <>
@@ -22,7 +22,7 @@ export function HeaderCompact(props: HeaderCompactProps) {
         <HeaderSearch small={false} show={showSearch} searchInput={props} isCollapsedHeader={isCollapsedHeader} />
 
         <div className={`flex items-center ${showSearch ? 'w-0 opacity-0 hidden' : ''}`}>
-          {isLargeScreen ? (
+          {isAboveSmallScreen ? (
             <HeaderLogo small width={25} height={22} className="min-w-[25px] min-h-[22px]" title={t('home')} />
           ) : (
             <HeaderLogo small width={18} height={16} className="min-w-[18px] min-h-[16px]" title={t('home')} />

@@ -80,7 +80,7 @@ export function UiBreadcrumb({ items, maxItems = 2, className, disabledCategorie
           return (
             <BreadcrumbItem key={index} className="hidden sm:block">
               {disabledCategories ? (
-                <BreadcrumbPage className="inline-flex items-center whitespace-nowrap text-text-action [&>svg]:size-4 lg:[&>svg]:size-6 font-bold underline px-0 lg:px-0">
+                <BreadcrumbPage className="inline-flex items-center whitespace-nowrap text-text-action [&>svg]:size-4 md:[&>svg]:size-6 font-bold underline px-0 md:px-0">
                   {item.label}
                   <ChevronRight className="size-4" />
                 </BreadcrumbPage>

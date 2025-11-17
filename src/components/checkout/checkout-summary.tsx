@@ -75,13 +75,13 @@ const CheckoutSummaryComponent: React.FC<OrderSummaryProps> = ({ leftContent, on
       <div
         className={cn(
           'flex flex-col gap-4',
-          isFixed ? 'fixed lg:mr-9' : '',
+          isFixed ? 'fixed md:mr-9' : '',
           isFixedToTop ? 'top-[112px]' : 'bottom-[40px]',
         )}
         ref={fixedContainer}
       >
         <Card
-          className={cn('bg-surface-action-hover-2 p-6 border-none gap-4 lg:max-w-[438px] w-full')}
+          className={cn('bg-surface-action-hover-2 p-6 border-none gap-4 md:max-w-[438px] w-full')}
           ref={fixedContainer}
         >
           <CardHeader className="p-0">

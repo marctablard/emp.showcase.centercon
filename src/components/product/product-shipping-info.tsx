@@ -32,7 +32,7 @@ export function ProductShippingInfo({
 
   return (
     <Card variant="gray" rounded="lg" className={cn('mt-8 p-0', className)}>
-      <CardContent className="px-6 lg:px-8 pt-6 pb-6 lg:pb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <CardContent className="px-6 md:px-8 pt-6 pb-6 md:pb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <H2 className="text-base mb-4">{t('deliveryDetails')}</H2>
 

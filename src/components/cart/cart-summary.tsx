@@ -25,17 +25,17 @@ export function CartSummary({ cart, boundingContent }: CartSummaryProps) {
   const { cartTotal, shippingCosts, currency } = useCartTotal();
 
   return (
-    <div className="col-span-1 xl:col-span-1 mb-6 flex">
+    <div className="col-span-1 lg:col-span-1 mb-6 flex">
       <div className={cn('flex flex-col w-full', isContainerBottom ? 'justify-end' : 'justify-start')}>
         <div
           className={cn(
             'flex flex-col gap-4',
-            isFixed ? 'fixed lg:mr-9' : '',
+            isFixed ? 'fixed md:mr-9' : '',
             isFixedToTop ? 'top-[112px]' : 'bottom-[40px]',
           )}
           ref={fixedContainer}
         >
-          <Card className="bg-surface-action-hover-2 p-6 border-none gap-4 shadow-sm lg:max-w-[438px] w-full">
+          <Card className="bg-surface-action-hover-2 p-6 border-none gap-4 shadow-sm md:max-w-[438px] w-full">
             <CardHeader className="p-0">
               <CardTitle>
                 <H5>{t('title')}</H5>

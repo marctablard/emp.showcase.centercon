@@ -39,7 +39,7 @@ const Recommendations = ({ overline, headline, productId, products, locale }: Re
   }
 
   return (
-    <div className="py-8 max-w-6xl mx-auto px-4 lg:px-9">
+    <div className="py-8 max-w-6xl mx-auto px-4 md:px-9">
       {overline && (
         <Heading variant="overline" as="div" className="mb-3">
           {overline}
@@ -49,7 +49,7 @@ const Recommendations = ({ overline, headline, productId, products, locale }: Re
       <div className="w-full relative">
         <Carousel className="w-full " orientation="horizontal">
           {headline && (
-            <Heading variant="h2" as="div" className="md:pr-36">
+            <Heading variant="h2" as="div" className="sm:pr-36">
               {headline}
             </Heading>
           )}
@@ -81,10 +81,10 @@ const Recommendations = ({ overline, headline, productId, products, locale }: Re
 
           <CarouselDots />
 
-          <CarouselPrevious className="hidden md:flex top-0 right-20 bottom-1 h-10 w-10">
+          <CarouselPrevious className="hidden sm:flex top-0 right-20 bottom-1 h-10 w-10">
             <ChevronLeft className="h-6 w-6 text-text-action" />
           </CarouselPrevious>
-          <CarouselNext className="hidden md:flex top-0 right-4 bottom-1 h-10 w-10">
+          <CarouselNext className="hidden sm:flex top-0 right-4 bottom-1 h-10 w-10">
             <ChevronRight className="h-6 w-6 text-text-action" />
           </CarouselNext>
         </Carousel>

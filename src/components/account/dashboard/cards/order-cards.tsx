@@ -246,7 +246,7 @@ function OrderDetail({ orderId }: { orderId: string }) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <H3 className="mb-2">{tOrder('orderDate')}</H3>
               <p>{order.createdAt ? format(new Date(order.createdAt), 'PPP') : '-'}</p>

@@ -51,7 +51,7 @@ export function CheckoutPayment({ initialEdit }: { initialEdit: boolean }) {
           )}
         </Button>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {!isPaymentEdit ? (
           <>
             <div className="flex flex-col">

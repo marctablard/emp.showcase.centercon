@@ -170,8 +170,8 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
   ];
 
   return (
-    <div className="lg:mx-9">
-      {breadcrumbs && <UiBreadcrumb items={breadcrumbs} className="max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6" />}
+    <div className="md:mx-9">
+      {breadcrumbs && <UiBreadcrumb items={breadcrumbs} className="max-w-6xl mx-auto px-4 md:px-9 sm:gap-x-6" />}
       <div className="flex min-h-screen">
         <AccountSidebar items={sidebarItems} groups={sidebarGroups} />
         <main className="w-full ml-4">{children}</main>

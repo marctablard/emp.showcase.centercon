@@ -79,10 +79,10 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
             )}
           </CardDescription>
           <CardTitle className="flex gap-2 justify-between">
-            <Heading variant="h5" as="div" className="lg:hidden">
+            <Heading variant="h5" as="div" className="md:hidden">
               <p className="line-clamp-3">{l10n(product.name)}</p>
             </Heading>
-            <Heading variant="h6" as="div" className="hidden lg:block">
+            <Heading variant="h6" as="div" className="hidden md:block">
               <p className="line-clamp-2">{l10n(product.name)}</p>
             </Heading>
             <Button
