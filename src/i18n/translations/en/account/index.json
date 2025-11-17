@@ -136,6 +136,7 @@
   "hello": "Hello",
   "sidebar": {
     "dashboard": "Dashboard",
+    "menu": "Menu",
     "groups": {
       "selfService": "Self Service",
       "orderManagement": "Order Management",

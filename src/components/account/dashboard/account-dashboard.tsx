@@ -30,7 +30,7 @@ export default function AccountDashboard({ customer }: AccountDashboardProps) {
   return (
     <AccountLayout>
       <div className="space-y-6 mb-6">
-        <div className="relative flex justify-between items-center">
+        <div className="relative flex justify-between items-center px-4 gap-2 flex-wrap">
           <H3>
             {t('hello')}{' '}
             <span className="text-text-action">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
