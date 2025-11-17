@@ -394,5 +394,10 @@
     "thunderstormWithSlightHail": "Gewitter mit leichtem Hagel",
     "thunderstormWithHeavyHail": "Gewitter mit starkem Hagel",
     "unknown": "Unbekannte Wetterbedingung"
+  },
+  "placeholder": {
+    "title": "Platzhalterseite",
+    "description": "Diese Seite ist ein Platzhalter im Emporix-Referenz-Storefront.",
+    "details": "Sie zeigt, wo zusätzliche Funktionen, Apps oder benutzerdefinierte Integrationen hinzugefügt werden können. Der Inhalt und die Funktionalität dieser Seite variieren je nach Anforderungen und Projektumfang."
   }
 }

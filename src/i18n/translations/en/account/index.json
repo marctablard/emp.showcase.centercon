@@ -386,5 +386,10 @@
     "thunderstormWithSlightHail": "Thunderstorm with Light Hail",
     "thunderstormWithHeavyHail": "Thunderstorm with Heavy Hail",
     "unknown": "Unknown Weather Condition"
+  },
+  "placeholder": {
+    "title": "Placeholder Page",
+    "description": "This page is a placeholder included in the Emporix reference storefront.",
+    "details": "It demonstrates where additional features, apps, or custom integrations can be added. The content and functionality of this page will vary depending on requirements and project scope."
   }
 }
