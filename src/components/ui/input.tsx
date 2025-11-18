@@ -19,7 +19,7 @@ export interface InputProps extends React.ComponentProps<'input'> {
 const inputVariants = cva(
   [
     'text-text-body flex w-full min-w-0 px-3 border border-border-primary',
-    'placeholder:text-text-placeholders py-3 text-base md:text-base',
+    'placeholder:text-text-placeholders py-3 text-base sm:text-base',
     'transition duration-150 ease-in-out hover:text-text-action-hover hover:border-border-action-hover hover:bg-surface-primary',
     'disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-surface-disabled disabled:text-text-on-disabled',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',

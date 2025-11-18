@@ -229,10 +229,10 @@ export default function FormFieldStyleguide() {
 
         <div className="flex flex-col gap-6 w-full">
           <H5>Validatable Form Elements</H5>
-          <div className="flex flex-col gap-10 md:flex-row">
-            <div className="flex flex-col gap-10 w-full md:flex-row md:w-1/2">
+          <div className="flex flex-col gap-10 sm:flex-row">
+            <div className="flex flex-col gap-10 w-full sm:flex-row sm:w-1/2">
               <Form {...formVal}>
-                <form className="flex flex-col gap-10 w-full md:w-1/2">
+                <form className="flex flex-col gap-10 w-full sm:w-1/2">
                   <div className="flex flex-col gap-2">
                     <FormField
                       control={formVal.control}
@@ -397,7 +397,7 @@ export default function FormFieldStyleguide() {
               </Form>
 
               <Form {...formRadio}>
-                <form className="flex flex-col gap-10 w-full md:w-1/2" onSubmit={formRadio.handleSubmit(onSubmit)}>
+                <form className="flex flex-col gap-10 w-full sm:w-1/2" onSubmit={formRadio.handleSubmit(onSubmit)}>
                   <div className="flex flex-col gap-2">
                     <FormField
                       control={formRadio.control}
@@ -450,7 +450,7 @@ export default function FormFieldStyleguide() {
                 </form>
               </Form>
             </div>
-            <div className="flex flex-col gap-10 w-full md:flex-row md:w-1/2">
+            <div className="flex flex-col gap-10 w-full sm:flex-row sm:w-1/2">
               <div className="flex flex-col gap-10 w-1/2">
                 <div className="flex flex-col gap-5">
                   <div className="text-base font-bold">Slider</div>

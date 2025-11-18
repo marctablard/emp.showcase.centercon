@@ -12,7 +12,7 @@ export default function DialogStyleguide() {
         <p className="text-lg mb-8">Examples of different ways to open and control dialogs.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
         <Card className="p-6">
           <H5 className="mb-4">Dialog with Button Trigger</H5>
           <p className="mb-6">Dialog with a button as trigger</p>

@@ -27,10 +27,10 @@ export function CartDelivery() {
   const isPickup = shippingMethod?.methodId === 'pickup';
 
   return (
-    <Card className="p-0 border-none shadow-sm mb-4 lg:mb-6">
-      <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2">
+    <Card className="p-0 border-none shadow-sm mb-4 md:mb-6">
+      <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-2">
         <ShippingMethod variant="slim" />
-        <div className="flex flex-col gap-4 pt-4 md:ps-6 md:pt-0">
+        <div className="flex flex-col gap-4 pt-4 sm:pt-0">
           <div className="flex justify-between">
             <H5>{isPickup ? t('pickup') : t('ship')}</H5>
             <AddressSelector
@@ -49,12 +49,12 @@ export function CartDelivery() {
               title={t('selectShippingAddress')}
             />
           </div>
-          <div className="flex flex-col md:flex-row gap-4 justify-between">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
             {shippingAddress && !isPickup && <AddressDisplay address={shippingAddress} />}
             {isPickup && (
               <>
                 <AddressDisplay address={pickupAddress} />
-                <div className="flex flex-col xl:pe-4 text-base w-full sm:w-1/2">
+                <div className="flex flex-col lg:pe-4 text-base w-full sm:w-1/2">
                   <div>
                     <span className="font-bold font-headlines">{t('hours')}</span>
                     <span>M-F 7:00 AM - 4:00 PM Central</span>

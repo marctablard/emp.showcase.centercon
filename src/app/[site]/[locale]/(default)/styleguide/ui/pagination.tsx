@@ -13,7 +13,7 @@ export default function PaginationStyleGuide() {
   return (
     <div className="py-12">
       <H4 className="mb-3">Pagination</H4>
-      <div className="p-4 grid grid-cols-[1fr] lg:grid-cols-[1fr_1fr] gap-6 mb-2">
+      <div className="p-4 grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] gap-6 mb-2">
         <Pagination>
           <PaginationContent>
             <PaginationItem>

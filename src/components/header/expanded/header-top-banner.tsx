@@ -9,9 +9,9 @@ import { SiteSwitcher } from '../common/header-site-switcher';
 
 export function HeaderTopBanner() {
   const t = useTranslations('layout.header');
-  const isExtraLargeScreen = useBreakpoint('xl');
+  const isAboveLargeScreen = useBreakpoint('lg');
   return (
-    <div className="bg-surface-action text-text-on-action shadow-sm rounded-lg flex items-center -mx-2 lg:-mx-4 -mt-1 h-8 px-8 lg:px-10">
+    <div className="bg-surface-action text-text-on-action shadow-sm rounded-lg flex items-center -mx-2 md:-mx-4 -mt-1 h-8 px-8 md:px-10">
       <div className="flex justify-between items-center self-stretch w-full">
         <div className="flex grow basis-0 shrink-0 items-center gap-2">
           <SiteSwitcher />
@@ -24,7 +24,7 @@ export function HeaderTopBanner() {
           </div>
           <CurrencySwitcher />
         </div>
-        {isExtraLargeScreen && (
+        {isAboveLargeScreen && (
           <div className="justify-center items-center font-bold">
             <TopBannerAnnouncement />
           </div>

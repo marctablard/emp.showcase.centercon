@@ -24,8 +24,8 @@ export default function ProductAddToCartBar({
   const t = useTranslations('product');
   const { l10n } = useL10n(locale);
   return (
-    <div className={cn('fixed top-0 left-0 right-0 mt-20 pt-4 z-50 max-w-6xl mx-auto hidden lg:block', className)}>
-      <div className="bg-surface-action shadow-lg rounded-lg overflow-hidden relative flex justify-between mx-4 lg:mx-9 h-16">
+    <div className={cn('fixed top-0 left-0 right-0 mt-20 pt-4 z-50 max-w-6xl mx-auto hidden md:block', className)}>
+      <div className="bg-surface-action shadow-lg rounded-lg overflow-hidden relative flex justify-between mx-4 md:mx-9 h-16">
         {product && (
           <div className="flex items-center gap-6">
             {product.images && product.images.length > 0 && (

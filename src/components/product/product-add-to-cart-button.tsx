@@ -77,7 +77,7 @@ export default function ProductAddToCartButton({
         disabled={cart === undefined || product.purchasable === false || adding || !price}
       >
         {t('addToCart')}
-        <ShoppingCart className="hidden md:inline" />
+        <ShoppingCart className="hidden sm:inline" />
       </Button>
 
       {/* Add to Cart Modal */}

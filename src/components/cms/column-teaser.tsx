@@ -74,16 +74,16 @@ const ColumnTeaser = ({ main_image, side_images }: ColumnTeaserProps) => {
       <div className="grid grid-cols-2 gap-4 h-auto ">
         {/* Main image - left side */}
         {mainImg && (
-          <div className="col-span-2 lg:col-span-1 h-96">
+          <div className="col-span-2 md:col-span-1 h-96">
             <ImageWithHover image={mainImg} className="w-full h-full" />
           </div>
         )}
 
         {/* Side images - right side */}
         {sideImgs.length > 0 && (
-          <div className="col-span-2 lg:col-span-1 flex flex-col gap-4">
+          <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
             {sideImgs.slice(0, 3).map((image, index) => (
-              <div key={index} className="flex-1 h-20 lg:h-auto min-h-[80px]">
+              <div key={index} className="flex-1 h-20 md:h-auto min-h-[80px]">
                 <ImageWithHover image={image} className="w-full h-full" />
               </div>
             ))}

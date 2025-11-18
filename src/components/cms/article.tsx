@@ -28,7 +28,7 @@ interface ArticleProps {
 
 const Article = ({ blok }: ArticleProps) => {
   return (
-    <article {...storyblokEditable(blok)} className="article max-w-6xl mx-auto px-4 lg:px-9 md:gap-x-6">
+    <article {...storyblokEditable(blok)} className="article max-w-6xl mx-auto px-4 md:px-9 sm:gap-x-6">
       {/* Article header */}
       {blok.title ||
         (blok.introduction && (
@@ -64,7 +64,7 @@ const Article = ({ blok }: ArticleProps) => {
           <H2 variant="h6" className="mb-4">
             Related Products
           </H2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {blok.linked_products.map((product) => (
               <div key={product._uid} className="border rounded-md p-4">
                 <H3 variant="h6" className="mb-2">

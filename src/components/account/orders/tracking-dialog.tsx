@@ -80,7 +80,7 @@ export function TrackingDialog({ orderId, open, onOpenChange }: TrackingDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md md:max-w-lg">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{tTracking('trackingInformation')}</DialogTitle>
         </DialogHeader>
@@ -103,7 +103,7 @@ export function TrackingDialog({ orderId, open, onOpenChange }: TrackingDialogPr
         {!loading && !error && trackingInfo && (
           <div className="space-y-6">
             {/* Carrier and status information */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <p className="font-medium text-sm text-text-placeholders">{tTracking('carrier')}</p>
                 <p className="font-semibold">{trackingInfo.carrier.name}</p>

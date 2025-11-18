@@ -431,7 +431,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
         )}
 
         {/* Quote details grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium text-text-placeholders">{t('quotationDate')}</p>
             <p className="mt-2 text-text-heading">{formatDate(quote.submittedDate)}</p>

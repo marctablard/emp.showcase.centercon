@@ -19,7 +19,7 @@ export function CheckoutNotes() {
           <Pencil />
         </Button> */}
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {!false ? (
           <>
             <div className="pb-flex flex-col">

@@ -112,7 +112,7 @@ const Article = ({ blok }: ArticleProps) => {
           <H2 variant="h6" className="mb-4">
             Related Products
           </H2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {blok.linked_products.map((product) => (
               <div key={product._uid} className="border rounded-lg p-4">
                 <H3 variant="h6" className="mb-2">

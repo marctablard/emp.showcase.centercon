@@ -67,8 +67,8 @@ export default function ProductAddToCart({
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:gap-2 w-full">
-      <div className="flex items-center md:w-auto md:flex-shrink-0">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 w-full">
+      <div className="flex items-center sm:w-auto sm:flex-shrink-0">
         <Button
           variant="secondary"
           size="icon"
@@ -85,7 +85,7 @@ export default function ProductAddToCart({
           min="1"
           max="999"
           aria-label={t('quantity')}
-          className="text-center min-w-[14] w-full h-13 border border-border-primary rounded-none md:[appearance:textfield] md:[&::-webkit-outer-spin-button]:appearance-none md:[&::-webkit-inner-spin-button]:appearance-none"
+          className="text-center min-w-[14] w-full h-13 border border-border-primary rounded-none sm:[appearance:textfield] sm:[&::-webkit-outer-spin-button]:appearance-none sm:[&::-webkit-inner-spin-button]:appearance-none"
           value={quantity}
           onChange={handleQuantityChange}
         />
@@ -103,7 +103,7 @@ export default function ProductAddToCart({
         product={product}
         price={price}
         quantity={quantity}
-        className="flex-1 w-full h-[52px] mt-4 md:mt-0 md:flex-grow"
+        className="flex-1 w-full h-[52px] mt-4 sm:mt-0 sm:flex-grow"
       />
     </div>
   );

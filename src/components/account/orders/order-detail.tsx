@@ -94,7 +94,7 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <H3 variant="h5" className="mb-2">
                 {tOrder('orderDate')}

@@ -82,7 +82,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   if (customer === undefined || loading || orderResponse) {
     console.log(customer, loading, orderResponse);
     return (
-      <div className="mx-4 xl:mx-9">
+      <div className="mx-4 lg:mx-9">
         <div className="flex flex-col items-center justify-center py-12">
           <Spinner variant="lg" />
         </div>
@@ -110,12 +110,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
           <p className="text-text-error">{error.message}</p>
         </div>
       )}
-      <div className="mx-4 xl:mx-9">
+      <div className="mx-4 lg:mx-9">
         <div className="flex gap-3 align-end mb-8">
           <H1 variant="h3">{t('title')}</H1>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-          <div className="col-span-1 lg:col-span-2 2xl:col-span-3" ref={leftContent}>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div className="col-span-1 md:col-span-2 lg:col-span-3" ref={leftContent}>
             {!customer && <ContactData />}
             <CheckoutShipping initialEdit={false} />
             <CheckoutPayment initialEdit={false} />

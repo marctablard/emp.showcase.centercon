@@ -71,7 +71,7 @@ const ContentBlock = ({ blok }: ContentBlockProps) => {
 
         {/* Images */}
         {blok.images && blok.images.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             {blok.images.map((image, index) => (
               <div key={index} className="relative h-48">
                 <Image src={image.filename} alt={image.alt || ''} fill className="object-cover rounded" />

@@ -6,13 +6,13 @@ import { SearchInputProps } from '@/hooks/search/useSearchInput';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export function HeaderExpanded(props: SearchInputProps) {
-  const isLargeScreen = useBreakpoint('lg');
+  const isAboveMediumScreen = useBreakpoint('md');
 
   return (
     <>
       <HeaderTopBanner />
 
-      {isLargeScreen ? (
+      {isAboveMediumScreen ? (
         /* Desktop */
         <div className="px-6 pb-2 group">
           <HeaderMiddleBar {...props} />

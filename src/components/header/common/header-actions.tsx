@@ -22,7 +22,7 @@ export function HeaderActions({
   const { isAuthenticated, loading } = useAuthentication();
   const { openDialog } = useAuthDialog();
   const [isMounted, setIsMounted] = useState(false);
-  const isMediumScreen = useBreakpoint('md');
+  const isAboveSmallScreen = useBreakpoint('sm');
 
   // This code is also mentioned in the React docs: https://react.dev/reference/react/useEffect#displaying-different-content-on-the-server-and-the-client
   useEffect(() => {
@@ -34,11 +34,11 @@ export function HeaderActions({
   if (!isMounted) {
     return (
       <div className={`flex items-center gap-5 text-nowrap ${className}`}>
-        <div className="hidden md:block">
+        <div className="hidden sm:block">
           <HeaderIconLink icon={Search} text={t('shortSearch')} href={'/#'} />
         </div>
         <HeaderIconButton icon={User} text={t('signIn')} onClick={() => {}} />
-        <div className="hidden md:flex gap-5">
+        <div className="hidden sm:flex gap-5">
           <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
           <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
         </div>
@@ -52,7 +52,7 @@ export function HeaderActions({
 
   return (
     <div className={`flex items-center gap-5 text-nowrap ${className}`}>
-      {onToggleSearch && !hideSearchIcon && isMediumScreen && (
+      {onToggleSearch && !hideSearchIcon && isAboveSmallScreen && (
         <HeaderIconButton icon={Search} text={t('shortSearch')} onClick={onToggleSearch} />
       )}
 
@@ -62,7 +62,7 @@ export function HeaderActions({
         <HeaderIconButton icon={User} text={t('signIn')} onClick={() => openDialog('login')} />
       )}
 
-      {isMediumScreen && (
+      {isAboveSmallScreen && (
         <div className="flex gap-5">
           <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
           <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />

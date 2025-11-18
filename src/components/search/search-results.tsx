@@ -133,7 +133,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
         {loading ? (
           <>
             <Skeleton className="h-5 w-[180px] mb-4" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-fr">
               {Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (
                 <ProductTileSkeleton key={i} />
               ))}
@@ -159,7 +159,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
                 </div>
 
                 {/* Client-side rendered products - this will replace the server-rendered ones */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-fr">
                   {products.map((product) => (
                     <div key={product.id} className="h-full">
                       <ProductTile product={product} locale={locale} />

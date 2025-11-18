@@ -31,7 +31,7 @@ export function SideBar({ categories, query }: SideBarProps) {
   ];
 
   return (
-    <div className="flex flex-col col-span-5 md:col-span-1 order-1 gap-7">
+    <div className="flex flex-col col-span-5 sm:col-span-1 order-1 gap-7">
       {categories?.length > 0 && (
         <div className="mb-10">
           <Heading className="mb-6" variant="h5" as="div">

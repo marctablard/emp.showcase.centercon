@@ -7,8 +7,8 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export function HeaderMiddleBar(props: SearchInputProps) {
   const t = useTranslations('layout.header');
-  const isExtraLargeScreen = useBreakpoint('xl');
-  const isLargeScreen = useBreakpoint('lg');
+  const isAboveLargeScreen = useBreakpoint('lg');
+  const isAboveMediumScreen = useBreakpoint('md');
   const {} = props;
 
   return (
@@ -18,8 +18,12 @@ export function HeaderMiddleBar(props: SearchInputProps) {
       <div className="w-[223px] transition-all duration-100 hide-on-focus">
         <HeaderLogo width={148} height={24} className="min-w-[148px] min-h-[24px]" title={t('home')} />
       </div>
-      <HeaderSearch small={!isExtraLargeScreen} show={isLargeScreen} searchInput={props} />
-      <HeaderActions className="hide-on-focus" onToggleSearch={props.toggleSearch} hideSearchIcon={isLargeScreen} />
+      <HeaderSearch small={!isAboveLargeScreen} show={isAboveMediumScreen} searchInput={props} />
+      <HeaderActions
+        className="hide-on-focus"
+        onToggleSearch={props.toggleSearch}
+        hideSearchIcon={isAboveMediumScreen}
+      />
     </div>
   );
 }

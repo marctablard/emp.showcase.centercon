@@ -29,7 +29,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   if (loading && !cart) {
     return (
       <div className="max-w-6xl mx-auto mt-8">
-        <Card className="mx-4 xl:mx-9">
+        <Card className="mx-4 lg:mx-9">
           <CardHeader>
             <CardTitle className="text-center text-2xl">{t('yourCart')}</CardTitle>
           </CardHeader>
@@ -47,7 +47,7 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
 
   return (
     <div className="max-w-6xl mx-auto mt-8">
-      <div className="mx-4 xl:mx-9">
+      <div className="mx-4 lg:mx-9">
         <div className="flex gap-3 align-end mb-8">
           <H3>{t('title')}</H3>
           <div className="text-text-on-disabled text-lg m-0 leading-[2]">
@@ -55,8 +55,8 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           </div>
         </div>
         <CartAction />
-        <div className="grid grid-cols-1 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-8 mb-11">
-          <div className="col-span-1 xl:col-span-2 2xl:col-span-3" ref={leftContent}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-11">
+          <div className="col-span-1 lg:col-span-2" ref={leftContent}>
             {false && customer && <CartDelivery />}
             <CartItemList cart={cart} />
           </div>

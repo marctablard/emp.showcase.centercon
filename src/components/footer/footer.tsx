@@ -15,7 +15,7 @@ export default function Footer({ reduced = false }: { reduced?: boolean }) {
 
   return (
     <footer className="w-full">
-      <div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6">
+      <div className="text-sm grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 p-4 md:p-6">
         {!reduced && (
           <div>
             <p className="font-bold mb-2">{t('newsletterTitle')}</p>
@@ -54,7 +54,7 @@ export default function Footer({ reduced = false }: { reduced?: boolean }) {
         )}
         {!reduced && (
           <div>
-            <p className="font-bold mb-2 md:mb-6">{t('paymentMethodsTitle')}</p>
+            <p className="font-bold mb-2 sm:mb-6">{t('paymentMethodsTitle')}</p>
             <div className="flex gap-2 justify-between items-center max-w-[400px]">
               <Image src="/images/mastercard.svg" alt="Mastercard" width="88" height="20" />
               <Image src="/images/paypal.svg" alt="Paypal" width="60" height="16" />
@@ -63,7 +63,7 @@ export default function Footer({ reduced = false }: { reduced?: boolean }) {
             </div>
           </div>
         )}
-        <div className="bg-surface-action-hover-2 rounded-ss-lg p-2 md:p-4">
+        <div className="bg-surface-action-hover-2 rounded-ss-lg p-2 sm:p-4">
           <div className="bg-[url('/images/map-pinned.svg')] bg-no-repeat bg-right-top">
             <p className="font-bold">{t('companyName')}</p>
             <p>{t('street')}</p>
@@ -71,7 +71,7 @@ export default function Footer({ reduced = false }: { reduced?: boolean }) {
             <p>{t('country')}</p>
           </div>
         </div>
-        <div className="bg-surface-action-hover-2 rounded-ee-lg p-2 md:p-4">
+        <div className="bg-surface-action-hover-2 rounded-ee-lg p-2 sm:p-4">
           <div className="bg-[url('/images/headset.svg')] bg-no-repeat bg-right-top flex flex-col gap-2">
             <div>
               <p className="font-bold">{t('ourServiceHours')}</p>
@@ -99,7 +99,7 @@ export function FooterLinks() {
   const t = useTranslations('layout.footerLinks');
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 lg:gap-6 ml-4 mr-4 lg:ml-6 lg:mr-6 py-4 lg:py-6 border-b border-b-border-primary">
+    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 md:gap-6 ml-4 mr-4 md:ml-6 md:mr-6 py-4 md:py-6 border-b border-b-border-primary">
       <div className="flex flex-col gap-2">
         <p className="text-lg mb-1">{t('products')}</p>
         <UiLink type="Link" href="#" variant="secondary" size="s">
@@ -167,11 +167,11 @@ export function FooterLinks() {
 export function FooterWrapper({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div className="flex-grow">
-      <div className="max-w-6xl mx-auto grid gap-x-4 md:gap-x-6">
+      <div className="max-w-6xl mx-auto grid gap-x-4 sm:gap-x-6">
         <div
           data-slot="footer"
           className={cn(
-            'md:ml-4 md:mr-4 lg:ml-9 lg:mr-9 shadow-xl rounded-ss-lg rounded-se-lg  bg-[url("/images/footer-bg.svg")] bg-no-repeat bg-right-bottom',
+            'sm:ml-4 sm:mr-4 md:ml-9 md:mr-9 shadow-xl rounded-ss-lg rounded-se-lg  bg-[url("/images/footer-bg.svg")] bg-no-repeat bg-right-bottom',
             className,
           )}
           {...props}
@@ -188,14 +188,14 @@ export function LegalFooter() {
 
   return (
     <div className="flex-grow">
-      <div className="max-w-6xl mx-auto md:mb-4">
+      <div className="max-w-6xl mx-auto sm:mb-4">
         <div
           data-slot="legal-footer"
-          className="px-4 pb-16 pt-2 md:mx-2 md:px-7 md:py-0 md:h-8 bg-surface-action md:rounded-full"
+          className="px-4 pb-16 pt-2 sm:mx-2 sm:px-7 sm:py-0 sm:h-8 bg-surface-action sm:rounded-full"
         >
-          <div className="flex flex-col md:flex-row gap-2 lg:gap-6 flex-wrap text-sm/8 text-text-on-action">
-            <p className="flex-grow text-center md:text-left">{t('copyright')}</p>
-            <div className="flex flex-grow gap-6 justify-between md:justify-end">
+          <div className="flex flex-col sm:flex-row gap-2 md:gap-6 flex-wrap text-sm/8 text-text-on-action">
+            <p className="flex-grow text-center sm:text-left">{t('copyright')}</p>
+            <div className="flex flex-grow gap-6 justify-between sm:justify-end">
               <UiLink type="Link" variant="footerLegal" href="/privacy-policy">
                 {t('privacyPolicy')}
               </UiLink>

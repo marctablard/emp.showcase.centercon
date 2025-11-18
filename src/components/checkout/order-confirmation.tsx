@@ -76,7 +76,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
             <CardHeader>
               <H2 variant="h5">{tOrder('orderDetails')}</H2>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <p className="text-base text-text-on-disabled mb-1">{tOrder('orderNumber')}</p>
                 <p className="font-medium">{order.id || orderId}</p>
@@ -111,8 +111,8 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
               </CardHeader>
               <CardContent>
                 {order.items.map((item) => (
-                  <div key={item.id} className="py-4 flex flex-wrap md:flex-nowrap">
-                    <div className="md:w-16 md:h-16 w-full h-24 bg-surface-image-background rounded-ss-md rounded-ee-md mb-4 md:mb-0 md:mr-4 flex-shrink-0">
+                  <div key={item.id} className="py-4 flex flex-wrap sm:flex-nowrap">
+                    <div className="sm:w-16 sm:h-16 w-full h-24 bg-surface-image-background rounded-ss-md rounded-ee-md mb-4 sm:mb-0 sm:mr-4 flex-shrink-0">
                       {item.images && item.images[0] && (
                         <Image
                           src={item.images[0]}
@@ -188,7 +188,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
               <CardHeader>
                 <H2 variant="h5">{tOrder('shipping')}</H2>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col pb-4">
                   <p className="font-bold mb-1">{tOrder('shippingAddress')}</p>
                   <div className="flex align-center">
@@ -230,7 +230,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
             <CardHeader>
               <H2 variant="h5">{tOrder('payment')}</H2>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <p className="font-bold mb-1">{tOrder('billingAddress')}</p>
 

@@ -12,7 +12,7 @@ const headingVariants = cva('font-bold text-text-headings font-headlines', {
       h4: 'text-4xl',
       h5: 'text-3xl',
       h6: 'text-2xl',
-      overline: 'text-xl lg:text-text-action uppercase tracking-widest',
+      overline: 'text-xl md:text-text-action uppercase tracking-widest',
     },
   },
 });

@@ -50,8 +50,8 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefi
           <p className="text-sm">{t('info')}</p>
           <Form {...form}>
             <div className="bg-surface-page">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-1">
                   <FormField
                     control={form.control}
                     name="firstName"
@@ -68,7 +68,7 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefi
                     )}
                   />
                 </div>
-                <div className="md:col-span-1">
+                <div className="sm:col-span-1">
                   <FormField
                     control={form.control}
                     name="lastName"
@@ -88,8 +88,8 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefi
               </div>
             </div>
             <div className="bg-surface-page">
-              <div className="grid grid-cols-1 md:grid-cols-2 space-y-2 gap-4">
-                <div className="md:col-span-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 space-y-2 gap-4">
+                <div className="sm:col-span-1">
                   <FormField
                     control={form.control}
                     name="email"
@@ -106,7 +106,7 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefi
                     )}
                   />
                 </div>
-                <div className="md:col-span-1">
+                <div className="sm:col-span-1">
                   <FormField
                     control={form.control}
                     name="emailConfirmation"
@@ -123,7 +123,7 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefi
                     )}
                   />
                 </div>
-                <div className="md:col-span-1 mb-6">
+                <div className="sm:col-span-1 mb-6">
                   <FormField
                     control={form.control}
                     name="company"
@@ -140,7 +140,7 @@ const ContactDataComponent: React.FC<ContactDataProps> = ({ initialData = undefi
                     )}
                   />
                 </div>
-                <div className="md:col-span-1">
+                <div className="sm:col-span-1">
                   <FormField
                     control={form.control}
                     name="phone"
