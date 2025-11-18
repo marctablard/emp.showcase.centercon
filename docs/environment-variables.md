@@ -102,6 +102,16 @@ npx web-push generate-vapid-keys
 
 Set the public key in `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and the private key in `VAPID_PRIVATE_KEY`.
 
+These variables are **optional**:
+
+- If `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is **missing** or empty, the storefront will treat push notifications as **disabled** and will not call the notifications API endpoints for push setup or polling.
+- If `NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS` is set to `true`, push notifications are **explicitly disabled** regardless of VAPID configuration, and the frontend will not attempt to register a service worker subscription or call the push notification API endpoints.
+
+To completely disable push notifications in any environment, you can either:
+
+- Set `NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS=true`, or
+- Leave `NEXT_PUBLIC_VAPID_PUBLIC_KEY` unset (and avoid configuring the server-side VAPID keys).
+
 ### Setup API
 
 The Setup API (`NEXT_SETUP_API_*`) provides an endpoint for initial system configuration. **Disable in production** or secure with a strong secret.
@@ -138,7 +148,7 @@ NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS
 NEXT_PUBLIC_ROBOTS_NOINDEX=false
 NEXT_PUBLIC_DEBUG_API_RESPONSE=OFF
 NEXT_SETUP_API_ENABLED=false
-NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS=false
+NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS=false   # Set to true to fully disable web push notifications
 ```
 
 ## Security Best Practices

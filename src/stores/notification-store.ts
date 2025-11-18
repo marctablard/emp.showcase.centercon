@@ -71,6 +71,9 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
   // The value is interpreted as seconds and converted to milliseconds for setInterval
   const pollingIntervalEnv = process.env.NEXT_PUBLIC_NOTIFICATION_POLLING_INTERVAL_SECONDS;
   const pollingInterval = pollingIntervalEnv ? Number(pollingIntervalEnv) * 1000 : 30000; // Default: 30 seconds
+  const pushNotificationsDisabled = process.env.NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS === 'true';
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const notificationsFeatureEnabled = !pushNotificationsDisabled && !!vapidPublicKey;
   let pollingIntervalId: ReturnType<typeof setInterval> | null = null;
 
   // Mutex flag to prevent duplicate fetchNotifications calls
@@ -87,6 +90,15 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
         return;
       }
       started = true;
+
+      if (!notificationsFeatureEnabled) {
+        set({
+          isPushSupported: false,
+          permissionState: null,
+        });
+        return;
+      }
+
       get()
         .checkSupport()
         .then((supported) => {
@@ -163,12 +175,20 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
         return isPushSupported == true && permissionState === 'granted';
       }
       try {
+        if (!notificationsFeatureEnabled) {
+          set({
+            isPushSupported: false,
+            permissionState: null,
+          });
+          return false;
+        }
+
         // Check if push notifications are disabled via environment variable
-        const pushNotificationsDisabled = process.env.NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS === 'true';
+        const pushNotificationsDisabledRuntime = process.env.NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS === 'true';
 
         // Only consider push notifications supported if they're not disabled and browser supports them
         const browserSupport =
-          !pushNotificationsDisabled &&
+          !pushNotificationsDisabledRuntime &&
           typeof window !== 'undefined' &&
           'serviceWorker' in navigator &&
           'PushManager' in window &&
@@ -236,8 +256,8 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     // Subscribe to push notifications
     subscribe: async () => {
       // Check if push notifications are disabled via environment variable
-      if (!get().isPushSupported) {
-        console.log('Push notifications are disabled via environment variable');
+      if (!notificationsFeatureEnabled || !get().isPushSupported) {
+        console.log('Push notifications are disabled via configuration');
         set({
           error: 'Push notifications are currently disabled',
         });
@@ -362,6 +382,9 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
 
     // Fetch notifications from the API
     fetchNotifications: async () => {
+      if (!notificationsFeatureEnabled) {
+        return;
+      }
       // If already fetching, skip this request
       if (isFetching) {
         console.debug('Notification fetch already in progress, skipping duplicate request');
