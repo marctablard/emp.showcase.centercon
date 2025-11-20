@@ -398,7 +398,7 @@
   },
   "placeholder": {
     "title": "Platzhalterseite",
-    "description": "Diese Seite ist ein Platzhalter im Emporix-Referenz-Storefront.",
+    "description": "Diese Seite ist ein Platzhalter in der Emporix-Referenz-Storefront.",
     "details": "Sie zeigt, wo zusätzliche Funktionen, Apps oder benutzerdefinierte Integrationen hinzugefügt werden können. Der Inhalt und die Funktionalität dieser Seite variieren je nach Anforderungen und Projektumfang."
   }
 }
