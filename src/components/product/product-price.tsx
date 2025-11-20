@@ -30,7 +30,7 @@ export function ProductPriceComponent({ price, isAddToCartBar }: ProductPricePro
       parts.map((part, index) => {
         if (part.type === 'currency') {
           return (
-            <span key={index} className="text-4xl">
+            <span id="currency" key={index} className="text-4xl">
               {part.value}
             </span>
           );
@@ -40,7 +40,7 @@ export function ProductPriceComponent({ price, isAddToCartBar }: ProductPricePro
         }
         if (part.type === 'integer') {
           return (
-            <span key={index} className="text-4xl">
+            <span id="price" key={index} className="text-4xl">
               {Math.floor(Number(part.value))}
             </span>
           );
