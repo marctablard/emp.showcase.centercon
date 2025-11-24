@@ -22,7 +22,7 @@ export function HeaderActions({
   const { isAuthenticated, loading } = useAuthentication();
   const { openDialog } = useAuthDialog();
   const [isMounted, setIsMounted] = useState(false);
-  const isAboveSmallScreen = useBreakpoint('sm');
+  const isAboveMediumScreen = useBreakpoint('md'); // TODO: Remove this once the header is fully responsive and replace with useBreakpoint('sm')
 
   // This code is also mentioned in the React docs: https://react.dev/reference/react/useEffect#displaying-different-content-on-the-server-and-the-client
   useEffect(() => {
@@ -52,7 +52,7 @@ export function HeaderActions({
 
   return (
     <div className={`flex items-center gap-5 text-nowrap ${className}`}>
-      {onToggleSearch && !hideSearchIcon && isAboveSmallScreen && (
+      {onToggleSearch && !hideSearchIcon && isAboveMediumScreen && (
         <HeaderIconButton icon={Search} text={t('shortSearch')} onClick={onToggleSearch} />
       )}
 
@@ -62,7 +62,7 @@ export function HeaderActions({
         <HeaderIconButton icon={User} text={t('signIn')} onClick={() => openDialog('login')} />
       )}
 
-      {isAboveSmallScreen && (
+      {isAboveMediumScreen && (
         <div className="flex gap-5">
           <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
           <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
