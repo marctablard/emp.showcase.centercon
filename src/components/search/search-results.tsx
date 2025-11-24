@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { SearchFilter } from '@/components/search/search-filter';
 import { SearchLayoutToggle } from '@/components/search/search-layout-toggle';
 import { SearchResultsGrid } from '@/components/search/search-results-grid';
+import { SearchResultsList } from '@/components/search/search-results-list';
 import {
   Pagination,
   PaginationContent,
@@ -133,9 +134,14 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
       {/* Product List/Grid */}
       <div className="mt-6 w-full">
         {layout === 'list' && (
-          <>
-            <p>Insert list view here</p>
-          </>
+          <SearchResultsList
+            products={products}
+            locale={locale}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            total={total}
+            loading={loading}
+          />
         )}
 
         {layout === 'grid' && (
