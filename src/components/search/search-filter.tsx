@@ -276,7 +276,6 @@ function SearchFilter({
   resetAllFacets,
   activeFilters,
 }: SearchFilterProps) {
-  const t = useTranslations('product');
   // Check if there are any active filters
   const hasActiveFilters = Object.keys(activeFilters).length > 0;
   // State to control if the filter offcanvas is visible
@@ -288,7 +287,7 @@ function SearchFilter({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative flex-wrap">
       {/* Filter Toggle Button */}
       <div className="flex gap-4 max-w-full overflow-x-scroll hide-scrollbar mb-4">
         <Button variant="secondary" onClick={toggleFilterOffcanvas}>
