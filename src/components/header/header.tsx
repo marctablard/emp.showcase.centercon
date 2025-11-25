@@ -12,6 +12,7 @@ export function Header() {
   const isAboveMediumScreen = useBreakpoint('md');
   const { scrolled, getHeaderHeight } = useHeaderScroll();
   const [isMounted, setIsMounted] = useState(false);
+  const [showCompactMenu, setShowCompactMenu] = useState(false);
   const searchInput = useSearchInput();
 
   // This code is also mentioned in the React docs: https://react.dev/reference/react/useEffect#displaying-different-content-on-the-server-and-the-client
@@ -26,7 +27,7 @@ export function Header() {
         /* Desktop & Tablet */
         <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto">
           <header
-            className={`bg-surface-page/95 backdrop-blur-default shadow-sm rounded-lg relative transition-[height] duration-200 ease-in-out mx-4 md:mx-9 ${scrolled ? 'h-16' : getHeaderHeight()}`}
+            className={`bg-surface-page/95 backdrop-blur-default shadow-sm rounded-lg relative transition-[height] duration-200 ease-in-out mx-4 md:mx-9 ${scrolled ? (showCompactMenu ? 'h-auto' : 'h-16') : getHeaderHeight()}`}
           >
             {/* Render only one header component based on scroll state */}
             {!scrolled ? (
@@ -34,8 +35,15 @@ export function Header() {
                 <HeaderExpanded {...searchInput} />
               </div>
             ) : (
-              <div className="flex transition-[height] duration-200 ease-in-out absolute top-0 left-0 right-0 h-[64px] opacity-100 transform translate-y-0 z-2">
-                <HeaderCompact {...searchInput} isCollapsedHeader={true} />
+              <div
+                className={`transition-[height] duration-200 ease-in-out ${showCompactMenu ? 'relative' : 'absolute'} top-0 left-0 right-0 opacity-100 transform translate-y-0 z-2`}
+              >
+                <HeaderCompact
+                  {...searchInput}
+                  isCollapsedHeader={true}
+                  showMenu={showCompactMenu}
+                  onToggleMenu={() => setShowCompactMenu(!showCompactMenu)}
+                />
               </div>
             )}
           </header>
