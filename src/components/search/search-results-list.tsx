@@ -1,5 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Product } from '@platform/services/model/product';
+import { ProductTileListItem } from '@/components/product/product-tile-list-item';
+import { ProductTileListItemSkeleton } from '@/components/product/product-tile-list-item-sekeleton';
 import { SearchNoResults } from '@/components/search/search-no-results';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -17,14 +19,15 @@ export function SearchResultsList({ products, locale, currentPage, pageSize, tot
 
   return (
     <>
-      {loading ? (
+      {/* Todo: remove `true` to show real content */}
+      {loading || true ? (
         <>
           <Skeleton className="mb-4 h-5 w-[180px]" />
-          <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-            {/*Todo: add skeleton here*/}
+          <div className="flex flex-col gap-4">
             {/*{Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (*/}
-            {/*  <ProductTileSkeleton key={i} />*/}
-            {/*))}*/}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductTileListItemSkeleton key={i} />
+            ))}
           </div>
         </>
       ) : (
@@ -44,11 +47,10 @@ export function SearchResultsList({ products, locale, currentPage, pageSize, tot
               </div>
 
               {/* Client-side rendered products - this will replace the server-rendered ones */}
-              <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+              <div className="grid auto-rows-fr grid-cols-1 gap-4">
                 {products.map((product) => (
                   <div key={product.id} className="h-full">
-                    {/* Todo: add product list item here */}
-                    {/*<ProductTile product={product} locale={locale} />*/}
+                    <ProductTileListItem product={product} locale={locale} />
                   </div>
                 ))}
               </div>
