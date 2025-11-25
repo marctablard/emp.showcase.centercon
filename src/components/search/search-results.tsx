@@ -115,7 +115,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
 
   return (
     <>
-      <div className="flex w-full items-start justify-between gap-4">
+      <div className="flex w-full items-center justify-between gap-4">
         {/* Todo: Break filter pills in new lines when there are too many filters */}
         <SearchFilter
           {...{

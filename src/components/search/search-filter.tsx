@@ -1,9 +1,10 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ListFilter, Trash2, X } from 'lucide-react';
+import { ListFilter, Trash, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Pill } from '@/components/ui/pill';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { FilterValue as SearchFilterValue } from '@/hooks/search/useSearch';
@@ -55,15 +56,13 @@ function ActiveFilters({ activeFilters, resetFacet }: ActiveFiltersProps) {
       {filters &&
         filters.map(([id, value]) => {
           return (
-            <Button
-              onClick={() => resetFacet(id)}
-              className="bg-surface-disabled text-text-headings border-none normal-case"
-              variant="secondary"
+            <Pill
+              trailingIcon={<X />}
               key={id}
-            >
-              {t(`filters.${id}`)} ({formatFilterValue(value)})
-              <X />
-            </Button>
+              label={t(`filters.${id}`)}
+              value={formatFilterValue(value)}
+              onClick={() => resetFacet(id)}
+            />
           );
         })}
     </>
@@ -260,7 +259,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
       })}
 
       {/* Submit button */}
-      <Button type="submit" className="w-full mt-4">
+      <Button type="submit" className="mt-4 w-full">
         {t('filters.applyFilters')}
       </Button>
     </form>
@@ -287,19 +286,16 @@ function SearchFilter({
   };
 
   return (
-    <div className="relative flex-wrap">
+    <div className="relative">
       {/* Filter Toggle Button */}
-      <div className="flex gap-4 max-w-full overflow-x-scroll hide-scrollbar mb-4">
+      <div className="hide-scrollbar flex max-w-full gap-4 overflow-x-scroll">
         <Button variant="secondary" onClick={toggleFilterOffcanvas}>
           <ListFilter className="mr-2" /> Filter
         </Button>
 
         <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
         {hasActiveFilters && (
-          <Button variant="neutral" onClick={resetAllFacets} className="normal-case">
-            <Trash2 className="mr-1" />
-            {t('filters.clearFilter')}
-          </Button>
+          <Pill variant="reset" leadingIcon={<Trash />} label="Clear all" onClick={resetAllFacets} />
         )}
       </div>
 
