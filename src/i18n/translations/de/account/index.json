@@ -21,8 +21,8 @@
       "titleLabel": "Anrede",
       "firstNameLabel": "Vorname",
       "lastNameLabel": "Nachname",
-      "emailLabel": "E-Mail",
-      "phoneLabel": "Telefon",
+      "emailLabel": "E-Mail (nur Kontakt)",
+      "phoneLabel": "Telefon (nur Kontakt)",
       "preferredLanguage": "Bevorzugte Sprache",
       "preferredCurrency": "Bevorzugte Währung",
       "selectTitle": "Anrede auswählen",
@@ -50,6 +50,11 @@
       "language": {
         "de": "Deutsch",
         "en": "English"
+      },
+      "titles": {
+        "MR": "Herr",
+        "MRS": "Frau",
+        "MS": "Fräulein"
       }
     }
   },

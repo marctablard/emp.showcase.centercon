@@ -28,7 +28,7 @@ type ProfileFormData = {
   preferredCurrency: string;
 };
 
-const TITLES = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof'];
+const TITLE_KEYS = ['MR', 'MRS', 'MS'];
 const LANGUAGES = ['de', 'en'];
 const CURRENCIES = ['EUR', 'USD', 'GBP'];
 
@@ -42,13 +42,13 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
 
   // Initial data for profile form
   const initialData: ProfileFormData = {
-    title: '', // Title ist nicht im Customer-Model vorhanden, wir fügen es hier als neues Feld hinzu
+    title: customer?.title || '',
     firstName: customer?.firstName || '',
     lastName: customer?.lastName || '',
-    email: customer?.email || '', // Verwenden des richtigen Felds aus dem Customer-Model
+    email: customer?.email || '',
     phone: customer?.contactPhone || '',
-    preferredLanguage: customer?.language || 'de', // Verwenden des richtigen Felds aus dem Customer-Model
-    preferredCurrency: customer?.currency || 'EUR', // Verwenden des richtigen Felds aus dem Customer-Model
+    preferredLanguage: customer?.language || 'de',
+    preferredCurrency: customer?.currency || 'EUR',
   };
 
   // Use the validator hook with the profile validation service
@@ -134,9 +134,9 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
                   <SelectValue placeholder={t('profile.form.selectTitle') || 'Anrede auswählen'} />
                 </SelectTrigger>
                 <SelectContent>
-                  {TITLES.map((title) => (
-                    <SelectItem key={title} value={title}>
-                      {title}
+                  {TITLE_KEYS.map((titleKey) => (
+                    <SelectItem key={titleKey} value={titleKey}>
+                      {t(`profile.form.titles.${titleKey}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>

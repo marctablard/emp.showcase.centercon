@@ -31,6 +31,7 @@ const FormSchemaValidate = z.object({
   input: z.string().min(3, { message: 'Error' }),
   textarea: z.string().optional(),
   select: z.string({ message: 'Error' }).email(),
+  selectWithIcons: z.string({ message: 'Error' }).email(),
   selectDisabled: z.string().optional(),
   checkboxes: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one item.',
@@ -271,7 +272,34 @@ export default function FormFieldStyleguide() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Select Field</FormLabel>
-                          <FormDescription>Username must be at least 3 characters.</FormDescription>
+                          <FormDescription>Hint Text</FormDescription>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Placeholder" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="abc@google.com">abc@email.com</SelectItem>
+                              <SelectItem value="def@google.com">def@email.com</SelectItem>
+                              <SelectItem value="ghi@google.com">ghi@email.com</SelectItem>
+                              <SelectItem value="jkl@support.com" disabled>
+                                jkl@email.com
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <FormField
+                      control={formVal.control}
+                      name="selectWithIcons"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Select Field with Icons</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger startIcon={User}>

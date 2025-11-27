@@ -69,8 +69,8 @@
       "titleLabel": "Title",
       "firstNameLabel": "First Name",
       "lastNameLabel": "Last Name",
-      "emailLabel": "Email",
-      "phoneLabel": "Phone",
+      "emailLabel": "Contact Email",
+      "phoneLabel": "Contact Phone",
       "preferredLanguage": "Preferred Language",
       "preferredCurrency": "Preferred Currency",
       "selectTitle": "Select title",
@@ -98,6 +98,11 @@
       "language": {
         "de": "German",
         "en": "English"
+      },
+      "titles": {
+        "MR": "Mr",
+        "MRS": "Mrs",
+        "MS": "Ms"
       }
     }
   },

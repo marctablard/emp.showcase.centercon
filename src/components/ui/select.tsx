@@ -125,38 +125,28 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        'w-full relative outline-hidden',
+        'flex items-center w-full p-3 gap-3 outline-hidden ',
         disabled && 'bg-surface-disabled border-border-disabled text-text-on-disabled pointer-events-none',
-        'transition-all hover:text-text-action-hover hover:bg-surface-action-hover-2',
+        'transition-all hover:text-text-action-hover hover:bg-surface-action-hover-2 focus:text-text-action-hover focus:bg-surface-action-hover-2',
         disabled && 'hover:bg-surface-disabled hover:text-text-on-disabled',
         'data-[state=checked]:bg-surface-action data-[state=checked]:text-text-on-action hover:data-[state=checked]:bg-surface-action-hover',
         className,
       )}
       {...props}
     >
-      {StartIcon && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 border-none">
-          <StartIcon size={20} />
-        </div>
-      )}
+      {StartIcon && <StartIcon size={20} />}
 
       <div
         className={cn(
-          'relative flex w-full cursor-default items-center gap-2 py-3 pr-8 text-base select-none data-[disabled]:pointer-events-none',
+          'w-full cursor-default select-none data-[disabled]:pointer-events-none',
           "hover:text-text-action-hover'",
-          startIcon && 'pl-10',
-          endIcon && 'pr-10',
           className,
         )}
       >
         <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
       </div>
 
-      {EndIcon && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <EndIcon size={20} />
-        </div>
-      )}
+      {EndIcon && <EndIcon size={20} />}
     </SelectPrimitive.Item>
   );
 }
