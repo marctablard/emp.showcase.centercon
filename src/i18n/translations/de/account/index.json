@@ -118,7 +118,8 @@
       "contractsAgreements": "Verträge & Vereinbarungen",
       "personalData": "Persönliche Daten",
       "accountSettings": "Kontoeinstellungen",
-      "approvals": "Freigaben"
+      "approvals": "Freigaben",
+      "tasks": "Aufgaben"
     }
   },
   "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",

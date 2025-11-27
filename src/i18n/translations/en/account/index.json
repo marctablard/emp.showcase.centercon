@@ -166,7 +166,8 @@
       "contractsAgreements": "Contracts & Agreements",
       "personalData": "Personal Data",
       "accountSettings": "Account Settings",
-      "approvals": "Approvals"
+      "approvals": "Approvals",
+      "tasks": "Tasks"
     }
   },
   "accountDashboardDescription": "Manage your account, orders, and company information",
