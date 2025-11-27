@@ -301,7 +301,7 @@
     "viewAll": "View all",
     "newInvoices": "new invoices",
     "overdueInvoices": "overdue invoices",
-    "pendingOffers": "offers waiting for your approval",
+    "pendingQuotes": "offers waiting for your approval",
     "tasksToComplete": "tasks to complete",
     "openReturns": "open returns",
     "unreadDocuments": "unread documents"

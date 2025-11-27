@@ -41,11 +41,11 @@ export function NotificationCard({ className, title, items: customItems, ...prop
       href: '/account/invoices?filter=overdue',
     },
     {
-      id: 'pending-offers',
+      id: 'pending-quotes',
       count: 4,
-      title: t('pendingOffers'),
+      title: t('pendingQuotes'),
       type: 'warning',
-      href: '/account/offers',
+      href: '/account/quotes',
     },
     {
       id: 'tasks',
