@@ -74,7 +74,7 @@ export function HeaderMobile(props: SearchInputProps) {
       <Sheet open={showMenu} onOpenChange={setShowMenu} modal={true}>
         <SheetContent
           side="bottom"
-          className="h-[calc(100vh-58px-68px)] bottom-[58px] p-0 rounded-t-2xl [&>button]:hidden"
+          className="h-[calc(100dvh-58px-env(safe-area-inset-top))] bottom-[58px] p-0 rounded-t-2xl [&>button]:hidden"
           onInteractOutside={closeMenu}
         >
           <SheetTitle className="sr-only">{t('menu')}</SheetTitle>
