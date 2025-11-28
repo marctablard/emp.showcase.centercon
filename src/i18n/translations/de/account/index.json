@@ -118,7 +118,8 @@
       "contractsAgreements": "Verträge & Vereinbarungen",
       "personalData": "Persönliche Daten",
       "accountSettings": "Kontoeinstellungen",
-      "approvals": "Freigaben"
+      "approvals": "Freigaben",
+      "tasks": "Aufgaben"
     }
   },
   "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
@@ -309,7 +310,7 @@
     "viewAll": "Alle anzeigen",
     "newInvoices": "neue Rechnungen",
     "overdueInvoices": "überfällige Rechnungen",
-    "pendingOffers": "Angebote warten auf Ihre Genehmigung",
+    "pendingQuotes": "Angebote warten auf Ihre Genehmigung",
     "tasksToComplete": "Aufgaben zu erledigen",
     "openReturns": "offene Rückgaben",
     "unreadDocuments": "ungelesene Dokumente"
@@ -321,7 +322,8 @@
       "company": "Meine Firmendokumente",
       "manuals": "Produkthandbücher & technische Datenblätter",
       "warranty": "Garantieunterlagen"
-    }
+    },
+    "seeAll": "Alle anzeigen"
   },
   "AiHelper": {
     "title": "KI-Dashboard-Assistent",

@@ -88,7 +88,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-7 gap-4">
-          <div className="sm:col-span-6">
+          <div className="sm:col-span-5">
             <FormField
               control={form.control}
               name="street"
@@ -106,29 +106,27 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             />
           </div>
 
-          <div>
-            <div className="sm:col-span-2">
-              <FormField
-                control={form.control}
-                name="streetNumber"
-                render={({ field }) => (
-                  <FormItem className="relative">
-                    <FormLabel htmlFor="streetNumber">{t('streetNumber')}*</FormLabel>
-                    <FormControl>
-                      <Input id="streetNumber" type="text" {...field} disabled={isReadOnly} />
-                    </FormControl>
-                    <div className="absolute top-full left-0 mt-0.5">
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
+          <div className="sm:col-span-2">
+            <FormField
+              control={form.control}
+              name="streetNumber"
+              render={({ field }) => (
+                <FormItem className="relative">
+                  <FormLabel htmlFor="streetNumber">{t('streetNumber')}*</FormLabel>
+                  <FormControl>
+                    <Input id="streetNumber" type="text" {...field} disabled={isReadOnly} />
+                  </FormControl>
+                  <div className="absolute top-full left-0 mt-0.5">
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-7 gap-4 space-y-4">
-          <div>
+          <div className="sm:col-span-2">
             <FormField
               control={form.control}
               name="zipCode"
@@ -146,7 +144,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isReadOnly = false, initialDa
             />
           </div>
 
-          <div className="sm:col-span-6">
+          <div className="sm:col-span-5">
             <FormField
               control={form.control}
               name="city"

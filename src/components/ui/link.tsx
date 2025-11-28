@@ -16,6 +16,7 @@ const linkVariants = cva(
         buttonPrimary:
           'cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-surface-disabled disabled:text-text-on-disabled [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 bg-surface-action text-text-on-action border border-transparent hover:bg-surface-action-hover rounded-sm',
         footerLegal: 'text-text-on-action hover:underline hover:text-text-on-action',
+        clean: '',
       },
       size: {
         s: 'text-sm [&_svg]:w-4 [&_svg]:h-4',

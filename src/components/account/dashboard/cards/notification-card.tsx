@@ -41,11 +41,11 @@ export function NotificationCard({ className, title, items: customItems, ...prop
       href: '/account/invoices?filter=overdue',
     },
     {
-      id: 'pending-offers',
+      id: 'pending-quotes',
       count: 4,
-      title: t('pendingOffers'),
+      title: t('pendingQuotes'),
       type: 'warning',
-      href: '/account/offers',
+      href: '/account/quotes',
     },
     {
       id: 'tasks',
@@ -92,8 +92,8 @@ export function NotificationCard({ className, title, items: customItems, ...prop
 
   return (
     <DashboardCard variant="default" className={cn('py-4', className)} {...props}>
-      <div className="flex items-center justify-between mb-4">
-        <CardTitle className="text-4xl font-bold">{title || t('title')}</CardTitle>
+      <div className="flex items-center justify-between flex-wrap mb-4">
+        <CardTitle className="text-4xl font-bold me-2">{title || t('title')}</CardTitle>
         <UiLink type="Link" href="/account/notifications" variant="primary" size="m" iconAfter={<ArrowRight />}>
           {t('viewAll')}
         </UiLink>

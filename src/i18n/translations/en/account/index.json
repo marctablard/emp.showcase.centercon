@@ -166,7 +166,8 @@
       "contractsAgreements": "Contracts & Agreements",
       "personalData": "Personal Data",
       "accountSettings": "Account Settings",
-      "approvals": "Approvals"
+      "approvals": "Approvals",
+      "tasks": "Tasks"
     }
   },
   "accountDashboardDescription": "Manage your account, orders, and company information",
@@ -301,7 +302,7 @@
     "viewAll": "View all",
     "newInvoices": "new invoices",
     "overdueInvoices": "overdue invoices",
-    "pendingOffers": "offers waiting for your approval",
+    "pendingQuotes": "offers waiting for your approval",
     "tasksToComplete": "tasks to complete",
     "openReturns": "open returns",
     "unreadDocuments": "unread documents"
@@ -313,7 +314,8 @@
       "company": "My Company Documents",
       "manuals": "Product manuals & technical sheets",
       "warranty": "Warranty documents"
-    }
+    },
+    "seeAll": "See all"
   },
   "AiHelper": {
     "title": "AI Dashboard Helper",
