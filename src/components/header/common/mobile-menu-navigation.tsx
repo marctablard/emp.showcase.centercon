@@ -76,7 +76,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
     <div className="flex flex-col h-full">
       {/* Header with back button */}
       {currentView !== 'main' && (
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-border-subtle">
+        <div className="flex items-center gap-3 px-4 py-4">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-text-action hover:text-text-action-hover"
@@ -84,6 +84,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
             <ChevronLeft className="w-5 h-5" />
             <span className="text-lg font-medium">{breadcrumb[breadcrumb.length - 1]?.label || 'Back'}</span>
           </button>
+          <hr className="mx-5 border-border-subtle" />
         </div>
       )}
 
@@ -91,7 +92,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
       <nav className="flex-1 overflow-y-auto py-2">
         <ul>
           {currentItems.map((item, index) => (
-            <li key={item.id || item.label || index} className="border-b border-border-subtle last:border-b-0">
+            <li key={item.id || item.label || index}>
               {item.href && !item.hasSubmenu ? (
                 <Link
                   href={item.href}
@@ -109,6 +110,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
                   {item.hasSubmenu && <ChevronDown className="w-5 h-5 -rotate-90" />}
                 </button>
               )}
+              <hr className="mx-5 border-border-subtle" />
             </li>
           ))}
         </ul>
@@ -117,10 +119,10 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
         {currentView === 'main' && (
           <ul>
             <li>
-              <div className="px-4 py-3 font-semibold text-base text-text-placeholders">{t('serviceAndContact')}</div>
+              <div className="px-5 pt-8 font-semibold text-base text-text-placeholders">{t('serviceAndContact')}</div>
             </li>
             {serviceItems.map((item) => (
-              <li key={item.id} className="border-b border-border-subtle last:border-b-0">
+              <li key={item.id}>
                 {item.href && (
                   <Link
                     href={item.href}
@@ -130,6 +132,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
                     {item.label}
                   </Link>
                 )}
+                <hr className="mx-5 border-border-subtle" />
               </li>
             ))}
           </ul>
@@ -139,7 +142,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
         {currentView === 'main' && (
           <ul>
             <li>
-              <div className="px-4 py-3 font-semibold text-base text-text-placeholders">{t('settings')}</div>
+              <div className="px-5 pt-8 font-semibold text-base text-text-placeholders">{t('settings')}</div>
             </li>
             <li>
               <button
