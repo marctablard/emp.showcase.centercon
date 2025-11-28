@@ -34,7 +34,7 @@ export function RegionSwitcher() {
   };
 
   if (siteLoading || sessionLoading) {
-    return <Spinner color="white" variant="sm" />;
+    return <Spinner color="default" variant="sm" />;
   }
 
   if (!regions || regions.length <= 1 || !currentRegion) {

@@ -43,7 +43,7 @@ export function CurrencySwitcher() {
   }, [session, currentCurrency, router]);
 
   if (siteLoading || sessionLoading) {
-    return <Spinner color="white" variant="sm" />;
+    return <Spinner color="default" variant="sm" />;
   }
 
   if (!currencies || currencies.length <= 1 || !currentCurrency) {
@@ -66,7 +66,7 @@ export function CurrencySwitcher() {
         return 'coins';
     }
   }
-  const icon = <DynamicIcon name={getIconName()} className="w-4 h-4 text-icon-on-action" />;
+  const icon = <DynamicIcon name={getIconName()} className="w-4 h-4" />;
 
   return (
     <TopBarSwitcher

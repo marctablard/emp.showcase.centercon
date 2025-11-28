@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { ChevronDown, ChevronLeft } from 'lucide-react';
-import { navigationMenuItems } from '@/data/navigation-menu';
+import { ChevronDown, ChevronLeft, MapPin } from 'lucide-react';
+import { navigationMenuItems, serviceMenuItems } from '@/data/navigation-menu';
+import { LocationSettingsDialog } from './location-settings-dialog';
 
 interface MobileMenuNavigationProps {
   onClose?: () => void;
@@ -19,8 +20,15 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
     label: t(item.labelKey as any),
   }));
 
+  // Transform service items with translations
+  const serviceItems = serviceMenuItems.map((item) => ({
+    ...item,
+    label: t(item.labelKey as any),
+  }));
+
   const [currentView, setCurrentView] = useState<'main' | string>('main');
   const [breadcrumb, setBreadcrumb] = useState<Array<{ id: string; label: string }>>([]);
+  const [showLocationSettings, setShowLocationSettings] = useState(false);
 
   const handleItemClick = (item: any) => {
     if (item.hasSubmenu) {
@@ -80,22 +88,22 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
       )}
 
       {/* Menu items */}
-      <nav className="flex-1 overflow-y-auto">
-        <ul className="py-2">
+      <nav className="flex-1 overflow-y-auto py-2">
+        <ul>
           {currentItems.map((item, index) => (
             <li key={item.id || item.label || index} className="border-b border-border-subtle last:border-b-0">
               {item.href && !item.hasSubmenu ? (
                 <Link
                   href={item.href}
                   onClick={() => handleItemClick(item)}
-                  className="flex items-center justify-between px-4 py-4 text-lg"
+                  className="flex items-center justify-between px-5 py-4 text-lg"
                 >
                   {item.label}
                 </Link>
               ) : (
                 <button
                   onClick={() => handleItemClick(item)}
-                  className="w-full flex items-center justify-between px-4 py-4 text-lg cursor-pointer"
+                  className="w-full flex items-center justify-between px-5 py-4 text-lg cursor-pointer"
                 >
                   {item.label}
                   {item.hasSubmenu && <ChevronDown className="w-5 h-5 -rotate-90" />}
@@ -104,7 +112,50 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
             </li>
           ))}
         </ul>
+
+        {/* Service & Contact Group - only show on main view */}
+        {currentView === 'main' && (
+          <ul>
+            <li>
+              <div className="px-4 py-3 font-semibold text-base text-text-placeholders">{t('serviceAndContact')}</div>
+            </li>
+            {serviceItems.map((item) => (
+              <li key={item.id} className="border-b border-border-subtle last:border-b-0">
+                {item.href && (
+                  <Link
+                    href={item.href}
+                    onClick={() => onClose?.()}
+                    className="flex items-center justify-between px-5 py-4 text-lg"
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Location Settings - only show on main view */}
+        {currentView === 'main' && (
+          <ul>
+            <li>
+              <div className="px-4 py-3 font-semibold text-base text-text-placeholders">{t('settings')}</div>
+            </li>
+            <li>
+              <button
+                onClick={() => setShowLocationSettings(true)}
+                className="w-full flex items-center justify-between px-5 py-4 text-lg cursor-pointer"
+              >
+                {t('locationSettings')}
+                <MapPin className="w-5 h-5" />
+              </button>
+            </li>
+          </ul>
+        )}
       </nav>
+
+      {/* Location Settings Dialog */}
+      <LocationSettingsDialog open={showLocationSettings} onOpenChange={setShowLocationSettings} />
     </div>
   );
 }

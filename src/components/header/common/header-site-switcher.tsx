@@ -34,11 +34,20 @@ export function SiteSwitcher() {
   };
 
   if (siteLoading) {
-    return <Spinner color="white" variant="sm" />;
+    return <Spinner color="default" variant="sm" />;
   }
 
-  if (!availableSites || availableSites.length <= 1 || !currentSite) {
+  if (!availableSites || !currentSite) {
     return <></>;
+  }
+
+  // If only one site is available, just show the site name without switcher
+  if (availableSites.length === 1) {
+    return (
+      <div className="flex items-center gap-2 h-auto normal-case p-1 focus-none hover:cursor-pointer">
+        <Globe className="w-4 h-4" /> <span className="text-sm pt-0.5">{currentSite.name}</span>
+      </div>
+    );
   }
 
   return (
