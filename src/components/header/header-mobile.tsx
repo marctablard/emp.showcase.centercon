@@ -13,14 +13,20 @@ import { HeaderSearch } from '@/components/header/common/search/header-search';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { SearchInputProps } from '@/hooks/search/useSearchInput';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export function HeaderMobile(props: SearchInputProps) {
   const t = useTranslations('layout.header');
   const { showSearch, activateSearch } = props;
   const [showMenu, setShowMenu] = useState(false);
+  const isAboveMediumScreen = useBreakpoint('md');
 
   const toggleMenu = () => setShowMenu(!showMenu);
   const closeMenu = () => setShowMenu(false);
+
+  if (showMenu && isAboveMediumScreen) {
+    closeMenu();
+  }
 
   return (
     <>
