@@ -10,11 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { changeCustomerPassword } from '@/lib/client/customer';
+import { cn } from '@/lib/utils';
 import { PasswordChangeDto } from '@/platform/services/customer/CustomerService';
 import { Customer } from '@/platform/services/model/customer/customer';
 
 interface PasswordChangeFormProps {
   customer: Customer | null;
+  className?: string;
 }
 
 type PasswordFormData = {
@@ -23,7 +25,7 @@ type PasswordFormData = {
   confirmPassword: string;
 };
 
-export default function PasswordChangeForm({ customer }: PasswordChangeFormProps) {
+export default function PasswordChangeForm({ customer, className }: PasswordChangeFormProps) {
   const t = useTranslations('account');
   const router = useRouter();
 
@@ -94,7 +96,7 @@ export default function PasswordChangeForm({ customer }: PasswordChangeFormProps
   }
 
   return (
-    <Card>
+    <Card className={cn('', className)}>
       <CardContent className="py-6">
         {success ? (
           <Alert className="bg-surface-success border-border-success">
