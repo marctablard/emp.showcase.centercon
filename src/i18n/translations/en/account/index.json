@@ -314,7 +314,8 @@
       "company": "My Company Documents",
       "manuals": "Product manuals & technical sheets",
       "warranty": "Warranty documents"
-    }
+    },
+    "seeAll": "See all"
   },
   "AiHelper": {
     "title": "AI Dashboard Helper",

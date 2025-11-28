@@ -322,7 +322,8 @@
       "company": "Meine Firmendokumente",
       "manuals": "Produkthandbücher & technische Datenblätter",
       "warranty": "Garantieunterlagen"
-    }
+    },
+    "seeAll": "Alle anzeigen"
   },
   "AiHelper": {
     "title": "KI-Dashboard-Assistent",
