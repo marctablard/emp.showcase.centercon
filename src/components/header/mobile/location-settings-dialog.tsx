@@ -1,11 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { CurrencySwitcher } from '@/components/header/switcher/header-currency-switcher';
+import { LanguageSwitcher } from '@/components/header/switcher/header-language-switcher';
+import { SiteSwitcher } from '@/components/header/switcher/header-site-switcher';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { CurrencySwitcher } from './header-currency-switcher';
-import { LanguageSwitcher } from './header-language-switcher';
-import { SiteSwitcher } from './header-site-switcher';
 
 interface LocationSettingsDialogProps {
   open: boolean;

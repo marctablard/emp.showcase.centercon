@@ -37,7 +37,10 @@
     "noResults": "Es tut uns leid – es gibt keine Produktübereinstimmungen für Ihre Suche.",
     "doubleCheck": "Prüfen Sie Ihre Suche auf Rechtschreibung oder Tippfehler, oder versuchen Sie es mit einem anderen Suchbegriff.",
     "commonSearch": "Hier sind häufige Suchbegriffe von anderen Kunden:",
-    "clearHistory": "Suchverlauf löschen"
+    "clearHistory": "Suchverlauf löschen",
+    "navigation": {
+      "meta": "Meta"
+    }
   },
   "footer": {
     "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",

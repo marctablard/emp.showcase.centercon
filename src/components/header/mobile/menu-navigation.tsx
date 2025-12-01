@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { ChevronDown, ChevronLeft, MapPin } from 'lucide-react';
+import { LocationSettingsDialog } from '@/components/header/mobile/location-settings-dialog';
 import { navigationMenuItems, serviceMenuItems } from '@/data/navigation-menu';
-import { LocationSettingsDialog } from './location-settings-dialog';
 
 interface MobileMenuNavigationProps {
   onClose?: () => void;

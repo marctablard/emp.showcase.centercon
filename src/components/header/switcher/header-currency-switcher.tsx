@@ -5,10 +5,10 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
+import { Spinner } from '@/components/ui/spinner';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
 import { l10n } from '@/lib/utils';
-import { Spinner } from '../../ui/spinner';
 
 export function CurrencySwitcher() {
   const { session, loading: sessionLoading, setCurrency } = useSession();
@@ -66,7 +66,11 @@ export function CurrencySwitcher() {
         return 'coins';
     }
   }
-  const icon = <DynamicIcon name={getIconName()} className="w-4 h-4" />;
+  const icon = (
+    <span className="w-4 h-4">
+      <DynamicIcon name={getIconName()} className="w-4 h-4" />
+    </span>
+  );
 
   return (
     <TopBarSwitcher

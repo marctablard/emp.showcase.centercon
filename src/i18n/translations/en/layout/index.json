@@ -37,7 +37,10 @@
     "noResults": "We're sorry – there are no product matches for your search.",
     "doubleCheck": "Double-check your search for any typos or spelling mistakes, or try using a different search term.",
     "commonSearch": "Here are common search queries from other customers:",
-    "clearHistory": "delete search history"
+    "clearHistory": "delete search history",
+    "navigation": {
+      "meta": "Meta"
+    }
   },
   "footer": {
     "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",

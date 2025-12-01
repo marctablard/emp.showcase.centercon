@@ -2,26 +2,26 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
+import { useHeaderSearch } from '@/components/header/search/search-context';
+import { SearchFlyOut } from '@/components/header/search/search-fly-out';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSearch } from '@/hooks/search/useSearch';
-import { SearchInputProps } from '@/hooks/search/useSearchInput';
 import { cn } from '@/lib/utils';
 import { Product } from '@/platform/services/model/product';
-import { SearchFlyOut } from './search-fly-out';
 
 export interface HeaderSearchProps {
-  small: boolean;
+  small?: boolean;
   show?: boolean;
-  searchInput: SearchInputProps;
   isCollapsedHeader?: boolean;
   className?: string;
 }
 
-export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, className }: HeaderSearchProps) {
+export function HeaderSearch({ small, show, isCollapsedHeader, className }: HeaderSearchProps) {
+  small = small || false;
   const t = useTranslations('layout.header');
   const router = useRouter();
-  const { deactivateSearch, showSearch, hasInputFocus, setHasInputFocus } = searchInput;
+  const { activateSearch, deactivateSearch, showSearch, hasInputFocus } = useHeaderSearch();
 
   // Get the current locale
   const locale = useLocale();
@@ -68,7 +68,7 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    setHasInputFocus(true);
+    activateSearch();
 
     if (inputTimeoutRef.current) {
       clearTimeout(inputTimeoutRef.current);
@@ -127,30 +127,11 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
     };
   }, [handleClickOutside]);
 
-  // SSR-Fallback: Always shows the large variant on first render
+  // SSR-Fallback
   if (!isMounted) {
     return (
       <div className="z-50 relative transition-all transition-discrete duration-200 w-full max-w-180">
-        <form>
-          <Input
-            placeholder={t('search')}
-            value={query}
-            onChange={handleInput}
-            onFocus={handleInput}
-            ref={inputRef}
-            id="search-input"
-            onKeyDown={(e) => e.key === 'Enter' && redirectToBrowse(e)}
-            className="h-11 py-2 pl-6 pr-[62px] placeholder:text-text-placeholders text-text-headings bg-surface-search-input hover:bg-surface-search-input border border-transparent"
-          />
-          <Button
-            type="submit"
-            className="absolute right-0 top-1/2 -translate-y-1/2 bg-transparent pr-6 cursor-pointer"
-            variant={'link'}
-            aria-label={t('searchProducts')}
-          >
-            <Search className="text-icon-primary-dark" width="28" height="28" />
-          </Button>
-        </form>
+        {/* Skeleton */}
       </div>
     );
   }
@@ -158,7 +139,9 @@ export function HeaderSearch({ small, show, searchInput, isCollapsedHeader, clas
   return (
     <div
       className={cn(
-        `z-50 relative transition-opacity transition-discrete duration-200 w-full ${showSearch || show ? 'block opacity-100' : 'hidden opacity-0'} ${hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180'}`,
+        'z-50 relative transition-opacity transition-discrete duration-200 w-full hidden opacity-0 md:block md:opacity-100',
+        showSearch || show ? 'block opacity-100' : '',
+        hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180',
         className,
       )}
     >

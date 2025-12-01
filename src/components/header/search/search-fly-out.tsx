@@ -1,14 +1,14 @@
 import React, { Dispatch, SetStateAction, forwardRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowRight } from 'lucide-react';
+import { NoResults } from '@/components/header/search/no-results';
+import { QueryCompletions } from '@/components/header/search/query-completions';
+import { SideBar } from '@/components/header/search/side-bar';
 import { ProductTileFlyOut } from '@/components/product/product-tile-fly-out';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/h';
 import useHistory from '@/hooks/history/useHistory';
 import { SearchSuggestions } from '@/platform/services/model/search';
-import { NoResults } from './no-results';
-import { QueryCompletions } from './query-completions';
-import { SideBar } from './side-bar';
 
 export interface SearchResultFlyOutProps {
   suggestions: SearchSuggestions;
@@ -35,7 +35,6 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
       onProductClick,
       onQuerySelect,
       redirectToBrowse,
-      isCollapsedHeader,
     },
     ref,
   ) => {
@@ -47,7 +46,7 @@ export const SearchFlyOut = forwardRef<HTMLDivElement, SearchResultFlyOutProps>(
     return (
       <section
         ref={ref}
-        className={`${isCollapsedHeader ? 'sm:top-[58px] sm:w-[calc(100vw-120px)]' : 'sm:relative top-[calc(-100vh+55px)] sm:top-[8px] sm:w-auto '} absolute z-10 left-[-16px] sm:left-0 w-screen sm:-ml-6 sm:-mr-6 p-6 bg-surface-page/95 backdrop-blur-default [box-shadow:inset_0_-4px_4px_0_rgba(0,0,0,0.25)] sm:shadow-sm sm:rounded-b-lg`}
+        className="w-screen absolute z-10 top-[calc(-100vh+55px)] left-[-16px] bg-surface-page/95 backdrop-blur-default [box-shadow:inset_0_-4px_4px_0_rgba(0,0,0,0.25)] p-6 sm:static sm:w-auto sm:px-0 sm:pb-0 sm:bg-transparent sm:backdrop-blur-none sm:shadow-none"
       >
         <div className="overflow-y-auto h-screen sm:h-auto max-h-[calc(100vh-106px)] sm:max-h-[calc(100vh-224px)] pb-4">
           <div className="grid grid-cols-5 gap-4">

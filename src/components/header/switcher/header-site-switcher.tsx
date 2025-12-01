@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Globe } from 'lucide-react';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
+import { Spinner } from '@/components/ui/spinner';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { Spinner } from '../../ui/spinner';
 
 export function SiteSwitcher() {
   const t = useTranslations('common.Regions');
@@ -44,8 +44,9 @@ export function SiteSwitcher() {
   // If only one site is available, just show the site name without switcher
   if (availableSites.length === 1) {
     return (
-      <div className="flex items-center gap-2 h-auto normal-case p-1 focus-none hover:cursor-pointer">
-        <Globe className="w-4 h-4" /> <span className="text-sm pt-0.5">{currentSite.name}</span>
+      <div className="flex items-baseline gap-1.5 h-auto normal-case focus-none hover:cursor-pointer">
+        <Globe className="flex self-center w-4 h-4" />
+        <span className="flex self-baseline text-sm">{currentSite.name}</span>
       </div>
     );
   }

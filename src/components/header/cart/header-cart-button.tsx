@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Cart } from '@platform/services/model/cart';
 import { InfoIcon, ShoppingCart } from 'lucide-react';
-import { HeaderMiniCartContent } from '@/components/header/common/cart/header-mini-cart-content';
+import { HeaderMiniCartContent } from '@/components/header/cart/header-mini-cart-content';
 import { Badge } from '@/components/ui/badge';
 import { UINotification } from '@/components/ui/molecules/ui-notification';
 import { Spinner } from '@/components/ui/spinner';
