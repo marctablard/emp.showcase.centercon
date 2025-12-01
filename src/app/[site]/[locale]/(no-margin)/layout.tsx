@@ -11,12 +11,14 @@ export default async function LocaleLayout({ children }: Props) {
   return (
     <>
       <Header />
-      {children}
-      <FooterWrapper>
-        <FooterLinks />
-        <Footer />
-      </FooterWrapper>
-      <LegalFooter />
+      <main>{children}</main>
+      <footer>
+        <FooterWrapper>
+          <FooterLinks />
+          <Footer />
+        </FooterWrapper>
+        <LegalFooter />
+      </footer>
     </>
   );
 }

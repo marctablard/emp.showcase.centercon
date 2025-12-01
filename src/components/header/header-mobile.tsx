@@ -32,7 +32,7 @@ export function HeaderMobile(props: SearchInputProps) {
     <>
       {/* Top */}
       <div className="fixed top-0 left-0 right-0 z-50 w-full">
-        <header className="bg-surface-page/95 backdrop-blur-default shadow-sm px-4 py-2 h-17">
+        <div className="bg-surface-page/95 backdrop-blur-default shadow-sm px-4 py-2 h-17">
           <div className="flex h-full justify-between items-center">
             <HeaderLogo small width={18} height={16} className="min-w-[18px] min-h-[16px]" title={t('home')} />
             <div className="flex gap-2">
@@ -40,7 +40,7 @@ export function HeaderMobile(props: SearchInputProps) {
               <HeaderCartButton />
             </div>
           </div>
-        </header>
+        </div>
       </div>
 
       {/* Bottom */}

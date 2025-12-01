@@ -13,10 +13,10 @@ export function Header() {
   const searchInput = useSearchInput();
 
   return (
-    <div className="has-[.search]:fixed has-[.search]:backdrop-blur-default has-[.search]:z-60 h-full w-full relative">
+    <header className="has-[.search]:fixed has-[.search]:backdrop-blur-default has-[.search]:z-60 h-full w-full relative">
       {/* Desktop & Tablet */}
       <div className="fixed top-0 left-0 right-0 pt-4 z-50 max-w-6xl mx-auto hidden md:block">
-        <header
+        <div
           className={`bg-surface-page/95 backdrop-blur-default shadow-sm rounded-lg relative transition-[height] duration-200 ease-in-out mx-4 md:mx-9 ${scrolled ? (showCompactMenu ? 'h-auto' : 'h-16') : getHeaderHeight()}`}
         >
           {/* Render only one header component based on scroll state */}
@@ -36,12 +36,12 @@ export function Header() {
               />
             </div>
           )}
-        </header>
+        </div>
       </div>
       {/* Mobile */}
       <div className="w-full md:hidden">
         <HeaderMobile {...searchInput} />
       </div>
-    </div>
+    </header>
   );
 }
