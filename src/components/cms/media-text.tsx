@@ -76,8 +76,8 @@ const MediaText = ({ blok }: MediaTextProps) => {
                   src={blok.image.filename}
                   alt={blok.image?.alt || ''}
                   className="w-full h-auto rounded-[inherit]"
-                  width={1000}
-                  height={1000}
+                  width={920}
+                  height={518}
                 />
               )}
               {video && (
