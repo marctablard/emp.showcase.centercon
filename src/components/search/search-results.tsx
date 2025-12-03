@@ -28,6 +28,31 @@ interface SearchClientWrapperProps {
   locale: string;
 }
 
+interface ActiveFiltersWithResetProps {
+  activeFilters: Record<string, string | string[] | Record<string, string>>;
+  resetFacet: (key: string) => void;
+  resetAllFacets: () => void;
+  resetLabel: string;
+}
+
+// Extracted component for active filters with reset button (must be outside main component)
+// Uses React Fragment to avoid extra wrapper div - allows filters to flow inline with siblings
+function ActiveFiltersWithReset({
+  activeFilters,
+  resetFacet,
+  resetAllFacets,
+  resetLabel,
+}: Omit<ActiveFiltersWithResetProps, 'className'>) {
+  return (
+    <>
+      <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
+      {Object.keys(activeFilters).length > 0 && (
+        <Pill variant="reset" leadingIcon={<Trash2 />} label={resetLabel} onClick={resetAllFacets} />
+      )}
+    </>
+  );
+}
+
 export function SearchResultsComponent({ initialSearch, initialResults, locale }: SearchClientWrapperProps) {
   const t = useTranslations('search.searchResults');
   const searchParams = useSearchParams();
@@ -49,6 +74,25 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     activeFilters,
     changePage,
   } = useSearch<Product>(initialSearch, initialResults);
+
+  // Shared props for SearchFilter component (used in both mobile and desktop layouts)
+  const searchFilterProps = {
+    activeFilters,
+    availableFilters,
+    resetFacet,
+    resetAllFacets,
+    applyFacet,
+    applyRangeFacet,
+    applyAllFacets,
+  };
+
+  // Shared props for ActiveFiltersWithReset component
+  const activeFiltersProps = {
+    activeFilters,
+    resetFacet,
+    resetAllFacets,
+    resetLabel: t('resetFilter'),
+  };
   const visiblePagination = useMemo(() => {
     if (pageSize <= 0) {
       return [];
@@ -124,51 +168,23 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
       <div className="w-full">
         {/* Row: SearchFilter + Layout toggle inline on mobile; desktop keeps toggle on the right */}
         <div className="flex w-full justify-between gap-4">
+          {/* Mobile: SearchFilter only */}
           <div className="flex sm:hidden">
-            <SearchFilter
-              {...{
-                activeFilters,
-                availableFilters,
-                resetFacet,
-                resetAllFacets,
-                applyFacet,
-                applyRangeFacet,
-                applyAllFacets,
-              }}
-            />
+            <SearchFilter {...searchFilterProps} />
           </div>
 
+          {/* Desktop: SearchFilter + Active filters inline */}
           <div className="hidden flex-wrap items-center gap-4 sm:flex">
-            <SearchFilter
-              {...{
-                activeFilters,
-                availableFilters,
-                resetFacet,
-                resetAllFacets,
-                applyFacet,
-                applyRangeFacet,
-                applyAllFacets,
-              }}
-            />
-
-            {/* Desktop: show active filters inline next to filter trigger */}
-            <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
-            {Object.keys(activeFilters).length > 0 && (
-              <Pill variant="reset" leadingIcon={<Trash2 />} label={t('resetFilter')} onClick={resetAllFacets} />
-            )}
+            <SearchFilter {...searchFilterProps} />
+            <ActiveFiltersWithReset {...activeFiltersProps} />
           </div>
 
           <SearchLayoutToggle active={layout} onSelectLayout={(selectedLayout) => setLayout(selectedLayout)} />
         </div>
 
         {/* Mobile: Active filters below, full width */}
-        <div className="mt-4 sm:hidden">
-          <div className="flex flex-col flex-wrap gap-4">
-            <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
-            {Object.keys(activeFilters).length > 0 && (
-              <Pill variant="reset" leadingIcon={<Trash2 />} label={t('resetFilter')} onClick={resetAllFacets} />
-            )}
-          </div>
+        <div className="mt-4 flex flex-col flex-wrap gap-4 sm:hidden">
+          <ActiveFiltersWithReset {...activeFiltersProps} />
         </div>
       </div>
 
