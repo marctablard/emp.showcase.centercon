@@ -13,7 +13,7 @@ export interface SearchLayoutToggleProps {
 export function SearchLayoutToggle({ active, onSelectLayout }: SearchLayoutToggleProps) {
   return (
     <>
-      <div className="hidden gap-2 sm:flex">
+      <div className="hidden gap-1 sm:flex">
         <Button variant="iconSelector" data-active={active === 'list'} onClick={() => onSelectLayout('list')}>
           <LayoutList height={24} width={24} />
         </Button>
