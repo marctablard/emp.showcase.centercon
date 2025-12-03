@@ -4,6 +4,7 @@
     "noProductsFound": "No products found",
     "tryAdjusting": "Try adjusting your search or filters",
     "allProducts": "Alle Produkte",
-    "resultsFor": "Results for \"{query}\""
+    "resultsFor": "Results for \"{query}\"",
+    "resetFilter": "Clear filter"
   }
 }

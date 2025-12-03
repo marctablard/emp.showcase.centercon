@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
+import { ActiveFilters } from '@/components/search/search-active-filters';
 import { SearchFilter } from '@/components/search/search-filter';
 import { SearchLayoutToggle } from '@/components/search/search-layout-toggle';
 import { SearchResultsGrid } from '@/components/search/search-results-grid';
@@ -14,6 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Pill } from '@/components/ui/pill';
 import { useSearch } from '@/hooks/search/useSearch';
 import { SearchParams, SearchResult } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
@@ -25,6 +29,7 @@ interface SearchClientWrapperProps {
 }
 
 export function SearchResultsComponent({ initialSearch, initialResults, locale }: SearchClientWrapperProps) {
+  const t = useTranslations('search.searchResults');
   const searchParams = useSearchParams();
   const [layout, setLayout] = useState<'list' | 'grid'>('list');
   // Initialize the search hook with Product type and initial results
@@ -115,19 +120,27 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
 
   return (
     <>
-      <div className="flex w-full items-center justify-between gap-4">
-        {/* Todo: Break filter pills in new lines when there are too many filters */}
-        <SearchFilter
-          {...{
-            activeFilters,
-            availableFilters,
-            resetFacet,
-            resetAllFacets,
-            applyFacet,
-            applyRangeFacet,
-            applyAllFacets,
-          }}
-        />
+      <div className="flex w-full justify-between gap-4">
+        {/* Todo: Show filter flyout trigger and layout-toggle inline. Show the active filters below with 100% width */}
+        <div className="flex flex-col flex-wrap gap-4 sm:flex-row">
+          <SearchFilter
+            {...{
+              activeFilters,
+              availableFilters,
+              resetFacet,
+              resetAllFacets,
+              applyFacet,
+              applyRangeFacet,
+              applyAllFacets,
+            }}
+          />
+
+          <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
+          {Object.keys(activeFilters).length > 0 && (
+            <Pill variant="reset" leadingIcon={<Trash2 />} label={t('resetFilter')} onClick={resetAllFacets} />
+          )}
+        </div>
+
         <SearchLayoutToggle active={layout} onSelectLayout={(selectedLayout) => setLayout(selectedLayout)} />
       </div>
 

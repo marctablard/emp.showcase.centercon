@@ -1,10 +1,9 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ListFilter, Trash, X } from 'lucide-react';
+import { ListFilter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pill } from '@/components/ui/pill';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { FilterValue as SearchFilterValue } from '@/hooks/search/useSearch';
@@ -25,49 +24,6 @@ interface SearchFilterProps {
 }
 
 type FilterFormValues = Record<string, string | number>;
-
-interface ActiveFiltersProps {
-  activeFilters: Record<string, SearchFilterValue>;
-  resetFacet: (facetId: string) => void;
-  resetAllFacets: () => void;
-}
-
-function ActiveFilters({ activeFilters, resetFacet }: ActiveFiltersProps) {
-  const t = useTranslations('product');
-  const filters = Object.entries(activeFilters);
-
-  // Helper function to format filter values for display
-  const formatFilterValue = (value: SearchFilterValue): string => {
-    if (typeof value === 'string') {
-      return value;
-    } else if (Array.isArray(value)) {
-      return value.join(', ');
-    } else if (value && typeof value === 'object') {
-      // Handle Record<string, string>
-      return Object.entries(value)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(', ');
-    }
-    return '';
-  };
-
-  return (
-    <>
-      {filters &&
-        filters.map(([id, value]) => {
-          return (
-            <Pill
-              trailingIcon={<X />}
-              key={id}
-              label={t(`filters.${id}`)}
-              value={formatFilterValue(value)}
-              onClick={() => resetFacet(id)}
-            />
-          );
-        })}
-    </>
-  );
-}
 
 function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitComplete }: SearchFilterProps) {
   const t = useTranslations('product');
@@ -293,10 +249,10 @@ function SearchFilter({
           <ListFilter className="mr-2" /> Filter
         </Button>
 
-        <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
-        {hasActiveFilters && (
-          <Pill variant="reset" leadingIcon={<Trash />} label="Clear all" onClick={resetAllFacets} />
-        )}
+        {/*<ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />*/}
+        {/*{hasActiveFilters && (*/}
+        {/*  <Pill variant="reset" leadingIcon={<Trash />} label="Clear all" onClick={resetAllFacets} />*/}
+        {/*)}*/}
       </div>
 
       {/* Offcanvas Filter Menu - shown when toggled */}
