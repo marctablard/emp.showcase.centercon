@@ -3,7 +3,7 @@
 import React from 'react';
 import { LayoutGrid, LayoutList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 
 export interface SearchLayoutToggleProps {
   active: 'list' | 'grid';
@@ -29,17 +29,17 @@ export function SearchLayoutToggle({ active, onSelectLayout }: SearchLayoutToggl
           onValueChange={(value) => onSelectLayout(value as 'list' | 'grid')}
         >
           <SelectTrigger>
-            <SelectValue />
+            {active === 'list' ? <LayoutList className="size-6" /> : <LayoutGrid className="size-6" />}
           </SelectTrigger>
           <SelectContent>
             {active === 'list' && (
               <SelectItem value="grid">
-                <LayoutGrid />
+                <LayoutGrid height={24} width={24} />
               </SelectItem>
             )}
             {active === 'grid' && (
               <SelectItem value="list">
-                <LayoutList />
+                <LayoutList height={24} width={24} />
               </SelectItem>
             )}
           </SelectContent>

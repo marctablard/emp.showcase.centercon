@@ -43,7 +43,7 @@ export function ProductTileListItemSkeleton() {
             <Skeleton className="h-6 w-6 shrink-0" />
             <Skeleton className="h-25 w-25 shrink-0" />
             <div className="flex w-full flex-col gap-1.5">
-              <div className="flex w-full justify-between">
+              <div className="flex w-full items-center justify-between">
                 <Skeleton className="h-4 w-1/3" />
                 <Skeleton className="h-3 w-3 rounded-full" />
               </div>
