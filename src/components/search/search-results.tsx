@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { Trash2 } from 'lucide-react';
-import { ActiveFilters } from '@/components/search/search-active-filters';
+import { SearchActiveFiltersWithReset } from '@/components/search/search-active-filters-with-reset';
 import { SearchFilter } from '@/components/search/search-filter';
 import { SearchLayoutToggle } from '@/components/search/search-layout-toggle';
 import { SearchResultsGrid } from '@/components/search/search-results-grid';
@@ -17,7 +16,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { Pill } from '@/components/ui/pill';
 import { useSearch } from '@/hooks/search/useSearch';
 import { SearchParams, SearchResult } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
@@ -26,31 +24,6 @@ interface SearchClientWrapperProps {
   initialSearch?: SearchParams<Product>;
   initialResults?: SearchResult<Product>;
   locale: string;
-}
-
-interface ActiveFiltersWithResetProps {
-  activeFilters: Record<string, string | string[] | Record<string, string>>;
-  resetFacet: (key: string) => void;
-  resetAllFacets: () => void;
-  resetLabel: string;
-}
-
-// Extracted component for active filters with reset button (must be outside main component)
-// Uses React Fragment to avoid extra wrapper div - allows filters to flow inline with siblings
-function ActiveFiltersWithReset({
-  activeFilters,
-  resetFacet,
-  resetAllFacets,
-  resetLabel,
-}: Omit<ActiveFiltersWithResetProps, 'className'>) {
-  return (
-    <>
-      <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
-      {Object.keys(activeFilters).length > 0 && (
-        <Pill variant="reset" leadingIcon={<Trash2 />} label={resetLabel} onClick={resetAllFacets} />
-      )}
-    </>
-  );
 }
 
 export function SearchResultsComponent({ initialSearch, initialResults, locale }: SearchClientWrapperProps) {
@@ -176,7 +149,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
           {/* Desktop: SearchFilter + Active filters inline */}
           <div className="hidden flex-wrap items-center gap-4 sm:flex">
             <SearchFilter {...searchFilterProps} />
-            <ActiveFiltersWithReset {...activeFiltersProps} />
+            <SearchActiveFiltersWithReset {...activeFiltersProps} />
           </div>
 
           <SearchLayoutToggle active={layout} onSelectLayout={(selectedLayout) => setLayout(selectedLayout)} />
@@ -184,7 +157,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
 
         {/* Mobile: Active filters below, full width */}
         <div className="mt-4 flex flex-col flex-wrap gap-4 sm:hidden">
-          <ActiveFiltersWithReset {...activeFiltersProps} />
+          <SearchActiveFiltersWithReset {...activeFiltersProps} />
         </div>
       </div>
 

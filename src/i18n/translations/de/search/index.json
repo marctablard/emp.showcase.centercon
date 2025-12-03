@@ -6,5 +6,9 @@
     "allProducts": "Alle Produkte",
     "resultsFor": "Ergebnisse für \"{query}\"",
     "resetFilter": "Filter löschen"
+  },
+  "layoutToggle": {
+    "list": "Listenansicht",
+    "grid": "Rasteransicht"
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { LayoutGrid, LayoutList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
@@ -11,13 +12,25 @@ export interface SearchLayoutToggleProps {
 }
 
 export function SearchLayoutToggle({ active, onSelectLayout }: SearchLayoutToggleProps) {
+  const t = useTranslations('search.layoutToggle');
+
   return (
     <>
       <div className="hidden gap-1 sm:flex">
-        <Button variant="iconSelector" data-active={active === 'list'} onClick={() => onSelectLayout('list')}>
+        <Button
+          variant="iconSelector"
+          data-active={active === 'list'}
+          onClick={() => onSelectLayout('list')}
+          aria-label={t('list')}
+        >
           <LayoutList height={24} width={24} />
         </Button>
-        <Button variant="iconSelector" data-active={active === 'grid'} onClick={() => onSelectLayout('grid')}>
+        <Button
+          variant="iconSelector"
+          data-active={active === 'grid'}
+          onClick={() => onSelectLayout('grid')}
+          arial-label={t('grid')}
+        >
           <LayoutGrid height={24} width={24} />
         </Button>
       </div>

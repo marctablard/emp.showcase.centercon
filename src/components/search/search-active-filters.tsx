@@ -3,13 +3,13 @@ import { X } from 'lucide-react';
 import { Pill } from '@/components/ui/pill';
 import { FilterValue as SearchFilterValue } from '@/hooks/search/useSearch';
 
-interface ActiveFiltersProps {
+interface SearchActiveFiltersProps {
   activeFilters: Record<string, SearchFilterValue>;
   resetFacet: (facetId: string) => void;
   resetAllFacets: () => void;
 }
 
-export function ActiveFilters({ activeFilters, resetFacet }: ActiveFiltersProps) {
+export function SearchActiveFilters({ activeFilters, resetFacet }: SearchActiveFiltersProps) {
   const t = useTranslations('product');
   const filters = Object.entries(activeFilters);
 
