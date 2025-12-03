@@ -232,7 +232,6 @@ function SearchFilter({
   activeFilters,
 }: SearchFilterProps) {
   // Check if there are any active filters
-  const hasActiveFilters = Object.keys(activeFilters).length > 0;
   // State to control if the filter offcanvas is visible
   const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
 
@@ -244,16 +243,9 @@ function SearchFilter({
   return (
     <div className="relative">
       {/* Filter Toggle Button */}
-      <div className="hide-scrollbar flex max-w-full gap-4 overflow-x-scroll">
-        <Button variant="secondary" onClick={toggleFilterOffcanvas}>
-          <ListFilter className="mr-2" /> Filter
-        </Button>
-
-        {/*<ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />*/}
-        {/*{hasActiveFilters && (*/}
-        {/*  <Pill variant="reset" leadingIcon={<Trash />} label="Clear all" onClick={resetAllFacets} />*/}
-        {/*)}*/}
-      </div>
+      <Button variant="secondary" onClick={toggleFilterOffcanvas}>
+        <ListFilter className="mr-2" /> Filter
+      </Button>
 
       {/* Offcanvas Filter Menu - shown when toggled */}
       {showFilterOffcanvas && (

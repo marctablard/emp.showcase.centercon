@@ -120,28 +120,56 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
 
   return (
     <>
-      <div className="flex w-full justify-between gap-4">
-        {/* Todo: Show filter flyout trigger and layout-toggle inline. Show the active filters below with 100% width */}
-        <div className="flex flex-col flex-wrap gap-4 sm:flex-row">
-          <SearchFilter
-            {...{
-              activeFilters,
-              availableFilters,
-              resetFacet,
-              resetAllFacets,
-              applyFacet,
-              applyRangeFacet,
-              applyAllFacets,
-            }}
-          />
+      {/* Top controls */}
+      <div className="w-full">
+        {/* Row: SearchFilter + Layout toggle inline on mobile; desktop keeps toggle on the right */}
+        <div className="flex w-full justify-between gap-4">
+          <div className="flex sm:hidden">
+            <SearchFilter
+              {...{
+                activeFilters,
+                availableFilters,
+                resetFacet,
+                resetAllFacets,
+                applyFacet,
+                applyRangeFacet,
+                applyAllFacets,
+              }}
+            />
+          </div>
 
-          <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
-          {Object.keys(activeFilters).length > 0 && (
-            <Pill variant="reset" leadingIcon={<Trash2 />} label={t('resetFilter')} onClick={resetAllFacets} />
-          )}
+          <div className="hidden flex-wrap items-center gap-4 sm:flex">
+            <SearchFilter
+              {...{
+                activeFilters,
+                availableFilters,
+                resetFacet,
+                resetAllFacets,
+                applyFacet,
+                applyRangeFacet,
+                applyAllFacets,
+              }}
+            />
+
+            {/* Desktop: show active filters inline next to filter trigger */}
+            <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
+            {Object.keys(activeFilters).length > 0 && (
+              <Pill variant="reset" leadingIcon={<Trash2 />} label={t('resetFilter')} onClick={resetAllFacets} />
+            )}
+          </div>
+
+          <SearchLayoutToggle active={layout} onSelectLayout={(selectedLayout) => setLayout(selectedLayout)} />
         </div>
 
-        <SearchLayoutToggle active={layout} onSelectLayout={(selectedLayout) => setLayout(selectedLayout)} />
+        {/* Mobile: Active filters below, full width */}
+        <div className="mt-4 sm:hidden">
+          <div className="flex flex-col flex-wrap gap-4">
+            <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
+            {Object.keys(activeFilters).length > 0 && (
+              <Pill variant="reset" leadingIcon={<Trash2 />} label={t('resetFilter')} onClick={resetAllFacets} />
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Product List/Grid */}
