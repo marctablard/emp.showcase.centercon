@@ -19,13 +19,11 @@ export function SearchResultsList({ products, locale, currentPage, pageSize, tot
 
   return (
     <>
-      {/* Todo: remove `true` to show real content */}
-      {loading || true ? (
+      {loading ? (
         <>
           <Skeleton className="mb-4 h-5 w-[180px]" />
           <div className="flex flex-col gap-4">
-            {/*{Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (*/}
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (
               <ProductTileListItemSkeleton key={i} />
             ))}
           </div>
