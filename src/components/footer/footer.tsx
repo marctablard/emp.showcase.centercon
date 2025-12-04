@@ -169,7 +169,7 @@ export function FooterWrapper({ className, ...props }: React.ComponentProps<'div
         <div
           data-slot="footer"
           className={cn(
-            'sm:ml-4 sm:mr-4 md:ml-9 md:mr-9 shadow-xl rounded-ss-lg rounded-se-lg  bg-[url("/images/footer-bg.svg")] bg-no-repeat bg-right-bottom',
+            'pb-1 sm:mx-4 lg:mx-9 shadow-xl rounded-ss-lg rounded-se-lg  bg-[url("/images/footer-bg.svg")] bg-no-repeat bg-right-bottom',
             className,
           )}
           {...props}
@@ -186,10 +186,10 @@ export function LegalFooter() {
 
   return (
     <div className="flex-grow">
-      <div className="max-w-6xl mx-auto sm:mb-4">
+      <div className="max-w-6xl mx-auto sm:mb-4 sm:px-4 lg:px-9">
         <div
           data-slot="legal-footer"
-          className="px-4 pb-16 pt-2 sm:mx-2 sm:px-7 sm:py-0 sm:h-8 bg-surface-action sm:rounded-full"
+          className="px-4 pb-16 pt-2 sm:-mx-2 lg:-mx-4 sm:-mt-1 sm:px-8 sm:py-0 lg:px-10 relative z-10 bg-surface-action sm:rounded-full"
         >
           <div className="flex flex-col sm:flex-row gap-2 md:gap-6 flex-wrap text-sm/8 text-text-on-action">
             <p className="flex-grow text-center sm:text-left">{t('copyright')}</p>
