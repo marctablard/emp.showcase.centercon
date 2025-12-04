@@ -46,11 +46,12 @@ export function SearchResultsList({ products, locale, currentPage, pageSize, tot
 
               {/* Client-side rendered products - this will replace the server-rendered ones */}
               <div className="flex flex-col gap-4">
-                {products.map((product) => (
-                  <div key={product.id} className="h-full">
-                    <ProductTileListItem product={product} locale={locale} />
-                  </div>
-                ))}
+                <p>List view currently not available. Please select grid view.</p>
+                {/*{products.map((product) => (*/}
+                {/*  <div key={product.id} className="h-full">*/}
+                {/*    <ProductTileListItem product={product} locale={locale} />*/}
+                {/*  </div>*/}
+                {/*))}*/}
               </div>
             </>
           )}
