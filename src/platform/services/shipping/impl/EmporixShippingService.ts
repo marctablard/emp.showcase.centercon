@@ -14,9 +14,6 @@ class EmporixShippingService implements ShippingService {
   private shippingApi: EmporixShippingApi;
   private shippingMapper: ShippingMapper;
 
-  // Default site ID - in a real application, this might be configurable
-  private defaultSiteId = 'main';
-
   constructor(
     @inject('EmporixShippingApi') shippingApi: EmporixShippingApi,
     @inject('EmporixShippingMapper') shippingMapper: ShippingMapper,
@@ -29,8 +26,13 @@ class EmporixShippingService implements ShippingService {
     country: string,
     postalCode: string,
     orderValue?: { amount: number; currency: string },
+    siteId?: string,
   ): Promise<ShippingMethod[]> {
     try {
+      siteId = siteId || process.env.NEXT_PUBLIC_DEFAULT_SITE;
+      if (!siteId) {
+        return [];
+      }
       // Find site based on location
       const sites = await this.shippingApi.findSite({
         country,
@@ -42,9 +44,12 @@ class EmporixShippingService implements ShippingService {
       }
 
       // Get the first site
-      const site = sites[0];
+      const site = sites.find((site) => site.id === siteId);
       const methods: ShippingMethod[] = [];
 
+      if (!site) {
+        return [];
+      }
       // Collect all shipping methods from all zones
       for (const zone of site.zones) {
         if (zone.methods && zone.methods.length > 0) {
@@ -71,9 +76,13 @@ class EmporixShippingService implements ShippingService {
     }
   }
 
-  async getShippingMethod(methodId: string, zoneId: string): Promise<ShippingMethod | null> {
+  async getShippingMethod(methodId: string, zoneId: string, siteId?: string): Promise<ShippingMethod | null> {
     try {
-      const emporixMethod = await this.shippingApi.getShippingMethod(this.defaultSiteId, zoneId, methodId);
+      siteId = siteId || process.env.NEXT_PUBLIC_DEFAULT_SITE;
+      if (!siteId) {
+        return null;
+      }
+      const emporixMethod = await this.shippingApi.getShippingMethod(siteId, zoneId, methodId);
 
       if (!emporixMethod) {
         return null;
