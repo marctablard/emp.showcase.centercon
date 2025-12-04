@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl';
 import { Product } from '@platform/services/model/product';
-import { ProductTileListItem } from '@/components/product/product-tile-list-item';
 import { ProductTileListItemSkeleton } from '@/components/product/product-tile-list-item-skeleton';
 import { SearchNoResults } from '@/components/search/search-no-results';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +13,7 @@ interface SearchResultsListProps {
   loading: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function SearchResultsList({ products, locale, currentPage, pageSize, total, loading }: SearchResultsListProps) {
   const t = useTranslations('search');
 
