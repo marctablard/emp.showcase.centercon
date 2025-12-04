@@ -7,7 +7,7 @@
     "dev:next": "next dev",
     "dev:https": "npm-run-all --parallel generate:watch dev:next:https",
     "dev:next:https": "next dev --experimental-https",
-    "build": "npm run generate && next build",
+    "build": "npm run generate && next build && npm run lint",
     "build:next": "next build",
     "generate": "ts-node --project scripts/tsconfig.json scripts/di-generator.ts",
     "generate:watch": "ts-node --project scripts/tsconfig.json scripts/di-generator.ts --watch",

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowRight, Search } from 'lucide-react';
 import { MyOrdersTable } from '@/components/account/orders/my-orders-table';
@@ -39,7 +39,8 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
   // Fetch fresh order data when component mounts
   useEffect(() => {
     refetchOrders();
-  }, [refetchOrders]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Get the appropriate status badge variant
   const getStatusBadge = (status: string) => {

@@ -52,8 +52,11 @@ class EmporixProductService implements ProductService {
 
     // Map all variant products first
     const mappedProducts = paginated.items.map((product: EmporixProduct) => this.productMapper.mapToService(product));
-
-    return await this.addAdditionalData(mappedProducts, options);
+    if (mappedProducts.length > 0) {
+      return await this.addAdditionalData(mappedProducts, options);
+    } else {
+      return [];
+    }
   }
 
   async getProducts(page?: number, pageSize?: number, options?: ProductFetchOptions): Promise<Paginated<Product>> {

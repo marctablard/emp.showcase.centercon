@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, Cloudy, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWeather } from '@/hooks/weather/useWeather';
-import { findCardLayout, useLocalDashboardStore } from '@/lib/client/dashboard';
 import { LocationData } from '@/platform/services/model/common';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 
@@ -80,8 +79,9 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({ description, className = 'h-1
 
 export function WeatherCard({ className, title, subtitle, ...props }: WeatherCardProps) {
   const t = useTranslations('account.Weather');
-  const state = useLocalDashboardStore();
-  const grid = state.renderedLayout ? findCardLayout('weather', state.renderedLayout) : { cols: 1, rows: 1 };
+  // TODO this breaks rendering and causes infinite loops
+  //const state = useLocalDashboardStore();
+  //const grid = state.renderedLayout ? findCardLayout('weather', state.renderedLayout) : { cols: 1, rows: 1 };
   const { weather, loading, changeLocation } = useWeather();
 
   if (loading || !weather) {
@@ -122,11 +122,7 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
             </div>
           </div>
           <div
-            className={`text-sm ${
-              grid?.cols > grid?.rows
-                ? 'border-l border-border-primary pl-4 flex-shrink-0 flex flex-col justify-center'
-                : 'mt-2'
-            }`}
+            className={`text-sm ${'border-l border-border-primary pl-4 flex-shrink-0 flex flex-col justify-center'}`}
           >
             <div className="flex justify-between py-1">
               <span>{t('precipitation')}:</span>

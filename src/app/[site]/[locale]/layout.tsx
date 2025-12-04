@@ -85,7 +85,9 @@ export default async function LocaleLayout({ children, params }: Props) {
     shopSession.language = locale;
   }
 
-  // Enable static rendering
+  // TODO: we need to figure out why getRequestSite
+  // doesn't return the correct value in child layouts
+  // (we need to duplicate this call there)
   setRequestSite(siteCode);
   setRequestLocale(locale);
 

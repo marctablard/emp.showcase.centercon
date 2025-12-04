@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowRight, Search } from 'lucide-react';
 import { SavedCartsTable } from '@/components/account/saved-carts/saved-carts-table';

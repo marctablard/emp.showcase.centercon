@@ -74,7 +74,7 @@ export default function LoginDialog({
   useEffect(() => {
     // Reset form fields and errors when dialog changes
     if (form) {
-      form.reset({ username: email || '' });
+      form.reset({ username: email || '', password: '' });
       setError(null);
       setShowPassword(false);
     }
