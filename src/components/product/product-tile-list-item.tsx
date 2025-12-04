@@ -5,7 +5,7 @@ interface ProductTileProps {
   locale?: string;
 }
 
-// eslint-disable-next-line unused-imports/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function ProductTileListItem({ product, locale = 'de' }: ProductTileProps) {
   // Todo: this has to be implemented
   return <></>;
