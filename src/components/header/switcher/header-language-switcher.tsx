@@ -57,7 +57,7 @@ export function LanguageSwitcher() {
   };
 
   if (isPending || siteLoading) {
-    return <Spinner color="white" variant="sm" />;
+    return <Spinner color="default" variant="sm" />;
   }
 
   return (

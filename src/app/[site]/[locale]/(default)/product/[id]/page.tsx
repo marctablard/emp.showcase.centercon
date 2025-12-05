@@ -60,11 +60,11 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
       <div>
         <UiBreadcrumb
           items={breadcrumbs}
-          className="max-w-6xl mx-auto px-4 md:px-9 sm:gap-x-6"
+          className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6"
           disabledCategories={true}
         />
         <ProductDetail
-          className="max-w-6xl mx-auto px-4 md:px-9 sm:gap-x-6 lg:pr-38"
+          className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6 lg:pr-38"
           product={product}
           availability={availability}
         />

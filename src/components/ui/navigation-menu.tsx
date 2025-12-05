@@ -16,7 +16,7 @@ function NavigationMenu({
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
       data-viewport={viewport}
-      className={cn('group/navigation-menu relative flex max-w-max flex-1 items-center justify-center', className)}
+      className={cn('group/navigation-menu relative', className)}
       {...props}
     >
       {children}
@@ -29,7 +29,7 @@ function NavigationMenuList({ className, ...props }: React.ComponentProps<typeof
   return (
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
-      className={cn('group flex flex-1 list-none items-center justify-center gap-8', className)}
+      className={cn('group flex flex-1 list-none items-center justify-between gap-8', className)}
       {...props}
     />
   );

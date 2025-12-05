@@ -18,11 +18,13 @@ export default async function LocaleLayout({ children, params }: Props) {
     <>
       <Header />
       <main className="flex-grow mt-17 sm:mt-36 md:mt-52">{children}</main>
-      <FooterWrapper>
-        <FooterLinks />
-        <Footer />
-      </FooterWrapper>
-      <LegalFooter />
+      <footer>
+        <FooterWrapper>
+          <FooterLinks />
+          <Footer />
+        </FooterWrapper>
+        <LegalFooter />
+      </footer>
     </>
   );
 }

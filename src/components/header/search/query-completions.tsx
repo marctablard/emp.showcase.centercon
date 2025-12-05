@@ -1,10 +1,10 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { useTranslations } from 'next-intl';
 import { History } from 'lucide-react';
+import MarkedText from '@/components/header/search/marked-text';
 import { Button } from '@/components/ui/button';
 import UiLink from '@/components/ui/link';
 import useHistory from '@/hooks/history/useHistory';
-import MarkedText from './marked-text';
 
 export interface QueryCompletionsProps {
   isProductsShown: boolean;

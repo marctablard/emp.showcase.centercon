@@ -17,12 +17,14 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <>
       <Header />
-      {children}
-      <FooterWrapper>
-        <FooterLinks />
-        <Footer />
-      </FooterWrapper>
-      <LegalFooter />
+      <main>{children}</main>
+      <footer>
+        <FooterWrapper>
+          <FooterLinks />
+          <Footer />
+        </FooterWrapper>
+        <LegalFooter />
+      </footer>
     </>
   );
 }
