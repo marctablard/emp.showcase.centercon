@@ -171,6 +171,7 @@
     }
   },
   "accountDashboardDescription": "Manage your account, orders, and company information",
+  "accountLoginDescription": "Login or Register to manage your orders and view your company information.",
   "accountDetails": "Account Details",
   "company": "Company",
   "ordersAndReturns": "Orders & Returns",
@@ -399,5 +400,41 @@
     "title": "Placeholder Page",
     "description": "This page is a placeholder included in the Emporix reference storefront.",
     "details": "It demonstrates where additional features, apps or custom integrations can be added. The content and functionality of this page will vary depending on requirements and project scope."
+  },
+  "landing": {
+    "title": "Welcome to Your Service Portal",
+    "subtitle": "Manage your business efficiently with our comprehensive account features",
+    "benefits": {
+      "title": "Why Create an Account?",
+      "trackOrders": {
+        "title": "Track Your Orders",
+        "description": "Monitor all your orders in real-time, view order history, and manage returns effortlessly."
+      },
+      "aiAssistant": {
+        "title": "AI-Powered Assistant",
+        "description": "Get instant answers to your questions with our intelligent AI helper available 24/7."
+      },
+      "supportTickets": {
+        "title": "Support Tickets",
+        "description": "Create and manage support tickets directly from your dashboard for quick resolution."
+      },
+      "quotes": {
+        "title": "Request & Manage Quotes",
+        "description": "Request custom quotes and track their status all in one place."
+      },
+      "approvals": {
+        "title": "Approval Workflows",
+        "description": "Streamline your business processes with built-in approval management."
+      },
+      "insights": {
+        "title": "Business Insights",
+        "description": "Access detailed analytics and insights about your orders and spending patterns."
+      }
+    },
+    "cta": {
+      "login": "Sign In to Your Account",
+      "register": "Create a Free Account",
+      "registerSubtext": "Join thousands of businesses already using our platform"
+    }
   }
 }

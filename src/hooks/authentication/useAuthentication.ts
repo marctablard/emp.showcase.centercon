@@ -1,17 +1,17 @@
 'use client';
 
-import { startTransition, useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { useCartStore, useCustomerStore } from '@/providers/StoreProvider';
+import { useLocale } from 'next-intl';
+import { getPathname } from '@/i18n/navigation';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
-import { useAddresses } from '../customer/useAddresses';
 
 interface AuthenticationHook {
   isAuthenticated: boolean;
   error: Error | null;
   loading: boolean;
-  login: (username: string, password: string, redirect?: boolean, callbackUrl?: string) => Promise<void>;
+  login: (username: string, password: string, callbackUrl?: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -20,6 +20,7 @@ interface AuthenticationHook {
  * @returns Authentication state and functions
  */
 export const useAuthentication = (): AuthenticationHook => {
+  const locale = useLocale();
   const session = useSession({
     required: true,
     onUnauthenticated: () => {
@@ -33,7 +34,7 @@ export const useAuthentication = (): AuthenticationHook => {
   const [loading, setLoading] = useState<boolean>(session.status === 'loading');
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
-  const { fetchAddresses } = useAddresses();
+  const [_isPending, startTransition] = useTransition();
 
   // Update authentication state when session status changes
   useEffect(() => {
@@ -41,55 +42,48 @@ export const useAuthentication = (): AuthenticationHook => {
     setLoading(session.status === 'loading');
   }, [session.status]);
 
-  const login = async (
-    username: string,
-    password: string,
-    redirect: boolean = true,
-    callbackUrl: string = '/account',
-  ): Promise<void> => {
+  const login = async (username: string, password: string, callbackUrl?: string): Promise<boolean> => {
     setLoading(true);
+    setError(null);
+    let success = false;
     try {
-      const response = await signIn('credentials', {
+      if (!callbackUrl) {
+        callbackUrl = '/account';
+      }
+      const data = await signIn('credentials', {
         username,
         password,
-        redirectTo: callbackUrl,
         redirect: false,
+        redirectTo: callbackUrl + '?login=success',
       });
-      if (response?.error) {
-        setError(new Error(response.error));
+      if (data?.error) {
+        setError(new Error(data.error));
+        setIsAuthenticated(false);
       } else {
         setIsAuthenticated(true);
         reset();
-        await fetchAddresses();
-        if (redirect) {
-          window.location.href = callbackUrl;
-        }
+        window.location.href = data?.url || getPathname({ href: callbackUrl + '?login=success', locale });
+        success = true;
       }
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log in'));
     } finally {
       setLoading(false);
     }
+    return success;
   };
-
-  const cartStore = useCartStore();
-  const customerStore = useCustomerStore();
 
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
-      await signOut({
-        redirect: false,
-      });
-      startTransition(() => {
-        // After signOut is complete, clear all stores
-        cartStore.clearCart();
-        customerStore.reset();
-
+      startTransition(async () => {
         // Clear all persisted store data
         clearAllPersistedStores();
-        // Redirect to logout page
-        window.location.href = '/?logout';
+        // ...then log out (no idea how this could fail)
+        await signOut({
+          redirect: true,
+          redirectTo: '/',
+        });
       });
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to log out'));

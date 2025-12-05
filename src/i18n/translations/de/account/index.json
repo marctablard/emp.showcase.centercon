@@ -123,6 +123,7 @@
     }
   },
   "accountDashboardDescription": "Verwalten Sie Ihr Konto, Bestellungen und Unternehmensinformationen",
+  "accountLoginDescription": "Melden Sie sich an, um Ihre Bestellungen verwalten und Ihre Unternehmensinformationen anzeigen.",
   "accountDetails": "Kontodaten",
   "profileSettings": "Profileinstellungen",
   "company": "Unternehmen",
@@ -407,5 +408,41 @@
     "title": "Platzhalterseite",
     "description": "Diese Seite ist ein Platzhalter in der Emporix-Referenz-Storefront.",
     "details": "Sie zeigt, wo zusätzliche Funktionen, Apps oder benutzerdefinierte Integrationen hinzugefügt werden können. Der Inhalt und die Funktionalität dieser Seite variieren je nach Anforderungen und Projektumfang."
+  },
+  "landing": {
+    "title": "Willkommen in Ihrem Service-Portal",
+    "subtitle": "Verwalten Sie Ihr Geschäft effizient mit unseren umfassenden Konto-Funktionen",
+    "benefits": {
+      "title": "Warum ein Konto erstellen?",
+      "trackOrders": {
+        "title": "Bestellungen verfolgen",
+        "description": "Überwachen Sie alle Ihre Bestellungen in Echtzeit, sehen Sie die Bestellhistorie ein und verwalten Sie Retouren mühelos."
+      },
+      "aiAssistant": {
+        "title": "KI-gestützter Assistent",
+        "description": "Erhalten Sie sofortige Antworten auf Ihre Fragen mit unserem intelligenten KI-Helfer, der rund um die Uhr verfügbar ist."
+      },
+      "supportTickets": {
+        "title": "Support-Tickets",
+        "description": "Erstellen und verwalten Sie Support-Tickets direkt von Ihrem Dashboard aus für eine schnelle Lösung."
+      },
+      "quotes": {
+        "title": "Angebote anfordern & verwalten",
+        "description": "Fordern Sie individuelle Angebote an und verfolgen Sie deren Status an einem Ort."
+      },
+      "approvals": {
+        "title": "Freigabe-Workflows",
+        "description": "Optimieren Sie Ihre Geschäftsprozesse mit integriertem Freigabe-Management."
+      },
+      "insights": {
+        "title": "Geschäftseinblicke",
+        "description": "Greifen Sie auf detaillierte Analysen und Einblicke zu Ihren Bestellungen und Ausgabenmustern zu."
+      }
+    },
+    "cta": {
+      "login": "Bei Ihrem Konto anmelden",
+      "register": "Kostenloses Konto erstellen",
+      "registerSubtext": "Schließen Sie sich Tausenden von Unternehmen an, die bereits unsere Plattform nutzen"
+    }
   }
 }

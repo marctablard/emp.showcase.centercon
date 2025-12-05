@@ -23,6 +23,7 @@
     "e2e:report": "playwright show-report",
     "format": "prettier --write \"**/*.{tsx,jsx,ts,css,scss,md}\"",
     "setup": "ts-node --project scripts/tsconfig.json scripts/setup-api.ts",
+    "generate:sso-password": "ts-node --project scripts/tsconfig.json scripts/generate-sso-password.ts",
     "prepare": "husky"
   },
   "lint-staged": {
