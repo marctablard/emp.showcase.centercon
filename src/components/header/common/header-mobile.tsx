@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Gauge, LayoutGrid, Menu, Pin, Search, X } from 'lucide-react';
 import { HeaderIconButton } from '@/components/header/common/header-icon-button';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
+import { HeaderPromo } from '@/components/header/common/header-promo';
 import { HeaderSearch } from '@/components/header/common/header-search';
 import { MobileMenuNavigation } from '@/components/header/mobile/menu-navigation';
 import { useHeaderSearch } from '@/components/header/search/search-context';
@@ -56,11 +57,12 @@ export function HeaderMobile() {
       <Sheet open={showMenu} onOpenChange={setShowMenu} modal={true}>
         <SheetContent
           side="bottom"
-          className="h-[calc(100dvh-58px-68px-12px-env(safe-area-inset-top))] bottom-[58px] mx-4 p-0 rounded-t-2xl [&>button]:hidden"
+          className="h-[calc(100dvh-58px-68px-12px-env(safe-area-inset-top))] bottom-[58px] mx-4 p-0 rounded-t-2xl [&>button]:hidden overflow-y-auto"
           onInteractOutside={closeMenu}
         >
           <SheetTitle className="sr-only">{t('menu')}</SheetTitle>
           <MobileMenuNavigation onClose={closeMenu} />
+          <HeaderPromo />
         </SheetContent>
       </Sheet>
     </>
