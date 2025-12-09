@@ -47,7 +47,6 @@ let nextConfig: NextConfig = {
   },
   headers: async () => {
     const headers = [];
-
     // Security headers for all routes
     const securityHeaders = [
       {
@@ -86,7 +85,7 @@ let nextConfig: NextConfig = {
     });
 
     // Robots meta tag for noindex
-    if (process.env.NEXT_PUBLIC_ROBOTS_NOINDEX === 'true') {
+    if (process.env.NEXT_ROBOTS_NOINDEX === 'true') {
       headers.push({
         source: '/:path*',
         headers: [
