@@ -4,10 +4,12 @@ import { HeaderActionBar } from '@/components/header/common/header-action-bar';
 import { HeaderMobile } from '@/components/header/common/header-mobile';
 import { HeaderTopBanner } from '@/components/header/common/header-top-banner';
 import { HeaderSearchProvider } from '@/components/header/search/search-context';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useHeaderScroll } from '@/hooks/useHeaderScroll';
 
 export function Header() {
   const { scrolled } = useHeaderScroll();
+  const isAboveSmallScreen = useBreakpoint('sm');
   return (
     <HeaderSearchProvider>
       <header className="has-[.search]:fixed has-[.search]:w-full has-[.search]:h-full has-[.search]:backdrop-blur-default has-[.search]:z-60">
@@ -17,9 +19,7 @@ export function Header() {
           <HeaderActionBar scrolled={scrolled} />
         </div>
         {/* Mobile */}
-        <div className="sm:hidden">
-          <HeaderMobile />
-        </div>
+        {!isAboveSmallScreen && <HeaderMobile />}
       </header>
     </HeaderSearchProvider>
   );
