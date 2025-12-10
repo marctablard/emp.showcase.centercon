@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixMonetaryAmount } from '@/platform/integrations/emporix/model/common';
 import type { EmporixShippingApi } from '@/platform/integrations/emporix/shipping/EmporixShippingApi';
+import type { SessionService } from '@/platform/services/session/SessionService';
 import { ShippingMethod } from '../../model/shipping';
 import type { ShippingMapper } from '../../model/shipping/ShippingMapper';
 import { ShippingService } from '../ShippingService';
@@ -13,24 +14,30 @@ import { ShippingService } from '../ShippingService';
 class EmporixShippingService implements ShippingService {
   private shippingApi: EmporixShippingApi;
   private shippingMapper: ShippingMapper;
+  private sessionService: SessionService;
 
   constructor(
     @inject('EmporixShippingApi') shippingApi: EmporixShippingApi,
     @inject('EmporixShippingMapper') shippingMapper: ShippingMapper,
+    @inject('SessionService') sessionService: SessionService,
   ) {
     this.shippingApi = shippingApi;
     this.shippingMapper = shippingMapper;
+    this.sessionService = sessionService;
   }
 
   async getShippingMethods(
     country: string,
     postalCode: string,
     orderValue?: { amount: number; currency: string },
-    siteId?: string,
   ): Promise<ShippingMethod[]> {
+    const session = await this.sessionService.getCurrent();
+    if (!session) {
+      throw new Error('No session found');
+    }
+    const siteCode = session.siteCode || process.env.NEXT_PUBLIC_DEFAULT_SITE;
     try {
-      siteId = siteId || process.env.NEXT_PUBLIC_DEFAULT_SITE;
-      if (!siteId) {
+      if (!siteCode) {
         return [];
       }
       // Find site based on location
@@ -44,7 +51,7 @@ class EmporixShippingService implements ShippingService {
       }
 
       // Get the first site
-      const site = sites.find((site) => site.id === siteId);
+      const site = sites.find((site) => site.id === siteCode);
       const methods: ShippingMethod[] = [];
 
       if (!site) {
@@ -76,13 +83,17 @@ class EmporixShippingService implements ShippingService {
     }
   }
 
-  async getShippingMethod(methodId: string, zoneId: string, siteId?: string): Promise<ShippingMethod | null> {
+  async getShippingMethod(methodId: string, zoneId: string): Promise<ShippingMethod | null> {
+    const session = await this.sessionService.getCurrent();
+    if (!session) {
+      throw new Error('No session found');
+    }
+    const siteCode = session.siteCode || process.env.NEXT_PUBLIC_DEFAULT_SITE;
     try {
-      siteId = siteId || process.env.NEXT_PUBLIC_DEFAULT_SITE;
-      if (!siteId) {
+      if (!siteCode) {
         return null;
       }
-      const emporixMethod = await this.shippingApi.getShippingMethod(siteId, zoneId, methodId);
+      const emporixMethod = await this.shippingApi.getShippingMethod(siteCode, zoneId, methodId);
 
       if (!emporixMethod) {
         return null;
