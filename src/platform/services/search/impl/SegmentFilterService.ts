@@ -13,8 +13,6 @@ class SegmentFilterService {
   private customerSegmentService: CustomerSegmentService;
   private categoryApi: EmporixCategoryApi;
   private customerService: CustomerService;
-  private segmentItems: Promise<any[]> | null = null;
-  private allAllowedProductIds: Promise<Set<string>> | null = null;
 
   constructor(
     @inject('CustomerSegmentService') customerSegmentService: CustomerSegmentService,
@@ -27,17 +25,11 @@ class SegmentFilterService {
   }
 
   private async getSegmentItems(): Promise<any[]> {
-    if (!this.segmentItems) {
-      this.segmentItems = this.customerSegmentService.getSegmentItems();
-    }
-    return this.segmentItems;
+    return this.customerSegmentService.getSegmentItems();
   }
 
   async getAllowedProductIds(): Promise<Set<string>> {
-    if (!this.allAllowedProductIds) {
-      this.allAllowedProductIds = this.computeAllowedProductIds();
-    }
-    return await this.allAllowedProductIds;
+    return this.computeAllowedProductIds();
   }
 
   async getSegmentIds(): Promise<string[]> {
