@@ -1,6 +1,6 @@
 {
   "name": "emporix-showcase",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "npm-run-all --parallel generate:watch dev:next",
