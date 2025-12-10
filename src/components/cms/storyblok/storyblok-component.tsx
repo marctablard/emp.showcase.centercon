@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import Button from '../button';

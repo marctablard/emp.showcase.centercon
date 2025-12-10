@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { Cart } from '@platform/services/model/cart';
 import { InfoIcon, ShoppingCart } from 'lucide-react';
 import { HeaderMiniCartContent } from '@/components/header/cart/header-mini-cart-content';
@@ -12,6 +11,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { useRouter } from '@/i18n/navigation';
 import { formatCurrency } from '@/lib/utils';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 

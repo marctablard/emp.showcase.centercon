@@ -50,7 +50,7 @@ export function useNotifications(): UseNotificationsReturn {
         navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
       };
     }
-  }, [fetchNotifications, navigator.serviceWorker]);
+  }, [fetchNotifications]);
 
   return {
     error,

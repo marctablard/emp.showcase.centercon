@@ -6,6 +6,7 @@ import { useLocale } from 'next-intl';
 import { getPathname } from '@/i18n/navigation';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
+import { useSite } from '../site/useSite';
 
 interface AuthenticationHook {
   isAuthenticated: boolean;
@@ -21,6 +22,7 @@ interface AuthenticationHook {
  */
 export const useAuthentication = (): AuthenticationHook => {
   const locale = useLocale();
+  const { site } = useSite();
   const session = useSession({
     required: true,
     onUnauthenticated: () => {
@@ -62,7 +64,7 @@ export const useAuthentication = (): AuthenticationHook => {
       } else {
         setIsAuthenticated(true);
         reset();
-        window.location.href = data?.url || getPathname({ href: callbackUrl + '?login=success', locale });
+        window.location.href = getPathname({ href: callbackUrl + '?login=success', locale, site: site?.code });
         success = true;
       }
     } catch (error) {
@@ -79,10 +81,11 @@ export const useAuthentication = (): AuthenticationHook => {
       startTransition(async () => {
         // Clear all persisted store data
         clearAllPersistedStores();
+        const logoutTarget = getPathname({ href: '/', locale, site: site?.code });
         // ...then log out (no idea how this could fail)
         await signOut({
           redirect: true,
-          redirectTo: '/',
+          redirectTo: logoutTarget,
         });
       });
     } catch (error) {

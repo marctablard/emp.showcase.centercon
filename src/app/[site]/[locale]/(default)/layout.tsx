@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import Footer from '@/components/footer';
 import { FooterLinks, FooterWrapper, LegalFooter } from '@/components/footer/footer';
 import { Header } from '@/components/header/header';
-import { setRequestSite } from '@/lib/ssr/site';
+import { setRequestSite } from '@/site/server/';
 
 type Props = {
   children: ReactNode;
