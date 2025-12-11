@@ -14,7 +14,7 @@ export function HeaderPromo() {
   ];
 
   return (
-    <div className="flex gap-2 mx-5 mb-5">
+    <div className="flex gap-2 mx-5 my-5">
       {promos.map((promo, index) => (
         <div key={index} className="flex w-full flex-col items-center rounded-sm bg-surface-image-background p-2">
           <div className="w-full aspect-square bg-surface-action-hover-2 mb-2">{/* Image Placeholder */}</div>
