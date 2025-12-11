@@ -6,6 +6,7 @@ import { ArrowRight, Search } from 'lucide-react';
 import { MyOrdersTable } from '@/components/account/orders/my-orders-table';
 import { CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { H4 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { useOrders } from '@/hooks/order/useOrders';
@@ -93,7 +94,9 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
   return (
     <DashboardCard variant="default" className={cn('py-4 pb-0', className)} {...props}>
       <div className="flex items-center justify-between mb-4">
-        <CardTitle className="text-4xl font-bold">{title || t('myOrders')}</CardTitle>
+        <CardTitle>
+          <H4>{title || t('myOrders')}</H4>
+        </CardTitle>
         <UiLink type="Link" href="/account/orders" variant="primary" size="m" iconAfter={<ArrowRight />}>
           {t('showAllOrders')}
         </UiLink>

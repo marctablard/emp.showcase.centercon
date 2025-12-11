@@ -37,7 +37,7 @@ export function QueryCompletions({
               }
             }}
             key={queryCompletion}
-            className="min-w-0 p-2 bg-surface-disabled hover:bg-surface-hover-grey text-text-heading flex shrink-1 font-medium"
+            className="min-w-0 p-2 bord border-width-pills rounded-pills bg-surface-disabled hover:bg-surface-hover-grey normal-case text-text-heading flex shrink-1 font-medium"
           >
             {isProductsShown ? (
               <span className="truncate w-full max-w-full text-left sm:max-w-[48ch]">

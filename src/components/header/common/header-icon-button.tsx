@@ -15,7 +15,7 @@ export function HeaderIconButton({ icon: Icon, text, className, ariaLabel, onCli
       aria-label={ariaLabel}
       onClick={onClick}
       className={cn(
-        'flex flex-col text-icon-primary-dark items-center min-w-12 rounded-sm p-0.5 hover:bg-surface-action hover:text-text-on-action transition-colors focus-visible:outline-2 focus:outline-border-focus cursor-pointer',
+        'flex flex-col text-icon-primary-dark items-center min-w-12 rounded-button p-0.5 hover:bg-surface-action hover:text-text-on-action transition-colors focus-visible:outline-2 focus:outline-border-focus cursor-pointer',
         className,
       )}
     >

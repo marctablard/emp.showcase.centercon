@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import AiStarsIcon from '@/components/icons/ai-stars';
 import { CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
+import { H4 } from '@/components/ui/h';
 import { InputButton } from '@/components/ui/input';
 import { useValidator } from '@/hooks/validation/useValidator';
 import { cn } from '@/lib/utils';
@@ -38,15 +39,10 @@ function AiHelperCard({ className, title, ...props }: Omit<DashboardCardProps, '
     <DashboardCard variant="default" className={cn('', className)} {...props}>
       <div className="flex items-center gap-3 mb-4">
         <AiStarsIcon className="flex-shrink-0" />
-        <CardTitle
-          className="text-4xl font-bold bg-gradient-to-t from-gradient-secondary-end to-gradient-secondary-start"
-          style={{
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          {title || t('title')}
+        <CardTitle>
+          <H4 className="bg-clip-text text-transparent bg-gradient-to-t from-gradient-secondary-end to-gradient-secondary-start">
+            {title || t('title')}
+          </H4>
         </CardTitle>
       </div>
       <Form {...form}>
