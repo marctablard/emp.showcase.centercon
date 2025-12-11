@@ -12,9 +12,9 @@ export function Header() {
   const isAboveSmallScreen = useBreakpoint('sm');
   return (
     <HeaderSearchProvider>
-      <header className="has-[.search]:fixed has-[.search]:w-full has-[.search]:h-full has-[.search]:backdrop-blur-default has-[.search]:z-60">
+      <header className="relative z-60 pointer-events-auto has-[.search]:fixed has-[.search]:w-full has-[.search]:h-full has-[.search]:backdrop-blur-default">
         {/* Mobile & Tablet & Desktop */}
-        <div className="fixed top-0 left-0 right-0 z-50 sm:pt-4 sm:px-4 md:pt-3 lg:px-9 w-full max-w-6xl mx-auto">
+        <div className="fixed top-0 left-0 right-0 z-60 sm:pt-4 sm:px-4 md:pt-3 lg:px-9 w-full max-w-6xl mx-auto">
           <HeaderTopBanner scrolled={scrolled} />
           <HeaderActionBar scrolled={scrolled} />
         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { ChevronDown, ChevronLeft, MapPin } from 'lucide-react';
+import { HeaderPromo } from '@/components/header/common/header-promo';
 import { LocationSettingsDialog } from '@/components/header/mobile/location-settings-dialog';
 import { navigationMenuItems, serviceMenuItems } from '@/data/navigation-menu';
 
@@ -73,7 +74,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
   const currentItems = getCurrentItems();
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col overflow-y-auto">
       {/* Header with back button */}
       {currentView !== 'main' && (
         <div className="flex items-center gap-3 px-4 py-4">
@@ -89,7 +90,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
       )}
 
       {/* Menu items */}
-      <nav className="flex-1 py-2">
+      <nav className="flex-1">
         <ul>
           {currentItems.map((item, index) => (
             <li key={item.id || item.label || index}>
@@ -107,7 +108,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
                   className="w-full flex items-center justify-between px-5 py-4 text-lg cursor-pointer"
                 >
                   {item.label}
-                  {item.hasSubmenu && <ChevronDown className="w-5 h-5 -rotate-90" />}
+                  {item.hasSubmenu && <ChevronDown className="w-5 h-5" />}
                 </button>
               )}
               <hr className="mx-5 border-border-subtle" />
@@ -155,6 +156,8 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
             </li>
           </ul>
         )}
+
+        {currentView === 'main' && <HeaderPromo />}
       </nav>
 
       {/* Location Settings Dialog */}
