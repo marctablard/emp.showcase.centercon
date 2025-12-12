@@ -2,10 +2,12 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import { QuoteData, QuoteListData, QuotePreviewItemData } from '../types';
 import { formatDate, formatPrice, getQuoteStatusColor, handleImageError } from '../utils';
 
 interface QuoteListRendererProps {
-  data: any;
+  data: QuoteListData;
 }
 
 export const QuoteListRenderer: React.FC<QuoteListRendererProps> = ({ data }) => {
@@ -15,7 +17,7 @@ export const QuoteListRenderer: React.FC<QuoteListRendererProps> = ({ data }) =>
     <div className="space-y-4">
       {data.message && <div className="text-text-body mb-3 text-base">{data.message}</div>}
       {data.quotes &&
-        data.quotes.map((quote: any, index: number) => (
+        data.quotes.map((quote: QuoteData, index: number) => (
           <div
             key={index}
             className="bg-surface-primary rounded-xl border border-border-primary shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
@@ -83,14 +85,17 @@ export const QuoteListRenderer: React.FC<QuoteListRendererProps> = ({ data }) =>
               <div className="p-3 bg-surface-primary">
                 <div className="text-sm font-semibold text-text-body mb-2">{t('previewItems')}</div>
                 <div className="flex flex-wrap gap-2">
-                  {quote.previewItems.map((item: any, itemIndex: number) => (
+                  {quote.previewItems.map((item: QuotePreviewItemData, itemIndex: number) => (
                     <div key={itemIndex} className="flex items-center space-x-2 text-sm text-text-body">
                       {item.image && (
-                        <img
+                        <Image
                           src={item.image}
                           alt={item.name}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 object-cover rounded"
                           onError={handleImageError}
+                          unoptimized
                         />
                       )}
                       <span>

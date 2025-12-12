@@ -2,11 +2,10 @@
 
 import React, { useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import { HTMLData } from '../types';
 
 interface HTMLRendererProps {
-  data: {
-    html: string;
-  };
+  data: HTMLData;
 }
 
 const DOMPURIFY_CONFIG = {

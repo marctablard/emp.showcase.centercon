@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { AiHelperFormData, StructuredDataHandlers } from '../types';
+import { ErrorData, StructuredDataHandlers } from '../types';
 
 interface ErrorRendererProps {
-  data: any;
+  data: ErrorData;
   setQuestionValue: StructuredDataHandlers['setQuestionValue'];
   handleQuestionSubmit: StructuredDataHandlers['handleQuestionSubmit'];
 }

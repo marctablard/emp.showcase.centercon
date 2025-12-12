@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import { OrderItemData, OrderSummaryData } from '../types';
 import { extractPrice, formatDate, formatPrice, getOrderStatusColor } from '../utils';
 import { ItemsListRenderer } from './ItemsListRenderer';
 
 interface OrderSummaryRendererProps {
-  data: any;
+  data: OrderSummaryData;
 }
 
 export const OrderSummaryRenderer: React.FC<OrderSummaryRendererProps> = ({ data }) => {
@@ -28,7 +29,7 @@ export const OrderSummaryRenderer: React.FC<OrderSummaryRendererProps> = ({ data
     let itemsGross = 0;
     let itemsTax = 0;
 
-    data.items.forEach((item: any) => {
+    data.items.forEach((item: OrderItemData) => {
       if (item.totalPrice) {
         const itemPrice = extractPrice(item.totalPrice);
         itemsNet += itemPrice.net || 0;
