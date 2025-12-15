@@ -2,10 +2,12 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import { OrderData, OrderItemData, OrderListData } from '../types';
 import { extractPrice, formatDate, formatPrice, getOrderStatusColor, handleImageError } from '../utils';
 
 interface OrderListRendererProps {
-  data: any;
+  data: OrderListData;
 }
 
 export const OrderListRenderer: React.FC<OrderListRendererProps> = ({ data }) => {
@@ -14,7 +16,7 @@ export const OrderListRenderer: React.FC<OrderListRendererProps> = ({ data }) =>
   return (
     <div className="space-y-3">
       {data.orders &&
-        data.orders.map((order: any, index: number) => {
+        data.orders.map((order: OrderData, index: number) => {
           const orderCurrency = order.currency || 'EUR';
           const totalPrice = extractPrice(order.total);
           const totalGross = totalPrice.gross || 0;
@@ -89,7 +91,7 @@ export const OrderListRenderer: React.FC<OrderListRendererProps> = ({ data }) =>
                 <div className="p-3 bg-surface-primary">
                   <div className="text-sm font-semibold text-text-body mb-2">{t('previewItems')}</div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-sm text-text-body">
-                    {order.items.map((item: any, itemIndex: number) => {
+                    {order.items.map((item: OrderItemData, itemIndex: number) => {
                       const itemPrice = item.totalPrice
                         ? extractPrice(item.totalPrice)
                         : item.unitPrice && item.quantity
@@ -105,11 +107,14 @@ export const OrderListRenderer: React.FC<OrderListRendererProps> = ({ data }) =>
                       return (
                         <div key={itemIndex} className="flex items-start space-x-2">
                           {item.image && (
-                            <img
+                            <Image
                               src={item.image}
                               alt={item.name}
+                              width={40}
+                              height={40}
                               className="w-10 h-10 object-cover rounded flex-shrink-0"
                               onError={handleImageError}
+                              unoptimized
                             />
                           )}
                           <div className="flex flex-col min-w-0 flex-1">

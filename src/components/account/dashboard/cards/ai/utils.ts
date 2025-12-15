@@ -27,7 +27,7 @@ export const formatTimestamp = (date: Date): string => {
 /**
  * Formats a date to a localized date string (e.g., "Jan 15, 2024")
  */
-export const formatDate = (date: Date | string, locale: string = 'en-US'): string => {
+export const formatDate = (date: Date | string, _locale: string = 'en-US'): string => {
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return format(dateObj, 'MMM d, yyyy');
@@ -39,7 +39,7 @@ export const formatDate = (date: Date | string, locale: string = 'en-US'): strin
 /**
  * Formats a date with time to a localized string (e.g., "January 15, 2024 2:30 PM")
  */
-export const formatDateTime = (date: Date | string | undefined | null, locale: string = 'en-US'): string => {
+export const formatDateTime = (date: Date | string | undefined | null, _locale: string = 'en-US'): string => {
   if (!date) {
     return 'N/A';
   }

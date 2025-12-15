@@ -34,7 +34,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, handlers }) =
   const isUser = message.isUser;
   const hasStructuredData = Boolean(message.data && message.type && message.type !== 'text');
 
-  const shouldShowContent = !hasStructuredData || message.content !== message.data?.message;
+  // Check if content duplicates the data message (to avoid showing twice)
+  const dataMessage =
+    message.data && typeof message.data === 'object' && 'message' in message.data
+      ? (message.data as { message?: string }).message
+      : undefined;
+  const shouldShowContent = !hasStructuredData || message.content !== dataMessage;
 
   return (
     <div className={cn('flex', isUser ? 'justify-end' : 'justify-start')}>

@@ -2,15 +2,11 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { TableData } from '../types';
 import { formatDate } from '../utils';
 
 interface TableRendererProps {
-  data: {
-    title?: string;
-    headers: string[];
-    rows: string[][];
-    columnTypes?: string[];
-  };
+  data: TableData;
 }
 
 export const TableRenderer: React.FC<TableRendererProps> = ({ data }) => {

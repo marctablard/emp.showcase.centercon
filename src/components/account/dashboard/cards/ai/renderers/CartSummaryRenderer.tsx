@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import { CartSummaryData, ShopData } from '../types';
 import { extractPrice, formatPrice } from '../utils';
 import { ItemsListRenderer } from './ItemsListRenderer';
 
 interface CartSummaryRendererProps {
-  data: any;
+  data: CartSummaryData;
 }
 
 export const CartSummaryRenderer: React.FC<CartSummaryRendererProps> = ({ data }) => {
@@ -91,7 +92,7 @@ export const CartSummaryRenderer: React.FC<CartSummaryRendererProps> = ({ data }
 
       {data.shops && data.shops.length > 0 && (
         <div className="space-y-4">
-          {data.shops.map((shop: any, shopIndex: number) => (
+          {data.shops.map((shop: ShopData, shopIndex: number) => (
             <div key={shopIndex} className="space-y-3">
               <div className="flex justify-between items-center p-3 bg-surface-image-background rounded-lg border">
                 <div className="font-semibold text-text-body text-base">{shop.shopName}</div>
@@ -103,7 +104,7 @@ export const CartSummaryRenderer: React.FC<CartSummaryRendererProps> = ({ data }
               {shop.items && shop.items.length > 0 && (
                 <ItemsListRenderer
                   items={shop.items}
-                  currency={shop.currency}
+                  currency={shop.currency || displayCurrency}
                   extractPrice={extractPrice}
                   showImages={true}
                   showDescription={false}

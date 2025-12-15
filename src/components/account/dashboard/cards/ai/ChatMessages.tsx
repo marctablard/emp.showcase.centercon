@@ -32,6 +32,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, loading, h
   return (
     <div
       ref={scrollContainerRef}
+      role="log"
+      aria-live="polite"
+      aria-label={t('chatHistory')}
+      aria-relevant="additions"
       className="flex-1 overflow-y-auto border rounded-lg p-3 bg-surface-image-background mb-3 scroll-smooth"
     >
       {messages.length === 0 ? (

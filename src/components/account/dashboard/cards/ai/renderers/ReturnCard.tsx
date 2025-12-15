@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { formatDate, formatPrice, getReturnStatusColor, handleImageError } from '../utils';
 
 interface ReturnCardProps {
@@ -108,11 +109,14 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ returnItem }) => {
               return (
                 <div key={itemIndex} className="flex items-start space-x-2">
                   {item.image && (
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.name}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 object-cover rounded flex-shrink-0"
                       onError={handleImageError}
+                      unoptimized
                     />
                   )}
                   <div className="flex flex-col min-w-0 flex-1">

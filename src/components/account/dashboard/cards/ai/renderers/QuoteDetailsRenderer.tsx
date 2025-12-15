@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import { QuoteDetailsData } from '../types';
 import { formatDate, formatPrice, getQuoteStatusColor } from '../utils';
 import { ProductItem, UnifiedProductItem } from './ProductItem';
 
 interface QuoteDetailsRendererProps {
-  data: any;
+  data: QuoteDetailsData;
 }
 
 export const QuoteDetailsRenderer: React.FC<QuoteDetailsRendererProps> = ({ data }) => {
@@ -130,7 +131,9 @@ export const QuoteDetailsRenderer: React.FC<QuoteDetailsRendererProps> = ({ data
                         showNetGross={false}
                       />
                     </div>
-                    {itemIndex < data.items.length - 1 && <div className="border-t border-border-primary"></div>}
+                    {data.items && itemIndex < data.items.length - 1 && (
+                      <div className="border-t border-border-primary"></div>
+                    )}
                   </div>
                 );
               })}

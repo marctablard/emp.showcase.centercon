@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { formatPrice, handleImageError } from '../utils';
 
 export interface UnifiedProductItem {
@@ -100,11 +101,14 @@ export const ProductItem: React.FC<ProductItemProps> = ({
   return (
     <div className={`flex items-start space-x-4 ${className}`}>
       {item.image && (
-        <img
+        <Image
           src={item.image}
           alt={item.name}
+          width={80}
+          height={80}
           className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
           onError={handleImageError}
+          unoptimized
         />
       )}
       <div className="flex-1 min-w-0">
