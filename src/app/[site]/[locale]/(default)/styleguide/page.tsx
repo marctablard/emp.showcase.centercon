@@ -13,7 +13,7 @@ import NotificationStyleguide from './ui/notification';
 import PaginationStyleGuide from './ui/pagination';
 
 export default function StyleGuide() {
-  if (!process.env.NEXT_PUBLIC_STYLEGUIDE_PAGE) {
+  if (!process.env.NEXT_STYLEGUIDE_PAGE) {
     notFound();
   }
   return (

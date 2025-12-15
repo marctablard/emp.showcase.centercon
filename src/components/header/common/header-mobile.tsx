@@ -16,12 +16,12 @@ export function HeaderMobile() {
   const t = useTranslations('layout.header');
   const { showSearch, activateSearch } = useHeaderSearch();
   const [showMenu, setShowMenu] = useState(false);
-  const isAboveMediumScreen = useBreakpoint('md');
+  const isAboveSmallScreen = useBreakpoint('sm');
 
   const toggleMenu = () => setShowMenu(!showMenu);
   const closeMenu = () => setShowMenu(false);
 
-  if (showMenu && isAboveMediumScreen) {
+  if (showMenu && isAboveSmallScreen) {
     closeMenu();
   }
 
@@ -41,9 +41,10 @@ export function HeaderMobile() {
             <Button
               onClick={toggleMenu}
               className="flex flex-col w-16 h-16 min-w-12 min-h-[46px] px-3 py-1 border-0 justify-center items-center rounded-ss-sm rounded-se-none rounded-es-none rounded-ee-sm bg-gradient-to-t from-gradient-secondary-end to-gradient-secondary-start text-text-on-action normal-case tracking-normal"
+              aria-label={showMenu ? t('close') : t('menu')}
             >
               {showMenu ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
-              <span className="text-sm font-bold -mt-4">{showMenu ? t('close') : t('menu')}</span>
+              <span className="text-sm font-bold -mt-4">{t('menu')}</span>
             </Button>
             <HeaderIconLink icon={LayoutGrid} text={t('products')} href="/#" />
             <HeaderIconLink icon={Pin} text={t('wishlists')} href="/#" />
@@ -55,7 +56,7 @@ export function HeaderMobile() {
       <Sheet open={showMenu} onOpenChange={setShowMenu} modal={true}>
         <SheetContent
           side="bottom"
-          className="h-[calc(100dvh-58px-68px-12px-env(safe-area-inset-top))] bottom-[58px] p-0 rounded-t-2xl [&>button]:hidden"
+          className="h-[calc(100dvh-58px-68px-12px-env(safe-area-inset-top))] bottom-[58px] mx-4 p-0 rounded-t-2xl [&>button]:hidden"
           onInteractOutside={closeMenu}
         >
           <SheetTitle className="sr-only">{t('menu')}</SheetTitle>

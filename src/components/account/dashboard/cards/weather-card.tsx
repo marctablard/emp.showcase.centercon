@@ -114,10 +114,7 @@ export function WeatherCard({ className, title, subtitle, ...props }: WeatherCar
               <WeatherIcon description={weather.current.description} />
             </div>
             <div>
-              <div className="text-3xl font-bold flex items-start">
-                {weather.current.temperature.toFixed(1)}
-                <span className="text-lg mt-1">°</span>
-              </div>
+              <div className="text-3xl font-bold flex items-start">{weather.current.temperature.toFixed(1)}°</div>
               <div className="text-sm">{weather.current.location}</div>
             </div>
           </div>

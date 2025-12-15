@@ -4,33 +4,26 @@ import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Globe } from 'lucide-react';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
-import { Spinner } from '@/components/ui/spinner';
-import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { redirect } from '@/i18n/navigation';
+import { getSite } from '@/lib/client/site';
+import { Spinner } from '../../ui/spinner';
 
 export function SiteSwitcher() {
   const t = useTranslations('common.Regions');
-  const { setSite } = useSession();
   const { site, availableSites, loading: siteLoading } = useSite();
   const locale = useLocale();
-  const pathname = usePathname();
-  const router = useRouter();
-
   const [currentSite] = useState(site);
 
-  const switchSite = (site: string) => {
-    setSite(site).then((success) => {
-      if (success) {
-        const newSite = availableSites?.find((s) => s.code === site);
-        if (newSite?.languages.includes(locale)) {
-          // refresh page, because content might change
-          location.reload();
-        } else {
-          router.push('/' + newSite?.defaultLanguage + pathname, { locale: newSite?.defaultLanguage, scroll: false });
-        }
-      }
-    });
+  const switchSite = async (site: string) => {
+    // redirect to ensure clean session handling on server side
+    const siteObject = await getSite(site);
+    if (!siteObject) {
+      console.error('Site not found:', site);
+      return;
+    }
+    const targetLocale = siteObject.languages?.includes(locale) ? locale : siteObject.languages?.[0] || locale;
+    redirect({ href: '/', locale: targetLocale, site, forcePrefix: true });
   };
 
   if (siteLoading) {

@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
 import { cva } from 'class-variance-authority';
 import { ChevronDownIcon } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 function NavigationMenu({
@@ -97,9 +98,9 @@ function NavigationMenuViewport({
   );
 }
 
-function NavigationMenuLink({ className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Link>) {
+function NavigationMenuLink({ className, ...props }: React.ComponentProps<typeof Link>) {
   return (
-    <NavigationMenuPrimitive.Link
+    <Link
       data-slot="navigation-menu-link"
       className={cn(
         "text-text-headings [&_svg:not([class*='text-'])]:text-text-placeholders flex flex-col gap-1 rounded-sm py-2 text-sm transition-all outline-none [&_svg:not([class*='size-'])]:size-4",

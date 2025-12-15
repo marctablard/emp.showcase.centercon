@@ -85,14 +85,15 @@ export function HeaderActionBar({ scrolled }: HeaderActionsProps) {
           <HeaderIconButton
             className={cn('hidden sm:flex', !scrolled && 'md:hidden')}
             icon={showMenu ? X : Menu}
-            text={showMenu ? t('close') : t('menu')}
+            text={t('menu')}
+            ariaLabel={showMenu ? t('close') : t('menu')}
             onClick={() => setShowMenu(!showMenu)}
           />
         </div>
       </div>
 
       {/* Navigation Menu */}
-      {!showSearch && showMenu && (
+      {!showSearch && showMenu && isAboveSmallScreen && (
         <div className="sm:-mx-3 px-3 py-4">
           <HeaderNavigation />
         </div>

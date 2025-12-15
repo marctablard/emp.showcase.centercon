@@ -11,10 +11,11 @@ import type { SearchService } from '@/platform/services/search/SearchService';
 import type { SessionService } from '@/platform/services/session/SessionService';
 import type { ProductMapper } from '../../model/product/ProductMapper';
 import type { SearchSuggestions } from '../../model/search';
+import type SegmentFilterService from './SegmentFilterService';
 
 /**
- * Implementation of SearchService for BatteryIncluded product data.
- * Maps between BatteryIncluded API product format and internal Product model.
+ * Implementation of SearchService for Emporix product data.
+ * Maps between Emporix API product format and internal Product model.
  */
 @injectable('SearchService', 'Singleton')
 class EmporixSearchService implements SearchService {
@@ -24,6 +25,7 @@ class EmporixSearchService implements SearchService {
   private sessionService: SessionService;
   private categoryApi: EmporixCategoryApi;
   private productService: ProductService;
+  private segmentFilterService: SegmentFilterService;
 
   constructor(
     @inject('SessionService') sessionService: SessionService,
@@ -32,6 +34,7 @@ class EmporixSearchService implements SearchService {
     @inject('EmporixCatalogApi') catalogApi: EmporixCatalogApi,
     @inject('EmporixCategoryApi') categoryApi: EmporixCategoryApi,
     @inject('ProductService') productService: ProductService,
+    @inject('SegmentFilterService') segmentFilterService: SegmentFilterService,
   ) {
     this.productApi = productApi;
     this.productMapper = productMapper;
@@ -39,6 +42,7 @@ class EmporixSearchService implements SearchService {
     this.categoryApi = categoryApi;
     this.productService = productService;
     this.sessionService = sessionService;
+    this.segmentFilterService = segmentFilterService;
   }
 
   async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
@@ -55,7 +59,11 @@ class EmporixSearchService implements SearchService {
       filters: undefined,
     });
 
-    const products = searchResult.items.map((hit) => this.productMapper.mapToService(hit));
+    const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
+      searchResult.items.filter((item) => !!item.id),
+    )) as EmporixProduct[];
+
+    const products = filteredItems.map((item) => this.productMapper.mapToService(item));
     const enrichedProducts = await this.productService.addAdditionalData(products, {
       prices: true,
       variants: true,
@@ -82,7 +90,11 @@ class EmporixSearchService implements SearchService {
       sort: undefined,
       filters: undefined,
     });
-    const products = searchResult.items.map((hit) => this.productMapper.mapToService(hit));
+    const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
+      searchResult.items.filter((item) => !!item.id),
+    )) as EmporixProduct[];
+
+    const products = filteredItems.map((item) => this.productMapper.mapToService(item));
     const enrichedProducts = await this.productService.addAdditionalData(products, {
       prices: true,
       variants: true,

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { Cart } from '@platform/services/model/cart';
 import { InfoIcon, ShoppingCart } from 'lucide-react';
 import { HeaderMiniCartContent } from '@/components/header/cart/header-mini-cart-content';
@@ -12,6 +11,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { useRouter } from '@/i18n/navigation';
 import { formatCurrency } from '@/lib/utils';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 
@@ -82,7 +82,7 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
     <Tooltip onOpenChange={openChange}>
       <TooltipTrigger
         aria-label={t('viewCart')}
-        className="relative pl-[11px] sm:pl-4 pr-1 pb-2 pt-1 sm:py-1 self-center bg-surface-action text-text-on-action border border-transparent hover:bg-surface-action-hover rounded-sm cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base/6 tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-surface-disabled disabled:text-text-on-disabled [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="relative pl-[11px] sm:pl-4 pr-1 pb-2 pt-1 sm:py-1 self-center bg-surface-action text-text-on-action border border-transparent hover:bg-surface-action-hover rounded-button cursor-pointer uppercase inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3 text-base/6 tracking-widest font-bold transition-all disabled:pointer-events-none disabled:bg-surface-disabled disabled:text-text-on-disabled [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         onClick={() => router.push('/cart')}
       >
         {showSum && isAboveSmallScreen && (
