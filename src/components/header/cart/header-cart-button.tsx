@@ -14,7 +14,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 
 interface HeaderCartButtonProps {
@@ -28,6 +28,7 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
   const [scrollHeight, setScrollHeight] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const scrollContainer = useRef<HTMLDivElement>(null);
   const isAboveSmallScreen = useBreakpoint('sm');
   const isAboveMediumScreen = useBreakpoint('md');
@@ -39,6 +40,10 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
   const subscriptionIdRef = useRef<string | null>(null);
   // Register for cart notifications on mount
   useEffect(() => {
+    // @see https://react.dev/reference/react-dom/client/hydrateRoot#handling-different-client-and-server-content
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsClient(true);
+
     // Handler for cart notifications
     const handleCartNotification = (notification: StorefrontNotification | string) => {
       if (typeof notification === 'string') {
@@ -91,19 +96,25 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
       {showSum && isAboveSmallScreen && (
         <span className="text-text-on-action text-lg">{formatCurrency(cartTotal || 0.0, currency)}</span>
       )}
-      <div className="flex items-center w-[43px] h-[35px] relative">
-        <Badge
-          variant="white"
-          rounded="full"
-          className="h-5 min-w-5 px-1 tabular-nums tracking-normal absolute top-0 right-0"
-        >
-          {loading ? (
-            <Spinner color="primary" variant="xs" />
-          ) : (
-            cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0
-          )}
-        </Badge>
-        <ShoppingCart width="32" height="32" />
+      <div className={cn('flex items-center w-[43px] h-[35px] relative', isClient ? '' : 'justify-center')}>
+          {isClient ? (
+            <>
+              <Badge
+                variant="white"
+                rounded="full"
+                className="h-5 min-w-5 px-1 tabular-nums tracking-normal absolute top-0 right-0"
+              >
+                {loading ? (
+                  <Spinner color="primary" variant="xs" />
+                ) : (
+                  cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0
+                )}
+              </Badge>
+              <ShoppingCart width="32" height="32" />
+            </>
+        ) : (
+          <Spinner color="white" variant="sm" />
+        )}
       </div>
 
       {/* Notification icon that appears only when hasNotifications is true */}
