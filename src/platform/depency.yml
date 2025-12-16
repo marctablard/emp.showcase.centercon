@@ -1,0 +1,6 @@
+Services:
+  SearchService: BatteryIncludedSearchService
+  ProductService: EmporixProductService
+
+Integrations:
+  EmporixProductApi: EmporixProductApi

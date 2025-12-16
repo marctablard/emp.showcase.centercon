@@ -20,7 +20,7 @@ import type SegmentFilterService from '../../search/impl/SegmentFilterService';
  * Implementation of ProductService for Emporix product data.
  * Maps between Emporix API product format and internal Product model.
  */
-@injectable('ProductService', 'Singleton')
+@injectable('EmporixProductService', 'Singleton')
 class EmporixProductService implements ProductService {
   constructor(
     @inject('PriceService') private priceService: PriceService,
