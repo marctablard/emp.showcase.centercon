@@ -7,8 +7,6 @@ import { QuotesTable } from '@/components/account/quotes/quotes-table';
 import { H1 } from '@/components/ui/h';
 import { useQuotes } from '@/hooks/quotes/useQuotes';
 
-export const dynamic = 'force-dynamic';
-
 export default function QuotesPage() {
   const t = useTranslations('account.quotesList');
   // Pagination state

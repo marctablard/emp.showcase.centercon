@@ -3,8 +3,6 @@ import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import { ApprovalStatus } from '@/platform/services/model/approval';
 
-export const revalidate = 0;
-
 interface RouteParams {
   params: Promise<{
     id: string;

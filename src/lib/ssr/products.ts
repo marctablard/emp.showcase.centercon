@@ -13,6 +13,7 @@ const _getProduct = cache(async (id: string, options?: ProductFetchOptions): Pro
     const product = await getProductService().getProductById(id, options);
     return product || null;
   } catch (_error) {
+    console.error(_error);
     // fail silently
     return undefined;
   }

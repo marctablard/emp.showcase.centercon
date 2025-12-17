@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart/CartService';
 
-export const revalidate = 0;
-
 /**
  * POST /api/cart/load
  * Load a saved cart

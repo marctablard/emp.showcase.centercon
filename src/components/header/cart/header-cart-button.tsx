@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+'use client';
+
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Cart } from '@platform/services/model/cart';
 import { InfoIcon, ShoppingCart } from 'lucide-react';
@@ -20,7 +22,7 @@ interface HeaderCartButtonProps {
   showSum?: boolean;
 }
 
-export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
+function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButtonProps) {
   const t = useTranslations('layout.header');
   const router = useRouter();
   const { cartTotal, currency } = useCartTotal();
@@ -117,5 +119,24 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
         />
       </MiniCartTooltipContent>
     </Tooltip>
+  );
+}
+
+export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButtonProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="relative pl-[11px] sm:pl-4 pr-1 pb-2 pt-1 sm:py-1 self-center bg-surface-action text-text-on-action border border-transparent rounded-button inline-flex items-center justify-center gap-3 whitespace-nowrap px-4 py-3">
+          <div className="flex items-center w-[43px] h-[35px] relative">
+            <Badge variant="white" rounded="full" className="h-5 min-w-5 px-1 absolute top-0 right-0">
+              <Spinner color="primary" variant="xs" />
+            </Badge>
+            <ShoppingCart width="32" height="32" />
+          </div>
+        </div>
+      }
+    >
+      <HeaderCartButtonContent initialCart={initialCart} showSum={showSum} />
+    </Suspense>
   );
 }

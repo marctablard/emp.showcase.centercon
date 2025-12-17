@@ -5,8 +5,6 @@ import AccountDashboard from '@/components/account/dashboard/account-dashboard';
 import { getCurrentCustomer } from '@/lib/ssr/customer';
 import { getPageTitle } from '@/lib/ssr/seo';
 
-export const dynamic = 'force-dynamic';
-
 export async function generateMetadata({
   params,
 }: {

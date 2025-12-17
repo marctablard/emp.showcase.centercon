@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { PasswordResetDialog } from '@/components/password/password-reset-dialog';
 import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import { LoginDialog } from '../login';
@@ -12,7 +13,7 @@ export default function AuthDialogManager() {
   const { activeDialog, closeDialog, openDialog, dialogOptions } = useAuthDialog();
 
   return (
-    <>
+    <Suspense fallback={null}>
       <LoginDialog
         open={activeDialog === 'login'}
         onCloseAction={closeDialog}
@@ -27,6 +28,6 @@ export default function AuthDialogManager() {
         onBackToLoginAction={(email) => openDialog('login', { email })}
         email={dialogOptions.email}
       />
-    </>
+    </Suspense>
   );
 }

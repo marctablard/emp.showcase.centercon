@@ -13,6 +13,7 @@ import { checkTokenValidity } from '../util/common';
 const STORAGE_PREFIX = 'emporix-token';
 
 export interface TokenStore {
+  publicToken?: StoredToken<EmporixAnonymousTokenResponse>;
   anonymousToken?: StoredToken<EmporixAnonymousTokenResponse>;
   customerToken?: StoredToken<EmporixCustomerTokenResponse>;
   serviceToken?: StoredToken<EmporixAccessTokenResponse>;
@@ -21,6 +22,13 @@ export interface TokenStore {
 export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManager {
   constructor(@inject('EmporixOAuthApi') protected oauthApi: EmporixOAuthApi) {}
   abstract clearTokens(tenant: string): void;
+
+  async getPublicToken(tenant: string, clientId: string): Promise<{ accessToken: string }> {
+    // this token should already be a cached one.
+    const publicToken = await this.oauthApi.getPublicToken(tenant, clientId);
+    return { accessToken: publicToken.access_token };
+  }
+
   async getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string; sessionId: string }> {
     let anonymousToken = await this.readToken<
       StoredToken<EmporixAnonymousTokenResponse>,

@@ -32,8 +32,8 @@ export const useAuthentication = (): AuthenticationHook => {
   });
 
   // State for authentication status and user data
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(session.status === 'authenticated');
-  const [loading, setLoading] = useState<boolean>(session.status === 'loading');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
   const [_isPending, startTransition] = useTransition();
@@ -42,7 +42,7 @@ export const useAuthentication = (): AuthenticationHook => {
   useEffect(() => {
     setIsAuthenticated(session.status === 'authenticated');
     setLoading(session.status === 'loading');
-  }, [session.status]);
+  }, [session]);
 
   const login = async (username: string, password: string, callbackUrl?: string): Promise<boolean> => {
     setLoading(true);

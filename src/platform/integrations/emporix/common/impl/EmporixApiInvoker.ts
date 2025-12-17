@@ -72,12 +72,18 @@ class EmporixApiInvoker {
     // Get the appropriate token based on the token type
     switch (tokenType) {
       case 'public':
-        const anonymousToken = await this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
-        token = anonymousToken.accessToken;
+        const publicToken = await this.tokenManager.getPublicToken(this.config.tenant, this.config.clientId);
+        token = publicToken.accessToken;
         headers = {
           ...headers,
-          ...this.addPublicHeaders(anonymousToken),
+          ...this.addPublicHeaders(publicToken),
         };
+        options['cache'] = 'force-cache';
+        if (!options['next']) {
+          options['next'] = {
+            revalidate: 3600,
+          };
+        }
         break;
       case 'customer-saas':
       case 'session':
@@ -180,10 +186,10 @@ class EmporixApiInvoker {
 
   /**
    * Returns additional headers for the public token case.
-   * @param _anonymousToken The anonymous token object (unused in base implementation, available for subclasses).
+   * @param _publicToken The anonymous token object (unused in base implementation, available for subclasses).
    * @returns An empty object (no additional headers for public tokens).
    */
-  protected addPublicHeaders(_anonymousToken: { accessToken: string; sessionId: string }): Record<string, string> {
+  protected addPublicHeaders(_publicToken: { accessToken: string }): Record<string, string> {
     return {};
   }
 }

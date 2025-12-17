@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 
-export const revalidate = 0;
-
 /**
  * GET /api/approval/requires-approval
  * Check if a cart requires approval

@@ -15,6 +15,33 @@ class EmporixOAuthApi implements IEmporixOAuthApi {
   protected readonly baseUrl: string = 'https://api.emporix.io';
 
   /**
+   * Gets an anonymous token that will be used for public (shared on ssr and server) requests
+   * @param tenant The tenant ID
+   * @param clientId Client ID for anonymous access
+   * @returns Promise with the anonymous token response
+   */
+  async getPublicToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
+    const url = `/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+
+    const response = await this.fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+      next: {
+        revalidate: 3200,
+      },
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(`Failed to get anonymous token: ${response.statusText} - ${message}`);
+    }
+
+    return (await response.json()) as EmporixAnonymousTokenResponse;
+  }
+
+  /**
    * Get an anonymous token
    * @param tenant The tenant ID
    * @param clientId Client ID for anonymous access

@@ -3,8 +3,6 @@ import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import { ApprovalPermittedRequest } from '@/platform/services/model/approval';
 
-export const revalidate = 0;
-
 /**
  * POST /api/approval/permitted
  * Check if an action is permitted for a resource

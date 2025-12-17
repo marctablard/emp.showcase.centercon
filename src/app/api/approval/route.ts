@@ -3,8 +3,6 @@ import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import { ApprovalCreateRequest } from '@/platform/services/model/approval';
 
-export const revalidate = 0;
-
 /**
  * GET /api/approval
  * Get all approvals with optional pagination, sorting, and filtering

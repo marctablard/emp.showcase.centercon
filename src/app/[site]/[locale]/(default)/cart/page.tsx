@@ -4,6 +4,8 @@ import { CartOverview } from '@/components/cart/cart-overview';
 import { getCurrentCart } from '@/lib/ssr/carts';
 import { getPageTitle } from '@/lib/ssr/seo';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'cart' });

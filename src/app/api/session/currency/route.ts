@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { SessionService } from '@/platform/services/session/SessionService';
 
-export const dynamic = 'force-dynamic';
-
 /**
  * PUT /api/session/currency
  * Update session currency

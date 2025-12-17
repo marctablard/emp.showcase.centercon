@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic'; // No caching for this route
-
 export async function GET() {
   try {
     // In a real implementation, this would use a GeoIP service

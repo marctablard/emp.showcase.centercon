@@ -36,11 +36,11 @@ class EmporixProductService implements ProductService {
   async getProductById(id: string, options?: ProductFetchOptions): Promise<Product | undefined> {
     const product = await this.productApi.getProduct(id);
     if (!product || !product.id) return undefined;
-
+    /*
     // Filter by customer segments
     const [filteredProduct] = await this.segmentFilterService.filterByCustomerSegments([product]);
     if (!filteredProduct) return undefined;
-
+*/
     // Map the base product
     const mappedProduct = this.productMapper.mapToService(product);
 
@@ -58,13 +58,14 @@ class EmporixProductService implements ProductService {
       size: 100,
     });
 
+    /*
     // Filter by customer segments before mapping
     const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
       paginated.items.filter((item: EmporixProduct) => !!item.id),
     )) as EmporixProduct[];
-
+*/
     // Map all variant products first
-    const mappedProducts = filteredItems.map((product: EmporixProduct) => this.productMapper.mapToService(product));
+    const mappedProducts = paginated.items.map((product: EmporixProduct) => this.productMapper.mapToService(product));
     if (mappedProducts.length > 0) {
       return await this.addAdditionalData(mappedProducts, options);
     } else {
@@ -75,12 +76,13 @@ class EmporixProductService implements ProductService {
   async getProducts(page?: number, pageSize?: number, options?: ProductFetchOptions): Promise<Paginated<Product>> {
     const paginated = await this.productApi.getProducts(page, pageSize);
 
+    /*
     // Filter by customer segments before mapping
     const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
       paginated.items.filter((item: EmporixProduct) => !!item.id),
     )) as EmporixProduct[];
-
-    const mappedProducts: Product[] = filteredItems.map((product: EmporixProduct) =>
+*/
+    const mappedProducts: Product[] = paginated.items.map((product: EmporixProduct) =>
       this.productMapper.mapToService(product),
     );
 

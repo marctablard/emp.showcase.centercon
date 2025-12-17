@@ -1,3 +1,5 @@
+'use client';
+
 import { useTranslations } from 'next-intl';
 import TopBannerAnnouncement from '@/components/cms/top-banner-announcement';
 import { CurrencySwitcher } from '@/components/header/switcher/header-currency-switcher';

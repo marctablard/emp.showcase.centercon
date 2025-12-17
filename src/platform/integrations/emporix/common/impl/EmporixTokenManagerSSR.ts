@@ -1,60 +1,83 @@
-import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
-import { cookies } from 'next/headers';
+import { cache } from 'react';
 import { inject } from 'inversify';
-import { omit } from 'lodash';
 import { injectable } from '@/platform/core/di/injectable';
 import { StoredToken } from '@/platform/integrations/types/auth';
-import { EmporixCustomerTokenResponse } from '../../model/oauth';
+import { EmporixAnonymousTokenResponse, EmporixCustomerTokenResponse } from '../../model/oauth';
 import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
 import { TokenStore } from './EmporixTokenManagerAbstract';
 import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
 
 @injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
-  protected ssrToken: Record<string, TokenStore> = {};
-
   constructor(@inject('EmporixOAuthApi') oauthApi: EmporixOAuthApi) {
     super(oauthApi);
   }
 
-  public clearTokens(tenant: string): void {
-    this.ssrToken[tenant] = {};
+  public clearTokens(_tenant: string): void {
+    // nothing to do
+  }
+
+  protected fetchCachedAnonymousToken = cache(
+    async (
+      tenant: string,
+      clientId: string,
+      _timestamp?: number,
+    ): Promise<StoredToken<EmporixAnonymousTokenResponse>> => {
+      console.log('fetching anonymous token');
+      const now = Date.now();
+      const response = await this.oauthApi.getAnonymousToken(tenant, clientId);
+      return {
+        token: response,
+        expiryAt: now + response.expires_in * 1000,
+        refreshExpiryAt: response.refresh_token_expires_in ? now + response.refresh_token_expires_in * 1000 : undefined,
+      };
+    },
+  );
+
+  protected refreshCachedAnonymousToken = cache(
+    async (
+      tenant: string,
+      clientId: string,
+      refreshToken: string,
+      _expiryAt?: number,
+    ): Promise<StoredToken<EmporixAnonymousTokenResponse>> => {
+      const response = await this.oauthApi.refreshAnonymousToken(tenant, refreshToken, clientId);
+      const now = Date.now();
+      return {
+        token: response,
+        expiryAt: now + response.expires_in * 1000,
+        refreshExpiryAt: response.refresh_token_expires_in ? now + response.refresh_token_expires_in * 1000 : undefined,
+      };
+    },
+  );
+
+  async getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string; sessionId: string }> {
+    console.log('getting anonymous token');
+    // otherwise check their anonymous token
+    let ssrAnonymousToken = await this.fetchCachedAnonymousToken(tenant, clientId);
+    // otherwise we use our own token
+    if (!this.checkAccessToken(ssrAnonymousToken)) {
+      ssrAnonymousToken = await this.refreshCachedAnonymousToken(
+        tenant,
+        clientId,
+        ssrAnonymousToken.token.refresh_token!,
+        ssrAnonymousToken.expiryAt,
+      );
+    }
+    if (!this.checkAccessToken(ssrAnonymousToken)) {
+      ssrAnonymousToken = await this.fetchCachedAnonymousToken(tenant, clientId, ssrAnonymousToken.expiryAt);
+    }
+    return {
+      accessToken: ssrAnonymousToken.token.access_token,
+      sessionId: ssrAnonymousToken.token.session_id,
+    };
   }
 
   public async getSessionToken(
-    tenant: string,
-    clientId: string,
+    _tenant: string,
+    _clientId: string,
   ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
-    const customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
-      'customer',
-      tenant,
-    );
-    // first check client's customer token
-    if (this.checkAccessToken(customerToken)) {
-      return { accessToken: customerToken!.token.access_token, sessionId: customerToken!.token.session_id };
-    }
-    // otherwise check their anonymous token
-    const anonymousToken = await this.readToken<
-      StoredToken<EmporixCustomerTokenResponse>,
-      EmporixCustomerTokenResponse
-    >('anonymous', tenant);
-    if (this.checkAccessToken(anonymousToken)) {
-      return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
-    }
-    // otherwise we use our own token
-    const ssrAnonymousToken = this.ssrToken[tenant]?.anonymousToken;
-    if (!this.checkAccessToken(ssrAnonymousToken)) {
-      const freshSsrAnonymousToken = await this.fetchAnonymousToken(ssrAnonymousToken, tenant, clientId);
-      // ...and store it globally, so it can be reused
-      if (!this.ssrToken[tenant]) {
-        this.ssrToken[tenant] = {};
-      }
-      this.ssrToken[tenant].anonymousToken = freshSsrAnonymousToken;
-    }
-    return {
-      accessToken: this.ssrToken[tenant].anonymousToken!.token.access_token,
-      sessionId: this.ssrToken[tenant].anonymousToken!.token.session_id,
-    };
+    throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
   }
 
   protected createCustomerToken(
@@ -89,24 +112,11 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     throw new Error("Customer authentication is not allowed, since SSR-Context can't provide Cookies in Response");
   }
 
-  protected async writeTokens(tokens: TokenStore, tenant: string): Promise<void> {
-    // strip customer Token, since that will be from the the SSR Clients cookie
-    tokens = omit(tokens, ['customerToken']);
-    this.ssrToken[tenant] = tokens;
+  protected async writeTokens(_tokens: TokenStore, _tenant: string): Promise<void> {
+    // do nothing
   }
-  protected async readTokens(tenant: string): Promise<TokenStore> {
-    const cookieStore = await cookies();
-    const tokenCookie: RequestCookie | undefined = cookieStore.get(this.buildStorageKey(tenant));
-    if (!tokenCookie) {
-      // Clear the in-memory cache when cookie is missing (e.g., after logout)
-      if (this.ssrToken[tenant]) {
-        this.ssrToken[tenant] = {};
-      }
-      return {};
-    }
-    const b64Token = tokenCookie.value;
-    const tokens: TokenStore = JSON.parse(Buffer.from(b64Token, 'base64').toString('utf-8'));
-    return tokens;
+  protected async readTokens(_tenant: string): Promise<TokenStore> {
+    return {};
   }
 }
 export default EmporixTokenManagerSSR;

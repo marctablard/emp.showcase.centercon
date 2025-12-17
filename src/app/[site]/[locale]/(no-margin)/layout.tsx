@@ -14,6 +14,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const { locale, site } = await params;
   setRequestSite(site);
   setRequestLocale(locale);
+
   return (
     <>
       <Header />
