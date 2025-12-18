@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Gauge, Menu, Pin, Search, User, UserCheck, X } from 'lucide-react';
 import { HeaderCartButton } from '@/components/header/cart/header-cart-button';
@@ -31,6 +31,26 @@ export function HeaderActionBar() {
   const [isClient, setIsClient] = useState(false);
   const { openDialog } = useAuthDialog();
   const [activeDesktopMenu, setActiveDesktopMenu] = useState<MenuItem | null>(null);
+  const menuLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMenuLeave = () => {
+    menuLeaveTimeoutRef.current = setTimeout(() => {
+      setActiveDesktopMenu(null);
+    }, 150);
+  };
+
+  const handleMenuHover = (item: MenuItem | null) => {
+    if (menuLeaveTimeoutRef.current) {
+      clearTimeout(menuLeaveTimeoutRef.current);
+      menuLeaveTimeoutRef.current = null;
+    }
+    // Close flyout immediately when hovering items without submenu
+    if (item && !item.hasSubmenu) {
+      setActiveDesktopMenu(null);
+      return;
+    }
+    setActiveDesktopMenu(item);
+  };
 
   useEffect(() => {
     // @see https://react.dev/reference/react-dom/client/hydrateRoot#handling-different-client-and-server-content
@@ -89,7 +109,7 @@ export function HeaderActionBar() {
           )}
         >
           <div className={cn('hidden md:block', (showSearch || scrolled) && 'md:hidden')}>
-            <MenuLevel1 onMenuHover={setActiveDesktopMenu} activeMenuId={activeDesktopMenu?.id} />
+            <MenuLevel1 onMenuHover={handleMenuHover} activeMenuId={activeDesktopMenu?.id} />
           </div>
           <HeaderCartButton />
           <HeaderIconButton
@@ -106,11 +126,11 @@ export function HeaderActionBar() {
       {!showSearch && showMenu && isAboveSmallScreen && !isAboveMediumScreen && <TabletMenuFlyout />}
       {!showSearch && scrolled && showMenu && isAboveMediumScreen && (
         <div className="flex mt-5">
-          <MenuLevel1 onMenuHover={setActiveDesktopMenu} activeMenuId={activeDesktopMenu?.id} />
+          <MenuLevel1 onMenuHover={handleMenuHover} activeMenuId={activeDesktopMenu?.id} />
         </div>
       )}
       {!showSearch && activeDesktopMenu && isAboveMediumScreen && (!scrolled || showMenu) && (
-        <DesktopMenuFlyout menuItem={activeDesktopMenu} onMouseLeave={() => setActiveDesktopMenu(null)} />
+        <DesktopMenuFlyout menuItem={activeDesktopMenu} onMouseLeave={handleMenuLeave} />
       )}
     </div>
   );

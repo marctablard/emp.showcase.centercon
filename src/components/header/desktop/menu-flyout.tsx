@@ -14,6 +14,13 @@ interface DesktopMenuFlyoutProps {
 
 export function DesktopMenuFlyout({ menuItem, onMouseLeave }: DesktopMenuFlyoutProps) {
   const [hoveredSubItem, setHoveredSubItem] = useState<SubMenuItem | null>(null);
+  const [prevMenuItem, setPrevMenuItem] = useState(menuItem);
+
+  // Reset 3rd level when switching 1st level menu items
+  if (menuItem !== prevMenuItem) {
+    setPrevMenuItem(menuItem);
+    setHoveredSubItem(null);
+  }
 
   const submenuItems = menuItem.submenuItems ?? [];
   const thirdLevelItems = hoveredSubItem?.submenuItems ?? [];
@@ -27,7 +34,7 @@ export function DesktopMenuFlyout({ menuItem, onMouseLeave }: DesktopMenuFlyoutP
   };
 
   return (
-    <div className="backdrop-active grid grid-cols-4 gap-2 mt-6 mb-4" onMouseLeave={onMouseLeave}>
+    <div className="backdrop-active grid grid-cols-4 gap-2 pt-6 -mb-2 pb-6 -mx-6 px-6" onMouseLeave={onMouseLeave}>
       <ul>
         {/* 2nd level */}
         {submenuItems.map((item, index) => (

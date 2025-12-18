@@ -27,7 +27,7 @@ export function MenuLevel1({ className, onMenuHover, activeMenuId }: HeaderNavig
         <li key={item.id}>
           {item.href && !item.hasSubmenu ? (
             <>
-              <Link href={item.href} className="text-lg">
+              <Link href={item.href} className="text-lg" onMouseEnter={() => onMenuHover?.(item)}>
                 {t(item.labelKey as any)}
               </Link>
             </>
