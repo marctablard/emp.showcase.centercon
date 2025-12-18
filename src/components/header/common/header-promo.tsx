@@ -1,8 +1,13 @@
 import { useId } from 'react';
 import { ArrowRight } from 'lucide-react';
 import UiLink from '@/components/ui/link';
+import { cn } from '@/lib/utils';
 
-export function HeaderPromo() {
+interface HeaderPromoProps {
+  className?: string;
+}
+
+export function HeaderPromo({ className }: HeaderPromoProps) {
   const baseId = useId();
   const promos = [
     {
@@ -14,10 +19,13 @@ export function HeaderPromo() {
   ];
 
   return (
-    <div className="flex gap-2 mx-5 my-5">
+    <div className={cn('grid grid-cols-2 gap-2 m-5 sm:m-0', className)}>
       {promos.map((promo, index) => (
-        <div key={index} className="flex w-full flex-col items-center rounded-sm bg-surface-image-background p-2">
-          <div className="w-full aspect-square bg-surface-action-hover-2 mb-2">{/* Image Placeholder */}</div>
+        <div
+          key={index}
+          className="flex w-full flex-col items-center justify-between rounded-sm bg-surface-image-background p-2 sm:p-4"
+        >
+          <div className="w-full aspect-square bg-surface-action-hover-2 mb-2 sm:mb-4">{/* Image Placeholder */}</div>
           <div className="flex w-full flex-wrap gap-2 justify-between">
             <p className="text-text-body font-bold" id={`${baseId}-promo-${index}`}>
               {promo.title}

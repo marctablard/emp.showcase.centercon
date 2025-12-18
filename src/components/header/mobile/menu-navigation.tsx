@@ -139,7 +139,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
                 className="w-full flex items-center justify-between px-5 py-4 text-lg cursor-pointer"
               >
                 {item.label}
-                <ChevronDown className="w-5 h-5" />
+                <ChevronDown className="w-5 h-5 ms-1" />
               </button>
               <hr className="mx-5 border-border-subtle" />
             </>

@@ -7,10 +7,10 @@ import { HeaderCartButton } from '@/components/header/cart/header-cart-button';
 import { HeaderIconButton } from '@/components/header/common/header-icon-button';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import { HeaderLogo } from '@/components/header/common/header-logo';
-import { HeaderNavigationFlyout } from '@/components/header/common/header-navigation-flyout';
 import { HeaderNavigationLevel1 } from '@/components/header/common/header-navigation-level-1';
 import { HeaderSearch } from '@/components/header/common/header-search';
 import { useHeaderSearch } from '@/components/header/search/search-context';
+import { TabletMenuFlyout } from '@/components/header/tablet/menu-flyout';
 import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -22,6 +22,7 @@ export function HeaderActionBar() {
   const { showSearch, activateSearch } = useHeaderSearch();
   const { scrolled } = useHeaderScroll();
   const isAboveSmallScreen = useBreakpoint('sm');
+  const isAboveMediumScreen = useBreakpoint('md');
   const isAboveLargeScreen = useBreakpoint('lg');
   const { isAuthenticated, loading } = useAuthentication();
   const [showMenu, setShowMenu] = useState(false);
@@ -33,6 +34,10 @@ export function HeaderActionBar() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true);
   }, []);
+
+  if (showMenu && isAboveMediumScreen) {
+    setShowMenu(false);
+  }
 
   return (
     <div
@@ -99,11 +104,7 @@ export function HeaderActionBar() {
       </div>
 
       {/* Navigation Menu */}
-      {!showSearch && showMenu && isAboveSmallScreen && (
-        <div className="sm:-mx-3 px-3 py-4">
-          <HeaderNavigationFlyout />
-        </div>
-      )}
+      {!showSearch && showMenu && isAboveSmallScreen && <TabletMenuFlyout />}
     </div>
   );
 }
