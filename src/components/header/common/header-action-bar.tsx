@@ -7,10 +7,12 @@ import { HeaderCartButton } from '@/components/header/cart/header-cart-button';
 import { HeaderIconButton } from '@/components/header/common/header-icon-button';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import { HeaderLogo } from '@/components/header/common/header-logo';
-import { HeaderNavigationLevel1 } from '@/components/header/common/header-navigation-level-1';
 import { HeaderSearch } from '@/components/header/common/header-search';
+import { DesktopMenuFlyout } from '@/components/header/desktop/menu-flyout';
+import { MenuLevel1 } from '@/components/header/desktop/menu-level-1';
 import { useHeaderSearch } from '@/components/header/search/search-context';
 import { TabletMenuFlyout } from '@/components/header/tablet/menu-flyout';
+import { MenuItem } from '@/data/navigation-menu';
 import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -28,16 +30,13 @@ export function HeaderActionBar() {
   const [showMenu, setShowMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const { openDialog } = useAuthDialog();
+  const [activeDesktopMenu, setActiveDesktopMenu] = useState<MenuItem | null>(null);
 
   useEffect(() => {
     // @see https://react.dev/reference/react-dom/client/hydrateRoot#handling-different-client-and-server-content
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true);
   }, []);
-
-  if (showMenu && isAboveMediumScreen) {
-    setShowMenu(false);
-  }
 
   return (
     <div
@@ -90,7 +89,7 @@ export function HeaderActionBar() {
           )}
         >
           <div className={cn('hidden md:block', (showSearch || scrolled) && 'md:hidden')}>
-            <HeaderNavigationLevel1 />
+            <MenuLevel1 onMenuHover={setActiveDesktopMenu} activeMenuId={activeDesktopMenu?.id} />
           </div>
           <HeaderCartButton />
           <HeaderIconButton
@@ -104,7 +103,15 @@ export function HeaderActionBar() {
       </div>
 
       {/* Navigation Menu */}
-      {!showSearch && showMenu && isAboveSmallScreen && <TabletMenuFlyout />}
+      {!showSearch && showMenu && isAboveSmallScreen && !isAboveMediumScreen && <TabletMenuFlyout />}
+      {!showSearch && scrolled && showMenu && isAboveMediumScreen && (
+        <div className="flex mt-5">
+          <MenuLevel1 onMenuHover={setActiveDesktopMenu} activeMenuId={activeDesktopMenu?.id} />
+        </div>
+      )}
+      {!showSearch && activeDesktopMenu && isAboveMediumScreen && (!scrolled || showMenu) && (
+        <DesktopMenuFlyout menuItem={activeDesktopMenu} onMouseLeave={() => setActiveDesktopMenu(null)} />
+      )}
     </div>
   );
 }
