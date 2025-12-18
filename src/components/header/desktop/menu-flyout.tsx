@@ -27,7 +27,7 @@ export function DesktopMenuFlyout({ menuItem, onMouseLeave }: DesktopMenuFlyoutP
   };
 
   return (
-    <div className="grid grid-cols-4 gap-2 mt-6 mb-4" onMouseLeave={onMouseLeave}>
+    <div className="backdrop-active grid grid-cols-4 gap-2 mt-6 mb-4" onMouseLeave={onMouseLeave}>
       <ul>
         {/* 2nd level */}
         {submenuItems.map((item, index) => (

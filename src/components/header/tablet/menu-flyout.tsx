@@ -32,7 +32,7 @@ export function TabletMenuFlyout() {
   };
 
   return (
-    <div className="grid mt-6 mb-4">
+    <div className="backdrop-active grid mt-6 mb-4">
       {/* 1st level view */}
       <div
         className={`col-start-1 row-start-1 grid grid-cols-3 gap-2 transition-opacity duration-300 ${currentView !== 'main' ? 'opacity-0 invisible' : 'opacity-100 visible'}`}

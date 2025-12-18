@@ -147,7 +147,7 @@ export function HeaderSearch({ small, show, isCollapsedHeader, className }: Head
       className={cn(
         'z-50 relative transition-opacity transition-discrete duration-200 w-full hidden opacity-0 md:block md:opacity-100',
         showSearch || show ? 'block opacity-100' : '',
-        hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180',
+        hasInputFocus ? 'backdrop-active' : small ? 'max-w-80' : 'max-w-180',
         className,
       )}
     >
