@@ -40,33 +40,32 @@ export class EmporixAuthService implements AuthService {
 
   async login(credentials: Credentials): Promise<Session> {
     const oldSession = await this.sessionService.getCurrent();
-    if (!oldSession) {
-      throw new Error('Failed to get session context');
-    }
-    const siteCode = oldSession.siteCode || 'main';
-    const oldSessionId = oldSession.id || '';
-    const oldCart = await this.cartService.getCartByCriteria(siteCode, oldSessionId, undefined);
     const password = credentials.password || this.generateSsoPassword(credentials.username);
     const session = await this.emporixCustomerApi.login(credentials.username, password);
     if (!session) {
       throw new Error('Failed to get session context');
     }
     let customerCartId: string | undefined;
-    // only merge carts if the old cart is anonymous
-    if (oldCart && !oldCart.customerId) {
-      // Capture the resulting customer cart id for the return value
-      if (session.customerId) {
-        const customerCart = await this.cartService.getCart();
-        let customerCartId: string;
-        if (!customerCart) {
-          customerCartId = await this.cartService.createCart(siteCode, session.customerId);
-        } else {
-          customerCartId = customerCart.id;
-        }
-        try {
-          await this.cartMigrationService.mergeCarts(oldCart.id, customerCartId);
-        } catch (error) {
-          console.error('Failed to merge carts:', error);
+    if (oldSession) {
+      const siteCode = oldSession.siteCode || 'main';
+      const oldSessionId = oldSession.id || '';
+      const oldCart = await this.cartService.getCartByCriteria(siteCode, oldSessionId, undefined);
+      // only merge carts if the old cart is anonymous
+      if (oldCart && !oldCart.customerId) {
+        // Capture the resulting customer cart id for the return value
+        if (session.customerId) {
+          const customerCart = await this.cartService.getCart();
+          let customerCartId: string;
+          if (!customerCart) {
+            customerCartId = await this.cartService.createCart(siteCode, session.customerId);
+          } else {
+            customerCartId = customerCart.id;
+          }
+          try {
+            await this.cartMigrationService.mergeCarts(oldCart.id, customerCartId);
+          } catch (error) {
+            console.error('Failed to merge carts:', error);
+          }
         }
       }
     }
@@ -135,7 +134,7 @@ export class EmporixAuthService implements AuthService {
     const session = await this.emporixSessionContextApi.getOwnSessionContext();
 
     if (!session) {
-      throw new Error('Failed to get session context');
+      return null;
     }
     return {
       sessionId: session.sessionId,
