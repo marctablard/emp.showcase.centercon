@@ -135,7 +135,7 @@ export class EmporixAuthService implements AuthService {
     const session = await this.emporixSessionContextApi.getOwnSessionContext();
 
     if (!session) {
-      throw new Error('Failed to get session context');
+      return null;
     }
     return {
       sessionId: session.sessionId,
