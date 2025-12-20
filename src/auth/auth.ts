@@ -2,6 +2,8 @@ import NextAuth from 'next-auth';
 import { User } from 'next-auth';
 import 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { headers } from 'next/headers';
+import { getBaseUrlFromHeaders } from '@/lib/server/url-utils';
 import server from '@/platform/server';
 import { CustomerNamingService } from '@/platform/services/customer/CustomerNamingService';
 import { CustomerService } from '@/platform/services/customer/CustomerService';
@@ -100,6 +102,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return session;
       }
       return { ...session, user: token.user };
+    },
+    async redirect({ url, baseUrl }) {
+      const actualBaseUrl = getBaseUrlFromHeaders(await headers(), baseUrl);
+      if (url.startsWith('/')) {
+        return `${actualBaseUrl}${url}`;
+      }
+
+      if (url.startsWith(actualBaseUrl)) {
+        return url;
+      }
+      return actualBaseUrl;
     },
   },
 });
