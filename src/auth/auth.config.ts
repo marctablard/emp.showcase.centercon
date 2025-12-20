@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from 'next-auth';
 import { Provider } from 'next-auth/providers';
+import AzureADB2C from 'next-auth/providers/azure-ad-b2c';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 const providers: Provider[] = [
@@ -42,4 +43,9 @@ export const config = {
   trustHost: true,
   theme: { logo: 'https://authjs.dev/img/logo-sm.png' },
   providers,
+  pages: {
+    signOut: '/',
+    signIn: '/account',
+    error: '/account',
+  },
 } satisfies NextAuthConfig;

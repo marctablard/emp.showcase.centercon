@@ -16,6 +16,7 @@ export function Notification() {
   const { registerNotificationListener, unregisterNotificationListener, markNotificationAsRead } = useNotifications();
   const t = useTranslations('common.Notification');
   const tLogin = useTranslations('auth.login');
+  const tErrors = useTranslations('auth.errors');
   const locale = useLocale();
 
   useEffect(() => {
@@ -72,6 +73,27 @@ export function Notification() {
       return;
     }
 
+    // Check if error parameter is present
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      const errorMessage = tErrors.has(errorParam) ? tErrors(errorParam as any) : tErrors('Default');
+
+      notify({
+        title: errorMessage,
+        duration: 5000,
+        type: ToastType.Error,
+        button: {
+          label: t('close'),
+          onClick: () => {},
+        },
+      });
+
+      // Mark as shown
+      hasShownWelcome.current = true;
+      router.push(pathname);
+      return;
+    }
+
     // Check if login parameter is present
     const loginParam = searchParams.get('login');
     if (!loginParam) {
@@ -100,7 +122,7 @@ export function Notification() {
     // Mark as shown
     hasShownWelcome.current = true;
     router.push(pathname);
-  }, [searchParams, session, t, pathname, router, tLogin]);
+  }, [searchParams, session, t, pathname, router, tLogin, tErrors]);
 
   return <></>;
 }

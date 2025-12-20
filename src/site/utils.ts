@@ -33,7 +33,7 @@ export function resolveApplicableRouting(hostname: string, routing: SiteRoutingC
   const domainRouting = routing.domains.find((domain) =>
     domain.domain instanceof RegExp ? domain.domain.test(hostname) : domain.domain === hostname,
   );
-  return domainRouting || routing;
+  return domainRouting ? { ...domainRouting, cookie: routing.cookie } : routing;
 }
 
 export function unprefixPathname(pathname: string, prefix: string) {

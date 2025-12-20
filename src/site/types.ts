@@ -13,13 +13,13 @@ export type SiteConfig = {
   availableSites: string[];
   prefix: SitePrefixMode;
   header?: string;
-  cookie?: string;
+  cookie?: { name: string; maxAge?: number };
 };
 
-export type SiteDomainConfig = SiteConfig & {
+export type SiteDomainConfig = Omit<SiteConfig, 'cookie'> & {
   domain: string | RegExp;
 };
 
 export type SiteRoutingConfig = SiteConfig & {
-  domains: SiteDomainConfig[];
+  domains?: SiteDomainConfig[];
 };

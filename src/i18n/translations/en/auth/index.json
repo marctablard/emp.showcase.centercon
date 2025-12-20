@@ -78,5 +78,11 @@
         "updatePassword": "Update Password",
         "updatePasswordDescription": "Update your password to secure your account.",
         "passwordUpdatedSuccess": "Your password has been updated successfully. You will be redirected to the login page."
+    },
+    "errors": {
+        "AccessDenied": "Access denied. You don't have permission to access this resource.",
+        "Configuration": "There is a problem with the server configuration.",
+        "Verification": "The verification token has expired or has already been used.",
+        "Default": "An authentication error occurred. Please try again."
     }
 }
