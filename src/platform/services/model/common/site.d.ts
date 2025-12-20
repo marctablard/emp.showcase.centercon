@@ -6,6 +6,7 @@ export interface Site {
   countries: Country[];
   shipToCountries: Country[];
   defaultCurrency: Currency;
+  defaultCountry: Country;
   currencies: Currency[];
   languages: string[];
   regions: Region[];

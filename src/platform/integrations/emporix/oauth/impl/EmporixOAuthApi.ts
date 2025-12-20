@@ -180,6 +180,9 @@ class EmporixOAuthApi implements IEmporixOAuthApi {
         Accept: 'application/json',
       },
       body: formData,
+      next: {
+        revalidate: 3200,
+      },
     });
 
     if (!response.ok) {

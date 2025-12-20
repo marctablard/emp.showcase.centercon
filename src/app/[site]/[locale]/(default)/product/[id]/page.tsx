@@ -11,6 +11,7 @@ import { getSite } from '@/lib/ssr/site';
 interface ProductPageProps {
   id: string;
   locale: string;
+  site: string;
 }
 
 const PRODUCT_FETCH_OPTIONS = {
@@ -25,15 +26,16 @@ export async function generateMetadata(
   _parent: ResolvingMetadata,
 ): Promise<Metadata> {
   // Get the product ID and locale from params
-  const { id, locale } = await params;
+  const { id, locale, site } = await params;
 
   // Fetch product data
-  const product = await getProductById(id, PRODUCT_FETCH_OPTIONS);
+  const product = await getProductById(id, { ...PRODUCT_FETCH_OPTIONS, prices: { siteCode: site } });
 
   // If product not found, return basic metadata
   if (!product) {
     return {};
   }
+
   // Use the extracted SEO utility function to generate metadata
   return generateProductMetadata(locale, product, product.price);
 }

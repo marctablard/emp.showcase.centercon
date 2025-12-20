@@ -128,6 +128,12 @@ class EmporixApiInvoker {
           this.config.serverClientId,
           this.config.serverClientSecret,
         );
+        options['cache'] = 'force-cache';
+        if (!options['next']) {
+          options['next'] = {
+            revalidate: 3600,
+          };
+        }
         break;
       default:
         throw new Error(`Unknown token type: ${tokenType}`);

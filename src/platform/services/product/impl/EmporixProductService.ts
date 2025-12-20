@@ -206,6 +206,7 @@ class EmporixProductService implements ProductService {
       if (product.id) productIds.add(product.id);
     });
 
+    const priceOptions = typeof options?.prices === 'object' ? options.prices : undefined;
     // Fetch all brands, labels, and categories in parallel
     const [brands, labels, productCategoriesArray, priceArray, variantArray] = await Promise.all([
       Promise.all([...brandIds].map((id) => this.brandApi.getBrand(id))),
@@ -215,7 +216,11 @@ class EmporixProductService implements ProductService {
           options?.categories ? this.categoryService.getCategoriesForProduct(id, true) : undefined,
         ),
       ),
-      Promise.all([...productIds].map((id) => (options?.prices ? this.priceService.getProductPrice(id) : undefined))),
+      Promise.all(
+        [...productIds].map((id) =>
+          options?.prices ? this.priceService.getProductPrice(id, undefined, undefined, priceOptions) : undefined,
+        ),
+      ),
       Promise.all([...productIds].map((id) => (options?.variants ? this.getVariantProducts(id) : undefined))),
     ]);
 
