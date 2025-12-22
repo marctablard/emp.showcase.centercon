@@ -8,40 +8,44 @@ import { resolveApplicableRouting, shouldPrefix } from './utils';
 function syncSiteCookie(
   req: NextRequest,
   res: NextResponse,
-  resolvedSite: string,
-  resolvedLocale: string,
   routing: SiteConfig,
+  resolvedSite?: string,
+  resolvedLocale?: string,
 ) {
   if (!routing.cookie) {
     return;
   }
-  const site = req.cookies?.get(routing.cookie.name);
-  if (site?.value !== resolvedSite) {
-    const maxAge = routing.cookie.maxAge ?? 365 * 24 * 60 * 60;
-    res.cookies.set({
-      name: routing.cookie.name,
-      value: resolvedSite,
-      maxAge: maxAge,
-      httpOnly: false,
-      sameSite: 'lax',
-      path: '/',
-    });
-  }
 
-  // Always sync locale cookie
-  const localeCookieName = process.env.NEXT_PUBLIC_LOCALE_COOKIE;
-  if (localeCookieName) {
-    const locale = req.cookies?.get(localeCookieName);
-    if (locale?.value !== resolvedLocale) {
+  if (resolvedSite) {
+    const site = req.cookies?.get(routing.cookie.name);
+    if (site?.value !== resolvedSite) {
       const maxAge = routing.cookie.maxAge ?? 365 * 24 * 60 * 60;
       res.cookies.set({
-        name: localeCookieName,
-        value: resolvedLocale,
+        name: routing.cookie.name,
+        value: resolvedSite,
         maxAge: maxAge,
         httpOnly: false,
         sameSite: 'lax',
         path: '/',
       });
+    }
+  }
+
+  if (resolvedLocale) {
+    const localeCookieName = process.env.NEXT_PUBLIC_LOCALE_COOKIE;
+    if (localeCookieName) {
+      const locale = req.cookies?.get(localeCookieName);
+      if (locale?.value !== resolvedLocale) {
+        const maxAge = routing.cookie.maxAge ?? 365 * 24 * 60 * 60;
+        res.cookies.set({
+          name: localeCookieName,
+          value: resolvedLocale,
+          maxAge: maxAge,
+          httpOnly: false,
+          sameSite: 'lax',
+          path: '/',
+        });
+      }
     }
   }
 }
@@ -83,13 +87,13 @@ const withCookies = function (
   to: NextResponse,
   req: NextRequest,
   routing: SiteConfig,
-  resolvedSite: string,
-  resolvedLocale: string,
+  resolvedSite?: string,
+  resolvedLocale?: string,
 ): NextResponse {
   from.cookies.getAll().forEach((cookie) => {
     to.cookies.set(cookie.name, cookie.value);
   });
-  syncSiteCookie(req, to, resolvedSite, resolvedLocale, routing);
+  syncSiteCookie(req, to, routing, resolvedSite, resolvedLocale);
   return to;
 };
 
@@ -98,6 +102,8 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     // First look for the matching routing by Domain
     const routing = resolveApplicableRouting(req.nextUrl.hostname, routingConfig);
     const { site, appPath } = resolveSite(req.nextUrl.pathname, req.cookies, req.headers, routing);
+    console.log('site', site);
+    console.log('appPath', appPath);
     setCachedRequestSite(site);
 
     const originalPathname = req.nextUrl.pathname;
@@ -116,8 +122,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
       if (shouldPrefix(site, routingConfig)) {
         newLocation.pathname = `/${site}${newLocation.pathname == '/' ? '' : newLocation.pathname}`;
       }
-      intlResponse.headers.set('location', newLocation.toString());
-      return intlResponse;
+      return withCookies(intlResponse, NextResponse.redirect(newLocation), req, routing, site);
     }
     // We can continue, but now we need to set the headers for Locale and Site
     const locale = intlResponse.headers.get(INTL_MIDDLEWARE_HEADER);
