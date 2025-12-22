@@ -102,8 +102,6 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     // First look for the matching routing by Domain
     const routing = resolveApplicableRouting(req.nextUrl.hostname, routingConfig);
     const { site, appPath } = resolveSite(req.nextUrl.pathname, req.cookies, req.headers, routing);
-    console.log('site', site);
-    console.log('appPath', appPath);
     setCachedRequestSite(site);
 
     const originalPathname = req.nextUrl.pathname;
