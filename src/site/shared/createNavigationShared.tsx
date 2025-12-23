@@ -1,8 +1,8 @@
-import { cloneElement, isValidElement } from 'react';
 import { createNavigation } from 'next-intl/navigation';
 import { permanentRedirect as nextPermanentRedirect, redirect as nextRedirect } from 'next/navigation';
 import { SiteRoutingConfig } from '@/site/types';
 import { addPrefixIfNeeded } from '@/site/utils';
+import { SiteLink } from './SiteLink';
 
 // helper taken from next-intl repo
 type ParametersExceptFirst<Fn> = Fn extends (arg0: any, ...rest: infer R) => any ? R : never;
@@ -45,26 +45,8 @@ export function createSiteNavigationShared(siteRouting: SiteRoutingConfig, intlR
     site?: string;
   }
 
-  function Link({ site, ...props }: LinkProps) {
-    const i18nLinkElement = <I18nLink {...props} />;
-
-    // Clone it and modify the href
-    if (isValidElement(i18nLinkElement)) {
-      const linkProps = i18nLinkElement.props as React.ComponentProps<typeof I18nLink>;
-      const originalHref = linkProps.href;
-      const prefixSite = site ?? getSite();
-      const modifiedHref = addPrefixIfNeeded(
-        typeof originalHref === 'string' ? originalHref : originalHref?.pathname || '',
-        prefixSite,
-        siteRouting,
-      );
-      return cloneElement(i18nLinkElement, {
-        ...linkProps,
-        href: modifiedHref,
-      } as React.ComponentProps<typeof I18nLink>);
-    }
-
-    return i18nLinkElement;
+  function Link(props: LinkProps) {
+    return <SiteLink {...props} I18nLink={I18nLink} getSite={getSite} siteRouting={siteRouting} />;
   }
 
   return {
