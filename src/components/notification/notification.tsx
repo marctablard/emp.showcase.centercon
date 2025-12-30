@@ -13,7 +13,7 @@ import type { StorefrontNotification } from '@/platform/services/model/notificat
 import { ToastType, notify } from '../ui/toast-notification';
 
 /**
- * Special Component for the Welcome-Notification after Login
+ * Special Component for the Welcome-Notification after Login and Error Notifications
  */
 function WelcomeNotification() {
   const searchParams = useSearchParams();
@@ -22,11 +22,33 @@ function WelcomeNotification() {
   const { data: session } = useSession();
   const hasShownWelcome = useRef(false);
   const tLogin = useTranslations('auth.login');
+  const tErrors = useTranslations('auth.errors');
   const t = useTranslations('common.Notification');
 
   useEffect(() => {
     // Only show welcome message once per mount
     if (hasShownWelcome.current) {
+      return;
+    }
+
+    // Check if error parameter is present
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      const errorMessage = tErrors.has(errorParam) ? tErrors(errorParam as any) : tErrors('Default');
+
+      notify({
+        title: errorMessage,
+        duration: 5000,
+        type: ToastType.Error,
+        button: {
+          label: t('close'),
+          onClick: () => {},
+        },
+      });
+
+      // Mark as shown
+      hasShownWelcome.current = true;
+      router.push(pathname);
       return;
     }
 
@@ -58,7 +80,7 @@ function WelcomeNotification() {
     // Mark as shown
     hasShownWelcome.current = true;
     router.push(pathname);
-  }, [searchParams, session, t, pathname, router, tLogin]);
+  }, [searchParams, session, t, pathname, router, tLogin, tErrors]);
 
   return null;
 }

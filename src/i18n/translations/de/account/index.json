@@ -58,6 +58,7 @@
       }
     }
   },
+  "mustBeLoggedIn": "Sie müssen angemeldet sein, um Ihr Passwort zu ändern.",
   "Password": {
     "title": "Passwort ändern",
     "description": "Passwortänderung für Ihr Konto",
