@@ -97,7 +97,7 @@ class EmporixCartApi implements IEmporixCartApi {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts?${queryParams.toString()}`,
       { method: 'GET' },
-      'session',
+      'service',
     );
 
     if (!response.ok) {
