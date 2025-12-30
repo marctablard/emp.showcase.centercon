@@ -10,7 +10,7 @@ import { ProductFetchOptions } from '@/platform/services/product/ProductService'
  * Fetch a product by ID
  * Uses React's cache() to deduplicate requests within the same render cycle
  */
-export const fetchProductById = cache(async (id: string, options?: ProductFetchOptions): Promise<Product> => {
+export const fetchProductById = cache(async (id: string, options?: ProductFetchOptions): Promise<Product | null> => {
   try {
     // Build query parameters
     const searchParams = new URLSearchParams();
@@ -31,6 +31,9 @@ export const fetchProductById = cache(async (id: string, options?: ProductFetchO
     });
 
     if (!response.ok) {
+      if (response.status == 404) {
+        return null;
+      }
       throw new Error(`Failed to fetch product: ${response.statusText}`);
     }
 

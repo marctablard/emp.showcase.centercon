@@ -6,7 +6,6 @@ import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
 import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
 import { getAvailability, getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
-import { getSite } from '@/lib/ssr/site';
 
 interface ProductPageProps {
   id: string;
@@ -41,13 +40,12 @@ export async function generateMetadata(
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
-  const { id, locale } = await params;
+  const { id, locale, site } = await params;
 
-  const site = await getSite(locale);
   // Fetch translations, product data and price in parallel
   const [product, availability] = await Promise.all([
-    getProductById(id, PRODUCT_FETCH_OPTIONS),
-    getAvailability(site?.code || '', id),
+    getProductById(id, { ...PRODUCT_FETCH_OPTIONS, prices: { siteCode: site } }),
+    getAvailability(site, id),
   ]);
 
   // If product not found, show 404 page

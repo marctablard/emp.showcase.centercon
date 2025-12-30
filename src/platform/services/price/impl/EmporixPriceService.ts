@@ -42,7 +42,7 @@ class EmporixPriceService implements PriceService {
           throw new Error(`Site ${params.siteCode} not found`);
         }
         params.currency = site.defaultCurrency.id;
-        params.country = site.defaultCountry.code;
+        params.country = site.defaultCountry;
       }
       const matchRequest: EmporixMatchPricesRequest = {
         targetCurrency: params.currency!,

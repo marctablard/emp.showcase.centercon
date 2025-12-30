@@ -10,6 +10,9 @@ switch (process.env.NEXT_SERVER_OUTPUTMODE) {
 }
 
 let nextConfig: NextConfig = {
+  experimental: {
+    nextScriptWorkers: true,
+  },
   images: {
     remotePatterns: [
       {

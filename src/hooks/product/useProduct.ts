@@ -65,9 +65,10 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
 
         // Fetch from API if not in store using our shared API layer
         const data = await fetchProductById(id, optionsRef.current);
-
-        // Add to store
-        addProduct(data);
+        if (data) {
+          // Add to store
+          addProduct(data);
+        }
         setProduct(data);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('An unknown error occurred'));
