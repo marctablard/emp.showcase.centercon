@@ -7,7 +7,6 @@ import { getBaseUrlFromHeaders } from '@/lib/server/url-utils';
 import server from '@/platform/server';
 import { CustomerNamingService } from '@/platform/services/customer/CustomerNamingService';
 import { CustomerService } from '@/platform/services/customer/CustomerService';
-import ssr from '@/platform/ssr';
 import { AuthService } from '../platform/services/auth/AuthService';
 import { config } from './auth.config';
 
@@ -88,7 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (!user) {
         // Must fail silently when no CustomerSession is present, using SSR-Scope
-        const authService = ssr.get<AuthService>('AuthService');
+        const authService = server.get<AuthService>('AuthService');
         const session = await authService.getCurrentSession();
         if (!session || session.customerId != token.user?.id) {
           return null;

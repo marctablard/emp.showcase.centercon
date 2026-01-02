@@ -42,7 +42,8 @@ export const useAuthentication = (): AuthenticationHook => {
   useEffect(() => {
     setIsAuthenticated(session.status === 'authenticated');
     setLoading(session.status === 'loading');
-  }, [session]);
+    // Since the session object itself is stable, we only need to watch the status property
+  }, [session.status]);
 
   const login = async (username: string, password: string, callbackUrl?: string): Promise<boolean> => {
     setLoading(true);
@@ -58,6 +59,7 @@ export const useAuthentication = (): AuthenticationHook => {
         redirect: false,
         redirectTo: callbackUrl + '?login=success',
       });
+
       if (data?.error) {
         setError(new Error(data.error));
         setIsAuthenticated(false);

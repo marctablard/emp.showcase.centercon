@@ -2,8 +2,9 @@
 
 import { Suspense, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Gauge, Menu, Pin, Search, User, UserCheck, X } from 'lucide-react';
+import { Gauge, Menu, Pin, Search, X } from 'lucide-react';
 import { HeaderCartButton } from '@/components/header/cart/header-cart-button';
+import { HeaderAccountButton } from '@/components/header/common/header-account-button';
 import { HeaderIconButton } from '@/components/header/common/header-icon-button';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import { HeaderLogo } from '@/components/header/common/header-logo';
@@ -11,8 +12,6 @@ import { HeaderNavigation } from '@/components/header/common/header-navigation';
 import { HeaderSearch } from '@/components/header/common/header-search';
 import { useHeaderSearch } from '@/components/header/search/search-context';
 import { Spinner } from '@/components/ui/spinner';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
-import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { cn } from '@/lib/utils';
 
@@ -25,9 +24,7 @@ function HeaderActionBarContent({ scrolled }: HeaderActionsProps) {
   const { showSearch, activateSearch } = useHeaderSearch();
   const isAboveSmallScreen = useBreakpoint('sm');
   const isAboveLargeScreen = useBreakpoint('lg');
-  const { isAuthenticated, loading } = useAuthentication();
   const [showMenu, setShowMenu] = useState(false);
-  const { openDialog } = useAuthDialog();
 
   return (
     <div
@@ -55,11 +52,7 @@ function HeaderActionBarContent({ scrolled }: HeaderActionsProps) {
               />
             )}
 
-            {!loading && isAuthenticated ? (
-              <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
-            ) : (
-              <HeaderIconButton icon={User} text={t('signIn')} onClick={() => openDialog('login')} />
-            )}
+            <HeaderAccountButton />
 
             <div className="hidden sm:flex gap-5">
               <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />

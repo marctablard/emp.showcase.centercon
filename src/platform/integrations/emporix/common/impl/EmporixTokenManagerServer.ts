@@ -28,11 +28,13 @@ class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
     }
     const b64Token = tokenCookie.value;
     const tokens: TokenStore = JSON.parse(Buffer.from(b64Token, 'base64').toString('utf-8'));
+    // we grab the service token from memory if possible because we don't want to store it in cookies for security reasons
     tokens.serviceToken = this.serviceToken;
     return tokens;
   }
 
   protected async writeTokens(tokens: TokenStore, tenant: string): Promise<void> {
+    // omit service token from cookies so it doesn't get leaked to client-side code
     const clientTokens = omit(tokens, ['serviceToken']);
     const b64Token = Buffer.from(JSON.stringify(clientTokens)).toString('base64');
     const cookieStore = await cookies();

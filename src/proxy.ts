@@ -50,8 +50,27 @@ const authMiddleware = auth(async (req: NextAuthRequest) => {
     // 3) Apply CSRF validation for remaining API requests
     const csrfResult = validateCsrf(req);
     if (csrfResult) return csrfResult;
+
+    // 4) Set cache headers for product API requests when not authenticated
+    if (!req.auth?.user && pathname.startsWith('/api/products/')) {
+      const response = NextResponse.next();
+      //response.headers.set('Cache-Control', 'public, max-age=3600');
+      return response;
+    }
   }
+  // 5) Protect /account/* routes (but not /account itself)
+  if (!req.auth?.user && pathname.match(/\/account\/[^/]+/)) {
+    const url = req.nextUrl.clone();
+    url.pathname = url.pathname.replace(/\/account\/.*$/, '/account');
+    return NextResponse.redirect(url);
+  }
+
   const response = siteMiddleware(req);
+
+  if (!req.auth?.user && pathname.match(/\/product\/[^/]+$/)) {
+    response.headers.set('Cache-Control', 'public, max-age=3600');
+  }
+
   return response;
 });
 

@@ -1,7 +1,9 @@
 'use client';
 
-import { type ReactNode, createContext, useContext, useState } from 'react';
+import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { useStore } from 'zustand/react';
+import { updateSessionLanguage } from '@/lib/client/session';
 import { Site } from '@/platform/services/model/common/site';
 import { Session } from '@/platform/services/model/session';
 import { createAvailabilityStore } from '@/stores/availability-store';
@@ -50,6 +52,7 @@ export interface StoreProviderProps {
 }
 
 export const StoreProvider = ({ children, shopSession, site, availableSites }: StoreProviderProps) => {
+  const locale = useLocale();
   const [productStore] = useState<ProductStoreApi>(() => createProductStore());
   const [cartStore] = useState<CartStoreApi>(() => createCartStore());
   const [checkoutStore] = useState<CheckoutStoreApi>(() => createCheckoutStore());
@@ -76,6 +79,14 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
    * 7. Checkout Data depends on Cart Data.
    * 8. History Data may depend on various aspects of customer's Browsing Behaviour
    */
+  useEffect(() => {
+    if (shopSession && shopSession.language != locale) {
+      // ensure that languages are aligned
+      updateSessionLanguage(locale).then(() => {
+        shopSession.language = locale;
+      });
+    }
+  });
   return (
     <SiteStoreContext.Provider value={siteStore}>
       <ShippingMethodsStoreContext.Provider value={shippingMethodsStore}>

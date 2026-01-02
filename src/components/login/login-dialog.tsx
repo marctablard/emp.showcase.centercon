@@ -87,17 +87,14 @@ export default function LoginDialog({
 
     try {
       const success = await login(values.username, values.password, callbackUrl);
-
+      console.log('Login success:', success);
       if (!success) {
         setError(t('invalidCredentials'));
         form.resetField('password', { defaultValue: '' });
-      } else {
-        onCloseAction?.();
-
-        form.resetField('username', { defaultValue: '' });
-        form.resetField('password', { defaultValue: '' });
+        setSubmitting(false);
       }
-    } finally {
+      // on success we leave the dialog open and wait for the redirect to happen
+    } catch {
       setSubmitting(false);
     }
   }
@@ -118,7 +115,16 @@ export default function LoginDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-      <DialogContent className="sm:max-w-[639px]">
+      <DialogContent
+        className="sm:max-w-[639px]"
+        onInteractOutside={(e) => {
+          if (loading || submitting) {
+            // prevent click outside when loading or submitting
+            // to avoid messing with redirection after successful login
+            e.preventDefault();
+          }
+        }}
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full">
             {/* Loading Overlay */}

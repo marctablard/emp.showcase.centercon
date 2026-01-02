@@ -114,7 +114,7 @@ class EmporixSessionService implements SessionService {
    */
   async getCurrent(): Promise<Session | undefined> {
     const sessionContext = await this.sessionContextApi.getOwnSessionContext();
-    if (sessionContext?.siteCode) {
+    if (sessionContext && sessionContext.siteCode) {
       if (!this.availableSites.includes(sessionContext.siteCode)) {
         await this.setSite(this.defaultSite);
         sessionContext.siteCode = this.defaultSite;
@@ -122,7 +122,6 @@ class EmporixSessionService implements SessionService {
     }
     const result = sessionContext ? this.mapper.mapToService(sessionContext) : undefined;
     if (!result) {
-      // TODO, can this even be?
       return undefined;
     }
     const updateDefaults: Partial<EmporixSessionContext> = {};
