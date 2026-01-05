@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/product/product-detail';
 import { JsonLd } from '@/components/seo/json-ld';
 import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
+import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
 import { getAvailability, getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
+import { ProductFetchOptions } from '@/platform/services/product';
 
 interface ProductPageProps {
   id: string;
@@ -13,7 +15,7 @@ interface ProductPageProps {
   site: string;
 }
 
-const PRODUCT_FETCH_OPTIONS = {
+const PRODUCT_FETCH_OPTIONS: ProductFetchOptions = {
   prices: true,
   variants: true,
   categories: true,
@@ -41,10 +43,17 @@ export async function generateMetadata(
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
   const { id, locale, site } = await params;
+  const { isAuthenticated } = useAuthentication();
 
   // Fetch translations, product data and price in parallel
   const [product, availability] = await Promise.all([
-    getProductById(id, { ...PRODUCT_FETCH_OPTIONS, prices: { siteCode: site } }),
+    getProductById(id, {
+      ...PRODUCT_FETCH_OPTIONS,
+      prices: {
+        siteCode: site,
+      },
+      customerSegments: isAuthenticated,
+    }),
     getAvailability(site, id),
   ]);
 

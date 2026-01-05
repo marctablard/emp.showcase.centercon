@@ -11,6 +11,8 @@ export interface ProductFetchOptions {
   prices?: boolean | PriceFetchOptions;
   /** Include product categories */
   categories?: boolean;
+  /** Include customer segments filtering */
+  customerSegments?: boolean;
 }
 
 /**
