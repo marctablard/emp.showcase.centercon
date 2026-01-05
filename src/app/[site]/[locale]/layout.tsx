@@ -43,8 +43,6 @@ export const viewport = {
   themeColor: '#192A42',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export function generateStaticParams() {
