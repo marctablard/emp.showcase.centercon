@@ -13,10 +13,10 @@ import { MenuLevel1 } from '@/components/header/desktop/menu-level-1';
 import { useHeaderSearch } from '@/components/header/search/search-context';
 import { TabletMenuFlyout } from '@/components/header/tablet/menu-flyout';
 import { MenuItem } from '@/data/navigation-menu';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useHeaderScroll } from '@/hooks/useHeaderScroll';
+import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 export function HeaderActionBar() {
@@ -29,7 +29,7 @@ export function HeaderActionBar() {
   const { isAuthenticated, loading } = useAuthentication();
   const [showMenu, setShowMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { openDialog } = useAuthDialog();
+  const router = useRouter();
   const [activeDesktopMenu, setActiveDesktopMenu] = useState<MenuItem | null>(null);
   const menuLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -91,7 +91,7 @@ export function HeaderActionBar() {
                 {isAuthenticated ? (
                   <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
                 ) : (
-                  <HeaderIconButton icon={User} text={t('signIn')} onClick={() => openDialog('login')} />
+                  <HeaderIconButton icon={User} text={t('signIn')} onClick={() => router.push('/login')} />
                 )}
               </>
             )}

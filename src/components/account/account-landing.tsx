@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { H5, Heading } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
+import { useRouter } from '@/i18n/navigation';
 
 const benefits = [
   {
@@ -38,7 +38,7 @@ const benefits = [
 
 export function AccountLanding() {
   const t = useTranslations('account.landing');
-  const { openDialog } = useAuthDialog();
+  const router = useRouter();
 
   return (
     <div className="py-8 md:py-12">
@@ -55,7 +55,7 @@ export function AccountLanding() {
           {t('cta.registerSubtext')}
         </Heading>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button onClick={() => openDialog('login')} className="w-full sm:w-auto">
+          <Button onClick={() => router.push('/login')} className="w-full sm:w-auto">
             <CheckCircle2 className="mr-2 h-5 w-5" />
             {t('cta.login')}
           </Button>

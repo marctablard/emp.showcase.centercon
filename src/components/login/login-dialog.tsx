@@ -22,10 +22,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Heading } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useValidator } from '@/hooks/validation/useValidator';
-import { useRouter } from '@/i18n/navigation';
 
 type LoginData = {
   username: string;
@@ -57,8 +55,6 @@ export default function LoginDialog({
   const { login, loading } = useAuthentication();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const { activeDialog } = useAuthDialog();
   const [submitting, setSubmitting] = useState(false);
 
   const { form } = useValidator(
@@ -78,7 +74,7 @@ export default function LoginDialog({
       setError(null);
       setShowPassword(false);
     }
-  }, [activeDialog, email, form]);
+  }, [open, email, form]);
 
   async function onSubmit(values: LoginData) {
     setError(null);
@@ -103,14 +99,6 @@ export default function LoginDialog({
   }
 
   const handleOpenChange = (open: boolean) => {
-    // If the dialog is being closed and we're on the login page, redirect to home, because the login page is empty an only for SSR
-    if (!open && window.location.pathname.endsWith('/login')) {
-      router.push('/');
-      onCloseAction?.();
-      return;
-    }
-
-    // Normal behavior for all other pages
     if (!open) onCloseAction?.();
   };
 

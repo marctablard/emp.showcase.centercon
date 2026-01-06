@@ -20,7 +20,6 @@ import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { ToastType, notify } from '@/components/ui/toast-notification';
 import { useValidator } from '@/hooks/validation/useValidator';
-import { useRouter } from '@/i18n/navigation';
 
 type PasswordResetProps = {
   trigger?: ReactNode;
@@ -38,7 +37,6 @@ export function PasswordResetDialog({
   onBackToLoginAction,
 }: PasswordResetProps) {
   const t = useTranslations('auth.Password');
-  const router = useRouter();
 
   const { form } = useValidator(
     'PasswordResetValidationService',
@@ -81,14 +79,6 @@ export function PasswordResetDialog({
   }
 
   const handleOpenChange = (open: boolean) => {
-    // If the dialog is being closed and we're on the login page, redirect to home, because the login page is empty an only for SSR
-    if (!open && window.location.pathname.endsWith('/login')) {
-      router.push('/');
-      onCloseAction?.();
-      return;
-    }
-
-    // Normal behavior for all other pages
     if (!open) onCloseAction?.();
   };
 
