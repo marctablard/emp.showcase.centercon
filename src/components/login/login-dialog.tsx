@@ -188,6 +188,7 @@ export default function LoginDialog({
                 className="self-end"
                 type="Link"
                 href={`/password-reset?email=${encodeURIComponent(form.watch('username') || '')}`}
+                replace
               >
                 {t('forgotPassword')}
               </UiLink>

@@ -122,7 +122,7 @@ export function PasswordResetDialog({ trigger, email, open = false, onCloseActio
                   t('sendResetLink')
                 )}
               </Button>
-              <UiLink type="Link" href={`/login?email=${encodeURIComponent(form.watch('email') || '')}`}>
+              <UiLink type="Link" href={`/login?email=${encodeURIComponent(form.watch('email') || '')}`} replace>
                 {t('backToLogin')}
               </UiLink>
             </DialogFooter>
