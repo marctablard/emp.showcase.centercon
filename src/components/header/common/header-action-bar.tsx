@@ -16,6 +16,7 @@ import { MenuItem } from '@/data/navigation-menu';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useHeaderScroll } from '@/hooks/useHeaderScroll';
+import { usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 export function HeaderActionBar() {
@@ -26,6 +27,8 @@ export function HeaderActionBar() {
   const isAboveMediumScreen = useBreakpoint('md');
   const isAboveLargeScreen = useBreakpoint('lg');
   const { isAuthenticated, loading } = useAuthentication();
+  const pathname = usePathname();
+  const isOnAuthPage = pathname === '/login' || pathname === '/password-reset';
   const [showMenu, setShowMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [activeDesktopMenu, setActiveDesktopMenu] = useState<MenuItem | null>(null);
@@ -88,6 +91,8 @@ export function HeaderActionBar() {
               <>
                 {isAuthenticated ? (
                   <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
+                ) : isOnAuthPage ? (
+                  <HeaderIconButton icon={User} text={t('signIn')} disabled />
                 ) : (
                   <HeaderIconLink icon={User} text={t('signIn')} href="/login" />
                 )}

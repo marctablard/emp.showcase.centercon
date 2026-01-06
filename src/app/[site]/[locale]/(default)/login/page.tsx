@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LoginDialog } from '@/components/login';
+import { LoginForm } from '@/components/login/login-form';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,13 +12,14 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[50vh]">
-      <LoginDialog
-        open={true}
-        onCloseAction={() => router.push('/')}
-        callbackUrl={callbackUrl}
-        email={email}
-        guestCheckout={guestCheckout}
-      />
+      <div className="w-full max-w-[639px] p-6">
+        <LoginForm
+          callbackUrl={callbackUrl}
+          email={email}
+          onSuccess={() => router.push('/')}
+          guestCheckout={guestCheckout}
+        />
+      </div>
     </div>
   );
 }

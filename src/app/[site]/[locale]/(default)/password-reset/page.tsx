@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PasswordResetDialog } from '@/components/password/password-reset-dialog';
+import { PasswordResetForm } from '@/components/password/password-reset-form';
 
 export default function PasswordResetPage() {
   const router = useRouter();
@@ -11,7 +11,9 @@ export default function PasswordResetPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[50vh]">
-      <PasswordResetDialog open={true} onCloseAction={() => router.push('/')} email={email} callbackUrl={callbackUrl} />
+      <div className="w-full max-w-150 p-6">
+        <PasswordResetForm email={email} callbackUrl={callbackUrl} onSuccess={() => router.push('/')} />
+      </div>
     </div>
   );
 }

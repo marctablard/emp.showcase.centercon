@@ -1,27 +1,11 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { ReactNode } from 'react';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { H1 } from '@/components/ui/h';
-import { Input } from '@/components/ui/input';
-import UiLink from '@/components/ui/link';
-import { ToastType, notify } from '@/components/ui/toast-notification';
-import { useValidator } from '@/hooks/validation/useValidator';
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { PasswordResetForm } from './password-reset-form';
 
-type PasswordResetProps = {
+type PasswordResetDialogProps = {
   trigger?: ReactNode;
   email?: string;
   open?: boolean;
@@ -29,49 +13,13 @@ type PasswordResetProps = {
   callbackUrl?: string;
 };
 
-export function PasswordResetDialog({ trigger, email, open = false, onCloseAction, callbackUrl }: PasswordResetProps) {
-  const t = useTranslations('auth.Password');
-
-  const { form } = useValidator(
-    'PasswordResetValidationService',
-    {
-      email: email || '',
-    },
-    'onChange',
-  );
-  const isSubmitting = form.formState.isSubmitting;
-  const isValid = form.formState.isValid;
-
-  // Reset form when dialog changes or closes
-  useEffect(() => {
-    // Reset form fields and errors when dialog changes
-    if (form) {
-      form.reset({ email: email || '' });
-    }
-  }, [form, email]);
-
-  async function onSubmit(values: { email: string }) {
-    await fetch('/api/password-reset', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: values.email }),
-    });
-
-    notify({
-      title: t('resetEmailSent'),
-      duration: 5000,
-      type: ToastType.Success,
-      button: {
-        label: t('close'),
-        onClick: () => {},
-      },
-    });
-
-    onCloseAction?.();
-  }
-
+export function PasswordResetDialog({
+  trigger,
+  email,
+  open = false,
+  onCloseAction,
+  callbackUrl,
+}: PasswordResetDialogProps) {
   const handleOpenChange = (open: boolean) => {
     if (!open) onCloseAction?.();
   };
@@ -81,58 +29,11 @@ export function PasswordResetDialog({ trigger, email, open = false, onCloseActio
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogContent className="sm:max-w-150">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full">
-            <DialogHeader>
-              <VisuallyHidden>
-                <DialogHeader>
-                  <DialogTitle />
-                  <DialogDescription />
-                </DialogHeader>
-              </VisuallyHidden>
-              <div className="space-y-1">
-                <H1 variant="h4">{t('resetPassword')}</H1>
-                <p>{t('resetPasswordDescription')}</p>
-              </div>
-            </DialogHeader>
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel>{t('email')}</FormLabel>
-                  <FormControl>
-                    <Input placeholder="email@example.com" type="email" {...field} />
-                  </FormControl>
-                  <div className="absolute top-full left-0 mt-0.5">
-                    <FormMessage />
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter className="flex flex-col sm:flex sm:flex-col gap-6 w-full items-center">
-              <Button type="submit" className="w-full" disabled={isSubmitting || !isValid}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : (
-                  t('sendResetLink')
-                )}
-              </Button>
-              <UiLink
-                type="Link"
-                href={`/login?email=${encodeURIComponent(form.watch('email') || '')}${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
-                replace
-              >
-                {t('backToLogin')}
-              </UiLink>
-            </DialogFooter>
-          </form>
-        </Form>
+        <VisuallyHidden>
+          <DialogTitle />
+          <DialogDescription />
+        </VisuallyHidden>
+        <PasswordResetForm email={email} callbackUrl={callbackUrl} onSuccess={onCloseAction} />
       </DialogContent>
     </Dialog>
   );
