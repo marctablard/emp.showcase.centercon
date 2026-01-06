@@ -7,10 +7,11 @@ export default function PasswordResetPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') ?? undefined;
+  const callbackUrl = searchParams.get('callbackUrl') ?? undefined;
 
   return (
     <div className="flex items-center justify-center min-h-[50vh]">
-      <PasswordResetDialog open={true} onCloseAction={() => router.push('/')} email={email} />
+      <PasswordResetDialog open={true} onCloseAction={() => router.push('/')} email={email} callbackUrl={callbackUrl} />
     </div>
   );
 }

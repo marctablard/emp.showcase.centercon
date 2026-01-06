@@ -26,9 +26,10 @@ type PasswordResetProps = {
   email?: string;
   open?: boolean;
   onCloseAction?: () => void;
+  callbackUrl?: string;
 };
 
-export function PasswordResetDialog({ trigger, email, open = false, onCloseAction }: PasswordResetProps) {
+export function PasswordResetDialog({ trigger, email, open = false, onCloseAction, callbackUrl }: PasswordResetProps) {
   const t = useTranslations('auth.Password');
 
   const { form } = useValidator(
@@ -122,7 +123,11 @@ export function PasswordResetDialog({ trigger, email, open = false, onCloseActio
                   t('sendResetLink')
                 )}
               </Button>
-              <UiLink type="Link" href={`/login?email=${encodeURIComponent(form.watch('email') || '')}`} replace>
+              <UiLink
+                type="Link"
+                href={`/login?email=${encodeURIComponent(form.watch('email') || '')}${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
+                replace
+              >
                 {t('backToLogin')}
               </UiLink>
             </DialogFooter>

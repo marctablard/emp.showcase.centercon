@@ -7,6 +7,9 @@ export default function PasswordResetInterceptPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') ?? undefined;
+  const callbackUrl = searchParams.get('callbackUrl') ?? undefined;
 
-  return <PasswordResetDialog open={true} onCloseAction={() => router.back()} email={email} />;
+  return (
+    <PasswordResetDialog open={true} onCloseAction={() => router.back()} email={email} callbackUrl={callbackUrl} />
+  );
 }

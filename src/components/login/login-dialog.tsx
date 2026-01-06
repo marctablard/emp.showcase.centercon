@@ -85,12 +85,11 @@ export default function LoginDialog({
       if (!success) {
         setError(t('invalidCredentials'));
         form.resetField('password', { defaultValue: '' });
-      } else {
+      } else if (!callbackUrl) {
+        // No callbackUrl - just close the modal
         onCloseAction?.();
-
-        form.resetField('username', { defaultValue: '' });
-        form.resetField('password', { defaultValue: '' });
       }
+      // On success with callbackUrl, the login() function handles the redirect via window.location.href
     } finally {
       setSubmitting(false);
     }
@@ -187,7 +186,7 @@ export default function LoginDialog({
               <UiLink
                 className="self-end"
                 type="Link"
-                href={`/password-reset?email=${encodeURIComponent(form.watch('username') || '')}`}
+                href={`/password-reset?email=${encodeURIComponent(form.watch('username') || '')}${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
                 replace
               >
                 {t('forgotPassword')}

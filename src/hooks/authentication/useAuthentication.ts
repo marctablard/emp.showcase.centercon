@@ -49,14 +49,11 @@ export const useAuthentication = (): AuthenticationHook => {
     setError(null);
     let success = false;
     try {
-      if (!callbackUrl) {
-        callbackUrl = '/account';
-      }
       const data = await signIn('credentials', {
         username,
         password,
         redirect: false,
-        redirectTo: callbackUrl + '?login=success',
+        redirectTo: callbackUrl ? callbackUrl + '?login=success' : undefined,
       });
       if (data?.error) {
         setError(new Error(data.error));
@@ -64,7 +61,9 @@ export const useAuthentication = (): AuthenticationHook => {
       } else {
         setIsAuthenticated(true);
         reset();
-        window.location.href = getPathname({ href: callbackUrl + '?login=success', locale, site: site?.code });
+        if (callbackUrl) {
+          window.location.href = getPathname({ href: callbackUrl + '?login=success', locale, site: site?.code });
+        }
         success = true;
       }
     } catch (error) {

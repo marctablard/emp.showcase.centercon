@@ -131,7 +131,7 @@ export default function Registration() {
         <H1 variant="h4">{t('title')}</H1>
         <p>
           {t('alreadyHaveAccount')}{' '}
-          <UiLink type="Link" href="/login">
+          <UiLink type="Link" href="/login?callbackUrl=/account">
             {t('logIn')}
           </UiLink>
         </p>
@@ -177,7 +177,7 @@ export default function Registration() {
         </Button>
         <p>
           {t('alreadyHaveAccount')}{' '}
-          <UiLink type="Link" href="/login">
+          <UiLink type="Link" href="/login?callbackUrl=/account">
             {t('logIn')}
           </UiLink>
         </p>
