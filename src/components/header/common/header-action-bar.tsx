@@ -16,7 +16,6 @@ import { MenuItem } from '@/data/navigation-menu';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useHeaderScroll } from '@/hooks/useHeaderScroll';
-import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 export function HeaderActionBar() {
@@ -29,7 +28,6 @@ export function HeaderActionBar() {
   const { isAuthenticated, loading } = useAuthentication();
   const [showMenu, setShowMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const router = useRouter();
   const [activeDesktopMenu, setActiveDesktopMenu] = useState<MenuItem | null>(null);
   const menuLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -91,7 +89,7 @@ export function HeaderActionBar() {
                 {isAuthenticated ? (
                   <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
                 ) : (
-                  <HeaderIconButton icon={User} text={t('signIn')} onClick={() => router.push('/login')} />
+                  <HeaderIconLink icon={User} text={t('signIn')} href="/login" />
                 )}
               </>
             )}

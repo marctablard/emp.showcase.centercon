@@ -26,16 +26,9 @@ type PasswordResetProps = {
   email?: string;
   open?: boolean;
   onCloseAction?: () => void;
-  onBackToLoginAction?: (email: string) => void;
 };
 
-export function PasswordResetDialog({
-  trigger,
-  email,
-  open = false,
-  onCloseAction,
-  onBackToLoginAction,
-}: PasswordResetProps) {
+export function PasswordResetDialog({ trigger, email, open = false, onCloseAction }: PasswordResetProps) {
   const t = useTranslations('auth.Password');
 
   const { form } = useValidator(
@@ -75,7 +68,7 @@ export function PasswordResetDialog({
       },
     });
 
-    onBackToLoginAction?.(form.getValues('email'));
+    onCloseAction?.();
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -129,7 +122,7 @@ export function PasswordResetDialog({
                   t('sendResetLink')
                 )}
               </Button>
-              <UiLink type="Button" onClick={() => onBackToLoginAction?.(form.getValues('email'))}>
+              <UiLink type="Link" href={`/login?email=${encodeURIComponent(form.watch('email') || '')}`}>
                 {t('backToLogin')}
               </UiLink>
             </DialogFooter>

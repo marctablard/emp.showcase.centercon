@@ -3,7 +3,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Eye, EyeOff, Loader2, LockKeyhole, User } from 'lucide-react';
 import { providerOptions } from '@/auth/auth.config';
@@ -24,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { Link } from '@/i18n/navigation';
 
 type LoginData = {
   username: string;
@@ -38,7 +38,6 @@ type LoginProps = {
   email?: string;
   open?: boolean;
   onCloseAction?: () => void;
-  onResetPasswordAction?: (email: string) => void;
   guestCheckout?: boolean;
 };
 
@@ -48,7 +47,6 @@ export default function LoginDialog({
   email,
   open = false,
   onCloseAction,
-  onResetPasswordAction,
   guestCheckout = false,
 }: LoginProps) {
   const t = useTranslations('auth.login');
@@ -188,8 +186,8 @@ export default function LoginDialog({
               />
               <UiLink
                 className="self-end"
-                type="Button"
-                onClick={() => onResetPasswordAction?.(form.getValues('username'))}
+                type="Link"
+                href={`/password-reset?email=${encodeURIComponent(form.watch('username') || '')}`}
               >
                 {t('forgotPassword')}
               </UiLink>

@@ -15,7 +15,6 @@ export default function LoginPage() {
       <LoginDialog
         open={true}
         onCloseAction={() => router.push('/')}
-        onResetPasswordAction={(email) => router.push(`/password-reset?email=${encodeURIComponent(email)}`)}
         callbackUrl={callbackUrl}
         email={email}
         guestCheckout={guestCheckout}

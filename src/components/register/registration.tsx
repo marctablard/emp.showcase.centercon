@@ -10,7 +10,6 @@ import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useRegistration } from '@/hooks/registration/useRegistration';
 import useCurrency from '@/hooks/useCurrency';
 import { useValidator } from '@/hooks/validation/useValidator';
-import { useRouter } from '@/i18n/navigation';
 import { RegistrationData } from '@/platform/services/validation/impl/EmporixRegistrationValidationService';
 import { Spinner } from '../ui/spinner';
 import { AccountSettingsSection } from './account-settings-section';
@@ -27,7 +26,6 @@ export default function Registration() {
   const top = useRef<HTMLDivElement>(null);
   const locale = useLocale();
   const { currency } = useCurrency();
-  const router = useRouter();
 
   useEffect(() => {
     if (formError && top.current) {
@@ -133,7 +131,7 @@ export default function Registration() {
         <H1 variant="h4">{t('title')}</H1>
         <p>
           {t('alreadyHaveAccount')}{' '}
-          <UiLink type="Button" onClick={() => router.push('/login')}>
+          <UiLink type="Link" href="/login">
             {t('logIn')}
           </UiLink>
         </p>
@@ -179,7 +177,7 @@ export default function Registration() {
         </Button>
         <p>
           {t('alreadyHaveAccount')}{' '}
-          <UiLink type="Button" onClick={() => router.push('/login')}>
+          <UiLink type="Link" href="/login">
             {t('logIn')}
           </UiLink>
         </p>

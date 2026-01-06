@@ -10,12 +10,7 @@ export default function PasswordResetPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[50vh]">
-      <PasswordResetDialog
-        open={true}
-        onCloseAction={() => router.push('/')}
-        onBackToLoginAction={(email) => router.push(`/login?email=${encodeURIComponent(email)}`)}
-        email={email}
-      />
+      <PasswordResetDialog open={true} onCloseAction={() => router.push('/')} email={email} />
     </div>
   );
 }

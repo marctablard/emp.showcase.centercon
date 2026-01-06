@@ -2,12 +2,11 @@ import { useTranslations } from 'next-intl';
 import { ArrowRight, User } from 'lucide-react';
 import { H1 } from '@/components/ui/h';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
-import { Link, useRouter } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import { Button } from '../ui/button';
 
 export function CartEmpty() {
   const t = useTranslations('cart');
-  const router = useRouter();
   const { isAuthenticated } = useAuthentication();
 
   return (
@@ -18,10 +17,12 @@ export function CartEmpty() {
           <p className="text-lg">{isAuthenticated ? t('cartEmptyTextLoggedIn') : t('cartEmptyText')}</p>
           <div className="flex gap-2 sm:gap-6">
             {!isAuthenticated && (
-              <Button onClick={() => router.push('/login')}>
-                {t('cartEmptyLogin')}
-                <User />
-              </Button>
+              <Link href="/login">
+                <Button>
+                  {t('cartEmptyLogin')}
+                  <User />
+                </Button>
+              </Link>
             )}
             <Link href="/browse">
               <Button variant="secondary">
