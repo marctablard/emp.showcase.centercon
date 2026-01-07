@@ -160,7 +160,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
   return (
     <div className="flex overflow-hidden">
       <nav
-        className={`flex transition-transform duration-300 ease-in-out ${currentView !== 'main' ? '-translate-x-full' : 'translate-x-0'}`}
+        className={`w-full flex transition-transform duration-300 ease-in-out ${currentView !== 'main' ? '-translate-x-full' : 'translate-x-0'}`}
       >
         {/* Main panel */}
         <div className="w-full flex-shrink-0 bg-surface-page overflow-y-auto">
