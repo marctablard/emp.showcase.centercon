@@ -63,7 +63,9 @@
         "nominal-power": "Nominal Power",
         "color": "Color",
         "ampere": "Ampere",
-        "length": "Length"
+        "length": "Length",
+        "farbe": "Color",
+        "format": "Format"
       },
       "productTemplateAttributes": {
         "length": "Product Length",
