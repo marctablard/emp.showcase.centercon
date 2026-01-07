@@ -6,7 +6,7 @@ import { LoginForm } from '@/components/login/login-form';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') ?? undefined;
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/account';
   const email = searchParams.get('email') ?? undefined;
   const guestCheckout = searchParams.get('guestCheckout') === 'true';
 
