@@ -97,7 +97,7 @@ export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
               >
                 {item.label}
               </Link>
-              <hr className="mx-5 border-border-subtle" />
+              {!isSecondLevel && <hr className="mx-5 border-border-subtle" />}
             </>
           ) : isSecondLevel && item.submenuItems && item.submenuItems.length > 0 ? (
             <Collapsible
