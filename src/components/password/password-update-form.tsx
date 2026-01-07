@@ -85,8 +85,8 @@ export function PasswordUpdateForm() {
 
   useEffect(() => {
     if (!token) {
-      // redirect to password-reset page if no token was supplied
-      router.push('/password-reset');
+      // force redirect to password-reset page if no token was supplied
+      router.replace('/password-reset');
     }
   }, [token, router]);
 
