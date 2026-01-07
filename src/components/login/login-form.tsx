@@ -74,18 +74,17 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      {/* Loading Overlay */}
+      {(loading || submitting) && (
+        <div className="absolute inset-0 z-1000 bg-surface/50 backdrop-blur-default flex items-center justify-center rounded-md">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm font-medium text-text-secondary">{t('loggingIn')}</p>
+          </div>
+        </div>
+      )}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full relative">
-          {/* Loading Overlay */}
-          {(loading || submitting) && (
-            <div className="absolute inset-0 z-1000 bg-surface/50 backdrop-blur-default flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm font-medium text-text-secondary">{t('loggingIn')}</p>
-              </div>
-            </div>
-          )}
-
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6 w-full">
           <Heading variant="h4" as="div">
             {t('title')}
           </Heading>

@@ -30,7 +30,7 @@ export default function LoginDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-      <DialogContent className="sm:max-w-[639px]">
+      <DialogContent className="sm:max-w-150">
         <VisuallyHidden>
           <DialogTitle />
           <DialogDescription />
