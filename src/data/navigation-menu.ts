@@ -33,19 +33,19 @@ export const navigationMenuItems: MenuItem[] = [
       {
         label: 'Accessories',
         href: '/product/enjoysolar-200w-module',
-        hasSubmenu: true,
+        hasSubmenu: false,
         submenuItems: [],
       },
       {
         label: 'Power Generators',
         href: '/product/ecoflow-extension-cable',
-        hasSubmenu: true,
+        hasSubmenu: false,
         submenuItems: [],
       },
       {
         label: 'Cables',
         href: '/product/ecoflow-extension-cable',
-        hasSubmenu: true,
+        hasSubmenu: false,
         submenuItems: [],
       },
     ],
@@ -54,6 +54,33 @@ export const navigationMenuItems: MenuItem[] = [
     id: 'services',
     labelKey: 'services',
     href: '/services',
+    hasSubmenu: true,
+    submenuItems: [
+      {
+        label: 'Solar Solutions',
+        href: '#',
+        hasSubmenu: false,
+        submenuItems: [],
+      },
+      {
+        label: 'Installations',
+        href: '#',
+        hasSubmenu: false,
+        submenuItems: [],
+      },
+      {
+        label: 'Renewable Energy',
+        href: '#',
+        hasSubmenu: false,
+        submenuItems: [],
+      },
+      {
+        label: 'Tech Services',
+        href: '#',
+        hasSubmenu: false,
+        submenuItems: [],
+      },
+    ],
   },
   {
     id: 'solutions',
@@ -69,5 +96,28 @@ export const navigationMenuItems: MenuItem[] = [
     id: 'about-us',
     labelKey: 'aboutUs',
     href: '/about-us',
+  },
+];
+
+export const serviceMenuItems: MenuItem[] = [
+  {
+    id: 'blog',
+    labelKey: 'blog',
+    href: '/blog',
+  },
+  {
+    id: 'newsletter',
+    labelKey: 'newsletter',
+    href: '/newsletter',
+  },
+  {
+    id: 'offerRequest',
+    labelKey: 'offerRequest',
+    href: '/offer-request',
+  },
+  {
+    id: 'contact',
+    labelKey: 'contact',
+    href: '/contact',
   },
 ];

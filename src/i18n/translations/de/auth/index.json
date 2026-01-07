@@ -6,7 +6,7 @@
     "forgotPassword": "Passwort vergessen?",
     "logIn": "Anmelden",
     "guestCheckout": "Als Gast bestellen",
-    "invalidCredentials": "Ungültige E-Mail oder Passwort",
+    "invalidCredentials": "Ungültige E-Mail oder Passwort, bitte prüfen Sie ihre Eingabe.",
     "loginError": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
     "loggingIn": "Anmeldung läuft...",
     "noAccountYet": "Noch kein Konto?",
@@ -16,7 +16,8 @@
     "error": "Fehler",
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort verbergen",
-    "loginFailed": "Anmeldung fehlgeschlagen"
+    "loginFailed": "Anmeldung fehlgeschlagen",
+    "signInWith": "Anmelden mit {provider}"
   },
   "register": {
     "title": "Registrierung",
@@ -78,5 +79,11 @@
     "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
     "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet.",
     "error": "Fehler"
+  },
+  "errors": {
+    "AccessDenied": "Zugriff verweigert. Sie haben keine Berechtigung, auf diese Ressource zuzugreifen.",
+    "Configuration": "Es gibt ein Problem mit der Serverkonfiguration.",
+    "Verification": "Das Verifizierungstoken ist abgelaufen oder wurde bereits verwendet.",
+    "Default": "Ein Authentifizierungsfehler ist aufgetreten. Bitte versuchen Sie es erneut."
   }
 }
