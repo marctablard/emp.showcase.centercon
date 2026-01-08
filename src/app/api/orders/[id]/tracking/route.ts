@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { TrackingService } from '@/platform/services/tracking/TrackingService';
 
@@ -21,7 +22,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(trackingInfo);
   } catch (error) {
-    console.error(`Error fetching tracking information for order ${orderId}:`, error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/orders/${orderId}/tracking`,
+        method: 'GET',
+        orderId,
+      },
+      `Error fetching tracking information for order ${orderId}`,
+    );
     return NextResponse.json({ error: 'Failed to fetch tracking information' }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import { ApprovalPermittedRequest } from '@/platform/services/model/approval';
@@ -21,7 +22,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error checking approval permission:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/approval/permitted',
+        method: 'POST',
+      },
+      'Error checking approval permission',
+    );
     return NextResponse.json({ error: 'Failed to check approval permission' }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { ShippingService } from '@/platform/services/shipping/ShippingService';
 
@@ -7,13 +8,13 @@ import { ShippingService } from '@/platform/services/shipping/ShippingService';
  * Get shipping methods for a country and postal code
  */
 export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const countryCode = searchParams.get('countryCode');
-    const postalCode = searchParams.get('postalCode');
-    const amount = searchParams.get('amount');
-    const currency = searchParams.get('currency');
+  const searchParams = request.nextUrl.searchParams;
+  const countryCode = searchParams.get('countryCode');
+  const postalCode = searchParams.get('postalCode');
+  const amount = searchParams.get('amount');
+  const currency = searchParams.get('currency');
 
+  try {
     if (!countryCode || !postalCode) {
       return NextResponse.json({ error: 'Missing required parameters: countryCode and postalCode' }, { status: 400 });
     }
@@ -27,7 +28,18 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(methods);
   } catch (error) {
-    console.error('Error fetching shipping methods:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/shipping',
+        method: 'GET',
+        countryCode,
+        postalCode,
+      },
+      'Error fetching shipping methods',
+    );
     return NextResponse.json({ error: 'Failed to fetch shipping methods' }, { status: 500 });
   }
 }
@@ -37,8 +49,13 @@ export async function GET(request: NextRequest) {
  * Get a specific shipping method by ID and zone (expects JSON body: { methodId, zoneId })
  */
 export async function POST(request: NextRequest) {
+  let methodId: string | undefined;
+  let zoneId: string | undefined;
+
   try {
-    const { methodId, zoneId } = await request.json();
+    const body = await request.json();
+    methodId = body.methodId;
+    zoneId = body.zoneId;
 
     if (!methodId || !zoneId) {
       return NextResponse.json({ error: 'Missing required parameters: methodId and zoneId' }, { status: 400 });
@@ -54,7 +71,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(method);
   } catch (error) {
-    console.error('Error fetching shipping method:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/shipping',
+        method: 'POST',
+        methodId,
+        zoneId,
+      },
+      'Error fetching shipping method',
+    );
     return NextResponse.json({ error: 'Failed to fetch shipping method' }, { status: 500 });
   }
 }

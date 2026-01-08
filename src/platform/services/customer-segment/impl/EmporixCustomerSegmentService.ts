@@ -3,6 +3,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCustomerSegmentApi } from '@/platform/integrations/emporix/customer-segment/EmporixCustomerSegmentApi';
 import { CategoryTreeItemResponse, ItemAssignmentResponse } from '@/platform/integrations/emporix/model';
 import type { CustomerService } from '../../customer/CustomerService';
+import type { LoggerService } from '../../logger/LoggerService';
 import { Category } from '../../model/category';
 import { CustomerSegmentQueryOptions, ItemAssignment } from '../../model/customer-segment';
 import type { CustomerSegmentMapper } from '../../model/customer-segment/CustomerSegmentMapper';
@@ -19,6 +20,7 @@ export class EmporixCustomerSegmentService implements CustomerSegmentService {
     @inject('EmporixCustomerSegmentMapper') private customerSegmentMapper: CustomerSegmentMapper,
     @inject('SessionService') sessionService: SessionService,
     @inject('CustomerService') customerService: CustomerService,
+    @inject('LoggerService') private logger: LoggerService,
   ) {
     this.sessionService = sessionService;
     this.customerService = customerService;
@@ -41,7 +43,9 @@ export class EmporixCustomerSegmentService implements CustomerSegmentService {
         (item: ItemAssignmentResponse): ItemAssignment => this.customerSegmentMapper.mapToService(item),
       );
     } catch (error) {
-      console.error('Error fetching customer segment items:', error);
+      this.logger.error('Error fetching customer segment items', {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(
         `Failed to retrieve customer segment items: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -66,7 +70,9 @@ export class EmporixCustomerSegmentService implements CustomerSegmentService {
         }),
       );
     } catch (error) {
-      console.error('Error fetching customer segment category trees:', error);
+      this.logger.error('Error fetching customer segment category trees', {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(
         `Failed to retrieve customer segment category trees: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

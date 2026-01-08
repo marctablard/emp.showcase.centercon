@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { SessionService } from '@/platform/services/session/SessionService';
 import { SiteService } from '@/platform/services/site/SiteService';
@@ -25,7 +26,16 @@ export async function PUT(request: NextRequest) {
     await sessionService.setSite(newSite.code);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating session site:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/session/site',
+        method: 'PUT',
+      },
+      'Error updating session site',
+    );
     return NextResponse.json({ error: 'Failed to update session site' }, { status: 500 });
   }
 }

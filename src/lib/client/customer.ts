@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { CustomerUpdateDto, PasswordChangeDto } from '@/platform/services/customer/CustomerService';
 import { Customer, CustomerAddress } from '@/platform/services/model/customer/customer';
 
@@ -22,7 +23,7 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
     const customer = await response.json();
     return customer;
   } catch (error) {
-    console.error('Error fetching customer:', error);
+    getLogger().error({ err: error }, 'Error fetching customer');
     return null;
   }
 }
@@ -43,7 +44,7 @@ export async function fetchCustomerAddresses(): Promise<CustomerAddress[]> {
     const addresses = await response.json();
     return addresses;
   } catch (error) {
-    console.error('Error fetching customer addresses:', error);
+    getLogger().error({ err: error }, 'Error fetching customer addresses');
     return [];
   }
 }
@@ -70,7 +71,7 @@ export async function createCustomerAddress(address: CustomerAddress): Promise<C
     const savedAddress = await response.json();
     return savedAddress;
   } catch (error) {
-    console.error('Error creating customer address:', error);
+    getLogger().error({ err: error }, 'Error creating customer address');
     throw error;
   }
 }
@@ -98,7 +99,7 @@ export async function updateCustomerAddress(id: string, address: CustomerAddress
     const updatedAddress = await response.json();
     return updatedAddress;
   } catch (error) {
-    console.error('Error updating customer address:', error);
+    getLogger().error({ err: error, addressId: id }, 'Error updating customer address');
     throw error;
   }
 }
@@ -118,7 +119,7 @@ export async function deleteCustomerAddress(id: string): Promise<void> {
       throw new Error(`Failed to delete customer address: ${response.statusText}`);
     }
   } catch (error) {
-    console.error('Error deleting customer address:', error);
+    getLogger().error({ err: error, addressId: id }, 'Error deleting customer address');
     throw error;
   }
 }
@@ -143,7 +144,7 @@ export async function changeCustomerPassword(passwordData: PasswordChangeDto): P
       throw new Error(`Failed to change password: ${response.statusText} - ${errorText}`);
     }
   } catch (error) {
-    console.error('Error changing customer password:', error);
+    getLogger().error({ err: error }, 'Error changing customer password');
     throw error;
   }
 }
@@ -171,7 +172,7 @@ export async function updateCustomerProfile(profileData: CustomerUpdateDto): Pro
     const updatedCustomer = await response.json();
     return updatedCustomer;
   } catch (error) {
-    console.error('Error updating customer profile:', error);
+    getLogger().error({ err: error }, 'Error updating customer profile');
     throw error;
   }
 }

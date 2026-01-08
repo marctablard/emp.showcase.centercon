@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { OrderService } from '@/platform/services/order/OrderService';
 
@@ -17,7 +18,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(statusTransitions);
   } catch (error) {
-    console.error(`Error fetching status transitions for order ${orderId}:`, error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/orders/${orderId}/status-transitions`,
+        method: 'GET',
+        orderId,
+      },
+      `Error fetching status transitions for order ${orderId}`,
+    );
     return NextResponse.json({ error: 'Failed to fetch status transitions' }, { status: 500 });
   }
 }

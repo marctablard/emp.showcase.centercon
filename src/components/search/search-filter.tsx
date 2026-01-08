@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { FilterValue as SearchFilterValue } from '@/hooks/search/useSearch';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Filter } from '@/platform/services/model/common';
 import { getMinMaxValues, isNumberRange, isSelect } from './util/search';
 
@@ -180,7 +181,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
         onSubmitComplete();
       }
     } catch (error) {
-      console.error('Error applying filters:', error);
+      getLogger().error({ err: error }, 'Error applying filters');
     }
   };
 

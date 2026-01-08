@@ -8,6 +8,7 @@ import EmporixSessionContextApi from '@/platform/integrations/emporix/session/im
 import { Credentials, Registration, Session } from '@/platform/services/model/auth/auth';
 import type { CartMigrationService } from '../../cart/CartMigrationService';
 import type { CartService } from '../../cart/CartService';
+import type { LoggerService } from '../../logger/LoggerService';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import type { SessionService } from '../../session';
 import { AuthService } from '../AuthService';
@@ -36,6 +37,8 @@ export class EmporixAuthService implements AuthService {
     private readonly sessionService: SessionService,
     @inject('CartService')
     private readonly cartService: CartService,
+    @inject('LoggerService')
+    private readonly logger: LoggerService,
   ) {}
 
   async login(credentials: Credentials): Promise<Session> {
@@ -64,7 +67,11 @@ export class EmporixAuthService implements AuthService {
           try {
             await this.cartMigrationService.mergeCarts(oldCart.id, customerCartId);
           } catch (error) {
-            console.error('Failed to merge carts:', error);
+            this.logger.error('Failed to merge carts', {
+              err: error instanceof Error ? error : String(error),
+              oldCartId: oldCart.id,
+              customerCartId,
+            });
           }
         }
       }

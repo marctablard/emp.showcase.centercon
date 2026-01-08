@@ -3,6 +3,7 @@ import { User } from 'next-auth';
 import 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { headers } from 'next/headers';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import { getBaseUrlFromHeaders } from '@/lib/server/url-utils';
 import server from '@/platform/server';
 import { CustomerNamingService } from '@/platform/services/customer/CustomerNamingService';
@@ -79,7 +80,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
           return !!session.customerId;
         } catch (error) {
-          console.error('signIn error', error);
+          getServerLogger().error({ err: error }, 'signIn error');
           return false;
         }
       }

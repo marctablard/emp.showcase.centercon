@@ -1,5 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { CMSNoResult, CMSPage } from '../../model/cms';
 import type { SessionService } from '../../session';
 import { CMSService } from '../CMSService';
@@ -12,14 +13,20 @@ import { CMSService } from '../CMSService';
 export class LocalCmsServiceSSR implements CMSService {
   private defaultSite: string;
   private sessionService: SessionService;
+  private logger: LoggerService;
 
   /**
    * Constructor
    * @param defaultSite Default site to use as fallback (default: '_default_')
    */
-  constructor(@inject('SessionService') sessionService: SessionService, defaultSite: string = '_default_') {
+  constructor(
+    @inject('SessionService') sessionService: SessionService,
+    @inject('LoggerService') logger: LoggerService,
+    defaultSite: string = '_default_',
+  ) {
     this.defaultSite = defaultSite;
     this.sessionService = sessionService;
+    this.logger = logger;
   }
 
   /**
@@ -45,13 +52,16 @@ export class LocalCmsServiceSSR implements CMSService {
 
       // If not found and site is not the default site, try the default site
       if ('notfound' in pageData && normalizedSite !== this.defaultSite) {
-        console.log(`Page '${slug}' not found for site '${normalizedSite}', trying default site`);
+        this.logger.info(`Page '${slug}' not found for site '${normalizedSite}', trying default site`, {
+          slug,
+          site: normalizedSite,
+        });
         pageData = await this.tryLoadPage(normalizedSlug, normalizedLocale, this.defaultSite);
       }
 
       return pageData;
     } catch (_error) {
-      console.warn(`Error loading CMS page with slug '${slug}`);
+      this.logger.warn(`Error loading CMS page with slug '${slug}`, { slug });
       return {
         notfound: true,
         message: `Error loading page with slug '${slug}'`,
@@ -82,7 +92,7 @@ export class LocalCmsServiceSSR implements CMSService {
 
       return pageData;
     } catch (_error) {
-      console.warn(`Error dynamically importing CMS data for slug '${slug}`);
+      this.logger.warn(`Error dynamically importing CMS data for slug '${slug}`, { slug });
       return {
         notfound: true,
         message: `Error loading page with slug '${slug}'`,

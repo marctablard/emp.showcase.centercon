@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { WeatherForecast } from '@/platform/services/model/weather';
 import { WeatherService } from '@/platform/services/weather/WeatherService';
@@ -9,12 +10,12 @@ import { WeatherService } from '@/platform/services/weather/WeatherService';
  * @returns NextResponse with weather forecast data
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  try {
-    // Get latitude and longitude from query parameters
-    const searchParams = request.nextUrl.searchParams;
-    const latitude = parseFloat(searchParams.get('latitude') || '');
-    const longitude = parseFloat(searchParams.get('longitude') || '');
+  // Get latitude and longitude from query parameters
+  const searchParams = request.nextUrl.searchParams;
+  const latitude = parseFloat(searchParams.get('latitude') || '');
+  const longitude = parseFloat(searchParams.get('longitude') || '');
 
+  try {
     // Validate parameters
     if (isNaN(latitude) || isNaN(longitude)) {
       return NextResponse.json(
@@ -33,7 +34,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // The dates will be automatically converted to ISO strings during JSON serialization
     return NextResponse.json(forecast);
   } catch (error) {
-    console.error('Error fetching weather data:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/weather',
+        method: 'GET',
+        latitude,
+        longitude,
+      },
+      'Error fetching weather data',
+    );
     return NextResponse.json({ error: 'Failed to fetch weather data' }, { status: 500 });
   }
 }

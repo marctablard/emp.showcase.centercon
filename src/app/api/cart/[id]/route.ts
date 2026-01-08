@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart';
 
@@ -20,7 +21,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(cart);
   } catch (error) {
-    console.error(`Error fetching cart ${cartId}:`, error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/cart/${cartId}`,
+        method: 'GET',
+        cartId,
+      },
+      `Error fetching cart ${cartId}`,
+    );
     return NextResponse.json({ error: 'Failed to fetch cart' }, { status: 500 });
   }
 }
@@ -40,7 +51,17 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     // Return success response
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(`Error deleting cart ${cartId}:`, error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/cart/${cartId}`,
+        method: 'DELETE',
+        cartId,
+      },
+      `Error deleting cart ${cartId}`,
+    );
     return NextResponse.json({ error: 'Failed to delete cart' }, { status: 500 });
   }
 }

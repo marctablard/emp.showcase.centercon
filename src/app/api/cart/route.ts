@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart';
 import type { Cart } from '@/platform/services/model/cart';
@@ -54,7 +55,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(cart);
   } catch (error) {
-    console.error('Error handling cart request:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/cart',
+        method: 'GET',
+      },
+      'Error handling cart request',
+    );
     return NextResponse.json({ error: 'Failed to process cart request' }, { status: 500 });
   }
 }
@@ -82,7 +92,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(cart);
   } catch (error) {
-    console.error('Error creating cart:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/cart',
+        method: 'POST',
+      },
+      'Error creating cart',
+    );
     return NextResponse.json({ error: 'Failed to create cart' }, { status: 500 });
   }
 }

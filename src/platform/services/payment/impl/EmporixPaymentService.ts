@@ -1,6 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixPaymentGatewayApi } from '@/platform/integrations/emporix/payment/EmporixPaymentGatewayApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { PaymentMode } from '@/platform/services/model/payment';
 import { PaymentService } from '../PaymentService';
 
@@ -10,9 +11,14 @@ import { PaymentService } from '../PaymentService';
 @injectable('PaymentService', 'Singleton')
 class EmporixPaymentService implements PaymentService {
   private paymentGatewayApi: EmporixPaymentGatewayApi;
+  private logger: LoggerService;
 
-  constructor(@inject('EmporixPaymentGatewayApi') paymentGatewayApi: EmporixPaymentGatewayApi) {
+  constructor(
+    @inject('EmporixPaymentGatewayApi') paymentGatewayApi: EmporixPaymentGatewayApi,
+    @inject('LoggerService') logger: LoggerService,
+  ) {
     this.paymentGatewayApi = paymentGatewayApi;
+    this.logger = logger;
   }
 
   /**
@@ -24,7 +30,7 @@ class EmporixPaymentService implements PaymentService {
       const paymentModes = await this.paymentGatewayApi.getPaymentModesFrontend();
       return paymentModes;
     } catch (error) {
-      console.error('Error getting payment modes:', error);
+      this.logger.error('Error getting payment modes', { err: error instanceof Error ? error : String(error) });
       return [];
     }
   }
@@ -39,7 +45,10 @@ class EmporixPaymentService implements PaymentService {
       const paymentMode = await this.paymentGatewayApi.getPaymentMode(id);
       return paymentMode;
     } catch (error) {
-      console.error('Error getting payment mode:', error);
+      this.logger.error('Error getting payment mode', {
+        err: error instanceof Error ? error : String(error),
+        paymentModeId: id,
+      });
       return null;
     }
   }

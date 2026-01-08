@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import type { QuoteService } from '@/platform/services/quote/QuoteService';
 
 export async function POST(request: NextRequest) {
+  let quoteId: string | undefined;
+
   try {
     const body = await request.json();
-    const { quoteId, comment } = body;
+    quoteId = body.quoteId;
+    const { comment } = body;
 
     if (!quoteId || !comment) {
       return NextResponse.json({ error: 'Quote ID and comment are required' }, { status: 400 });
@@ -24,7 +28,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error adding comment to quote:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/quote/add-comment',
+        method: 'POST',
+        quoteId,
+      },
+      'Error adding comment to quote',
+    );
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to add comment to quote' },
       { status: 500 },

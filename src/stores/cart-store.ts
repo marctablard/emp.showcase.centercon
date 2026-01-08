@@ -9,6 +9,7 @@ import {
   updateShippingInfo as apiUpdateShippingInfo,
   loadSavedCart,
 } from '@/lib/client/carts';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
 
@@ -96,7 +97,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to fetch cart');
         set({ error, loading: false });
-        console.error('Error fetching cart:', err);
+        getLogger().error({ err }, 'Error fetching cart');
         return undefined;
       }
     },
@@ -118,7 +119,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to fetch cart');
         set({ error, loading: false });
-        console.error('Error fetching cart:', err);
+        getLogger().error({ err }, 'Error fetching cart');
         return undefined;
       }
     },
@@ -155,7 +156,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to add item to cart');
         set({ error, loading: false });
-        console.error('Error adding item to cart:', err);
+        getLogger().error({ err }, 'Error adding item to cart');
         throw err;
       }
     },
@@ -181,7 +182,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to update cart item');
         set({ error, loading: false });
-        console.error('Error updating cart item:', err);
+        getLogger().error({ err }, 'Error updating cart item');
       }
     },
 
@@ -206,7 +207,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to remove cart item');
         set({ error, loading: false });
-        console.error('Error removing cart item:', err);
+        getLogger().error({ err }, 'Error removing cart item');
       }
     },
 
@@ -254,7 +255,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to update shipping info');
         set({ error, loading: false });
-        console.error('Error updating shipping info:', err);
+        getLogger().error({ err }, 'Error updating shipping info');
       }
     },
 

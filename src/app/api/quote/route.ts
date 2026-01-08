@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import { PriceService } from '@/platform/services/price/PriceService';
@@ -74,13 +75,32 @@ export async function POST(request: NextRequest) {
           await quoteService.updateQuote(result.quoteId, updateList, 'service');
         }
       } catch (updateError) {
-        console.error('Failed to update quote :', updateError);
+        const logger = getServerLogger();
+        logger.error(
+          {
+            error: updateError instanceof Error ? updateError.message : String(updateError),
+            stack: updateError instanceof Error ? updateError.stack : undefined,
+            path: '/api/quote',
+            method: 'POST',
+            quoteId: result.quoteId,
+          },
+          'Failed to update quote',
+        );
       }
     }
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    console.error('Error creating quote:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/quote',
+        method: 'POST',
+      },
+      'Error creating quote',
+    );
     const message = error instanceof Error ? error.message : 'Failed to create quote';
     return NextResponse.json({ error: message }, { status: 500 });
   }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { QuoteService } from '@/platform/services/quote/QuoteService';
 
@@ -6,13 +7,13 @@ import { QuoteService } from '@/platform/services/quote/QuoteService';
  * GET /api/quotes - Returns a list of quotes
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
+  // Parse query parameters (outside try for logging context)
+  const searchParams = req.nextUrl.searchParams;
+  const query = searchParams.get('query') || undefined;
+  const sort = searchParams.get('sort') || undefined;
+
   try {
     const quoteService = server.get<QuoteService>('QuoteService');
-
-    // Parse query parameters
-    const searchParams = req.nextUrl.searchParams;
-    const query = searchParams.get('query') || undefined;
-    const sort = searchParams.get('sort') || undefined;
 
     // Get quotes with filters
     const response = await quoteService.getQuotes({
@@ -22,7 +23,18 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching quotes:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/quotes',
+        method: 'GET',
+        query,
+        sort,
+      },
+      'Error fetching quotes',
+    );
     return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
   }
 }

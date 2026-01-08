@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { OrderService } from '@/platform/services/order/OrderService';
 
@@ -7,9 +8,12 @@ import { OrderService } from '@/platform/services/order/OrderService';
  * Creates a new order from a quote
  */
 export async function POST(request: NextRequest) {
+  let quoteId: string | undefined;
+
   try {
     const body = await request.json();
-    const { quoteId, customerNote } = body;
+    quoteId = body.quoteId;
+    const { customerNote } = body;
 
     if (!quoteId) {
       return NextResponse.json({ error: 'Quote ID is required' }, { status: 400 });
@@ -20,7 +24,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ orderId }, { status: 201 });
   } catch (error) {
-    console.error('Error creating order from quote:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/order/from-quote',
+        method: 'POST',
+        quoteId,
+      },
+      'Error creating order from quote',
+    );
     const message = error instanceof Error ? error.message : 'Failed to create order from quote';
     return NextResponse.json({ error: message }, { status: 500 });
   }

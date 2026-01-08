@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import type { SetupResult, SetupService } from '@/platform/services/model/setup/setup';
 
@@ -8,16 +9,17 @@ import type { SetupResult, SetupService } from '@/platform/services/model/setup/
  * @returns Whether the secret is valid
  */
 function verifySetupApiSecret(request: NextRequest): boolean {
+  const logger = getServerLogger();
   // Check if setup API is enabled
   if (process.env.NEXT_SETUP_API_ENABLED !== 'true') {
-    console.warn('Setup API is disabled. Enable it by setting NEXT_SETUP_API_ENABLED=true');
+    logger.warn('Setup API is disabled. Enable it by setting NEXT_SETUP_API_ENABLED=true');
     return false;
   }
 
   // Get the secret from the request
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.warn('Missing or invalid Authorization header');
+    logger.warn('Missing or invalid Authorization header');
     return false;
   }
 
@@ -25,7 +27,7 @@ function verifySetupApiSecret(request: NextRequest): boolean {
   const expectedSecret = process.env.NEXT_SETUP_API_SECRET;
 
   if (!expectedSecret) {
-    console.warn('NEXT_SETUP_API_SECRET is not configured');
+    logger.warn('NEXT_SETUP_API_SECRET is not configured');
     return false;
   }
 
@@ -38,13 +40,14 @@ function verifySetupApiSecret(request: NextRequest): boolean {
  * @returns Results of all setup steps
  */
 async function executeSetupSteps(): Promise<Record<string, SetupResult>> {
+  const logger = getServerLogger();
   const results: Record<string, SetupResult> = {};
 
   // Get the list of setup step services from environment variable
   const setupStepServices = process.env.NEXT_SETUP_STEP_SERVICES?.split(',') || [];
 
   if (setupStepServices.length === 0) {
-    console.warn('No setup step services configured in NEXT_SETUP_STEP_SERVICES');
+    logger.warn('No setup step services configured in NEXT_SETUP_STEP_SERVICES');
     return {
       system: {
         success: false,
@@ -53,7 +56,10 @@ async function executeSetupSteps(): Promise<Record<string, SetupResult>> {
     };
   }
 
-  console.log(`Executing ${setupStepServices.length} setup steps: ${setupStepServices.join(', ')}`);
+  logger.info(
+    { setupStepServices },
+    `Executing ${setupStepServices.length} setup steps: ${setupStepServices.join(', ')}`,
+  );
 
   // Execute each setup step
   for (const serviceName of setupStepServices) {
@@ -61,7 +67,7 @@ async function executeSetupSteps(): Promise<Record<string, SetupResult>> {
       const service = server.get<SetupService>(serviceName);
 
       if (!service) {
-        console.warn(`Setup step service '${serviceName}' not found in container`);
+        logger.warn({ serviceName }, `Setup step service '${serviceName}' not found in container`);
         results[serviceName] = {
           success: false,
           error: `Service '${serviceName}' not found in container`,
@@ -69,12 +75,22 @@ async function executeSetupSteps(): Promise<Record<string, SetupResult>> {
         continue;
       }
 
-      console.log(`Executing setup step: ${service.name} (${service.id})`);
+      logger.info(
+        { serviceId: service.id, serviceName: service.name },
+        `Executing setup step: ${service.name} (${service.id})`,
+      );
       const result = await service.execute();
       results[service.id] = result;
-      console.log(`Setup step ${service.id} completed with result:`, result);
+      logger.info({ serviceId: service.id, result }, `Setup step ${service.id} completed with result`);
     } catch (error) {
-      console.error(`Error executing setup step ${serviceName}:`, error);
+      logger.error(
+        {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          serviceName,
+        },
+        `Error executing setup step ${serviceName}`,
+      );
       results[serviceName] = {
         success: false,
         error: error instanceof Error ? error.message : String(error),
@@ -111,13 +127,25 @@ async function executeSetupStep(stepId: string): Promise<SetupResult> {
       }
 
       if (service.id === stepId) {
-        console.log(`Executing setup step: ${service.name} (${service.id})`);
+        const logger = getServerLogger();
+        logger.info(
+          { serviceId: service.id, serviceName: service.name },
+          `Executing setup step: ${service.name} (${service.id})`,
+        );
         const result = await service.execute();
-        console.log(`Setup step ${service.id} completed with result:`, result);
+        logger.info({ serviceId: service.id, result }, `Setup step ${service.id} completed with result`);
         return result;
       }
     } catch (error) {
-      console.error(`Error checking setup step ${serviceName}:`, error);
+      const logger = getServerLogger();
+      logger.error(
+        {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          serviceName,
+        },
+        `Error checking setup step ${serviceName}`,
+      );
     }
   }
 
@@ -162,6 +190,7 @@ export async function GET(request: NextRequest) {
  * @returns Result of the setup operation
  */
 async function executeFileBasedSetup(): Promise<SetupResult> {
+  const logger = getServerLogger();
   try {
     // Get the FileBasedSetupService from the container
     const service = server.get<SetupService>('FileBasedSetupService');
@@ -173,13 +202,19 @@ async function executeFileBasedSetup(): Promise<SetupResult> {
       };
     }
 
-    console.log(`Executing file-based setup`);
+    logger.info('Executing file-based setup');
     const result = await service.execute();
-    console.log(`File-based setup completed with result:`, result);
+    logger.info({ result }, 'File-based setup completed with result');
 
     return result;
   } catch (error) {
-    console.error(`Error executing file-based setup:`, error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      'Error executing file-based setup',
+    );
     return {
       success: false,
       error: error instanceof Error ? error.message : String(error),

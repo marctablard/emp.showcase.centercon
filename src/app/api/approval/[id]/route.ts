@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import { ApprovalStatus } from '@/platform/services/model/approval';
@@ -27,7 +28,17 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(approval);
   } catch (error) {
-    console.error(`Error fetching approval ${id}:`, error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/approval/${id}`,
+        method: 'GET',
+        approvalId: id,
+      },
+      `Error fetching approval ${id}`,
+    );
     return NextResponse.json({ error: 'Failed to fetch approval' }, { status: 500 });
   }
 }
@@ -60,7 +71,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const updatedApproval = await approvalService.getApproval(id);
     return NextResponse.json(updatedApproval);
   } catch (error) {
-    console.error(`Error updating approval ${id}:`, error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/approval/${id}`,
+        method: 'PATCH',
+        approvalId: id,
+      },
+      `Error updating approval ${id}`,
+    );
     return NextResponse.json({ error: 'Failed to update approval' }, { status: 500 });
   }
 }
@@ -77,7 +98,17 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
 
     return new Response(null, { status: 204 });
   } catch (error) {
-    console.error(`Error deleting approval ${id}:`, error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/approval/${id}`,
+        method: 'DELETE',
+        approvalId: id,
+      },
+      `Error deleting approval ${id}`,
+    );
     return NextResponse.json({ error: 'Failed to delete approval' }, { status: 500 });
   }
 }

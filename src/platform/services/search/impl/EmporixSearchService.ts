@@ -4,6 +4,7 @@ import type { EmporixCatalogApi } from '@/platform/integrations/emporix/catalog/
 import type { EmporixCategoryApi } from '@/platform/integrations/emporix/category/EmporixCategoryApi';
 import { EmporixPaginatedResponse, EmporixProduct } from '@/platform/integrations/emporix/model';
 import type { EmporixProductApi } from '@/platform/integrations/emporix/product/EmporixProductApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Product } from '@/platform/services/model/product';
 import type { ProductService } from '@/platform/services/product/ProductService';
@@ -26,6 +27,7 @@ class EmporixSearchService implements SearchService {
   private categoryApi: EmporixCategoryApi;
   private productService: ProductService;
   private segmentFilterService: SegmentFilterService;
+  private logger: LoggerService;
 
   constructor(
     @inject('SessionService') sessionService: SessionService,
@@ -35,6 +37,7 @@ class EmporixSearchService implements SearchService {
     @inject('EmporixCategoryApi') categoryApi: EmporixCategoryApi,
     @inject('ProductService') productService: ProductService,
     @inject('SegmentFilterService') segmentFilterService: SegmentFilterService,
+    @inject('LoggerService') logger: LoggerService,
   ) {
     this.productApi = productApi;
     this.productMapper = productMapper;
@@ -43,6 +46,7 @@ class EmporixSearchService implements SearchService {
     this.productService = productService;
     this.sessionService = sessionService;
     this.segmentFilterService = segmentFilterService;
+    this.logger = logger;
   }
 
   async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
@@ -173,7 +177,10 @@ class EmporixSearchService implements SearchService {
             });
           } catch (error) {
             // Continue with other categories if one fails
-            console.warn(`Failed to get assignments for category ${categoryId}:`, error);
+            this.logger.warn(`Failed to get assignments for category ${categoryId}`, {
+              err: error,
+              categoryId,
+            });
           }
         }
       }

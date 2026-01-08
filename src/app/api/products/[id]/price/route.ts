@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { PriceService } from '@/platform/services/price/PriceService';
 import { SessionService } from '@/platform/services/session/SessionService';
@@ -12,14 +13,14 @@ import { SessionService } from '@/platform/services/session/SessionService';
  * - unitCode: Optional unit code
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: productId } = await params;
+  const { searchParams } = new URL(request.url);
+
+  // Parse query parameters
+  const quantity = searchParams.get('quantity') ? parseInt(searchParams.get('quantity') as string, 10) : undefined;
+  const unitCode = searchParams.get('unitCode') || undefined;
+
   try {
-    const { id: productId } = await params;
-    const { searchParams } = new URL(request.url);
-
-    // Parse query parameters
-    const quantity = searchParams.get('quantity') ? parseInt(searchParams.get('quantity') as string, 10) : undefined;
-    const unitCode = searchParams.get('unitCode') || undefined;
-
     // Get session
     const sessionService = server.get<SessionService>('SessionService');
     const session = await sessionService.getCurrent();
@@ -37,7 +38,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(price);
   } catch (error) {
-    console.error('Error fetching product price:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/products/${productId}/price`,
+        method: 'GET',
+        productId,
+      },
+      'Error fetching product price',
+    );
     return NextResponse.json({ error: 'Failed to fetch product price' }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { SearchService } from '@/platform/services/search/SearchService';
 
@@ -15,7 +16,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ products: highlights });
   } catch (error) {
-    console.error('Error fetching highlighted products:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/search/highlights',
+        method: 'GET',
+      },
+      'Error fetching highlighted products',
+    );
     return NextResponse.json({ error: 'Failed to fetch highlighted products' }, { status: 500 });
   }
 }

@@ -1,3 +1,5 @@
+import { getServerLogger } from '@/lib/logger/server-logger';
+
 // Central definition for all sensitive keys (used for headers and query params)
 const SENSITIVE_KEYS_NORMALIZED = new Set(['session', 'secret', 'password', 'token', 'auth', 'api', 'client']);
 
@@ -147,7 +149,15 @@ export function buildAndLogCurl(url: string, options: RequestInit): string {
   if (debugCurl) {
     if (!shouldLogEndpoint(url)) return '';
     logPrefix = `[${getDebugPrefix(url)}]`;
-    console.debug(`${logPrefix} ${buildCurl(url, options, maskSensitive)}`);
+    const logger = getServerLogger();
+    logger.debug(
+      {
+        prefix: logPrefix,
+        url: maskSensitive ? maskSensitiveQueryParams(url) : url,
+        method: options.method || 'GET',
+      },
+      `${logPrefix} ${buildCurl(url, options, maskSensitive)}`,
+    );
   }
   return logPrefix;
 }
@@ -172,13 +182,18 @@ export async function logResponse(
 
   const status = response.status;
   const isError = status >= 400;
-  const log = isError ? console.error : console.debug;
+  const logger = getServerLogger();
   const method = (requestOptions.method || 'GET').toUpperCase();
   const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
   const logPrefix = prefix ? `${prefix} [${method} ${status}]` : `[${method} ${status}]`;
 
-  // We build an array of log parts and log them all at once at the end
-  const logParts: any[] = [`${logPrefix} ${maskedUrl}`];
+  // Build context object for structured logging
+  const logContext: Record<string, unknown> = {
+    prefix: logPrefix,
+    method,
+    status,
+    url: maskedUrl,
+  };
 
   // --- 1. Handle Headers ---
   const needsHeaders = debugResponse === 'status-headers' || debugResponse === 'full';
@@ -187,7 +202,7 @@ export async function logResponse(
     if (maskSensitive) {
       headers = maskHeaders(headers);
     }
-    logParts.push('Headers:', headers);
+    logContext.headers = headers;
   }
 
   // --- 2. Handle Body ---
@@ -198,19 +213,23 @@ export async function logResponse(
 
       if (debugResponse.startsWith('status-body-')) {
         const limit = parseInt(debugResponse.split('-')[2], 10) || 200;
-        logParts.push(`Body (max ${limit} chars):`, bodyText.slice(0, limit));
+        logContext.body = bodyText.slice(0, limit);
+        logContext.bodyLimit = limit;
       } else {
         // This covers 'status-body' and 'full'
-        logParts.push('Body:', bodyText);
+        logContext.body = bodyText;
       }
     } catch (err) {
       // Log the actual error for better debugging
-      logParts.push('Error reading body:', err);
+      logContext.bodyError = err instanceof Error ? err.message : String(err);
     }
   }
 
   // --- 3. Final Log ---
-  // If debugResponse was 'status', only the logPrefix and URL are in the array.
-  // Otherwise, headers and/or body have been added.
-  log(...logParts);
+  const logMessage = `${logPrefix} ${maskedUrl}`;
+  if (isError) {
+    logger.error(logContext, logMessage);
+  } else {
+    logger.debug(logContext, logMessage);
+  }
 }

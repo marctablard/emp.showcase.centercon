@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CustomerService } from '@/platform/services/customer/CustomerService';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id: customerId } = await params;
+  const { id: customerId } = await params;
 
+  try {
     const customerService = server.get<CustomerService>('CustomerService');
     const addresses = await customerService.getAddresses(customerId === 'current' ? undefined : customerId);
 
     return NextResponse.json(addresses);
   } catch (error) {
-    console.error('Error fetching customer addresses:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/customer/${customerId}/addresses`,
+        method: 'GET',
+        customerId,
+      },
+      'Error fetching customer addresses',
+    );
     return NextResponse.json({ error: 'Failed to fetch customer addresses' }, { status: 500 });
   }
 }
@@ -20,9 +31,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  * POST handler for creating a new address
  */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id: customerId } = await params;
+  const { id: customerId } = await params;
 
+  try {
     // Only the current user can add addresses
     if (customerId !== 'current') {
       return NextResponse.json({ error: 'You can only add addresses for the current customer' }, { status: 403 });
@@ -42,7 +53,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json(newAddress, { status: 201 });
   } catch (error) {
-    console.error('Error creating customer address:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/customer/${customerId}/addresses`,
+        method: 'POST',
+        customerId,
+      },
+      'Error creating customer address',
+    );
     return NextResponse.json({ error: 'Failed to create customer address' }, { status: 500 });
   }
 }

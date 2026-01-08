@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { SearchService } from '@/platform/services/search';
 
@@ -7,12 +8,11 @@ import { SearchService } from '@/platform/services/search';
  * GET /api/search?query=term&page=0&size=20&sort=name:asc
  */
 export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  const query = url.searchParams.get('query') || undefined;
+
   try {
     const searchService = server.get<SearchService>('SearchService');
-    const url = new URL(request.url);
-
-    // Extract search parameters from the URL
-    const query = url.searchParams.get('query') || undefined;
     const page = url.searchParams.get('page') ? parseInt(url.searchParams.get('page')!) : 0;
     const size = url.searchParams.get('size') ? parseInt(url.searchParams.get('size')!) : 20;
     const sort = url.searchParams.get('sort') || undefined;
@@ -47,7 +47,17 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(searchResults);
   } catch (error) {
-    console.error('Error searching products:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/search',
+        method: 'GET',
+        query,
+      },
+      'Error searching products',
+    );
     return NextResponse.json({ error: 'Failed to search products' }, { status: 500 });
   }
 }

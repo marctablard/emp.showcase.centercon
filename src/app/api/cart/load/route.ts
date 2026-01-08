@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart/CartService';
 
@@ -32,7 +33,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(cart);
   } catch (error) {
-    console.error('Error loading saved cart:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/cart/load',
+        method: 'POST',
+      },
+      'Error loading saved cart',
+    );
     return NextResponse.json({ error: 'Failed to load saved cart' }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getServerLogger } from '@/lib/logger/server-logger';
 
 export const dynamic = 'force-dynamic'; // No caching for this route
 
@@ -22,7 +23,16 @@ export async function GET() {
 
     return NextResponse.json(mockGeoIPResponse);
   } catch (error) {
-    console.error('Error in location API route:', error);
+    const logger = getServerLogger();
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/location',
+        method: 'GET',
+      },
+      'Error in location API route',
+    );
     return NextResponse.json({ error: 'Failed to determine location' }, { status: 500 });
   }
 }

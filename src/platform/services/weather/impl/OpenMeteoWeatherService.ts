@@ -3,6 +3,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type { OpenMeteoWeatherApi } from '@/platform/integrations/openmeteo/weather/OpenMeteoWeatherApi';
 import type { WeatherForecast } from '@/platform/services/model/weather';
 import type { WeatherMapper } from '@/platform/services/model/weather/WeatherMapper';
+import type { LoggerService } from '../../logger/LoggerService';
 import { WeatherService } from '../WeatherService';
 
 /**
@@ -13,6 +14,7 @@ export class OpenMeteoWeatherService implements WeatherService {
   constructor(
     @inject('OpenMeteoWeatherApi') private weatherApi: OpenMeteoWeatherApi,
     @inject('OpenMeteoWeatherMapper') private weatherMapper: WeatherMapper,
+    @inject('LoggerService') private logger: LoggerService,
   ) {}
 
   /**
@@ -26,7 +28,11 @@ export class OpenMeteoWeatherService implements WeatherService {
       const apiResponse = await this.weatherApi.getWeatherForecast(latitude, longitude);
       return this.weatherMapper.mapToService(apiResponse);
     } catch (error) {
-      console.error('Error fetching weather forecast:', error);
+      this.logger.error('Error fetching weather forecast', {
+        err: error instanceof Error ? error : String(error),
+        latitude,
+        longitude,
+      });
       throw new Error(`Failed to fetch weather forecast: ${error instanceof Error ? error.message : String(error)}`);
     }
   }

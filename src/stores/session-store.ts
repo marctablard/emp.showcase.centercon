@@ -1,6 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Session } from '@/platform/services/model/session/session';
 
 export interface SessionState {
@@ -45,7 +46,7 @@ export const createSessionStore = (initState: SessionState = defaultState) => {
         const updatedSession = await response.json();
         set({ session: updatedSession, loading: false });
       } catch (error) {
-        console.error('Error setting language:', error);
+        getLogger().error({ err: error }, 'Error setting language');
         set({ loading: false });
       }
     },
@@ -62,7 +63,7 @@ export const createSessionStore = (initState: SessionState = defaultState) => {
         const updatedSession = await response.json();
         set({ session: updatedSession, loading: false });
       } catch (error) {
-        console.error('Error setting currency:', error);
+        getLogger().error({ err: error }, 'Error setting currency');
         set({ loading: false });
       }
     },
@@ -79,7 +80,7 @@ export const createSessionStore = (initState: SessionState = defaultState) => {
         const updatedSession = await response.json();
         set({ session: updatedSession, loading: false });
       } catch (error) {
-        console.error('Error setting country:', error);
+        getLogger().error({ err: error }, 'Error setting country');
         set({ loading: false });
       }
     },
@@ -96,7 +97,7 @@ export const createSessionStore = (initState: SessionState = defaultState) => {
         const updatedSession = await response.json();
         set({ session: updatedSession, loading: false });
       } catch (error) {
-        console.error('Error setting site:', error);
+        getLogger().error({ err: error }, 'Error setting site');
         set({ loading: false });
       }
     },

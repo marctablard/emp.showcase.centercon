@@ -7,6 +7,7 @@ import { EmporixCustomEntity } from '@/platform/integrations/emporix/model/schem
 import type { EmporixSchemaApi } from '@/platform/integrations/emporix/schema/EmporixSchemaApi';
 import type { CartService } from '@/platform/services/cart/CartService';
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type {
   RecipientType,
   StorefrontNotification,
@@ -31,6 +32,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
     @inject('CustomerService') private customerService: CustomerService,
     @inject('NotificationPayloadService') private augmentationService: NotificationPayloadService,
     @inject('CartService') private cartService: CartService,
+    @inject('LoggerService') private logger: LoggerService,
   ) {
     // Configure web-push with VAPID details
     if (process.env.VAPID_CONTACT && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -94,7 +96,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
         return dateB - dateA;
       });
     } catch (_error) {
-      console.warn('Failed to get context notifications, most likely a call that happened during Logout');
+      this.logger.warn('Failed to get context notifications, most likely a call that happened during Logout');
       return [];
     }
   }
@@ -150,12 +152,14 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       const response = await this.schemaApi.getCustomEntity(this.NOTIFICATION_TYPE, notificationId);
       if (!response) {
-        console.warn(`Notification ${notificationId} not found`);
+        this.logger.warn(`Notification ${notificationId} not found`);
         return null;
       }
       return this.mapNotificationToService(response);
     } catch (error) {
-      console.error(`Failed to get notification ${notificationId}:`, error);
+      this.logger.error(`Failed to get notification ${notificationId}`, {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(`Failed to get notification: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -167,7 +171,9 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       await this.schemaApi.deleteCustomEntity(this.NOTIFICATION_TYPE, notificationId);
     } catch (error) {
-      console.error(`Failed to delete notification ${notificationId}:`, error);
+      this.logger.error(`Failed to delete notification ${notificationId}`, {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(`Failed to delete notification: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -229,7 +235,9 @@ export class EmporixNotificationServiceServer implements INotificationService {
       }
       return subscriptionId;
     } catch (error) {
-      console.error('Failed to subscribe to push notifications:', error);
+      this.logger.error('Failed to subscribe to push notifications', {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(
         `Failed to subscribe to push notifications: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -240,7 +248,9 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       await this.schemaApi.deleteCustomEntity(this.SUBSCRIPTION_TYPE, subscriptionId);
     } catch (error) {
-      console.error('Failed to unsubscribe from push notifications:', error);
+      this.logger.error('Failed to unsubscribe from push notifications', {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(
         `Failed to unsubscribe from push notifications: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -301,7 +311,9 @@ export class EmporixNotificationServiceServer implements INotificationService {
       }
       return subscriptions.items.map((item) => this.mapSubscriptionToService(item));
     } catch (error) {
-      console.error('Failed to get subscriptions for notification:', error);
+      this.logger.error('Failed to get subscriptions for notification', {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(
         `Failed to get subscriptions for notification: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -312,7 +324,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       const notification = await this.getNotification(notificationId);
       if (!notification) {
-        console.warn(`Notification ${notificationId} not found`);
+        this.logger.warn(`Notification ${notificationId} not found`);
         return;
       }
       const subscriptions = await this.getSubscriptionsForNotification(notification);
@@ -328,7 +340,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
                 language = session.language;
               }
             } catch (_err) {
-              console.warn('Could not get session language, using default');
+              this.logger.warn('Could not get session language, using default');
             }
           }
 
@@ -363,7 +375,10 @@ export class EmporixNotificationServiceServer implements INotificationService {
         }),
       );
     } catch (error) {
-      console.error('Failed to send push notification:', error);
+      this.logger.error('Failed to send push notification', {
+        err: error instanceof Error ? error : String(error),
+        notificationId,
+      });
       throw new Error(`Failed to send push notification: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -385,7 +400,9 @@ export class EmporixNotificationServiceServer implements INotificationService {
 
       return (response.items || []).map((item: EmporixCustomEntity) => this.mapNotificationToService(item));
     } catch (error) {
-      console.error(`Failed to get notifications for ${recipientType} ${recipientId}:`, error);
+      this.logger.error(`Failed to get notifications for ${recipientType} ${recipientId}`, {
+        err: error instanceof Error ? error : String(error),
+      });
       throw new Error(`Failed to get notifications: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -402,7 +419,7 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       data = notification.data_json && notification.data_json.trim() !== '' ? JSON.parse(notification.data_json) : {};
     } catch (error) {
-      console.warn(`Failed to parse notification data: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(`Failed to parse notification data: ${error instanceof Error ? error.message : String(error)}`);
     }
     const metadata = response.metadata;
     if (!metadata) {
