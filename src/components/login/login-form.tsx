@@ -79,7 +79,7 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
         <div className="absolute inset-0 z-1000 bg-surface/50 backdrop-blur-default flex items-center justify-center rounded-md">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm font-medium text-text-secondary">{t('loggingIn')}</p>
+            {submitting && <p className="text-sm font-medium text-text-secondary">{t('loggingIn')}</p>}
           </div>
         </div>
       )}
