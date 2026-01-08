@@ -33,7 +33,7 @@ export function PasswordResetDialog({
           <DialogTitle />
           <DialogDescription />
         </VisuallyHidden>
-        <PasswordResetForm email={email} callbackUrl={callbackUrl} onSuccess={onCloseAction} />
+        <PasswordResetForm email={email} callbackUrl={callbackUrl} onSuccess={onCloseAction} isDialog />
       </DialogContent>
     </Dialog>
   );

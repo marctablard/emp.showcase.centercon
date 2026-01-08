@@ -24,9 +24,10 @@ type LoginFormProps = {
   email?: string;
   onSuccess?: () => void;
   guestCheckout?: boolean;
+  isDialog?: boolean;
 };
 
-export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false }: LoginFormProps) {
+export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false, isDialog = false }: LoginFormProps) {
   const t = useTranslations('auth.login');
   const { login, loading } = useAuthentication();
   const [showPassword, setShowPassword] = useState(false);
@@ -151,7 +152,7 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
               className="self-end"
               type="Link"
               href={`/password-reset?email=${encodeURIComponent(form.watch('username') || '')}${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
-              replace
+              replace={isDialog}
             >
               {t('forgotPassword')}
             </UiLink>

@@ -35,7 +35,13 @@ export default function LoginDialog({
           <DialogTitle />
           <DialogDescription />
         </VisuallyHidden>
-        <LoginForm callbackUrl={callbackUrl} email={email} onSuccess={onCloseAction} guestCheckout={guestCheckout} />
+        <LoginForm
+          callbackUrl={callbackUrl}
+          email={email}
+          onSuccess={onCloseAction}
+          guestCheckout={guestCheckout}
+          isDialog
+        />
       </DialogContent>
     </Dialog>
   );

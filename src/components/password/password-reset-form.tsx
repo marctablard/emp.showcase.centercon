@@ -15,9 +15,10 @@ type PasswordResetFormProps = {
   email?: string;
   callbackUrl?: string;
   onSuccess?: () => void;
+  isDialog?: boolean;
 };
 
-export function PasswordResetForm({ email, callbackUrl, onSuccess }: PasswordResetFormProps) {
+export function PasswordResetForm({ email, callbackUrl, onSuccess, isDialog = false }: PasswordResetFormProps) {
   const t = useTranslations('auth.Password');
 
   const { form } = useValidator(
@@ -98,7 +99,7 @@ export function PasswordResetForm({ email, callbackUrl, onSuccess }: PasswordRes
             <UiLink
               type="Link"
               href={`/login?email=${encodeURIComponent(form.watch('email') || '')}${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
-              replace
+              replace={isDialog}
             >
               {t('backToLogin')}
             </UiLink>
