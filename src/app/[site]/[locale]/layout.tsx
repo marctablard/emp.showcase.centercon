@@ -34,7 +34,7 @@ const fontBody = Open_Sans({
 
 type Props = {
   children: ReactNode;
-  modal: ReactNode;
+  dialog: ReactNode;
   params: Promise<{ locale: Locale; site: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
 };
@@ -64,7 +64,7 @@ export async function generateMetadata(props: Omit<Props, 'children'>) {
   };
 }
 
-export default async function LocaleLayout({ children, modal, params }: Props) {
+export default async function LocaleLayout({ children, dialog, params }: Props) {
   // Ensure that the incoming `locale` is valid
   const { locale, site: siteCode } = await params;
   if (!hasLocale(routing.locales, locale)) {
@@ -106,7 +106,7 @@ export default async function LocaleLayout({ children, modal, params }: Props) {
                 <StoryblokProvider>
                   <CsrfProvider />
                   {children}
-                  {modal}
+                  {dialog}
                   <Toaster />
                   <Notification />
                 </StoryblokProvider>
