@@ -4,6 +4,8 @@ import { CartOverview } from '@/components/cart/cart-overview';
 import { getCurrentCart } from '@/lib/ssr/carts';
 import { getPageTitle } from '@/lib/ssr/seo';
 
+const ssr_enabled = process.env.NEXT_SSR_CART === 'true';
+
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -21,7 +23,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function CartPage() {
-  const cart = await getCurrentCart();
-
+  const cart = ssr_enabled ? await getCurrentCart() : undefined;
   return <CartOverview initialCart={cart} />;
 }

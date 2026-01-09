@@ -38,7 +38,7 @@ export const providerOptions: ProviderOption[] = providers
   .filter((provider) => provider.id !== 'credentials');
 
 export const config = {
-  debug: false,
+  debug: true,
   trustHost: true,
   theme: { logo: 'https://authjs.dev/img/logo-sm.png' },
   providers,

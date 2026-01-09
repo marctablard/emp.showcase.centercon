@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/product/product-detail';
 import { JsonLd } from '@/components/seo/json-ld';
 import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
-import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
 import { getAvailability, getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
@@ -19,18 +18,34 @@ const PRODUCT_FETCH_OPTIONS: ProductFetchOptions = {
   prices: true,
   variants: true,
   categories: true,
+  customerSegments: true,
 };
+
+// Helper function to parse product ID and create fetch options
+function createProductOptions(id: string, site: string): { productId: string; options: ProductFetchOptions } {
+  const customerMatch = id.match(/^AUTHENTICATED_(.+)$/);
+  const productId = customerMatch ? customerMatch[1] : id;
+  const anonymous = !customerMatch;
+
+  const options: ProductFetchOptions = {
+    ...PRODUCT_FETCH_OPTIONS,
+    prices: { siteCode: site },
+    customerSegments: !anonymous,
+  };
+
+  return { productId, options };
+}
 
 // Generate metadata for the product page
 export async function generateMetadata(
   { params }: { params: Promise<ProductPageProps> },
   _parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  // Get the product ID and locale from params
   const { id, locale, site } = await params;
+  const { productId, options } = createProductOptions(id, site);
 
   // Fetch product data
-  const product = await getProductById(id, { ...PRODUCT_FETCH_OPTIONS, prices: { siteCode: site } });
+  const product = await getProductById(productId, options);
 
   // If product not found, return basic metadata
   if (!product) {
@@ -43,19 +58,10 @@ export async function generateMetadata(
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
   const { id, locale, site } = await params;
-  const { isAuthenticated } = useAuthentication();
+  const { productId, options } = createProductOptions(id, site);
 
-  // Fetch translations, product data and price in parallel
-  const [product, availability] = await Promise.all([
-    getProductById(id, {
-      ...PRODUCT_FETCH_OPTIONS,
-      prices: {
-        siteCode: site,
-      },
-      customerSegments: isAuthenticated,
-    }),
-    getAvailability(site, id),
-  ]);
+  // Fetch product data
+  const product = await getProductById(productId, options);
 
   // If product not found, show 404 page
   if (!product) {
@@ -75,7 +81,7 @@ export default async function ProductPage({ params }: { params: Promise<ProductP
         <ProductDetail
           className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6 lg:pr-38"
           product={product}
-          availability={availability}
+          options={options}
         />
       </div>
     </>

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { config as authConfig } from './auth/auth.config';
 import { createSiteMiddleware } from './site/middleware';
 import { routing as siteRouting } from './site/routing';
+import { NEXT_REWRITE_HEADER } from './site/types';
 
 const securedPages = ['/account/.*?'];
 //const securedPathnameRegex = RegExp(`^(/(${intlRouting.locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
@@ -66,11 +67,25 @@ const authMiddleware = auth(async (req: NextAuthRequest) => {
   }
 
   const response = siteMiddleware(req);
-
-  if (!req.auth?.user && pathname.match(/\/product\/[^/]+$/)) {
-    response.headers.set('Cache-Control', 'public, max-age=3600');
+  const siteLocation = response.headers.get('location');
+  if (siteLocation) {
+    // leave redirect untouched
+    return response;
   }
 
+  const siteRewriteHeader = response.headers.get(NEXT_REWRITE_HEADER);
+  const url = siteRewriteHeader ? new URL(siteRewriteHeader) : req.nextUrl.clone();
+  // 6) Handle product page routing with customer-specific URLs
+  const productMatch = url.pathname.match(/^(.*)\/product\/([^/]+)$/);
+  if (productMatch) {
+    const [, pathPrefix, productId] = productMatch;
+    if (req.auth?.user) {
+      url.pathname = `${pathPrefix}/product/AUTHENTICATED_${productId}`;
+      return NextResponse.rewrite(url, { request: { headers: req.headers } });
+    } else {
+      response.headers.set('Cache-Control', 'public, max-age=3600');
+    }
+  }
   return response;
 });
 

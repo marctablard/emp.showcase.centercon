@@ -46,7 +46,6 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
         setNotifications((prev) => prev.filter((item) => item.id !== notification));
         return true;
       }
-      console.log('headerCartButton notification', notification);
       if (notification.recipient_id !== cart?.id) {
         return false;
       }
@@ -96,7 +95,7 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
             rounded="full"
             className="h-5 min-w-5 px-1 tabular-nums tracking-normal absolute top-0 right-0"
           >
-            {loading ? (
+            {cart === undefined ? (
               <Spinner color="primary" variant="xs" />
             ) : (
               cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0

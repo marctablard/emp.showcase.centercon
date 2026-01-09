@@ -80,6 +80,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
 
     // Cart API operations
     fetchCart: async (createCurrent: boolean = false) => {
+      if (get().loading) return;
       try {
         set({ loading: true, error: null });
 

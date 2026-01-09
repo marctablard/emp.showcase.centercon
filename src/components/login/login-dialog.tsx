@@ -72,11 +72,9 @@ export default function LoginDialog({
 
   // Reset form when dialog changes or closes
   useEffect(() => {
-    // Reset form fields and errors when dialog changes
+    // Only reset form fields when dialog changes - don't call setState here
     if (form) {
       form.reset({ username: email || '', password: '' });
-      setError(null);
-      setShowPassword(false);
     }
   }, [activeDialog, email, form]);
 
@@ -100,6 +98,12 @@ export default function LoginDialog({
   }
 
   const handleOpenChange = (open: boolean) => {
+    // Reset state when dialog opens/closes
+    if (!open) {
+      setError(null);
+      setShowPassword(false);
+    }
+
     // If the dialog is being closed and we're on the login page, redirect to home, because the login page is empty an only for SSR
     if (!open && window.location.pathname.endsWith('/login')) {
       router.push('/');

@@ -44,7 +44,7 @@ const enrichedProviders = config.providers.map((provider) => {
             name: customerNamingService.getFullName(customer),
             email: customer.email,
             businessModel: customer.businessModel,
-            roles: [],
+            roles: [], // Add Roles here, if you like to customize the UX
           };
         } catch (_error) {
           throw new Error('Failed to authorize using Credentials');
@@ -66,9 +66,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
+      // If the user is signing in with credentials, return true, because the password is already validated
       if (account?.provider == 'credentials') {
         return true;
       }
+      // If the user is signing in with SSO we need the email to login
       if (user.email) {
         try {
           const authService = server.get<AuthService>('AuthService');
@@ -76,6 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (!session) {
             return false;
           }
+          // This can be customized to include the customers SSO-User-Id in the Customer Backend and check against that
           return !!session.customerId;
         } catch (error) {
           console.error('signIn error', error);

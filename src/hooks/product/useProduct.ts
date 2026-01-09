@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useHistory } from '@/hooks/history/useHistory';
 import { fetchProductById } from '@/lib/client/products';
 import { Product } from '@/platform/services/model/product';
@@ -18,17 +18,6 @@ interface UseProductResult {
 
 export const useProduct = (productOrId?: string | Product, options?: ProductFetchOptions): UseProductResult => {
   const { getProduct, setCurrentProduct, addProduct, currentProductId } = useProductStore();
-
-  // Stabilize options to prevent unnecessary re-renders
-  const optionsRef = useRef<ProductFetchOptions | undefined>(options);
-  const optionsChanged =
-    optionsRef.current?.variants !== options?.variants ||
-    optionsRef.current?.prices !== options?.prices ||
-    optionsRef.current?.categories !== options?.categories;
-
-  if (optionsChanged) {
-    optionsRef.current = options;
-  }
 
   let id: string | undefined;
   if (!productOrId) {
@@ -64,7 +53,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
         }
 
         // Fetch from API if not in store using our shared API layer
-        const data = await fetchProductById(id, optionsRef.current);
+        const data = await fetchProductById(id, options);
         if (data) {
           // Add to store
           addProduct(data);
@@ -77,7 +66,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
         setLoading(false);
       }
     },
-    [id, getProduct, addProduct],
+    [id, getProduct, addProduct, options],
   );
 
   const refetch = () => fetchProduct(true);

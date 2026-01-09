@@ -9,6 +9,8 @@ export interface ProductFetchOptions {
   variants?: boolean;
   /** Include product prices */
   prices?: boolean | PriceFetchOptions;
+  /** Include availability */
+  availability?: boolean;
   /** Include product categories */
   categories?: boolean;
   /** Include customer segments filtering */

@@ -12,7 +12,8 @@ const getCart = cache(async (): Promise<Cart | null | undefined> => {
   try {
     const cart = await getCartService().getCart();
     return cart;
-  } catch (_error) {
+  } catch (error) {
+    console.error('Failed to get cart during SSR', error);
     // on SSR we fail with undefined, so the Client can refetch if necessary
     return undefined;
   }

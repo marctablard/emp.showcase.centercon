@@ -17,7 +17,7 @@ import { fetchProductPrice } from '@/lib/client/prices';
 import { cn } from '@/lib/utils';
 import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product, ProductVariantAttribute } from '@/platform/services/model/product';
-import { StockAvailability } from '@/platform/services/stock/StockService';
+import { ProductFetchOptions } from '@/platform/services/product';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
 import { H1, H2, Overline } from '../ui/h';
@@ -31,12 +31,12 @@ import ProductVariantSelector from './product-variant-selector';
 
 export interface ProductDetailProps {
   product?: Product;
-  availability?: StockAvailability | null;
+  options: ProductFetchOptions;
   className?: string;
 }
 
-export default function ProductDetail({ product: initialProduct, availability, className }: ProductDetailProps) {
-  const { product, loading, setAsCurrent } = useProduct(initialProduct);
+export default function ProductDetail({ product: initialProduct, options, className }: ProductDetailProps) {
+  const { product, loading, setAsCurrent } = useProduct(initialProduct, options);
   const [price, setPrice] = useState<ProductPrice | null | undefined>(product?.price);
   const locale = useLocale();
   const { l10n } = useL10n(locale);
@@ -96,6 +96,7 @@ export default function ProductDetail({ product: initialProduct, availability, c
     return notFound();
   }
 
+  const availability = product?.availability;
   return (
     <>
       <div className={cn('grid grid-cols-1 gap-x-4 md:gap-x-12 lg:gap-x-20 md:grid-cols-2 mb-6', className)}>
