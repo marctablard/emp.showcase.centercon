@@ -5,6 +5,8 @@ const nextJest = require('next/jest');
 const createJestConfig = nextJest({ dir: './' });
 
 const commonJestConfig = {
+  // Note: nextJest automatically creates moduleNameMapper from tsconfig.json paths
+  // We explicitly set it here to ensure it's applied to all projects
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@platform/(.*)$': '<rootDir>/src/platform/$1',
@@ -28,6 +30,11 @@ const customJestConfig = {
       testEnvironment: 'jsdom',
       testMatch: ['**/hooks/**/?(*.)+(spec|test).ts?(x)'],
       setupFilesAfterEnv: ['<rootDir>/jest.react.setup.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@platform/(.*)$': '<rootDir>/src/platform/$1',
+      },
+      testPathIgnorePatterns: commonJestConfig.testPathIgnorePatterns,
       transform: {
         '^.+\\.(ts|tsx)$': [
           '@swc/jest',
@@ -53,7 +60,6 @@ const customJestConfig = {
           },
         ],
       },
-      ...commonJestConfig,
     },
     {
       preset: 'ts-jest',
