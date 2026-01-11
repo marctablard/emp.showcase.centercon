@@ -30,7 +30,7 @@ class EmporixPaymentService implements PaymentService {
       const paymentModes = await this.paymentGatewayApi.getPaymentModesFrontend();
       return paymentModes;
     } catch (error) {
-      this.logger.error('Error getting payment modes', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting payment modes');
       return [];
     }
   }
@@ -45,10 +45,13 @@ class EmporixPaymentService implements PaymentService {
       const paymentMode = await this.paymentGatewayApi.getPaymentMode(id);
       return paymentMode;
     } catch (error) {
-      this.logger.error('Error getting payment mode', {
-        err: error instanceof Error ? error : String(error),
-        paymentModeId: id,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          paymentModeId: id,
+        },
+        'Error getting payment mode',
+      );
       return null;
     }
   }

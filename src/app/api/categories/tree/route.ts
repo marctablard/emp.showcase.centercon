@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CategoryService } from '@/platform/services/category/CategoryService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * API endpoint to get a category tree
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(categoryTree);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),

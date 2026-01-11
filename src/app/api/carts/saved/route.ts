@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart/CartService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * GET /api/carts/saved
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(savedCarts);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),

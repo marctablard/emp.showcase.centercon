@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 import { NotificationService } from '@/platform/services/notification/NotificationService';
 
@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ notifications });
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),
@@ -109,7 +109,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     const id = request.nextUrl.searchParams.get('id');
     logger.error(
       {

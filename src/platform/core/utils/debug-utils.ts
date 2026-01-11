@@ -1,4 +1,5 @@
-import { getServerLogger } from '@/lib/logger/server-logger';
+import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 // Central definition for all sensitive keys (used for headers and query params)
 const SENSITIVE_KEYS_NORMALIZED = new Set(['session', 'secret', 'password', 'token', 'auth', 'api', 'client']);
@@ -149,7 +150,7 @@ export function buildAndLogCurl(url: string, options: RequestInit): string {
   if (debugCurl) {
     if (!shouldLogEndpoint(url)) return '';
     logPrefix = `[${getDebugPrefix(url)}]`;
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.debug(
       {
         prefix: logPrefix,
@@ -182,7 +183,7 @@ export async function logResponse(
 
   const status = response.status;
   const isError = status >= 400;
-  const logger = getServerLogger();
+  const logger = server.get<LoggerService>('LoggerService');
   const method = (requestOptions.method || 'GET').toUpperCase();
   const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
   const logPrefix = prefix ? `${prefix} [${method} ${status}]` : `[${method} ${status}]`;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * PATCH /api/carts/[id]/items/[itemId]
@@ -29,7 +29,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json(updatedCart);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     const errorParams = await params.catch(() => ({ id: 'unknown', itemId: 'unknown' }));
     logger.error(
       {
@@ -64,7 +64,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     return NextResponse.json(updatedCart);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     const errorParams = await params.catch(() => ({ id: 'unknown', itemId: 'unknown' }));
     logger.error(
       {

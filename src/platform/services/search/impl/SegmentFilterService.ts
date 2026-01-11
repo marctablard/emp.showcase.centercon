@@ -121,10 +121,13 @@ class SegmentFilterService {
             }
           });
         } catch (error) {
-          this.logger.error(`Error fetching category assignments for ${segmentItem.item.id}`, {
-            err: error,
-            categoryId: segmentItem.item.id,
-          });
+          this.logger.error(
+            {
+              err: error,
+              categoryId: segmentItem.item.id,
+            },
+            `Error fetching category assignments for ${segmentItem.item.id}`,
+          );
         }
       }
     }

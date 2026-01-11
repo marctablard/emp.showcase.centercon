@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { ApprovalCreateRequest } from '@/platform/services/model/approval';
 
 export const revalidate = 0;
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(approvals);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(approvalId, { status: 201 });
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),

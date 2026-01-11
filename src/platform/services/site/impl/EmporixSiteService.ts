@@ -52,7 +52,7 @@ class EmporixSiteService implements SiteService {
 
       return this.mapSite(emporixSite, currencies, countries, regions, paymentModes);
     } catch (error) {
-      this.logger.error('Error getting site', { err: error instanceof Error ? error : String(error), code });
+      this.logger.error({ err: error instanceof Error ? error : String(error), code }, 'Error getting site');
       return null;
     }
   }
@@ -67,7 +67,7 @@ class EmporixSiteService implements SiteService {
       const sites = await Promise.all(config.map(async (code) => this.getSite(code)));
       return sites.filter((site) => site !== null) as Site[];
     } catch (error) {
-      this.logger.error('Error getting available sites', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting available sites');
       return [];
     }
   }
@@ -130,7 +130,7 @@ class EmporixSiteService implements SiteService {
       const emporixCountries = await this.countryApi.getCountries(active);
       return emporixCountries.map((country) => this.mapCountry(country));
     } catch (error) {
-      this.logger.error('Error getting countries', { err: error instanceof Error ? error : String(error), active });
+      this.logger.error({ err: error instanceof Error ? error : String(error), active }, 'Error getting countries');
       return [];
     }
   }
@@ -145,7 +145,7 @@ class EmporixSiteService implements SiteService {
       const emporixRegions = await this.countryApi.getRegions();
       return emporixRegions.map((region) => this.mapRegion(region));
     } catch (error) {
-      this.logger.error('Error getting regions', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting regions');
       return [];
     }
   }
@@ -184,7 +184,7 @@ class EmporixSiteService implements SiteService {
       const emporixCurrencies = await this.currencyApi.getCurrencies();
       return emporixCurrencies.map((currency) => this.mapCurrency(currency));
     } catch (error) {
-      this.logger.error('Error getting currencies', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting currencies');
       return [];
     }
   }
@@ -194,10 +194,13 @@ class EmporixSiteService implements SiteService {
       const emporixCurrency = await this.currencyApi.getCurrency(currencyCode);
       return emporixCurrency ? this.mapCurrency(emporixCurrency) : undefined;
     } catch (error) {
-      this.logger.error('Error getting currency', {
-        err: error instanceof Error ? error : String(error),
-        currencyCode,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          currencyCode,
+        },
+        'Error getting currency',
+      );
       return undefined;
     }
   }
@@ -207,7 +210,7 @@ class EmporixSiteService implements SiteService {
       const emporixRates = await this.currencyApi.getExchangeRates();
       return emporixRates.map((rate) => this.mapExchangeRate(rate));
     } catch (error) {
-      this.logger.error('Error getting exchange rates', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting exchange rates');
       return [];
     }
   }
@@ -217,11 +220,14 @@ class EmporixSiteService implements SiteService {
       const emporixRate = await this.currencyApi.getExchangeRate(sourceCurrency, targetCurrency);
       return emporixRate ? this.mapExchangeRate(emporixRate) : undefined;
     } catch (error) {
-      this.logger.error('Error getting exchange rate', {
-        err: error instanceof Error ? error : String(error),
-        sourceCurrency,
-        targetCurrency,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          sourceCurrency,
+          targetCurrency,
+        },
+        'Error getting exchange rate',
+      );
       return undefined;
     }
   }

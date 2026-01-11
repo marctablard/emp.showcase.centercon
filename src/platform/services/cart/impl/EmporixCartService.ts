@@ -315,7 +315,7 @@ class EmporixCartService implements CartService {
       const cart = await this.cartApi.getCartByCriteria(siteCode, sessionId, customerId, type);
       return cart ? this.mapper.mapToService(cart) : null;
     } catch (error) {
-      this.logger.error('Error getting cart by criteria', { err: error });
+      this.logger.error({ err: error }, 'Error getting cart by criteria');
       return null;
     }
   }

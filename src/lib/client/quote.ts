@@ -12,7 +12,7 @@ export async function getQuoteById(id: string): Promise<Quote | null> {
     return await quoteService.getQuote(id);
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
-    logger.error('Failed to get quote', { err: error, quoteId: id });
+    logger.error({ err: error, quoteId: id }, 'Failed to get quote');
     return null;
   }
 }

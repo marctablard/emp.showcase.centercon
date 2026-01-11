@@ -43,9 +43,12 @@ export class EmporixCustomerSegmentService implements CustomerSegmentService {
         (item: ItemAssignmentResponse): ItemAssignment => this.customerSegmentMapper.mapToService(item),
       );
     } catch (error) {
-      this.logger.error('Error fetching customer segment items', {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        'Error fetching customer segment items',
+      );
       throw new Error(
         `Failed to retrieve customer segment items: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -70,9 +73,12 @@ export class EmporixCustomerSegmentService implements CustomerSegmentService {
         }),
       );
     } catch (error) {
-      this.logger.error('Error fetching customer segment category trees', {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        'Error fetching customer segment category trees',
+      );
       throw new Error(
         `Failed to retrieve customer segment category trees: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

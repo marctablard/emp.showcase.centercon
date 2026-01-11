@@ -14,10 +14,10 @@
  *   const logger = getLogger();
  *   try {
  *     const response = await fetch('/api/data');
- *     logger.debug('Data fetched successfully', { status: response.status });
+ *     logger.debug({ status: response.status }, 'Data fetched successfully');
  *     return response.json();
  *   } catch (error) {
- *     logger.error('Failed to fetch data', { error: error.message });
+ *     logger.error({ error: error.message }, 'Failed to fetch data');
  *     throw error;
  *   }
  * }
@@ -26,58 +26,16 @@
 'use client';
 
 import type pino from 'pino';
-import { getClientLogger } from './client-logger';
+import { getService } from '@/lib/client/service';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * Get the client logger instance
- * Returns a singleton logger that can be used in any client-side code
+ * Returns a logger from the DI container that can be used in any client-side code
  *
  * @returns PINO logger instance configured for client-side logging
  */
 export function getLogger(): pino.Logger {
-  return getClientLogger();
+  // Cast to pino.Logger to maintain backward compatibility with existing code
+  return getService<LoggerService>('LoggerService') as unknown as pino.Logger;
 }
-
-/**
- * Convenience wrapper for logging at specific levels
- * These functions provide a simpler API for one-off logging needs
- */
-
-export function logDebug(message: string, context?: Record<string, unknown>): void {
-  const logger = getLogger();
-  if (context) {
-    logger.debug(context, message);
-  } else {
-    logger.debug(message);
-  }
-}
-
-export function logInfo(message: string, context?: Record<string, unknown>): void {
-  const logger = getLogger();
-  if (context) {
-    logger.info(context, message);
-  } else {
-    logger.info(message);
-  }
-}
-
-export function logWarn(message: string, context?: Record<string, unknown>): void {
-  const logger = getLogger();
-  if (context) {
-    logger.warn(context, message);
-  } else {
-    logger.warn(message);
-  }
-}
-
-export function logError(message: string, context?: Record<string, unknown>): void {
-  const logger = getLogger();
-  if (context) {
-    logger.error(context, message);
-  } else {
-    logger.error(message);
-  }
-}
-
-// Re-export the getClientLogger for direct access if needed
-export { getClientLogger } from './client-logger';

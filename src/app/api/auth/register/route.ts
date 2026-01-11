@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { AuthService } from '@/platform/services/auth/AuthService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { Registration } from '@/platform/services/model/auth';
 
 /**
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     // Determine appropriate status code based on error
     let status = 500;
     let message = 'An unexpected error occurred during registration';

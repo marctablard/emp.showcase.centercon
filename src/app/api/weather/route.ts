@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { WeatherForecast } from '@/platform/services/model/weather';
 import { WeatherService } from '@/platform/services/weather/WeatherService';
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // The dates will be automatically converted to ISO strings during JSON serialization
     return NextResponse.json(forecast);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),

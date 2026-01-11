@@ -67,11 +67,14 @@ export class EmporixAuthService implements AuthService {
           try {
             await this.cartMigrationService.mergeCarts(oldCart.id, customerCartId);
           } catch (error) {
-            this.logger.error('Failed to merge carts', {
-              err: error instanceof Error ? error : String(error),
-              oldCartId: oldCart.id,
-              customerCartId,
-            });
+            this.logger.error(
+              {
+                err: error instanceof Error ? error : String(error),
+                oldCartId: oldCart.id,
+                customerCartId,
+              },
+              'Failed to merge carts',
+            );
           }
         }
       }

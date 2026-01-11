@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
+import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 export const dynamic = 'force-dynamic'; // No caching for this route
 
@@ -23,7 +24,7 @@ export async function GET() {
 
     return NextResponse.json(mockGeoIPResponse);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),

@@ -1,4 +1,5 @@
-import { createServerLogger } from '@/lib/logger/server-logger';
+import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * Next.js instrumentation hook
@@ -8,6 +9,6 @@ import { createServerLogger } from '@/lib/logger/server-logger';
 export async function register() {
   // Initialize the server-side logger on application startup
   // This ensures pino-pretty transport is ready before any logging occurs
-  const logger = createServerLogger();
+  const logger = server.get<LoggerService>('LoggerService');
   logger.info('Server logger initialized');
 }

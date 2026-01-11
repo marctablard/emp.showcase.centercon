@@ -82,7 +82,7 @@ class EmporixShippingService implements ShippingService {
       }
       return methods;
     } catch (error) {
-      this.logger.error('Error getting shipping methods', { err: error });
+      this.logger.error({ err: error }, 'Error getting shipping methods');
       return [];
     }
   }
@@ -105,7 +105,7 @@ class EmporixShippingService implements ShippingService {
 
       return this.shippingMapper.mapToService(emporixMethod, zoneId);
     } catch (error) {
-      this.logger.error('Error getting shipping method', { err: error });
+      this.logger.error({ err: error }, 'Error getting shipping method');
       return null;
     }
   }

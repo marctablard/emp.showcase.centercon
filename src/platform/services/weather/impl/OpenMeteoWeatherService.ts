@@ -28,11 +28,14 @@ export class OpenMeteoWeatherService implements WeatherService {
       const apiResponse = await this.weatherApi.getWeatherForecast(latitude, longitude);
       return this.weatherMapper.mapToService(apiResponse);
     } catch (error) {
-      this.logger.error('Error fetching weather forecast', {
-        err: error instanceof Error ? error : String(error),
-        latitude,
-        longitude,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          latitude,
+          longitude,
+        },
+        'Error fetching weather forecast',
+      );
       throw new Error(`Failed to fetch weather forecast: ${error instanceof Error ? error.message : String(error)}`);
     }
   }

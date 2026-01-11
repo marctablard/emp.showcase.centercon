@@ -107,7 +107,7 @@ class BatteryIncludedSearchService implements SearchService {
       const filteredResponse = this.suggestionsMapper.filterBySite(apiResponse, session?.siteCode);
       return this.suggestionsMapper.mapSearchSuggestions(filteredResponse);
     } catch (error) {
-      this.logger.error('[SearchService] Error getting suggestions', { err: error });
+      this.logger.error({ err: error }, '[SearchService] Error getting suggestions');
       return {
         queryCompletions: [],
         products: [],

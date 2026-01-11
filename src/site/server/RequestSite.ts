@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { headers } from 'next/headers';
-import { getServerLogger } from '@/lib/logger/server-logger';
+import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { INTERNAL_SITE_HEADER } from '../types';
 import { getCachedRequestSite } from './RequestSiteCache';
 
@@ -9,9 +10,9 @@ async function getSiteFromHeaderImpl(): Promise<string> {
 
   try {
     site = (await headers()).get(INTERNAL_SITE_HEADER) || undefined;
-    getServerLogger().debug({ site }, 'Request site resolved');
+    server.get<LoggerService>('LoggerService').debug({ site }, 'Request site resolved');
   } catch (error) {
-    getServerLogger().error({ err: error }, 'Error getting headers');
+    server.get<LoggerService>('LoggerService').error({ err: error }, 'Error getting headers');
   }
 
   return site || 'main';

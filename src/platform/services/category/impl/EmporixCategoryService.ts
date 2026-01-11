@@ -35,7 +35,7 @@ export class EmporixCategoryService implements CategoryService {
       }
       return this.categoryMapper.mapToService(category);
     } catch (error) {
-      this.logger.error('Error fetching category by ID', { err: error, categoryId: id });
+      this.logger.error({ err: error, categoryId: id }, 'Error fetching category by ID');
       return null;
     }
   }
@@ -57,7 +57,7 @@ export class EmporixCategoryService implements CategoryService {
 
       return this.categoryMapper.mapToService(response.items[0]);
     } catch (error) {
-      this.logger.error('Error fetching category by slug', { err: error, categorySlug: slug });
+      this.logger.error({ err: error, categorySlug: slug }, 'Error fetching category by slug');
       return null;
     }
   }
@@ -79,7 +79,7 @@ export class EmporixCategoryService implements CategoryService {
 
       return this.categoryMapper.mapToService(response.items[0]);
     } catch (error) {
-      this.logger.error('Error fetching category by code', { err: error, categoryCode: code });
+      this.logger.error({ err: error, categoryCode: code }, 'Error fetching category by code');
       return null;
     }
   }
@@ -98,7 +98,7 @@ export class EmporixCategoryService implements CategoryService {
 
       return response.items.map((category) => this.categoryMapper.mapToService(category));
     } catch (error) {
-      this.logger.error('Error fetching categories', { err: error });
+      this.logger.error({ err: error }, 'Error fetching categories');
       return [];
     }
   }
@@ -118,7 +118,7 @@ export class EmporixCategoryService implements CategoryService {
 
       return parents.map((parent) => this.categoryMapper.mapToService(parent));
     } catch (error) {
-      this.logger.error('Error fetching category parents', { err: error, categoryId });
+      this.logger.error({ err: error, categoryId }, 'Error fetching category parents');
       return [];
     }
   }
@@ -138,7 +138,7 @@ export class EmporixCategoryService implements CategoryService {
 
       return subcategories.items.map((subcategory) => this.categoryMapper.mapToService(subcategory));
     } catch (error) {
-      this.logger.error('Error fetching category subcategories', { err: error, categoryId });
+      this.logger.error({ err: error, categoryId }, 'Error fetching category subcategories');
       return [];
     }
   }
@@ -183,7 +183,7 @@ export class EmporixCategoryService implements CategoryService {
       }
       return result;
     } catch (error) {
-      this.logger.error('Error fetching categories for product', { err: error, productId });
+      this.logger.error({ err: error, productId }, 'Error fetching categories for product');
       return [];
     }
   }
@@ -204,7 +204,7 @@ export class EmporixCategoryService implements CategoryService {
 
       return this.categoryMapper.mapToService(categoryTree);
     } catch (error) {
-      this.logger.error('Error fetching category tree', { err: error, categoryId });
+      this.logger.error({ err: error, categoryId }, 'Error fetching category tree');
       return null;
     }
   }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { ShippingService } from '@/platform/services/shipping/ShippingService';
 
 /**
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(methods);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(method);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),

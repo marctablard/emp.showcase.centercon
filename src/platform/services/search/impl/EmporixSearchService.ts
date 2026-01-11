@@ -177,10 +177,13 @@ class EmporixSearchService implements SearchService {
             });
           } catch (error) {
             // Continue with other categories if one fails
-            this.logger.warn(`Failed to get assignments for category ${categoryId}`, {
-              err: error,
-              categoryId,
-            });
+            this.logger.warn(
+              {
+                err: error,
+                categoryId,
+              },
+              `Failed to get assignments for category ${categoryId}`,
+            );
           }
         }
       }

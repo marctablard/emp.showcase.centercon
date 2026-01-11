@@ -54,11 +54,12 @@ NEXT_PUBLIC_LOG_ENABLED=true
 
 ### 1. API Routes (Server-side)
 
-Use `getServerLogger()` from the logger factory in API routes:
+Use the `LoggerService` from the server DI container in API routes:
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
+import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),
@@ -347,7 +348,7 @@ In production, logs are output as JSON for log aggregation:
 
 Client-side errors and warnings can be transmitted to the server for centralized logging. The application includes a `/api/logs` endpoint that receives browser logs.
 
-To enable browser log transmission, configure the client logger's transmit option in `src/lib/logger/config.ts`.
+Logger configuration is managed in `src/platform/core/config/logger-config.ts`.
 
 ## Troubleshooting
 
@@ -368,8 +369,24 @@ To enable browser log transmission, configure the client logger's transmit optio
 Ensure you're importing from the correct location:
 - React Components: `import { useLogger } from '@/hooks/common/useLogger'`
 - Client libraries/stores: `import { getLogger } from '@/lib/logger/use-logger-client'`
-- API routes (server): `import { getServerLogger } from '@/lib/logger/server-logger'`
+- API routes (server): `import server from '@/platform/server'` then `server.get<LoggerService>('LoggerService')`
 - Platform services (DI): `@inject('LoggerService') private logger: LoggerService`
+
+### Logger API Pattern
+
+The logger follows PINO's native API where the context object comes first, then the message:
+
+```typescript
+// ✅ Correct - context first, message second (PINO native order)
+logger.error({ error: err.message }, 'Operation failed');
+
+// ❌ Incorrect - message first, context second
+logger.error('Operation failed', { error: err.message });
+```
+
+The logger supports both patterns for convenience:
+- `logger.error(message)` - message only
+- `logger.error(context, message)` - context first, then message (recommended)
 
 ## Related Documentation
 

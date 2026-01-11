@@ -157,9 +157,12 @@ export class EmporixNotificationServiceServer implements INotificationService {
       }
       return this.mapNotificationToService(response);
     } catch (error) {
-      this.logger.error(`Failed to get notification ${notificationId}`, {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        `Failed to get notification ${notificationId}`,
+      );
       throw new Error(`Failed to get notification: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -171,9 +174,12 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       await this.schemaApi.deleteCustomEntity(this.NOTIFICATION_TYPE, notificationId);
     } catch (error) {
-      this.logger.error(`Failed to delete notification ${notificationId}`, {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        `Failed to delete notification ${notificationId}`,
+      );
       throw new Error(`Failed to delete notification: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -235,9 +241,12 @@ export class EmporixNotificationServiceServer implements INotificationService {
       }
       return subscriptionId;
     } catch (error) {
-      this.logger.error('Failed to subscribe to push notifications', {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        'Failed to subscribe to push notifications',
+      );
       throw new Error(
         `Failed to subscribe to push notifications: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -248,9 +257,12 @@ export class EmporixNotificationServiceServer implements INotificationService {
     try {
       await this.schemaApi.deleteCustomEntity(this.SUBSCRIPTION_TYPE, subscriptionId);
     } catch (error) {
-      this.logger.error('Failed to unsubscribe from push notifications', {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        'Failed to unsubscribe from push notifications',
+      );
       throw new Error(
         `Failed to unsubscribe from push notifications: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -311,9 +323,12 @@ export class EmporixNotificationServiceServer implements INotificationService {
       }
       return subscriptions.items.map((item) => this.mapSubscriptionToService(item));
     } catch (error) {
-      this.logger.error('Failed to get subscriptions for notification', {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        'Failed to get subscriptions for notification',
+      );
       throw new Error(
         `Failed to get subscriptions for notification: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -375,10 +390,13 @@ export class EmporixNotificationServiceServer implements INotificationService {
         }),
       );
     } catch (error) {
-      this.logger.error('Failed to send push notification', {
-        err: error instanceof Error ? error : String(error),
-        notificationId,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          notificationId,
+        },
+        'Failed to send push notification',
+      );
       throw new Error(`Failed to send push notification: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -400,9 +418,12 @@ export class EmporixNotificationServiceServer implements INotificationService {
 
       return (response.items || []).map((item: EmporixCustomEntity) => this.mapNotificationToService(item));
     } catch (error) {
-      this.logger.error(`Failed to get notifications for ${recipientType} ${recipientId}`, {
-        err: error instanceof Error ? error : String(error),
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+        },
+        `Failed to get notifications for ${recipientType} ${recipientId}`,
+      );
       throw new Error(`Failed to get notifications: ${error instanceof Error ? error.message : String(error)}`);
     }
   }

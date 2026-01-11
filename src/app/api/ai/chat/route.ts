@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import { AIChatContext } from '@/platform/integrations/ai/model';
 import server from '@/platform/server';
 import { AIService } from '@/platform/services/ai';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SessionService } from '@/platform/services/session';
 import { AIChatRequestSchema } from './schema';
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const response = await aiService.sendChatMessageWithContext(userMessage, context);
     return NextResponse.json(response);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     const isRetryable =
       error instanceof Error && (error.message.includes('timeout') || error.message.includes('network'));
 

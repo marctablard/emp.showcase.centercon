@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
 import { CustomerService, CustomerUpdateDto } from '@/platform/services/customer/CustomerService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * PATCH /api/customer/current/profile
@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest) {
     // Return the updated customer data
     return NextResponse.json(updatedCustomer);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     // Check if error is due to validation
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const statusCode = errorMessage.includes('validation') ? 400 : 500;

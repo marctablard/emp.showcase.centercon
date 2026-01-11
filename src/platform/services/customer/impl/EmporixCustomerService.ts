@@ -74,10 +74,13 @@ export class EmporixCustomerService implements CustomerService {
         roles: roles,
       };
     } catch (error) {
-      this.logger.error('Error fetching customer', {
-        err: error instanceof Error ? error : String(error),
-        customerId,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          customerId,
+        },
+        'Error fetching customer',
+      );
       return null;
     }
   }
@@ -114,7 +117,7 @@ export class EmporixCustomerService implements CustomerService {
       // Convert back to service model
       return this.mapToCustomerAddress(createdAddress);
     } catch (error) {
-      this.logger.error('Error creating customer address', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error creating customer address');
       throw new Error(`Failed to create address: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -142,10 +145,13 @@ export class EmporixCustomerService implements CustomerService {
       // Convert back to service model
       return this.mapToCustomerAddress(updatedAddress);
     } catch (error) {
-      this.logger.error('Error updating customer address', {
-        err: error instanceof Error ? error : String(error),
-        addressId,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          addressId,
+        },
+        'Error updating customer address',
+      );
       throw new Error(`Failed to update address: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -160,10 +166,13 @@ export class EmporixCustomerService implements CustomerService {
       // Delete address using API
       await this.customerApi.deleteCustomerAddress(addressId);
     } catch (error) {
-      this.logger.error('Error deleting customer address', {
-        err: error instanceof Error ? error : String(error),
-        addressId,
-      });
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          addressId,
+        },
+        'Error deleting customer address',
+      );
       throw new Error(`Failed to delete address: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -178,7 +187,7 @@ export class EmporixCustomerService implements CustomerService {
       // Call the CustomerApi to change the password
       await this.customerApi.changePassword(passwordData);
     } catch (error) {
-      this.logger.error('Error changing customer password', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error changing customer password');
       throw new Error(`Failed to change password: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -216,7 +225,7 @@ export class EmporixCustomerService implements CustomerService {
         contactPhone: updatedProfile.contactPhone,
       };
     } catch (error) {
-      this.logger.error('Error updating customer profile', { err: error instanceof Error ? error : String(error) });
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error updating customer profile');
       throw new Error(`Failed to update customer profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }

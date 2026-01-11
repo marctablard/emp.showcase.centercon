@@ -25,26 +25,35 @@ export class FileBasedSetupServiceServer implements SetupService {
    */
   async execute(): Promise<SetupResult> {
     try {
-      this.logger.info(`Executing file-based setup step: ${this.name} (${this.id})`, {
-        serviceId: this.id,
-        serviceName: this.name,
-      });
+      this.logger.info(
+        {
+          serviceId: this.id,
+          serviceName: this.name,
+        },
+        `Executing file-based setup step: ${this.name} (${this.id})`,
+      );
 
       // Read all setup files in the directory
       const operations = await this.readSetupFile();
-      this.logger.info(`Found ${operations.length} operations to execute from directory`, {
-        operationCount: operations.length,
-      });
+      this.logger.info(
+        {
+          operationCount: operations.length,
+        },
+        `Found ${operations.length} operations to execute from directory`,
+      );
 
       // Execute each operation
       const results = [];
       for (let index = 0; index < operations.length; index++) {
         const operation = operations[index];
         try {
-          this.logger.info(`Executing operation ${index + 1}: ${operation.description || operation.endpoint}`, {
-            operationIndex: index + 1,
-            operationDescription: operation.description || operation.endpoint,
-          });
+          this.logger.info(
+            {
+              operationIndex: index + 1,
+              operationDescription: operation.description || operation.endpoint,
+            },
+            `Executing operation ${index + 1}: ${operation.description || operation.endpoint}`,
+          );
           const result = await this.executeOperation(operation);
           results.push({
             success: true,
@@ -52,11 +61,14 @@ export class FileBasedSetupServiceServer implements SetupService {
             result,
           });
         } catch (error) {
-          this.logger.error(`Error executing operation ${index + 1}`, {
-            err: error instanceof Error ? error : String(error),
-            operationIndex: index + 1,
-            operation,
-          });
+          this.logger.error(
+            {
+              err: error instanceof Error ? error : String(error),
+              operationIndex: index + 1,
+              operation,
+            },
+            `Error executing operation ${index + 1}`,
+          );
           results.push({
             success: false,
             operation,
@@ -194,9 +206,12 @@ export class FileBasedSetupServiceServer implements SetupService {
 
         // For more complex evaluations, we would need a proper function evaluation
         // which is beyond the scope of this implementation
-        this.logger.warn(`Complex evaluation not supported: ${condition.evaluate}`, {
-          evaluate: condition.evaluate,
-        });
+        this.logger.warn(
+          {
+            evaluate: condition.evaluate,
+          },
+          `Complex evaluation not supported: ${condition.evaluate}`,
+        );
       }
 
       // If no evaluation function is provided or it's not supported,
@@ -204,9 +219,12 @@ export class FileBasedSetupServiceServer implements SetupService {
       return true;
     } catch (error) {
       // If the condition endpoint fails, consider the condition not met
-      this.logger.warn(`Condition evaluation failed: ${error instanceof Error ? error.message : String(error)}`, {
-        err: error,
-      });
+      this.logger.warn(
+        {
+          err: error,
+        },
+        `Condition evaluation failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return false;
     }
   }

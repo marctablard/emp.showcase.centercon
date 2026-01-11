@@ -7,7 +7,8 @@
 
 import { useMemo } from 'react';
 import type pino from 'pino';
-import { getClientLogger } from '@/lib/logger/client-logger';
+import client from '@/platform/client';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * Hook for accessing the client-side logger
@@ -16,5 +17,6 @@ import { getClientLogger } from '@/lib/logger/client-logger';
  */
 export function useLogger(): pino.Logger {
   // Use useMemo to ensure the logger instance is stable across re-renders
-  return useMemo(() => getClientLogger(), []);
+  // Cast to pino.Logger to maintain backward compatibility with existing code
+  return useMemo(() => client.get<LoggerService>('LoggerService') as unknown as pino.Logger, []);
 }

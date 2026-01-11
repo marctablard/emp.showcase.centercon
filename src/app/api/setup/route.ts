@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerLogger } from '@/lib/logger/server-logger';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SetupResult, SetupService } from '@/platform/services/model/setup/setup';
 
 /**
@@ -9,7 +9,7 @@ import type { SetupResult, SetupService } from '@/platform/services/model/setup/
  * @returns Whether the secret is valid
  */
 function verifySetupApiSecret(request: NextRequest): boolean {
-  const logger = getServerLogger();
+  const logger = server.get<LoggerService>('LoggerService');
   // Check if setup API is enabled
   if (process.env.NEXT_SETUP_API_ENABLED !== 'true') {
     logger.warn('Setup API is disabled. Enable it by setting NEXT_SETUP_API_ENABLED=true');
@@ -40,7 +40,7 @@ function verifySetupApiSecret(request: NextRequest): boolean {
  * @returns Results of all setup steps
  */
 async function executeSetupSteps(): Promise<Record<string, SetupResult>> {
-  const logger = getServerLogger();
+  const logger = server.get<LoggerService>('LoggerService');
   const results: Record<string, SetupResult> = {};
 
   // Get the list of setup step services from environment variable
@@ -127,7 +127,7 @@ async function executeSetupStep(stepId: string): Promise<SetupResult> {
       }
 
       if (service.id === stepId) {
-        const logger = getServerLogger();
+        const logger = server.get<LoggerService>('LoggerService');
         logger.info(
           { serviceId: service.id, serviceName: service.name },
           `Executing setup step: ${service.name} (${service.id})`,
@@ -137,7 +137,7 @@ async function executeSetupStep(stepId: string): Promise<SetupResult> {
         return result;
       }
     } catch (error) {
-      const logger = getServerLogger();
+      const logger = server.get<LoggerService>('LoggerService');
       logger.error(
         {
           error: error instanceof Error ? error.message : String(error),
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
  * @returns Result of the setup operation
  */
 async function executeFileBasedSetup(): Promise<SetupResult> {
-  const logger = getServerLogger();
+  const logger = server.get<LoggerService>('LoggerService');
   try {
     // Get the FileBasedSetupService from the container
     const service = server.get<SetupService>('FileBasedSetupService');

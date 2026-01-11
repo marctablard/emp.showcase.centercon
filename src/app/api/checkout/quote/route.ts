@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkoutFromQuote } from '@/lib/client/checkout';
-import { getServerLogger } from '@/lib/logger/server-logger';
+import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { QuoteCheckoutRequest } from '@/platform/services/model/checkout';
 
 /**
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Return the response
     return NextResponse.json(response);
   } catch (error) {
-    const logger = getServerLogger();
+    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),
