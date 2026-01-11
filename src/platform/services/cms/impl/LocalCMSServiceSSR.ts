@@ -52,16 +52,19 @@ export class LocalCmsServiceSSR implements CMSService {
 
       // If not found and site is not the default site, try the default site
       if ('notfound' in pageData && normalizedSite !== this.defaultSite) {
-        this.logger.info(`Page '${slug}' not found for site '${normalizedSite}', trying default site`, {
-          slug,
-          site: normalizedSite,
-        });
+        this.logger.info(
+          {
+            slug,
+            site: normalizedSite,
+          },
+          `Page '${slug}' not found for site '${normalizedSite}', trying default site`,
+        );
         pageData = await this.tryLoadPage(normalizedSlug, normalizedLocale, this.defaultSite);
       }
 
       return pageData;
     } catch (_error) {
-      this.logger.warn(`Error loading CMS page with slug '${slug}`, { slug });
+      this.logger.warn({ slug }, `Error loading CMS page with slug '${slug}`);
       return {
         notfound: true,
         message: `Error loading page with slug '${slug}'`,
@@ -92,7 +95,7 @@ export class LocalCmsServiceSSR implements CMSService {
 
       return pageData;
     } catch (_error) {
-      this.logger.warn(`Error dynamically importing CMS data for slug '${slug}`, { slug });
+      this.logger.warn({ slug }, `Error dynamically importing CMS data for slug '${slug}`);
       return {
         notfound: true,
         message: `Error loading page with slug '${slug}'`,

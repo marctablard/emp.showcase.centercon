@@ -2,6 +2,7 @@
  * Logger configuration utilities
  * Provides environment detection and log level resolution for PINO logger
  */
+import pino from 'pino';
 
 export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
@@ -104,8 +105,12 @@ export function getClientLoggerConfig() {
 
   return {
     level,
+    serializers: {
+      err: pino.stdSerializers.err, // Enable error serialization
+    },
     browser: {
       asObject: true, // Output JSON objects for structured logging
+      serialize: true, // Enable serializers in browser (required for Error objects)
       reportCaller: isDev, // Include file:line:column in development
     },
   };

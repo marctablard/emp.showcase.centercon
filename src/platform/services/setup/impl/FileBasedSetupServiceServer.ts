@@ -97,11 +97,11 @@ export class FileBasedSetupServiceServer implements SetupService {
       };
     } catch (error) {
       this.logger.error(
-        `Error executing file-based setup step: ${error instanceof Error ? error.message : String(error)}`,
         {
           err: error instanceof Error ? error : String(error),
           serviceId: this.id,
         },
+        `Error executing file-based setup step: ${error instanceof Error ? error.message : String(error)}`,
       );
       return {
         success: false,
