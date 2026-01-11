@@ -46,11 +46,6 @@ const customJestConfig = {
                 decoratorMetadata: true,
               },
               target: 'es2017',
-              baseUrl: '.',
-              paths: {
-                '@/*': ['src/*'],
-                '@platform/*': ['src/platform/*'],
-              },
             },
             module: {
               type: 'es6',
