@@ -33,11 +33,19 @@ const customJestConfig = {
           '@swc/jest',
           {
             jsc: {
+              parser: {
+                syntax: 'typescript',
+                decorators: true, // TypeScript decorators required, lack was causing a syntax error when parsing files with @injectable decorators
+                tsx: true,
+              },
               transform: {
                 react: {
                   runtime: 'automatic',
                 },
+                legacyDecorator: true,
+                decoratorMetadata: true,
               },
+              target: 'es2017',
             },
           },
         ],

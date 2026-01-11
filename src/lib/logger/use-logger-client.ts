@@ -1,13 +1,16 @@
 /**
  * Client Logger Utility
- * Provides logger access in non-component client-side code
- * (e.g., client libraries, utility functions, stores)
  *
- * Use this when you need to log from client-side code that is not a React component.
- * For React components, prefer using the `useLogger` hook instead.
+ * NOTE: This is a convenience wrapper around `getService<LoggerService>('LoggerService')`.
+ *
+ * In Next.js client-side code, you can use this function anywhere (React components,
+ * stores, utilities) since the DI container returns singletons.
+ *
+ * Alternative: You could use `getService<LoggerService>('LoggerService')` directly instead.
+ * This wrapper exists for convenience (shorter API).
  *
  * @example
- * // In a client library file
+ * // In any client-side code (React components, stores, utilities)
  * import { getLogger } from '@/lib/logger/use-logger-client';
  *
  * export async function fetchData() {
@@ -21,21 +24,31 @@
  *     throw error;
  *   }
  * }
+ *
+ * @example
+ * // Alternative: Use getService directly (no wrapper needed)
+ * import { getService } from '@/lib/client/service';
+ * import type { LoggerService } from '@/platform/services/logger/LoggerService';
+ *
+ * const logger = getService<LoggerService>('LoggerService');
  */
 
 'use client';
 
-import type pino from 'pino';
 import { getService } from '@/lib/client/service';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * Get the client logger instance
- * Returns a logger from the DI container that can be used in any client-side code
  *
- * @returns PINO logger instance configured for client-side logging
+ * Convenience wrapper around `getService<LoggerService>('LoggerService')` that:
+ * - Provides a shorter, more semantic API
+ *
+ * Since the DI container returns singletons, this is safe to call from anywhere
+ * in client-side code (React components, stores, utilities, etc.).
+ *
+ * @returns Logger service instance
  */
-export function getLogger(): pino.Logger {
-  // Cast to pino.Logger to maintain backward compatibility with existing code
-  return getService<LoggerService>('LoggerService') as unknown as pino.Logger;
+export function getLogger(): LoggerService {
+  return getService<LoggerService>('LoggerService');
 }
