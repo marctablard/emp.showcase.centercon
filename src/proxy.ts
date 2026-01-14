@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthRequest } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { config as authConfig } from './auth/auth.config';
+import { applyCacheDirectives } from './cache-middleware';
 import { createSiteMiddleware } from './site/middleware';
 import { routing as siteRouting } from './site/routing';
 import { NEXT_REWRITE_HEADER } from './site/types';
@@ -37,6 +38,8 @@ function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
 
 const authMiddleware = auth(async (req: NextAuthRequest) => {
   const { pathname } = req.nextUrl;
+  console.log('pathname', pathname);
+  const isAuthenticated = !!req.auth?.user;
   if (pathname.startsWith('/api/')) {
     // 1) Bypass certain API prefixes (e.g., NextAuth and CSRF endpoint)
     if (startsWithAny(pathname, apiBypassPrefixes)) {
@@ -44,23 +47,22 @@ const authMiddleware = auth(async (req: NextAuthRequest) => {
     }
 
     // 2) Require auth for secured API prefixes (return 401 for unauthenticated)
-    if (!req.auth?.user && startsWithAny(pathname, securedApiPrefixes)) {
+    if (!isAuthenticated && startsWithAny(pathname, securedApiPrefixes)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 3) Apply CSRF validation for remaining API requests
     const csrfResult = validateCsrf(req);
-    if (csrfResult) return csrfResult;
-
-    // 4) Set cache headers for product API requests when not authenticated
-    if (!req.auth?.user && pathname.startsWith('/api/products/')) {
-      const response = NextResponse.next();
-      //response.headers.set('Cache-Control', 'public, max-age=3600');
-      return response;
+    if (csrfResult) {
+      return csrfResult;
     }
+
+    const response = NextResponse.next();
+    return applyCacheDirectives(req, response, isAuthenticated);
   }
+
   // 5) Protect /account/* routes (but not /account itself)
-  if (!req.auth?.user && pathname.match(/\/account\/[^/]+/)) {
+  if (!isAuthenticated && pathname.match(/\/account\/[^/]+/)) {
     const url = req.nextUrl.clone();
     url.pathname = url.pathname.replace(/\/account\/.*$/, '/account');
     return NextResponse.redirect(url);
@@ -79,14 +81,12 @@ const authMiddleware = auth(async (req: NextAuthRequest) => {
   const productMatch = url.pathname.match(/^(.*)\/product\/([^/]+)$/);
   if (productMatch) {
     const [, pathPrefix, productId] = productMatch;
-    if (req.auth?.user) {
+    if (isAuthenticated) {
       url.pathname = `${pathPrefix}/product/AUTHENTICATED_${productId}`;
       return NextResponse.rewrite(url, { request: { headers: req.headers } });
-    } else {
-      response.headers.set('Cache-Control', 'public, max-age=3600');
     }
   }
-  return response;
+  return applyCacheDirectives(req, response, isAuthenticated);
 });
 
 export default async function middleware(req: NextRequest) {
@@ -95,5 +95,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next|api|.well-known\\.*|.*\\..*).*)'],
+  matcher: ['/((?!_next|.well-known\\.*|.*\\..*).*)'],
 };

@@ -4,6 +4,7 @@ import { SearchResultsComponent } from '@/components/search/search-results';
 import { Heading } from '@/components/ui/h';
 import { searchProducts } from '@/lib/ssr/search';
 import { getPageTitle } from '@/lib/ssr/seo';
+import { isSearchSsrEnabled } from '@/lib/ssr/ssr-config';
 import { SearchParams } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
 import { extractFiltersFromSearchParams } from '@/utils/filterUtils';
@@ -48,8 +49,8 @@ export default async function BrowsePage({
     query: q,
     filters: Object.keys(filters).length > 0 ? filters : undefined,
   };
-  // Fetch initial products server-side
-  const initialResults = await searchProducts(initialSearch);
+  // Fetch initial products server-side if SSR is enabled
+  const initialResults = isSearchSsrEnabled() ? await searchProducts(initialSearch) : undefined;
 
   return (
     <div className="max-w-6xl mx-auto px-4 lg:px-9 pb-32">

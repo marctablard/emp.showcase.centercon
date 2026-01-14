@@ -13,8 +13,10 @@ import { useProduct } from '@/hooks/product/useProduct';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 // import { useRecommendations } from '@/hooks/recommendations/useRecommendations';
 import { useL10n } from '@/hooks/useL10n';
+import { fetchProductAvailability } from '@/lib/client/availability';
 import { fetchProductPrice } from '@/lib/client/prices';
 import { cn } from '@/lib/utils';
+import { StockAvailability } from '@/platform/services/model/common';
 import { ProductPrice } from '@/platform/services/model/price';
 import { GroupedSpecification, Product, ProductVariantAttribute } from '@/platform/services/model/product';
 import { ProductFetchOptions } from '@/platform/services/product';
@@ -23,6 +25,7 @@ import { Button } from '../ui/button';
 import { H1, H2, Overline } from '../ui/h';
 import UiLink from '../ui/link';
 import { RatingStarRow } from '../ui/rating';
+import { Spinner } from '../ui/spinner';
 import ProductAddToCart from './product-add-to-cart';
 import ProductAddToCartBar from './product-add-to-cart-bar';
 import { ProductPriceComponent, ProductPriceSkeleton } from './product-price';
@@ -38,6 +41,7 @@ export interface ProductDetailProps {
 export default function ProductDetail({ product: initialProduct, options, className }: ProductDetailProps) {
   const { product, loading, setAsCurrent } = useProduct(initialProduct, options);
   const [price, setPrice] = useState<ProductPrice | null | undefined>(product?.price);
+  const [availability, setAvailability] = useState<StockAvailability | undefined>(product?.availability);
   const locale = useLocale();
   const { l10n } = useL10n(locale);
   const t = useTranslations('product');
@@ -58,12 +62,23 @@ export default function ProductDetail({ product: initialProduct, options, classN
 
   // asynchronous price fetching if not provided in SSR
   useEffect(() => {
-    if (product && price === undefined) {
-      fetchProductPrice(product.id).then((price) => {
-        setPrice(price);
-      });
+    if (product) {
+      if (product.price === undefined) {
+        fetchProductPrice(product.id).then((price) => {
+          setPrice(price);
+        });
+      }
+      if (product.availability === undefined) {
+        fetchProductAvailability(product.id).then((availability) => {
+          setAvailability(availability);
+        });
+      }
+    } else {
+      setPrice(undefined);
+      setAvailability(undefined);
     }
-  }, [product, price]);
+  }, [product]);
+
   useEffect(() => {
     if (addToCartButton.current !== null && isAboveMediumScreen) {
       const observer = new IntersectionObserver(
@@ -89,14 +104,17 @@ export default function ProductDetail({ product: initialProduct, options, classN
   });
 
   if (loading) {
-    return <div>Loading</div>;
+    return (
+      <div>
+        <Spinner variant="lg" />
+      </div>
+    );
   }
 
   if (!product) {
     return notFound();
   }
 
-  const availability = product?.availability;
   return (
     <>
       <div className={cn('grid grid-cols-1 gap-x-4 md:gap-x-12 lg:gap-x-20 md:grid-cols-2 mb-6', className)}>

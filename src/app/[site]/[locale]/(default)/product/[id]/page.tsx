@@ -4,8 +4,9 @@ import ProductDetail from '@/components/product/product-detail';
 import { JsonLd } from '@/components/seo/json-ld';
 import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
 import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
-import { getAvailability, getProductById } from '@/lib/ssr/products';
+import { getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
+import { isProductSsrEnabled } from '@/lib/ssr/ssr-config';
 import { ProductFetchOptions } from '@/platform/services/product';
 
 interface ProductPageProps {
@@ -14,22 +15,21 @@ interface ProductPageProps {
   site: string;
 }
 
-const PRODUCT_FETCH_OPTIONS: ProductFetchOptions = {
-  prices: true,
-  variants: true,
-  categories: true,
-  customerSegments: true,
-};
-
-// Helper function to parse product ID and create fetch options
+// Helper function to parse product ID and create fetch options based on SSR config
 function createProductOptions(id: string, site: string): { productId: string; options: ProductFetchOptions } {
   const customerMatch = id.match(/^AUTHENTICATED_(.+)$/);
   const productId = customerMatch ? customerMatch[1] : id;
   const anonymous = !customerMatch;
 
+  const productConfig = isProductSsrEnabled();
+
+  // Build fetch options based on SSR configuration
   const options: ProductFetchOptions = {
-    ...PRODUCT_FETCH_OPTIONS,
-    prices: { siteCode: site },
+    prices:
+      typeof productConfig === 'boolean' ? productConfig : (productConfig.prices ?? false) ? { siteCode: site } : false,
+    variants: typeof productConfig === 'boolean' ? productConfig : (productConfig.variants ?? false),
+    categories: typeof productConfig === 'boolean' ? productConfig : (productConfig.categories ?? false),
+    availability: typeof productConfig === 'boolean' ? productConfig : (productConfig.availability ?? false),
     customerSegments: !anonymous,
   };
 

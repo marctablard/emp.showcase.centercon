@@ -3,8 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { CartOverview } from '@/components/cart/cart-overview';
 import { getCurrentCart } from '@/lib/ssr/carts';
 import { getPageTitle } from '@/lib/ssr/seo';
-
-const ssr_enabled = process.env.NEXT_SSR_CART === 'true';
+import { isCartSsrEnabled } from '@/lib/ssr/ssr-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +22,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function CartPage() {
-  const cart = ssr_enabled ? await getCurrentCart() : undefined;
+  const cart = isCartSsrEnabled() ? await getCurrentCart() : undefined;
   return <CartOverview initialCart={cart} />;
 }

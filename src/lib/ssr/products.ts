@@ -1,8 +1,8 @@
 import { cache } from 'react';
+import { StockAvailability } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions, ProductService } from '@/platform/services/product';
 import { StockService } from '@/platform/services/stock/StockService';
-import { StockAvailability } from '@/platform/services/stock/StockService';
 import ssr from '@/platform/ssr';
 
 const getProductService = () => ssr.get<ProductService>('ProductService');

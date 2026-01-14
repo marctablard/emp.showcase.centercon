@@ -35,7 +35,7 @@ export async function generateMetadata({
 export default async function AccountPage() {
   const session = await auth();
 
-  if (!session) {
+  if (!session || !session.user) {
     return (
       <div className="w-full max-w-6xl mx-auto px-4 lg:px-9">
         <AccountLanding />

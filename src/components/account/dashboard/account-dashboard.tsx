@@ -28,54 +28,44 @@ export default function AccountDashboard(_props: AccountDashboardProps) {
     // Hier kann später die API-Integration erfolgen
   };
 
+  if (!customer) {
+    return <div>Customer not found</div>;
+  }
+
   return (
     <AccountLayout>
-      <Suspense
-        fallback={
-          <div className="space-y-6 mb-6 animate-pulse">
-            <div className="relative flex justify-between items-center px-4 gap-2 flex-wrap">
-              <div className="h-8 bg-gray-200 rounded w-48"></div>
-              <div className="flex gap-4">
-                <div className="h-10 bg-gray-200 rounded w-32"></div>
-                <div className="h-10 bg-gray-200 rounded w-32"></div>
-              </div>
+      {loading ? (
+        <div className="space-y-6 mb-6 animate-pulse">
+          <div className="relative flex justify-between items-center px-4 gap-2 flex-wrap">
+            <div className="h-8 bg-gray-200 rounded w-48"></div>
+            <div className="flex gap-4">
+              <div className="h-10 bg-gray-200 rounded w-32"></div>
+              <div className="h-10 bg-gray-200 rounded w-32"></div>
             </div>
           </div>
-        }
-      >
-        {loading ? (
-          <div className="space-y-6 mb-6 animate-pulse">
-            <div className="relative flex justify-between items-center px-4 gap-2 flex-wrap">
-              <div className="h-8 bg-gray-200 rounded w-48"></div>
-              <div className="flex gap-4">
-                <div className="h-10 bg-gray-200 rounded w-32"></div>
-                <div className="h-10 bg-gray-200 rounded w-32"></div>
-              </div>
+        </div>
+      ) : (
+        <div className="space-y-6 mb-6">
+          <div className="relative flex justify-between items-center px-4 gap-2 flex-wrap">
+            <H3>
+              {t('hello')}{' '}
+              <span className="text-text-action">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
+            </H3>
+            <div className="flex gap-4">
+              <SupportTicketDialog onSubmit={handleTicketSubmit} />
+              <DashboardControls
+                isCustomizableInitial={isCustomizable}
+                onIsCustomizableChanged={() => {
+                  setIsCustomizable(!isCustomizable);
+                }}
+              />
             </div>
           </div>
-        ) : (
-          <div className="space-y-6 mb-6">
-            <div className="relative flex justify-between items-center px-4 gap-2 flex-wrap">
-              <H3>
-                {t('hello')}{' '}
-                <span className="text-text-action">{customer?.firstName + ' ' + customer?.lastName || 'Kunde'}</span>
-              </H3>
-              <div className="flex gap-4">
-                <SupportTicketDialog onSubmit={handleTicketSubmit} />
-                <DashboardControls
-                  isCustomizableInitial={isCustomizable}
-                  onIsCustomizableChanged={() => {
-                    setIsCustomizable(!isCustomizable);
-                  }}
-                />
-              </div>
-            </div>
-            <ClientOnly>
-              <Dashboard isCustomizable={isCustomizable} layouts={getLayouts()} layoutChanged={setLayouts} />
-            </ClientOnly>
-          </div>
-        )}
-      </Suspense>
+          <ClientOnly>
+            <Dashboard isCustomizable={isCustomizable} layouts={getLayouts()} layoutChanged={setLayouts} />
+          </ClientOnly>
+        </div>
+      )}
     </AccountLayout>
   );
 }
