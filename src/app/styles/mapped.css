@@ -65,8 +65,8 @@
   --color-gradient-secondary-start: var(--color-primary-500);
   --color-gradient-secondary-end: var(--color-blue-700);
 
-  --colors-shadow-strong: var(--color-transparent-primary-10);
-  --colors-shadow-light: var(--color-transparent-primary-5);
+  --color-shadow-strong: var(--color-transparent-primary-10);
+  --color-shadow-light: var(--color-transparent-primary-5);
 
   --desktop-font-size-body-sm: var(--scale-300-12);
   --desktop-font-size-body-md: var(--scale-400-16);
