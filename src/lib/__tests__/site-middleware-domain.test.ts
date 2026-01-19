@@ -131,6 +131,56 @@ describe('site middleware - domain and prefix handling', () => {
   });
 });
 
+describe('domain-only entry mapping', () => {
+  const routingConfig: SiteRoutingConfig = {
+    defaultSite: 'de',
+    availableSites: ['de', 'en'],
+    prefix: 'as-needed',
+    cookie: { name: 'NEXT_SITE' },
+    domains: [
+      {
+        domain: 'example.de',
+        defaultSite: 'de',
+        availableSites: ['de', 'en'],
+        prefix: 'as-needed',
+      },
+      {
+        domain: 'example.en',
+        defaultSite: 'en',
+        availableSites: ['de', 'en'],
+        prefix: 'as-needed',
+      },
+      {
+        domain: 'example.com',
+        defaultSite: 'de',
+        availableSites: ['de', 'en'],
+        prefix: 'as-needed',
+      },
+    ],
+  };
+
+  test('https://example.de maps to site de', () => {
+    const routing = resolveApplicableRouting('example.de', routingConfig);
+    const result = resolveSite('/', createCookies({}) as unknown as NextRequest['cookies'], new Headers(), routing);
+
+    expect(result.site).toBe('de');
+  });
+
+  test('https://example.en maps to site en', () => {
+    const routing = resolveApplicableRouting('example.en', routingConfig);
+    const result = resolveSite('/', createCookies({}) as unknown as NextRequest['cookies'], new Headers(), routing);
+
+    expect(result.site).toBe('en');
+  });
+
+  test('https://example.com maps to site de (default)', () => {
+    const routing = resolveApplicableRouting('example.com', routingConfig);
+    const result = resolveSite('/', createCookies({}) as unknown as NextRequest['cookies'], new Headers(), routing);
+
+    expect(result.site).toBe('de');
+  });
+});
+
 describe('createSiteMiddleware redirect/rewrite behavior', () => {
   const routingConfig: SiteRoutingConfig = {
     defaultSite: 'main',
