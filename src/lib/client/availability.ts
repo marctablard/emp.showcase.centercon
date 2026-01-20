@@ -3,7 +3,7 @@
  * Can be used by both server and client components
  */
 import { cache } from 'react';
-import { StockAvailability } from '@/platform/services/stock/StockService';
+import { StockAvailability } from '@/platform/services/model/common';
 
 /**
  * Fetch product availability by product ID
