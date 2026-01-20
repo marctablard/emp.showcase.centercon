@@ -33,7 +33,7 @@ export function HeaderSearch({ small, show, isCollapsedHeader, className }: Head
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasInitialSearch, setHasInitialSearch] = useState(Boolean(currentQuery));
-  const [isMounted, setIsMounted] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [query, setQuery] = useState(currentQuery || '');
 
   const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -41,10 +41,10 @@ export function HeaderSearch({ small, show, isCollapsedHeader, className }: Head
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // This code is also mentioned in the React docs: https://react.dev/reference/react/useEffect#displaying-different-content-on-the-server-and-the-client
   useEffect(() => {
+    // @see https://react.dev/reference/react-dom/client/hydrateRoot#handling-different-client-and-server-content
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true);
+    setIsClient(true);
   }, []);
 
   useEffect(() => {
@@ -130,10 +130,16 @@ export function HeaderSearch({ small, show, isCollapsedHeader, className }: Head
   }, [handleClickOutside]);
 
   // SSR-Fallback
-  if (!isMounted) {
+  if (!isClient) {
     return (
-      <div className="z-50 relative transition-all transition-discrete duration-200 w-full max-w-180">
-        {/* Skeleton */}
+      <div className="z-50 relative transition-opacity transition-discrete duration-200 w-full hidden opacity-0 md:block md:opacity-100 max-w-80 lg:max-w-180">
+        <div className="relative flex items-center">
+          <div className="w-full h-full relative">
+            <div className="flex w-full min-w-0 px-3 rounded-form-field h-11 py-2 pl-6 pr-[62px] bg-surface-search-input hover:bg-surface-search-input border border-transparent">
+              {/* Skeleton */}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -143,7 +149,7 @@ export function HeaderSearch({ small, show, isCollapsedHeader, className }: Head
       className={cn(
         'z-50 relative transition-opacity transition-discrete duration-200 w-full hidden opacity-0 md:block md:opacity-100',
         showSearch || show ? 'block opacity-100' : '',
-        hasInputFocus ? 'search' : small ? 'max-w-80' : 'max-w-180',
+        hasInputFocus ? 'backdrop-active' : small ? 'max-w-80' : 'max-w-180',
         className,
       )}
     >

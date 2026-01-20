@@ -6,15 +6,13 @@ import { CurrencySwitcher } from '@/components/header/switcher/header-currency-s
 import { LanguageSwitcher } from '@/components/header/switcher/header-language-switcher';
 import { SiteSwitcher } from '@/components/header/switcher/header-site-switcher';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { useHeaderScroll } from '@/hooks/useHeaderScroll';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
-interface HeaderTopBannerProps {
-  scrolled: boolean;
-}
-
-export function HeaderTopBanner({ scrolled }: HeaderTopBannerProps) {
+export function HeaderTopBanner() {
   const t = useTranslations('layout.header');
+  const { scrolled } = useHeaderScroll();
   const isAboveLargeScreen = useBreakpoint('lg');
   return (
     <div

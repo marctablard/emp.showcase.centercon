@@ -12,6 +12,11 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const { id } = await params;
     const site = await siteService.getSite(id);
 
+    // Return 404 if site is null
+    if (!site) {
+      return NextResponse.json({ error: `Site with id '${id}' not found` }, { status: 404 });
+    }
+
     return NextResponse.json(site);
   } catch (error) {
     console.error('Error fetching site data:', error);
