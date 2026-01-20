@@ -27,7 +27,7 @@ class EmporixSiteService implements SiteService {
     @inject('LoggerService') private logger: LoggerService,
   ) {}
 
-  async getSite(code?: string): Promise<Site | null> {
+  async getSite(code?: string, hasTriedDefaultSite: boolean = false): Promise<Site | null> {
     if (!code) {
       const sites = await this.siteSettingsApi.getSites({}, false);
       // TODO we could be faster, by using this result below
@@ -47,7 +47,30 @@ class EmporixSiteService implements SiteService {
       ]);
       // Get Default Site as fallback
       if (!emporixSite) {
-        return await this.getSite(process.env.NEXT_PUBLIC_DEFAULT_SITE);
+        const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE;
+
+        // Prevent infinite recursion:
+        // 1. Don't recurse if we've already tried the default site
+        // 2. Don't recurse if the current code is already the default site
+        // 3. Don't recurse if default site is undefined or empty
+        if (defaultSite && code !== defaultSite && !hasTriedDefaultSite) {
+          console.warn(`Site '${code}' not found, attempting fallback to default site '${defaultSite}'`);
+          const fallbackSite = await this.getSite(defaultSite, true);
+          if (!fallbackSite) {
+            console.error(`Failed to get site '${code}' and fallback to default site '${defaultSite}' also failed`);
+          }
+          return fallbackSite;
+        }
+
+        // If we've already tried default or it's the same code, return null
+        if (defaultSite && code === defaultSite) {
+          console.error(`Site '${code}' not found and it is the configured default site`);
+        } else if (hasTriedDefaultSite) {
+          console.error(`Site '${code}' not found and default site fallback has already been attempted`);
+        } else if (!defaultSite) {
+          console.error(`Site '${code}' not found and no default site is configured`);
+        }
+        return null;
       }
 
       return this.mapSite(emporixSite, currencies, countries, regions, paymentModes);

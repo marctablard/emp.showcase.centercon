@@ -125,21 +125,17 @@ export const createCartStore = (initState: CartState = defaultState) => {
     },
 
     addToCart: async (productId: string, quantity: number) => {
-      const { currentCart } = get();
+      // first get a cart (before we block with the loading state)
+      let { currentCart } = get();
+      if (!currentCart) {
+        currentCart = await get().fetchCart(true);
+        if (!currentCart) throw new Error('No cart available');
+      }
+
       set({ loading: true, error: null });
 
       try {
-        let cartId;
-        if (!currentCart) {
-          const newCart = await get().fetchCart(true);
-          if (newCart) {
-            cartId = newCart.id;
-          } else {
-            throw new Error('No cart available');
-          }
-        } else {
-          cartId = currentCart.id;
-        }
+        const cartId = currentCart.id;
 
         // Call API to add item
         const result = await apiAddItemToCart(cartId, productId, quantity);

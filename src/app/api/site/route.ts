@@ -12,6 +12,12 @@ export async function GET() {
     const siteService = server.get<SiteService>('SiteService');
     const site = await siteService.getSite();
     const availableSites = await siteService.getAvailableSites();
+
+    // Return 404 if site is null
+    if (!site) {
+      return NextResponse.json({ error: 'Site not found' }, { status: 404 });
+    }
+
     return NextResponse.json({ current: site, available: availableSites });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');

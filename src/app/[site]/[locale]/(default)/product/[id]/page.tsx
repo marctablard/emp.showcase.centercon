@@ -11,6 +11,7 @@ import { getSite } from '@/lib/ssr/site';
 interface ProductPageProps {
   id: string;
   locale: string;
+  site: string;
 }
 
 const PRODUCT_FETCH_OPTIONS = {
@@ -39,9 +40,9 @@ export async function generateMetadata(
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
-  const { id, locale } = await params;
+  const { id, locale, site: siteCode } = await params;
 
-  const site = await getSite(locale);
+  const site = await getSite(siteCode);
   // Fetch translations, product data and price in parallel
   const [product, availability] = await Promise.all([
     getProductById(id, PRODUCT_FETCH_OPTIONS),
