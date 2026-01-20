@@ -1,4 +1,3 @@
-import React from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import AccountLayout from '@/components/account/account-layout';
@@ -6,6 +5,8 @@ import PasswordChangeForm from '@/components/account/password/password-change-fo
 import { H1, H2 } from '@/components/ui/h';
 import { getCurrentCustomer } from '@/lib/ssr/customer';
 import { getPageTitle } from '@/lib/ssr/seo';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
