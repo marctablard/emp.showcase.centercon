@@ -27,7 +27,7 @@ interface SavedCartsListProps extends Omit<DashboardCardProps, 'children'> {
 }
 
 export function SavedCartsList({ className, title, isModal = false, onClose, ...props }: SavedCartsListProps) {
-  const t = useTranslations('savedCarts');
+  const t = useTranslations('cart.savedCarts');
   const { toast } = useToast();
   const { loadCart } = useCart();
 
