@@ -4,8 +4,8 @@ import { SsrConfig, SsrService } from '../SsrService';
 /**
  * Default implementation of SsrService that reads configuration from environment variables
  */
-@injectable('SsrService')
-export class DefaultSsrService implements SsrService {
+@injectable('SsrService', 'Singleton')
+class DefaultSsrService implements SsrService {
   private config: SsrConfig;
 
   constructor() {
@@ -87,3 +87,5 @@ export class DefaultSsrService implements SsrService {
     return this.config.search;
   }
 }
+
+export default DefaultSsrService;

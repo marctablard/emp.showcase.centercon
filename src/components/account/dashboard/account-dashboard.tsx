@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ClientOnly } from '@/components/common/client-only';
 import { H3 } from '@/components/ui/h';
