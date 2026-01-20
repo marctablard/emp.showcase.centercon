@@ -183,6 +183,34 @@ describe('EmporixApprovalApi', () => {
     const username = 'benjamin.blue@alaba.ma'; // User that requires approval
     const approverUsername = 'forrest.gump@alaba.ma'; // User that can approve
 
+    async function getOrCreateCustomerCartId() {
+      const customerProfile = await customerApi.getCustomerProfile();
+      const customerId = customerProfile.id;
+      const createRequest: EmporixCreateCartRequest = {
+        ...sampleCreateCartRequest,
+        customerId,
+      };
+
+      try {
+        return await cartApi.createCart(createRequest);
+      } catch (error: any) {
+        if (error?.message?.includes('409')) {
+          const existingCart = await cartApi.getCartByCriteria(
+            sampleCreateCartRequest.siteCode,
+            undefined,
+            customerId,
+            sampleCreateCartRequest.type,
+          );
+
+          if (existingCart?.id) {
+            return existingCart.id;
+          }
+        }
+
+        throw error;
+      }
+    }
+
     async function setupCustomerToken() {
       try {
         // Login with test customer credentials
@@ -217,17 +245,7 @@ describe('EmporixApprovalApi', () => {
       // Set up a customer token with test user credentials
       await setupCustomerToken();
 
-      // Create a cart
-      try {
-        customerCartId = await cartApi.createCart(sampleCreateCartRequest);
-      } catch (error: any) {
-        if (error.message && error.message.includes('409')) {
-          console.log('Cart already exists, skipping creation');
-          return;
-        }
-        console.error('Error creating cart for approval flow:', error);
-        throw error;
-      }
+      customerCartId = await getOrCreateCustomerCartId();
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
@@ -300,6 +318,7 @@ describe('EmporixApprovalApi', () => {
             addresses: checkoutRequest.addresses,
           },
         });
+        approvalId = approval.id;
 
         await setupApproverToken();
 
