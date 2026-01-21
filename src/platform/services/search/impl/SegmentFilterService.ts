@@ -1,6 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCategoryApi } from '@/platform/integrations/emporix/category/EmporixCategoryApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { CustomerSegmentService } from '../../customer-segment/CustomerSegmentService';
 import type { CustomerService } from '../../customer/CustomerService';
 
@@ -13,15 +14,18 @@ class SegmentFilterService {
   private customerSegmentService: CustomerSegmentService;
   private categoryApi: EmporixCategoryApi;
   private customerService: CustomerService;
+  private logger: LoggerService;
 
   constructor(
     @inject('CustomerSegmentService') customerSegmentService: CustomerSegmentService,
     @inject('EmporixCategoryApi') categoryApi: EmporixCategoryApi,
     @inject('CustomerService') customerService: CustomerService,
+    @inject('LoggerService') logger: LoggerService,
   ) {
     this.customerSegmentService = customerSegmentService;
     this.categoryApi = categoryApi;
     this.customerService = customerService;
+    this.logger = logger;
   }
 
   private async getSegmentItems(): Promise<any[]> {
@@ -117,7 +121,13 @@ class SegmentFilterService {
             }
           });
         } catch (error) {
-          console.error(`Error fetching category assignments for ${segmentItem.item.id}:`, error);
+          this.logger.error(
+            {
+              err: error,
+              categoryId: segmentItem.item.id,
+            },
+            `Error fetching category assignments for ${segmentItem.item.id}`,
+          );
         }
       }
     }

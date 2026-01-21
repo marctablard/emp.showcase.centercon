@@ -5,6 +5,8 @@ const nextJest = require('next/jest');
 const createJestConfig = nextJest({ dir: './' });
 
 const commonJestConfig = {
+  // Note: nextJest automatically creates moduleNameMapper from tsconfig.json paths
+  // We explicitly set it here to ensure it's applied to all projects
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@platform/(.*)$': '<rootDir>/src/platform/$1',
@@ -28,21 +30,36 @@ const customJestConfig = {
       testEnvironment: 'jsdom',
       testMatch: ['**/hooks/**/?(*.)+(spec|test).ts?(x)'],
       setupFilesAfterEnv: ['<rootDir>/jest.react.setup.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@platform/(.*)$': '<rootDir>/src/platform/$1',
+      },
+      testPathIgnorePatterns: commonJestConfig.testPathIgnorePatterns,
       transform: {
         '^.+\\.(ts|tsx)$': [
           '@swc/jest',
           {
             jsc: {
+              parser: {
+                syntax: 'typescript',
+                decorators: true, // TypeScript decorators required, lack was causing a syntax error when parsing files with @injectable decorators
+                tsx: true,
+              },
               transform: {
                 react: {
                   runtime: 'automatic',
                 },
+                legacyDecorator: true,
+                decoratorMetadata: true,
               },
+              target: 'es2017',
+            },
+            module: {
+              type: 'es6',
             },
           },
         ],
       },
-      ...commonJestConfig,
     },
     {
       preset: 'ts-jest',

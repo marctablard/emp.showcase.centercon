@@ -1,5 +1,6 @@
 import { enableMapSet } from 'immer';
 import { create } from 'zustand/react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import type {
   StorefrontNotification,
   WebPushSubscriptionRegistration,
@@ -160,7 +161,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
             isConsumed = true;
           }
         } catch (error) {
-          console.error(`Error in notification listener ${listener.id}:`, error);
+          getLogger().error({ err: error, listenerId: listener.id }, 'Error in notification listener');
         }
       }
 
@@ -171,7 +172,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     checkSupport: async (): Promise<boolean> => {
       const { isPushSupported, permissionState } = get();
       if (isPushSupported !== undefined && permissionState !== undefined) {
-        console.log('Using cached result', isPushSupported, permissionState);
+        getLogger().debug({ isPushSupported, permissionState }, 'Using cached result');
         return isPushSupported == true && permissionState === 'granted';
       }
       try {
@@ -201,21 +202,21 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
           });
           return false;
         }
-        console.log('Push notifications are supported');
+        getLogger().debug('Push notifications are supported');
         // Request permission if needed
         if (Notification.permission !== 'granted') {
-          console.log('Requesting notification permission');
+          getLogger().debug('Requesting notification permission');
           await Notification.requestPermission();
         }
         const permissionState = Notification.permission as NotificationPermission;
-        console.log('Permission state:', permissionState);
+        getLogger().debug({ permissionState }, 'Permission state');
         set({
           isPushSupported: true,
           permissionState,
         });
         return permissionState === 'granted';
       } catch (error) {
-        console.error('Error checking push notification status:', error);
+        getLogger().error({ err: error }, 'Error checking push notification status');
         set({
           error: error instanceof Error ? error.message : 'Unknown error',
         });
@@ -233,7 +234,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
       }
 
       if (!get().isPushSupported) {
-        console.log('Push notifications are not supported in this browser');
+        getLogger().debug('Push notifications are not supported in this browser');
         set({
           error: 'Push notifications are not supported in this browser',
         });
@@ -241,11 +242,11 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
       }
 
       try {
-        console.log('Registering service worker');
+        getLogger().debug('Registering service worker');
         const registration = await navigator.serviceWorker.register('/notification-worker.js');
         return registration;
       } catch (error) {
-        console.error('Service worker registration failed:', error);
+        getLogger().error({ err: error }, 'Service worker registration failed');
         set({
           error: `Service worker registration failed: ${error instanceof Error ? error.message : String(error)}`,
         });
@@ -257,14 +258,14 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     subscribe: async () => {
       // Check if push notifications are disabled via environment variable
       if (!notificationsFeatureEnabled || !get().isPushSupported) {
-        console.log('Push notifications are disabled via configuration');
+        getLogger().debug('Push notifications are disabled via configuration');
         set({
           error: 'Push notifications are currently disabled',
         });
         return;
       }
       if (get().subscription === 'PENDING') {
-        console.log('Already subscribing to push notifications');
+        getLogger().debug('Already subscribing to push notifications');
         return;
       }
       set({
@@ -321,7 +322,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
 
         get().fetchNotifications();
       } catch (error) {
-        console.error('Subscription error:', error);
+        getLogger().error({ err: error }, 'Subscription error');
         set({
           subscription: 'UNSUBSCRIBED',
           error: `Subscription failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -357,23 +358,23 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
             body: JSON.stringify(subscription),
           });
         } catch (unsubscribeError) {
-          console.error('Error notifying server about unsubscription:', unsubscribeError);
+          getLogger().error({ err: unsubscribeError }, 'Error notifying server about unsubscription');
           // Continue even if server notification fails
         }
         // Start polling as fallback only if interval > 0
         if (pollingInterval > 0) {
           get().startPolling();
         } else {
-          console.log('Polling not started after unsubscribe because interval is set to 0');
+          getLogger().debug('Polling not started after unsubscribe because interval is set to 0');
         }
         set({
           subscription: 'UNSUBSCRIBED',
           error: null,
         });
 
-        console.log('Push notification unsubscription successful');
+        getLogger().debug('Push notification unsubscription successful');
       } catch (error) {
-        console.error('Unsubscription error:', error);
+        getLogger().error({ err: error }, 'Unsubscription error');
         set({
           error: `Unsubscription failed: ${error instanceof Error ? error.message : String(error)}`,
         });
@@ -387,7 +388,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
       }
       // If already fetching, skip this request
       if (isFetching) {
-        console.debug('Notification fetch already in progress, skipping duplicate request');
+        getLogger().debug('Notification fetch already in progress, skipping duplicate request');
         return;
       }
 
@@ -426,7 +427,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
           });
         }
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        getLogger().error({ err: error }, 'Error fetching notifications');
         set({ error: error instanceof Error ? error.message : 'Unknown error' });
       } finally {
         // Always clear the mutex flag when done, even if there was an error
@@ -446,7 +447,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     startPolling: () => {
       // Do not start polling if interval is 0
       if (pollingInterval === 0) {
-        console.log('Polling is disabled because interval is set to 0');
+        getLogger().debug('Polling is disabled because interval is set to 0');
         return;
       }
       // Don't start polling if already polling
@@ -454,7 +455,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
         return;
       }
 
-      console.log('Starting polling for notifications');
+      getLogger().debug('Starting polling for notifications');
 
       // Clear any existing interval
       if (pollingIntervalId) {
@@ -463,7 +464,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
 
       // Then set up the interval
       pollingIntervalId = setInterval(() => {
-        console.log('Polling for notifications');
+        getLogger().debug('Polling for notifications');
         get().fetchNotifications();
       }, pollingInterval);
 
@@ -475,7 +476,7 @@ export const createNotificationStore = (initState: NotificationState = defaultSt
     // Stop polling for notifications
     stopPolling: () => {
       if (pollingIntervalId) {
-        console.log('Stopping polling for notifications');
+        getLogger().debug('Stopping polling for notifications');
         clearInterval(pollingIntervalId);
       }
 

@@ -52,6 +52,66 @@ openssl rand -base64 32
 - **Development:** `http://localhost:3000`
 - **Production:** Your actual domain (e.g., `https://shop.example.com`)
 
+### Logging Configuration
+
+The application uses PINO logger for structured logging. Log levels and behavior can be controlled via environment variables.
+
+#### `NEXT_LOG_LEVEL` (Server-Side)
+
+Controls the log level for server-side logging (API routes, Server Components, platform services):
+
+- `trace` - Most verbose (development only)
+- `debug` - Detailed debugging information (default in development)
+- `info` - Informational messages (default in production)
+- `warn` - Warning messages
+- `error` - Error messages only
+- `fatal` - Fatal errors only
+
+**Example:**
+```env
+# Development - verbose logging
+NEXT_LOG_LEVEL=debug
+
+# Production - minimal logging
+NEXT_LOG_LEVEL=info
+```
+
+#### `NEXT_PUBLIC_LOG_LEVEL` (Client-Side)
+
+Controls the log level for client-side logging (browser):
+
+- `debug` - Detailed debugging information (default in development)
+- `info` - Informational messages
+- `warn` - Warning messages (default in production)
+- `error` - Error messages only
+
+**Example:**
+```env
+# Development - show debug logs in browser console
+NEXT_PUBLIC_LOG_LEVEL=debug
+
+# Production - only show warnings and errors
+NEXT_PUBLIC_LOG_LEVEL=warn
+```
+
+#### `NEXT_PUBLIC_LOG_ENABLED` (Client-Side)
+
+Controls whether client-side logging is enabled:
+
+- `true` - Enable client-side logging (default in development)
+- `false` - Disable client-side logging (recommended for production)
+
+**Example:**
+```env
+# Enable client-side logging (development)
+NEXT_PUBLIC_LOG_ENABLED=true
+
+# Disable client-side logging (production)
+NEXT_PUBLIC_LOG_ENABLED=false
+```
+
+**Note:** Client-side logging is automatically enabled in development mode and disabled in production unless explicitly set.
+
 ### Debug Settings
 
 #### `NEXT_PUBLIC_DEBUG_API_RESPONSE`
@@ -132,6 +192,12 @@ Minimal configuration for local development:
 
 ### Development
 ```env
+# Logging
+NEXT_LOG_LEVEL=debug
+NEXT_PUBLIC_LOG_LEVEL=debug
+NEXT_PUBLIC_LOG_ENABLED=true
+
+# API Debugging
 NEXT_PUBLIC_DEBUG_API_CURL=true
 NEXT_PUBLIC_DEBUG_API_VERBOSE=true
 NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY-500
@@ -139,12 +205,24 @@ NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY-500
 
 ### Staging
 ```env
+# Logging
+NEXT_LOG_LEVEL=info
+NEXT_PUBLIC_LOG_LEVEL=warn
+NEXT_PUBLIC_LOG_ENABLED=false
+
+# SEO & Debugging
 NEXT_PUBLIC_ROBOTS_NOINDEX=true  # Prevent search engine indexing
 NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS
 ```
 
 ### Production
 ```env
+# Logging
+NEXT_LOG_LEVEL=info
+NEXT_PUBLIC_LOG_LEVEL=warn
+NEXT_PUBLIC_LOG_ENABLED=false
+
+# General Settings
 NEXT_PUBLIC_ROBOTS_NOINDEX=false
 NEXT_PUBLIC_DEBUG_API_RESPONSE=OFF
 NEXT_SETUP_API_ENABLED=false

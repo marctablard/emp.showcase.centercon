@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import { QuoteService } from '@/platform/services/quote/QuoteService';
 
 export async function POST(request: NextRequest) {
+  let quoteId: string | undefined;
+  let status: string | undefined;
+
   try {
     const body = await request.json();
-    const { quoteId, status, comment, locale, oldStatus } = body;
+    quoteId = body.quoteId;
+    status = body.status;
+    const { comment, locale, oldStatus } = body;
 
     if (!quoteId) {
       return NextResponse.json({ error: 'Quote ID is required' }, { status: 400 });
@@ -33,7 +39,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error('Error updating quote status:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/quote/update-status',
+        method: 'POST',
+        quoteId,
+        status,
+      },
+      'Error updating quote status',
+    );
     const message = error instanceof Error ? error.message : 'Failed to update quote status';
     return NextResponse.json({ error: message }, { status: 500 });
   }

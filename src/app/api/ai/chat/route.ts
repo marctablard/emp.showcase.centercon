@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AIChatContext } from '@/platform/integrations/ai/model';
 import server from '@/platform/server';
 import { AIService } from '@/platform/services/ai';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SessionService } from '@/platform/services/session';
 import { AIChatRequestSchema } from './schema';
 
@@ -50,10 +51,20 @@ export async function POST(request: NextRequest) {
     const response = await aiService.sendChatMessageWithContext(userMessage, context);
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[API /ai/chat] Error:', error);
-
+    const logger = server.get<LoggerService>('LoggerService');
     const isRetryable =
       error instanceof Error && (error.message.includes('timeout') || error.message.includes('network'));
+
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/ai/chat',
+        method: 'POST',
+        retryable: isRetryable,
+      },
+      'Error processing AI chat request',
+    );
 
     return NextResponse.json(
       {

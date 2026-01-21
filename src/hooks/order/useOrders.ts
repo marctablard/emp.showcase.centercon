@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { buildSearchQuery } from '@/platform/integrations/emporix/common/util/common';
 import { Order } from '@/platform/services/model/order/order';
 import { useOrderStore } from '@/providers/StoreProvider';
@@ -89,7 +90,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
       await storeFetchOrders(pageSize, pageNumber, filters);
     } catch (err) {
       // Error is already handled in the store
-      console.error('Error in refetchOrders:', err);
+      getLogger().error({ err, pageSize, pageNumber }, 'Error in refetchOrders');
     }
   }, [pageSize, pageNumber, filters, storeFetchOrders]);
 

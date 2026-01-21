@@ -14,6 +14,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn, formatCurrency } from '@/lib/utils';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 
@@ -51,7 +52,7 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
         setNotifications((prev) => prev.filter((item) => item.id !== notification));
         return true;
       }
-      console.log('headerCartButton notification', notification);
+      getLogger().debug({ notification }, 'headerCartButton notification');
       if (notification.recipient_id !== cart?.id) {
         return false;
       }
@@ -97,21 +98,21 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
         <span className="text-text-on-action text-lg">{formatCurrency(cartTotal || 0.0, currency)}</span>
       )}
       <div className={cn('flex items-center w-[43px] h-[35px] relative', isClient ? '' : 'justify-center')}>
-          {isClient ? (
-            <>
-              <Badge
-                variant="white"
-                rounded="full"
-                className="h-5 min-w-5 px-1 tabular-nums tracking-normal absolute top-0 right-0"
-              >
-                {loading ? (
-                  <Spinner color="primary" variant="xs" />
-                ) : (
-                  cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0
-                )}
-              </Badge>
-              <ShoppingCart width="32" height="32" />
-            </>
+        {isClient ? (
+          <>
+            <Badge
+              variant="white"
+              rounded="full"
+              className="h-5 min-w-5 px-1 tabular-nums tracking-normal absolute top-0 right-0"
+            >
+              {loading ? (
+                <Spinner color="primary" variant="xs" />
+              ) : (
+                cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0
+              )}
+            </Badge>
+            <ShoppingCart width="32" height="32" />
+          </>
         ) : (
           <Spinner color="white" variant="sm" />
         )}

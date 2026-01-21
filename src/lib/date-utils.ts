@@ -1,3 +1,5 @@
+import { getLogger } from '@/lib/logger/use-logger-client';
+
 /**
  * Format a date string to a localized format
  * @param dateString The date string to format
@@ -13,7 +15,7 @@ export function formatDate(dateString: string, locale: string = 'en-US'): string
       day: '2-digit',
     }).format(date);
   } catch (error) {
-    console.error('Error formatting date:', error);
+    getLogger().error({ err: error, dateString, locale }, 'Error formatting date');
     return dateString;
   }
 }

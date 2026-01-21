@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/ui/useToast';
 import { searchApprovalUsers } from '@/lib/client/approval';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import type { ApprovalUser } from '@/platform/services/model/approval';
 
 interface UseApproverSearchProps {
@@ -44,7 +45,7 @@ export function useApproverSearch({
       const fetchedApprovers = await searchApprovalUsers(resourceType, resourceId, action);
       setApprovers(fetchedApprovers);
     } catch (err) {
-      console.error('Error fetching approvers:', err);
+      getLogger().error({ err }, 'Error fetching approvers');
       const errorObj = err instanceof Error ? err : new Error(String(err));
       setError(errorObj);
 

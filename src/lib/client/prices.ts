@@ -3,6 +3,7 @@
  * Can be used by both server and client components
  */
 import { cache } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import type { ProductPrice } from '@/platform/services/model/price/price';
 
 /**
@@ -49,7 +50,7 @@ export const fetchProductPrice = cache(
 
       return await response.json();
     } catch (error) {
-      console.error(`Error fetching price for product ${id}:`, error);
+      getLogger().error({ err: error, productId: id }, 'Error fetching product price');
       throw error;
     }
   },

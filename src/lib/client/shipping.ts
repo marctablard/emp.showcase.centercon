@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { ShippingMethod } from '@/platform/services/model/shipping';
 
 /**
@@ -30,7 +31,7 @@ export async function getShippingMethods(
 
     return await response.json();
   } catch (error) {
-    console.error(`Error fetching shipping methods:`, error);
+    getLogger().error({ err: error, countryCode, postalCode }, 'Error fetching shipping methods');
     throw error;
   }
 }
@@ -58,7 +59,7 @@ export async function getShippingMethod(methodId: string, zoneId: string): Promi
 
     return await response.json();
   } catch (error) {
-    console.error(`Error fetching shipping method:`, error);
+    getLogger().error({ err: error, methodId, zoneId }, 'Error fetching shipping method');
     throw error;
   }
 }

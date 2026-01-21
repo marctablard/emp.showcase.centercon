@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useL10n } from '@/hooks/useL10n';
 import { useRouter } from '@/i18n/navigation';
 import { fetchProductVariants } from '@/lib/client/products';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
 import { getColorValue } from '@/utils/colors';
@@ -136,7 +137,7 @@ export default function ProductVariantSelectorMulti({ product, className }: Prod
           setVariants(fetchedVariants);
         }
       } catch (error) {
-        console.error('Failed to fetch variants:', error);
+        getLogger().error({ err: error }, 'Failed to fetch variants');
         if (!isCancelled) {
           setVariants([]);
         }

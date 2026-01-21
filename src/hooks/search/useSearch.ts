@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import useHistory from '@/hooks/history/useHistory';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
 
@@ -321,7 +322,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       // Set suggestions directly from API response
       setSuggestions(data);
     } catch (err) {
-      console.error('Error fetching suggestions:', err);
+      getLogger().error({ err, query }, 'Error fetching suggestions');
     } finally {
       setLoading(false);
     }

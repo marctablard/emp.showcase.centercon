@@ -1,5 +1,7 @@
 'use client';
 
+import { getLogger } from '@/lib/logger/use-logger-client';
+
 /**
  * Clear all persisted stores from localStorage and sessionStorage during logout
  */
@@ -14,7 +16,7 @@ export const clearAllPersistedStores = (): void => {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.error(`Error clearing localStorage item ${key}:`, error);
+      getLogger().error({ err: error, storageKey: key }, 'Error clearing localStorage item');
     }
   });
 };

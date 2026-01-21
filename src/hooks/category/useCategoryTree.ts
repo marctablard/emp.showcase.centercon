@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { fetchCategoryTree } from '@/lib/client/category';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Category } from '@/platform/services/model/category';
 
 interface CategoryTreeHook {
@@ -47,7 +48,7 @@ export const useCategoryTree = (
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch category tree'));
-        console.error('Error fetching category tree:', err);
+        getLogger().error({ err }, 'Error fetching category tree');
       } finally {
         setLoading(false);
       }

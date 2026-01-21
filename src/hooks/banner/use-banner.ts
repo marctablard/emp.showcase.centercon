@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { ISbStoriesParams, StoryblokClient } from '@storyblok/react/rsc';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { getStoryblokApi } from '@/lib/storyblok';
 import { useBannerStore } from '@/stores/banner-store';
 
@@ -62,7 +63,7 @@ export function useBanner(): UseBannerResult {
         }
       } catch (err) {
         if (isMounted) {
-          console.error('Error fetching banner data:', err);
+          getLogger().error({ err }, 'Error fetching banner data');
           setError(err instanceof Error ? err : new Error('Unknown error'));
           setIsLoading(false);
         }
