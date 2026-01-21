@@ -63,6 +63,18 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
   }, [currentPage, total, pageSize]);
 
   useEffect(() => {
+    // Whitelist of search-related parameters
+    const searchRelatedParams = ['q', 'page', 'size', 'sort', 'filters'];
+    const isSearchRelatedParam = (key: string) =>
+      searchRelatedParams.some((param) => key === param || key.startsWith(`${param}[`));
+
+    // Check if URL has any search-related params - if not, skip processing
+    // This prevents reacting to unrelated params like email, callbackUrl from auth dialogs
+    const hasSearchParams = Array.from(searchParams.keys()).some(isSearchRelatedParam);
+    if (!hasSearchParams && searchParams.toString() !== '') {
+      return;
+    }
+
     // Parse URL parameters to restore search state
     const query = searchParams.get('q') ?? '';
     const page = parseInt(searchParams.get('page') ?? '0', 10);
