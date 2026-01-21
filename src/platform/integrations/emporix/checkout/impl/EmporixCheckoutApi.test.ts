@@ -150,6 +150,34 @@ describe('EmporixCheckoutApi', () => {
     await apiInvoker.clearTokens();
   });
 
+  async function getOrCreateCustomerCartId() {
+    const customerProfile = await customerApi.getCustomerProfile();
+    const customerId = customerProfile.id;
+    const createRequest: EmporixCreateCartRequest = {
+      ...sampleCreateCartRequest,
+      customerId,
+    };
+
+    try {
+      return await cartApi.createCart(createRequest);
+    } catch (error: any) {
+      if (error?.message?.includes('409')) {
+        const existingCart = await cartApi.getCartByCriteria(
+          sampleCreateCartRequest.siteCode,
+          undefined,
+          customerId,
+          sampleCreateCartRequest.type,
+        );
+
+        if (existingCart?.id) {
+          return existingCart.id;
+        }
+      }
+
+      throw error;
+    }
+  }
+
   describe('Checkout Operations', () => {
     // Create a cart and add items before testing checkout
     beforeEach(async () => {
@@ -235,7 +263,7 @@ describe('EmporixCheckoutApi', () => {
       await setupCustomerToken();
 
       // Create a cart
-      customerCartId = await cartApi.createCart(sampleCreateCartRequest);
+      customerCartId = await getOrCreateCustomerCartId();
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
@@ -278,7 +306,7 @@ describe('EmporixCheckoutApi', () => {
       await setupCustomerToken();
 
       // Create a cart
-      customerCartId = await cartApi.createCart(sampleCreateCartRequest);
+      customerCartId = await getOrCreateCustomerCartId();
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
@@ -334,7 +362,7 @@ describe('EmporixCheckoutApi', () => {
       await setupCustomerToken();
 
       // Create a cart
-      customerCartId = await cartApi.createCart(sampleCreateCartRequest);
+      customerCartId = await getOrCreateCustomerCartId();
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
@@ -344,7 +372,9 @@ describe('EmporixCheckoutApi', () => {
 
     afterEach(async () => {
       // Delete the cart
-      await cartApi.deleteCart(customerCartId);
+      if (customerCartId) {
+        await cartApi.deleteCart(customerCartId);
+      }
     }, 15000);
 
     it('should fail trying to perform checkout with approval required', async () => {

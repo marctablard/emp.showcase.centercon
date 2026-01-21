@@ -183,6 +183,34 @@ describe('EmporixApprovalApi', () => {
     const username = 'benjamin.blue@alaba.ma'; // User that requires approval
     const approverUsername = 'forrest.gump@alaba.ma'; // User that can approve
 
+    async function getOrCreateCustomerCartId() {
+      const customerProfile = await customerApi.getCustomerProfile();
+      const customerId = customerProfile.id;
+      const createRequest: EmporixCreateCartRequest = {
+        ...sampleCreateCartRequest,
+        customerId,
+      };
+
+      try {
+        return await cartApi.createCart(createRequest);
+      } catch (error: any) {
+        if (error?.message?.includes('409')) {
+          const existingCart = await cartApi.getCartByCriteria(
+            sampleCreateCartRequest.siteCode,
+            undefined,
+            customerId,
+            sampleCreateCartRequest.type,
+          );
+
+          if (existingCart?.id) {
+            return existingCart.id;
+          }
+        }
+
+        throw error;
+      }
+    }
+
     async function setupCustomerToken() {
       try {
         // Login with test customer credentials
@@ -298,6 +326,7 @@ describe('EmporixApprovalApi', () => {
             addresses: checkoutRequest.addresses,
           },
         });
+        approvalId = approval.id;
 
         await setupApproverToken();
 
