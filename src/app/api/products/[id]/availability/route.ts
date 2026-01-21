@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SessionService } from '@/platform/services/session/SessionService';
 import { StockService } from '@/platform/services/stock/StockService';
 
@@ -8,8 +9,9 @@ import { StockService } from '@/platform/services/stock/StockService';
  * GET /api/products/[id]/availability
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: productId } = await params;
+
   try {
-    const { id: productId } = await params;
     const sessionService = server.get<SessionService>('SessionService');
     const session = await sessionService.getCurrent();
     if (!session) {
@@ -25,7 +27,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(availability);
   } catch (error) {
-    console.error('Error fetching product availability:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/products/${productId}/availability`,
+        method: 'GET',
+        productId,
+      },
+      'Error fetching product availability',
+    );
     return NextResponse.json({ error: 'Failed to fetch product availability' }, { status: 500 });
   }
 }

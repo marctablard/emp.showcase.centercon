@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CategoryService } from '@/platform/services/category/CategoryService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * API endpoint to get a category tree
@@ -22,7 +23,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(categoryTree);
   } catch (error) {
-    console.error('Error fetching category tree:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/categories/tree',
+        method: 'GET',
+      },
+      'Error fetching category tree',
+    );
     return NextResponse.json({ error: 'Failed to fetch category tree' }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { TrackingInfo } from '@/platform/services/model/tracking';
 
 interface UseTrackingProps {
@@ -38,7 +39,7 @@ export function useTracking({ orderId }: UseTrackingProps): UseTrackingResult {
       const data = await response.json();
       setTrackingInfo(data);
     } catch (err) {
-      console.error('Error fetching tracking information:', err);
+      getLogger().error({ err, orderId }, 'Error fetching tracking information');
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setLoading(false);

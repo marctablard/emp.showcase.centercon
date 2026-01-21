@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixMonetaryAmount } from '@/platform/integrations/emporix/model/common';
 import type { EmporixShippingApi } from '@/platform/integrations/emporix/shipping/EmporixShippingApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SessionService } from '@/platform/services/session/SessionService';
 import { ShippingMethod } from '../../model/shipping';
 import type { ShippingMapper } from '../../model/shipping/ShippingMapper';
@@ -15,15 +16,18 @@ class EmporixShippingService implements ShippingService {
   private shippingApi: EmporixShippingApi;
   private shippingMapper: ShippingMapper;
   private sessionService: SessionService;
+  private logger: LoggerService;
 
   constructor(
     @inject('EmporixShippingApi') shippingApi: EmporixShippingApi,
     @inject('EmporixShippingMapper') shippingMapper: ShippingMapper,
     @inject('SessionService') sessionService: SessionService,
+    @inject('LoggerService') logger: LoggerService,
   ) {
     this.shippingApi = shippingApi;
     this.shippingMapper = shippingMapper;
     this.sessionService = sessionService;
+    this.logger = logger;
   }
 
   async getShippingMethods(
@@ -78,7 +82,7 @@ class EmporixShippingService implements ShippingService {
       }
       return methods;
     } catch (error) {
-      console.error('Error getting shipping methods:', error);
+      this.logger.error({ err: error }, 'Error getting shipping methods');
       return [];
     }
   }
@@ -101,7 +105,7 @@ class EmporixShippingService implements ShippingService {
 
       return this.shippingMapper.mapToService(emporixMethod, zoneId);
     } catch (error) {
-      console.error('Error getting shipping method:', error);
+      this.logger.error({ err: error }, 'Error getting shipping method');
       return null;
     }
   }

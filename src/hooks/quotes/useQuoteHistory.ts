@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { QuoteHistory, UseQuoteHistoryResult } from '@/platform/services/model/quote';
 
 export function useQuoteHistory(quoteId: string): UseQuoteHistoryResult {
@@ -21,7 +22,7 @@ export function useQuoteHistory(quoteId: string): UseQuoteHistoryResult {
       const data = await response.json();
       setHistory(data.history || []);
     } catch (err) {
-      console.error('Failed to fetch quote history:', err);
+      getLogger().error({ err }, 'Failed to fetch quote history');
       setError(err instanceof Error ? err : new Error('Failed to fetch quote history'));
     } finally {
       setLoading(false);

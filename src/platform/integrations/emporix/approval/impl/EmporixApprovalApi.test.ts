@@ -217,7 +217,7 @@ describe('EmporixApprovalApi', () => {
         const password = 'Test1234';
 
         // Use the customer API to login
-        await customerApi.login(username, password);
+        return await customerApi.login(username, password);
       } catch (error) {
         console.error('Error setting up customer token for approval flow:', error);
         throw error;
@@ -243,9 +243,17 @@ describe('EmporixApprovalApi', () => {
 
     beforeEach(async () => {
       // Set up a customer token with test user credentials
-      await setupCustomerToken();
+      const sessionContext = await setupCustomerToken();
+      // Create or reuse a cart
+      const cart: any = await cartApi.getCartByCriteria(
+        'main',
+        undefined,
+        sessionContext.customerId,
+        sampleCreateCartRequest.type,
+        true,
+      );
+      customerCartId = cart?.id;
 
-      customerCartId = await getOrCreateCustomerCartId();
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart

@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { getLogger } from '@/lib/logger/use-logger-client';
 
 export const NewsletterSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -15,7 +16,7 @@ export function useNewsletterForm() {
   });
 
   const onSubmit = (data: any) => {
-    console.log('newsletter registration successful for this mail: ', data);
+    getLogger().info({ data }, 'newsletter registration successful for this mail');
   };
 
   return {

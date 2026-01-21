@@ -11,6 +11,7 @@ import { H1 } from '@/components/ui/h';
 import { Spinner } from '@/components/ui/spinner';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import { useToast } from '@/hooks/ui/useToast';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Address, AddressType } from '@/platform/services/model/common';
 import { AddressDialog } from './address-dialog';
 
@@ -167,7 +168,7 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
                           });
                         }
                       } catch (error) {
-                        console.error('Error deleting address:', error);
+                        getLogger().error({ err: error }, 'Error deleting address');
                         toast({
                           title: t('Address.error'),
                           description: t('Address.errorDeletingAddress'),
@@ -204,7 +205,7 @@ export function AddressesList({ type = 'SHIPPING' as AddressType }) {
               : t('Address.addBillingAddress')
         }
         onSave={(savedAddress) => {
-          console.log('Address saved:', savedAddress);
+          getLogger().debug({ savedAddress }, 'Address saved');
           fetchAddresses();
         }}
       />

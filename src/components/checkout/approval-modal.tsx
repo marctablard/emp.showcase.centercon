@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useApproverSearch } from '@/hooks/approval/useApproverSearch';
 import { useToast } from '@/hooks/ui/useToast';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import type { ApprovalUser } from '@/platform/services/model/approval';
 
 interface ApprovalModalProps {
@@ -53,7 +54,7 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
       approvalSubmit(selectedApprover.userId, comment);
       onClose();
     } catch (error) {
-      console.error('Error creating approval request:', error);
+      getLogger().error({ err: error }, 'Error creating approval request');
       toast({
         title: t('approvalRequestError'),
         description: t('errorCreatingApprovalRequest'),

@@ -13,6 +13,7 @@ import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import useCustomer from '@/hooks/customer/useCustomer';
 import { useToast } from '@/hooks/ui/useToast';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Address } from '@/platform/services/model/common';
 
 interface QuoteRequestDialogProps {
@@ -124,7 +125,7 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
 
       onOpenChange(false);
     } catch (err) {
-      console.error('Send quote failed', err);
+      getLogger().error({ err }, 'Send quote failed');
       // Show error toast notification
       toast({
         title: t('failedTitle'),

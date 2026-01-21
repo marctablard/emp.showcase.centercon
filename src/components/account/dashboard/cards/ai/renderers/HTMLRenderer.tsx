@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { HTMLData } from '../types';
 
 interface HTMLRendererProps {
@@ -59,7 +60,7 @@ export const HTMLRenderer: React.FC<HTMLRendererProps> = ({ data }) => {
       const clean = DOMPurify.sanitize(html, DOMPURIFY_CONFIG);
       return { sanitizedHtml: clean, error: null };
     } catch (err) {
-      console.error('[HTMLRenderer] Sanitization error:', err);
+      getLogger().error({ err }, '[HTMLRenderer] Sanitization error');
       return { sanitizedHtml: null, error: 'Failed to sanitize HTML content' };
     }
   }, [html]);
