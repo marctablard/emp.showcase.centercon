@@ -33,7 +33,7 @@ import { ProductShippingInfo } from './product-shipping-info';
 import ProductVariantSelector from './product-variant-selector';
 
 export interface ProductDetailProps {
-  product?: Product;
+  product?: Product | string;
   options: ProductFetchOptions;
   className?: string;
 }
@@ -105,13 +105,13 @@ export default function ProductDetail({ product: initialProduct, options, classN
 
   if (loading) {
     return (
-      <div>
+      <div className={cn('flex justify-center items-center min-h-[400px] mb-6', className)}>
         <Spinner variant="lg" />
       </div>
     );
   }
 
-  if (!product) {
+  if (product === null) {
     return notFound();
   }
 

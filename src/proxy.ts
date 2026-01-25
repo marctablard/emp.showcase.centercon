@@ -1,15 +1,15 @@
 import NextAuth, { NextAuthRequest } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 import { config as authConfig } from './auth/auth.config';
 import { applyCacheDirectives } from './cache-middleware';
 import { createSiteMiddleware } from './site/middleware';
 import { routing as siteRouting } from './site/routing';
 import { NEXT_REWRITE_HEADER } from './site/types';
 
-const securedPages = ['/account/.*?'];
-//const securedPathnameRegex = RegExp(`^(/(${intlRouting.locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
-const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shipping'));
 const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications'];
+const accountRegex = /^(.*)\/account\/([^/]+)$/;
+const authSubpageRegex = /^(.*)\/(category|browse|product)\/([^/]+)$/;
+const authPatterns = [accountRegex, authSubpageRegex];
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 
@@ -35,63 +35,68 @@ function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
     return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
   }
 }
-
-const authMiddleware = auth(async (req: NextAuthRequest) => {
+const authMiddleware = auth(async (req: NextAuthRequest, _event: NextFetchEvent) => {
   const { pathname } = req.nextUrl;
-  console.log('pathname', pathname);
-  const isAuthenticated = !!req.auth?.user;
-  if (pathname.startsWith('/api/')) {
-    // 1) Bypass certain API prefixes (e.g., NextAuth and CSRF endpoint)
-    if (startsWithAny(pathname, apiBypassPrefixes)) {
-      return NextResponse.next();
-    }
-
-    // 2) Require auth for secured API prefixes (return 401 for unauthenticated)
-    if (!isAuthenticated && startsWithAny(pathname, securedApiPrefixes)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // 3) Apply CSRF validation for remaining API requests
-    const csrfResult = validateCsrf(req);
-    if (csrfResult) {
-      return csrfResult;
-    }
-
-    const response = NextResponse.next();
-    return applyCacheDirectives(req, response, isAuthenticated);
+  console.log('authMiddleware', pathname, !!req.auth?.user);
+  if (!req.auth?.user && accountRegex.test(pathname)) {
+    // to protect all account routes without requiring explicit protection
+    return NextResponse.redirect(new URL('/account', req.nextUrl));
   }
 
-  // 5) Protect /account/* routes (but not /account itself)
-  if (!isAuthenticated && pathname.match(/\/account\/[^/]+/)) {
-    const url = req.nextUrl.clone();
-    url.pathname = url.pathname.replace(/\/account\/.*$/, '/account');
-    return NextResponse.redirect(url);
-  }
-
-  const response = siteMiddleware(req);
+  let response = siteMiddleware(req);
   const siteLocation = response.headers.get('location');
   if (siteLocation) {
     // leave redirect untouched
     return response;
   }
-
   const siteRewriteHeader = response.headers.get(NEXT_REWRITE_HEADER);
   const url = siteRewriteHeader ? new URL(siteRewriteHeader) : req.nextUrl.clone();
   // 6) Handle product page routing with customer-specific URLs
-  const productMatch = url.pathname.match(/^(.*)\/product\/([^/]+)$/);
-  if (productMatch) {
-    const [, pathPrefix, productId] = productMatch;
-    if (isAuthenticated) {
-      url.pathname = `${pathPrefix}/product/AUTHENTICATED_${productId}`;
-      return NextResponse.rewrite(url, { request: { headers: req.headers } });
+  const authSubpageMatch = url.pathname.match(authSubpageRegex);
+  if (authSubpageMatch) {
+    const [, pathPrefix, pageType, entityId] = authSubpageMatch;
+    if (!!req.auth?.user) {
+      url.pathname = `${pathPrefix}/${pageType}/${entityId}/authenticated`;
+      response = NextResponse.rewrite(url, { request: { headers: req.headers } });
+    } else {
+      // Remove Set-Cookie header (required for caching)
+      response.headers.delete('Set-Cookie');
     }
   }
-  return applyCacheDirectives(req, response, isAuthenticated);
+
+  return applyCacheDirectives(req, response);
 });
 
-export default async function middleware(req: NextRequest) {
-  const response = await (authMiddleware as (req: NextRequest) => Promise<NextResponse>)(req);
-  return response;
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+  const { pathname } = req.nextUrl;
+  // 1) Bypass certain API prefixes (e.g., NextAuth and CSRF endpoint)
+  if (startsWithAny(pathname, apiBypassPrefixes)) {
+    return NextResponse.next();
+  }
+
+  let response;
+  if (pathname.startsWith('/api/')) {
+    const csrfResult = validateCsrf(req);
+    if (csrfResult) {
+      response = csrfResult;
+    } else {
+      response = applyCacheDirectives(req, NextResponse.next());
+    }
+    return response;
+  }
+
+  // 5) Protect /account/* routes (but not /account itself)
+  if (authPatterns.some((regex) => regex.test(pathname))) {
+    return authMiddleware(req, event);
+  } else {
+    const response = siteMiddleware(req);
+    const siteLocation = response.headers.get('location');
+    if (siteLocation) {
+      // leave redirect untouched
+      return response;
+    }
+    return applyCacheDirectives(req, response);
+  }
 }
 
 export const config = {

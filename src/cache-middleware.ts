@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DEFAULT_CACHE_REVALIDATE, cacheRules } from './cache-config';
+import { INTERNAL_APP_PATH_HEADER } from './site/types';
 
 /**
  * Check if cache middleware is enabled via environment variable
@@ -54,31 +55,20 @@ function buildCacheControlHeader(revalidate?: number): string {
 /**
  * Apply cache directives to response based on URL patterns
  */
-export function applyCacheDirectives(
-  req: NextRequest,
-  response: NextResponse,
-  isAuthenticated: boolean = false,
-): NextResponse {
+export function applyCacheDirectives(req: NextRequest, response: Response): Response {
   // Skip if cache middleware is disabled
   if (!isCacheMiddlewareEnabled()) {
     return response;
   }
 
-  const pathname = req.nextUrl.pathname;
-
+  const siteAppPath = response.headers.get(INTERNAL_APP_PATH_HEADER);
+  const pathname = siteAppPath ? siteAppPath : req.nextUrl.pathname;
+  console.log('applyCacheDirectives', pathname);
   // Find first matching cache rule
   for (const rule of cacheRules) {
     const { matches, groups } = matchPattern(pathname, rule.url);
-
+    console.log('applyCacheDirectives', rule.url, matches);
     if (matches) {
-      // Skip caching if user is authenticated and rule specifies skipIfAuthenticated
-      if (isAuthenticated && rule.skipIfAuthenticated) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[Cache Middleware] Skipped for ${pathname}: user is authenticated`);
-        }
-        break;
-      }
-
       const { revalidate = DEFAULT_CACHE_REVALIDATE, tags = [] } = rule.cache || {};
 
       // Set Cache-Control header
@@ -95,7 +85,6 @@ export function applyCacheDirectives(
         console.log(`[Cache Middleware] Applied to ${pathname}:`, {
           revalidate: revalidate ?? DEFAULT_CACHE_REVALIDATE,
           tags: tags ? replacePlaceholders(tags, groups) : undefined,
-          isAuthenticated,
         });
       }
 
@@ -105,13 +94,4 @@ export function applyCacheDirectives(
   }
 
   return response;
-}
-
-/**
- * Create cache middleware function
- */
-export function createCacheMiddleware() {
-  return (req: NextRequest, response: NextResponse): NextResponse => {
-    return applyCacheDirectives(req, response);
-  };
 }

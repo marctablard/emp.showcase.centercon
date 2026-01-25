@@ -15,37 +15,39 @@ interface ProductPageProps {
   site: string;
 }
 
-// Helper function to parse product ID and create fetch options based on SSR config
-function createProductOptions(id: string, site: string): { productId: string; options: ProductFetchOptions } {
-  const customerMatch = id.match(/^AUTHENTICATED_(.+)$/);
-  const productId = customerMatch ? customerMatch[1] : id;
-  const anonymous = !customerMatch;
+export const PUBLIC_PRODUCT_OPTIONS = {
+  prices: false,
+  variants: false,
+  categories: false,
+  availability: false,
+  customerSegments: false,
+};
 
+export function createProductOptions(baseOptions: ProductFetchOptions): { ssr: boolean; options: ProductFetchOptions } {
   const productConfig = isProductSsrEnabled();
 
   // Build fetch options based on SSR configuration
-  const options: ProductFetchOptions = {
-    prices:
-      typeof productConfig === 'boolean' ? productConfig : (productConfig.prices ?? false) ? { siteCode: site } : false,
-    variants: typeof productConfig === 'boolean' ? productConfig : (productConfig.variants ?? false),
-    categories: typeof productConfig === 'boolean' ? productConfig : (productConfig.categories ?? false),
-    availability: typeof productConfig === 'boolean' ? productConfig : (productConfig.availability ?? false),
-    customerSegments: !anonymous,
-  };
+  const options: ProductFetchOptions =
+    typeof productConfig === 'boolean'
+      ? {
+          ...baseOptions,
+        }
+      : {
+          ...baseOptions,
+          ...productConfig, // merge in the ssr product config
+        };
 
-  return { productId, options };
+  return { ssr: !!productConfig, options };
 }
 
-// Generate metadata for the product page
-export async function generateMetadata(
-  { params }: { params: Promise<ProductPageProps> },
-  _parent: ResolvingMetadata,
+export async function generateProductPageMetadata(
+  id: string,
+  locale: string,
+  options: ProductFetchOptions,
+  ssr: boolean,
 ): Promise<Metadata> {
-  const { id, locale, site } = await params;
-  const { productId, options } = createProductOptions(id, site);
-
   // Fetch product data
-  const product = await getProductById(productId, options);
+  const product = ssr ? await getProductById(id, options) : null;
 
   // If product not found, return basic metadata
   if (!product) {
@@ -56,34 +58,54 @@ export async function generateMetadata(
   return generateProductMetadata(locale, product, product.price);
 }
 
-export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
-  const { id, locale, site } = await params;
-  const { productId, options } = createProductOptions(id, site);
+export async function renderProductPage(id: string, locale: string, options: ProductFetchOptions, ssr: boolean) {
+  if (ssr) {
+    // Fetch product data
+    const product = await getProductById(id, options);
 
-  // Fetch product data
-  const product = await getProductById(productId, options);
+    // If product not found, show 404 page
+    if (!product) {
+      notFound();
+    }
+    const jsonLd = await generateProductJsonLd(product, locale);
+    const breadcrumbs = generateBreadcrumbForProduct(product, locale);
 
-  // If product not found, show 404 page
-  if (!product) {
-    notFound();
+    return (
+      <>
+        <JsonLd jsonLd={jsonLd} />
+        <div>
+          <UiBreadcrumb
+            items={breadcrumbs}
+            className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6"
+            disabledCategories={true}
+          />
+          <ProductDetail
+            className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6 lg:pr-38"
+            product={product}
+            options={options}
+          />
+        </div>
+      </>
+    );
+  } else {
+    return (
+      <ProductDetail className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6 lg:pr-38" product={id} options={options} />
+    );
   }
-  const jsonLd = await generateProductJsonLd(product, locale);
-  const breadcrumbs = generateBreadcrumbForProduct(product, locale);
-  return (
-    <>
-      <JsonLd jsonLd={jsonLd} />
-      <div>
-        <UiBreadcrumb
-          items={breadcrumbs}
-          className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6"
-          disabledCategories={true}
-        />
-        <ProductDetail
-          className="max-w-6xl mx-auto px-4 lg:px-9 sm:gap-x-6 lg:pr-38"
-          product={product}
-          options={options}
-        />
-      </div>
-    </>
-  );
+}
+
+// Generate metadata for the product page
+export async function generateMetadata(
+  { params }: { params: Promise<ProductPageProps> },
+  _parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const { id, locale } = await params;
+  const { ssr, options } = createProductOptions(PUBLIC_PRODUCT_OPTIONS);
+  return generateProductPageMetadata(id, locale, options, ssr);
+}
+
+export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
+  const { id, locale } = await params;
+  const { ssr, options } = createProductOptions(PUBLIC_PRODUCT_OPTIONS);
+  return renderProductPage(id, locale, options, ssr);
 }

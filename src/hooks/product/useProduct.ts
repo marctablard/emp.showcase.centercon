@@ -30,7 +30,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
       id = productOrId as string;
     }
   }
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(typeof productOrId === 'string' ? true : false);
   const [error, setError] = useState<Error | null>(null);
   const [product, setProduct] = useState<Product | null>(id ? getProduct(id) : null);
 

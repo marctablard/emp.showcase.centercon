@@ -1,7 +1,13 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from '@/i18n/routing';
-import { INTERNAL_SITE_HEADER, NEXT_REWRITE_HEADER, type SiteConfig, type SiteRoutingConfig } from '@/site/types';
+import {
+  INTERNAL_APP_PATH_HEADER,
+  INTERNAL_SITE_HEADER,
+  NEXT_REWRITE_HEADER,
+  type SiteConfig,
+  type SiteRoutingConfig,
+} from '@/site/types';
 import { setCachedRequestSite } from './server/RequestSiteCache';
 import { resolveApplicableRouting, shouldPrefix } from './utils';
 
@@ -126,6 +132,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     const locale = intlResponse.headers.get(INTL_MIDDLEWARE_HEADER);
     const resolvedLocale = locale || 'en';
     const headers = new Headers(req.headers);
+    headers.set(INTERNAL_APP_PATH_HEADER, appPath);
     if (locale) {
       headers.set(INTL_LOCALE_HEADER, locale);
     }

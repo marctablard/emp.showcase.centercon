@@ -42,6 +42,7 @@ export const config = {
   trustHost: true,
   theme: { logo: 'https://authjs.dev/img/logo-sm.png' },
   providers,
+
   pages: {
     signOut: '/',
     signIn: '/account',
