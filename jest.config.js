@@ -6,6 +6,12 @@ const dotenv = require('dotenv');
 // Providing the path to your Next.js app which will enable loading next.config.js and .env files
 const createJestConfig = nextJest({ dir: './' });
 
+const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+const envPath = process.env.DOTENV_CONFIG_PATH || path.resolve(__dirname, '.env.test');
+
+if (!isCi || process.env.DOTENV_CONFIG_PATH) {
+  dotenv.config({ path: envPath, quiet: true });
+}
 const hasEmporixTestConfig = Boolean(
   process.env.NEXT_EMPORIX_TEST_TENANT &&
     process.env.NEXT_EMPORIX_TEST_CLIENT_ID &&
@@ -14,12 +20,6 @@ const hasEmporixTestConfig = Boolean(
 const hasBatteryIncludedConfig = Boolean(
   process.env.NEXT_PUBLIC_BATTERY_INCLUDED_API_KEY && process.env.NEXT_PUBLIC_BATTERY_INCLUDED_COLLECTION,
 );
-const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-const envPath = path.resolve(__dirname, '.env.test');
-
-if (!isCi) {
-  dotenv.config({ path: envPath, quiet: true });
-}
 const runIntegrationTests = isCi || process.env.RUN_INTEGRATION_TESTS === 'true';
 const skipEmporixIntegrationTests = !runIntegrationTests || !hasEmporixTestConfig;
 const skipBatteryIncludedTests = !runIntegrationTests || !hasBatteryIncludedConfig;
