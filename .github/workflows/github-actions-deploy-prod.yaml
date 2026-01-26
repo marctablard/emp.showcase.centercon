@@ -53,6 +53,12 @@ jobs:
         run: npm run lint
       - name: Run jest
         run: npm run jest
+        env:
+          NEXT_EMPORIX_TEST_TENANT: ${{ secrets.NEXT_EMPORIX_TEST_TENANT }}
+          NEXT_EMPORIX_TEST_CLIENT_ID: ${{ secrets.NEXT_EMPORIX_TEST_CLIENT_ID }}
+          NEXT_EMPORIX_TEST_CLIENT_SECRET: ${{ secrets.NEXT_EMPORIX_TEST_CLIENT_SECRET }}
+          NEXT_PUBLIC_BATTERY_INCLUDED_API_KEY: ${{ secrets.NEXT_PUBLIC_BATTERY_INCLUDED_API_KEY }}
+          NEXT_PUBLIC_BATTERY_INCLUDED_COLLECTION: ${{ secrets.NEXT_PUBLIC_BATTERY_INCLUDED_COLLECTION }}
       - name: Debug checkout contents
         if: failure()
         run: |
