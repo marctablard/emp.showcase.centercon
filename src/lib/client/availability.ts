@@ -3,6 +3,7 @@
  * Can be used by both server and client components
  */
 import { cache } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { StockAvailability } from '@/platform/services/stock/StockService';
 
 /**
@@ -23,7 +24,7 @@ export const fetchProductAvailability = cache(async (id: string): Promise<StockA
 
     return await response.json();
   } catch (error) {
-    console.error(`Error fetching availability for product ${id}:`, error);
+    getLogger().error({ err: error, productId: id }, 'Error fetching product availability');
     throw error;
   }
 });

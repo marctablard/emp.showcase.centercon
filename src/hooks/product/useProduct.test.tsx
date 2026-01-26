@@ -6,6 +6,18 @@ import { createHistoryStore } from '@/stores/history-store';
 import { createProductStore } from '@/stores/products-store';
 import { useProduct } from './useProduct';
 
+// Mock logger to avoid DI container requirements in tests
+jest.mock('@/lib/logger/use-logger-client', () => ({
+  getLogger: () => ({
+    trace: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    fatal: jest.fn(),
+  }),
+}));
+
 // Mock the API module
 jest.mock('@/lib/client/products', () => ({
   fetchProductById: jest.fn(),

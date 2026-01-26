@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from '@/hooks/history/useHistory';
 import { fetchProductById } from '@/lib/client/products';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions } from '@/platform/services/product/ProductService';
 import { useProductStore } from '@/providers/StoreProvider';
@@ -71,7 +72,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
         setProduct(data);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('An unknown error occurred'));
-        console.error('Error fetching product:', err);
+        getLogger().error({ err }, 'Error fetching product');
       } finally {
         setLoading(false);
       }

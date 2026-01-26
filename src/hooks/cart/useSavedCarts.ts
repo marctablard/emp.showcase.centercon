@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { Paginated } from '@/platform/services/model/common';
 
@@ -40,7 +41,7 @@ export function useSavedCarts(options: UseSavedCartsOptions = {}) {
         if (size !== undefined) setPageSize(size);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('An unknown error occurred'));
-        console.error('Error fetching saved carts:', err);
+        getLogger().error({ err }, 'Error fetching saved carts');
       } finally {
         setLoading(false);
       }

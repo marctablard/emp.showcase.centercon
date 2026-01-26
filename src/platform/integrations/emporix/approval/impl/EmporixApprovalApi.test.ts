@@ -183,13 +183,41 @@ describe('EmporixApprovalApi', () => {
     const username = 'benjamin.blue@alaba.ma'; // User that requires approval
     const approverUsername = 'forrest.gump@alaba.ma'; // User that can approve
 
+    async function getOrCreateCustomerCartId() {
+      const customerProfile = await customerApi.getCustomerProfile();
+      const customerId = customerProfile.id;
+      const createRequest: EmporixCreateCartRequest = {
+        ...sampleCreateCartRequest,
+        customerId,
+      };
+
+      try {
+        return await cartApi.createCart(createRequest);
+      } catch (error: any) {
+        if (error?.message?.includes('409')) {
+          const existingCart = await cartApi.getCartByCriteria(
+            sampleCreateCartRequest.siteCode,
+            undefined,
+            customerId,
+            sampleCreateCartRequest.type,
+          );
+
+          if (existingCart?.id) {
+            return existingCart.id;
+          }
+        }
+
+        throw error;
+      }
+    }
+
     async function setupCustomerToken() {
       try {
         // Login with test customer credentials
         const password = 'Test1234';
 
         // Use the customer API to login
-        await customerApi.login(username, password);
+        return await customerApi.login(username, password);
       } catch (error) {
         console.error('Error setting up customer token for approval flow:', error);
         throw error;
@@ -215,19 +243,17 @@ describe('EmporixApprovalApi', () => {
 
     beforeEach(async () => {
       // Set up a customer token with test user credentials
-      await setupCustomerToken();
+      const sessionContext = await setupCustomerToken();
+      // Create or reuse a cart
+      const cart: any = await cartApi.getCartByCriteria(
+        'main',
+        undefined,
+        sessionContext.customerId,
+        sampleCreateCartRequest.type,
+        true,
+      );
+      customerCartId = cart?.id;
 
-      // Create a cart
-      try {
-        customerCartId = await cartApi.createCart(sampleCreateCartRequest);
-      } catch (error: any) {
-        if (error.message && error.message.includes('409')) {
-          console.log('Cart already exists, skipping creation');
-          return;
-        }
-        console.error('Error creating cart for approval flow:', error);
-        throw error;
-      }
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
@@ -300,6 +326,7 @@ describe('EmporixApprovalApi', () => {
             addresses: checkoutRequest.addresses,
           },
         });
+        approvalId = approval.id;
 
         await setupApproverToken();
 

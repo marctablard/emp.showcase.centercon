@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import { CartStatus, CartStatusDetailCode } from '@/platform/services/cart/CartService';
 import { ProductPrice } from '@/platform/services/model/price';
@@ -37,7 +38,7 @@ export default function ProductAddToCartButton({
 
   // No-op function for saving cart (to be implemented later)
   const handleSaveCart = () => {
-    console.log('Save cart functionality will be implemented later');
+    getLogger().debug({}, 'Save cart functionality will be implemented later');
     // This would be where we'd implement the saved cart functionality
   };
 
@@ -59,7 +60,7 @@ export default function ProductAddToCartButton({
       // Show the modal instead of a toast
       setIsModalOpen(true);
     } catch (error) {
-      console.error('Error adding to cart:', error);
+      getLogger().error({ err: error }, 'Error adding to cart');
       notify({
         title: error instanceof Error ? error.message : String(error),
         type: ToastType.Error,

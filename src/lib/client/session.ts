@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Session } from '@/platform/services/model/session/session';
 
 /**
@@ -15,7 +16,7 @@ export async function fetchCurrentSession(): Promise<Session | null> {
     const session = await response.json();
     return session;
   } catch (error) {
-    console.error('Error fetching session:', error);
+    getLogger().error({ err: error }, 'Error fetching session');
     return null;
   }
 }
@@ -39,7 +40,7 @@ export async function updateSessionLanguage(language: string): Promise<boolean> 
 
     return true;
   } catch (error) {
-    console.error('Error updating language:', error);
+    getLogger().error({ err: error, language }, 'Error updating language');
     return false;
   }
 }
@@ -63,7 +64,7 @@ export async function updateSessionCurrency(currency: string): Promise<boolean> 
 
     return true;
   } catch (error) {
-    console.error('Error updating currency:', error);
+    getLogger().error({ err: error, currency }, 'Error updating currency');
     return false;
   }
 }
@@ -87,7 +88,7 @@ export async function updateSessionCountry(country: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Error updating country:', error);
+    getLogger().error({ err: error, country }, 'Error updating country');
     return false;
   }
 }
@@ -111,7 +112,7 @@ export async function updateSessionSite(site: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Error updating site:', error);
+    getLogger().error({ err: error, site }, 'Error updating site');
     return false;
   }
 }
@@ -130,7 +131,7 @@ export async function updateSessionRegion(region: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Error updating region:', error);
+    getLogger().error({ err: error, region }, 'Error updating region');
     return false;
   }
 }

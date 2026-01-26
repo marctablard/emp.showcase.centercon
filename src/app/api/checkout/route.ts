@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CheckoutService } from '@/platform/services/checkout/CheckoutService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { CheckoutRequest } from '@/platform/services/model/checkout';
 
 /**
@@ -36,7 +37,17 @@ export async function POST(request: NextRequest) {
     // Return the response
     return nextResponse;
   } catch (error) {
-    console.error('Checkout error:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/checkout',
+        method: 'POST',
+        cartId: (error as any)?.checkoutData?.cartId,
+      },
+      'Checkout error',
+    );
 
     return NextResponse.json(
       { error: 'Failed to process checkout', details: (error as Error).message },

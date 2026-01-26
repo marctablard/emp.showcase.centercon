@@ -5,6 +5,7 @@ import {
   fetchOrderById as apiFetchOrderById,
   fetchOrderStatusTransitions as apiFetchOrderStatusTransitions,
 } from '@/lib/client/orders';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Order } from '@/platform/services/model/order/order';
 
 interface UseOrderOptions {
@@ -54,7 +55,7 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrderResult => {
       setOrder(orderData);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch order'));
-      console.error('Error fetching order:', err);
+      getLogger().error({ err, orderId }, 'Error fetching order');
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrderResult => {
       setStatusTransitions(transitions);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch status transitions'));
-      console.error('Error fetching status transitions:', err);
+      getLogger().error({ err, orderId }, 'Error fetching status transitions');
     } finally {
       setLoading(false);
     }
@@ -98,7 +99,7 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrderResult => {
       await fetchStatusTransitions();
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to cancel order'));
-      console.error('Error cancelling order:', err);
+      getLogger().error({ err, orderId }, 'Error cancelling order');
     } finally {
       setLoading(false);
     }
@@ -126,7 +127,7 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrderResult => {
       await fetchStatusTransitions();
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to return order'));
-      console.error('Error returning order:', err);
+      getLogger().error({ err, orderId }, 'Error returning order');
     } finally {
       setLoading(false);
     }

@@ -39,6 +39,7 @@ export interface EmporixCartApi {
     sessionId?: string,
     customerId?: string,
     type?: string,
+    create?: boolean,
   ): Promise<EmporixCart | null>;
 
   /**

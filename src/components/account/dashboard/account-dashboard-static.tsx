@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { H3 } from '@/components/ui/h';
 import { useCustomer } from '@/hooks/customer/useCustomer';
 import { BreadcrumbContent } from '@/lib/breadcrumb';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Customer } from '@/platform/services/model/customer/customer';
 import AccountLayout from '../account-layout';
 import { AiHelperCard } from './cards/ai-helper-card';
@@ -26,7 +27,7 @@ export default function AccountDashboard({ initialCustomer, breadcrumbs }: Accou
   const { customer, loading: isCustomerLoading } = useCustomer(initialCustomer);
 
   const handleTicketSubmit = (data: SupportTicketData) => {
-    console.log('Ticket submitted:', data);
+    getLogger().debug({ data }, 'Ticket submitted');
     // Hier kann später die API-Integration erfolgen
   };
 

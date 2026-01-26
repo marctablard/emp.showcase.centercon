@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 
@@ -51,7 +52,7 @@ export function MyInvoicesCard({ className, title, ...props }: MyInvoicesCardPro
   });
 
   const onSubmit = (data: InvoiceSearchFormData) => {
-    console.log('Searching invoices with query:', data.searchQuery);
+    getLogger().debug({ searchQuery: data.searchQuery }, 'Searching invoices with query');
     // Here would go the actual search logic
   };
 

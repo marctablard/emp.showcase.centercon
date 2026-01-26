@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CustomerService } from '@/platform/services/customer/CustomerService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * Update password using a password reset token
@@ -28,7 +29,16 @@ export async function POST(request: NextRequest) {
     // Return success response
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating password:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/password-reset/update',
+        method: 'POST',
+      },
+      'Error updating password',
+    );
 
     return NextResponse.json(
       { error: 'Failed to update password', details: (error as Error).message },

@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { CMSComponent } from '@/platform/services/model/cms';
 
 // Dynamically import components
@@ -32,7 +33,7 @@ export default function CMSComponentRenderer({ components, locale }: CMSComponen
         const Component = componentMap[component.type];
 
         if (!Component) {
-          console.warn(`Component type "${component.type}" not found`);
+          getLogger().warn({ componentType: component.type }, 'Component type not found');
           return null;
         }
 

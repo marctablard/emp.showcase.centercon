@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchCurrentCompany } from '@/lib/client/company';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Company } from '@/platform/services/model/company/company';
 
 export interface Order {
@@ -241,7 +242,7 @@ export const useCompany = (): CompanyHook => {
 
     // Update company state would happen here in a real implementation
     // For mock purposes, we'll just log the action
-    console.log(`Approval ${id} has been approved`);
+    getLogger().info({ approvalId: id }, 'Approval has been approved');
     return true;
   };
 
@@ -254,7 +255,7 @@ export const useCompany = (): CompanyHook => {
 
     // Update company state would happen here in a real implementation
     // For mock purposes, we'll just log the action
-    console.log(`Approval ${id} has been rejected`);
+    getLogger().info({ approvalId: id }, 'Approval has been rejected');
     return true;
   };
 
@@ -290,7 +291,7 @@ export const useCompany = (): CompanyHook => {
         });
       }
     } catch (error) {
-      console.error('Error fetching company:', error);
+      getLogger().error({ err: error }, 'Error fetching company');
       setError(error as Error);
     } finally {
       setLoading(false);

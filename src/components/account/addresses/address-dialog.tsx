@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAddresses } from '@/hooks/customer/useAddresses';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Address, AddressType } from '@/platform/services/model/common';
 import { CustomerAddress } from '@/platform/services/model/customer/customer';
 
@@ -64,7 +65,7 @@ export function AddressDialog({
       }
       onOpenChange(false);
     } catch (error) {
-      console.error('Failed to save address:', error);
+      getLogger().error({ err: error }, 'Failed to save address');
     } finally {
       setIsSaving(false);
     }

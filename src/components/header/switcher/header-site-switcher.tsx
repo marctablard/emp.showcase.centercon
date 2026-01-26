@@ -7,6 +7,7 @@ import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { useSite } from '@/hooks/site/useSite';
 import { redirect } from '@/i18n/navigation';
 import { getSite } from '@/lib/client/site';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Spinner } from '../../ui/spinner';
 
 export function SiteSwitcher() {
@@ -19,7 +20,7 @@ export function SiteSwitcher() {
     // redirect to ensure clean session handling on server side
     const siteObject = await getSite(site);
     if (!siteObject) {
-      console.error('Site not found:', site);
+      getLogger().error({ site }, 'Site not found');
       return;
     }
     const targetLocale = siteObject.languages?.includes(locale) ? locale : siteObject.languages?.[0] || locale;

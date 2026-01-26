@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CustomerService } from '@/platform/services/customer/CustomerService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * PUT handler for updating an existing address
  */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string; addressId: string }> }) {
-  try {
-    const { id: customerId, addressId } = await params;
+  const { id: customerId, addressId } = await params;
 
+  try {
     // Only the current user can update addresses
     if (customerId !== 'current') {
       return NextResponse.json({ error: 'You can only update addresses for the current customer' }, { status: 403 });
@@ -29,7 +30,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(updatedAddress);
   } catch (error) {
-    console.error('Error updating customer address:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/customer/${customerId}/addresses/${addressId}`,
+        method: 'PUT',
+        customerId,
+        addressId,
+      },
+      'Error updating customer address',
+    );
     return NextResponse.json({ error: 'Failed to update customer address' }, { status: 500 });
   }
 }
@@ -38,9 +50,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
  * DELETE handler for removing an address
  */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string; addressId: string }> }) {
-  try {
-    const { id: customerId, addressId } = await params;
+  const { id: customerId, addressId } = await params;
 
+  try {
     // Only the current user can delete addresses
     if (customerId !== 'current') {
       return NextResponse.json({ error: 'You can only delete addresses for the current customer' }, { status: 403 });
@@ -54,7 +66,18 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error('Error deleting customer address:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/customer/${customerId}/addresses/${addressId}`,
+        method: 'DELETE',
+        customerId,
+        addressId,
+      },
+      'Error deleting customer address',
+    );
     return NextResponse.json({ error: 'Failed to delete customer address' }, { status: 500 });
   }
 }
