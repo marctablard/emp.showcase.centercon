@@ -6,6 +6,7 @@ import {
   fetchCustomerAddresses,
   updateCustomerAddress,
 } from '@/lib/client/customer';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Address, AddressType } from '@/platform/services/model/common';
 import { CustomerAddress } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
@@ -43,7 +44,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
       setAddresses(addressData);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch addresses'));
-      console.error('Error fetching addresses:', err);
+      getLogger().error({ err }, 'Error fetching addresses');
     } finally {
       setAddressLoading(false);
     }
@@ -86,7 +87,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to create address');
         setError(error);
-        console.error('Error creating address:', err);
+        getLogger().error({ err }, 'Error creating address');
         throw error;
       } finally {
         setAddressLoading(false);
@@ -109,7 +110,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to update address');
         setError(error);
-        console.error('Error updating address:', err);
+        getLogger().error({ err, addressId: id }, 'Error updating address');
         throw error;
       } finally {
         setAddressLoading(false);
@@ -131,7 +132,7 @@ export const useAddresses = (initialAddresses?: CustomerAddress[] | undefined): 
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to delete address');
         setError(error);
-        console.error('Error deleting address:', err);
+        getLogger().error({ err, addressId: id }, 'Error deleting address');
         throw error;
       } finally {
         setAddressLoading(false);

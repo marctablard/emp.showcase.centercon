@@ -7,6 +7,7 @@ import { EmporixAddCartItemRequest, EmporixUpdateCartItemRequest } from '@/platf
 import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
 import type { CartService, ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import type { CartStatus, CartStatusDetailCode } from '@/platform/services/cart/CartService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Cart } from '@/platform/services/model/cart/cart';
 import type { PriceService } from '@/platform/services/price/PriceService';
 import type { ProductService } from '@/platform/services/product/ProductService';
@@ -29,6 +30,7 @@ class EmporixCartService implements CartService {
     @inject('PriceService') private priceService: PriceService,
     @inject('ProductService') private productService: ProductService,
     @inject('StockService') private stockService: StockService,
+    @inject('LoggerService') private logger: LoggerService,
   ) {}
 
   async createCart(currency: string, siteCode: string): Promise<string> {
@@ -313,7 +315,7 @@ class EmporixCartService implements CartService {
       const cart = await this.cartApi.getCartByCriteria(siteCode, sessionId, customerId, type);
       return cart ? this.mapper.mapToService(cart) : null;
     } catch (error) {
-      console.error('Error getting cart by criteria:', error);
+      this.logger.error({ err: error }, 'Error getting cart by criteria');
       return null;
     }
   }

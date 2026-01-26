@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SessionService } from '@/platform/services/session/SessionService';
 
 /**
@@ -12,7 +13,16 @@ export async function GET() {
     const session = await sessionService.getCurrent();
     return NextResponse.json(session);
   } catch (error) {
-    console.error('Error fetching session data:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/session',
+        method: 'GET',
+      },
+      'Error fetching session data',
+    );
     return NextResponse.json({ error: 'Failed to fetch session data' }, { status: 500 });
   }
 }
@@ -47,7 +57,16 @@ export async function PATCH(request: NextRequest) {
     const updatedSession = await sessionService.getCurrent();
     return NextResponse.json(updatedSession);
   } catch (error) {
-    console.error('Error updating session data:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/session',
+        method: 'PATCH',
+      },
+      'Error updating session data',
+    );
     return NextResponse.json({ error: 'Failed to update session data' }, { status: 500 });
   }
 }

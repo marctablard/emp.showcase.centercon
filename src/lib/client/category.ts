@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Category } from '@/platform/services/model/category';
 
 /**
@@ -22,23 +23,27 @@ export async function fetchCategoryTree(
     if (!response.ok) {
       // Handle 404 gracefully - category not found is an expected case
       if (response.status === 404) {
-        console.log(`Client: Category '${categoryId}' not found`);
+        getLogger().debug({ categoryId }, `Category '${categoryId}' not found`);
         return null;
       }
 
       // Handle other errors
       const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-      console.error('Client: Error response from API:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData,
-      });
+      getLogger().error(
+        {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          categoryId,
+        },
+        'Error response from API',
+      );
       throw new Error(errorData.error || `API error: ${response.status} ${response.statusText}`);
     }
 
     return response.json();
   } catch (error) {
-    console.error('Client: Error fetching category tree:', error instanceof Error ? error.message : 'Unknown error');
+    getLogger().error({ err: error, categoryId }, 'Error fetching category tree');
     throw error;
   }
 }

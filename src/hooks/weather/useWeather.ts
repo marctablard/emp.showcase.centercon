@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getWeatherData, useWeatherStore } from '@/lib/client/weather';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { LocationData } from '@/platform/services/model/common';
 import { useLocation } from '../location/useLocation';
 
@@ -59,7 +60,7 @@ export function useWeather() {
         const forecast = await getWeatherData(geoLocation.latitude, geoLocation.longitude);
         setWeather(forecast);
       } catch (err) {
-        console.error('Error fetching weather data:', err);
+        getLogger().error({ err }, 'Error fetching weather data');
         setError('Failed to fetch weather data');
       } finally {
         setLoading(false);

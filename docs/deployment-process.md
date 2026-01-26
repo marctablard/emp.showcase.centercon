@@ -14,6 +14,7 @@ This document describes the deployment process for the Emporix Showcase applicat
 - [Deployment Process Flow](#deployment-process-flow)
 - [Environment Variables](#environment-variables)
 - [Caching Strategy](#caching-strategy)
+- [Health Checks](#health-checks)
 - [Testing](#testing)
 - [Vercel CLI](#vercel-cli)
 - [Troubleshooting](#troubleshooting)
@@ -158,6 +159,23 @@ All workflows implement caching for npm dependencies using GitHub Actions' built
 ```
 
 Additionally, Vercel provides its own build caching mechanisms to optimize deployment speed.
+
+## Health Checks
+
+For deployments to Azure, GCP, or Kubernetes, **dedicated health check endpoints** must be configured to prevent infinite API call loops. Health checks should **never** point to application routes like `/` or `/api/site`.
+
+**Required Configuration**:
+- **Liveness probe**: `/api/health`
+- **Readiness probe**: `/api/ready`
+
+See [Health Checks Documentation](./health-checks.md) for detailed configuration instructions for:
+- Azure App Service
+- Azure Container Apps
+- Azure Kubernetes Service (AKS)
+- Google Cloud Run
+- Google Kubernetes Engine (GKE)
+
+**⚠️ Critical**: If health checks are not properly configured, you may experience 36+ API calls per minute even with no user traffic, causing unnecessary load on Emporix APIs.
 
 ## Testing
 

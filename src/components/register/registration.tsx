@@ -10,6 +10,7 @@ import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useRegistration } from '@/hooks/registration/useRegistration';
 import useCurrency from '@/hooks/useCurrency';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { RegistrationData } from '@/platform/services/validation/impl/EmporixRegistrationValidationService';
 import { Spinner } from '../ui/spinner';
 import { AccountSettingsSection } from './account-settings-section';
@@ -108,7 +109,7 @@ export default function Registration() {
         }
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      getLogger().error({ err: error }, 'Registration error');
       setFormError(t('validation.registrationFailed'));
     }
   }

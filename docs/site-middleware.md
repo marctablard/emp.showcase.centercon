@@ -14,7 +14,23 @@ The site middleware system consists of several key components:
 - `src/site/types.d.ts` - TypeScript type definitions
 - `src/site/config.ts` - Site routing configurations
 - `src/site/routing.ts` - Configuration loader
-- `src/middleware.ts` - Main application middleware that orchestrates site and auth handling
+- `src/proxy.ts` - Main application middleware that orchestrates site and auth handling
+
+## Domain-based Site Recognition (Pre-auth)
+
+The middleware selects an applicable routing configuration based on the request hostname
+before any login state is known. This ensures that users arriving on a domain such as
+`shop.pl` are immediately routed to the correct site context.
+
+In practice, the domain match happens first, and then site resolution (path/cookie/header)
+is executed within that domain context.
+
+Example (from `src/site/config.ts`):
+
+```
+domain: 'showcase.emporix.la' -> defaultSite: <DEFAULT_SITE>
+domain: 'localhost' -> defaultSite: <DEFAULT_SITE>
+```
 
 ## Site Resolution Strategy
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 
 interface UsePersistedStateOptions<T> {
   key: string;
@@ -40,7 +41,7 @@ export function usePersistedState<T>({
     try {
       storageApi.setItem(key, serialize(state));
     } catch (error) {
-      console.warn(`[usePersistedState] Failed to persist ${key}:`, error);
+      getLogger().warn({ err: error, key }, '[usePersistedState] Failed to persist key');
     }
   }, [key, state, storageApi, serialize]);
 

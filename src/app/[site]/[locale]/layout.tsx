@@ -74,6 +74,20 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
 
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
 
+  // Handle invalid site: redirect to valid site or show 404
+  if (!site) {
+    if (availableSites && availableSites.length > 0) {
+      // Redirect to first available site, preserving locale if possible
+      const targetSite = availableSites[0];
+      const targetLocale = targetSite.languages?.includes(locale) ? locale : targetSite.languages?.[0] || locale;
+      redirect({ href: '/', locale: targetLocale, site: targetSite.code, forcePrefix: true });
+      return;
+    } else {
+      // No sites available, show 404
+      notFound();
+    }
+  }
+
   if (site && !hasLocale(site.languages, locale)) {
     // ensure that languages are aligned
     const newLocale = site.languages[0];

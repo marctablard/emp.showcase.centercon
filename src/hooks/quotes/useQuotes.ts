@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { SearchParams, SearchResult } from '@/platform/services/model/common';
 import { Quote } from '@/platform/services/model/quote';
 
@@ -85,7 +86,7 @@ export function useQuotes(params?: SearchParams<Quote>) {
         }
       } catch (err) {
         if (isMounted) {
-          console.error('Error fetching quotes:', err);
+          getLogger().error({ err }, 'Error fetching quotes');
           setError(err instanceof Error ? err : new Error('Failed to fetch quotes'));
         }
       } finally {
@@ -146,7 +147,7 @@ export function useQuote(quoteId: string | undefined) {
         }
       } catch (err) {
         if (isMounted) {
-          console.error(`Error fetching quote ${quoteId}:`, err);
+          getLogger().error({ err, quoteId }, 'Error fetching quote');
           setError(err instanceof Error ? err : new Error(`Failed to fetch quote ${quoteId}`));
         }
       } finally {

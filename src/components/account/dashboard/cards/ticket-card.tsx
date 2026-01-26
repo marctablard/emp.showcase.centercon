@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import { DashboardCard, DashboardCardProps } from './dashboard-card';
 
@@ -43,7 +44,7 @@ export function TicketCard({ className, title, items: customItems, ...props }: T
   });
 
   const handleSearch = (data: TicketSearchFormData) => {
-    console.log('Searching for:', data.searchQuery);
+    getLogger().debug({ searchQuery: data.searchQuery }, 'Searching for');
     // Implement search functionality here
   };
 

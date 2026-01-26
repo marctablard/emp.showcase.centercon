@@ -14,6 +14,7 @@ import { useAvailability } from '@/hooks/product/useAvailability';
 import { useL10n } from '@/hooks/useL10n';
 import { fetchProductPrice } from '@/lib/client/prices';
 import { fetchProductById } from '@/lib/client/products';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency } from '@/lib/utils';
 import { CartItem, CartItemSubstitution } from '@/platform/services/model/cart/cart.d';
 import { ProductPrice } from '@/platform/services/model/price/price';
@@ -74,7 +75,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
 
         setProductMap(newProductMap);
       } catch (error) {
-        console.error('Error fetching substitution products:', error);
+        getLogger().error({ err: error }, 'Error fetching substitution products');
       } finally {
         setIsLoading(false);
       }
@@ -110,7 +111,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
 
         setPriceMap(newPriceMap);
       } catch (error) {
-        console.error('Error fetching product prices:', error);
+        getLogger().error({ err: error }, 'Error fetching product prices');
       } finally {
         setIsPriceLoading(false);
       }
@@ -193,7 +194,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
 
       onDone();
     } catch (error) {
-      console.error('Error applying substitutions:', error);
+      getLogger().error({ err: error }, 'Error applying substitutions');
     } finally {
       setIsProcessing(false);
     }

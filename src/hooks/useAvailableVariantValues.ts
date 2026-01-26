@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchProductVariants } from '@/lib/client/products';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { LocalizedString } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
 
@@ -99,7 +100,7 @@ export function useAvailableVariantValues(product: Product, attributeKey?: strin
 
         setValues(orderedValues);
       } catch (err) {
-        console.error('Error fetching available variant values:', err);
+        getLogger().error({ err }, 'Error fetching available variant values');
         setError(err instanceof Error ? err.message : 'Failed to fetch variant values');
         // Fallback to current product's values
         setValues(targetAttribute.values || []);
