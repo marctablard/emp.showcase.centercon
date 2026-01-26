@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { getLogger } from '@/lib/logger/use-logger-client';
 
 export interface SupportTicketData {
   subject: string;
@@ -28,7 +29,7 @@ export function SupportTicketDialog({ onSubmit }: SupportTicketDialogProps) {
       onSubmit({ subject, message });
     } else {
       // Fallback behavior if no callback is provided
-      console.log('Sending ticket:', { subject, message });
+      getLogger().debug({ subject, message }, 'Sending ticket');
     }
 
     // Reset form fields

@@ -6,6 +6,7 @@ import { ClientOnly } from '@/components/common/client-only';
 import { H3 } from '@/components/ui/h';
 import { useCustomer } from '@/hooks/customer/useCustomer';
 import { useConfigStore } from '@/lib/client/dashboard';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Customer } from '@/platform/services/model/customer/customer';
 import AccountLayout from '../account-layout';
 import { SupportTicketData, SupportTicketDialog } from './cards/support-ticket-dialog';
@@ -24,7 +25,7 @@ export default function AccountDashboard({ customer }: AccountDashboardProps) {
   useCustomer(customer);
 
   const handleTicketSubmit = (data: SupportTicketData) => {
-    console.log('Ticket submitted:', data);
+    getLogger().debug({ data }, 'Ticket submitted');
     // Hier kann später die API-Integration erfolgen
   };
 

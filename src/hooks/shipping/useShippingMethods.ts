@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { useShippingMethodsStore } from '@/providers/StoreProvider';
 
@@ -46,7 +47,7 @@ export const useShippingMethods = (): UseShippingMethods => {
         const methods = await getShippingMethods(countryCode, postalCode, orderValue);
         setShippingMethods(methods);
       } catch (err) {
-        console.error('Error fetching shipping methods:', err);
+        getLogger().error({ err }, 'Error fetching shipping methods');
         setError(err instanceof Error ? err : new Error('Failed to fetch shipping methods'));
       } finally {
         setLoading(false);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { LocationData } from '@/platform/services/model/common';
 import { useAddresses } from '../customer/useAddresses';
 import { useSite } from '../site/useSite';
@@ -119,7 +120,7 @@ export function useLocation(): UseLocationResult {
       const data = await response.json();
       return mapGeoIPToLocationData(data);
     } catch (err) {
-      console.error('Error fetching from GeoIP API:', err);
+      getLogger().error({ err }, 'Error fetching from GeoIP API');
       throw new Error('Failed to fetch location from GeoIP');
     }
   }, []);
@@ -139,14 +140,14 @@ export function useLocation(): UseLocationResult {
       const locationData = await fetchLocationFromBrowser();
       setLocation(locationData);
     } catch (browserErr) {
-      console.log('Browser geolocation failed, falling back to GeoIP:', browserErr);
+      getLogger().debug({ err: browserErr }, 'Browser geolocation failed, falling back to GeoIP');
 
       // If browser geolocation fails, fall back to GeoIP
       try {
         const locationData = await fetchLocationFromGeoIP();
         setLocation(locationData);
       } catch (geoIPErr) {
-        console.error('GeoIP fallback also failed:', geoIPErr);
+        getLogger().error({ err: geoIPErr }, 'GeoIP fallback also failed');
         setError('Failed to determine your location. Please try again later.');
       }
     } finally {

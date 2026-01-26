@@ -31,7 +31,7 @@ export function SavedCartsTable({
   hasNextPage,
   hasPreviousPage,
 }: SavedCartsTableProps) {
-  const t = useTranslations('savedCarts');
+  const t = useTranslations('cart.savedCarts');
 
   if (loading) {
     return (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SearchService } from '@/platform/services/search/SearchService';
 
 /**
@@ -7,8 +8,9 @@ import { SearchService } from '@/platform/services/search/SearchService';
  * GET /api/search/recommendations/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: productId } = await params;
+
   try {
-    const { id: productId } = await params;
     const searchService = server.get<SearchService>('SearchService');
 
     if (!productId) {
@@ -19,7 +21,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ products: recommendations });
   } catch (error) {
-    console.error('Error fetching product recommendations:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/search/recommendations/${productId}`,
+        method: 'GET',
+        productId,
+      },
+      'Error fetching product recommendations',
+    );
     return NextResponse.json({ error: 'Failed to fetch product recommendations' }, { status: 500 });
   }
 }

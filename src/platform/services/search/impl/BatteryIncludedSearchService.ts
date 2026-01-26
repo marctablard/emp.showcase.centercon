@@ -1,8 +1,8 @@
 import { inject } from 'inversify';
-import { injectable } from '@/platform/core/di/injectable';
 import type { BatteryIncludedSearchResponse } from '@/platform/integrations/batteryincluded/model';
 import { BatteryIncludedProduct } from '@/platform/integrations/batteryincluded/model/product';
 import type { BatteryIncludedShopApi } from '@/platform/integrations/batteryincluded/shop/BatteryIncludedShopApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Filter, SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Product } from '@/platform/services/model/product';
 import type { SearchService } from '@/platform/services/search/SearchService';
@@ -24,6 +24,7 @@ class BatteryIncludedSearchService implements SearchService {
   private sessionService: SessionService;
   private segmentFilterService: SegmentFilterService;
   private customerService: CustomerService;
+  private logger: LoggerService;
 
   constructor(
     @inject('BatteryIncludedShopApi') shopApi: BatteryIncludedShopApi,
@@ -31,6 +32,7 @@ class BatteryIncludedSearchService implements SearchService {
     @inject('SessionService') sessionService: SessionService,
     @inject('SegmentFilterService') segmentFilterService: SegmentFilterService,
     @inject('CustomerService') customerService: CustomerService,
+    @inject('LoggerService') logger: LoggerService,
   ) {
     this.shopApi = shopApi;
     this.productMapper = productMapper;
@@ -39,6 +41,7 @@ class BatteryIncludedSearchService implements SearchService {
     this.sessionService = sessionService;
     this.segmentFilterService = segmentFilterService;
     this.customerService = customerService;
+    this.logger = logger;
   }
 
   async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
@@ -104,7 +107,7 @@ class BatteryIncludedSearchService implements SearchService {
       const filteredResponse = this.suggestionsMapper.filterBySite(apiResponse, session?.siteCode);
       return this.suggestionsMapper.mapSearchSuggestions(filteredResponse);
     } catch (error) {
-      console.error('[SearchService] Error getting suggestions:', error);
+      this.logger.error({ err: error }, '[SearchService] Error getting suggestions');
       return {
         queryCompletions: [],
         products: [],

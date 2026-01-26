@@ -1,5 +1,7 @@
 'use client';
 
+import { getLogger } from '@/lib/logger/use-logger-client';
+
 // Cache the token to avoid unnecessary requests
 let csrfToken: string = '';
 
@@ -36,7 +38,7 @@ export async function getCsrfToken(): Promise<string> {
 
     return csrfToken;
   } catch (error) {
-    console.error('Error fetching CSRF token:', error);
+    getLogger().error({ err: error }, 'Error fetching CSRF token');
     throw error;
   }
 }

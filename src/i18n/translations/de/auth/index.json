@@ -79,5 +79,11 @@
     "updatePasswordDescription": "Aktualisieren Sie Ihr Passwort, um Ihr Konto zu sichern.",
     "passwordUpdatedSuccess": "Ihr Passwort wurde erfolgreich aktualisiert. Sie werden zur Login-Seite weitergeleitet.",
     "error": "Fehler"
+  },
+  "errors": {
+    "AccessDenied": "Zugriff verweigert. Sie haben keine Berechtigung, auf diese Ressource zuzugreifen.",
+    "Configuration": "Es gibt ein Problem mit der Serverkonfiguration.",
+    "Verification": "Das Verifizierungstoken ist abgelaufen oder wurde bereits verwendet.",
+    "Default": "Ein Authentifizierungsfehler ist aufgetreten. Bitte versuchen Sie es erneut."
   }
 }

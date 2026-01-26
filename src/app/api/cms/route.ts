@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import server from '@/platform/server';
 import { CMSService } from '@/platform/services/cms/CMSService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import ssr from '@/platform/ssr';
 
 /**
@@ -7,13 +9,13 @@ import ssr from '@/platform/ssr';
  * Get CMS page data based on slug, locale, and site
  */
 export async function GET(request: NextRequest) {
-  try {
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const slug = searchParams.get('slug') || 'home';
-    const locale = searchParams.get('locale') || 'de';
-    const site = searchParams.get('site') || '';
+  // Get query parameters (outside try for logging context)
+  const { searchParams } = new URL(request.url);
+  const slug = searchParams.get('slug') || 'home';
+  const locale = searchParams.get('locale') || 'de';
+  const site = searchParams.get('site') || '';
 
+  try {
     // Create CMS service instance
     const cmsService = ssr.get<CMSService>('CMSService');
 
@@ -23,7 +25,19 @@ export async function GET(request: NextRequest) {
     // Return response
     return NextResponse.json(pageData);
   } catch (error) {
-    console.error('Error fetching CMS data:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/cms',
+        method: 'GET',
+        slug,
+        locale,
+        site,
+      },
+      'Error fetching CMS data',
+    );
     return NextResponse.json({ error: 'Failed to fetch CMS data' }, { status: 500 });
   }
 }
