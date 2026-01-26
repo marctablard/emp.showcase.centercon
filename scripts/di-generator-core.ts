@@ -4,6 +4,79 @@ import * as path from 'path';
 import { globSync } from 'glob';
 import type { Layer } from './types'
 
+type DependencyAliasConfig = {
+  Services?: Record<string, string> | Array<Record<string, string>>;
+  Integrations?: Record<string, string> | Array<Record<string, string>>;
+  Repositories?: Record<string, string> | Array<Record<string, string>>;
+};
+
+function resolveDependencyFilePath(): string | null {
+  const explicit = process.env.DI_DEPENDENCY_FILE;
+  if (explicit) {
+    const explicitPath = path.isAbsolute(explicit)
+      ? explicit
+      : path.join(process.cwd(), explicit);
+    return fs.existsSync(explicitPath) ? explicitPath : null;
+  }
+
+  const envName = (process.env.DI_ENV || process.env.NODE_ENV || '').trim();
+  if (envName) {
+    const envPath = path.join(process.cwd(), `src/platform/depency.${envName}.yml`);
+    if (fs.existsSync(envPath)) return envPath;
+  }
+
+  const defaultPath = path.join(process.cwd(), 'src/platform/depency.yml');
+  return fs.existsSync(defaultPath) ? defaultPath : null;
+}
+
+function tryParseDependencyAliases(): Array<{ alias: string; target: string }> {
+  try {
+    const dependencyFilePath = resolveDependencyFilePath();
+    if (!dependencyFilePath) return [];
+    if (DEBUG) console.debug(`[DI] Using dependency alias config: ${dependencyFilePath}`);
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const yaml = require('js-yaml');
+    const raw = fs.readFileSync(dependencyFilePath, 'utf8');
+    const parsed = (yaml.load(raw) || {}) as DependencyAliasConfig;
+
+    const sections: Array<keyof DependencyAliasConfig> = ['Services', 'Integrations', 'Repositories'];
+    const aliases: Array<{ alias: string; target: string }> = [];
+
+    for (const section of sections) {
+      const entries = parsed[section];
+
+      if (entries && !Array.isArray(entries) && typeof entries === 'object') {
+        for (const [alias, target] of Object.entries(entries as Record<string, unknown>)) {
+          if (typeof target !== 'string') continue;
+          const a = String(alias).trim();
+          const t = target.trim();
+          if (!a || !t) continue;
+          aliases.push({ alias: a, target: t });
+        }
+        continue;
+      }
+
+      if (!entries || !Array.isArray(entries)) continue;
+      for (const entry of entries) {
+        if (!entry || typeof entry !== 'object') continue;
+        for (const [alias, target] of Object.entries(entry)) {
+          if (typeof target !== 'string') continue;
+          const a = String(alias).trim();
+          const t = target.trim();
+          if (!a || !t) continue;
+          aliases.push({ alias: a, target: t });
+        }
+      }
+    }
+
+    return aliases;
+  } catch (error) {
+    console.error('Error reading/parsing src/platform/depency.yml:', error);
+    return [];
+  }
+}
+
 // Configuration
 const ID_KEY = 'emp_inversify:id';
 
@@ -205,6 +278,8 @@ async function scanForInjectables(directory?: string): Promise<InjectableInfo[]>
 export async function generateContainerFile(layer: Layer): Promise<string> {
   const { directory, outputFile } = LAYER_CONFIGS[layer];
   if (DEBUG) console.debug(`Scanning ${layer} layer in directory: ${directory}`);
+
+  const dependencyAliases = tryParseDependencyAliases();
   
   // Scan for injectables in this specific directory
   const injectables = await scanForInjectables(directory);
@@ -365,6 +440,29 @@ export async function generateContainerFile(layer: Layer): Promise<string> {
   templateContent = templateContent.replace('{{SERVER_MODULES}}', serverModulesStr);
   templateContent = templateContent.replace('{{CLIENT_MODULES}}', clientModulesStr);
   templateContent = templateContent.replace('{{COMMON_MODULES}}', commonModulesStr);
+
+  const aliasBindings = (() => {
+    if (!dependencyAliases.length) return '';
+
+    const lines: string[] = [];
+    lines.push('// Dependency aliases from src/platform/depency.yml');
+
+    for (const { alias, target } of dependencyAliases) {
+      if (alias === target) continue;
+      lines.push(`if (!container.isBound('${target}')) {`);
+      lines.push(`  console.warn('[DI] Alias target not bound: ${target} (for alias: ${alias})');`);
+      lines.push('} else {');
+      lines.push(`  if (container.isBound('${alias}')) {`);
+      lines.push(`    container.unbind('${alias}');`);
+      lines.push('  }');
+      lines.push(`  container.bind('${alias}').toService('${target}');`);
+      lines.push('}');
+    }
+
+    return lines.map((l) => `  ${l}`).join('\n');
+  })();
+
+  templateContent = templateContent.replace('{{aliasBindings}}', aliasBindings);
   
   // Make sure to replace all instances of the LAYER placeholder
   while (templateContent.includes('{{LAYER}}')) {

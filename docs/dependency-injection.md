@@ -163,6 +163,36 @@ The following scripts are available in `package.json`:
 - **generate:watch**: Continuously watches for changes and regenerates containers as needed.
 - **dev**: Runs both the development server and the container generator in watch mode.
 
+### Dependency Aliases (depency.yml)
+
+In addition to scanning `@injectable(...)` modules, the generator can apply dependency alias mappings from a YAML config file:
+
+- `src/platform/depency.yml`
+
+This is useful when you want to resolve a stable identifier (e.g. `SearchService`) but transparently map it to a different binding (e.g. `BatteryIncludedSearchService`) without changing all call sites.
+
+The recommended (clean) format is:
+
+```yml
+Services:
+  SearchService: BatteryIncludedSearchService
+
+Integrations:
+  EmporixProductApi: EmporixProductApi
+```
+
+The alias key (left side) and target key (right side) must match actual container binding identifiers.
+
+#### Environment-specific alias configs
+
+You can provide different alias mappings per environment.
+
+Resolution order:
+
+1. `DI_DEPENDENCY_FILE`
+2. `DI_ENV` (fallback: `NODE_ENV`) using `src/platform/depency.<env>.yml` (e.g. `depency.production.yml`)
+3. Fallback: `src/platform/depency.yml`
+
 ### How Generation Works
 
 1. The generator scans directories for TypeScript files with `@injectable` decorators.

@@ -27,6 +27,8 @@ export function initializeContainer(): Container {
   modules.forEach(module => {
     addInjectableModule(module, container);
   });
+
+  {{aliasBindings}}
   
   return container;
 }
