@@ -9,7 +9,7 @@ import { NEXT_REWRITE_HEADER } from './site/types';
 const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications'];
 const accountRegex = /^(.*)\/account\/([^/]+)$/;
 const authSubpageRegex = /^(.*)\/(category|browse|product)\/([^/]+)$/;
-const authPatterns = [accountRegex, authSubpageRegex];
+const securedPatterns = [accountRegex, authSubpageRegex];
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 
@@ -37,12 +37,13 @@ function validateCsrf(req: NextRequest): Response | NextResponse | undefined {
 }
 const authMiddleware = auth(async (req: NextAuthRequest, _event: NextFetchEvent) => {
   const { pathname } = req.nextUrl;
-  console.log('authMiddleware', pathname, !!req.auth?.user);
+  // Account routes are protected by default
   if (!req.auth?.user && accountRegex.test(pathname)) {
     // to protect all account routes without requiring explicit protection
     return NextResponse.redirect(new URL('/account', req.nextUrl));
   }
 
+  // Invoke site middleware to get actual pathes and handle potential redirects after authentication
   let response = siteMiddleware(req);
   const siteLocation = response.headers.get('location');
   if (siteLocation) {
@@ -51,7 +52,7 @@ const authMiddleware = auth(async (req: NextAuthRequest, _event: NextFetchEvent)
   }
   const siteRewriteHeader = response.headers.get(NEXT_REWRITE_HEADER);
   const url = siteRewriteHeader ? new URL(siteRewriteHeader) : req.nextUrl.clone();
-  // 6) Handle product page routing with customer-specific URLs
+  // Handle URLs that may require customer specific content
   const authSubpageMatch = url.pathname.match(authSubpageRegex);
   if (authSubpageMatch) {
     const [, pathPrefix, pageType, entityId] = authSubpageMatch;
@@ -74,6 +75,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
     return NextResponse.next();
   }
 
+  // 2) Handle API requests with CSRF validation
   let response;
   if (pathname.startsWith('/api/')) {
     const csrfResult = validateCsrf(req);
@@ -85,18 +87,19 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
     return response;
   }
 
-  // 5) Protect /account/* routes (but not /account itself)
-  if (authPatterns.some((regex) => regex.test(pathname))) {
+  // 3) Handle secured Routes
+  if (securedPatterns.some((regex) => regex.test(pathname))) {
     return authMiddleware(req, event);
-  } else {
-    const response = siteMiddleware(req);
-    const siteLocation = response.headers.get('location');
-    if (siteLocation) {
-      // leave redirect untouched
-      return response;
-    }
-    return applyCacheDirectives(req, response);
   }
+
+  // 4) Handle all remaining routes
+  response = siteMiddleware(req);
+  const siteLocation = response.headers.get('location');
+  if (siteLocation) {
+    // leave redirect untouched
+    return response;
+  }
+  return applyCacheDirectives(req, response);
 }
 
 export const config = {

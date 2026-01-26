@@ -53,21 +53,26 @@ class EmporixSearchService implements SearchService {
       size: params.size,
       criteria: {
         ...(params.query && { name: '~' + params.query }),
-        id: productIds.length > 0 ? `(${productIds.join(' OR ')})` : undefined,
       },
       sort: undefined,
       filters: undefined,
     });
 
-    const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
-      searchResult.items.filter((item) => !!item.id),
-    )) as EmporixProduct[];
+    let filteredItems;
+    if (params.customerSegments) {
+      filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
+        searchResult.items.filter((item) => !!item.id),
+      )) as EmporixProduct[];
+    } else {
+      filteredItems = searchResult.items.filter((item) => !!item.id);
+    }
 
     const products = filteredItems.map((item) => this.productMapper.mapToService(item));
     const enrichedProducts = await this.productService.addAdditionalData(products, {
       prices: true,
       variants: true,
       categories: false,
+      customerSegments: params.customerSegments,
     });
     return {
       items: enrichedProducts,
@@ -79,13 +84,11 @@ class EmporixSearchService implements SearchService {
   }
 
   async getSuggestions(query: string, _locale?: string): Promise<SearchSuggestions> {
-    const productIds = await this.gatherProductIdsFromCatalogs();
     const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: 1,
       size: 10,
       criteria: {
         name: '~' + query,
-        id: productIds.length > 0 ? `(${productIds.join(' OR ')})` : undefined,
       },
       sort: undefined,
       filters: undefined,
@@ -113,73 +116,6 @@ class EmporixSearchService implements SearchService {
 
   async getRecommendations(_productId: string): Promise<Product[]> {
     return [];
-  }
-
-  /**
-   * Gathers all product IDs from categories across all catalogs for the current session
-   * @returns Array of unique product IDs
-   */
-  private async gatherProductIdsFromCatalogs(): Promise<string[]> {
-    const session = await this.sessionService.getCurrent();
-    if (!session) {
-      throw new Error('No session found');
-    }
-
-    const catalogs = await this.catalogApi.getCatalogs({
-      page: 1,
-      size: 100,
-      criteria: {
-        publishedSite: session.siteCode,
-      },
-    });
-
-    if (!catalogs.items.length) {
-      throw new Error('No catalog found');
-    }
-
-    // Gather product IDs from all categories across all catalogs
-    const allProductIds = new Set<string>();
-    const allCategoryIdsForCatalog = new Set<string>();
-
-    for (const catalog of catalogs.items) {
-      if (catalog.categoryIds && catalog.categoryIds.length > 0) {
-        //Get all the subcategories of the root categories
-        for (const categoryId of catalog.categoryIds) {
-          allCategoryIdsForCatalog.add(categoryId);
-          const subcategories = await this.categoryApi.getCategorySubcategories(categoryId);
-
-          if (subcategories?.items && Array.isArray(subcategories.items)) {
-            subcategories.items.map((subcategory) => {
-              allCategoryIdsForCatalog.add(subcategory.id);
-            });
-          }
-        }
-
-        for (const categoryId of allCategoryIdsForCatalog) {
-          try {
-            const assignments = await this.categoryApi.getCategoryAssignments(categoryId, {
-              page: 1,
-              size: 9999,
-              criteria: {
-                assignmentType: 'PRODUCT',
-              },
-            });
-
-            // Add all product IDs to our set (using Set to avoid duplicates)
-            assignments.items.forEach((assignment) => {
-              if (assignment.ref && assignment.ref.id) {
-                allProductIds.add(assignment.ref.id);
-              }
-            });
-          } catch (error) {
-            // Continue with other categories if one fails
-            console.warn(`Failed to get assignments for category ${categoryId}:`, error);
-          }
-        }
-      }
-    }
-
-    return Array.from(allProductIds);
   }
 }
 
