@@ -15,7 +15,7 @@ export interface SearchService {
    * @param locale Optional locale for localized content
    * @returns SearchSuggestions object containing query completions, products, and categories
    */
-  getSuggestions(query: string, locale?: string, site?: string): Promise<SearchSuggestions>;
+  getSuggestions(params: SearchParams<Product>): Promise<SearchSuggestions>;
 
   /**
    * Get highlighted products

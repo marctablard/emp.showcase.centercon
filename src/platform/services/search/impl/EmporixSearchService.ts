@@ -4,6 +4,7 @@ import type { EmporixCatalogApi } from '@/platform/integrations/emporix/catalog/
 import type { EmporixCategoryApi } from '@/platform/integrations/emporix/category/EmporixCategoryApi';
 import { EmporixPaginatedResponse, EmporixProduct } from '@/platform/integrations/emporix/model';
 import type { EmporixProductApi } from '@/platform/integrations/emporix/product/EmporixProductApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Product } from '@/platform/services/model/product';
 import type { ProductService } from '@/platform/services/product/ProductService';
@@ -26,6 +27,7 @@ class EmporixSearchService implements SearchService {
   private categoryApi: EmporixCategoryApi;
   private productService: ProductService;
   private segmentFilterService: SegmentFilterService;
+  private logger: LoggerService;
 
   constructor(
     @inject('SessionService') sessionService: SessionService,
@@ -35,6 +37,7 @@ class EmporixSearchService implements SearchService {
     @inject('EmporixCategoryApi') categoryApi: EmporixCategoryApi,
     @inject('ProductService') productService: ProductService,
     @inject('SegmentFilterService') segmentFilterService: SegmentFilterService,
+    @inject('LoggerService') logger: LoggerService,
   ) {
     this.productApi = productApi;
     this.productMapper = productMapper;
@@ -43,58 +46,22 @@ class EmporixSearchService implements SearchService {
     this.productService = productService;
     this.sessionService = sessionService;
     this.segmentFilterService = segmentFilterService;
+    this.logger = logger;
   }
 
-  async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
-    const productIds = await this.gatherProductIdsFromCatalogs();
+  private async filterMapAndEnrichProducts(items: EmporixProduct[], site?: string) {
+    const beforeFiltering = items.length;
 
-    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
-      page: (params.page || 0) + 1, // normalize page
-      size: params.size,
-      criteria: {
-        ...(params.query && { name: '~' + params.query }),
-      },
-      sort: undefined,
-      filters: undefined,
-    });
+    // TODO : this should be cached somehow,
+    // using cache() will only do it per request
+    const productIds = await this.gatherProductIdsFromCatalogs(site);
+    const productIdSet = new Set(productIds);
+    const itemsByCatalog = items
+      .filter((item) => !!item.id)
+      .filter((item) => productIdSet.size === 0 || productIdSet.has(item.id as string));
 
-    let filteredItems;
-    if (params.customerSegments) {
-      filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
-        searchResult.items.filter((item) => !!item.id),
-      )) as EmporixProduct[];
-    } else {
-      filteredItems = searchResult.items.filter((item) => !!item.id);
-    }
-
-    const products = filteredItems.map((item) => this.productMapper.mapToService(item));
-    const enrichedProducts = await this.productService.addAdditionalData(products, {
-      prices: true,
-      variants: true,
-      categories: false,
-      customerSegments: params.customerSegments,
-    });
-    return {
-      items: enrichedProducts,
-      page: searchResult.page - 1, // normalize page
-      pageSize: searchResult.size,
-      total: searchResult.total,
-      availableFilters: [],
-    };
-  }
-
-  async getSuggestions(query: string, _locale?: string): Promise<SearchSuggestions> {
-    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
-      page: 1,
-      size: 10,
-      criteria: {
-        name: '~' + query,
-      },
-      sort: undefined,
-      filters: undefined,
-    });
     const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
-      searchResult.items.filter((item) => !!item.id),
+      itemsByCatalog,
     )) as EmporixProduct[];
 
     const products = filteredItems.map((item) => this.productMapper.mapToService(item));
@@ -103,6 +70,50 @@ class EmporixSearchService implements SearchService {
       variants: true,
       categories: false,
     });
+
+    return {
+      enrichedProducts,
+      beforeFiltering,
+      filteredCount: filteredItems.length,
+    };
+  }
+
+  async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
+    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
+      page: (params.page || 0) + 1, // normalize page
+      size: 1000,
+      criteria: {
+        ...(params.query && { name: '~' + params.query }),
+      },
+      sort: undefined,
+      filters: undefined,
+    });
+
+    const { enrichedProducts, beforeFiltering, filteredCount } = await this.filterMapAndEnrichProducts(
+      searchResult.items,
+      params.site,
+    );
+    return {
+      items: enrichedProducts.splice(0, searchResult.size),
+      page: searchResult.page - 1, // normalize page
+      pageSize: Math.min(searchResult.size, filteredCount),
+      total: searchResult.total - (beforeFiltering - filteredCount), // ~approximation
+      availableFilters: [],
+    };
+  }
+
+  async getSuggestions(params: SearchParams<Product>): Promise<SearchSuggestions> {
+    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
+      page: 1,
+      size: 1000,
+      criteria: {
+        name: '~' + params.query,
+      },
+      sort: undefined,
+      filters: undefined,
+    });
+
+    const { enrichedProducts } = await this.filterMapAndEnrichProducts(searchResult.items, params.site);
     return {
       queryCompletions: [],
       products: enrichedProducts,
@@ -116,6 +127,82 @@ class EmporixSearchService implements SearchService {
 
   async getRecommendations(_productId: string): Promise<Product[]> {
     return [];
+  }
+
+  /**
+   * Gathers all product IDs from categories across all catalogs for the current session
+   * @returns Array of unique product IDs
+   */
+  private async gatherProductIdsFromCatalogs(site?: string): Promise<string[]> {
+    if (!site) {
+      const session = await this.sessionService.getCurrent();
+      if (!session) {
+        throw new Error('No session found');
+      }
+      site = session.siteCode;
+    }
+
+    const catalogs = await this.catalogApi.getCatalogs({
+      page: 1,
+      size: 100,
+      criteria: {
+        publishedSite: site,
+      },
+    });
+
+    if (!catalogs.items.length) {
+      throw new Error('No catalog found');
+    }
+
+    // Gather product IDs from all categories across all catalogs
+    const allProductIds = new Set<string>();
+    const allCategoryIdsForCatalog = new Set<string>();
+
+    for (const catalog of catalogs.items) {
+      if (catalog.categoryIds && catalog.categoryIds.length > 0) {
+        //Get all the subcategories of the root categories
+        for (const categoryId of catalog.categoryIds) {
+          allCategoryIdsForCatalog.add(categoryId);
+          const subcategories = await this.categoryApi.getCategorySubcategories(categoryId);
+
+          if (subcategories?.items && Array.isArray(subcategories.items)) {
+            subcategories.items.map((subcategory) => {
+              allCategoryIdsForCatalog.add(subcategory.id);
+            });
+          }
+        }
+
+        for (const categoryId of allCategoryIdsForCatalog) {
+          try {
+            const assignments = await this.categoryApi.getCategoryAssignments(categoryId, {
+              page: 1,
+              size: 9999,
+              criteria: {
+                assignmentType: 'PRODUCT',
+              },
+            });
+
+            // Add all product IDs to our set (using Set to avoid duplicates)
+            assignments.items.forEach((assignment) => {
+              if (assignment.ref && assignment.ref.id) {
+                allProductIds.add(assignment.ref.id);
+              }
+            });
+          } catch (error) {
+            // Continue with other categories if one fails
+            this.logger.warn(
+              {
+                err: error,
+                categoryId,
+              },
+              `Failed to get assignments for category ${categoryId}`,
+            );
+          }
+        }
+      }
+    }
+
+    return Array.from(allProductIds);
   }
 }
 

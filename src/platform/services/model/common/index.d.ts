@@ -104,6 +104,7 @@ export interface SearchParams<T> extends PaginationQuery {
   criteria?: Partial<T>;
   filters?: Record<string, string | string[]>;
   customerSegments?: boolean;
+  locale?: string;
   site?: string;
 }
 
