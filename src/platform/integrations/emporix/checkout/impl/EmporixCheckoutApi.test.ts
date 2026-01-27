@@ -325,7 +325,6 @@ describe('EmporixCheckoutApi', () => {
     }, 20000);
   });
 
-  // TODO: Fix cart handling (403/404 for B2C credentials)
   describe('Customer B2C Checkout Operations', () => {
     // Helper function to set up customer token
     const username = 'jenny.curran@alaba.ma';
@@ -382,7 +381,6 @@ describe('EmporixCheckoutApi', () => {
     }, 15000);
   });
 
-  // TODO: Fix cart handling (403 for approval credentials)
   describe('Customer Checkout with Approval Required', () => {
     // Helper function to set up customer token
     const username = 'benjamin.blue@alaba.ma';
