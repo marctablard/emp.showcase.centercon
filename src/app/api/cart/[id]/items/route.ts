@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * GET /api/carts/[id]/items
@@ -20,7 +21,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(cart.items);
   } catch (error) {
-    console.error(`Error fetching cart items for ${cartId}:`, error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/cart/${cartId}/items`,
+        method: 'GET',
+        cartId,
+      },
+      `Error fetching cart items for ${cartId}`,
+    );
     return NextResponse.json({ error: 'Failed to fetch cart items' }, { status: 500 });
   }
 }
@@ -54,7 +65,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       cart: updatedCart,
     });
   } catch (error) {
-    console.error(`Error adding item to cart ${cartId}:`, error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/cart/${cartId}/items`,
+        method: 'POST',
+        cartId,
+      },
+      `Error adding item to cart ${cartId}`,
+    );
     return NextResponse.json({ error: 'Failed to add item to cart' }, { status: 500 });
   }
 }

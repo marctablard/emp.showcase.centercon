@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { checkout } from '@/lib/client/checkout';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { PaymentMode } from '@/platform/services/model';
 import { Cart } from '@/platform/services/model/cart/cart';
 import type {
@@ -207,7 +208,7 @@ export const useCheckout = (): UseCheckout => {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to process checkout');
       setError(error);
-      console.error('Error processing checkout:', err);
+      getLogger().error({ err }, 'Error processing checkout');
       return null;
     } finally {
       setLoading(false);
@@ -233,7 +234,7 @@ export const useCheckout = (): UseCheckout => {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to process quote checkout');
       setError(error);
-      console.error('Error processing quote checkout:', err);
+      getLogger().error({ err }, 'Error processing quote checkout');
       return null;
     } finally {
       setLoading(false);

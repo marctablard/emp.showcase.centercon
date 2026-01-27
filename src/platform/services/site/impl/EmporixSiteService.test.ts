@@ -6,6 +6,7 @@ import { EmporixSite } from '@/platform/integrations/emporix/model/site-settings
 import type { EmporixSiteSettingsApi } from '@/platform/integrations/emporix/site-settings/EmporixSiteSettingsApi';
 import { PaymentMode } from '@/platform/services/model/payment';
 import type { PaymentService } from '@/platform/services/payment/PaymentService';
+import { LoggerService } from '../../logger/LoggerService';
 import EmporixSiteService from './EmporixSiteService';
 
 describe('EmporixSiteService', () => {
@@ -15,6 +16,7 @@ describe('EmporixSiteService', () => {
   let mockCountryApi: jest.Mocked<EmporixCountryApi>;
   let mockCurrencyApi: jest.Mocked<EmporixCurrencyApi>;
   let mockPaymentService: jest.Mocked<PaymentService>;
+  let mockLoggerService: jest.Mocked<LoggerService>;
 
   const mockSite: EmporixSite = {
     code: 'main',
@@ -68,6 +70,14 @@ describe('EmporixSiteService', () => {
       getPaymentModes: jest.fn(),
       getPaymentMode: jest.fn(),
     };
+    mockLoggerService = {
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    };
 
     // Register mocks
     container.bind<EmporixSiteSettingsApi>('EmporixSiteSettingsApi').toConstantValue(mockSiteSettingsApi);
@@ -75,6 +85,7 @@ describe('EmporixSiteService', () => {
     container.bind<EmporixCurrencyApi>('EmporixCurrencyApi').toConstantValue(mockCurrencyApi);
     container.bind<PaymentService>('PaymentService').toConstantValue(mockPaymentService);
     container.bind<EmporixSiteService>('SiteService').to(EmporixSiteService);
+    container.bind<LoggerService>('LoggerService').toConstantValue(mockLoggerService);
 
     // Get service instance
     siteService = container.get<EmporixSiteService>('SiteService');

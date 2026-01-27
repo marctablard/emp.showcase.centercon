@@ -3,6 +3,7 @@
  * Can be used by both server and client components
  */
 import { cache } from 'react';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions } from '@/platform/services/product/ProductService';
 
@@ -39,7 +40,7 @@ export const fetchProductById = cache(async (id: string, options?: ProductFetchO
 
     return await response.json();
   } catch (error) {
-    console.error(`Error fetching product ${id}:`, error);
+    getLogger().error({ err: error, productId: id }, 'Error fetching product');
     throw error;
   }
 });
@@ -62,7 +63,7 @@ export const fetchProductVariants = cache(async (parentId: string): Promise<Prod
     const data = await response.json();
     return data.variants;
   } catch (error) {
-    console.error(`Error fetching variants for product ${parentId}:`, error);
+    getLogger().error({ err: error, parentId }, 'Error fetching product variants');
     throw error;
   }
 });

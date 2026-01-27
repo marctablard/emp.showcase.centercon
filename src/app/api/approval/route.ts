@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { ApprovalCreateRequest } from '@/platform/services/model/approval';
 
 /**
@@ -20,7 +21,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(approvals);
   } catch (error) {
-    console.error('Error fetching approvals:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/approval',
+        method: 'GET',
+      },
+      'Error fetching approvals',
+    );
     return NextResponse.json({ error: 'Failed to fetch approvals' }, { status: 500 });
   }
 }
@@ -41,7 +51,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(approvalId, { status: 201 });
   } catch (error) {
-    console.error('Error creating approval:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/approval',
+        method: 'POST',
+      },
+      'Error creating approval',
+    );
     return NextResponse.json({ error: 'Failed to create approval' }, { status: 500 });
   }
 }

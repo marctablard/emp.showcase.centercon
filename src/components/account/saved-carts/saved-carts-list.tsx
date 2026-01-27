@@ -13,6 +13,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useSavedCarts } from '@/hooks/cart/useSavedCarts';
 import { useToast } from '@/hooks/ui/useToast';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import { DashboardCard, DashboardCardProps } from '../dashboard/cards/dashboard-card';
 
@@ -50,7 +51,7 @@ export function SavedCartsList({ className, title, isModal = false, onClose, ...
   }, [fetchSavedCarts, currentPage, cartsPerPage]);
 
   const handleSearch = (data: SavedCartSearchFormData) => {
-    console.log('Searching for:', data.searchQuery);
+    getLogger().debug({ searchQuery: data.searchQuery }, 'Searching for');
     // Implement search functionality here
   };
 
@@ -79,7 +80,7 @@ export function SavedCartsList({ className, title, isModal = false, onClose, ...
         onClose();
       }
     } catch (error) {
-      console.error('Error loading cart:', error);
+      getLogger().error({ err: error }, 'Error loading cart');
       toast({
         title: 'Failed to load cart',
         description: 'There was an error loading your saved cart',
@@ -90,7 +91,7 @@ export function SavedCartsList({ className, title, isModal = false, onClose, ...
 
   const handleDeleteCart = async (cartId: string) => {
     // This would be implemented with a delete cart API
-    console.log('Delete cart:', cartId);
+    getLogger().debug({ cartId }, 'Delete cart');
     toast({
       title: 'Cart deleted',
       description: 'Your saved cart has been deleted',

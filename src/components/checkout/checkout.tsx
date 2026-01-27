@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useCustomer } from '@/hooks/customer/useCustomer';
 import { createApproval } from '@/lib/client/approval';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { H1 } from '../ui/h';
 import { Spinner } from '../ui/spinner';
 import { CheckoutItemlist } from './checkout-itemlist';
@@ -80,7 +81,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
   }, [orderResponse, onComplete, router]);
 
   if (customer === undefined || loading || orderResponse) {
-    console.log(customer, loading, orderResponse);
+    getLogger().debug({ customer, loading, orderResponse }, 'Checkout loading state');
     return (
       <div className="mx-4 lg:mx-9">
         <div className="flex flex-col items-center justify-center py-12">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SessionService } from '@/platform/services/session/SessionService';
 
 /**
@@ -19,7 +20,16 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating session currency:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/session/currency',
+        method: 'PUT',
+      },
+      'Error updating session currency',
+    );
     return NextResponse.json({ error: 'Failed to update session currency' }, { status: 500 });
   }
 }

@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useOrder } from '@/hooks/order/useOrder';
 import { useRouter } from '@/i18n/navigation';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Order } from '@/platform/services/model/order/order';
 import { OrderStatusBadge } from './order-status-badge';
 import { TrackingDialog } from './tracking-dialog';
@@ -233,7 +234,7 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                       await cancelOrder();
                     } catch (err) {
                       // Handle error, could show a toast notification
-                      console.error('Failed to cancel order:', err);
+                      getLogger().error({ err }, 'Failed to cancel order');
                     }
                   }}
                 >
@@ -250,7 +251,7 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                       await returnOrder();
                     } catch (err) {
                       // Handle error, could show a toast notification
-                      console.error('Failed to return order:', err);
+                      getLogger().error({ err }, 'Failed to return order');
                     }
                   }}
                 >

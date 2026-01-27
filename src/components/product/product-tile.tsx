@@ -14,6 +14,7 @@ import { useAvailableVariantValues } from '@/hooks/useAvailableVariantValues';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
 import { Link } from '@/i18n/navigation';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency, imageSizes } from '@/lib/utils';
 import { Product } from '@/platform/services/model/product';
 import { ToastType, notify } from '../ui/toast-notification';
@@ -47,7 +48,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
         type: ToastType.Success,
       });
     } catch (error) {
-      console.error('Error adding to cart:', error);
+      getLogger().error({ err: error }, 'Error adding to cart');
       notify({
         title: error instanceof Error ? error.message : String(error),
         type: ToastType.Error,

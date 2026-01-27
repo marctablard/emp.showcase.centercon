@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { AuthService } from '@/platform/services/auth/AuthService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { Registration } from '@/platform/services/model/auth';
 
 /**
@@ -27,8 +28,7 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
-    console.error('Registration error:', error);
-
+    const logger = server.get<LoggerService>('LoggerService');
     // Determine appropriate status code based on error
     let status = 500;
     let message = 'An unexpected error occurred during registration';
@@ -46,6 +46,17 @@ export async function POST(request: NextRequest) {
         message = error.message;
       }
     }
+
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/auth/register',
+        method: 'POST',
+        statusCode: status,
+      },
+      'Registration error',
+    );
 
     return NextResponse.json({ error: message }, { status });
   }

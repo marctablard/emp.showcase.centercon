@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SearchService } from '@/platform/services/search/SearchService';
 
 /**
@@ -7,6 +8,10 @@ import { SearchService } from '@/platform/services/search/SearchService';
  * GET /api/search/suggestions?query=term&locale=en
  */
 export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  const query = url.searchParams.get('query');
+  const locale = url.searchParams.get('locale') || undefined;
+
   try {
     const searchService = server.get<SearchService>('SearchService');
 
@@ -21,11 +26,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
     }
 
-    const suggestions = await searchService.getSuggestions(query, locale, site);
+    const suggestions = await searchService.getSuggestions({ query, locale, site });
 
     return NextResponse.json(suggestions);
   } catch (error) {
-    console.error('Error fetching suggestions:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/search/suggestions',
+        method: 'GET',
+        query,
+        locale,
+      },
+      'Error fetching suggestions',
+    );
     return NextResponse.json({ error: 'Failed to fetch suggestions' }, { status: 500 });
   }
 }

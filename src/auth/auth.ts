@@ -7,6 +7,7 @@ import { getBaseUrlFromHeaders } from '@/lib/server/url-utils';
 import server from '@/platform/server';
 import { CustomerNamingService } from '@/platform/services/customer/CustomerNamingService';
 import { CustomerService } from '@/platform/services/customer/CustomerService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { AuthService } from '../platform/services/auth/AuthService';
 import { config } from './auth.config';
 
@@ -81,7 +82,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // This can be customized to include the customers SSO-User-Id in the Customer Backend and check against that
           return !!session.customerId;
         } catch (error) {
-          console.error('signIn error', error);
+          server.get<LoggerService>('LoggerService').error({ err: error }, 'signIn error');
           return false;
         }
       }

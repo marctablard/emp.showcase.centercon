@@ -1,16 +1,25 @@
-import server from '@/platform/server';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Quote } from '@/platform/services/model/quote';
-import { QuoteService } from '@/platform/services/quote/QuoteService';
 
 /**
- * Get quote by ID using the quote service
+ * Get quote by ID from the API
  */
 export async function getQuoteById(id: string): Promise<Quote | null> {
   try {
-    const quoteService = server.get<QuoteService>('QuoteService');
-    return await quoteService.getQuote(id);
+    const response = await fetch(`/api/quotes/${id}`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error(`Failed to fetch quote: ${response.statusText}`);
+    }
+
+    return await response.json();
   } catch (error) {
-    console.error(`Failed to get quote ${id}:`, error);
+    getLogger().error({ err: error, quoteId: id }, 'Failed to get quote');
     return null;
   }
 }

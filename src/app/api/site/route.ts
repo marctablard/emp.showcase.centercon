@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SiteService } from '@/platform/services/site/SiteService';
 
 /**
@@ -19,7 +20,16 @@ export async function GET() {
 
     return NextResponse.json({ current: site, available: availableSites });
   } catch (error) {
-    console.error('Error fetching site data:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/site',
+        method: 'GET',
+      },
+      'Error fetching site data',
+    );
     return NextResponse.json({ error: 'Failed to fetch site data' }, { status: 500 });
   }
 }

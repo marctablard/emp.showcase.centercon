@@ -7,6 +7,7 @@ import { Coins, Package, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useL10n } from '@/hooks/useL10n';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency } from '@/lib/utils';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 
@@ -23,7 +24,7 @@ export function HeaderMiniCartItemList({ cart }: HeaderMiniCartItemListProps) {
   // Handler for cart notifications
   const handleCartNotification = useCallback(
     (notification: StorefrontNotification | string) => {
-      console.log('Cart notification received:', notification);
+      getLogger().debug({ notification }, 'Cart notification received');
       if (typeof notification === 'string') {
         // Remove notification with matching ID from state
         setNotifications((prev) => prev.filter((item) => item.id !== notification));

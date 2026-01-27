@@ -7,6 +7,7 @@ import { EmporixCurrency, EmporixExchangeRate } from '@/platform/integrations/em
 import { EmporixSite } from '@/platform/integrations/emporix/model/site-settings';
 import type { EmporixSiteSettingsApi } from '@/platform/integrations/emporix/site-settings/EmporixSiteSettingsApi';
 import { Address, Country, Currency, ExchangeRate, Region } from '@/platform/services/model/common';
+import type { LoggerService } from '../../logger/LoggerService';
 import { PaymentMode } from '../../model';
 import { Site } from '../../model/common/site';
 import type { PaymentService } from '../../payment/PaymentService';
@@ -23,6 +24,7 @@ class EmporixSiteService implements SiteService {
     @inject('EmporixCurrencyApi') private currencyApi: EmporixCurrencyApi,
     @inject('EmporixSiteSettingsApi') private siteSettingsApi: EmporixSiteSettingsApi,
     @inject('PaymentService') private paymentService: PaymentService,
+    @inject('LoggerService') private logger: LoggerService,
   ) {}
 
   async getSite(code?: string, hasTriedDefaultSite: boolean = false): Promise<Site | null> {
@@ -73,7 +75,7 @@ class EmporixSiteService implements SiteService {
 
       return this.mapSite(emporixSite, currencies, countries, regions, paymentModes);
     } catch (error) {
-      console.error(`Error getting site ${code}:`, error);
+      this.logger.error({ err: error instanceof Error ? error : String(error), code }, 'Error getting site');
       return null;
     }
   }
@@ -88,7 +90,7 @@ class EmporixSiteService implements SiteService {
       const sites = await Promise.all(config.map(async (code) => this.getSite(code)));
       return sites.filter((site) => site !== null) as Site[];
     } catch (error) {
-      console.error('Error getting available sites:', error);
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting available sites');
       return [];
     }
   }
@@ -154,7 +156,7 @@ class EmporixSiteService implements SiteService {
       const emporixCountries = await this.countryApi.getCountries(active);
       return emporixCountries.map((country) => this.mapCountry(country));
     } catch (error) {
-      console.error('Error getting countries:', error);
+      this.logger.error({ err: error instanceof Error ? error : String(error), active }, 'Error getting countries');
       return [];
     }
   }
@@ -169,7 +171,7 @@ class EmporixSiteService implements SiteService {
       const emporixRegions = await this.countryApi.getRegions();
       return emporixRegions.map((region) => this.mapRegion(region));
     } catch (error) {
-      console.error('Error getting regions:', error);
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting regions');
       return [];
     }
   }
@@ -208,7 +210,7 @@ class EmporixSiteService implements SiteService {
       const emporixCurrencies = await this.currencyApi.getCurrencies();
       return emporixCurrencies.map((currency) => this.mapCurrency(currency));
     } catch (error) {
-      console.error('Error getting currencies:', error);
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting currencies');
       return [];
     }
   }
@@ -218,7 +220,13 @@ class EmporixSiteService implements SiteService {
       const emporixCurrency = await this.currencyApi.getCurrency(currencyCode);
       return emporixCurrency ? this.mapCurrency(emporixCurrency) : undefined;
     } catch (error) {
-      console.error(`Error getting currency ${currencyCode}:`, error);
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          currencyCode,
+        },
+        'Error getting currency',
+      );
       return undefined;
     }
   }
@@ -228,7 +236,7 @@ class EmporixSiteService implements SiteService {
       const emporixRates = await this.currencyApi.getExchangeRates();
       return emporixRates.map((rate) => this.mapExchangeRate(rate));
     } catch (error) {
-      console.error('Error getting exchange rates:', error);
+      this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting exchange rates');
       return [];
     }
   }
@@ -238,7 +246,14 @@ class EmporixSiteService implements SiteService {
       const emporixRate = await this.currencyApi.getExchangeRate(sourceCurrency, targetCurrency);
       return emporixRate ? this.mapExchangeRate(emporixRate) : undefined;
     } catch (error) {
-      console.error(`Error getting exchange rate from ${sourceCurrency} to ${targetCurrency}:`, error);
+      this.logger.error(
+        {
+          err: error instanceof Error ? error : String(error),
+          sourceCurrency,
+          targetCurrency,
+        },
+        'Error getting exchange rate',
+      );
       return undefined;
     }
   }
