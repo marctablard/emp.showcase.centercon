@@ -56,18 +56,4 @@ export const cacheRules: CacheRule[] = [
       tags: ['search'],
     },
   },
-  {
-    url: '/category/(.*)',
-    cache: {
-      revalidate: 7200,
-      tags: ['category-$1'],
-    },
-  },
-  {
-    url: '/api/categories/(.*)',
-    cache: {
-      revalidate: 7200,
-      tags: ['category'],
-    },
-  },
 ];

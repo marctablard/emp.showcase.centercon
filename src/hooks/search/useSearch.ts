@@ -180,7 +180,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
         setLoading(false);
       }
     },
-    [updateBrowserUrl],
+    [updateBrowserUrl, locale, siteCode],
   );
 
   /**

@@ -69,7 +69,6 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  const authSession = await auth();
 
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
 
@@ -105,7 +104,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       className={`${fontHeadlines.variable} ${fontBody.variable} ${fontHeadlines.className} ${fontBody.className}`}
     >
       <body className="flex h-full flex-col font-body has-[.search]:overflow-hidden">
-        <AuthSessionProvider session={authSession}>
+        <AuthSessionProvider>
           <SiteProvider siteCode={siteCode}>
             <NextIntlClientProvider locale={locale}>
               <StoreProvider site={site} availableSites={availableSites}>

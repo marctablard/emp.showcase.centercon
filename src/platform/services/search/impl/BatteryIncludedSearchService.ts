@@ -105,17 +105,19 @@ class BatteryIncludedSearchService implements SearchService {
     };
   }
 
-  async getSuggestions(query: string, locale?: string, site?: string): Promise<SearchSuggestions> {
+  async getSuggestions(params: SearchParams<Product>): Promise<SearchSuggestions> {
     try {
-      const currentCustomer = await this.customerService.getCustomer();
       let segmentIds;
-      if (currentCustomer) {
-        segmentIds = await this.segmentFilterService.getSegmentIds();
+      if (params.customerSegments) {
+        const currentCustomer = await this.customerService.getCustomer();
+        if (currentCustomer) {
+          segmentIds = await this.segmentFilterService.getSegmentIds();
+        }
       }
-      const apiResponse = await this.shopApi.suggest(query, locale, segmentIds?.join(','));
-      if (!site) {
+      const apiResponse = await this.shopApi.suggest(params.query || '', params.locale, segmentIds?.join(','));
+      if (!params.site) {
         const session = await this.sessionService.getCurrent();
-        site = session?.siteCode;
+        params.site = session?.siteCode;
       }
       return this.suggestionsMapper.mapSearchSuggestions(apiResponse);
     } catch (error) {

@@ -11,7 +11,7 @@ interface CMSPageParams {
   site?: string;
   emptyOnNoResult?: boolean;
 }
-const fetchData = cache(async (locale: string, slug: string, site?: string) => {
+export const fetchData = cache(async (locale: string, slug: string, site?: string) => {
   const sbParams: ISbStoriesParams = {
     version: process.env.NEXT_PUBLIC_STORYBLOK_ACCESS_PREVIEW === 'true' ? 'draft' : 'published',
     language: locale,

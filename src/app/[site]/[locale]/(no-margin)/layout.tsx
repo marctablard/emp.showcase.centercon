@@ -12,6 +12,7 @@ type Props = {
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale, site } = await params;
+  console.log('LocaleLayout', locale, site);
   setRequestSite(site);
   setRequestLocale(locale);
 

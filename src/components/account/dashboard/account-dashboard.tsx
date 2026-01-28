@@ -29,13 +29,9 @@ export default function AccountDashboard(_props: AccountDashboardProps) {
     // Hier kann später die API-Integration erfolgen
   };
 
-  if (!customer) {
-    return <div>Customer not found</div>;
-  }
-
   return (
     <AccountLayout>
-      {loading ? (
+      {loading || !customer ? (
         <div className="space-y-6 mb-6 animate-pulse">
           <div className="relative flex justify-between items-center px-4 gap-2 flex-wrap">
             <div className="h-8 bg-gray-200 rounded w-48"></div>

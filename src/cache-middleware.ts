@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { DEFAULT_CACHE_REVALIDATE, cacheRules } from './cache-config';
 import { INTERNAL_APP_PATH_HEADER } from './site/types';
 
@@ -63,11 +63,9 @@ export function applyCacheDirectives(req: NextRequest, response: Response): Resp
 
   const siteAppPath = response.headers.get(INTERNAL_APP_PATH_HEADER);
   const pathname = siteAppPath ? siteAppPath : req.nextUrl.pathname;
-  console.log('applyCacheDirectives', pathname);
   // Find first matching cache rule
   for (const rule of cacheRules) {
     const { matches, groups } = matchPattern(pathname, rule.url);
-    console.log('applyCacheDirectives', rule.url, matches);
     if (matches) {
       const { revalidate = DEFAULT_CACHE_REVALIDATE, tags = [] } = rule.cache || {};
 
@@ -78,14 +76,6 @@ export function applyCacheDirectives(req: NextRequest, response: Response): Resp
       if (tags.length > 0) {
         const processedTags = replacePlaceholders(tags, groups);
         response.headers.set('X-Cache-Tags', processedTags.join(','));
-      }
-
-      // Log cache application in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[Cache Middleware] Applied to ${pathname}:`, {
-          revalidate: revalidate ?? DEFAULT_CACHE_REVALIDATE,
-          tags: tags ? replacePlaceholders(tags, groups) : undefined,
-        });
       }
 
       // First match wins, stop processing

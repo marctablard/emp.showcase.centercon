@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { fetchCurrentCustomer } from '@/lib/client/customer';
 import { getLogger } from '@/lib/logger/use-logger-client';
@@ -22,6 +22,12 @@ interface CustomerHook {
 export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => {
   const { customer, loading, getLoading, setLoading, setCustomer, getCustomer, reset } = useCustomerStore();
   const { status } = useSession();
+
+  const hookInstanceIdRef = useRef<string | null>(null);
+  if (!hookInstanceIdRef.current) {
+    hookInstanceIdRef.current = `useCustomer-${Math.random().toString(36).slice(2, 10)}`;
+  }
+  const hookInstanceId = hookInstanceIdRef.current;
 
   // only preload on initial load
   useEffect(() => {
@@ -56,6 +62,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
 
   // Initialize customer on first render if not already initialized
   useEffect(() => {
+    console.log('useCustomer 1', hookInstanceId, customer, loading, status);
     // Do not fetch when unauthenticated or during session loading
     if (status !== 'authenticated') {
       setCustomer(null);
@@ -64,17 +71,15 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
       }
       return;
     }
+    console.log('useCustomer 2', hookInstanceId, customer, loading, status);
 
-    if (customer === undefined && !getLoading()) {
+    if (!customer && !getLoading()) {
       setLoading(true);
       // check without state-effect
-      if (getCustomer() !== undefined) {
-        setLoading(false);
-      } else {
-        fetchCustomer();
-      }
+      fetchCustomer();
     }
-  }, [customer, setCustomer, getCustomer, getLoading, setLoading, fetchCustomer, status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   return {
     customer,
