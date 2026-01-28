@@ -13,23 +13,24 @@ import { MenuLevel1 } from '@/components/header/desktop/menu-level-1';
 import { useHeaderSearch } from '@/components/header/search/search-context';
 import { TabletMenuFlyout } from '@/components/header/tablet/menu-flyout';
 import { MenuItem } from '@/data/navigation-menu';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useHeaderScroll } from '@/hooks/useHeaderScroll';
+import { usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 export function HeaderActionBar() {
   const t = useTranslations('layout.header');
   const { showSearch, activateSearch } = useHeaderSearch();
-  const { loading, isAuthenticated } = useAuthentication();
+  const { isAuthenticated, loading } = useAuthentication();
   const { scrolled } = useHeaderScroll();
   const isAboveSmallScreen = useBreakpoint('sm');
   const isAboveMediumScreen = useBreakpoint('md');
   const isAboveLargeScreen = useBreakpoint('lg');
+  const pathname = usePathname();
+  const isOnAuthPage = pathname === '/login' || pathname === '/password-reset';
   const [showMenu, setShowMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { openDialog } = useAuthDialog();
   const [activeDesktopMenu, setActiveDesktopMenu] = useState<MenuItem | null>(null);
   const menuLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -90,8 +91,10 @@ export function HeaderActionBar() {
               <>
                 {isAuthenticated ? (
                   <HeaderIconLink icon={UserCheck} text={t('account')} href="/account" />
+                ) : isOnAuthPage ? (
+                  <HeaderIconButton icon={User} text={t('signIn')} disabled />
                 ) : (
-                  <HeaderIconButton icon={User} text={t('signIn')} onClick={() => openDialog('login')} />
+                  <HeaderIconLink icon={User} text={t('signIn')} href="/login" />
                 )}
               </>
             )}

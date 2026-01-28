@@ -49,15 +49,18 @@ export const useAuthentication = (): AuthenticationHook => {
     setLoading(true);
     setError(null);
     let success = false;
+    // Validate callbackUrl to prevent open redirect attacks
+    const safeCallbackUrl = callbackUrl
+      ? callbackUrl.startsWith('/') && !callbackUrl.startsWith('//')
+        ? callbackUrl
+        : '/account'
+      : undefined;
     try {
-      if (!callbackUrl) {
-        callbackUrl = '/account';
-      }
       const data = await signIn('credentials', {
         username,
         password,
         redirect: false,
-        redirectTo: callbackUrl + '?login=success',
+        redirectTo: safeCallbackUrl ? safeCallbackUrl + '?login=success' : undefined,
       });
 
       if (data?.error) {
@@ -66,7 +69,9 @@ export const useAuthentication = (): AuthenticationHook => {
       } else {
         setIsAuthenticated(true);
         reset();
-        window.location.href = getPathname({ href: callbackUrl + '?login=success', locale, site: site?.code });
+        if (safeCallbackUrl) {
+          window.location.href = getPathname({ href: safeCallbackUrl + '?login=success', locale, site: site?.code });
+        }
         success = true;
       }
     } catch (error) {

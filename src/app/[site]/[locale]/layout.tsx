@@ -6,7 +6,6 @@ import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import { auth } from '@/auth/auth';
-import AuthDialogManager from '@/components/auth/auth-dialog-manager';
 import { CsrfProvider } from '@/components/csrf/CsrfProvider';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
@@ -34,6 +33,7 @@ const fontBody = Open_Sans({
 
 type Props = {
   children: ReactNode;
+  dialog: ReactNode;
   params: Promise<{ locale: Locale; site: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
 };
@@ -63,7 +63,7 @@ export async function generateMetadata(props: Omit<Props, 'children'>) {
   };
 }
 
-export default async function LocaleLayout({ children, params }: Props) {
+export default async function LocaleLayout({ children, dialog, params }: Props) {
   // Ensure that the incoming `locale` is valid
   const { locale, site: siteCode } = await params;
   if (!hasLocale(routing.locales, locale)) {
@@ -110,8 +110,8 @@ export default async function LocaleLayout({ children, params }: Props) {
               <StoreProvider site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
-                  <AuthDialogManager />
                   {children}
+                  {dialog}
                   <Toaster />
                   <Notification />
                 </StoryblokProvider>

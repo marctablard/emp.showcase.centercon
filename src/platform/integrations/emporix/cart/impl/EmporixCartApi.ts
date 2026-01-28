@@ -119,7 +119,14 @@ class EmporixCartApi implements IEmporixCartApi {
     const { query, body } = buildSearchQuery(searchParams);
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/search?${query}`,
-      { method: 'POST', body: JSON.stringify(body) },
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(body),
+      },
       'session',
     );
 

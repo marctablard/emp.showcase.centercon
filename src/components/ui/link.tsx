@@ -44,6 +44,7 @@ interface LinkProps {
   className?: string;
   onClick?: () => void;
   target?: string;
+  replace?: boolean;
 }
 
 export default function UiLink({
@@ -56,6 +57,7 @@ export default function UiLink({
   className,
   onClick,
   target,
+  replace,
   ...props
 }: LinkProps &
   VariantProps<typeof linkVariants> & {
@@ -65,7 +67,7 @@ export default function UiLink({
   switch (type) {
     case 'Link':
       return (
-        <Link href={href} target={target} className={classes} onClick={onClick} {...props}>
+        <Link href={href} target={target} className={classes} onClick={onClick} replace={replace} {...props}>
           {iconBefore}
           {props.children}
           {iconAfter}

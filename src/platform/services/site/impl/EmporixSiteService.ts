@@ -54,21 +54,21 @@ class EmporixSiteService implements SiteService {
         // 2. Don't recurse if the current code is already the default site
         // 3. Don't recurse if default site is undefined or empty
         if (defaultSite && code !== defaultSite && !hasTriedDefaultSite) {
-          console.warn(`Site '${code}' not found, attempting fallback to default site '${defaultSite}'`);
+          this.logger.warn(`Site '${code}' not found, attempting fallback to default site '${defaultSite}'`);
           const fallbackSite = await this.getSite(defaultSite, true);
           if (!fallbackSite) {
-            console.error(`Failed to get site '${code}' and fallback to default site '${defaultSite}' also failed`);
+            this.logger.error(`Failed to get site '${code}' and fallback to default site '${defaultSite}' also failed`);
           }
           return fallbackSite;
         }
 
         // If we've already tried default or it's the same code, return null
         if (defaultSite && code === defaultSite) {
-          console.error(`Site '${code}' not found and it is the configured default site`);
+          this.logger.error(`Site '${code}' not found and it is the configured default site`);
         } else if (hasTriedDefaultSite) {
-          console.error(`Site '${code}' not found and default site fallback has already been attempted`);
+          this.logger.error(`Site '${code}' not found and default site fallback has already been attempted`);
         } else if (!defaultSite) {
-          console.error(`Site '${code}' not found and no default site is configured`);
+          this.logger.error(`Site '${code}' not found and no default site is configured`);
         }
         return null;
       }

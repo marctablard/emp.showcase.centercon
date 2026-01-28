@@ -47,22 +47,22 @@
 
   /* Theme variables - shadow */
   --theme-shadow-xs: var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-0-25)
-    var(--colors-shadow-light); /* shadow-default (1dp) */
+    var(--color-shadow-light); /* shadow-default (1dp) */
   --theme-shadow-sm:
-    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-0-25) var(--colors-shadow-light),
-    var(--spacing-none,) var(--spacing-0-5) var(--spacing-2,) var(--spacing-0-5) var(--colors-shadow-strong);
+    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-0-25) var(--color-shadow-light),
+    var(--spacing-none,) var(--spacing-0-5) var(--spacing-2,) var(--spacing-0-5) var(--color-shadow-strong);
   --theme-shadow-md:
-    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--colors-shadow-light),
-    var(--spacing-none) var(--spacing-1) var(--spacing-2) var(--spacing-1) var(--colors-shadow-strong);
+    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--color-shadow-light),
+    var(--spacing-none) var(--spacing-1) var(--spacing-2) var(--spacing-1) var(--color-shadow-strong);
   --theme-shadow-lg:
-    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--colors-shadow-strong),
-    var(--spacing-none) var(--spacing-2) var(--spacing-3) var(--spacing-2) var(--colors-shadow-strong);
+    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--color-shadow-strong),
+    var(--spacing-none) var(--spacing-2) var(--spacing-3) var(--spacing-2) var(--color-shadow-strong);
   --theme-shadow-xl:
-    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--colors-shadow-light),
-    var(--spacing-none) var(--spacing-4) var(--spacing-4) var(--spacing-2) var(--colors-shadow-strong);
+    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--color-shadow-light),
+    var(--spacing-none) var(--spacing-4) var(--spacing-4) var(--spacing-2) var(--color-shadow-strong);
   --theme-shadow-2xl:
-    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--colors-shadow-light),
-    var(--spacing-none) var(--spacing-6) var(--spacing-6) var(--spacing-2) var(--colors-shadow-strong);
+    var(--spacing-none) var(--spacing-0-25) var(--spacing-3) var(--spacing-none) var(--color-shadow-light),
+    var(--spacing-none) var(--spacing-6) var(--spacing-6) var(--spacing-2) var(--color-shadow-strong);
 
   /* Default theme values */
   --tw-ring-offset-width: 0.125rem;
