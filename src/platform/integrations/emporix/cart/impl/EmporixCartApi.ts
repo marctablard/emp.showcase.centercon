@@ -77,6 +77,7 @@ class EmporixCartApi implements IEmporixCartApi {
     sessionId?: string,
     customerId?: string,
     type?: string,
+    create?: boolean,
   ): Promise<EmporixCart | null> {
     const queryParams = new URLSearchParams();
     queryParams.append('siteCode', siteCode);
@@ -91,6 +92,10 @@ class EmporixCartApi implements IEmporixCartApi {
 
     if (type) {
       queryParams.append('type', type);
+    }
+
+    if (create) {
+      queryParams.append('create', 'true');
     }
 
     const response = await this.apiClient.authenticatedFetch(
