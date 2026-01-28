@@ -250,7 +250,6 @@ describe('EmporixApprovalApi', () => {
         undefined,
         sessionContext.customerId,
         sampleCreateCartRequest.type,
-        true,
       );
       customerCartId = cart?.id;
 
