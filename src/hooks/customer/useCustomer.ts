@@ -56,7 +56,6 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
 
   // Initialize customer on first render if not already initialized
   useEffect(() => {
-    console.log('useCustomer 1', hookInstanceId, customer, loading, status);
     // Do not fetch when unauthenticated or during session loading
     if (status !== 'authenticated') {
       setCustomer(null);
@@ -65,7 +64,6 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
       }
       return;
     }
-    console.log('useCustomer 2', hookInstanceId, customer, loading, status);
 
     if (!customer && !getLoading()) {
       setLoading(true);
