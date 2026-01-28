@@ -10,6 +10,7 @@ import UiLink from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
 import { useL10n } from '@/hooks/useL10n';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency } from '@/lib/utils';
 import { CartItem, CartItemPriceChange } from '@/platform/services/model/cart/cart.d';
 
@@ -41,7 +42,7 @@ export function ItemPriceChangeModal({ isOpen, onClose, cartItem, priceChange, o
       await removeItem(cartItem.id);
       onDone();
     } catch (error) {
-      console.error('Error removing item from cart:', error);
+      getLogger().error({ err: error }, 'Error removing item from cart');
     } finally {
       setIsProcessing(false);
     }

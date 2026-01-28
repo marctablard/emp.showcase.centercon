@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { fetchCurrentCustomer } from '@/lib/client/customer';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Customer } from '@/platform/services/model/customer/customer';
 import { useCustomerStore } from '@/providers/StoreProvider';
 
@@ -47,7 +48,7 @@ export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => 
       setCustomer(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch customer'));
-      console.error('Error fetching customer:', err);
+      getLogger().error({ err }, 'Error fetching customer');
     } finally {
       setLoading(false);
     }

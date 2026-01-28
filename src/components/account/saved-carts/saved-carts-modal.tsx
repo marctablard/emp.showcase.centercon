@@ -11,7 +11,7 @@ interface SavedCartsModalProps {
 }
 
 export function SavedCartsModal({ isOpen, onClose }: SavedCartsModalProps) {
-  const t = useTranslations('savedCarts');
+  const t = useTranslations('cart.savedCarts');
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>

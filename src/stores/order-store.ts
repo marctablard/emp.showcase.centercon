@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { fetchOrders as apiFetchOrders } from '@/lib/client/orders';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { buildSearchQuery } from '@/platform/integrations/emporix/common/util/common';
 import { Order } from '@/platform/services/model/order/order';
 
@@ -116,7 +117,7 @@ export const createOrderStore = () =>
             error: { ...get().error, [queryKey]: error },
             loading: { ...get().loading, [queryKey]: false },
           });
-          console.error('Error fetching orders:', err);
+          getLogger().error({ err }, 'Error fetching orders');
           throw error;
         } finally {
           // Remove from ongoing fetches and set loading to false

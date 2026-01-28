@@ -14,6 +14,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn, formatCurrency } from '@/lib/utils';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 
@@ -51,7 +52,7 @@ export function HeaderCartButton({ initialCart, showSum = true }: HeaderCartButt
         setNotifications((prev) => prev.filter((item) => item.id !== notification));
         return true;
       }
-      console.log('headerCartButton notification', notification);
+      getLogger().debug({ notification }, 'headerCartButton notification');
       if (notification.recipient_id !== cart?.id) {
         return false;
       }

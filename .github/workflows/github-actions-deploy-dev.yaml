@@ -48,6 +48,19 @@ jobs:
         run: npm run lint
       - name: Run jest
         run: npm run jest
+        env:
+          DOTENV_CONFIG_PATH: .env
+          NEXT_EMPORIX_TEST_TENANT: ${{ vars.NEXT_EMPORIX_TEST_TENANT }}
+          NEXT_EMPORIX_TEST_CLIENT_ID: ${{ vars.NEXT_EMPORIX_TEST_CLIENT_ID }}
+          NEXT_EMPORIX_TEST_CLIENT_SECRET: ${{ secrets.NEXT_EMPORIX_TEST_CLIENT_SECRET }}
+          NEXT_PUBLIC_BATTERY_INCLUDED_API_KEY: ${{ secrets.NEXT_PUBLIC_BATTERY_INCLUDED_API_KEY }}
+          NEXT_PUBLIC_BATTERY_INCLUDED_COLLECTION: ${{ vars.NEXT_PUBLIC_BATTERY_INCLUDED_COLLECTION }}
+      - name: Debug checkout contents
+        if: failure()
+        run: |
+          echo "HEAD: $(git rev-parse HEAD)"
+          git status -sb
+          git ls-files src/platform/services/site/impl/EmporixSiteService.test.ts
       # - name: Run e2e
       #   run: npm run e2e
       # - uses: actions/upload-artifact@v4

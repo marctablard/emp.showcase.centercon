@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { StorefrontNotification } from '@/platform/services/model/notification/notification';
 import { NotificationService } from '@/platform/services/notification/NotificationService';
 
@@ -21,7 +22,16 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ notifications });
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/notifications',
+        method: 'GET',
+      },
+      'Error fetching notifications',
+    );
     return NextResponse.json(
       { error: `Failed to fetch notifications: ${error instanceof Error ? error.message : String(error)}` },
       { status: 500 },
@@ -35,9 +45,11 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
  * @returns Response indicating success or failure
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  let notificationId: string | undefined;
+
   try {
     const body = await request.json();
-    const { notificationId } = body;
+    notificationId = body.notificationId;
 
     if (!notificationId) {
       return NextResponse.json({ error: 'Notification ID is required' }, { status: 400 });
@@ -55,7 +67,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error sending push notification:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/notifications',
+        method: 'POST',
+        notificationId,
+      },
+      'Error sending push notification',
+    );
     return NextResponse.json(
       { error: `Failed to send push notification: ${error instanceof Error ? error.message : String(error)}` },
       { status: 500 },
@@ -87,7 +109,18 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting notification:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    const id = request.nextUrl.searchParams.get('id');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/notifications',
+        method: 'DELETE',
+        notificationId: id,
+      },
+      'Error deleting notification',
+    );
     return NextResponse.json(
       { error: `Failed to delete notification: ${error instanceof Error ? error.message : String(error)}` },
       { status: 500 },

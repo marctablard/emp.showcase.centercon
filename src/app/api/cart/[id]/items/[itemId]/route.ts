@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 
 /**
  * PATCH /api/carts/[id]/items/[itemId]
@@ -28,8 +29,19 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json(updatedCart);
   } catch (error) {
+    const logger = server.get<LoggerService>('LoggerService');
     const errorParams = await params.catch(() => ({ id: 'unknown', itemId: 'unknown' }));
-    console.error(`Error updating item ${errorParams.itemId} in cart ${errorParams.id}:`, error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/cart/${errorParams.id}/items/${errorParams.itemId}`,
+        method: 'PATCH',
+        cartId: errorParams.id,
+        itemId: errorParams.itemId,
+      },
+      `Error updating item ${errorParams.itemId} in cart ${errorParams.id}`,
+    );
     return NextResponse.json({ error: 'Failed to update cart item' }, { status: 500 });
   }
 }
@@ -52,8 +64,19 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     return NextResponse.json(updatedCart);
   } catch (error) {
+    const logger = server.get<LoggerService>('LoggerService');
     const errorParams = await params.catch(() => ({ id: 'unknown', itemId: 'unknown' }));
-    console.error(`Error removing item ${errorParams.itemId} from cart ${errorParams.id}:`, error);
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/cart/${errorParams.id}/items/${errorParams.itemId}`,
+        method: 'DELETE',
+        cartId: errorParams.id,
+        itemId: errorParams.itemId,
+      },
+      `Error removing item ${errorParams.itemId} from cart ${errorParams.id}`,
+    );
     return NextResponse.json({ error: 'Failed to remove cart item' }, { status: 500 });
   }
 }

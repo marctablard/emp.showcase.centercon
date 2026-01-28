@@ -51,7 +51,7 @@ export function TabletMenuFlyout() {
                 <>
                   <button
                     onClick={() => handleItemClick(item)}
-                    className="w-full flex items-center justify-between py-4 text-lg cursor-pointer"
+                    className="w-full flex items-center justify-between py-4 text-lg text-left cursor-pointer"
                   >
                     {item.label}
                     <ChevronDown className="w-5 h-5 ms-1" />

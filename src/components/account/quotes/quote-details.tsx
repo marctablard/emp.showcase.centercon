@@ -15,6 +15,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useQuoteHistory } from '@/hooks/quotes/useQuoteHistory';
 import { useQuote } from '@/hooks/quotes/useQuotes';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import { Quote } from '@/platform/services/model/quote';
 
@@ -284,7 +285,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                         setShowAcceptConfirmation(false);
                         setComment('');
                       } catch (error) {
-                        console.error('Failed to process quote:', error);
+                        getLogger().error({ err: error }, 'Failed to process quote');
                         setProcessError(error instanceof Error ? error.message : 'Failed to process quote');
                       } finally {
                         setIsProcessing(false);
@@ -349,7 +350,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                         setShowRejectConfirmation(false);
                         setComment('');
                       } catch (error) {
-                        console.error('Failed to reject quote:', error);
+                        getLogger().error({ err: error }, 'Failed to reject quote');
                         setProcessError(error instanceof Error ? error.message : 'Failed to reject quote');
                       } finally {
                         setIsProcessing(false);
@@ -413,7 +414,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                         setShowRequestChangeConfirmation(false);
                         setComment('');
                       } catch (error) {
-                        console.error('Failed to add comment to quote:', error);
+                        getLogger().error({ err: error }, 'Failed to add comment to quote');
                         setProcessError(error instanceof Error ? error.message : 'Failed to add comment to quote');
                       } finally {
                         setIsProcessing(false);

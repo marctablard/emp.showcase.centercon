@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { NotificationService } from '@/platform/services/notification/NotificationService';
 
 /**
@@ -22,7 +23,16 @@ export async function PUT(request: NextRequest) {
     // Store the subscription using the notification service
     await notificationService.subscribe(body);
   } catch (error) {
-    console.error('Error validating subscription:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/notifications/subscriptions',
+        method: 'PUT',
+      },
+      'Error validating subscription',
+    );
     return NextResponse.json({ success: false, message: 'Invalid subscription' }, { status: 400 });
   }
 
@@ -52,7 +62,16 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error removing subscription:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: '/api/notifications/subscriptions',
+        method: 'DELETE',
+      },
+      'Error removing subscription',
+    );
     return NextResponse.json({ success: false, message: 'Failed to remove subscription' }, { status: 500 });
   }
 }

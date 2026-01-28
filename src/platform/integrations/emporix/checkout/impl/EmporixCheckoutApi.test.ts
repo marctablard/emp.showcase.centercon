@@ -12,6 +12,7 @@ import {
   EmporixCheckoutCustomer,
   EmporixCheckoutPaymentMethod,
   EmporixCreateCartRequest,
+  EmporixSessionContext,
   EmporixShipping,
 } from '../../model';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
@@ -125,6 +126,7 @@ describe('EmporixCheckoutApi', () => {
   let cartApi: EmporixCartApi;
   let apiInvoker: EmporixApiInvoker;
   let customerApi: EmporixCustomerApi;
+  let config: EmporixConfig;
   let createdCartId: string;
 
   beforeAll(async () => {
@@ -143,12 +145,79 @@ describe('EmporixCheckoutApi', () => {
     cartApi = container.get<EmporixCartApi>('EmporixCartApi');
     checkoutApi = container.get<EmporixCheckoutApi>('EmporixCheckoutApi');
     customerApi = container.get<EmporixCustomerApi>('EmporixCustomerApi');
+    config = container.get<EmporixConfig>('EmporixConfig');
   });
 
   afterAll(async () => {
     // Clean up any tokens
     await apiInvoker.clearTokens();
   });
+
+  async function getOrCreateCustomerCartId(sessionContext?: EmporixSessionContext) {
+    const customerProfile = await customerApi.getCustomerProfile();
+    const customerId = sessionContext?.customerId ?? customerProfile.id;
+
+    if (sessionContext?.cartId) {
+      return sessionContext.cartId;
+    }
+
+    const queryParams = new URLSearchParams({
+      siteCode: sampleCreateCartRequest.siteCode,
+      create: 'true',
+    });
+    if (customerId) {
+      queryParams.append('customerId', customerId);
+    }
+    if (sampleCreateCartRequest.type) {
+      queryParams.append('type', sampleCreateCartRequest.type);
+    }
+
+    const response = await apiInvoker.authenticatedFetch(
+      `/cart/${config.tenant}/carts?${queryParams.toString()}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+      'customer-saas',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to get or create cart: ${response.statusText} ${errorDetails}`);
+    }
+
+    const cart = (await response.json()) as { id?: string; cartId?: string };
+    const cartId = cart.id ?? cart.cartId;
+    if (!cartId) {
+      throw new Error('Cart ID is missing in get/create response');
+    }
+    return cartId;
+  }
+
+  async function addItemToCustomerCart(cartId: string, item: EmporixAddCartItemRequest): Promise<string> {
+    const response = await apiInvoker.authenticatedFetch(
+      `/cart/${config.tenant}/carts/${cartId}/items?siteCode=${item.siteCode}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(item),
+      },
+      'customer-saas',
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to add item to cart: ${response.statusText} ${errorDetails}`);
+    }
+
+    const createdItem: { itemId: string } = await response.json();
+    return createdItem.itemId;
+  }
 
   describe('Checkout Operations', () => {
     // Create a cart and add items before testing checkout
@@ -216,13 +285,14 @@ describe('EmporixCheckoutApi', () => {
   describe('Customer B2B Checkout Operations', () => {
     // Helper function to set up customer token
     const username = 'forrest.gump@alaba.ma';
-    async function setupCustomerToken() {
+    async function setupCustomerToken(): Promise<EmporixSessionContext> {
       try {
+        await apiInvoker.clearTokens();
         // Login with test customer credentials
         const password = 'Test1234';
 
         // Use the customer API to login
-        await customerApi.login(username, password);
+        return await customerApi.login(username, password);
       } catch (error) {
         console.error('Error setting up customer token:', error);
         throw error;
@@ -232,14 +302,14 @@ describe('EmporixCheckoutApi', () => {
 
     beforeEach(async () => {
       // Set up a customer token with test user credentials
-      await setupCustomerToken();
+      const sessionContext = await setupCustomerToken();
 
       // Create a cart
-      customerCartId = await cartApi.createCart(sampleCreateCartRequest);
+      customerCartId = await getOrCreateCustomerCartId(sessionContext);
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
-      const itemId = await cartApi.addItemToCart(customerCartId, sampleAddItemRequest);
+      const itemId = await addItemToCustomerCart(customerCartId, sampleAddItemRequest);
       expect(itemId).toBeDefined();
     }, 15000);
 
@@ -258,13 +328,14 @@ describe('EmporixCheckoutApi', () => {
   describe('Customer B2C Checkout Operations', () => {
     // Helper function to set up customer token
     const username = 'jenny.curran@alaba.ma';
-    async function setupCustomerToken() {
+    async function setupCustomerToken(): Promise<EmporixSessionContext> {
       try {
+        await apiInvoker.clearTokens();
         // Login with test customer credentials
         const password = 'Test1234';
 
         // Use the customer API to login
-        await customerApi.login(username, password);
+        return await customerApi.login(username, password);
       } catch (error) {
         console.error('Error setting up B2C customer token:', error);
         throw error;
@@ -274,14 +345,14 @@ describe('EmporixCheckoutApi', () => {
 
     beforeEach(async () => {
       // Set up a customer token with test user credentials
-      await setupCustomerToken();
+      const sessionContext = await setupCustomerToken();
 
       // Create a cart
-      customerCartId = await cartApi.createCart(sampleCreateCartRequest);
+      customerCartId = await getOrCreateCustomerCartId(sessionContext);
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
-      const itemId = await cartApi.addItemToCart(customerCartId, sampleAddItemRequest);
+      const itemId = await addItemToCustomerCart(customerCartId, sampleAddItemRequest);
       expect(itemId).toBeDefined();
     }, 15000);
 
@@ -313,13 +384,14 @@ describe('EmporixCheckoutApi', () => {
   describe('Customer Checkout with Approval Required', () => {
     // Helper function to set up customer token
     const username = 'benjamin.blue@alaba.ma';
-    async function setupCustomerToken() {
+    async function setupCustomerToken(): Promise<EmporixSessionContext> {
       try {
+        await apiInvoker.clearTokens();
         // Login with test customer credentials
         const password = 'Test1234';
 
         // Use the customer API to login
-        await customerApi.login(username, password);
+        return await customerApi.login(username, password);
       } catch (error) {
         console.error('Error setting up customer token for approval flow:', error);
         throw error;
@@ -329,20 +401,22 @@ describe('EmporixCheckoutApi', () => {
 
     beforeEach(async () => {
       // Set up a customer token with test user credentials
-      await setupCustomerToken();
+      const sessionContext = await setupCustomerToken();
 
       // Create a cart
-      customerCartId = await cartApi.createCart(sampleCreateCartRequest);
+      customerCartId = await getOrCreateCustomerCartId(sessionContext);
       expect(customerCartId).toBeDefined();
 
       // Add an item to the cart
-      const itemId = await cartApi.addItemToCart(customerCartId, sampleAddItemRequest);
+      const itemId = await addItemToCustomerCart(customerCartId, sampleAddItemRequest);
       expect(itemId).toBeDefined();
     }, 15000);
 
     afterEach(async () => {
       // Delete the cart
-      await cartApi.deleteCart(customerCartId);
+      if (customerCartId) {
+        await cartApi.deleteCart(customerCartId);
+      }
     }, 15000);
 
     it('should fail trying to perform checkout with approval required', async () => {

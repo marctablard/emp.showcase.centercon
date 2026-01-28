@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Company } from '@/platform/services/model/company/company';
 
 /**
@@ -21,7 +22,7 @@ export async function fetchCurrentCompany(): Promise<Company | null> {
     const company = await response.json();
     return company;
   } catch (error) {
-    console.error('Error fetching company:', error);
+    getLogger().error({ err: error }, 'Error fetching company');
     return null;
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { ProductService } from '@/platform/services/product/ProductService';
 
 /**
@@ -7,8 +8,9 @@ import { ProductService } from '@/platform/services/product/ProductService';
  * GET /api/products/[id]/variants
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: productId } = await params;
+
   try {
-    const { id: productId } = await params;
     const productService = server.get<ProductService>('ProductService');
 
     const variants = await productService.getVariantProducts(productId);
@@ -19,7 +21,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ variants });
   } catch (error) {
-    console.error('Error fetching product variants:', error);
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/products/${productId}/variants`,
+        method: 'GET',
+        productId,
+      },
+      'Error fetching product variants',
+    );
     return NextResponse.json({ error: 'Failed to fetch product variants' }, { status: 500 });
   }
 }

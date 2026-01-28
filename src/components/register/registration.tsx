@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { H1, H2 } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import useAuthentication from '@/hooks/authentication/useAuthentication';
 import { useRegistration } from '@/hooks/registration/useRegistration';
 import useCurrency from '@/hooks/useCurrency';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { RegistrationData } from '@/platform/services/validation/impl/EmporixRegistrationValidationService';
 import { Spinner } from '../ui/spinner';
 import { AccountSettingsSection } from './account-settings-section';
@@ -27,7 +27,6 @@ export default function Registration() {
   const top = useRef<HTMLDivElement>(null);
   const locale = useLocale();
   const { currency } = useCurrency();
-  const { openDialog } = useAuthDialog();
 
   useEffect(() => {
     if (formError && top.current) {
@@ -110,7 +109,7 @@ export default function Registration() {
         }
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      getLogger().error({ err: error }, 'Registration error');
       setFormError(t('validation.registrationFailed'));
     }
   }
@@ -133,7 +132,7 @@ export default function Registration() {
         <H1 variant="h4">{t('title')}</H1>
         <p>
           {t('alreadyHaveAccount')}{' '}
-          <UiLink type="Button" onClick={() => openDialog('login')}>
+          <UiLink type="Link" href="/login?callbackUrl=/account">
             {t('logIn')}
           </UiLink>
         </p>
@@ -179,7 +178,7 @@ export default function Registration() {
         </Button>
         <p>
           {t('alreadyHaveAccount')}{' '}
-          <UiLink type="Button" onClick={() => openDialog('login')}>
+          <UiLink type="Link" href="/login?callbackUrl=/account">
             {t('logIn')}
           </UiLink>
         </p>
