@@ -20,14 +20,8 @@ interface CustomerHook {
  * @returns Customer data and state
  */
 export const useCustomer = (initialCustomer?: Customer | null): CustomerHook => {
-  const { customer, loading, getLoading, setLoading, setCustomer, getCustomer, reset } = useCustomerStore();
+  const { customer, loading, getLoading, setLoading, setCustomer, reset } = useCustomerStore();
   const { status } = useSession();
-
-  const hookInstanceIdRef = useRef<string | null>(null);
-  if (!hookInstanceIdRef.current) {
-    hookInstanceIdRef.current = `useCustomer-${Math.random().toString(36).slice(2, 10)}`;
-  }
-  const hookInstanceId = hookInstanceIdRef.current;
 
   // only preload on initial load
   useEffect(() => {
