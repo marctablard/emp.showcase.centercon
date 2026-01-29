@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { ProductTile } from '@/components/product/product-tile';
-import { ProductTileSkeleton } from '@/components/product/product-tile-skeleton';
+import { SearchActiveFiltersWithReset } from '@/components/search/search-active-filters-with-reset';
 import { SearchFilter } from '@/components/search/search-filter';
-import { H2 } from '@/components/ui/h';
+import { SearchLayoutToggle } from '@/components/search/search-layout-toggle';
+import { SearchResultsGrid } from '@/components/search/search-results-grid';
+import { SearchResultsList } from '@/components/search/search-results-list';
 import {
   Pagination,
   PaginationContent,
@@ -15,7 +16,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useSearch } from '@/hooks/search/useSearch';
 import { SearchParams, SearchResult } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
@@ -27,8 +27,9 @@ interface SearchClientWrapperProps {
 }
 
 export function SearchResultsComponent({ initialSearch, initialResults, locale }: SearchClientWrapperProps) {
-  const t = useTranslations('search');
+  const t = useTranslations('search.searchResults');
   const searchParams = useSearchParams();
+  const [layout, setLayout] = useState<'list' | 'grid'>('list');
   // Initialize the search hook with Product type and initial results
   const {
     data: products,
@@ -46,6 +47,25 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     activeFilters,
     changePage,
   } = useSearch<Product>(initialSearch, initialResults);
+
+  // Shared props for SearchFilter component (used in both mobile and desktop layouts)
+  const searchFilterProps = {
+    activeFilters,
+    availableFilters,
+    resetFacet,
+    resetAllFacets,
+    applyFacet,
+    applyRangeFacet,
+    applyAllFacets,
+  };
+
+  // Shared props for ActiveFiltersWithReset component
+  const activeFiltersProps = {
+    activeFilters,
+    resetFacet,
+    resetAllFacets,
+    resetLabel: t('resetFilter'),
+  };
   const visiblePagination = useMemo(() => {
     if (pageSize <= 0) {
       return [];
@@ -84,7 +104,7 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
     const filters: Record<string, string | string[] | Record<string, string>> = {};
 
     searchParams.forEach((value, key) => {
-      const filterRegex = /^filters\[(.*?)\](\[\]|\[(.*?)\])?$/;
+      const filterRegex = /^filters\[(.*?)](\[]|\[(.*?)])?$/;
       const match = key.match(filterRegex);
 
       if (match) {
@@ -129,59 +149,54 @@ export function SearchResultsComponent({ initialSearch, initialResults, locale }
 
   return (
     <>
-      <SearchFilter
-        {...{
-          activeFilters,
-          availableFilters,
-          resetFacet,
-          resetAllFacets,
-          applyFacet,
-          applyRangeFacet,
-          applyAllFacets,
-        }}
-      />
-      {/* Product Grid */}
-      <div className="mt-6 w-full">
-        {loading ? (
-          <>
-            <Skeleton className="h-5 w-[180px] mb-4" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-fr">
-              {Array.from({ length: Math.min(pageSize, products.length) }).map((_, i) => (
-                <ProductTileSkeleton key={i} />
-              ))}
-            </div>
-          </>
-        ) : (
-          <>
-            {products.length === 0 ? (
-              <div className="text-center py-12">
-                <H2 className="mb-2">{t('searchResults.noProductsFound')}</H2>
-                <p className="text-text-placeholders">{t('searchResults.tryAdjusting')}</p>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4">
-                  <p className="text-sm text-text-placeholders">
-                    {t('searchResults.showing', {
-                      start: currentPage * pageSize + 1,
-                      end: currentPage * pageSize + products.length,
-                      total: total,
-                    })}
-                  </p>
-                </div>
+      {/* Top controls */}
+      <div className="w-full">
+        {/* Row: SearchFilter + Layout toggle inline on mobile; desktop keeps toggle on the right */}
+        <div className="flex w-full justify-between gap-4">
+          {/* Mobile: SearchFilter only */}
+          <div className="flex sm:hidden">
+            <SearchFilter {...searchFilterProps} />
+          </div>
 
-                {/* Client-side rendered products - this will replace the server-rendered ones */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-fr">
-                  {products.map((product) => (
-                    <div key={product.id} className="h-full">
-                      <ProductTile product={product} locale={locale} />
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </>
+          {/* Desktop: SearchFilter + Active filters inline */}
+          <div className="hidden flex-wrap items-center gap-4 sm:flex">
+            <SearchFilter {...searchFilterProps} />
+            <SearchActiveFiltersWithReset {...activeFiltersProps} />
+          </div>
+
+          <SearchLayoutToggle active={layout} onSelectLayout={(selectedLayout) => setLayout(selectedLayout)} />
+        </div>
+
+        {/* Mobile: Active filters below, full width */}
+        <div className="mt-4 flex flex-col flex-wrap gap-4 sm:hidden">
+          <SearchActiveFiltersWithReset {...activeFiltersProps} />
+        </div>
+      </div>
+
+      {/* Product List/Grid */}
+      <div className="mt-6 w-full">
+        {layout === 'list' && (
+          <SearchResultsList
+            products={products}
+            locale={locale}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            total={total}
+            loading={loading}
+          />
         )}
+
+        {layout === 'grid' && (
+          <SearchResultsGrid
+            products={products}
+            locale={locale}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            total={total}
+            loading={loading}
+          />
+        )}
+
         {/* Simple Pagination */}
         {total > pageSize && (
           <div className="mt-8 flex justify-center">

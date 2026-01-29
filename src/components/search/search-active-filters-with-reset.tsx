@@ -1,0 +1,26 @@
+import { Trash2 } from 'lucide-react';
+import { SearchActiveFilters } from '@/components/search/search-active-filters';
+import { Pill } from '@/components/ui/pill';
+
+interface SearchActiveFiltersWithResetProps {
+  activeFilters: Record<string, string | string[] | Record<string, string>>;
+  resetFacet: (key: string) => void;
+  resetAllFacets: () => void;
+  resetLabel: string;
+}
+
+export function SearchActiveFiltersWithReset({
+  activeFilters,
+  resetFacet,
+  resetAllFacets,
+  resetLabel,
+}: Omit<SearchActiveFiltersWithResetProps, 'className'>) {
+  return (
+    <>
+      <SearchActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
+      {Object.keys(activeFilters).length > 0 && (
+        <Pill variant="reset" leadingIcon={<Trash2 />} label={resetLabel} onClick={resetAllFacets} />
+      )}
+    </>
+  );
+}
