@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
@@ -31,16 +31,13 @@ export function CurrencySwitcher() {
     return currencies[0];
   }, [currencies, session]);
 
-  const switchCurrency = (currency: string) => {
-    setCurrency(currency);
-  };
-
-  useEffect(() => {
-    if (session?.currency != currentCurrency?.code) {
-      // refresh page, because much will change due to changed currency
+  const switchCurrency = async (currency: string) => {
+    const success = await setCurrency(currency);
+    if (success) {
+      // Refresh page after session update completes to reload prices with new currency
       router.refresh();
     }
-  }, [session, currentCurrency, router]);
+  };
 
   if (siteLoading || sessionLoading) {
     return <Spinner color="default" variant="sm" />;
