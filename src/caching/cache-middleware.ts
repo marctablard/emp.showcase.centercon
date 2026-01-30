@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
+import { INTERNAL_APP_PATH_HEADER } from '../site/types';
 import { DEFAULT_CACHE_REVALIDATE, cacheRules } from './cache-config';
-import { INTERNAL_APP_PATH_HEADER } from './site/types';
 
 /**
  * Check if cache middleware is enabled via environment variable

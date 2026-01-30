@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthRequest } from 'next-auth';
 import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 import { config as authConfig } from './auth/auth.config';
-import { applyCacheDirectives } from './cache-middleware';
+import { applyCacheDirectives } from './caching/cache-middleware';
 import { createSiteMiddleware } from './site/middleware';
 import { routing as siteRouting } from './site/routing';
 import { NEXT_REWRITE_HEADER } from './site/types';
