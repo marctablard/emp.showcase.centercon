@@ -68,6 +68,7 @@ const customJestConfig = {
         '^@platform/(.*)$': '<rootDir>/src/platform/$1',
       },
       testPathIgnorePatterns: commonJestConfig.testPathIgnorePatterns,
+      transformIgnorePatterns: ['/node_modules/(?!(next-intl|use-intl)/)'],
       transform: {
         '^.+\\.(ts|tsx)$': [
           '@swc/jest',
@@ -84,6 +85,26 @@ const customJestConfig = {
                 },
                 legacyDecorator: true,
                 decoratorMetadata: true,
+              },
+              target: 'es2017',
+            },
+            module: {
+              type: 'es6',
+            },
+          },
+        ],
+        '^.+\\.(js|jsx)$': [
+          '@swc/jest',
+          {
+            jsc: {
+              parser: {
+                syntax: 'ecmascript',
+                jsx: true,
+              },
+              transform: {
+                react: {
+                  runtime: 'automatic',
+                },
               },
               target: 'es2017',
             },
