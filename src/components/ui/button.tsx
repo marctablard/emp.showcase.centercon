@@ -22,6 +22,8 @@ const buttonVariants = cva(
           'bg-surface-action text-text-on-action border-width-button border-transparent hover:bg-surface-action-hover rounded-r-sm',
         carouselControl:
           'absolute size-8 rounded-full border-width-button border-border-secondary bg-transparent text-text-action hover:border-border-action-hover hover:bg-surface-action-hover-2 hover:text-text-action-hover disabled:border-transparent',
+        iconSelector:
+          'border-width-button border-border-primary bg-surface-page !p-2 w-12 h-12 rounded-sm data-[active=true]:border-2 data-[active=true]:border-border-black hover:border-border-black disabled:!border-border-primary disabled:!border-1 disabled:bg-surface-disabled disabled:text-text-on-disabled',
       },
       size: {
         small: 'px-2 py-1',
@@ -59,7 +61,7 @@ function BackToTopButton({
   return (
     <button
       className={cn(
-        'cursor-pointer text-icon-on-action [&>svg]:size-8 p-2 rounded-full bg-linear-to-t from-gradient-secondary-end to-gradient-secondary-start hover:to-surface-action-hover transition disabled:bg-none disabled:bg-surface-disabled-selected disabled:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+        'text-icon-on-action from-gradient-secondary-end to-gradient-secondary-start hover:to-surface-action-hover disabled:bg-surface-disabled-selected focus-visible:ring-border-focus shrink-0 cursor-pointer rounded-full bg-linear-to-t p-2 transition outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:bg-none [&_svg]:shrink-0 [&>svg]:size-8',
         className,
       )}
       {...props}

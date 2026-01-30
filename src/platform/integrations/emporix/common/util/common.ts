@@ -26,6 +26,9 @@ export function buildSearchQuery<T>(
   let query: string = '';
   if (params.criteria) {
     Object.entries(params.criteria).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        return;
+      }
       if (filterAsQuery) {
         queryParams.append(key, '' + value);
       } else {

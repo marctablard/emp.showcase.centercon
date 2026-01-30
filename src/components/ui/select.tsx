@@ -30,15 +30,15 @@ function SelectTrigger({ className, children, disabled, startIcon, ...props }: S
   return (
     <div
       className={cn(
-        'w-full relative ',
-        'transition-all hover:text-text-action-hover hover:bg-surface-page',
+        'relative w-full',
+        'hover:text-text-action-hover hover:bg-surface-page transition-all',
         dataDirtySuccess && 'text-text-success border-border-success',
         props['aria-invalid'] && 'border-border-error text-text-error',
         disabled && 'hover:text-text-on-disabled',
       )}
     >
       {StartIcon && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 border-none text-icon-neutral">
+        <div className="text-icon-neutral absolute top-1/2 left-3 -translate-y-1/2 transform border-none">
           <StartIcon size={20} />
         </div>
       )}
@@ -46,14 +46,14 @@ function SelectTrigger({ className, children, disabled, startIcon, ...props }: S
       <SelectPrimitive.Trigger
         data-slot="select-trigger"
         className={cn(
-          'text-text-body group flex justify-between items-center w-full min-w-0 px-3 border border-border-primary rounded-sm',
-          'transition duration-150 ease-in-out hover:border-border-action-hover hover:text-text-action-hover hover:bg-surface-page',
+          'text-text-body group border-border-primary flex w-full min-w-0 items-center justify-between gap-3 rounded-sm border px-3',
+          'hover:border-border-action-hover hover:text-text-action-hover hover:bg-surface-page transition duration-150 ease-in-out',
           startIcon && 'pl-10',
           disabled &&
             'bg-surface-disabled text-text-on-disabled border-border-disabled hover:text-text-on-disabled hover:bg-surface-disabled hover:border-border-disabled pointer-events-none',
-          'data-[state=open]:outline-2 data-[state=open]:outline-offset-2 data-[state=open]:outline-border-focus',
+          'data-[state=open]:outline-border-focus data-[state=open]:outline-2 data-[state=open]:outline-offset-2',
           'aria-invalid:text-text-error aria-invalid:border-border-error hover:aria-invalid:border-border-action-hover hover:aria-invalid:text-text-action-hover',
-          "data-[placeholder]:text-text-placeholders flex w-full text-base py-3 [&_svg:not([class*='size-'])]:size-5",
+          "data-[placeholder]:text-text-placeholders w-full py-3 text-base [&_svg:not([class*='size-'])]:size-5",
           dataDirtySuccess &&
             'bg-surface-success border-border-success hover:border-border-action-hover hover:text-text-action-hover',
           dataDirtyError && 'bg-surface-error hover:border-border-action-hover hover:text-text-action-hover',
@@ -65,7 +65,7 @@ function SelectTrigger({ className, children, disabled, startIcon, ...props }: S
         <SelectPrimitive.Icon asChild>
           <ChevronDownIcon
             className={cn(
-              'size-4 text-icon-neutral transition-transform duration-200 group-data-[state=open]:rotate-180',
+              'text-icon-neutral size-4 transition-transform duration-200 group-data-[state=open]:rotate-180',
             )}
           />
         </SelectPrimitive.Icon>
@@ -85,7 +85,7 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          'mt-1 bg-surface-page data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-sm border',
+          'bg-surface-page data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 mt-1 max-h-(--radix-select-content-available-height) origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-sm border',
           position === 'popper' &&
             'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
           className,

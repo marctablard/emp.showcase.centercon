@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ListFilter, Trash2, X } from 'lucide-react';
+import { ListFilter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,51 +25,6 @@ interface SearchFilterProps {
 }
 
 type FilterFormValues = Record<string, string | number>;
-
-interface ActiveFiltersProps {
-  activeFilters: Record<string, SearchFilterValue>;
-  resetFacet: (facetId: string) => void;
-  resetAllFacets: () => void;
-}
-
-function ActiveFilters({ activeFilters, resetFacet }: ActiveFiltersProps) {
-  const t = useTranslations('product');
-  const filters = Object.entries(activeFilters);
-
-  // Helper function to format filter values for display
-  const formatFilterValue = (value: SearchFilterValue): string => {
-    if (typeof value === 'string') {
-      return value;
-    } else if (Array.isArray(value)) {
-      return value.join(', ');
-    } else if (value && typeof value === 'object') {
-      // Handle Record<string, string>
-      return Object.entries(value)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(', ');
-    }
-    return '';
-  };
-
-  return (
-    <>
-      {filters &&
-        filters.map(([id, value]) => {
-          return (
-            <Button
-              onClick={() => resetFacet(id)}
-              className="bg-surface-disabled text-text-headings border-none normal-case"
-              variant="secondary"
-              key={id}
-            >
-              {t(`filters.${id}`)} ({formatFilterValue(value)})
-              <X />
-            </Button>
-          );
-        })}
-    </>
-  );
-}
 
 function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitComplete }: SearchFilterProps) {
   const t = useTranslations('product');
@@ -261,7 +216,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
       })}
 
       {/* Submit button */}
-      <Button type="submit" className="w-full mt-4">
+      <Button type="submit" className="mt-4 w-full">
         {t('filters.applyFilters')}
       </Button>
     </form>
@@ -277,9 +232,7 @@ function SearchFilter({
   resetAllFacets,
   activeFilters,
 }: SearchFilterProps) {
-  const t = useTranslations('product');
   // Check if there are any active filters
-  const hasActiveFilters = Object.keys(activeFilters).length > 0;
   // State to control if the filter offcanvas is visible
   const [showFilterOffcanvas, setShowFilterOffcanvas] = useState(false);
 
@@ -289,21 +242,11 @@ function SearchFilter({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative">
       {/* Filter Toggle Button */}
-      <div className="flex gap-4 max-w-full overflow-x-scroll hide-scrollbar mb-4">
-        <Button variant="secondary" onClick={toggleFilterOffcanvas}>
-          <ListFilter className="mr-2" /> Filter
-        </Button>
-
-        <ActiveFilters activeFilters={activeFilters} resetFacet={resetFacet} resetAllFacets={resetAllFacets} />
-        {hasActiveFilters && (
-          <Button variant="neutral" onClick={resetAllFacets} className="normal-case">
-            <Trash2 className="mr-1" />
-            {t('filters.clearFilter')}
-          </Button>
-        )}
-      </div>
+      <Button variant="secondary" onClick={toggleFilterOffcanvas}>
+        <ListFilter className="mr-2" /> Filter
+      </Button>
 
       {/* Offcanvas Filter Menu - shown when toggled */}
       {showFilterOffcanvas && (
