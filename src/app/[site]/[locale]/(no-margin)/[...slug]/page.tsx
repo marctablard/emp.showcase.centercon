@@ -21,7 +21,6 @@ export default async function DynamicPage({ params }: { params: Promise<DynamicP
 
   setRequestSite(site);
   setRequestLocale(locale);
-  console.log('DynamicPage', locale, site);
   return (
     <div>
       <CMSPageComponent slug={slug.join('/')} locale={locale} site={site} />

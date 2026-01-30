@@ -5,7 +5,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
-import { auth } from '@/auth/auth';
 import { CsrfProvider } from '@/components/csrf/CsrfProvider';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';

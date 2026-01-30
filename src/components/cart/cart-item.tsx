@@ -93,7 +93,6 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
       setQuantity(newQuantity);
       await updateItemQuantity(item.id, newQuantity);
     } finally {
-      console.log('finally');
       setIsProcessing(false);
     }
   };
