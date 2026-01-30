@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { fetchCurrentCustomer } from '@/lib/client/customer';
 import { getLogger } from '@/lib/logger/use-logger-client';

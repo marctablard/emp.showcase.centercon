@@ -3,8 +3,6 @@ import { getTranslations } from 'next-intl/server';
 import { OrderConfirmation } from '@/components/checkout';
 import { getOrderById } from '@/lib/ssr/orders';
 
-export const dynamic = 'force-dynamic';
-
 interface ConfirmationPageProps {
   orderId: string;
   locale: string;
