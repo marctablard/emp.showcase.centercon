@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useSession as useAppSession } from '@/hooks/session/useSession';
 import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
-import { useCartStore } from '@/providers/StoreProvider';
+import { useCartStore, useSessionStore } from '@/providers/StoreProvider';
 
 interface UseCart {
   // Cart data
@@ -51,7 +51,10 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     setCurrentCart,
     loadCart,
     validateCart,
+    validateSite,
   } = useCartStore();
+
+  const { session } = useSessionStore();
 
   useEffect(() => {
     // Initialize with initialCart if provided and cart is undefined
@@ -65,6 +68,13 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
   useEffect(() => {
     validateCart(sessionStatus);
   }, [sessionStatus, validateCart]);
+
+  // Validate cart when site changes
+  useEffect(() => {
+    if (session?.siteCode) {
+      validateSite(session.siteCode);
+    }
+  }, [session?.siteCode, validateSite]);
 
   const { session: appSession } = useAppSession();
   useEffect(() => {
