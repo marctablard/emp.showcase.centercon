@@ -25,6 +25,8 @@ export interface CartState {
     timestamp: number;
   } | null;
   sessionStatus: string | null;
+  // Track last site code to detect site changes
+  lastSiteCode: string | null;
 }
 
 interface CartActions {
@@ -37,6 +39,7 @@ interface CartActions {
   loadCart: (cartId: string, type?: string) => Promise<Cart | null | undefined>;
 
   validateCart: (sessionStatus: string) => Promise<void>;
+  validateSite: (siteCode: string) => Promise<void>;
 
   // Cart API operations
   fetchCart: (createCurrent?: boolean) => Promise<Cart | null | undefined>;
@@ -55,6 +58,7 @@ const defaultState: CartState = {
   error: null,
   lastShippingUpdate: null,
   sessionStatus: null,
+  lastSiteCode: null,
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
@@ -65,6 +69,23 @@ export const createCartStore = (initState: CartState = defaultState) => {
       if (sessionStatus !== newSessionStatus) {
         set({ sessionStatus: newSessionStatus });
         await get().fetchCart(false);
+      }
+    },
+    validateSite: async (newSiteCode: string) => {
+      const { lastSiteCode } = get();
+      if (lastSiteCode !== null && lastSiteCode !== newSiteCode) {
+        // Site changed - set new site first to prevent race conditions, then clear cart state and fetch new one
+        set({
+          lastSiteCode: newSiteCode,
+          currentCart: null,
+          loading: true,
+          error: null,
+          lastShippingUpdate: null,
+        });
+        await get().fetchCart(false);
+      } else if (lastSiteCode === null) {
+        // First time setting site
+        set({ lastSiteCode: newSiteCode });
       }
     },
     // State setters
@@ -262,6 +283,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
         loading: false,
         error: null,
         lastShippingUpdate: null,
+        lastSiteCode: null,
       });
     },
   }));
