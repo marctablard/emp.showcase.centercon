@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSession as useAppSession } from '@/hooks/session/useSession';
 import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { useCartStore, useSessionStore } from '@/providers/StoreProvider';
@@ -44,6 +45,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     updateItemQuantity,
     removeItem,
     updateShippingInfo,
+    updateCurrency,
     clearCart,
     fetchCart,
     setCurrentCart,
@@ -73,6 +75,18 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
       validateSite(session.siteCode);
     }
   }, [session?.siteCode, validateSite]);
+
+  const { session: appSession } = useAppSession();
+  useEffect(() => {
+    if (!cart || !appSession?.currency) {
+      return;
+    }
+
+    const cartCurrency = cart.currency || cart.totalPrice?.currency;
+    if (cartCurrency && cartCurrency !== appSession.currency) {
+      updateCurrency(appSession.currency);
+    }
+  }, [appSession?.currency, cart, updateCurrency]);
 
   return {
     cart,

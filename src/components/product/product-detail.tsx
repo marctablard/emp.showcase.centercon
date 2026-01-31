@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
 import { Card, CardContent } from '@/components/ui/card';
 import { useProduct } from '@/hooks/product/useProduct';
+import { useSession } from '@/hooks/session/useSession';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 // import { useRecommendations } from '@/hooks/recommendations/useRecommendations';
 import { useL10n } from '@/hooks/useL10n';
@@ -37,6 +38,7 @@ export interface ProductDetailProps {
 
 export default function ProductDetail({ product: initialProduct, availability, className }: ProductDetailProps) {
   const { product, loading, setAsCurrent } = useProduct(initialProduct);
+  const { session } = useSession();
   const [price, setPrice] = useState<ProductPrice | null | undefined>(product?.price);
   const locale = useLocale();
   const { l10n } = useL10n(locale);
@@ -55,6 +57,15 @@ export default function ProductDetail({ product: initialProduct, availability, c
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
+
+  // Reset price when currency changes to trigger re-fetch
+  useEffect(() => {
+    if (session?.currency && price !== undefined) {
+      // Only reset if currency changed (price exists and might be stale)
+      setPrice(undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.currency]);
 
   // asynchronous price fetching if not provided in SSR
   useEffect(() => {

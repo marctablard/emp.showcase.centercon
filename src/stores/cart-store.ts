@@ -5,6 +5,7 @@ import {
   addItemToCart as apiAddItemToCart,
   fetchCurrentCart as apiFetchCurrentCart,
   removeCartItem as apiRemoveCartItem,
+  updateCartCurrency as apiUpdateCartCurrency,
   updateCartItemQuantity as apiUpdateCartItemQuantity,
   updateShippingInfo as apiUpdateShippingInfo,
   loadSavedCart,
@@ -47,6 +48,7 @@ interface CartActions {
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
+  updateCurrency: (currency: string) => Promise<void>;
   clearCart: () => void;
 }
 export type CartStore = CartState & CartActions;
@@ -262,7 +264,10 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
 
         const cart = get().currentCart;
-        if (!cart) return;
+        if (!cart) {
+          set({ loading: false });
+          return;
+        }
 
         // Call API to update shipping info
         await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
@@ -273,6 +278,29 @@ export const createCartStore = (initState: CartState = defaultState) => {
         const error = err instanceof Error ? err : new Error('Failed to update shipping info');
         set({ error, loading: false });
         getLogger().error({ err }, 'Error updating shipping info');
+      }
+    },
+
+    updateCurrency: async (currency: string) => {
+      try {
+        const { currentCart } = get();
+        if (!currentCart) {
+          await get().fetchCart();
+          const updatedCart = get().currentCart;
+          if (!updatedCart) return;
+        }
+
+        set({ loading: true, error: null });
+
+        const cart = get().currentCart;
+        if (!cart) return;
+
+        await apiUpdateCartCurrency(cart.id, currency);
+        await get().fetchCart(false);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to update cart currency');
+        set({ error, loading: false });
+        getLogger().error({ err }, 'Error updating cart currency');
       }
     },
 
