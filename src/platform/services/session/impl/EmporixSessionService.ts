@@ -75,12 +75,21 @@ class EmporixSessionService implements SessionService {
     if (!session) {
       return;
     }
+
+    // Check if site is actually changing
+    const siteChanged = session.siteCode && session.siteCode !== site;
+
     await this.sessionContextApi.updateOwnSessionContext({
       siteCode: site,
       metadata: {
         version: session.metadata?.version || 1,
       },
     });
+
+    // Clear cart association when site changes - cart is site-specific
+    if (siteChanged) {
+      await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
+    }
   }
 
   async setCart(cartId: string): Promise<void> {

@@ -69,17 +69,9 @@ class EmporixCartService implements CartService {
     const currentSiteCode = session.siteCode || 'main';
     let cart;
 
-    // First try to get cart by cached ID
+    // Try to get cart by cached ID (trusted - cartId is cleared on site change in setSite())
     if (session.cartId) {
       cart = await this.cartApi.getCart(session.cartId);
-      // Validate cart belongs to current site - ignore if siteCode mismatch
-      if (cart && cart.siteCode !== currentSiteCode) {
-        this.logger.info(
-          { cachedCartId: session.cartId, cartSiteCode: cart.siteCode, sessionSiteCode: currentSiteCode },
-          'Cached cart belongs to different site, searching for correct site cart',
-        );
-        cart = null;
-      }
     }
 
     // Fallback to search by criteria if no valid cart found
