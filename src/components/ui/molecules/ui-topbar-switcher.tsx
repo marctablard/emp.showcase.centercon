@@ -28,6 +28,16 @@ export default function TopBarSwitcher({
     return null;
   }
 
+  // Single option: render static label without dropdown
+  if (options.length === 1) {
+    return (
+      <span className="flex items-baseline gap-1.5 h-auto">
+        <span className="flex self-center">{icon}</span>
+        <span className="text-sm">{options[0].name}</span>
+      </span>
+    );
+  }
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
