@@ -66,25 +66,30 @@ class EmporixCartService implements CartService {
     if (!session) {
       throw new Error('Failed to get session context');
     }
+    const currentSiteCode = session.siteCode || 'main';
     let cart;
+
+    // Try to get cart by cached ID (trusted - cartId is cleared on site change in setSite())
     if (session.cartId) {
       cart = await this.cartApi.getCart(session.cartId);
     }
-    // Fallback to search if no cart is assigned to session
+
+    // Fallback to search by criteria if no valid cart found
     if (!cart) {
-      cart = await this.cartApi.getCartByCriteria(session.siteCode || 'main', session.id, undefined, 'shopping');
+      // Search by session ID first (anonymous users), with create=true to auto-create if not found
+      cart = await this.cartApi.getCartByCriteria(currentSiteCode, session.id, undefined, 'shopping', true);
+
+      // If no cart found by session ID, try by customer ID (logged-in users)
       if (!cart && session.customerId) {
-        cart = await this.cartApi.getCartByCriteria(
-          session.siteCode || 'main',
-          undefined,
-          session.customerId,
-          'shopping',
-        );
+        cart = await this.cartApi.getCartByCriteria(currentSiteCode, undefined, session.customerId, 'shopping', true);
       }
+
+      // Update session with correct cart ID if found/created
       if (cart) {
         await this.sessionService.setCart(cart.id);
       }
     }
+
     return cart ? this.mapper.mapToService(cart) : null;
   }
 

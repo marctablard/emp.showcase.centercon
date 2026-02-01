@@ -7,6 +7,9 @@ import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { useCartStore, useSessionStore } from '@/providers/StoreProvider';
 
+// Module-level lock to prevent duplicate currency updates across all useCart instances
+let globalCurrencyUpdateInProgress = false;
+
 interface UseCart {
   // Cart data
   cart: Cart | null | undefined;
@@ -78,15 +81,28 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
 
   const { session: appSession } = useAppSession();
   useEffect(() => {
-    if (!cart || !appSession?.currency) {
+    // Prevent duplicate calls while update is in progress (global lock across all useCart instances)
+    if (globalCurrencyUpdateInProgress) {
+      return;
+    }
+
+    if (!cart || !appSession?.currency || !appSession?.siteCode) {
+      return;
+    }
+
+    // Don't update currency if cart belongs to a different site (stale cart during site switch)
+    if (cart.site !== appSession.siteCode) {
       return;
     }
 
     const cartCurrency = cart.currency || cart.totalPrice?.currency;
     if (cartCurrency && cartCurrency !== appSession.currency) {
-      updateCurrency(appSession.currency);
+      globalCurrencyUpdateInProgress = true;
+      updateCurrency(appSession.currency).finally(() => {
+        globalCurrencyUpdateInProgress = false;
+      });
     }
-  }, [appSession?.currency, cart, updateCurrency]);
+  }, [appSession?.currency, appSession?.siteCode, cart, updateCurrency]);
 
   return {
     cart,
