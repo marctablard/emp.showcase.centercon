@@ -64,6 +64,7 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
   const [sessionStore] = useState<SessionStoreApi>(() => createSessionStore({ session: shopSession, loading: false }));
   const [notificationStore] = useState<NotificationStoreApi>(() => createNotificationStore());
   const [availabilityStore] = useState<AvailabilityStoreApi>(() => createAvailabilityStore());
+
   /**
    * The order is relevant, because store data can only depend on one another,
    * when nested properly.

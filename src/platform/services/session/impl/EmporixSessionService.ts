@@ -7,7 +7,8 @@ import type {
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import type { SessionMapper } from '@/platform/services/model/session/SessionMapper';
 import type { Session } from '@/platform/services/model/session/session';
-import { SessionService } from '../SessionService';
+import type { SiteService } from '../../site/SiteService';
+import type { SessionService } from '../SessionService';
 
 /**
  * Implementation of SessionService for Emporix session context data.
@@ -25,6 +26,7 @@ class EmporixSessionService implements SessionService {
   constructor(
     @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,
     @inject('EmporixSessionMapper') private mapper: SessionMapper<EmporixSessionContext, EmporixContextAttribute>,
+    @inject('SiteService') private siteService: SiteService,
   ) {}
 
   async setRegion(region: string): Promise<void> {
@@ -122,22 +124,53 @@ class EmporixSessionService implements SessionService {
    * Get the current session context
    */
   async getCurrent(): Promise<Session | undefined> {
-    const sessionContext = await this.sessionContextApi.getOwnSessionContext();
-    if (sessionContext?.siteCode) {
-      if (!this.availableSites.includes(sessionContext.siteCode)) {
-        await this.setSite(this.defaultSite);
-        sessionContext.siteCode = this.defaultSite;
+    try {
+      const sessionContext = await this.sessionContextApi.getOwnSessionContext();
+      const result = sessionContext ? this.mapper.mapToService(sessionContext) : undefined;
+      if (!result) {
+        return undefined;
       }
-    }
-    const result = sessionContext ? this.mapper.mapToService(sessionContext) : undefined;
-    if (!result) {
-      // TODO, can this even be?
+      await this.adjustSessionsSettings(sessionContext, result);
+      return result;
+    } catch (_error) {
+      // fail silently for ssr context
       return undefined;
     }
+  }
+
+  private async adjustSessionsSettings(sessionContext: EmporixSessionContext | undefined, result: Session) {
     const updateDefaults: Partial<EmporixSessionContext> = {};
+    if (!sessionContext?.siteCode || !this.availableSites.includes(sessionContext.siteCode)) {
+      updateDefaults.siteCode = this.defaultSite;
+      result.siteCode = this.defaultSite;
+    }
+    const site = await this.siteService.getSite(result.siteCode);
+    if (!site) {
+      return;
+    }
+    if (!sessionContext?.currency || !site.currencies.find((currency) => currency.id === result.currency)) {
+      updateDefaults.currency = site.defaultCurrency.id;
+      result.currency = site.defaultCurrency.id;
+    }
     if (!result.country) {
       updateDefaults.targetLocation = this.defaultCountry;
       result.country = this.defaultCountry;
+    }
+    if (!result.language) {
+      if (updateDefaults.context) {
+        updateDefaults.context.language = this.defaultLanguage;
+      } else {
+        updateDefaults.context = { language: this.defaultLanguage };
+      }
+      result.language = this.defaultLanguage;
+    }
+    if (!result.region) {
+      if (updateDefaults.context) {
+        updateDefaults.context.region = this.defaultRegion;
+      } else {
+        updateDefaults.context = { region: this.defaultRegion };
+      }
+      result.region = this.defaultRegion;
     }
     if (Object.keys(updateDefaults).length > 0) {
       updateDefaults.metadata = {
@@ -145,15 +178,6 @@ class EmporixSessionService implements SessionService {
       };
       this.sessionContextApi.updateOwnSessionContext(updateDefaults);
     }
-    if (!result.language) {
-      this.setLanguage(this.defaultLanguage);
-      result.language = this.defaultLanguage;
-    }
-    if (!result.region) {
-      this.setRegion(this.defaultRegion);
-      result.region = this.defaultRegion;
-    }
-    return result;
   }
 }
 
