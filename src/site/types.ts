@@ -1,5 +1,6 @@
 import { LocalePrefixMode } from 'next-intl/routing';
 
+export const NEXT_MIDDLEWARE_PREFIX = 'x-middleware-request-x-';
 // this is used to memorize the site in the middleware
 export const INTERNAL_SITE_HEADER = 'x-request-emp-site';
 export const INTERNAL_APP_PATH_HEADER = 'x-request-emp-app-path';

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { INTERNAL_APP_PATH_HEADER } from '../site/types';
+import { INTERNAL_APP_PATH_HEADER, NEXT_MIDDLEWARE_PREFIX } from '../site/types';
 import { DEFAULT_CACHE_REVALIDATE, cacheRules } from './cache-config';
 
 /**
@@ -60,8 +60,7 @@ export function applyCacheDirectives(req: NextRequest, response: Response): Resp
   if (!isCacheMiddlewareEnabled()) {
     return response;
   }
-
-  const siteAppPath = response.headers.get(INTERNAL_APP_PATH_HEADER);
+  const siteAppPath = response.headers.get(NEXT_MIDDLEWARE_PREFIX + INTERNAL_APP_PATH_HEADER);
   const pathname = siteAppPath ? siteAppPath : req.nextUrl.pathname;
   // Find first matching cache rule
   for (const rule of cacheRules) {
