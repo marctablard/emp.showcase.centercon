@@ -1,10 +1,7 @@
 'use client';
 
-import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { type ReactNode, createContext, useContext, useState } from 'react';
 import { useStore } from 'zustand/react';
-import { useRouter } from '@/i18n/navigation';
-import { updateSessionLanguage, updateSessionSite } from '@/lib/client/session';
 import { Site } from '@/platform/services/model/common/site';
 import { Session } from '@/platform/services/model/session';
 import { createAvailabilityStore } from '@/stores/availability-store';
@@ -53,8 +50,6 @@ export interface StoreProviderProps {
 }
 
 export const StoreProvider = ({ children, shopSession, site, availableSites }: StoreProviderProps) => {
-  const locale = useLocale();
-  const router = useRouter();
   const [productStore] = useState<ProductStoreApi>(() => createProductStore());
   const [cartStore] = useState<CartStoreApi>(() => createCartStore());
   const [checkoutStore] = useState<CheckoutStoreApi>(() => createCheckoutStore());
@@ -69,21 +64,6 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
   const [sessionStore] = useState<SessionStoreApi>(() => createSessionStore({ session: shopSession, loading: false }));
   const [notificationStore] = useState<NotificationStoreApi>(() => createNotificationStore());
   const [availabilityStore] = useState<AvailabilityStoreApi>(() => createAvailabilityStore());
-  useEffect(() => {
-    if (site && shopSession?.siteCode !== site.code) {
-      updateSessionSite(site.code).then(() => {
-        router.refresh();
-      });
-    }
-    if (shopSession && shopSession.language != locale) {
-      // ensure that languages are aligned
-      updateSessionLanguage(locale).then(() => {
-        router.refresh();
-      });
-    }
-    // only run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   /**
    * The order is relevant, because store data can only depend on one another,
