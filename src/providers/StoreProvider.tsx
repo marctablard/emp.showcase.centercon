@@ -83,28 +83,37 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
   const fixSessionSiteIfNecessary = async () => {
     if (site && shopSession?.siteCode !== site.code) {
       await updateSessionSite(site.code);
-      if (shopSession) {
-        shopSession.siteCode = site.code;
-      }
+      return site.code;
     }
+    return shopSession?.siteCode;
   };
 
   const fixSessionLanguageIfNecessary = async () => {
     if (shopSession && shopSession.language != locale) {
       // ensure that languages are aligned
       await updateSessionLanguage(locale);
-      if (shopSession) {
-        shopSession.language = locale;
-      }
+      return locale;
     }
+    return shopSession?.language;
   };
 
   useEffect(() => {
     // must be daisy-chained to prevent race conditions
-    fixSessionSiteIfNecessary().then(() => {
-      fixSessionLanguageIfNecessary();
+    fixSessionSiteIfNecessary().then((siteCode) => {
+      if (shopSession && siteCode) {
+        shopSession.siteCode = siteCode;
+        sessionStore.setState({ session: shopSession });
+      }
+      fixSessionLanguageIfNecessary().then((language) => {
+        if (shopSession && language) {
+          shopSession.language = language;
+          sessionStore.setState({ session: shopSession });
+        }
+      });
     });
-  }, [site, shopSession, locale]);
+    // only run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * The order is relevant, because store data can only depend on one another,
