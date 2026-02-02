@@ -95,12 +95,12 @@ describe('site middleware - domain and prefix handling', () => {
     expect(result.appPath).toBe('en/products');
   });
 
-  test('resolves site from cookie when no path segment is present', () => {
+  test('ignores site from cookie when no path segment is present (cookieOverridesDefault not set)', () => {
     const headers = new Headers();
     const cookies = createCookies({ NEXT_SITE: 'tenant2' }) as unknown as NextRequest['cookies'];
     const result = resolveSite('/en/products', cookies, headers, baseRouting);
 
-    expect(result.site).toBe('tenant2');
+    expect(result.site).toBe('main');
     expect(result.appPath).toBe('en/products');
   });
 
@@ -187,6 +187,7 @@ describe('createSiteMiddleware redirect/rewrite behavior', () => {
     availableSites: ['main', 'tenant1'],
     prefix: 'as-needed',
     cookie: { name: 'NEXT_SITE' },
+    cookieOverridesDefault: true,
   };
 
   test('redirects to include site when prefix is required', () => {
