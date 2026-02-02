@@ -6,12 +6,14 @@ import type {
 import { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import type { EmporixSessionMapper } from '@/platform/services/model/session/impl/EmporixSessionMapper';
 import type { Session, SessionAttribute } from '@/platform/services/model/session/session';
+import { SiteService } from '../../site/SiteService';
 import EmporixSessionService from './EmporixSessionService';
 
 describe('EmporixSessionService', () => {
   let container: Container;
   let sessionService: EmporixSessionService;
   let mockSessionContextApi: jest.Mocked<EmporixSessionContextApi>;
+  let mockSiteService: jest.Mocked<SiteService>;
   let mockSessionMapper: jest.Mocked<EmporixSessionMapper>;
 
   const mockSessionContext: EmporixSessionContext = {
@@ -72,10 +74,24 @@ describe('EmporixSessionService', () => {
       mapAttributeToSource: jest.fn(),
     };
 
+    mockSiteService = {
+      getSite: jest.fn(),
+      getAvailableSites: jest.fn(),
+      getCountries: jest.fn(),
+      getCountry: jest.fn(),
+      getRegions: jest.fn(),
+      getRegion: jest.fn(),
+      getExchangeRates: jest.fn(),
+      getExchangeRate: jest.fn(),
+      getCurrencies: jest.fn(),
+      getCurrency: jest.fn(),
+    };
+
     // Register mocks
     container.bind<EmporixSessionContextApi>('EmporixSessionContextApi').toConstantValue(mockSessionContextApi);
     container.bind<EmporixSessionMapper>('EmporixSessionMapper').toConstantValue(mockSessionMapper);
     container.bind<EmporixSessionService>('SessionService').to(EmporixSessionService);
+    container.bind<SiteService>('SiteService').toConstantValue(mockSiteService);
 
     // Get service instance
     sessionService = container.get<EmporixSessionService>('SessionService');
@@ -92,7 +108,7 @@ describe('EmporixSessionService', () => {
 
       const result = await sessionService.getCurrent();
 
-      expect(mockSessionContextApi.getOwnSessionContext).toHaveBeenCalledTimes(2);
+      expect(mockSessionContextApi.getOwnSessionContext).toHaveBeenCalledTimes(1);
       expect(mockSessionMapper.mapToService).toHaveBeenCalledWith(mockSessionContext);
       expect(result).toEqual(mockSession);
     });
