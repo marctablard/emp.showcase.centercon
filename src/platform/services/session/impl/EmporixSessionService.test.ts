@@ -138,4 +138,63 @@ describe('EmporixSessionService', () => {
       expect(mockSessionContextApi.addOwnSessionContextAttribute).toHaveBeenCalledWith(mockSessionAttribute);
     });
   });
+
+  describe('setSite', () => {
+    it('should clear currentCart when site changes', async () => {
+      // Arrange
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a', // Current site
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
+
+      // Act
+      await sessionService.setSite('site-b'); // New site
+
+      // Assert
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        siteCode: 'site-b',
+        metadata: { version: 1 },
+      });
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+    });
+
+    it('should NOT clear currentCart when site is set to same value', async () => {
+      // Arrange
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+
+      // Act
+      await sessionService.setSite('site-a'); // Same site
+
+      // Assert
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalled();
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
+    });
+
+    it('should NOT clear currentCart when session has no siteCode set initially', async () => {
+      // Arrange - session exists but no siteCode yet (first time setting site)
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+
+      // Act
+      await sessionService.setSite('site-a');
+
+      // Assert
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
+    });
+  });
 });

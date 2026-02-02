@@ -5,6 +5,7 @@ import {
   addItemToCart as apiAddItemToCart,
   fetchCurrentCart as apiFetchCurrentCart,
   removeCartItem as apiRemoveCartItem,
+  updateCartCurrency as apiUpdateCartCurrency,
   updateCartItemQuantity as apiUpdateCartItemQuantity,
   updateShippingInfo as apiUpdateShippingInfo,
   loadSavedCart,
@@ -25,6 +26,8 @@ export interface CartState {
     timestamp: number;
   } | null;
   sessionStatus: string | null;
+  // Track last site code to detect site changes
+  lastSiteCode: string | null;
 }
 
 interface CartActions {
@@ -37,6 +40,7 @@ interface CartActions {
   loadCart: (cartId: string, type?: string) => Promise<Cart | null | undefined>;
 
   validateCart: (sessionStatus: string) => Promise<void>;
+  validateSite: (siteCode: string) => Promise<void>;
 
   // Cart API operations
   fetchCart: (createCurrent?: boolean) => Promise<Cart | null | undefined>;
@@ -44,6 +48,7 @@ interface CartActions {
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
+  updateCurrency: (currency: string) => Promise<void>;
   clearCart: () => void;
 }
 export type CartStore = CartState & CartActions;
@@ -55,6 +60,7 @@ const defaultState: CartState = {
   error: null,
   lastShippingUpdate: null,
   sessionStatus: null,
+  lastSiteCode: null,
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
@@ -65,6 +71,23 @@ export const createCartStore = (initState: CartState = defaultState) => {
       if (sessionStatus !== newSessionStatus) {
         set({ sessionStatus: newSessionStatus });
         await get().fetchCart(false);
+      }
+    },
+    validateSite: async (newSiteCode: string) => {
+      const { lastSiteCode } = get();
+      if (lastSiteCode !== null && lastSiteCode !== newSiteCode) {
+        // Site changed - set new site first to prevent race conditions, then clear cart state and fetch new one
+        set({
+          lastSiteCode: newSiteCode,
+          currentCart: null,
+          loading: true,
+          error: null,
+          lastShippingUpdate: null,
+        });
+        await get().fetchCart(false);
+      } else if (lastSiteCode === null) {
+        // First time setting site
+        set({ lastSiteCode: newSiteCode });
       }
     },
     // State setters
@@ -242,7 +265,10 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
 
         const cart = get().currentCart;
-        if (!cart) return;
+        if (!cart) {
+          set({ loading: false });
+          return;
+        }
 
         // Call API to update shipping info
         await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
@@ -256,6 +282,29 @@ export const createCartStore = (initState: CartState = defaultState) => {
       }
     },
 
+    updateCurrency: async (currency: string) => {
+      try {
+        const { currentCart } = get();
+        if (!currentCart) {
+          await get().fetchCart();
+          const updatedCart = get().currentCart;
+          if (!updatedCart) return;
+        }
+
+        set({ loading: true, error: null });
+
+        const cart = get().currentCart;
+        if (!cart) return;
+
+        await apiUpdateCartCurrency(cart.id, currency);
+        await get().fetchCart(false);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to update cart currency');
+        set({ error, loading: false });
+        getLogger().error({ err }, 'Error updating cart currency');
+      }
+    },
+
     clearCart: () => {
       // Reset all cart-related state to ensure proper cleanup
       set({
@@ -263,6 +312,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
         loading: false,
         error: null,
         lastShippingUpdate: null,
+        lastSiteCode: null,
       });
     },
   }));

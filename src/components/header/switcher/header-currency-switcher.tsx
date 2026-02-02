@@ -15,40 +15,56 @@ function CurrencySwitcherContent() {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations('common.Currencies');
-  const { currencies, loading: siteLoading } = useSite();
+  const { currencies, loading: siteLoading, site } = useSite();
   const currentCurrency = useMemo(() => {
-    if (!currencies || currencies.length === 0) {
-      return undefined;
-    }
-
-    if (session?.currency) {
-      const matchedCurrency = currencies.find((currency) => currency.code === session.currency);
-      if (matchedCurrency) {
-        return matchedCurrency;
+    // First, try to find session currency in available currencies
+    if (currencies && currencies.length > 0) {
+      if (session?.currency) {
+        const matchedCurrency = currencies.find((currency) => currency.code === session.currency);
+        if (matchedCurrency) {
+          return matchedCurrency;
+        }
       }
+      return currencies[0];
     }
 
-    return currencies[0];
-  }, [currencies, session]);
+    // Fallback to site's default currency when currencies array is empty
+    if (site?.defaultCurrency) {
+      return site.defaultCurrency;
+    }
 
-  const switchCurrency = (currency: string) => {
-    setCurrency(currency);
-  };
+    return undefined;
+  }, [currencies, session, site]);
 
-  useEffect(() => {
-    if (session?.currency != currentCurrency?.code) {
-      // refresh page, because much will change due to changed currency
+  const switchCurrency = async (currency: string) => {
+    const success = await setCurrency(currency);
+    if (success) {
+      // Refresh page after session update completes to reload prices with new currency
       router.refresh();
     }
-  }, [session, currentCurrency, router]);
+  };
 
   if (siteLoading || sessionLoading) {
     return <Spinner color="default" variant="sm" />;
   }
 
-  if (!currencies || currencies.length <= 1 || !currentCurrency) {
+  if (!currentCurrency) {
     return <></>;
   }
+
+  // Build options array - use currencies if available, otherwise use currentCurrency
+  const options =
+    currencies && currencies.length > 0
+      ? currencies.map((currency) => ({
+          code: currency.id,
+          name: l10n(currency.name || currency.id, locale),
+        }))
+      : [
+          {
+            code: currentCurrency.id,
+            name: l10n(currentCurrency.name || currentCurrency.id, locale),
+          },
+        ];
 
   function getIconName(): IconName {
     switch (currentCurrency?.code) {
@@ -74,10 +90,7 @@ function CurrencySwitcherContent() {
 
   return (
     <TopBarSwitcher
-      options={currencies.map((currency) => ({
-        code: currency.id,
-        name: l10n(currency.name || currency.id, locale),
-      }))}
+      options={options}
       current={currentCurrency.id}
       label={t('label')}
       onSelected={switchCurrency}

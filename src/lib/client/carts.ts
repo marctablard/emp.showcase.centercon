@@ -148,6 +148,27 @@ export async function updateShippingInfo(cartId: string, countryCode?: string, z
 }
 
 /**
+ * Update cart currency
+ */
+export async function updateCartCurrency(cartId: string, currency: string): Promise<Cart> {
+  const response = await fetch(`/api/cart/${cartId}/currency`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      currency,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to update cart currency: ${response.statusText}`);
+  }
+
+  return await response.json();
+}
+
+/**
  * Load a saved cart
  * @param {string} cartId - The ID of the saved cart to load
  * @param {string} type - The type of the cart to load

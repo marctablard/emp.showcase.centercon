@@ -103,3 +103,7 @@ next-env.d.ts
 # GitHub agents and prompts (local only, mirrored in .cursor/)
 .github/workflows/agents/
 .github/workflows/prompts/
+.github/newestprompts
+/docs/cursor/
+/docs/pr-analysis/
+/docs/testing-plans/
