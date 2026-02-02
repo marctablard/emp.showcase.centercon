@@ -104,6 +104,7 @@ next-env.d.ts
 .github/workflows/agents/
 .github/workflows/prompts/
 .github/newestprompts
+.github/copilot-instructions.md
 /docs/cursor/
 /docs/pr-analysis/
 /docs/testing-plans/
