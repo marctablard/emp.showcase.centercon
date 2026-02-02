@@ -251,8 +251,7 @@ class EmporixCartService implements CartService {
     if (!site) {
       throw new Error('Site not found');
     }
-    console.log('site in updateCurrency: ', site);
-    console.log(' currency: ', currency);
+
     if (!site.currencies.find((siteCurrency) => siteCurrency.code === currency || siteCurrency.id === currency)) {
       throw new Error('Currency not supported');
     }
