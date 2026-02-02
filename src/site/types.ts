@@ -15,6 +15,7 @@ export type SiteConfig = {
   prefix: SitePrefixMode;
   header?: string;
   cookie?: { name: string; maxAge?: number };
+  cookieOverridesDefault?: boolean;
 };
 
 export type SiteDomainConfig = Omit<SiteConfig, 'cookie'> & {

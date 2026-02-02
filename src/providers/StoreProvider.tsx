@@ -1,9 +1,7 @@
 'use client';
 
-import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { type ReactNode, createContext, useContext, useState } from 'react';
 import { useStore } from 'zustand/react';
-import { updateSessionLanguage, updateSessionSite } from '@/lib/client/session';
 import { Site } from '@/platform/services/model/common/site';
 import { Session } from '@/platform/services/model/session';
 import { createAvailabilityStore } from '@/stores/availability-store';
@@ -52,7 +50,6 @@ export interface StoreProviderProps {
 }
 
 export const StoreProvider = ({ children, shopSession, site, availableSites }: StoreProviderProps) => {
-  const locale = useLocale();
   const [productStore] = useState<ProductStoreApi>(() => createProductStore());
   const [cartStore] = useState<CartStoreApi>(() => createCartStore());
   const [checkoutStore] = useState<CheckoutStoreApi>(() => createCheckoutStore());
@@ -67,44 +64,6 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
   const [sessionStore] = useState<SessionStoreApi>(() => createSessionStore({ session: shopSession, loading: false }));
   const [notificationStore] = useState<NotificationStoreApi>(() => createNotificationStore());
   const [availabilityStore] = useState<AvailabilityStoreApi>(() => createAvailabilityStore());
-  /**
-   * The order is relevant, because store data can only depend on one another,
-   * when nested properly.
-   * 1. Site Data is the root of all stores.
-   * 2. Shipping Methods Data depends on Countries and Currency Data (from Site)
-   * 3. Product Data depends on Currency and their Availability from Country (from Site)
-   * 4. Customer Data depends on Currency for Customer-Preferences
-   * 5. Order Data depends on Customer Data in logged in State
-   * 6. Cart Data depends on Customer Data in logged in State
-   * 7. Checkout Data depends on Cart Data.
-   * 8. History Data may depend on various aspects of customer's Browsing Behaviour
-   */
-
-  const fixSessionSiteIfNecessary = async () => {
-    if (site && shopSession?.siteCode !== site.code) {
-      await updateSessionSite(site.code);
-      if (shopSession) {
-        shopSession.siteCode = site.code;
-      }
-    }
-  };
-
-  const fixSessionLanguageIfNecessary = async () => {
-    if (shopSession && shopSession.language != locale) {
-      // ensure that languages are aligned
-      await updateSessionLanguage(locale);
-      if (shopSession) {
-        shopSession.language = locale;
-      }
-    }
-  };
-
-  useEffect(() => {
-    // must be daisy-chained to prevent race conditions
-    fixSessionSiteIfNecessary().then(() => {
-      fixSessionLanguageIfNecessary();
-    });
-  }, [site, shopSession, locale]);
 
   /**
    * The order is relevant, because store data can only depend on one another,
