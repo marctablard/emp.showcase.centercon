@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';

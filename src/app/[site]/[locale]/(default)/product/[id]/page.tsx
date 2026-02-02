@@ -6,7 +6,6 @@ import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
 import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
 import { getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
-import { getSite } from '@/lib/ssr/site';
 import { isProductSsrEnabled } from '@/lib/ssr/ssr-config';
 import { ProductFetchOptions } from '@/platform/services/product';
 
