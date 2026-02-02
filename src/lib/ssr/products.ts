@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { StockAvailability } from '@/platform/services/model/common';
+import { Paginated, StockAvailability } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions, ProductService } from '@/platform/services/product';
 import { StockService } from '@/platform/services/stock/StockService';
@@ -21,6 +21,17 @@ const _getProduct = cache(async (id: string, optionsJson: string): Promise<Produ
   }
 });
 
+const _getProducts = cache(async (page: number, size: number, optionsJson: string): Promise<Paginated<Product>> => {
+  try {
+    const options: ProductFetchOptions | undefined = optionsJson ? JSON.parse(optionsJson) : undefined;
+    const products = await getProductService().getProducts(page, size, options);
+    return products;
+  } catch (_error) {
+    console.error(_error);
+    return { items: [], total: 0, page: 0, pageSize: 0 };
+  }
+});
+
 const _getAvailability = cache(async (site: string, id: string): Promise<StockAvailability | null | undefined> => {
   try {
     const availability = await getStockService().getStockAvailability(site, id);
@@ -37,4 +48,9 @@ export function getAvailability(site: string, id: string): Promise<StockAvailabi
 export function getProductById(id: string, options?: ProductFetchOptions): Promise<Product | null | undefined> {
   const optionsJson = options ? JSON.stringify(options) : '';
   return _getProduct(id, optionsJson);
+}
+
+export function getProducts(page?: number, size?: number, options?: ProductFetchOptions): Promise<Paginated<Product>> {
+  const optionsJson = options ? JSON.stringify(options) : '';
+  return _getProducts(page || 0, size || 20, optionsJson);
 }
