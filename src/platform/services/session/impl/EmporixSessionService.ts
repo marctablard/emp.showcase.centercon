@@ -132,7 +132,7 @@ class EmporixSessionService implements SessionService {
       }
       await this.adjustSessionsSettings(sessionContext, result);
       return result;
-    } catch (error) {
+    } catch (_error) {
       // fail silently for ssr context
       return undefined;
     }
