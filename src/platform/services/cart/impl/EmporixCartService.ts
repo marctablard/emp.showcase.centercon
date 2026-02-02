@@ -251,7 +251,8 @@ class EmporixCartService implements CartService {
     if (!site) {
       throw new Error('Site not found');
     }
-    if (!site.currencies.find((currency) => currency.code === currency)) {
+
+    if (!site.currencies.find((siteCurrency) => siteCurrency.code === currency || siteCurrency.id === currency)) {
       throw new Error('Currency not supported');
     }
     await this.cartApi.changeCurrency(cartId, currency);
