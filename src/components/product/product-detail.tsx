@@ -78,6 +78,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
       setPrice(undefined);
       setAvailability(undefined);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product, session?.currency]);
 
   useEffect(() => {

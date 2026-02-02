@@ -6,6 +6,7 @@ import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
 import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
 import { getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
+import { getSite } from '@/lib/ssr/site';
 import { isProductSsrEnabled } from '@/lib/ssr/ssr-config';
 import { ProductFetchOptions } from '@/platform/services/product';
 
@@ -23,7 +24,11 @@ export const PUBLIC_PRODUCT_OPTIONS = {
   customerSegments: false,
 };
 
-export function createProductOptions(baseOptions: ProductFetchOptions): { ssr: boolean; options: ProductFetchOptions } {
+export function createProductOptions(
+  baseOptions: ProductFetchOptions,
+  authenticated: boolean,
+  siteCode: string,
+): { ssr: boolean; options: ProductFetchOptions } {
   const productConfig = isProductSsrEnabled();
 
   // Build fetch options based on SSR configuration
@@ -37,6 +42,11 @@ export function createProductOptions(baseOptions: ProductFetchOptions): { ssr: b
           ...productConfig, // merge in the ssr product config
         };
 
+  if (!authenticated && options.prices) {
+    options.prices = {
+      siteCode: siteCode,
+    };
+  }
   return { ssr: !!productConfig, options };
 }
 
@@ -99,13 +109,13 @@ export async function generateMetadata(
   { params }: { params: Promise<ProductPageProps> },
   _parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const { id, locale } = await params;
-  const { ssr, options } = createProductOptions(PUBLIC_PRODUCT_OPTIONS);
+  const { id, locale, site } = await params;
+  const { ssr, options } = createProductOptions(PUBLIC_PRODUCT_OPTIONS, false, site);
   return generateProductPageMetadata(id, locale, options, ssr);
 }
 
 export default async function ProductPage({ params }: { params: Promise<ProductPageProps> }) {
-  const { id, locale } = await params;
-  const { ssr, options } = createProductOptions(PUBLIC_PRODUCT_OPTIONS);
+  const { id, locale, site } = await params;
+  const { ssr, options } = createProductOptions(PUBLIC_PRODUCT_OPTIONS, false, site);
   return renderProductPage(id, locale, options, ssr);
 }

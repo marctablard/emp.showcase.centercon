@@ -22,13 +22,13 @@ export async function generateMetadata(
   { params }: { params: Promise<AuthenticatedProductPageProps> },
   _parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const { id, locale } = await params;
-  const { ssr, options } = createProductOptions(AUTHENTICATED_PRODUCT_OPTIONS);
+  const { id, locale, site } = await params;
+  const { ssr, options } = createProductOptions(AUTHENTICATED_PRODUCT_OPTIONS, true, site);
   return generateProductPageMetadata(id, locale, options, ssr);
 }
 
 export default async function AuthenticatedProductPage({ params }: { params: Promise<AuthenticatedProductPageProps> }) {
-  const { id, locale } = await params;
-  const { ssr, options } = createProductOptions(AUTHENTICATED_PRODUCT_OPTIONS);
+  const { id, locale, site } = await params;
+  const { ssr, options } = createProductOptions(AUTHENTICATED_PRODUCT_OPTIONS, true, site);
   return renderProductPage(id, locale, options, ssr);
 }
