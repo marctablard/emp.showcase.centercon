@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useSession as useAppSession } from '@/hooks/session/useSession';
 import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
@@ -53,7 +52,6 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     fetchCart,
     setCurrentCart,
     loadCart,
-    validateCart,
     validateSite,
   } = useCartStore();
 

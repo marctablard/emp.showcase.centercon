@@ -108,7 +108,7 @@ class EmporixSiteService implements SiteService {
       emporixSite.availableCurrencies?.map((currency) => currencies.find((c) => c.id === currency)) || undefined;
     if (!availableCurrencies) {
       // TODO is empty on Emporix side
-      availableCurrencies = currencies;
+      availableCurrencies = [currencies.find((c) => c.id === emporixSite.currency)];
     }
     // TODO use what the site returns
     const availablePaymentModes = paymentModes;
@@ -202,9 +202,16 @@ class EmporixSiteService implements SiteService {
   }
 
   // Currency methods
-  async getCurrencies(): Promise<Currency[]> {
+  async getCurrencies(site?: string): Promise<Currency[]> {
     try {
-      const emporixCurrencies = await this.currencyApi.getCurrencies();
+      let emporixCurrencies = await this.currencyApi.getCurrencies();
+      if (site) {
+        const siteCurrencies = await this.siteSettingsApi.getSite(site);
+        if (!siteCurrencies) {
+          return emporixCurrencies.map((currency) => this.mapCurrency(currency));
+        }
+        emporixCurrencies = emporixCurrencies.filter((c) => siteCurrencies.availableCurrencies?.includes(c.code));
+      }
       return emporixCurrencies.map((currency) => this.mapCurrency(currency));
     } catch (error) {
       this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting currencies');

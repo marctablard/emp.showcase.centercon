@@ -15,6 +15,7 @@ import type { StockService } from '@/platform/services/stock/StockService';
 import type { CartMapper } from '../../model/cart/CartMapper';
 import { Media, Paginated, PaginationQuery } from '../../model/common';
 import type { SessionService } from '../../session/SessionService';
+import type { SiteService } from '../../site/SiteService';
 
 /**
  * Implementation of CartService for Emporix cart data.
@@ -31,6 +32,7 @@ class EmporixCartService implements CartService {
     @inject('ProductService') private productService: ProductService,
     @inject('StockService') private stockService: StockService,
     @inject('LoggerService') private logger: LoggerService,
+    @inject('SiteService') private siteService: SiteService,
   ) {}
 
   async createCart(currency: string, siteCode: string): Promise<string> {
@@ -241,6 +243,17 @@ class EmporixCartService implements CartService {
   }
 
   async updateCurrency(cartId: string, currency: string): Promise<void> {
+    const cart = await this.getCartById(cartId);
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+    const site = await this.siteService.getSite(cart?.site);
+    if (!site) {
+      throw new Error('Site not found');
+    }
+    if (!site.currencies.find((currency) => currency.code === currency)) {
+      throw new Error('Currency not supported');
+    }
     await this.cartApi.changeCurrency(cartId, currency);
     await this.cartApi.refreshCart(cartId);
   }
