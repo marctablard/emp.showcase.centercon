@@ -61,19 +61,10 @@ export default function ProductDetail({ product: initialProduct, options, classN
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
-  // Reset price when currency changes to trigger re-fetch
-  useEffect(() => {
-    if (session?.currency && price !== undefined) {
-      // Only reset if currency changed (price exists and might be stale)
-      setPrice(undefined);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.currency]);
-
   // asynchronous price fetching if not provided in SSR
   useEffect(() => {
     if (product) {
-      if (product.price === undefined) {
+      if (product.price === undefined || session?.currency != price?.currency) {
         fetchProductPrice(product.id).then((price) => {
           setPrice(price);
         });
@@ -87,7 +78,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
       setPrice(undefined);
       setAvailability(undefined);
     }
-  }, [product]);
+  }, [product, session?.currency]);
 
   useEffect(() => {
     if (addToCartButton.current !== null && isAboveMediumScreen) {
