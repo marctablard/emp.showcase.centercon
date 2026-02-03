@@ -158,7 +158,7 @@ export default function ProductDetail({ product: initialProduct, availability, c
                         )}
                         variant="white"
                         iconColor="white"
-                        value={l10n(attribute.values?.find((value) => value.selected)?.name ?? '')}
+                        value={l10n(product.variantAttributeValues?.[attribute.key] ?? '')}
                       />
                     ))}
                     {Object.keys(product.templateAttributes || {}).map((attribute: string) => (
