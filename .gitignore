@@ -96,6 +96,7 @@ next-env.d.ts
 # These files contain personal MCP configs, agents, and prompts
 .cursor/
 !.cursor/.gitkeep
+.github/copilot-instructions.md
 
 # Specifications directory (local development artifacts)
 /specifications/
