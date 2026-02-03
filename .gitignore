@@ -54,6 +54,7 @@ cypress/videos/**/*
 .DS_Store
 *.pem
 certificates
+.certificates
 .windsurf
 *.iml
 
