@@ -26,6 +26,9 @@ export const PUBLIC_PRODUCT_OPTIONS = {
   customerSegments: false,
 };
 
+// Cached page will become stale and regenrated in the background at most once every 360 seconds.
+export const revalidate = 360;
+
 export async function generateStaticParams() {
   const ssgProductCount = parseInt(process.env.NEXT_SSG_PRODUCT_COUNT || '0', 0);
   if (ssgProductCount <= 0) {
