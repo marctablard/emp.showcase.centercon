@@ -152,10 +152,9 @@ export default function ProductDetail({ product: initialProduct, availability, c
                         key={attribute.key}
                         className="font-bold"
                         label={l10n(
-                          attribute.name ??
-                            t(`filters.mixins.productVariantAttributes.${attribute.key}`, {
-                              defaultValue: attribute.key,
-                            }),
+                          t(`filters.mixins.productVariantAttributes.${attribute.key}`, {
+                            defaultValue: attribute.key,
+                          }),
                         )}
                         variant="white"
                         iconColor="white"

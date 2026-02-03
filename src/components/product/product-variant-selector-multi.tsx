@@ -222,7 +222,13 @@ export default function ProductVariantSelectorMulti({ product, className }: Prod
         {product.variantAttributes.map((variantAttribute, index) => (
           <div key={variantAttribute.key}>
             <div className="flex flex-col gap-1">
-              <label className="text-base font-medium">{l10n(variantAttribute.name || variantAttribute.key)}</label>
+              <label className="text-base font-medium">
+                {l10n(
+                  t(`filters.mixins.productVariantAttributes.${variantAttribute.key}`, {
+                    defaultValue: variantAttribute.key,
+                  }),
+                )}
+              </label>
               {variantAttribute.key === 'color' || variantAttribute.key === 'farbe' ? (
                 <div className="flex flex-wrap gap-2">
                   <style type="text/css">
