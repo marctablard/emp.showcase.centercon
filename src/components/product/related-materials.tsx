@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useProducts } from '@/hooks/product/useProducts';
 import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
-import { Product, RelatedItem } from '@/platform/services/model/product';
+import { RelatedItem } from '@/platform/services/model/product';
 import { H2, Overline } from '../ui/h';
 import { RelatedMaterialItem } from './related-material-item';
 
