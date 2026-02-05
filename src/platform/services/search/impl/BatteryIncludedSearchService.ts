@@ -46,7 +46,6 @@ class BatteryIncludedSearchService implements SearchService {
   }
 
   async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
-    const session = await this.sessionService.getCurrent();
     const currentCustomer = await this.customerService.getCustomer();
 
     // Add filter with segmentIds if customer is logged in and has segments assigned.
@@ -86,9 +85,7 @@ class BatteryIncludedSearchService implements SearchService {
         return filter;
       });
     return {
-      items: searchResult.hits
-        .filter((hit) => hit.document.siteCode === session?.siteCode)
-        .map((hit) => this.productMapper.mapToService(hit.document)),
+      items: searchResult.hits.map((hit) => this.productMapper.mapToService(hit.document)),
       page: searchResult.page - 1,
       pageSize: params.size || 10, // default
       total: searchResult.found,
@@ -104,9 +101,7 @@ class BatteryIncludedSearchService implements SearchService {
         segmentIds = await this.segmentFilterService.getSegmentIds();
       }
       const apiResponse = await this.shopApi.suggest(query, locale, segmentIds?.join(','));
-      const session = await this.sessionService.getCurrent();
-      const filteredResponse = this.suggestionsMapper.filterBySite(apiResponse, session?.siteCode);
-      return this.suggestionsMapper.mapSearchSuggestions(filteredResponse);
+      return this.suggestionsMapper.mapSearchSuggestions(apiResponse);
     } catch (error) {
       this.logger.error({ err: error }, '[SearchService] Error getting suggestions');
       return {
