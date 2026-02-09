@@ -3,6 +3,7 @@ import { SessionProvider as AuthSessionProvider } from 'next-auth/react';
 import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import { auth } from '@/auth/auth';
@@ -16,6 +17,7 @@ import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
+import { isProbeUserAgent } from '@/site/probe-detection';
 import { setRequestSite } from '@/site/server/';
 
 const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
@@ -70,6 +72,20 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+
+  // Belt-and-suspenders guard: Check for probes in layout as backup
+  const headersList = await headers();
+  const ua = headersList.get('user-agent') ?? '';
+
+  if (isProbeUserAgent(ua)) {
+    // Minimal render path – DO NOT call auth(), getSession(), getSite(), etc.
+    return (
+      <html>
+        <body>OK</body>
+      </html>
+    );
+  }
+
   const [authSession, shopSession] = await Promise.all([auth(), getSession()]);
 
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
