@@ -326,15 +326,43 @@ logger.info(
 
 ## Output Format
 
-### Development (pino-pretty)
+### Development (pino-pretty + colorized JSON)
 
-In development, logs are formatted for human readability:
+In development, logs are formatted for human readability using `pino-pretty`. API debug logs additionally use **ANSI color-coded JSON** for response bodies and headers:
+
+- **Keys** in **cyan** (`"id"`, `"orders"`, `"total"`)
+- **String values** in **yellow** (`"PENDING"`, `"EUR"`)
+- **Numbers** in **magenta** (`35`, `1`)
+- **Booleans / null** in **green** (`false`, `true`, `null`)
+- **Labels** (`Headers:`, `Body:`) in **dim** gray
+
+Example terminal output:
 
 ```
-10:30:45.123 INFO: Processing request
-    path: "/api/users"
-    method: "GET"
+[20:40:07.229] DEBUG: [RETU-063t] [GET 200] /return/showcasedev/returns?pageNumber=1&pageSize=60
+  Body: [
+    {
+      "id": "698dca3b77a5e440a638957c",
+      "orders": [
+        {
+          "id": "EON1267",
+          "items": [
+            {
+              "name": "EcoFlow Extension Cable",
+              "quantity": 1,
+              "unitPrice": { "value": 35, "currency": "EUR" }
+            }
+          ]
+        }
+      ],
+      "approvalStatus": "PENDING",
+      "received": false
+    }
+  ]
+    module: "api-debug"
 ```
+
+The colorization is implemented by `colorizeJson()` in `src/platform/core/utils/debug-utils.ts` and only activates in dev mode. Production output is unaffected.
 
 ### Production (JSON)
 
@@ -366,17 +394,59 @@ Combined with existing response logging (`NEXT_PUBLIC_DEBUG_API_RESPONSE`), this
 # Full API debugging in development
 NEXT_PUBLIC_DEBUG_API_CURL=true
 NEXT_DEBUG_API_PAYLOAD=true
-NEXT_PUBLIC_DEBUG_API_RESPONSE=FULL
+NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
 NEXT_PUBLIC_DEBUG_API_ENDPOINTS=cart,order  # Optional: filter to specific endpoints
 ```
 
 ## Browser DevTools Debug Stream
 
-When `NEXT_PUBLIC_DEBUG_API_RESPONSE` is set to any value other than `off`, the application provides two mechanisms to inspect upstream API calls directly in the browser:
+When `NEXT_PUBLIC_DEBUG_API_RESPONSE` is set to any value other than `OFF`, the application provides a dual-output debug system that logs upstream API calls to **both** the server terminal and the browser DevTools Console.
+
+### Architecture
+
+```
+EmporixApiInvoker.fetch()
+    │
+    ├─── buildAndLogCurl()      → Terminal: curl command
+    ├─── logRequestPayload()    → Terminal: request body (POST/PUT/PATCH)
+    └─── logResponse()          → Terminal: colorized pretty-printed response
+                │
+                └─── debugEventBus.emit(event)
+                         │
+                         ├─── Ring buffer (50 events, survives SSR→browser gap)
+                         └─── SSE subscribers
+                                  │
+                                  └─── /api/debug/stream (SSE route)
+                                           │
+                                           ├─── Replay buffered events on connect
+                                           └─── Stream live events
+                                                    │
+                                                    └─── ApiDebugPanel (browser)
+                                                              │
+                                                              └─── console.groupCollapsed()
+```
+
+**Key implementation details:**
+
+| Concept | Detail |
+| --- | --- |
+| **globalThis singleton** | `debugEventBus` uses `globalThis.__debugEventBus` to share a single instance across Next.js RSC and API Route module scopes (they are separate in dev mode) |
+| **Replay buffer** | Events are stored in a ring buffer (50 max). When the browser's `EventSource` connects, all buffered events are replayed immediately — this captures SSR calls that happened before the browser loaded |
+| **Single body read** | `response.clone().text()` is called once in `logResponse()` and shared between terminal log and SSE event. The caller consumes the original response with `.json()`, so a second clone would fail |
+| **Sensitive data masking** | Headers, query params, and body containing tokens/secrets are masked as `******` unless `NEXT_PUBLIC_DEBUG_API_VERBOSE=true` |
+
+**Files:**
+
+| File | Role |
+| --- | --- |
+| `src/platform/core/utils/debug-utils.ts` | `buildAndLogCurl()`, `logResponse()`, `logRequestPayload()`, `attachDebugHeaders()`, `colorizeJson()` |
+| `src/platform/core/utils/debug-event-bus.ts` | `DebugEventBus` class, `globalThis` singleton, ring buffer, `ApiDebugEvent` interface |
+| `src/app/api/debug/stream/route.ts` | SSE endpoint with replay + live subscription |
+| `src/components/debug/ApiDebugPanel.tsx` | Invisible client component that renders events in browser Console |
 
 ### 1. X-Debug Response Headers
 
-Every response from your Next.js API routes includes debug headers visible in the browser **Network** tab:
+Every response from your Next.js API routes can include debug headers visible in the browser **Network** tab:
 
 | Header                      | Example                             | Description                    |
 | --------------------------- | ----------------------------------- | ------------------------------ |
@@ -388,23 +458,40 @@ These headers are automatically attached by `attachDebugHeaders()` when called i
 
 ### 2. SSE Console Stream (ApiDebugPanel)
 
-A Server-Sent Events stream at `/api/debug/stream` pushes upstream API debug events to the browser in real time. The `ApiDebugPanel` component (loaded in the root layout in dev mode) connects to this stream and pretty-prints each event in the browser **Console**:
+The SSE stream at `/api/debug/stream` pushes upstream API debug events to the browser in real time. The `ApiDebugPanel` component (loaded in the root layout in dev mode) connects to this stream and pretty-prints each event in the browser **Console**:
 
 - **Collapsible groups** — each API call is a `console.groupCollapsed` (or `console.group` for errors)
 - **Color-coded** — green for 2xx, orange for 4xx, red for 5xx
-- **JSON pretty-printing** — response bodies are parsed and displayed via `console.dir` with full object expansion
+- **JSON pretty-printing** — response bodies are parsed and displayed via `console.dir` with `depth: 10` for full object expansion
 - **Headers as table** — response headers are displayed via `console.table`
 - **Duration** — round-trip time shown in the group label
+- **Auto-reconnect** — reconnects after 5 seconds on connection loss
 
 This makes it trivial to inspect large JSON response bodies that would be hard to read as a single-line string in the server terminal.
 
+### 3. Terminal Output (colorized pino-pretty)
+
+In dev mode, terminal output uses `pino-pretty` with additional ANSI color-coding for JSON content:
+
+- **Keys** in **cyan** (`"id"`, `"orders"`, `"total"`)
+- **String values** in **yellow** (`"PENDING"`, `"EUR"`, `"EON1267"`)
+- **Numbers** in **magenta** (`35`, `1`)
+- **Booleans / null** in **green** (`false`, `true`, `null`)
+- **Labels** (`Headers:`, `Body:`) in **dim** gray
+
+JSON bodies and headers are multi-line indented for easy visual scanning.
+
 #### Quick Start
 
-1. Ensure `NEXT_PUBLIC_DEBUG_API_RESPONSE` is set (e.g. `STATUS-BODY`, `FULL`)
+1. Set these in `.env`:
+   ```env
+   NEXT_PUBLIC_DEBUG_API_CURL=true
+   NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
+   ```
 2. Start the dev server with `npm run dev`
 3. Open your browser's DevTools Console
 4. You'll see a "🔌 API Debug Stream connected" message
-5. Every upstream API call will appear as a collapsible group
+5. Every upstream API call will appear as a collapsible group in the Console **and** as colorized output in the terminal
 
 #### Filtering: Show Only Specific API Calls
 
@@ -437,7 +524,7 @@ With this config:
 
 #### SSR Error Logging
 
-All `lib/ssr/*` functions log errors via `LoggerService` instead of silently swallowing them. When an SSR call fails (e.g. missing auth scope, network error), you'll see an `ERROR`-level log line in the **terminal** like:
+All `lib/ssr/*` functions (returns, orders, carts, customer, products, session, site, approvals, price, search) log errors via `LoggerService` instead of silently swallowing them. When an SSR call fails (e.g. missing auth scope, network error), you'll see an `ERROR`-level log line in the **terminal** like:
 
 ```
 ERROR [SSR getReturns failed] {"error":"Failed to get returns: ...","pageNumber":1}
@@ -472,9 +559,22 @@ export async function GET() {
 
 ### pino-pretty Not Working
 
-1. Ensure `pino-pretty` is installed as a dev dependency
+1. Ensure `pino-pretty` is installed as a dev dependency (`npm ls pino-pretty`)
 2. Check that `NODE_ENV=development`
 3. Restart the development server
+
+### Debug Stream Not Showing SSR Calls
+
+SSR calls happen before the browser connects to the EventSource. The debug event bus buffers the last 50 events and replays them when the browser connects. If you're still not seeing SSR events:
+
+1. Ensure `debugEventBus` uses the `globalThis` singleton pattern (check `debug-event-bus.ts`)
+2. Verify `NEXT_PUBLIC_DEBUG_API_RESPONSE` is not `OFF`
+3. Check endpoint filter is not excluding your URLs
+4. Restart the dev server — the `globalThis` singleton persists across HMR but not across full restarts
+
+### Response Body Shows `<error reading body>`
+
+This means `response.clone().text()` was called after the response body was already consumed. The `logResponse()` function reads the body exactly once and shares it between the terminal log and the SSE event. If you see this error, check that no code between `buildAndLogCurl()` and `logResponse()` is consuming the response body.
 
 ### TypeScript Errors
 

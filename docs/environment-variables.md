@@ -114,39 +114,77 @@ NEXT_PUBLIC_LOG_ENABLED=false
 
 ### Debug Settings
 
+The application includes a comprehensive API debug system that provides real-time visibility into upstream API calls in both the **server terminal** (with colorized pretty-printing) and the **browser DevTools Console** (via an SSE stream with collapsible groups).
+
+#### `NEXT_PUBLIC_DEBUG_API_CURL`
+
+Log a `curl` command for every upstream API call. Useful for reproducing API calls manually:
+
+- `true` – Log curl commands (headers and query params are masked unless verbose mode is on)
+- `false` – Don't log curl commands (default)
+
+```env
+NEXT_PUBLIC_DEBUG_API_CURL=true
+```
+
 #### `NEXT_PUBLIC_DEBUG_API_RESPONSE`
 
-Controls the verbosity of API response logging. Useful for debugging API issues:
+Controls the verbosity of API response logging. This also enables the **Browser DevTools Debug Stream** — when set to any value other than `OFF`, upstream API calls appear as collapsible groups in the browser Console (via the `ApiDebugPanel` component).
 
-- `OFF` - No response logging (default, use in production)
-- `STATUS` - Log only HTTP status code
+- `OFF` - No response logging, no browser debug stream (default, use in production)
+- `STATUS` - Log only HTTP method + status code
 - `STATUS-HEADERS` - Log status code and response headers
-- `STATUS-BODY-200` - Log status and first 200 characters of response body
-- `STATUS-BODY` - Log status and full response body
+- `STATUS-BODY-{n}` - Log status and first N characters of response body (e.g. `STATUS-BODY-200`)
+- `STATUS-BODY` - Log status and full response body (pretty-printed with ANSI colors in terminal)
 - `FULL` - Log everything (status, headers, full body)
 
 **Example:**
 ```env
-NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY-500
+NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
 ```
+
+**Terminal output** is formatted with `pino-pretty` and colorized JSON:
+- Keys in **cyan**, string values in **yellow**, numbers in **magenta**, booleans/null in **green**
+- Multi-line indented output for easy scanning
+
+**Browser Console output** uses styled `console.groupCollapsed`:
+- Color-coded by status (green 2xx, orange 4xx, red 5xx)
+- Response bodies displayed via `console.dir` for full object expansion
+- Response headers displayed via `console.table`
 
 #### `NEXT_PUBLIC_DEBUG_API_ENDPOINTS`
 
-Restrict debugging to specific endpoints to reduce noise:
+Restrict debugging to specific endpoints to reduce noise. The value is a comma-separated list of path substrings — only URLs containing at least one of these substrings will be logged. Case-insensitive.
 
 ```env
-# Debug only these endpoints
-NEXT_PUBLIC_DEBUG_API_ENDPOINTS=site,price,product
+# Debug only orders and returns
+NEXT_PUBLIC_DEBUG_API_ENDPOINTS=order,return
 
-# Debug all endpoints (leave empty)
+# Debug only cart calls
+NEXT_PUBLIC_DEBUG_API_ENDPOINTS=cart
+
+# Debug all endpoints (leave empty — this is the default)
 NEXT_PUBLIC_DEBUG_API_ENDPOINTS=
+```
+
+> **Tip:** This filter applies to both the terminal log and the browser debug stream. After changing, restart the dev server.
+
+#### `NEXT_PUBLIC_DEBUG_API_VERBOSE`
+
+Controls whether sensitive data (tokens, secrets, API keys) is shown in debug output:
+
+- `true` – Show raw values (use only in local development)
+- `false` – Mask sensitive values as `******` (default, always in production)
+
+```env
+NEXT_PUBLIC_DEBUG_API_VERBOSE=true
 ```
 
 #### `NEXT_DEBUG_API_PAYLOAD`
 
 Log request body for outgoing POST/PUT/PATCH API calls. Useful for debugging what data is being sent to external APIs:
 
-- `true` – Log request bodies (with sensitive data masking in non-verbose mode)
+- `true` – Log request bodies (truncated to 500 chars in masked mode)
 - `false` – Don't log request bodies (default)
 
 ```env
@@ -154,6 +192,17 @@ NEXT_DEBUG_API_PAYLOAD=true
 ```
 
 **Note:** This is a server-side-only variable (no `NEXT_PUBLIC_` prefix) because request payload logging only makes sense on the server where API calls are made.
+
+#### Full API Debugging Example
+
+```env
+# Recommended dev setup for debugging specific API calls
+NEXT_PUBLIC_DEBUG_API_CURL=true
+NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
+NEXT_PUBLIC_DEBUG_API_ENDPOINTS=order,return
+NEXT_PUBLIC_DEBUG_API_VERBOSE=false
+NEXT_DEBUG_API_PAYLOAD=true
+```
 
 ### Multi-Site Support
 
@@ -210,10 +259,13 @@ NEXT_LOG_LEVEL=debug
 NEXT_PUBLIC_LOG_LEVEL=debug
 NEXT_PUBLIC_LOG_ENABLED=true
 
-# API Debugging
+# API Debugging — full visibility with colorized terminal output + browser Console stream
 NEXT_PUBLIC_DEBUG_API_CURL=true
 NEXT_PUBLIC_DEBUG_API_VERBOSE=true
-NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY-500
+NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
+NEXT_DEBUG_API_PAYLOAD=true
+# Optional: filter to specific endpoints to reduce noise
+# NEXT_PUBLIC_DEBUG_API_ENDPOINTS=order,return
 ```
 
 ### Staging
@@ -237,9 +289,14 @@ NEXT_PUBLIC_LOG_ENABLED=false
 
 # General Settings
 NEXT_PUBLIC_ROBOTS_NOINDEX=false
-NEXT_PUBLIC_DEBUG_API_RESPONSE=OFF
 NEXT_SETUP_API_ENABLED=false
 NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS=false   # Set to true to fully disable web push notifications
+
+# API Debugging — OFF in production (no debug stream, no curl logging)
+NEXT_PUBLIC_DEBUG_API_CURL=false
+NEXT_PUBLIC_DEBUG_API_RESPONSE=OFF
+NEXT_PUBLIC_DEBUG_API_VERBOSE=false
+NEXT_DEBUG_API_PAYLOAD=false
 ```
 
 ## Security Best Practices
