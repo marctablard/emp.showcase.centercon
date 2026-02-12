@@ -14,6 +14,9 @@
     "Regions": {
         "label": "Site"
     },
+    "Companies": {
+        "label": "Unternehmen"
+    },
     "hello": {
         "world": "Hallo Welt",
         "friend": "Hey Kumpel"
@@ -43,5 +46,5 @@
             }
         }
     },
-  "optional": "(optional)"
+    "optional": "(optional)"
 }

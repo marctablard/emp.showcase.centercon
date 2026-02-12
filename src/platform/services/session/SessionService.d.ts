@@ -43,4 +43,10 @@ export interface SessionService {
    * Set the cart for the current session context
    */
   setCart(cartId: string): Promise<void>;
+
+  /**
+   * Set the legal entity (company) for the current session context
+   * This will refresh the customer token with the new legal entity ID
+   */
+  setLegalEntity(legalEntityId: string): Promise<void>;
 }

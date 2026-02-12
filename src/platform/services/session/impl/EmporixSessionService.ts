@@ -1,5 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
+import type { EmporixTokenManager } from '@/platform/integrations/emporix/common/EmporixTokenManager';
+import type { EmporixConfig } from '@/platform/integrations/emporix/config';
 import type {
   EmporixContextAttribute,
   EmporixSessionContext,
@@ -27,6 +29,8 @@ class EmporixSessionService implements SessionService {
     @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,
     @inject('EmporixSessionMapper') private mapper: SessionMapper<EmporixSessionContext, EmporixContextAttribute>,
     @inject('SiteService') private siteService: SiteService,
+    @inject('EmporixTokenManager') private tokenManager: EmporixTokenManager,
+    @inject('EmporixConfig') private config: EmporixConfig,
   ) {}
 
   async setRegion(region: string): Promise<void> {
@@ -112,6 +116,14 @@ class EmporixSessionService implements SessionService {
       },
     });
     */
+  }
+
+  async setLegalEntity(legalEntityId: string): Promise<void> {
+    await this.tokenManager.refreshCustomerTokenWithLegalEntity(this.config.tenant, legalEntityId);
+    await this.sessionContextApi.addOwnSessionContextAttribute({
+      key: 'legalEntityId',
+      value: legalEntityId,
+    });
   }
 
   async getById(id: string): Promise<Session | undefined> {

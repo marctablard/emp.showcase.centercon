@@ -1,3 +1,5 @@
+import { Company } from '../model/company/company';
+
 /**
  * Service for company-related operations
  */
@@ -7,5 +9,11 @@ export interface CompanyService {
    * @param companyId The ID of the company to retrieve (or none for the current)
    * @returns Promise with the current company or null if not logged in
    */
-  getCompany(companyId?: string): Promise<Customer | null>;
+  getCompany(companyId?: string): Promise<Company | null>;
+
+  /**
+   * Get all companies assigned to the current user
+   * @returns Promise with array of companies
+   */
+  getCompanies(): Promise<Company[]>;
 }

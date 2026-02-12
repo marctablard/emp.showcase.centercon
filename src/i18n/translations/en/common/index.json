@@ -14,6 +14,9 @@
     "Regions": {
         "label": "Site"
     },
+    "Companies": {
+        "label": "Company"
+    },
     "hello": {
         "world": "Hello World",
         "friend": "Hey Friend"

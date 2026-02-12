@@ -105,10 +105,18 @@ class EmporixOAuthApi implements IEmporixOAuthApi {
    * Refresh a customer token
    * @param tenant The tenant ID
    * @param refreshToken Refresh token from the original customer token response
+   * @param legalEntityId Optional legal entity ID for B2B company context
    * @returns Promise with the refreshed customer token response
    */
-  async refreshCustomerToken(tenant: string, refreshToken: string): Promise<EmporixCustomerTokenResponse> {
-    const url = `/customer/${tenant}/refreshauthtoken/refresh?refresh_token=${refreshToken}`;
+  async refreshCustomerToken(
+    tenant: string,
+    refreshToken: string,
+    legalEntityId?: string,
+  ): Promise<EmporixCustomerTokenResponse> {
+    let url = `/customer/${tenant}/refreshauthtoken/refresh?refresh_token=${refreshToken}`;
+    if (legalEntityId) {
+      url += `&legalEntityId=${encodeURIComponent(legalEntityId)}`;
+    }
 
     const response = await this.fetch(url, {
       method: 'GET',

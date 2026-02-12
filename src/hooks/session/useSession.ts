@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from 'react';
 import {
   fetchCurrentSession,
+  updateSessionCompany,
   updateSessionCountry,
   updateSessionCurrency,
   updateSessionLanguage,
@@ -107,6 +108,20 @@ export function useSession() {
   };
 
   /**
+   * Update the session company (legal entity)
+   */
+  const setCompany = async (legalEntityId: string): Promise<boolean> => {
+    sessionStore.setLoading(true);
+    const success = await updateSessionCompany(legalEntityId);
+    if (success) {
+      const updatedSession = await fetchCurrentSession();
+      sessionStore.setSession(updatedSession);
+    }
+    sessionStore.setLoading(false);
+    return success;
+  };
+
+  /**
    * Manually refresh the session data
    */
   const refreshSession = async (): Promise<Session | null | undefined> => {
@@ -125,6 +140,7 @@ export function useSession() {
     setCountry,
     setSite,
     setRegion,
+    setCompany,
     refreshSession,
   };
 }

@@ -41,6 +41,42 @@ export class EmporixCompanyService implements CompanyService {
       },
     };
   }
+  async getCompanies(): Promise<Company[]> {
+    const customer = await this.customerService.getCustomer();
+    if (!customer || !customer.id) {
+      return [];
+    }
+
+    const contactAssignments = await this.customerManagementApi.getContactAssignmentsByCustomerId(customer.id);
+    if (!contactAssignments || contactAssignments.length === 0) {
+      return [];
+    }
+
+    const companies: Company[] = [];
+    for (const assignment of contactAssignments) {
+      if (assignment.legalEntity?.id) {
+        try {
+          const emporixLegalEntity = await this.customerManagementApi.getLegalEntityById(assignment.legalEntity.id);
+          if (emporixLegalEntity) {
+            const creditscore = emporixLegalEntity.mixins?.['creditscore'];
+            companies.push({
+              id: emporixLegalEntity.id,
+              name: emporixLegalEntity.name,
+              onboarding: {
+                status: this.mapStatus(creditscore?.internalrating),
+                updatedAt: creditscore?.statusupdate || new Date(),
+              },
+            });
+          }
+        } catch (_error) {
+          continue;
+        }
+      }
+    }
+
+    return companies;
+  }
+
   mapStatus(internalrating?: string): 'approved' | 'pending' | 'rejected' {
     if (!internalrating) {
       return 'pending';
