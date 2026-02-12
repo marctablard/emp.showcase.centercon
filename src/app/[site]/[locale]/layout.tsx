@@ -3,7 +3,6 @@ import { SessionProvider as AuthSessionProvider } from 'next-auth/react';
 import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import { auth } from '@/auth/auth';
@@ -17,7 +16,6 @@ import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
-import { isProbeUserAgent } from '@/site/probe-detection';
 import { setRequestSite } from '@/site/server/';
 
 const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
