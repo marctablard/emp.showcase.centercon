@@ -8,6 +8,8 @@
   "payment": "Payment",
   "trackOrder": "Track Order",
   "returnOrder": "Return Order",
+  "returnLink": "Return",
+  "returnDisabledTooltip": "Returns can only be created for completed orders",
   "paymentMethod": "Payment Method",
   "shippingMethod": "Shipping Method",
   "orderItems": "Order Items",
@@ -43,7 +45,8 @@
     "deliveryDate": "Delivery Date",
     "deliveryAddress": "Delivery Address",
     "payment": "Payment",
-    "orderValue": "Order Value"
+    "orderValue": "Order Value",
+    "action": "Actions"
   },
   "status": {
     "in_checkout": "In Checkout",

@@ -92,6 +92,7 @@ export default function Registration() {
         // Redirect to login page or show a success message
         await login(values.email, values.password);
       } else if (result.error) {
+        console.log('Registration error:', result.error);
         // Handle specific error types
         // Todo: Check below cases if they exist
         switch (result.error) {

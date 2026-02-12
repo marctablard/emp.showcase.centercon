@@ -7,6 +7,8 @@
   "orderNumber": "Bestellnummer",
   "trackOrder": "Sendung verfolgen",
   "returnOrder": "Bestellung zurücksenden",
+  "returnLink": "Retoure",
+  "returnDisabledTooltip": "Retouren können nur für abgeschlossene Bestellungen erstellt werden",
   "orderDate": "Bestelldatum",
   "payment": "Zahlung",
   "paymentMethod": "Zahlungsmethode",
@@ -37,7 +39,8 @@
     "deliveryDate": "Lieferdatum",
     "deliveryAddress": "Lieferadresse",
     "payment": "Zahlungsart",
-    "orderValue": "Bestellwert"
+    "orderValue": "Bestellwert",
+    "action": "Aktionen"
   },
   "status": {
     "in_checkout": "Im Warenkorb",

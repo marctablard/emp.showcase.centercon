@@ -13,6 +13,7 @@ import { useOrder } from '@/hooks/order/useOrder';
 import { useRouter } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { Order } from '@/platform/services/model/order/order';
+import { CreateReturnDialog } from './create-return-dialog';
 import { OrderStatusBadge } from './order-status-badge';
 import { TrackingDialog } from './tracking-dialog';
 
@@ -27,7 +28,7 @@ function shouldShowCancelButton(status: Order['status']): boolean {
  * Determines if the return button should be shown based on order status
  */
 function shouldShowReturnButton(status: Order['status']): boolean {
-  return status === 'DELIVERED';
+  return status === 'COMPLETED';
 }
 
 /**
@@ -38,9 +39,10 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
   const tOrder = useTranslations('orders');
   const tPaymentModes = useTranslations('checkout.PaymentModes');
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const router = useRouter();
 
-  const { order, loading, error, cancelOrder, returnOrder } = useOrder({ orderId, initialOrder });
+  const { order, loading, error, cancelOrder } = useOrder({ orderId, initialOrder });
 
   if (loading) {
     return (
@@ -242,19 +244,8 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                   {tOrder('cancelOrder')}
                 </Button>
               )}
-              {shouldShowReturnButton(order.status) && returnOrder && (
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={async () => {
-                    try {
-                      await returnOrder();
-                    } catch (err) {
-                      // Handle error, could show a toast notification
-                      getLogger().error({ err }, 'Failed to return order');
-                    }
-                  }}
-                >
+              {shouldShowReturnButton(order.status) && (
+                <Button variant="secondary" size="small" onClick={() => setReturnDialogOpen(true)}>
                   <RotateCcw className="mr-2 h-4 w-4" />
                   {tOrder('returnOrder')}
                 </Button>
@@ -280,6 +271,9 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
 
       {/* Tracking Dialog */}
       <TrackingDialog orderId={orderId} open={trackingDialogOpen} onOpenChange={setTrackingDialogOpen} />
+
+      {/* Return Order Dialog */}
+      {order && <CreateReturnDialog order={order} open={returnDialogOpen} onOpenChange={setReturnDialogOpen} />}
     </div>
   );
 }

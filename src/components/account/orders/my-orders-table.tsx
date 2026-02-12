@@ -1,15 +1,24 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/dashboard-badge';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Order } from '@/platform/services/model/order/order';
+import { CreateReturnDialog } from './create-return-dialog';
+
+/**
+ * Determines if the return action should be enabled based on order status
+ */
+function isReturnEnabled(status: Order['status']): boolean {
+  return status === 'COMPLETED';
+}
 
 export interface MyOrdersTableProps {
   orders: Order[];
@@ -38,6 +47,16 @@ export function MyOrdersTable({
 }: MyOrdersTableProps) {
   const t = useTranslations('orders');
   const router = useRouter();
+
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Handle return link click - opens dialog
+  const handleReturnClick = (order: Order): void => {
+    setSelectedOrder(order);
+    setDialogOpen(true);
+  };
 
   // Format date in the current locale
   const formatDate = (dateString: string | undefined) => {
@@ -76,19 +95,20 @@ export function MyOrdersTable({
             <TableHead className="w-[100px] font-bold">{t('columns.deliveryDate')}</TableHead>
             <TableHead className="w-[150px] font-bold">{t('columns.deliveryAddress')}</TableHead>
             <TableHead className="w-[120px] font-bold">{t('columns.payment')}</TableHead>
+            <TableHead className="w-[80px] font-bold text-center">{t('columns.action')}</TableHead>
             <TableHead className="w-[100px] font-bold text-right">{t('columns.orderValue')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
+              <TableCell colSpan={9} className="text-center py-4">
                 {t('loading')}
               </TableCell>
             </TableRow>
           ) : visibleOrders.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
+              <TableCell colSpan={9} className="text-center py-4">
                 {t('noOrders')}
               </TableCell>
             </TableRow>
@@ -122,6 +142,23 @@ export function MyOrdersTable({
                 </TableCell>
                 <TableCell className="px-2 py-4">{formatAddress(order.shippingAddress)}</TableCell>
                 <TableCell className="px-2 py-4">{formatPayment(order.payments)}</TableCell>
+                <TableCell className="px-2 py-4 text-center">
+                  {isReturnEnabled(order.status) ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={() => handleReturnClick(order)}
+                        className="font-bold underline text-text-action hover:text-text-action-hover"
+                      >
+                        {t('returnLink')}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-text-disabled text-sm cursor-not-allowed" title={t('returnDisabledTooltip')}>
+                      {t('returnLink')}
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell className="text-right py-4 font-medium">
                   {order.price?.total.gross} {order.currency}
                 </TableCell>
@@ -151,6 +188,9 @@ export function MyOrdersTable({
           </div>
         </div>
       )}
+
+      {/* Create Return Dialog */}
+      {selectedOrder && <CreateReturnDialog open={dialogOpen} onOpenChange={setDialogOpen} order={selectedOrder} />}
     </div>
   );
 }
