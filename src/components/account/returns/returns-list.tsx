@@ -11,27 +11,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useReturns } from '@/hooks/return/useReturns';
 import { Link } from '@/i18n/navigation';
 import { Return, ReturnStatus } from '@/platform/services/model/return';
-import { mockReturns } from './mock-returns-data';
 import { ReturnStatusBadge } from './return-status-badge';
 
 interface ReturnsListProps {
   initialReturns?: Return[];
-  useMockData?: boolean;
 }
 
-export function ReturnsList({ initialReturns, useMockData = true }: ReturnsListProps) {
+export function ReturnsList({ initialReturns }: ReturnsListProps) {
   const t = useTranslations('account.returns');
   const tStatus = useTranslations('account.returns.status');
   const locale = useLocale();
   const [filterStatus, setFilterStatus] = useState<ReturnStatus | '_ALL_'>('_ALL_');
   const [sortField, setSortField] = useState<'date' | 'value' | 'status' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const { returns: apiReturns, loading, error, refreshReturns } = useReturns(initialReturns);
-
-  // Use mock data when API returns empty/error and useMockData is enabled
-  const shouldUseMockData = useMockData && (apiReturns.length === 0 || error);
-  const returns = shouldUseMockData ? mockReturns : apiReturns;
-  const effectiveError = shouldUseMockData ? null : error;
+  const { returns, loading, error, refreshReturns } = useReturns(initialReturns);
 
   // Filter returns client-side based on selected status
   const filteredReturns =
@@ -113,7 +106,7 @@ export function ReturnsList({ initialReturns, useMockData = true }: ReturnsListP
     );
   }
 
-  if (effectiveError) {
+  if (error) {
     return (
       <Card>
         <CardHeader>
@@ -122,7 +115,7 @@ export function ReturnsList({ initialReturns, useMockData = true }: ReturnsListP
         </CardHeader>
         <CardContent>
           <div className="bg-surface-error p-4 rounded-md text-text-error">
-            {t('errorLoading')}: {effectiveError.message}
+            {t('errorLoading')}: {error.message}
           </div>
         </CardContent>
         <CardFooter>

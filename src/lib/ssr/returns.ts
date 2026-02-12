@@ -1,6 +1,7 @@
 'use server';
 
 import { cache } from 'react';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { Return } from '@/platform/services/model/return';
 import { ReturnService } from '@/platform/services/return/ReturnService';
 import ssr from '@/platform/ssr';
@@ -9,6 +10,7 @@ import ssr from '@/platform/ssr';
  * Get the return service instance from the platform container
  */
 const getReturnService = () => ssr.get<ReturnService>('ReturnService');
+const getLogger = () => ssr.get<LoggerService>('LoggerService');
 
 /**
  * Get a specific return by ID
@@ -18,7 +20,11 @@ export const getReturnById = cache(async (returnId: string): Promise<Return | nu
   try {
     const returnService = getReturnService();
     return await returnService.getReturn(returnId);
-  } catch (_error) {
+  } catch (error) {
+    getLogger().error(
+      { error: error instanceof Error ? error.message : String(error), returnId },
+      'SSR getReturnById failed',
+    );
     return undefined;
   }
 });
@@ -32,7 +38,11 @@ export const getReturns = cache(async (pageNumber?: number, pageSize?: number): 
     const returnService = getReturnService();
     const returns = await returnService.getReturns(pageNumber, pageSize);
     return returns;
-  } catch (_error) {
+  } catch (error) {
+    getLogger().error(
+      { error: error instanceof Error ? error.message : String(error), pageNumber, pageSize },
+      'SSR getReturns failed',
+    );
     return undefined;
   }
 });

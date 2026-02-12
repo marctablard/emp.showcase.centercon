@@ -1,4 +1,5 @@
 import { Container } from 'inversify';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import BatteryIncludedApiInvoker from '../../common/impl/BatteryIncludedApiInvoker';
 import type { BatteryIncludedConfig } from '../../config';
 import { BatteryIncludedSearchResponse } from '../../model';
@@ -24,6 +25,14 @@ describe('BatteryIncludedShopApi', () => {
     container = new Container();
     container.bind<BatteryIncludedConfig>('BatteryIncludedConfig').to(TestBatteryIncludedConfig);
     container.bind<BatteryIncludedApiInvoker>('BatteryIncludedApiInvoker').to(BatteryIncludedApiInvoker);
+    container.bind<LoggerService>('LoggerService').toConstantValue({
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    });
     container.bind<BatteryIncludedShopApi>('BatteryIncludedShopApi').to(BatteryIncludedShopApi);
 
     // Get instances from the container

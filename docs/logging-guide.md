@@ -350,6 +350,118 @@ Client-side errors and warnings can be transmitted to the server for centralized
 
 Logger configuration is managed in `src/platform/core/config/logger-config.ts`.
 
+## API Request Payload Logging
+
+In development, you can enable logging of outgoing API request bodies by setting:
+
+```env
+NEXT_DEBUG_API_PAYLOAD=true
+```
+
+This logs the body of all POST/PUT/PATCH requests made through `EmporixApiInvoker` and `EmporixOAuthApi`, respecting the endpoint filtering configured via `NEXT_PUBLIC_DEBUG_API_ENDPOINTS`.
+
+Combined with existing response logging (`NEXT_PUBLIC_DEBUG_API_RESPONSE`), this gives you full request/response visibility:
+
+```env
+# Full API debugging in development
+NEXT_PUBLIC_DEBUG_API_CURL=true
+NEXT_DEBUG_API_PAYLOAD=true
+NEXT_PUBLIC_DEBUG_API_RESPONSE=FULL
+NEXT_PUBLIC_DEBUG_API_ENDPOINTS=cart,order  # Optional: filter to specific endpoints
+```
+
+## Browser DevTools Debug Stream
+
+When `NEXT_PUBLIC_DEBUG_API_RESPONSE` is set to any value other than `off`, the application provides two mechanisms to inspect upstream API calls directly in the browser:
+
+### 1. X-Debug Response Headers
+
+Every response from your Next.js API routes includes debug headers visible in the browser **Network** tab:
+
+| Header                      | Example                             | Description                    |
+| --------------------------- | ----------------------------------- | ------------------------------ |
+| `X-Debug-Upstream-Url`      | `/cart/showcasedev/carts/abc123`    | Upstream URL (masked)          |
+| `X-Debug-Upstream-Status`   | `200`                               | Upstream HTTP status           |
+| `X-Debug-Upstream-Duration` | `142ms`                             | Round-trip time                |
+
+These headers are automatically attached by `attachDebugHeaders()` when called in API routes.
+
+### 2. SSE Console Stream (ApiDebugPanel)
+
+A Server-Sent Events stream at `/api/debug/stream` pushes upstream API debug events to the browser in real time. The `ApiDebugPanel` component (loaded in the root layout in dev mode) connects to this stream and pretty-prints each event in the browser **Console**:
+
+- **Collapsible groups** — each API call is a `console.groupCollapsed` (or `console.group` for errors)
+- **Color-coded** — green for 2xx, orange for 4xx, red for 5xx
+- **JSON pretty-printing** — response bodies are parsed and displayed via `console.dir` with full object expansion
+- **Headers as table** — response headers are displayed via `console.table`
+- **Duration** — round-trip time shown in the group label
+
+This makes it trivial to inspect large JSON response bodies that would be hard to read as a single-line string in the server terminal.
+
+#### Quick Start
+
+1. Ensure `NEXT_PUBLIC_DEBUG_API_RESPONSE` is set (e.g. `STATUS-BODY`, `FULL`)
+2. Start the dev server with `npm run dev`
+3. Open your browser's DevTools Console
+4. You'll see a "🔌 API Debug Stream connected" message
+5. Every upstream API call will appear as a collapsible group
+
+#### Filtering: Show Only Specific API Calls
+
+Use `NEXT_PUBLIC_DEBUG_API_ENDPOINTS` to limit which upstream API calls appear in both the **terminal** and the **browser Console stream**. The value is a comma-separated list of path substrings — only URLs containing at least one of these substrings will be logged.
+
+| Goal | `.env` value |
+|------|-------------|
+| Log everything (default) | `NEXT_PUBLIC_DEBUG_API_ENDPOINTS=` |
+| Only orders + returns | `NEXT_PUBLIC_DEBUG_API_ENDPOINTS=order,return` |
+| Only cart calls | `NEXT_PUBLIC_DEBUG_API_ENDPOINTS=cart` |
+| Only product + price | `NEXT_PUBLIC_DEBUG_API_ENDPOINTS=product,price` |
+| Only session context | `NEXT_PUBLIC_DEBUG_API_ENDPOINTS=session-context` |
+
+**Example — show only orders and returns:**
+
+```bash
+# .env
+NEXT_PUBLIC_DEBUG_API_CURL=true
+NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
+NEXT_PUBLIC_DEBUG_API_ENDPOINTS=order,return
+```
+
+With this config:
+- `/order/showcasedev/orders` → ✅ logged (contains `order`)
+- `/return/showcasedev/returns` → ✅ logged (contains `return`)
+- `/cart/showcasedev/carts/abc` → ❌ filtered out
+- `/session-context/showcasedev/me/context` → ❌ filtered out
+
+> **Tip:** The filter is case-insensitive and matches anywhere in the URL path. After changing the `.env` value, restart the dev server (`npm run dev`).
+
+#### SSR Error Logging
+
+All `lib/ssr/*` functions log errors via `LoggerService` instead of silently swallowing them. When an SSR call fails (e.g. missing auth scope, network error), you'll see an `ERROR`-level log line in the **terminal** like:
+
+```
+ERROR [SSR getReturns failed] {"error":"Failed to get returns: ...","pageNumber":1}
+```
+
+These errors are always logged regardless of `NEXT_PUBLIC_DEBUG_API_ENDPOINTS` — the endpoint filter only applies to the upstream HTTP request/response debug stream, not to application-level error logs.
+
+#### How to add X-Debug headers to an API route
+
+Use `attachDebugHeaders()` in your API route after fetching from an upstream service:
+
+```typescript
+import { attachDebugHeaders } from '@/platform/core/utils/debug-utils';
+
+export async function GET() {
+  const startTime = Date.now();
+  const upstream = await someService.fetch(url);
+  
+  const response = NextResponse.json(data);
+  attachDebugHeaders(response, upstream, url, startTime);
+  return response;
+}
+```
+
 ## Troubleshooting
 
 ### Logs Not Appearing

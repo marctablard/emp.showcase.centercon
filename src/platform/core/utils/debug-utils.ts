@@ -1,3 +1,55 @@
+import pino from 'pino';
+import { getServerLoggerConfig } from '@/platform/core/config/logger-config';
+import { type ApiDebugEvent, debugEventBus } from './debug-event-bus';
+
+const isDev = process.env.NODE_ENV === 'development';
+
+// ANSI color codes for terminal output (used only in dev)
+const c = {
+  cyan: '\x1b[36m',
+  yellow: '\x1b[33m',
+  magenta: '\x1b[35m',
+  green: '\x1b[32m',
+  dim: '\x1b[2m',
+  reset: '\x1b[0m',
+} as const;
+
+/**
+ * Colorizes a pretty-printed JSON string for terminal readability.
+ * Keys → cyan, string values → yellow, numbers → magenta, booleans/null → green.
+ * Only applied in dev mode (pino-pretty).
+ */
+function colorizeJson(prettyJson: string): string {
+  if (!isDev) return prettyJson;
+  return prettyJson
+    .replace(/"([^"\\]*(?:\\.[^"\\]*)*)"\s*:/g, `${c.cyan}"$1"${c.reset}:`) // keys
+    .replace(/:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/g, `: ${c.yellow}"$1"${c.reset}`) // string values
+    .replace(/:\s*(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g, `: ${c.magenta}$1${c.reset}`) // numbers
+    .replace(/:\s*(true|false|null)\b/g, `: ${c.green}$1${c.reset}`); // booleans/null
+}
+
+// Lazy-initialised pino child logger for API debug logging
+let _debugLogger: pino.Logger | null = null;
+
+// Track request start times for duration calculation (dev only)
+const _requestTimestamps = new Map<string, number>();
+
+/** Generate a short unique ID for correlating request/response events */
+function generateRequestId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+/**
+ * Returns a lazy-initialised pino child logger for API debug/request logging.
+ * Exported for use by EmporixApiInvoker and EmporixOAuthApi.
+ */
+export function getDebugLogger(): pino.Logger {
+  if (!_debugLogger) {
+    _debugLogger = pino(getServerLoggerConfig()).child({ module: 'api-debug' });
+  }
+  return _debugLogger;
+}
+
 // Central definition for all sensitive keys (used for headers and query params)
 const SENSITIVE_KEYS_NORMALIZED = new Set(['session', 'secret', 'password', 'token', 'auth', 'api', 'client']);
 
@@ -135,7 +187,8 @@ function shouldLogEndpoint(url: string): boolean {
 }
 
 /**
- * Logs a curl command if debugging is enabled (reads environment variables directly)
+ * Logs a curl command if debugging is enabled (reads environment variables directly).
+ * In dev mode also records a start timestamp for duration calculation.
  * @param url Target URL
  * @param options Request options
  * @returns The log prefix used for this request
@@ -147,7 +200,14 @@ export function buildAndLogCurl(url: string, options: RequestInit): string {
   if (debugCurl) {
     if (!shouldLogEndpoint(url)) return '';
     logPrefix = `[${getDebugPrefix(url)}]`;
-    console.debug(`${logPrefix} ${buildCurl(url, options, maskSensitive)}`);
+    getDebugLogger().debug(`${logPrefix} ${buildCurl(url, options, maskSensitive)}`);
+  }
+  // Track request start time for the SSE debug stream (always in dev — events are buffered for replay)
+  if (isDev) {
+    const requestId = generateRequestId();
+    _requestTimestamps.set(`${(options.method || 'GET').toUpperCase()}:${url}`, Date.now());
+    // Store the requestId so logResponse can correlate
+    _requestTimestamps.set(`rid:${(options.method || 'GET').toUpperCase()}:${url}`, requestId as unknown as number);
   }
   return logPrefix;
 }
@@ -172,45 +232,153 @@ export async function logResponse(
 
   const status = response.status;
   const isError = status >= 400;
-  const log = isError ? console.error : console.debug;
+  const logger = getDebugLogger();
+  const log = isError ? logger.error.bind(logger) : logger.debug.bind(logger);
   const method = (requestOptions.method || 'GET').toUpperCase();
   const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
   const logPrefix = prefix ? `${prefix} [${method} ${status}]` : `[${method} ${status}]`;
 
-  // We build an array of log parts and log them all at once at the end
-  const logParts: any[] = [`${logPrefix} ${maskedUrl}`];
+  // Build a human-readable, pretty-printed log message
+  let message = `${logPrefix} ${maskedUrl}`;
 
   // --- 1. Handle Headers ---
   const needsHeaders = debugResponse === 'status-headers' || debugResponse === 'full';
+  let responseHeaders: Record<string, string> | undefined;
   if (needsHeaders) {
     let headers = Object.fromEntries(response.headers.entries());
     if (maskSensitive) {
       headers = maskHeaders(headers);
     }
-    logParts.push('Headers:', headers);
+    responseHeaders = headers;
+    const prettyHeaders = JSON.stringify(headers, null, 2).replace(/\n/g, '\n    ');
+    message += `\n  ${c.dim}Headers:${c.reset} ${colorizeJson(prettyHeaders)}`;
   }
 
-  // --- 2. Handle Body ---
+  // --- 2. Handle Body (read once — the caller will consume the original, making re-clone impossible) ---
   const needsBody = debugResponse.startsWith('status-body') || debugResponse === 'full';
+  let bodyText: string | undefined;
   if (needsBody) {
     try {
-      const bodyText = await response.clone().text();
+      bodyText = await response.clone().text();
 
       if (debugResponse.startsWith('status-body-')) {
         const limit = parseInt(debugResponse.split('-')[2], 10) || 200;
-        logParts.push(`Body (max ${limit} chars):`, bodyText.slice(0, limit));
+        message += `\n  Body (max ${limit} chars): ${bodyText.slice(0, limit)}`;
       } else {
-        // This covers 'status-body' and 'full'
-        logParts.push('Body:', bodyText);
+        // Pretty-print JSON bodies; fall back to raw text for non-JSON
+        try {
+          const parsed = JSON.parse(bodyText);
+          const prettyBody = JSON.stringify(parsed, null, 2).replace(/\n/g, '\n    ');
+          message += `\n  ${c.dim}Body:${c.reset} ${colorizeJson(prettyBody)}`;
+        } catch {
+          message += `\n  ${c.dim}Body:${c.reset} ${bodyText}`;
+        }
       }
     } catch (err) {
-      // Log the actual error for better debugging
-      logParts.push('Error reading body:', err);
+      message += `\n  Body error: ${err}`;
     }
   }
 
   // --- 3. Final Log ---
-  // If debugResponse was 'status', only the logPrefix and URL are in the array.
-  // Otherwise, headers and/or body have been added.
-  log(...logParts);
+  log(message);
+
+  // --- 4. Emit to browser debug stream (dev only, always — events are buffered for replay) ---
+  if (isDev) {
+    const tsKey = `${method}:${url}`;
+    const ridKey = `rid:${tsKey}`;
+    const startTime = _requestTimestamps.get(tsKey);
+    const requestId = _requestTimestamps.get(ridKey);
+    _requestTimestamps.delete(tsKey);
+    _requestTimestamps.delete(ridKey);
+
+    // Reuse headers from section 1, or compute them for the SSE event
+    if (!responseHeaders && debugResponse !== 'status') {
+      let hdrs = Object.fromEntries(response.headers.entries());
+      if (maskSensitive) hdrs = maskHeaders(hdrs);
+      responseHeaders = hdrs;
+    }
+
+    const event: ApiDebugEvent = {
+      id: requestId ? String(requestId) : generateRequestId(),
+      timestamp: new Date().toISOString(),
+      method,
+      url: maskedUrl,
+      status,
+      responseHeaders,
+      responseBody: bodyText,
+      duration: startTime ? Date.now() - startTime : undefined,
+      prefix: prefix || undefined,
+      isError,
+    };
+    debugEventBus.emit(event);
+  }
+}
+
+/**
+ * Logs the request payload when NEXT_DEBUG_API_PAYLOAD is enabled.
+ * Only logs for methods that typically have a body (POST, PUT, PATCH).
+ * @param url Target URL
+ * @param options Request options
+ * @param prefix Optional log prefix
+ */
+export function logRequestPayload(url: string, options: RequestInit, prefix: string): void {
+  const debugPayload = process.env.NEXT_DEBUG_API_PAYLOAD === 'true';
+  if (!debugPayload) return;
+  if (!shouldLogEndpoint(url)) return;
+
+  const method = (options.method || 'GET').toUpperCase();
+  if (!['POST', 'PUT', 'PATCH'].includes(method)) return;
+
+  const body = options.body;
+  if (!body) return;
+
+  const logger = getDebugLogger();
+  const logPrefix = prefix || `[${getDebugPrefix(url)}]`;
+
+  try {
+    const bodyStr =
+      typeof body === 'string' ? body : body instanceof URLSearchParams ? body.toString() : JSON.stringify(body);
+    const maskSensitive = shouldMaskSensitive();
+    if (maskSensitive) {
+      logger.debug(
+        `${logPrefix} [${method} PAYLOAD] ${bodyStr.substring(0, 500)}${bodyStr.length > 500 ? '...(truncated)' : ''}`,
+      );
+    } else {
+      logger.debug(`${logPrefix} [${method} PAYLOAD] ${bodyStr}`);
+    }
+  } catch {
+    logger.debug(`${logPrefix} [${method} PAYLOAD] <unserializable body>`);
+  }
+}
+
+/**
+ * Attaches X-Debug-Upstream-* headers to a NextResponse so that upstream
+ * API call metadata is visible in the browser Network tab.
+ *
+ * Call this in API route handlers after the upstream call completes.
+ * No-op in production or when debug response logging is off.
+ *
+ * @param nextResponse The NextResponse to mutate
+ * @param upstreamResponse The upstream fetch Response
+ * @param url The upstream URL
+ * @param startTime Optional `Date.now()` captured before the fetch
+ */
+export function attachDebugHeaders(
+  nextResponse: { headers: Headers },
+  upstreamResponse: Response,
+  url: string,
+  startTime?: number,
+): void {
+  if (process.env.NODE_ENV !== 'development') return;
+  const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
+  if (debugResponse === 'off') return;
+
+  const maskSensitive = shouldMaskSensitive();
+  const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
+
+  nextResponse.headers.set('X-Debug-Upstream-Url', maskedUrl);
+  nextResponse.headers.set('X-Debug-Upstream-Status', String(upstreamResponse.status));
+  if (startTime) {
+    nextResponse.headers.set('X-Debug-Upstream-Duration', `${Date.now() - startTime}ms`);
+  }
 }

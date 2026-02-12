@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions, ProductService } from '@/platform/services/product';
 import { StockService } from '@/platform/services/stock/StockService';
@@ -7,13 +8,17 @@ import ssr from '@/platform/ssr';
 
 const getProductService = () => ssr.get<ProductService>('ProductService');
 const getStockService = () => ssr.get<StockService>('StockService');
+const getLogger = () => ssr.get<LoggerService>('LoggerService');
 
 const _getProduct = cache(async (id: string, options?: ProductFetchOptions): Promise<Product | null | undefined> => {
   try {
     const product = await getProductService().getProductById(id, options);
     return product || null;
-  } catch (_error) {
-    // fail silently
+  } catch (error) {
+    getLogger().error(
+      { error: error instanceof Error ? error.message : String(error), productId: id },
+      'SSR getProductById failed',
+    );
     return undefined;
   }
 });
@@ -22,7 +27,11 @@ const _getAvailability = cache(async (site: string, id: string): Promise<StockAv
   try {
     const availability = await getStockService().getStockAvailability(site, id);
     return availability || null;
-  } catch (_error) {
+  } catch (error) {
+    getLogger().error(
+      { error: error instanceof Error ? error.message : String(error), site, productId: id },
+      'SSR getStockAvailability failed',
+    );
     return undefined;
   }
 });

@@ -142,6 +142,19 @@ NEXT_PUBLIC_DEBUG_API_ENDPOINTS=site,price,product
 NEXT_PUBLIC_DEBUG_API_ENDPOINTS=
 ```
 
+#### `NEXT_DEBUG_API_PAYLOAD`
+
+Log request body for outgoing POST/PUT/PATCH API calls. Useful for debugging what data is being sent to external APIs:
+
+- `true` – Log request bodies (with sensitive data masking in non-verbose mode)
+- `false` – Don't log request bodies (default)
+
+```env
+NEXT_DEBUG_API_PAYLOAD=true
+```
+
+**Note:** This is a server-side-only variable (no `NEXT_PUBLIC_` prefix) because request payload logging only makes sense on the server where API calls are made.
+
 ### Multi-Site Support
 
 The application supports multiple sites/storefronts:

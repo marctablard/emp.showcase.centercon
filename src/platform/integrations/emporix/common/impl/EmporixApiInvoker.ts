@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { buildAndLogCurl, logResponse } from '@/platform/core/utils/debug-utils';
+import { buildAndLogCurl, getDebugLogger, logRequestPayload, logResponse } from '@/platform/core/utils/debug-utils';
 import type { EmporixConfig } from '../../config';
 import type { EmporixTokenManager } from '../EmporixTokenManager';
 
@@ -143,8 +143,14 @@ class EmporixApiInvoker {
   async fetch(url: string, options: RequestInit = {}): Promise<Response> {
     url = `${this.config.baseUrl}/${url}`;
     const prefix = buildAndLogCurl(url, options);
+    logRequestPayload(url, options, prefix);
     const responsePromise = fetch(url, options);
-    responsePromise.catch((err) => console.error(`${prefix} [FETCH ERROR] ${url}`, err));
+    responsePromise.catch((err) =>
+      getDebugLogger().error(
+        { url, error: err instanceof Error ? err.message : String(err) },
+        `${prefix} [FETCH ERROR]`,
+      ),
+    );
     responsePromise.then((response) => logResponse(response, url, options, prefix));
     return responsePromise;
   }

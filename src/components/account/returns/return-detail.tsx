@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useReturn } from '@/hooks/return/useReturn';
 import { Link } from '@/i18n/navigation';
 import { Return } from '@/platform/services/model/return';
-import { ExtendedReturn, ExtendedReturnItem, claimReasonOptions, getMockReturnById } from './mock-returns-data';
+import { ExtendedReturn, ExtendedReturnItem, claimReasonOptions } from './mock-returns-data';
 import { ReturnStatusBadge } from './return-status-badge';
 
 // Max character limit for description field per Figma design
@@ -363,8 +363,7 @@ export function ReturnDetail({ returnId, initialReturn }: ReturnDetailProps) {
   const locale = useLocale();
   const { returnItem: apiReturnItem, loading, error, refreshReturn } = useReturn(returnId, initialReturn);
 
-  // Use API result or fall back to mock data for UI verification
-  const returnItem: ExtendedReturn | null = (apiReturnItem as ExtendedReturn) || getMockReturnById(returnId) || null;
+  const returnItem: ExtendedReturn | null = (apiReturnItem as ExtendedReturn) || null;
 
   if (loading) {
     return (

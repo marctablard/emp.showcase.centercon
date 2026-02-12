@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import AccountLayout from '@/components/account/account-layout';
-import { getMockReturnById } from '@/components/account/returns/mock-returns-data';
 import { ReturnDetail } from '@/components/account/returns/return-detail';
 import { getReturnById } from '@/lib/ssr/returns';
 import { getPageTitle } from '@/lib/ssr/seo';
@@ -34,11 +33,8 @@ export default async function ReturnDetailPage({ params }: { params: Promise<{ l
     getReturnById(id),
   ]);
 
-  // Use API result or fall back to mock data for UI verification
-  const returnItem = apiReturn || getMockReturnById(id);
-
-  // If return not found in both API and mock data, return 404
-  if (!returnItem) {
+  // If return not found, return 404
+  if (!apiReturn) {
     notFound();
   }
 
@@ -59,7 +55,7 @@ export default async function ReturnDetailPage({ params }: { params: Promise<{ l
 
   return (
     <AccountLayout breadcrumbs={breadcrumbs}>
-      <ReturnDetail returnId={id} initialReturn={returnItem} />
+      <ReturnDetail returnId={id} initialReturn={apiReturn} />
     </AccountLayout>
   );
 }

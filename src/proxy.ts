@@ -7,7 +7,7 @@ import { routing as siteRouting } from './site/routing';
 const securedPages = ['/account/.*?'];
 //const securedPathnameRegex = RegExp(`^(/(${intlRouting.locales.join('|')}))?(${securedPages.join('|')})(/.*)?/?$`, 'i');
 const securedApiPrefixes = securedPages.filter((p) => p.startsWith('/api/shipping'));
-const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications'];
+const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications', '/api/debug'];
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 
