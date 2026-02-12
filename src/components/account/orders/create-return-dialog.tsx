@@ -42,16 +42,13 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate total selected items
   const totalSelectedItems = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
 
-  // Format date in the current locale
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return '-';
     return format(new Date(dateString), 'MMMM d, yyyy');
   };
 
-  // Get item image URL
   const getItemImage = (item: OrderItem): string => {
     if (item.images && item.images.length > 0) {
       return item.images[0];
@@ -59,7 +56,6 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
     return '/images/placeholder.png';
   };
 
-  // Update quantity for an item
   const updateQuantity = (itemId: string, newQty: number, maxQty: number): void => {
     const clampedQty = Math.max(0, Math.min(newQty, maxQty));
     setQuantities((prev) => ({
@@ -68,13 +64,11 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
     }));
   };
 
-  // Handle submit
   const handleSubmit = async (): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      // Build items array from quantities
       const items: CreateReturnItem[] = Object.entries(quantities)
         .filter(([, qty]) => qty > 0)
         .map(([id, quantity]) => ({ id, quantity }));
@@ -87,7 +81,6 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
 
       const response = await createReturn(order.id, items);
 
-      // Close dialog and navigate to return detail
       onOpenChange(false);
       router.push(`/account/returns/${response.id}`);
     } catch (err) {
@@ -97,7 +90,6 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
     }
   };
 
-  // Reset state when dialog closes
   const handleOpenChange = (newOpen: boolean): void => {
     if (!newOpen) {
       setQuantities({});

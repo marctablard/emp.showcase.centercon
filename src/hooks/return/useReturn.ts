@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { getMockReturnById } from '@/components/account/returns/mock-returns-data';
 import { fetchReturnById } from '@/lib/client/returns';
 import { Return } from '@/platform/services/model/return';
 
@@ -29,17 +28,9 @@ export function useReturn(returnId: string, initialReturn?: Return | null): UseR
       setLoading(true);
       setError(null);
       const data = await fetchReturnById(returnId);
-      // Use API result or fall back to mock data for UI verification
-      const result = data || getMockReturnById(returnId) || null;
-      setReturnItem(result);
+      setReturnItem(data || null);
     } catch (err) {
-      if (err instanceof Error && err.message === 'Return not found') {
-        // Try mock data fallback
-        const mockReturn = getMockReturnById(returnId);
-        setReturnItem(mockReturn || null);
-      } else {
-        setError(err instanceof Error ? err : new Error(String(err)));
-      }
+      setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setLoading(false);
     }
@@ -49,7 +40,6 @@ export function useReturn(returnId: string, initialReturn?: Return | null): UseR
     await fetchReturn();
   }, [fetchReturn]);
 
-  // Load return on initial render if not provided
   useEffect(() => {
     if (!initialReturn && returnId) {
       fetchReturn();

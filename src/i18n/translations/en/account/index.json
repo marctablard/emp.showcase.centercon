@@ -233,6 +233,15 @@
     "uploadPhotos": "Upload Photos",
     "claimReason": "Claim Reason",
     "selectReason": "Select a reason",
+    "claimReasons": {
+      "DEFECTIVE": "Defective Product",
+      "DAMAGED": "Damaged",
+      "WRONG_ITEM": "Wrong Item Received",
+      "NOT_AS_DESCRIBED": "Not as Described",
+      "CHANGED_MIND": "Changed Mind",
+      "WARRANTY": "Warranty Claim",
+      "OTHER": "Other"
+    },
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Describe the issue with the product...",
     "cancel": "Cancel",

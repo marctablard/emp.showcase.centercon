@@ -15,11 +15,39 @@ import { Textarea } from '@/components/ui/textarea';
 import { useReturn } from '@/hooks/return/useReturn';
 import { Link } from '@/i18n/navigation';
 import { Return } from '@/platform/services/model/return';
-import { ExtendedReturn, ExtendedReturnItem, claimReasonOptions } from './mock-returns-data';
 import { ReturnStatusBadge } from './return-status-badge';
 
-// Max character limit for description field per Figma design
 const MAX_DESCRIPTION_CHARACTERS = 500;
+
+interface ExtendedReturnItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unitPrice?: { value: number; currency: string };
+  total?: { value: number; currency: string };
+  netPrice?: { value: number; currency: string };
+  reason?: { code?: string; details?: string };
+  images?: string[];
+  brand?: string;
+  itemNumber?: string;
+}
+
+interface ExtendedReturn extends Omit<Return, 'orders'> {
+  orders: {
+    id: string;
+    items: ExtendedReturnItem[];
+  }[];
+}
+
+const claimReasonValues = [
+  'DEFECTIVE',
+  'DAMAGED',
+  'WRONG_ITEM',
+  'NOT_AS_DESCRIBED',
+  'CHANGED_MIND',
+  'WARRANTY',
+  'OTHER',
+] as const;
 
 const formatCurrency = (value: number | undefined, currency: string | undefined, locale: string): string => {
   if (value === undefined || !currency) return '-';
@@ -55,14 +83,12 @@ function ReturnOverview({ returnItem, locale, t }: ReturnOverviewProps) {
   return (
     <div className="bg-surface-action-hover-2 p-6 rounded-lg shadow-sm">
       <div className="bg-surface-page p-4 rounded-lg space-y-4">
-        {/* Header with receipt icon + title */}
         <div className="flex items-center gap-2">
           <ReceiptText className="h-6 w-6 shrink-0 text-text-headings" />
           <h3 className="text-[28px] leading-[36px] md:text-[28px] md:leading-[36px] max-md:text-[20px] max-md:leading-[20px] font-bold text-text-headings font-primary">
             {t('returnOverview')}
           </h3>
         </div>
-        {/* Total return value row */}
         <div className="flex items-start gap-4 text-[20px] leading-[24px] max-md:text-[16px] max-md:leading-[16px] font-bold text-text-body font-primary">
           <span className="flex-1">{t('totalReturnValue')}</span>
           <span className="flex-1 text-right">{totalValue}</span>
@@ -86,9 +112,7 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
   return (
     <Card className="border border-border-primary shadow-sm">
       <CardContent className="p-6">
-        {/* Desktop table */}
         <div className="hidden md:block">
-          {/* Column headers - Figma: h6, 16px bold, bottom border */}
           <div className="flex gap-6 items-start pb-4 border-b border-border-primary text-[16px] leading-[20px] font-bold text-text-headings font-primary">
             <div className="w-[420px] shrink-0">{t('product')}</div>
             <div className="flex-1 min-w-0">{t('price')}</div>
@@ -96,7 +120,6 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
             <div className="flex-1 min-w-0 text-right">{t('refundAmount')}</div>
           </div>
 
-          {/* Product rows */}
           {items.map((item) => {
             const refund = getItemRefund(item);
             const firstImage = item.images?.[0];
@@ -105,9 +128,7 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
                 key={item.id}
                 className="flex gap-6 items-center pb-6 pt-6 border-b border-border-primary last:border-b-0"
               >
-                {/* Product column - image + details */}
                 <div className="flex gap-4 items-start w-[420px] shrink-0">
-                  {/* Product image - 80x52, bg-gray, rounded tl-8/br-8 */}
                   <div className="bg-surface-image-background w-[80px] h-[52px] shrink-0 rounded-tl-lg rounded-br-lg overflow-hidden flex items-center justify-center">
                     {firstImage ? (
                       <Image
@@ -121,7 +142,6 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
                       <div className="w-full h-full bg-surface-image-background" />
                     )}
                   </div>
-                  {/* Product details */}
                   <div className="flex-1 min-w-0 flex flex-col gap-2 justify-center">
                     <div className="flex flex-col gap-1">
                       {item.brand && (
@@ -138,15 +158,12 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
                     )}
                   </div>
                 </div>
-                {/* Price column */}
                 <div className="flex-1 min-w-0 text-[16px] leading-[24px] text-text-body font-secondary">
                   {formatCurrency(item.unitPrice?.value, item.unitPrice?.currency, locale)}
                 </div>
-                {/* Quantity column */}
                 <div className="flex-1 min-w-0 text-[16px] leading-[24px] text-text-body font-secondary">
                   {item.quantity}
                 </div>
-                {/* Refund Amount column - right aligned, gross + net */}
                 <div className="flex-1 min-w-0 flex flex-col gap-1 items-end text-right">
                   <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary">
                     {formatCurrency(refund.value, refund.currency, locale)}
@@ -162,7 +179,6 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
           })}
         </div>
 
-        {/* Mobile card layout */}
         <div className="space-y-4 md:hidden">
           {items.map((item) => {
             const refund = getItemRefund(item);
@@ -170,7 +186,6 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
             return (
               <div key={item.id} className="border-b border-border-primary pb-4 last:border-b-0">
                 <div className="flex gap-3 items-start">
-                  {/* Product image */}
                   <div className="bg-surface-image-background w-[64px] h-[42px] shrink-0 rounded-tl-lg rounded-br-lg overflow-hidden flex items-center justify-center">
                     {firstImage ? (
                       <Image
@@ -238,11 +253,9 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
         <h2 className="text-4xl font-bold mb-6">{t('productDetails')}</h2>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left side - Photos */}
           <div className="lg:w-[45%]">
             <Label className="text-base font-bold mb-3 block">{t('photos')}</Label>
             <div className="grid grid-cols-2 gap-3">
-              {/* Show up to 3 product images - no border radius per Figma */}
               {images.slice(0, 3).map((imageUrl, index) => (
                 <div key={index} className="aspect-[3/2] relative bg-surface-muted overflow-hidden">
                   <Image
@@ -255,7 +268,6 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
                 </div>
               ))}
 
-              {/* Upload Photos placeholder/button - Figma: solid blue border, uniform radius, plus icon */}
               <div className="aspect-[3/2] relative bg-white rounded-lg border border-action flex flex-col items-center justify-center cursor-pointer hover:bg-surface-muted transition-colors">
                 <Plus className="w-6 h-6 text-action mb-1" />
                 <span className="text-sm text-action font-bold underline">{t('uploadPhotos')}</span>
@@ -263,11 +275,8 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
             </div>
           </div>
 
-          {/* Right side - Form fields */}
           <div className="lg:w-[55%] space-y-4">
-            {/* Quantity and Item Name row */}
             <div className="flex gap-4">
-              {/* Quantity counter - no label per Figma, trash icon when qty=1 */}
               <div className="w-40 flex items-end">
                 <div className="flex items-center border rounded-md">
                   <Button
@@ -295,7 +304,6 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
                 </div>
               </div>
 
-              {/* Item Name */}
               <div className="flex-1">
                 <Label htmlFor={`itemName-${item.id}`} className="text-base font-bold text-text-headings mb-1 block">
                   {t('itemName')}
@@ -310,7 +318,6 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
               </div>
             </div>
 
-            {/* Claim Reason dropdown */}
             <div>
               <Label htmlFor={`claimReason-${item.id}`} className="text-sm font-bold text-text-headings mb-1 block">
                 {t('claimReason')}
@@ -320,16 +327,15 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
                   <SelectValue placeholder={t('selectReason')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {claimReasonOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                  {claimReasonValues.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {t(`claimReasons.${value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Description textarea with character counter */}
             <div>
               <Label htmlFor={`description-${item.id}`} className="text-sm font-bold text-text-headings mb-1 block">
                 {t('descriptionLabel')}
@@ -346,7 +352,6 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
           </div>
         </div>
 
-        {/* Action buttons - no border-t per Figma */}
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="secondary" className="uppercase">
             {t('cancel')}
@@ -408,15 +413,11 @@ export function ReturnDetail({ returnId, initialReturn }: ReturnDetailProps) {
     );
   }
 
-  // Collect all items from all orders
   const allItems: ExtendedReturnItem[] = returnItem.orders.flatMap((order) => order.items);
-
-  // Edit mode - hidden by default (no UI toggle yet, for future use)
   const editMode = false;
 
   return (
     <div className="space-y-6">
-      {/* Header with title and status badge */}
       <div className="flex items-center gap-4 flex-wrap">
         <h1 className="text-5xl font-bold">
           {t('title')}: {returnItem.id}
@@ -428,7 +429,6 @@ export function ReturnDetail({ returnId, initialReturn }: ReturnDetailProps) {
         <div className="space-y-6 order-1">
           <ReturnItemsList items={allItems} locale={locale} t={t} />
 
-          {/* Product Detail Cards - only shown in edit mode */}
           {editMode && allItems.map((item) => <ProductDetailCard key={item.id} item={item} locale={locale} t={t} />)}
         </div>
         <div className="order-2 min-[1920px]:sticky min-[1920px]:top-6 h-fit">

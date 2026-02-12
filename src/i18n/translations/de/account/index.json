@@ -186,6 +186,15 @@
     "uploadPhotos": "Fotos hochladen",
     "claimReason": "Reklamationsgrund",
     "selectReason": "Grund auswählen",
+    "claimReasons": {
+      "DEFECTIVE": "Defektes Produkt",
+      "DAMAGED": "Beschädigt",
+      "WRONG_ITEM": "Falscher Artikel erhalten",
+      "NOT_AS_DESCRIBED": "Nicht wie beschrieben",
+      "CHANGED_MIND": "Meinung geändert",
+      "WARRANTY": "Garantieanspruch",
+      "OTHER": "Sonstiges"
+    },
     "descriptionLabel": "Beschreibung",
     "descriptionPlaceholder": "Beschreiben Sie das Problem mit dem Produkt...",
     "cancel": "Abbrechen",

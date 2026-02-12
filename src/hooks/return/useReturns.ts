@@ -39,7 +39,6 @@ export function useReturns(initialReturns?: Return[], pageSize?: number, pageNum
     await fetchReturnsData();
   }, [fetchReturnsData]);
 
-  // Load returns on initial render if not provided
   useEffect(() => {
     if (!initialReturns) {
       fetchReturnsData();

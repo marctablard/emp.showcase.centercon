@@ -14,7 +14,6 @@ interface ReturnStatusBadgeProps {
 export function ReturnStatusBadge({ status, isExpired }: ReturnStatusBadgeProps) {
   const t = useTranslations('account.returns.status');
 
-  // If expired, override the display
   if (isExpired) {
     return <Badge variant="outline">{t('EXPIRED')}</Badge>;
   }

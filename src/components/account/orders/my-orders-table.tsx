@@ -48,36 +48,30 @@ export function MyOrdersTable({
   const t = useTranslations('orders');
   const router = useRouter();
 
-  // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Handle return link click - opens dialog
   const handleReturnClick = (order: Order): void => {
     setSelectedOrder(order);
     setDialogOpen(true);
   };
 
-  // Format date in the current locale
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return '-';
     return format(new Date(dateString), 'dd.MM.yyyy');
   };
 
-  // Format address
   const formatAddress = (address: any) => {
     if (!address) return '-';
     return `${address.city}, ${address.country}`;
   };
 
-  // Format payment method
   const formatPayment = (payments: any[] | undefined) => {
     if (!payments || payments.length === 0) return '-';
     // Use the translation for the payment method if available
     return t(`paymentTypes.${payments[0].method.toLowerCase()}`) || payments[0].method;
   };
 
-  // Get visible orders for current page
   const visibleOrders = orders
     .slice()
     .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())

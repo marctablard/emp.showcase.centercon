@@ -26,7 +26,6 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const { returns, loading, error, refreshReturns } = useReturns(initialReturns);
 
-  // Filter returns client-side based on selected status
   const filteredReturns =
     filterStatus === '_ALL_'
       ? returns
@@ -34,7 +33,6 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
           (r) => r.status === filterStatus || (filterStatus === ('EXPIRED' as ReturnStatus) && r.isExpired),
         );
 
-  // Sort returns
   const sortedReturns = [...filteredReturns].sort((a, b) => {
     if (!sortField) return 0;
 
@@ -141,10 +139,8 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
 
   return (
     <div className="space-y-6">
-      {/* Page Title - matches Figma h1 styling */}
       <h1 className="text-[48px] font-bold leading-[52px] text-text-headings font-primary">{t('title')}</h1>
 
-      {/* Filter and Table Container */}
       <div className="bg-surface-primary border border-border-primary rounded-md p-4">
         <div className="mb-4 flex flex-wrap gap-4">
           <div className="min-w-[200px]">
@@ -163,7 +159,6 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
           </div>
         </div>
 
-        {/* Table */}
         <Table>
           <TableHeader>
             <TableRow>
