@@ -73,19 +73,6 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
     notFound();
   }
 
-  // Belt-and-suspenders guard: Check for probes in layout as backup
-  const headersList = await headers();
-  const ua = headersList.get('user-agent') ?? '';
-
-  if (isProbeUserAgent(ua)) {
-    // Minimal render path – DO NOT call auth(), getSession(), getSite(), etc.
-    return (
-      <html>
-        <body>OK</body>
-      </html>
-    );
-  }
-
   const [authSession, shopSession] = await Promise.all([auth(), getSession()]);
 
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
