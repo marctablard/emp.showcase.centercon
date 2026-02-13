@@ -2,6 +2,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from '@/i18n/routing';
 import { INTERNAL_SITE_HEADER, NEXT_REWRITE_HEADER, type SiteConfig, type SiteRoutingConfig } from '@/site/types';
+import { isLikelyProbe } from './probe-detection';
 import { setCachedRequestSite } from './server/RequestSiteCache';
 import { resolveApplicableRouting, shouldPrefix } from './utils';
 
@@ -82,6 +83,36 @@ const INTL_MIDDLEWARE_HEADER = NEXT_MIDDLEWARE_PREFIX + INTL_LOCALE_HEADER;
 
 const intlMiddleware = createIntlMiddleware(routing);
 
+function handleMisroutedHealthCheck(req: NextRequest): NextResponse {
+  const ua = req.headers.get('user-agent') ?? '';
+  const xff = req.headers.get('x-forwarded-for') ?? '';
+  const rid = req.headers.get('x-request-id') ?? '';
+
+  // Structured log for easy filtering in Azure/App Insights
+  console.warn(
+    JSON.stringify({
+      event: 'misrouted_healthcheck',
+      path: req.nextUrl.pathname,
+      method: req.method,
+      ua,
+      xff,
+      rid,
+      recommendation: 'Configure health checks to use /api/health or /api/ready',
+    }),
+  );
+
+  return new NextResponse('OK', {
+    status: 200,
+    headers: {
+      'content-type': 'text/plain; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-misrouted-healthcheck': '1',
+      'x-recommended-endpoint': '/api/health',
+      'x-alternative-endpoint': '/api/ready',
+    },
+  });
+}
+
 const withCookies = function (
   from: NextResponse,
   to: NextResponse,
@@ -99,6 +130,15 @@ const withCookies = function (
 
 export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
   return (req: NextRequest) => {
+    const path = req.nextUrl.pathname;
+
+    // Only protect the expensive "main routes"
+    if (path === '/' || /^\/[^/]+\/[^/]+$/.test(path)) {
+      if (isLikelyProbe(req)) {
+        return handleMisroutedHealthCheck(req);
+      }
+    }
+
     // First look for the matching routing by Domain
     const routing = resolveApplicableRouting(req.nextUrl.hostname, routingConfig);
     const { site, appPath } = resolveSite(req.nextUrl.pathname, req.cookies, req.headers, routing);

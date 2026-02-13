@@ -70,6 +70,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+
   const [authSession, shopSession] = await Promise.all([auth(), getSession()]);
 
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
