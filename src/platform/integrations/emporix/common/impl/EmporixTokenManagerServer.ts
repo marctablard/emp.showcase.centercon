@@ -40,7 +40,7 @@ class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
     const cookieStore = await cookies();
     cookieStore.set(this.buildStorageKey(tenant), b64Token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
       maxAge: 60 * 60 * 24 * 30, // 30 days

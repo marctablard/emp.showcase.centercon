@@ -54,6 +54,7 @@ cypress/videos/**/*
 .DS_Store
 *.pem
 certificates
+.certificates
 .windsurf
 *.iml
 
@@ -96,6 +97,7 @@ next-env.d.ts
 # These files contain personal MCP configs, agents, and prompts
 .cursor/
 !.cursor/.gitkeep
+.github/copilot-instructions.md
 
 # Specifications directory (local development artifacts)
 /specifications/
@@ -104,6 +106,7 @@ next-env.d.ts
 .github/workflows/agents/
 .github/workflows/prompts/
 .github/newestprompts
+.github/copilot-instructions.md
 /docs/cursor/
 /docs/pr-analysis/
 /docs/testing-plans/
