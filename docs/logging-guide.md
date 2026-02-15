@@ -277,6 +277,30 @@ logger.error(
 - **error**: Failures that affect functionality
 - **fatal**: Critical failures that require immediate attention
 
+### 2.5 Edge Middleware Logging
+
+The Edge runtime does not use the DI containers, so `LoggerService` is not available in `src/proxy.ts` or `src/site/middleware.ts`. For edge-only logging (for example, misrouted health checks), use structured `console.warn` with JSON payloads:
+
+```typescript
+console.warn(
+  JSON.stringify({
+    event: 'misrouted_healthcheck',
+    path: req.nextUrl.pathname,
+    method: req.method,
+    ua: req.headers.get('user-agent') ?? '',
+  }),
+);
+```
+
+### 2.6 Legacy Console Usage (To Be Migrated)
+
+There are a few legacy `console.error` calls in server utilities that are pending migration to `LoggerService`:
+
+- `src/lib/ssr/products.ts`
+- `src/platform/services/session/impl/EmporixSessionService.ts`
+
+New code should use `LoggerService` or `getLogger` as shown above.
+
 ### 3. Don't Log Sensitive Data
 
 Never log passwords, tokens, credit card numbers, or PII:

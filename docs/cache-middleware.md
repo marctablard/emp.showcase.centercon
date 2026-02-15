@@ -6,9 +6,9 @@ This avoids sprinkling `export const revalidate` / `export const dynamic` across
 
 ## What exists where
 
-- **`src/cache-config.ts`**
+- **`src/caching/cache-config.ts`**
   - Declarative cache rules (pattern → revalidate/tags)
-- **`src/cache-middleware.ts`**
+- **`src/caching/cache-middleware.ts`**
   - Applies the matching rule and sets headers
 - **`src/proxy.ts`**
   - Calls the cache middleware as part of request handling
@@ -22,7 +22,7 @@ NEXT_CACHE_DEFAULT_REVALIDATE=3600
 
 ## Rule shape
 
-Rules live in `src/cache-config.ts`.
+Rules live in `src/caching/cache-config.ts`.
 
 ```ts
 export const cacheRules: CacheRule[] = [
@@ -97,7 +97,7 @@ revalidateTag('product-123');
 
 ## Related files
 
-- `src/cache-config.ts`
-- `src/cache-middleware.ts`
+- `src/caching/cache-config.ts`
+- `src/caching/cache-middleware.ts`
 - `src/proxy.ts`
 - `.env.template`
