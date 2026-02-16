@@ -151,7 +151,12 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
     let response;
     // try refresh token first
     if (customerToken && checkTokenValidity(customerToken.token.refresh_token, customerToken.refreshExpiryAt)) {
-      response = await this.oauthApi.refreshCustomerToken(tenant, customerToken.token.refresh_token!, legalEntityId);
+      response = await this.oauthApi.refreshCustomerToken(
+        tenant,
+        customerToken.token.access_token!,
+        customerToken.token.refresh_token!,
+        legalEntityId,
+      );
     }
     if (response) {
       const now = Date.now();

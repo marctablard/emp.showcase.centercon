@@ -1,47 +1,55 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Building2 } from 'lucide-react';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { Spinner } from '@/components/ui/spinner';
 import { useSession } from '@/hooks/session/useSession';
+import { useToast } from '@/hooks/ui/useToast';
 import { Company } from '@/platform/services/model/company/company';
 
 export function CompanySwitcher() {
   const { session, loading: sessionLoading, setCompany } = useSession();
   const router = useRouter();
   const t = useTranslations('common.Companies');
+  const { toast } = useToast();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/companies');
-        if (!response.ok) {
-          throw new Error('Failed to fetch companies');
-        }
-        const data = await response.json();
-        setCompanies(data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load companies');
-        setCompanies([]);
-      } finally {
-        setLoading(false);
+  const fetchCompanies = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/companies');
+      if (!response.ok) {
+        throw new Error('Failed to fetch companies');
       }
-    };
+      const data = await response.json();
+      setCompanies(data);
+      setError(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load companies';
+      setError(errorMessage);
+      setCompanies([]);
+      toast({
+        title: t('errorLoading'),
+        description: t('errorLoadingDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
+  useEffect(() => {
     if (session?.customerId) {
       fetchCompanies();
     } else {
       setLoading(false);
     }
-  }, [session?.customerId]);
+  }, [session?.customerId, fetchCompanies]);
 
   const currentCompany = useMemo(() => {
     if (!companies || companies.length === 0) {
@@ -67,7 +75,13 @@ export function CompanySwitcher() {
         setError('Failed to switch company');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to switch company');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to switch company';
+      setError(errorMessage);
+      toast({
+        title: t('errorSwitching'),
+        description: t('errorSwitchingDescription'),
+        variant: 'destructive',
+      });
     }
   };
 

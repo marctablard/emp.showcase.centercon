@@ -15,7 +15,11 @@
         "label": "Site"
     },
     "Companies": {
-        "label": "Unternehmen"
+        "label": "Unternehmen",
+        "errorLoading": "Unternehmen konnten nicht geladen werden",
+        "errorLoadingDescription": "Bitte versuchen Sie es später erneut.",
+        "errorSwitching": "Unternehmenswechsel fehlgeschlagen",
+        "errorSwitchingDescription": "Bitte versuchen Sie es erneut."
     },
     "hello": {
         "world": "Hallo Welt",

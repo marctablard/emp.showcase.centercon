@@ -1,5 +1,6 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
+import type { EmporixCustomerApi } from '@/platform/integrations/emporix/customer/EmporixCustomerApi';
 import type { EmporixCustomerManagementApi } from '@/platform/integrations/emporix/customer/EmporixCustomerManagementApi';
 import type { CustomerService } from '../../customer/CustomerService';
 import { Company } from '../../model/company/company';
@@ -10,6 +11,8 @@ export class EmporixCompanyService implements CompanyService {
   constructor(
     @inject('EmporixCustomerManagementApi')
     private readonly customerManagementApi: EmporixCustomerManagementApi,
+    @inject('EmporixCustomerApi')
+    private readonly customerApi: EmporixCustomerApi,
     @inject('CustomerService')
     private readonly customerService: CustomerService,
   ) {}
@@ -42,35 +45,33 @@ export class EmporixCompanyService implements CompanyService {
     };
   }
   async getCompanies(): Promise<Company[]> {
-    const customer = await this.customerService.getCustomer();
-    if (!customer || !customer.id) {
-      return [];
-    }
+    // Get customer profile with b2b.legalEntities data
+    const customerProfile = await this.customerApi.getCustomerProfile();
 
-    const contactAssignments = await this.customerManagementApi.getContactAssignmentsByCustomerId(customer.id);
-    if (!contactAssignments || contactAssignments.length === 0) {
+    if (!customerProfile || !customerProfile.b2b?.legalEntities) {
       return [];
     }
 
     const companies: Company[] = [];
-    for (const assignment of contactAssignments) {
-      if (assignment.legalEntity?.id) {
-        try {
-          const emporixLegalEntity = await this.customerManagementApi.getLegalEntityById(assignment.legalEntity.id);
-          if (emporixLegalEntity) {
-            const creditscore = emporixLegalEntity.mixins?.['creditscore'];
-            companies.push({
-              id: emporixLegalEntity.id,
-              name: emporixLegalEntity.name,
-              onboarding: {
-                status: this.mapStatus(creditscore?.internalrating),
-                updatedAt: creditscore?.statusupdate || new Date(),
-              },
-            });
-          }
-        } catch (_error) {
-          continue;
-        }
+    for (const legalEntity of customerProfile.b2b.legalEntities) {
+      if (legalEntity.id && legalEntity.name) {
+        // TODO: Optionally fetch full legal entity details for mixins (creditscore)
+        // let creditscore;
+        // try {
+        //   const emporixLegalEntity = await this.customerManagementApi.getLegalEntityById(legalEntity.id);
+        //   creditscore = emporixLegalEntity?.mixins?.['creditscore'];
+        // } catch (_error) {
+        //   // Ignore error and use basic data without creditscore
+        // }
+
+        companies.push({
+          id: legalEntity.id,
+          name: legalEntity.name,
+          onboarding: {
+            status: this.mapStatus(undefined),
+            updatedAt: new Date(),
+          },
+        });
       }
     }
 
