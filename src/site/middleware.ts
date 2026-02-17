@@ -1,7 +1,13 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from '@/i18n/routing';
-import { INTERNAL_SITE_HEADER, NEXT_REWRITE_HEADER, type SiteConfig, type SiteRoutingConfig } from '@/site/types';
+import {
+  INTERNAL_APP_PATH_HEADER,
+  INTERNAL_SITE_HEADER,
+  NEXT_REWRITE_HEADER,
+  type SiteConfig,
+  type SiteRoutingConfig,
+} from '@/site/types';
 import { isLikelyProbe } from './probe-detection';
 import { setCachedRequestSite } from './server/RequestSiteCache';
 import { resolveApplicableRouting, shouldPrefix } from './utils';
