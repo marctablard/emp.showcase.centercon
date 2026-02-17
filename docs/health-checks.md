@@ -29,6 +29,14 @@ Dedicated health check endpoints that:
 - ✅ Are lightweight and fast (< 10ms response time)
 - ✅ Can be safely called every few seconds without impact
 
+In addition, the site middleware includes **probe detection** to protect expensive page routes when misconfigured health checks hit `/` or `/{site}/{locale}`. If a request looks like a probe (known probe user agents, empty UA, or `HEAD`), the middleware returns a lightweight `200 OK` response with:
+
+- `Content-Type: text/plain; charset=utf-8`
+- `Cache-Control: no-store`
+- `x-misrouted-healthcheck: 1`
+- `x-recommended-endpoint: /api/health`
+- `x-alternative-endpoint: /api/ready`
+
 ## Available Endpoints
 
 ### `/api/health` - Liveness Probe
@@ -357,6 +365,8 @@ spec:
 ✅ **DO**:
 - `/api/health` (liveness)
 - `/api/ready` (readiness)
+
+Even with the middleware guard, always target the dedicated endpoints. The guard is a safety net, not a substitute for correct configuration.
 
 ### 2. **Configure Appropriate Intervals**
 

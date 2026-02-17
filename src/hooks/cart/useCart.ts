@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { useCartStore } from '@/providers/StoreProvider';
@@ -47,6 +48,7 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     fetchCart,
     setCurrentCart,
     loadCart,
+    validateCart,
   } = useCartStore();
 
   useEffect(() => {
@@ -60,6 +62,12 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart, initialCart]);
+
+  // Track authentication status changes to refresh cart
+  const { status: sessionStatus } = useSession();
+  useEffect(() => {
+    validateCart(sessionStatus);
+  }, [sessionStatus, validateCart]);
 
   // NOTE: Currency sync and site validation effects have been moved to
   // store-level subscriptions in src/stores/sync/store-synchronizer.ts
