@@ -1,4 +1,6 @@
 import { Container } from 'inversify';
+import type { EmporixTokenManager } from '@/platform/integrations/emporix/common/EmporixTokenManager';
+import type { EmporixConfig } from '@/platform/integrations/emporix/config';
 import type {
   EmporixContextAttribute,
   EmporixSessionContext,
@@ -14,6 +16,8 @@ describe('EmporixSessionService', () => {
   let sessionService: EmporixSessionService;
   let mockSessionContextApi: jest.Mocked<EmporixSessionContextApi>;
   let mockSiteService: jest.Mocked<SiteService>;
+  let mockTokenManager: jest.Mocked<EmporixTokenManager>;
+  let mockConfig: EmporixConfig;
   let mockSessionMapper: jest.Mocked<SessionMapper<EmporixSessionContext, EmporixContextAttribute>>;
 
   const mockSessionContext: EmporixSessionContext = {
@@ -87,6 +91,24 @@ describe('EmporixSessionService', () => {
       getCurrency: jest.fn(),
     };
 
+    mockTokenManager = {
+      getAnonymousToken: jest.fn(),
+      clearAnonymousToken: jest.fn(),
+      getCustomerToken: jest.fn(),
+      clearCustomerToken: jest.fn(),
+      getServiceAccessToken: jest.fn(),
+      getSessionToken: jest.fn(),
+      refreshCustomerTokenWithLegalEntity: jest.fn(),
+      clearTokens: jest.fn(),
+    } as jest.Mocked<EmporixTokenManager>;
+
+    mockConfig = {
+      tenant: 'test-tenant',
+      clientId: 'test-client-id',
+      clientSecret: 'test-client-secret',
+      baseUrl: 'https://api.test.com',
+    };
+
     // Register mocks
     container.bind<EmporixSessionContextApi>('EmporixSessionContextApi').toConstantValue(mockSessionContextApi);
     container
@@ -94,6 +116,8 @@ describe('EmporixSessionService', () => {
       .toConstantValue(mockSessionMapper);
     container.bind<EmporixSessionService>('SessionService').to(EmporixSessionService);
     container.bind<SiteService>('SiteService').toConstantValue(mockSiteService);
+    container.bind<EmporixTokenManager>('EmporixTokenManager').toConstantValue(mockTokenManager);
+    container.bind<EmporixConfig>('EmporixConfig').toConstantValue(mockConfig);
 
     // Get service instance
     sessionService = container.get<EmporixSessionService>('SessionService');
