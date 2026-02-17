@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Loader2, LockKeyhole, User } from 'lucide-react';
 import { providerOptions } from '@/auth/auth.config';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,6 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
   const { form } = useValidator(
     'LoginValidationService',
     {
@@ -43,6 +43,15 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
     },
     'onChange',
   );
+
+  const searchParams = useSearchParams();
+  if (email === undefined) {
+    email = searchParams.get('email') ?? undefined;
+  }
+  if (callbackUrl === undefined) {
+    callbackUrl = searchParams.get('callbackUrl') ?? '/account';
+  }
+  guestCheckout = guestCheckout || searchParams.get('guestCheckout') === 'true';
 
   // Reset form when email changes
   useEffect(() => {

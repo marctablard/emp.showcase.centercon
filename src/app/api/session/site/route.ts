@@ -4,8 +4,6 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SessionService } from '@/platform/services/session/SessionService';
 import { SiteService } from '@/platform/services/site/SiteService';
 
-export const dynamic = 'force-dynamic';
-
 /**
  * PUT /api/session/site
  * Update session site

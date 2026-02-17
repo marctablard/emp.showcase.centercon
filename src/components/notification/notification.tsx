@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
@@ -12,60 +12,18 @@ import type { CompanyOnboardingStatus } from '@/platform/services/model/company/
 import type { StorefrontNotification } from '@/platform/services/model/notification/notification';
 import { ToastType, notify } from '../ui/toast-notification';
 
-export function Notification() {
-  const { registerNotificationListener, unregisterNotificationListener, markNotificationAsRead } = useNotifications();
-  const t = useTranslations('common.Notification');
-  const tLogin = useTranslations('auth.login');
-  const tErrors = useTranslations('auth.errors');
-  const locale = useLocale();
-
-  useEffect(() => {
-    const notificationSubscription = registerNotificationListener(
-      'COMPANY',
-      (notification: string | StorefrontNotification<CompanyOnboardingStatus>) => {
-        if (typeof notification !== 'string') {
-          if (notification.code !== 'COMPANY_ONBOARDING') {
-            return;
-          }
-          const status = notification.data_json?.status;
-          const message = l10n(notification.message, locale) || t('company.onboarding.' + status);
-          let type = ToastType.Success;
-          switch (status) {
-            case 'rejected':
-              type = ToastType.Error;
-              break;
-            case 'pending':
-              type = ToastType.Warning;
-              break;
-            default:
-            case 'approved':
-              type = ToastType.Success;
-              break;
-          }
-
-          markNotificationAsRead(notification.id);
-          notify({
-            title: message,
-            type: type,
-            button: {
-              label: t('close'),
-              onClick: () => {},
-            },
-          });
-        }
-      },
-    );
-    return () => {
-      unregisterNotificationListener(notificationSubscription);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+/**
+ * Special Component for the Welcome-Notification after Login and Error Notifications
+ */
+function WelcomeNotification() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
   const hasShownWelcome = useRef(false);
+  const tLogin = useTranslations('auth.login');
+  const tErrors = useTranslations('auth.errors');
+  const t = useTranslations('common.Notification');
 
   useEffect(() => {
     // Only show welcome message once per mount
@@ -124,5 +82,59 @@ export function Notification() {
     router.push(pathname);
   }, [searchParams, session, t, pathname, router, tLogin, tErrors]);
 
-  return <></>;
+  return null;
+}
+
+export function Notification() {
+  const { registerNotificationListener, unregisterNotificationListener, markNotificationAsRead } = useNotifications();
+  const t = useTranslations('common.Notification');
+  const locale = useLocale();
+
+  useEffect(() => {
+    const notificationSubscription = registerNotificationListener(
+      'COMPANY',
+      (notification: string | StorefrontNotification<CompanyOnboardingStatus>) => {
+        if (typeof notification !== 'string') {
+          if (notification.code !== 'COMPANY_ONBOARDING') {
+            return;
+          }
+          const status = notification.data_json?.status;
+          const message = l10n(notification.message, locale) || t('company.onboarding.' + status);
+          let type = ToastType.Success;
+          switch (status) {
+            case 'rejected':
+              type = ToastType.Error;
+              break;
+            case 'pending':
+              type = ToastType.Warning;
+              break;
+            default:
+            case 'approved':
+              type = ToastType.Success;
+              break;
+          }
+
+          markNotificationAsRead(notification.id);
+          notify({
+            title: message,
+            type: type,
+            button: {
+              label: t('close'),
+              onClick: () => {},
+            },
+          });
+        }
+      },
+    );
+    return () => {
+      unregisterNotificationListener(notificationSubscription);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Suspense fallback={<></>}>
+      <WelcomeNotification />
+    </Suspense>
+  );
 }

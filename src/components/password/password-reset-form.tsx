@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -58,6 +59,13 @@ export function PasswordResetForm({ email, callbackUrl, onSuccess, isDialog = fa
     });
 
     onSuccess?.();
+  }
+
+  const searchParams = useSearchParams();
+  email = email ?? searchParams.get('email') ?? undefined;
+  // null is fine, just undefined needs to be checked
+  if (callbackUrl === undefined) {
+    callbackUrl = searchParams.get('callbackUrl') ?? undefined;
   }
 
   return (

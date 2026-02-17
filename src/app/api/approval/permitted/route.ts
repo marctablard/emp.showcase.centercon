@@ -4,8 +4,6 @@ import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { ApprovalPermittedRequest } from '@/platform/services/model/approval';
 
-export const revalidate = 0;
-
 /**
  * POST /api/approval/permitted
  * Check if an action is permitted for a resource

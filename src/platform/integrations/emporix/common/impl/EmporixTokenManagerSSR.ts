@@ -23,7 +23,7 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
 
   public async getSessionToken(
     tenant: string,
-    clientId: string,
+    _clientId: string,
   ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
     const customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
       'customer',
@@ -41,20 +41,7 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     if (this.checkAccessToken(anonymousToken)) {
       return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
     }
-    // otherwise we use our own token
-    const ssrAnonymousToken = this.ssrToken[tenant]?.anonymousToken;
-    if (!this.checkAccessToken(ssrAnonymousToken)) {
-      const freshSsrAnonymousToken = await this.fetchAnonymousToken(ssrAnonymousToken, tenant, clientId);
-      // ...and store it globally, so it can be reused
-      if (!this.ssrToken[tenant]) {
-        this.ssrToken[tenant] = {};
-      }
-      this.ssrToken[tenant].anonymousToken = freshSsrAnonymousToken;
-    }
-    return {
-      accessToken: this.ssrToken[tenant].anonymousToken!.token.access_token,
-      sessionId: this.ssrToken[tenant].anonymousToken!.token.session_id,
-    };
+    throw new Error('No valid Session Token found in SSR context');
   }
 
   protected createCustomerToken(

@@ -49,22 +49,19 @@ class EmporixSearchService implements SearchService {
     this.logger = logger;
   }
 
-  async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
-    const productIds = await this.gatherProductIdsFromCatalogs();
+  private async filterMapAndEnrichProducts(items: EmporixProduct[], site?: string) {
+    const beforeFiltering = items.length;
 
-    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
-      page: (params.page || 0) + 1, // normalize page
-      size: params.size,
-      criteria: {
-        ...(params.query && { name: '~' + params.query }),
-        id: productIds.length > 0 ? `(${productIds.join(' OR ')})` : undefined,
-      },
-      sort: undefined,
-      filters: undefined,
-    });
+    // TODO : this should be cached somehow,
+    // using cache() will only do it per request
+    const productIds = await this.gatherProductIdsFromCatalogs(site);
+    const productIdSet = new Set(productIds);
+    const itemsByCatalog = items
+      .filter((item) => !!item.id)
+      .filter((item) => productIdSet.size === 0 || productIdSet.has(item.id as string));
 
     const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
-      searchResult.items.filter((item) => !!item.id),
+      itemsByCatalog,
     )) as EmporixProduct[];
 
     const products = filteredItems.map((item) => this.productMapper.mapToService(item));
@@ -73,37 +70,50 @@ class EmporixSearchService implements SearchService {
       variants: true,
       categories: false,
     });
+
     return {
-      items: enrichedProducts,
+      enrichedProducts,
+      beforeFiltering,
+      filteredCount: filteredItems.length,
+    };
+  }
+
+  async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
+    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
+      page: (params.page || 0) + 1, // normalize page
+      size: 1000,
+      criteria: {
+        ...(params.query && { name: '~' + params.query }),
+      },
+      sort: undefined,
+      filters: undefined,
+    });
+
+    const { enrichedProducts, beforeFiltering, filteredCount } = await this.filterMapAndEnrichProducts(
+      searchResult.items,
+      params.site,
+    );
+    return {
+      items: enrichedProducts.splice(0, searchResult.size),
       page: searchResult.page - 1, // normalize page
-      pageSize: searchResult.size,
-      total: searchResult.total,
+      pageSize: Math.min(searchResult.size, filteredCount),
+      total: searchResult.total - (beforeFiltering - filteredCount), // ~approximation
       availableFilters: [],
     };
   }
 
-  async getSuggestions(query: string, _locale?: string): Promise<SearchSuggestions> {
-    const productIds = await this.gatherProductIdsFromCatalogs();
+  async getSuggestions(params: SearchParams<Product>): Promise<SearchSuggestions> {
     const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: 1,
-      size: 10,
+      size: 1000,
       criteria: {
-        name: '~' + query,
-        id: productIds.length > 0 ? `(${productIds.join(' OR ')})` : undefined,
+        name: '~' + params.query,
       },
       sort: undefined,
       filters: undefined,
     });
-    const filteredItems = (await this.segmentFilterService.filterByCustomerSegments(
-      searchResult.items.filter((item) => !!item.id),
-    )) as EmporixProduct[];
 
-    const products = filteredItems.map((item) => this.productMapper.mapToService(item));
-    const enrichedProducts = await this.productService.addAdditionalData(products, {
-      prices: true,
-      variants: true,
-      categories: false,
-    });
+    const { enrichedProducts } = await this.filterMapAndEnrichProducts(searchResult.items, params.site);
     return {
       queryCompletions: [],
       products: enrichedProducts,
@@ -123,17 +133,20 @@ class EmporixSearchService implements SearchService {
    * Gathers all product IDs from categories across all catalogs for the current session
    * @returns Array of unique product IDs
    */
-  private async gatherProductIdsFromCatalogs(): Promise<string[]> {
-    const session = await this.sessionService.getCurrent();
-    if (!session) {
-      throw new Error('No session found');
+  private async gatherProductIdsFromCatalogs(site?: string): Promise<string[]> {
+    if (!site) {
+      const session = await this.sessionService.getCurrent();
+      if (!session) {
+        throw new Error('No session found');
+      }
+      site = session.siteCode;
     }
 
     const catalogs = await this.catalogApi.getCatalogs({
       page: 1,
       size: 100,
       criteria: {
-        publishedSite: session.siteCode,
+        publishedSite: site,
       },
     });
 
