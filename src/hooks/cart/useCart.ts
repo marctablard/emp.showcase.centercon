@@ -48,7 +48,6 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     fetchCart,
     setCurrentCart,
     loadCart,
-    validateSite: _validateSite,
     validateCart,
   } = useCartStore();
 
