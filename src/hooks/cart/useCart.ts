@@ -1,13 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSession as useAppSession } from '@/hooks/session/useSession';
 import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
-import { useCartStore, useSessionStore } from '@/providers/StoreProvider';
-
-// Module-level lock to prevent duplicate currency updates across all useCart instances
-let globalCurrencyUpdateInProgress = false;
+import { useCartStore } from '@/providers/StoreProvider';
 
 interface UseCart {
   // Cart data
@@ -47,15 +43,11 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     updateItemQuantity,
     removeItem,
     updateShippingInfo,
-    updateCurrency,
     clearCart,
     fetchCart,
     setCurrentCart,
     loadCart,
-    validateSite,
   } = useCartStore();
-
-  const { session } = useSessionStore();
 
   useEffect(() => {
     if (!cart) {
@@ -69,37 +61,9 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart, initialCart]);
 
-  // Validate cart when site changes
-  useEffect(() => {
-    if (session?.siteCode) {
-      validateSite(session.siteCode);
-    }
-  }, [session?.siteCode, validateSite]);
-
-  const { session: appSession } = useAppSession();
-  useEffect(() => {
-    // Prevent duplicate calls while update is in progress (global lock across all useCart instances)
-    if (globalCurrencyUpdateInProgress) {
-      return;
-    }
-
-    if (!cart || !appSession?.currency || !appSession?.siteCode) {
-      return;
-    }
-
-    // Don't update currency if cart belongs to a different site (stale cart during site switch)
-    if (cart.site !== appSession.siteCode) {
-      return;
-    }
-
-    const cartCurrency = cart.currency || cart.totalPrice?.currency;
-    if (cartCurrency && cartCurrency !== appSession.currency) {
-      globalCurrencyUpdateInProgress = true;
-      updateCurrency(appSession.currency).finally(() => {
-        globalCurrencyUpdateInProgress = false;
-      });
-    }
-  }, [appSession?.currency, appSession?.siteCode, cart, updateCurrency]);
+  // NOTE: Currency sync and site validation effects have been moved to
+  // store-level subscriptions in src/stores/sync/store-synchronizer.ts
+  // This eliminates duplicate API calls when multiple components use useCart.
 
   return {
     cart,

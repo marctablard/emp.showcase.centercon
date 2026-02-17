@@ -176,7 +176,16 @@ class EmporixSessionService implements SessionService {
       updateDefaults.metadata = {
         version: sessionContext?.metadata?.version || 1,
       };
-      this.sessionContextApi.updateOwnSessionContext(updateDefaults);
+      // Fire-and-forget: update session defaults in background.
+      // 404 errors are expected for newly created sessions due to eventual consistency
+      // in the Emporix backend - the session context may not be immediately available
+      // for updates after token creation.
+      this.sessionContextApi.updateOwnSessionContext(updateDefaults).catch((error: Error) => {
+        // Only log unexpected errors (not 404s which are expected for new sessions)
+        if (!error.message.includes('Not Found')) {
+          console.error('Unexpected error updating session defaults:', error.message);
+        }
+      });
     }
   }
 }

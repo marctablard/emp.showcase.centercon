@@ -162,14 +162,13 @@ export default function ProductDetail({ product: initialProduct, options, classN
                         key={attribute.key}
                         className="font-bold"
                         label={l10n(
-                          attribute.name ??
-                            t(`filters.mixins.productVariantAttributes.${attribute.key}`, {
-                              defaultValue: attribute.key,
-                            }),
+                          t(`filters.mixins.productVariantAttributes.${attribute.key}`, {
+                            defaultValue: attribute.key,
+                          }),
                         )}
                         variant="white"
                         iconColor="white"
-                        value={l10n(attribute.values?.find((value) => value.selected)?.name ?? '')}
+                        value={l10n(product.variantAttributeValues?.[attribute.key] ?? '')}
                       />
                     ))}
                     {Object.keys(product.templateAttributes || {}).map((attribute: string) => (
