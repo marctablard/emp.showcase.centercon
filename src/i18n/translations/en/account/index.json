@@ -106,6 +106,7 @@
       }
     }
   },
+  "mustBeLoggedIn": "You must be logged in to change your password.",
   "Password": {
     "title": "Change Password",
     "description": "Update your account password",

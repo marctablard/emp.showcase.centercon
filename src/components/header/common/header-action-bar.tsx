@@ -22,11 +22,11 @@ import { cn } from '@/lib/utils';
 export function HeaderActionBar() {
   const t = useTranslations('layout.header');
   const { showSearch, activateSearch } = useHeaderSearch();
+  const { isAuthenticated, loading } = useAuthentication();
   const { scrolled } = useHeaderScroll();
   const isAboveSmallScreen = useBreakpoint('sm');
   const isAboveMediumScreen = useBreakpoint('md');
   const isAboveLargeScreen = useBreakpoint('lg');
-  const { isAuthenticated, loading } = useAuthentication();
   const pathname = usePathname();
   const isOnAuthPage = pathname === '/login' || pathname === '/password-reset';
   const [showMenu, setShowMenu] = useState(false);

@@ -91,7 +91,7 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
     setIsProcessing(true);
     try {
       setQuantity(newQuantity);
-      updateItemQuantity(item.id, newQuantity);
+      await updateItemQuantity(item.id, newQuantity);
     } finally {
       setIsProcessing(false);
     }
@@ -103,7 +103,7 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
     setIsProcessing(true);
     try {
       setQuantity(0);
-      removeItem(item.id);
+      await removeItem(item.id);
     } finally {
       setIsProcessing(false);
     }

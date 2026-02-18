@@ -32,8 +32,8 @@ export const useAuthentication = (): AuthenticationHook => {
   });
 
   // State for authentication status and user data
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(session.status === 'authenticated');
-  const [loading, setLoading] = useState<boolean>(session.status === 'loading');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
   const [_isPending, startTransition] = useTransition();
@@ -42,6 +42,7 @@ export const useAuthentication = (): AuthenticationHook => {
   useEffect(() => {
     setIsAuthenticated(session.status === 'authenticated');
     setLoading(session.status === 'loading');
+    // Since the session object itself is stable, we only need to watch the status property
   }, [session.status]);
 
   const login = async (username: string, password: string, callbackUrl?: string): Promise<boolean> => {
@@ -61,12 +62,14 @@ export const useAuthentication = (): AuthenticationHook => {
         redirect: false,
         redirectTo: safeCallbackUrl ? safeCallbackUrl + '?login=success' : undefined,
       });
+
       if (data?.error) {
         setError(new Error(data.error));
         setIsAuthenticated(false);
       } else {
         setIsAuthenticated(true);
         reset();
+        console.log(safeCallbackUrl);
         if (safeCallbackUrl) {
           window.location.href = getPathname({ href: safeCallbackUrl + '?login=success', locale, site: site?.code });
         }

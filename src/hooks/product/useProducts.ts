@@ -53,6 +53,7 @@ export function useProducts(productIds: Product['id'][] = [], fetchOptions?: Pro
               const fetched = await fetchProductById(id, fetchOptionsRef.current);
               return fetched;
             } catch (_err) {
+              console.error(`Failed to fetch product ${id}:`, _err);
               // Optionally handle fetch errors per product
               return null;
             }

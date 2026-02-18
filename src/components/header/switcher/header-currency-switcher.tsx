@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
@@ -10,7 +10,7 @@ import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
 import { l10n } from '@/lib/utils';
 
-export function CurrencySwitcher() {
+function CurrencySwitcherContent() {
   const { session, loading: sessionLoading, setCurrency } = useSession();
   const locale = useLocale();
   const router = useRouter();
@@ -96,5 +96,13 @@ export function CurrencySwitcher() {
       onSelected={switchCurrency}
       icon={icon}
     />
+  );
+}
+
+export function CurrencySwitcher() {
+  return (
+    <Suspense fallback={<Spinner color="default" variant="sm" />}>
+      <CurrencySwitcherContent />
+    </Suspense>
   );
 }

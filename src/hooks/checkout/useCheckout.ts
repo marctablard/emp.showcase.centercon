@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
 import { checkout } from '@/lib/client/checkout';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { PaymentMode } from '@/platform/services/model';
@@ -85,15 +84,7 @@ export const useCheckout = (): UseCheckout => {
     loading: shippingMethodsLoading,
   } = useShippingMethods();
   const { paymentModes } = useSite();
-  const searchParams = useSearchParams();
   const { status } = useSession();
-
-  // Check for logout query parameter and reset store if present
-  useEffect(() => {
-    if (searchParams.has('logout')) {
-      storeReset();
-    }
-  }, [searchParams, storeReset]);
 
   const submitContactData = useCallback(
     (contactData: ContactData) => {

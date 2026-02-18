@@ -16,6 +16,7 @@ const getCart = cache(async (): Promise<Cart | null | undefined> => {
     return cart;
   } catch (error) {
     getLogger().error({ error: error instanceof Error ? error.message : String(error) }, 'SSR getCart failed');
+    // on SSR we fail with undefined, so the Client can refetch if necessary
     return undefined;
   }
 });

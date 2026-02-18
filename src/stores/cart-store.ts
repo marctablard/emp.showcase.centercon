@@ -1,6 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 import {
   addItemToCart as apiAddItemToCart,
   fetchCurrentCart as apiFetchCurrentCart,
@@ -50,6 +51,9 @@ interface CartActions {
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
   updateCurrency: (currency: string) => Promise<void>;
   clearCart: () => void;
+
+  // Cross-store synchronization
+  syncCurrencyWithSession: (currency: string, siteCode: string) => Promise<void>;
 }
 export type CartStore = CartState & CartActions;
 
@@ -64,255 +68,270 @@ const defaultState: CartState = {
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
-  return create<CartStore>()((set, get) => ({
-    ...initState,
-    validateCart: async (newSessionStatus: string) => {
-      const { sessionStatus } = get();
-      if (sessionStatus !== newSessionStatus) {
-        set({ sessionStatus: newSessionStatus });
-        await get().fetchCart(false);
-      }
-    },
-    validateSite: async (newSiteCode: string) => {
-      const { lastSiteCode } = get();
-      if (lastSiteCode !== null && lastSiteCode !== newSiteCode) {
-        // Site changed - set new site first to prevent race conditions, then clear cart state and fetch new one
+  return create<CartStore>()(
+    subscribeWithSelector((set, get) => ({
+      ...initState,
+      validateCart: async (newSessionStatus: string) => {
+        const { sessionStatus } = get();
+        if (sessionStatus !== newSessionStatus) {
+          set({ sessionStatus: newSessionStatus });
+          await get().fetchCart(false);
+        }
+      },
+      validateSite: async (newSiteCode: string) => {
+        const { lastSiteCode } = get();
+        if (lastSiteCode !== null && lastSiteCode !== newSiteCode) {
+          // Site changed - set new site first to prevent race conditions, then clear cart state and fetch new one
+          set({
+            lastSiteCode: newSiteCode,
+            currentCart: null,
+            loading: true,
+            error: null,
+            lastShippingUpdate: null,
+          });
+          await get().fetchCart(false);
+        } else if (lastSiteCode === null) {
+          // First time setting site
+          set({ lastSiteCode: newSiteCode });
+        }
+      },
+      // State setters
+      setCurrentCart: (cart: Cart | null | undefined) => {
+        if (cart === get().currentCart) {
+          return;
+        }
+        set({ currentCart: cart, loading: false });
+      },
+      getCurrentCart: () => get().currentCart,
+      setLoading: (loading: boolean) => set({ loading }),
+      getLoading: () => get().loading,
+      setError: (error: Error | null) => set({ error }),
+
+      // Cart API operations
+      fetchCart: async (createCurrent: boolean = false) => {
+        try {
+          set({ loading: true, error: null });
+
+          // Try to fetch existing cart
+          try {
+            const cartData = await apiFetchCurrentCart(createCurrent);
+            set({ currentCart: cartData, loading: false });
+            return cartData;
+          } catch (_err) {
+            // Silent error when cart is gone
+            set({ currentCart: null, loading: false });
+            return null;
+          }
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Failed to fetch cart');
+          set({ error, loading: false });
+          getLogger().error({ err }, 'Error fetching cart');
+          return undefined;
+        }
+      },
+
+      loadCart: async (cartId: string, type: string = 'shopping') => {
+        try {
+          set({ loading: true, error: null });
+
+          // Try to fetch existing cart
+          try {
+            const cartData = await loadSavedCart(cartId, type);
+            set({ currentCart: cartData, loading: false });
+            return cartData;
+          } catch (_err) {
+            // Silent error when cart is gone
+            set({ currentCart: null, loading: false });
+            return null;
+          }
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Failed to fetch cart');
+          set({ error, loading: false });
+          getLogger().error({ err }, 'Error fetching cart');
+          return undefined;
+        }
+      },
+
+      addToCart: async (productId: string, quantity: number) => {
+        // first get a cart (before we block with the loading state)
+        let { currentCart } = get();
+        if (!currentCart) {
+          currentCart = await get().fetchCart(true);
+          if (!currentCart) throw new Error('No cart available');
+        }
+
+        set({ loading: true, error: null });
+
+        try {
+          const cartId = currentCart.id;
+
+          // Call API to add item
+          const result = await apiAddItemToCart(cartId, productId, quantity);
+
+          // Update cart state with the result
+          if (result.cart) {
+            set({ currentCart: result.cart, loading: false });
+          } else {
+            // Refetch cart to get updated state if result doesn't include cart
+            await get().fetchCart();
+          }
+
+          return result;
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Failed to add item to cart');
+          set({ error, loading: false });
+          getLogger().error({ err }, 'Error adding item to cart');
+          throw err;
+        }
+      },
+
+      updateItemQuantity: async (itemId: string, quantity: number) => {
+        const { currentCart } = get();
+        if (!currentCart) {
+          await get().fetchCart();
+          const updatedCart = get().currentCart;
+          if (!updatedCart) throw new Error('No cart available');
+        }
+
+        try {
+          set({ loading: true, error: null });
+          const cart = get().currentCart;
+          if (!cart) throw new Error('No cart available');
+
+          // Call API to update item
+          await apiUpdateCartItemQuantity(cart.id, itemId, quantity);
+
+          // Refetch cart to get updated state
+          await get().fetchCart();
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Failed to update cart item');
+          set({ error, loading: false });
+          getLogger().error({ err }, 'Error updating cart item');
+        }
+      },
+
+      removeItem: async (itemId: string) => {
+        const { currentCart } = get();
+        if (!currentCart) {
+          await get().fetchCart();
+          const updatedCart = get().currentCart;
+          if (!updatedCart) throw new Error('No cart available');
+        }
+
+        try {
+          set({ loading: true, error: null });
+          const cart = get().currentCart;
+          if (!cart) throw new Error('No cart available');
+
+          // Call API to remove item
+          await apiRemoveCartItem(cart.id, itemId);
+
+          // Refetch cart to get updated state
+          await get().fetchCart();
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Failed to remove cart item');
+          set({ error, loading: false });
+          getLogger().error({ err }, 'Error removing cart item');
+        }
+      },
+
+      updateShippingInfo: async (countryCode?: string, zipCode?: string) => {
+        try {
+          // Check if we've recently updated with the same values to prevent duplicate calls to avoid conflict error
+          const { lastShippingUpdate } = get();
+          const now = Date.now();
+          const DEBOUNCE_TIME = 2000;
+
+          if (
+            lastShippingUpdate &&
+            lastShippingUpdate.countryCode === countryCode &&
+            lastShippingUpdate.zipCode === zipCode &&
+            now - lastShippingUpdate.timestamp < DEBOUNCE_TIME
+          ) {
+            return;
+          }
+
+          set({
+            loading: true,
+            error: null,
+            lastShippingUpdate: {
+              countryCode,
+              zipCode,
+              timestamp: now,
+            },
+          });
+
+          const { currentCart } = get();
+          if (!currentCart) {
+            await get().fetchCart();
+            const updatedCart = get().currentCart;
+            if (!updatedCart) return;
+          }
+
+          const cart = get().currentCart;
+          if (!cart) {
+            set({ loading: false });
+            return;
+          }
+
+          // Call API to update shipping info
+          await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
+
+          // Refetch cart to get updated state
+          await get().fetchCart();
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Failed to update shipping info');
+          set({ error, loading: false });
+          getLogger().error({ err }, 'Error updating shipping info');
+        }
+      },
+
+      updateCurrency: async (currency: string) => {
+        try {
+          const { currentCart } = get();
+          if (!currentCart) {
+            await get().fetchCart();
+            const updatedCart = get().currentCart;
+            if (!updatedCart) return;
+          }
+
+          set({ loading: true, error: null });
+
+          const cart = get().currentCart;
+          if (!cart) return;
+
+          await apiUpdateCartCurrency(cart.id, currency);
+          await get().fetchCart(false);
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error('Failed to update cart currency');
+          set({ error, loading: false });
+          getLogger().error({ err }, 'Error updating cart currency');
+        }
+      },
+
+      clearCart: () => {
+        // Reset all cart-related state to ensure proper cleanup
         set({
-          lastSiteCode: newSiteCode,
           currentCart: null,
-          loading: true,
+          loading: false,
           error: null,
           lastShippingUpdate: null,
+          lastSiteCode: null,
         });
-        await get().fetchCart(false);
-      } else if (lastSiteCode === null) {
-        // First time setting site
-        set({ lastSiteCode: newSiteCode });
-      }
-    },
-    // State setters
-    setCurrentCart: (cart: Cart | null | undefined) => {
-      if (cart === get().currentCart) {
-        return;
-      }
-      set({ currentCart: cart, loading: false });
-    },
-    getCurrentCart: () => get().currentCart,
-    setLoading: (loading: boolean) => set({ loading }),
-    getLoading: () => get().loading,
-    setError: (error: Error | null) => set({ error }),
+      },
 
-    // Cart API operations
-    fetchCart: async (createCurrent: boolean = false) => {
-      try {
-        set({ loading: true, error: null });
-
-        // Try to fetch existing cart
-        try {
-          const cartData = await apiFetchCurrentCart(createCurrent);
-          set({ currentCart: cartData, loading: false });
-          return cartData;
-        } catch (_err) {
-          // Silent error when cart is gone
-          set({ currentCart: null, loading: false });
-          return null;
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to fetch cart');
-        set({ error, loading: false });
-        getLogger().error({ err }, 'Error fetching cart');
-        return undefined;
-      }
-    },
-
-    loadCart: async (cartId: string, type: string = 'shopping') => {
-      try {
-        set({ loading: true, error: null });
-
-        // Try to fetch existing cart
-        try {
-          const cartData = await loadSavedCart(cartId, type);
-          set({ currentCart: cartData, loading: false });
-          return cartData;
-        } catch (_err) {
-          // Silent error when cart is gone
-          set({ currentCart: null, loading: false });
-          return null;
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to fetch cart');
-        set({ error, loading: false });
-        getLogger().error({ err }, 'Error fetching cart');
-        return undefined;
-      }
-    },
-
-    addToCart: async (productId: string, quantity: number) => {
-      // first get a cart (before we block with the loading state)
-      let { currentCart } = get();
-      if (!currentCart) {
-        currentCart = await get().fetchCart(true);
-        if (!currentCart) throw new Error('No cart available');
-      }
-
-      set({ loading: true, error: null });
-
-      try {
-        const cartId = currentCart.id;
-
-        // Call API to add item
-        const result = await apiAddItemToCart(cartId, productId, quantity);
-
-        // Update cart state with the result
-        if (result.cart) {
-          set({ currentCart: result.cart, loading: false });
-        } else {
-          // Refetch cart to get updated state if result doesn't include cart
-          await get().fetchCart();
-        }
-
-        return result;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to add item to cart');
-        set({ error, loading: false });
-        getLogger().error({ err }, 'Error adding item to cart');
-        throw err;
-      }
-    },
-
-    updateItemQuantity: async (itemId: string, quantity: number) => {
-      const { currentCart } = get();
-      if (!currentCart) {
-        await get().fetchCart();
-        const updatedCart = get().currentCart;
-        if (!updatedCart) throw new Error('No cart available');
-      }
-
-      try {
-        set({ loading: true, error: null });
-        const cart = get().currentCart;
-        if (!cart) throw new Error('No cart available');
-
-        // Call API to update item
-        await apiUpdateCartItemQuantity(cart.id, itemId, quantity);
-
-        // Refetch cart to get updated state
-        await get().fetchCart();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to update cart item');
-        set({ error, loading: false });
-        getLogger().error({ err }, 'Error updating cart item');
-      }
-    },
-
-    removeItem: async (itemId: string) => {
-      const { currentCart } = get();
-      if (!currentCart) {
-        await get().fetchCart();
-        const updatedCart = get().currentCart;
-        if (!updatedCart) throw new Error('No cart available');
-      }
-
-      try {
-        set({ loading: true, error: null });
-        const cart = get().currentCart;
-        if (!cart) throw new Error('No cart available');
-
-        // Call API to remove item
-        await apiRemoveCartItem(cart.id, itemId);
-
-        // Refetch cart to get updated state
-        await get().fetchCart();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to remove cart item');
-        set({ error, loading: false });
-        getLogger().error({ err }, 'Error removing cart item');
-      }
-    },
-
-    updateShippingInfo: async (countryCode?: string, zipCode?: string) => {
-      try {
-        // Check if we've recently updated with the same values to prevent duplicate calls to avoid conflict error
-        const { lastShippingUpdate } = get();
-        const now = Date.now();
-        const DEBOUNCE_TIME = 2000;
-
-        if (
-          lastShippingUpdate &&
-          lastShippingUpdate.countryCode === countryCode &&
-          lastShippingUpdate.zipCode === zipCode &&
-          now - lastShippingUpdate.timestamp < DEBOUNCE_TIME
-        ) {
-          return;
-        }
-
-        set({
-          loading: true,
-          error: null,
-          lastShippingUpdate: {
-            countryCode,
-            zipCode,
-            timestamp: now,
-          },
-        });
-
+      syncCurrencyWithSession: async (currency: string, siteCode: string) => {
         const { currentCart } = get();
-        if (!currentCart) {
-          await get().fetchCart();
-          const updatedCart = get().currentCart;
-          if (!updatedCart) return;
+        if (!currentCart) return;
+
+        // Don't update if cart belongs to different site
+        if (currentCart.site !== siteCode) return;
+
+        const cartCurrency = currentCart.currency || currentCart.totalPrice?.currency;
+        if (cartCurrency && cartCurrency !== currency) {
+          await get().updateCurrency(currency);
         }
-
-        const cart = get().currentCart;
-        if (!cart) {
-          set({ loading: false });
-          return;
-        }
-
-        // Call API to update shipping info
-        await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
-
-        // Refetch cart to get updated state
-        await get().fetchCart();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to update shipping info');
-        set({ error, loading: false });
-        getLogger().error({ err }, 'Error updating shipping info');
-      }
-    },
-
-    updateCurrency: async (currency: string) => {
-      try {
-        const { currentCart } = get();
-        if (!currentCart) {
-          await get().fetchCart();
-          const updatedCart = get().currentCart;
-          if (!updatedCart) return;
-        }
-
-        set({ loading: true, error: null });
-
-        const cart = get().currentCart;
-        if (!cart) return;
-
-        await apiUpdateCartCurrency(cart.id, currency);
-        await get().fetchCart(false);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to update cart currency');
-        set({ error, loading: false });
-        getLogger().error({ err }, 'Error updating cart currency');
-      }
-    },
-
-    clearCart: () => {
-      // Reset all cart-related state to ensure proper cleanup
-      set({
-        currentCart: null,
-        loading: false,
-        error: null,
-        lastShippingUpdate: null,
-        lastSiteCode: null,
-      });
-    },
-  }));
+      },
+    })),
+  );
 };

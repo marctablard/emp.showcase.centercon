@@ -11,10 +11,11 @@ The site middleware system consists of several key components:
 ### Core Files
 
 - `src/site/middleware.ts` - Core site resolution and middleware logic
-- `src/site/types.d.ts` - TypeScript type definitions
+- `src/site/types.ts` - TypeScript type definitions
 - `src/site/config.ts` - Site routing configurations
 - `src/site/routing.ts` - Configuration loader
-- `src/proxy.ts` - Main application middleware that orchestrates site and auth handling
+- `src/site/probe-detection.ts` - Health-check probe detection
+- `src/proxy.ts` - Main application middleware that orchestrates site, auth, and cache handling
 
 ## Domain-based Site Recognition (Pre-auth)
 
@@ -225,20 +226,31 @@ The site middleware sets the following headers:
 
 ## Usage in Main Middleware
 
-The site middleware is integrated into the main application middleware (`src/middleware.ts`):
+The site middleware is integrated into the main application middleware (`src/proxy.ts`):
 
 ```typescript
+import NextAuth from 'next-auth';
+import { applyCacheDirectives } from './caching/cache-middleware';
 import { createSiteMiddleware } from './site/middleware';
 import { routing as siteRouting } from './site/routing';
+import { config as authConfig } from './auth/auth.config';
 
+const { auth } = NextAuth(authConfig);
 const siteMiddleware = createSiteMiddleware(siteRouting);
 
-export default auth(async (req: NextAuthRequest) => {
-  // ... authentication and API handling ...
-  
-  // Apply site middleware for page requests
-  return applySecurityHeaders(siteMiddleware(req) ?? NextResponse.next());
+const authMiddleware = auth((req) => {
+  const response = siteMiddleware(req);
+  return applyCacheDirectives(req, response);
 });
+
+export default async function middleware(req: NextRequest) {
+  // API requests are handled separately (CSRF validation, cache directives)
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    return applyCacheDirectives(req, NextResponse.next());
+  }
+
+  return authMiddleware(req);
+}
 ```
 
 ## Configuration Management
@@ -329,12 +341,11 @@ NEXT_PUBLIC_SITE_ROUTING_CONFIG=staging
 
 ### Debugging
 
-Enable debug logging by checking the console output in development mode. The middleware logs redirect decisions:
+Misrouted health checks are detected and logged with a structured JSON payload (via `console.warn`) to make filtering easy in App Insights. The middleware responds with a lightweight `200 OK` and these headers:
 
-```typescript
-console.debug('redirecting to appPath, because the site should not be supplied', `/${appPath}`);
-console.debug('redirecting to appPath, because the site should be supplied', `/${site}/${appPath}`);
-```
+- `x-misrouted-healthcheck: 1`
+- `x-recommended-endpoint: /api/health`
+- `x-alternative-endpoint: /api/ready`
 
 ## Security Considerations
 

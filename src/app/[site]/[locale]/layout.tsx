@@ -5,14 +5,13 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
-import { auth } from '@/auth/auth';
 import { CsrfProvider } from '@/components/csrf/CsrfProvider';
 import { ApiDebugPanel } from '@/components/debug/ApiDebugPanel';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { redirect } from '@/i18n/edge/navigation';
 import { routing } from '@/i18n/routing';
-import { getSession, setSessionLanguage } from '@/lib/ssr/session';
+import { setSessionLanguage } from '@/lib/ssr/session';
 import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
@@ -71,7 +70,6 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  const [authSession, shopSession] = await Promise.all([auth(), getSession()]);
 
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
 
@@ -90,18 +88,12 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
   }
 
   if (site && !hasLocale(site.languages, locale)) {
+    setSessionLanguage(locale);
     // ensure that languages are aligned
     const newLocale = site.languages[0];
-    await setSessionLanguage(newLocale);
     // force prefix to ensure that the redirect is correctly adapting the cookie
-    redirect({ href: '/', locale: newLocale, site: siteCode, forcePrefix: true });
+    return redirect({ href: '/', locale: newLocale, site: siteCode, forcePrefix: true });
   }
-  if (shopSession && shopSession.language != locale) {
-    // ensure that languages are aligned
-    await setSessionLanguage(locale);
-    shopSession.language = locale;
-  }
-
   // TODO: we need to figure out why getRequestSite
   // doesn't return the correct value in child layouts
   // (we need to duplicate this call there)
@@ -114,10 +106,10 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
       className={`${fontHeadlines.variable} ${fontBody.variable} ${fontHeadlines.className} ${fontBody.className}`}
     >
       <body className="flex h-full flex-col font-body has-[.search]:overflow-hidden">
-        <AuthSessionProvider session={authSession}>
+        <AuthSessionProvider>
           <SiteProvider siteCode={siteCode}>
             <NextIntlClientProvider locale={locale}>
-              <StoreProvider shopSession={shopSession} site={site} availableSites={availableSites}>
+              <StoreProvider site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
                   {process.env.NODE_ENV === 'development' && <ApiDebugPanel />}

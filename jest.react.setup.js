@@ -7,6 +7,13 @@ require('@testing-library/jest-dom');
 // Load environment variables from .env.test
 require('dotenv').config({ path: '.env.test', quiet: true });
 
+jest.mock('next-intl', () => {
+  return {
+    useLocale: () => 'en',
+    useTranslations: () => (key) => key,
+  };
+});
+
 // Silence known benign warnings in test runs
 const originalEmitWarning = process.emitWarning;
 process.emitWarning = (warning, ...args) => {

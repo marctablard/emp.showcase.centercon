@@ -58,6 +58,7 @@
       }
     }
   },
+  "mustBeLoggedIn": "Sie müssen angemeldet sein, um Ihr Passwort zu ändern.",
   "Password": {
     "title": "Passwort ändern",
     "description": "Passwortänderung für Ihr Konto",
@@ -437,6 +438,8 @@
     "sendButton": "Senden",
     "sending": "Wird gesendet...",
     "thinking": "KI denkt nach...",
+    "aiProcessing": "KI-Assistent verarbeitet Ihre Nachricht",
+    "chatHistory": "Chat-Gesprächsverlauf",
     "emptyState": "Beginnen Sie ein Gespräch mit dem KI-Assistenten",
     "addToCartMessage": "Produkt hinzufügen: {productId} mit Menge {quantity} zum Warenkorb",
     "addSelectedToCart": "Ausgewählte zum Warenkorb hinzufügen ({count} Artikel)",
@@ -497,6 +500,7 @@
     "pleaseTryAgain": "Bitte versuchen Sie es erneut",
     "clearChat": "Chat löschen",
     "errorOccurred": "Entschuldigung, es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+    "rateLimitExceeded": "Sie senden Nachrichten zu schnell. Bitte warten Sie einen Moment, bevor Sie es erneut versuchen.",
     "received": "Erhalten",
     "notReceived": "Nicht erhalten",
     "expiresOn": "Läuft ab am",
