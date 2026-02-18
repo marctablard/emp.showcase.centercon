@@ -7,7 +7,7 @@ import { EmporixMetadata } from './common';
 /**
  * Return approval status
  */
-export type EmporixReturnStatus = 'APPROVED' | 'PENDING' | 'REJECTED' | 'CLOSED';
+export type EmporixReturnStatus = 'APPROVED' | 'PENDING' | 'REJECTED' | 'CLOSED' | 'REVIEWED';
 
 /**
  * Price object with value and currency
