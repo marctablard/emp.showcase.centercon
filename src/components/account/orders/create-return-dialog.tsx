@@ -15,8 +15,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from '@/i18n/navigation';
-import { CreateReturnItem, createReturn } from '@/lib/client/returns';
+import { CreateReturnItem, RETURN_REASON_CODES, ReturnReasonCode, createReturn } from '@/lib/client/returns';
 import { formatCurrency } from '@/lib/utils';
 import { Order, OrderItem } from '@/platform/services/model/order/order';
 
@@ -39,6 +40,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
   const tReturns = useTranslations('account.returns');
   const router = useRouter();
   const [quantities, setQuantities] = useState<ItemQuantity>({});
+  const [reasonCode, setReasonCode] = useState<ReturnReasonCode | ''>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,7 +81,13 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
         return;
       }
 
-      const response = await createReturn(order.id, items);
+      if (!reasonCode) {
+        setError(t('reasonRequired'));
+        setLoading(false);
+        return;
+      }
+
+      const response = await createReturn(order.id, items, reasonCode);
 
       onOpenChange(false);
       router.push(`/account/returns/${response.id}`);
@@ -93,6 +101,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
   const handleOpenChange = (newOpen: boolean): void => {
     if (!newOpen) {
       setQuantities({});
+      setReasonCode('');
       setError(null);
     }
     onOpenChange(newOpen);
@@ -278,6 +287,29 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
           </div>
         </div>
 
+        {/* Return Reason */}
+        <div className="py-4 border-b border-border-primary">
+          <label className="block text-sm font-semibold text-text-body mb-2">
+            {t('returnReason')} <span className="text-text-error">*</span>
+          </label>
+          <Select
+            value={reasonCode}
+            onValueChange={(value: string) => setReasonCode(value as ReturnReasonCode)}
+            disabled={loading}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t('selectReason')} />
+            </SelectTrigger>
+            <SelectContent>
+              {RETURN_REASON_CODES.map((code) => (
+                <SelectItem key={code} value={code}>
+                  {t(`reasons.${code}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Error Message */}
         {error && <div className="p-4 bg-surface-error-soft rounded text-text-error text-sm">{error}</div>}
 
@@ -292,7 +324,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
             variant="primary"
             size="default"
             onClick={handleSubmit}
-            disabled={totalSelectedItems === 0 || loading}
+            disabled={totalSelectedItems === 0 || !reasonCode || loading}
           >
             {loading ? t('submitting') : t('submit')}
           </Button>

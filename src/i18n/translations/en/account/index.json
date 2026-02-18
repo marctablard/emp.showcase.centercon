@@ -252,6 +252,7 @@
       "APPROVED": "Approved",
       "PENDING": "Pending",
       "REJECTED": "Rejected",
+      "REVIEWED": "Reviewed",
       "CLOSED": "Closed",
       "EXPIRED": "Expired"
     },
@@ -270,6 +271,7 @@
       "returnReason": "Return Reason",
       "selectReason": "Select a reason",
       "noItemsSelected": "Please select at least one item to return",
+      "reasonRequired": "Please select a return reason",
       "submit": "Submit Return",
       "cancel": "Cancel",
       "submitting": "Submitting...",

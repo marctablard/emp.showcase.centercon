@@ -54,9 +54,10 @@ export class EmporixReturnService implements ReturnService {
    * Create a new return for an order
    * @param orderId The ID of the order to create return for
    * @param items Array of items to return with quantities
+   * @param reasonCode The reason code for the return (mandatory per Emporix API)
    * @returns Promise with the created return ID
    */
-  async createReturn(orderId: string, items: CreateReturnItem[]): Promise<string> {
+  async createReturn(orderId: string, items: CreateReturnItem[], reasonCode: string): Promise<string> {
     const request: EmporixReturnCreateRequest = {
       orders: [
         {
@@ -68,7 +69,7 @@ export class EmporixReturnService implements ReturnService {
         },
       ],
       reason: {
-        code: 'CUSTOMER_REQUEST',
+        code: reasonCode,
       },
     };
 

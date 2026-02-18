@@ -9,6 +9,20 @@ export interface CreateReturnItem {
 }
 
 /**
+ * Return reason code - mandatory per Emporix Returns API
+ */
+export type ReturnReasonCode = 'DEFECTIVE' | 'WRONG_ITEM' | 'NOT_AS_DESCRIBED' | 'CHANGED_MIND' | 'SIZE_FIT' | 'OTHER';
+
+export const RETURN_REASON_CODES: ReturnReasonCode[] = [
+  'DEFECTIVE',
+  'WRONG_ITEM',
+  'NOT_AS_DESCRIBED',
+  'CHANGED_MIND',
+  'SIZE_FIT',
+  'OTHER',
+];
+
+/**
  * Response from create return API
  */
 export interface CreateReturnResponse {
@@ -21,13 +35,17 @@ export interface CreateReturnResponse {
  * @param items Array of items to return with quantities
  * @returns Promise with the created return ID
  */
-export async function createReturn(orderId: string, items: CreateReturnItem[]): Promise<CreateReturnResponse> {
+export async function createReturn(
+  orderId: string,
+  items: CreateReturnItem[],
+  reasonCode: ReturnReasonCode,
+): Promise<CreateReturnResponse> {
   const response = await fetch('/api/returns', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ orderId, items }),
+    body: JSON.stringify({ orderId, items, reasonCode }),
   });
 
   if (!response.ok) {

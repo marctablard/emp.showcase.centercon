@@ -6,7 +6,7 @@ import { Price } from '../common';
 /**
  * Return approval status
  */
-export type ReturnStatus = 'APPROVED' | 'PENDING' | 'REJECTED' | 'CLOSED';
+export type ReturnStatus = 'APPROVED' | 'PENDING' | 'REJECTED' | 'REVIEWED' | 'CLOSED';
 
 /**
  * Reason for return (at return or item level)

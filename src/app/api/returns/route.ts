@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderId, items } = body;
+    const { orderId, items, reasonCode } = body;
 
     // Validate required fields
     if (!orderId || typeof orderId !== 'string') {
@@ -52,6 +52,10 @@ export async function POST(request: NextRequest) {
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'items array is required and cannot be empty' }, { status: 400 });
+    }
+
+    if (!reasonCode || typeof reasonCode !== 'string') {
+      return NextResponse.json({ error: 'reasonCode is required and must be a string' }, { status: 400 });
     }
 
     // Validate item structure
@@ -65,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     const returnService = server.get<ReturnService>('ReturnService');
-    const returnId = await returnService.createReturn(orderId, items);
+    const returnId = await returnService.createReturn(orderId, items, reasonCode);
 
     return NextResponse.json({ id: returnId }, { status: 201 });
   } catch (error) {

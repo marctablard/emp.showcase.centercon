@@ -34,7 +34,8 @@ export interface ReturnService {
    * Create a new return for an order
    * @param orderId The ID of the order to create return for
    * @param items Array of items to return with quantities
+   * @param reasonCode The reason code for the return (mandatory per Emporix API)
    * @returns Promise with the created return ID
    */
-  createReturn(orderId: string, items: CreateReturnItem[]): Promise<string>;
+  createReturn(orderId: string, items: CreateReturnItem[], reasonCode: string): Promise<string>;
 }

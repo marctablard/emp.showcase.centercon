@@ -205,6 +205,7 @@
       "APPROVED": "Genehmigt",
       "PENDING": "Ausstehend",
       "REJECTED": "Abgelehnt",
+      "REVIEWED": "Überprüft",
       "CLOSED": "Geschlossen",
       "EXPIRED": "Abgelaufen"
     },
@@ -223,6 +224,7 @@
       "returnReason": "Rückgabegrund",
       "selectReason": "Grund auswählen",
       "noItemsSelected": "Bitte wählen Sie mindestens einen Artikel zur Rückgabe aus",
+      "reasonRequired": "Bitte wählen Sie einen Rückgabegrund aus",
       "submit": "Retoure einreichen",
       "cancel": "Abbrechen",
       "submitting": "Wird eingereicht...",
