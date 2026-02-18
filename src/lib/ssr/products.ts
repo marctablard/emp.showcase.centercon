@@ -32,7 +32,7 @@ const _getProducts = cache(async (page: number, size: number, optionsJson: strin
     const products = await getProductService().getProducts(page, size, options);
     return products;
   } catch (_error) {
-    console.error(_error);
+    getLogger().error({ error: _error instanceof Error ? _error.message : String(_error) }, 'SSR getProducts failed');
     return { items: [], total: 0, page: 0, pageSize: 0 };
   }
 });

@@ -5,6 +5,7 @@ import type {
   EmporixSessionContext,
 } from '@/platform/integrations/emporix/model/session-context';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SessionMapper } from '@/platform/services/model/session/SessionMapper';
 import type { Session } from '@/platform/services/model/session/session';
 import type { SiteService } from '../../site/SiteService';
@@ -27,6 +28,7 @@ class EmporixSessionService implements SessionService {
     @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,
     @inject('EmporixSessionMapper') private mapper: SessionMapper<EmporixSessionContext, EmporixContextAttribute>,
     @inject('SiteService') private siteService: SiteService,
+    @inject('LoggerService') private logger: LoggerService,
   ) {}
 
   async setRegion(region: string): Promise<void> {
@@ -183,7 +185,7 @@ class EmporixSessionService implements SessionService {
       this.sessionContextApi.updateOwnSessionContext(updateDefaults).catch((error: Error) => {
         // Only log unexpected errors (not 404s which are expected for new sessions)
         if (!error.message.includes('Not Found')) {
-          console.error('Unexpected error updating session defaults:', error.message);
+          this.logger.error({ error: error.message }, 'Unexpected error updating session defaults');
         }
       });
     }

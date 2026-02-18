@@ -69,7 +69,6 @@ export const useAuthentication = (): AuthenticationHook => {
       } else {
         setIsAuthenticated(true);
         reset();
-        console.log(safeCallbackUrl);
         if (safeCallbackUrl) {
           window.location.href = getPathname({ href: safeCallbackUrl + '?login=success', locale, site: site?.code });
         }
