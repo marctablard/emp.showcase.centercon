@@ -168,6 +168,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
                         onChange={(e: ChangeEvent<HTMLInputElement>) => {
                           handleInputChange(inputId, e.target.value);
                         }}
+                        data-testid={`filter-${id}-${input}`}
                       />
                     </div>
                   );
@@ -182,6 +183,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
                 onValueChange={(values: number[]) => {
                   handleSliderChange(id, values);
                 }}
+                data-testid={`filter-${id}-slider`}
               />
             </div>
           );
@@ -198,7 +200,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
                   handleSelectChange(id, value);
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid={`filter-${id}-select`}>
                   <SelectValue placeholder={t(dk<ProductFilterKey>(`filters.${name}`))} />
                 </SelectTrigger>
                 <SelectContent>
@@ -217,7 +219,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
       })}
 
       {/* Submit button */}
-      <Button type="submit" className="mt-4 w-full">
+      <Button type="submit" className="mt-4 w-full" data-testid="filter-applyButton">
         {t('filters.applyFilters')}
       </Button>
     </form>
@@ -245,7 +247,7 @@ function SearchFilter({
   return (
     <div className="relative">
       {/* Filter Toggle Button */}
-      <Button variant="secondary" onClick={toggleFilterOffcanvas}>
+      <Button variant="secondary" onClick={toggleFilterOffcanvas} data-testid="filter-toggleButton">
         <ListFilter className="mr-2" /> Filter
       </Button>
 

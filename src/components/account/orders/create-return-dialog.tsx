@@ -171,6 +171,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
                           onClick={() => updateQuantity(item.id, currentQty - 1, maxQty)}
                           disabled={currentQty <= 0 || loading}
                           aria-label={t('decrease')}
+                          data-testid={`return-item-decrease-${item.id}`}
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -185,6 +186,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
                           onClick={() => updateQuantity(item.id, currentQty + 1, maxQty)}
                           disabled={currentQty >= maxQty || loading}
                           aria-label={t('increase')}
+                          data-testid={`return-item-increase-${item.id}`}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -262,6 +264,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
                         onClick={() => updateQuantity(item.id, currentQty - 1, maxQty)}
                         disabled={currentQty <= 0 || loading}
                         aria-label={t('decrease')}
+                        data-testid={`return-item-decrease-mobile-${item.id}`}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -276,6 +279,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
                         onClick={() => updateQuantity(item.id, currentQty + 1, maxQty)}
                         disabled={currentQty >= maxQty || loading}
                         aria-label={t('increase')}
+                        data-testid={`return-item-increase-mobile-${item.id}`}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -297,7 +301,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
             onValueChange={(value: string) => setReasonCode(value as ReturnReasonCode)}
             disabled={loading}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" data-testid="return-reasonSelect">
               <SelectValue placeholder={t('selectReason')} />
             </SelectTrigger>
             <SelectContent>
@@ -316,7 +320,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
         {/* Footer */}
         <DialogFooter className="flex flex-row gap-6 pt-4">
           <DialogClose asChild>
-            <Button variant="secondary" size="default" disabled={loading}>
+            <Button variant="secondary" size="default" disabled={loading} data-testid="return-cancelButton">
               {tReturns('cancel')}
             </Button>
           </DialogClose>
@@ -325,6 +329,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
             size="default"
             onClick={handleSubmit}
             disabled={totalSelectedItems === 0 || !reasonCode || loading}
+            data-testid="return-submitButton"
           >
             {loading ? t('submitting') : t('submit')}
           </Button>

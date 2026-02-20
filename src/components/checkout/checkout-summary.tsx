@@ -133,7 +133,12 @@ const CheckoutSummaryComponent: React.FC<OrderSummaryProps> = ({ leftContent, on
                 render={({ field }) => (
                   <FormItem className="flex flex-row gap-3 pb-4">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} className="bg-surface-page" />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="bg-surface-page"
+                        data-testid="checkout-termsAndConditions"
+                      />
                     </FormControl>
                     <FormLabel className="font-medium leading-6">{t('termsAndConditions')}</FormLabel>
                   </FormItem>
@@ -152,6 +157,7 @@ const CheckoutSummaryComponent: React.FC<OrderSummaryProps> = ({ leftContent, on
                 }}
                 disabled={disabled || isSubmitting || loading || approvalLoading}
                 className="w-full"
+                data-testid="checkout-submitOrder"
               >
                 {isSubmitting || loading
                   ? t('processing')

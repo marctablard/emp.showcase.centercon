@@ -90,6 +90,7 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
                     : 'hover:bg-surface-disabled'
                 }`}
                 onClick={() => handleSelectApprover(approver)}
+                data-testid={`approval-approver-${approver.userId}`}
               >
                 <Avatar className="h-8 w-8 mr-2">
                   <div className="bg-surface-action text-text-on-action rounded-full h-full w-full flex items-center justify-center">
@@ -125,14 +126,19 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
+            data-testid="approval-comment"
           />
         </div>
 
         <DialogFooter>
-          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="secondary" onClick={onClose} disabled={isSubmitting} data-testid="approval-cancelButton">
             {t('cancel')}
           </Button>
-          <Button onClick={handleSubmit} disabled={!selectedApprover || isSubmitting}>
+          <Button
+            onClick={handleSubmit}
+            disabled={!selectedApprover || isSubmitting}
+            data-testid="approval-submitButton"
+          >
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2 h-4 w-4" />

@@ -174,7 +174,13 @@ export default function Registration() {
             ),
           })}
         </p>
-        <Button type="submit" form="register-form" className="w-full" disabled={loading || !form.formState.isValid}>
+        <Button
+          type="submit"
+          form="register-form"
+          className="w-full"
+          disabled={loading || !form.formState.isValid}
+          data-testid="register-submitButton"
+        >
           {loading ? t('registering') : t('registerButton')}
         </Button>
         <p>

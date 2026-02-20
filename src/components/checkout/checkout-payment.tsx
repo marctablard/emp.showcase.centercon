@@ -40,6 +40,7 @@ export function CheckoutPayment({ initialEdit }: { initialEdit: boolean }) {
           size="default"
           className="normal-case text-base tracking-normal p-0 gap-1 underline"
           onClick={() => (isPaymentEdit ? setIsPaymentEdit(false) : setIsPaymentEdit(true))}
+          data-testid="payment-editButton"
         >
           {isPaymentEdit ? (
             <>
@@ -103,6 +104,7 @@ export function CheckoutPayment({ initialEdit }: { initialEdit: boolean }) {
                 }
                 isReadOnly={false}
                 onAddressChange={handleBillingAddressChange}
+                testIdPrefix="billing"
               />
               {/* Payment Method */}
               <PaymentMethodComponent />

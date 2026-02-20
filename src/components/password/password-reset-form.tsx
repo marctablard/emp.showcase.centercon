@@ -84,7 +84,7 @@ export function PasswordResetForm({ email, callbackUrl, onSuccess, isDialog = fa
               <FormItem className="relative">
                 <FormLabel>{t('email')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="email@example.com" type="email" {...field} />
+                  <Input placeholder="email@example.com" type="email" {...field} data-testid="passwordReset-email" />
                 </FormControl>
                 <div className="absolute top-full left-0 mt-0.5">
                   <FormMessage />
@@ -94,7 +94,12 @@ export function PasswordResetForm({ email, callbackUrl, onSuccess, isDialog = fa
           />
 
           <div className="flex flex-col gap-6 w-full items-center">
-            <Button type="submit" className="w-full" disabled={isSubmitting || !isValid}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || !isValid}
+              data-testid="passwordReset-submitButton"
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

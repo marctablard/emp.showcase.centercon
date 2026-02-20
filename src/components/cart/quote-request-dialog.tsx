@@ -163,6 +163,7 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
             addressLabel={tCheckout('address')}
             isReadOnly={false}
             onAddressChange={handleShippingChange}
+            testIdPrefix="quoteShipping"
           />
 
           {addresses && addresses.length > 0 && (
@@ -191,6 +192,7 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
                 : undefined
             }
             onAddressChange={handleBillingChange}
+            testIdPrefix="quoteBilling"
           />
 
           <ShippingMethod />
@@ -206,6 +208,7 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
                 maxLength={24}
+                data-testid="quote-reference"
               />
               <div className="text-sm text-text-placeholders">{reference.length}/24</div>
             </div>
@@ -220,16 +223,19 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
                 onChange={(e) => setComment(e.target.value)}
                 rows={4}
                 maxLength={500}
+                data-testid="quote-comment"
               />
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="secondary" onClick={() => onOpenChange(false)}>
+          <Button variant="secondary" onClick={() => onOpenChange(false)} data-testid="quote-cancelButton">
             {t('cancel')}
           </Button>
-          <Button onClick={sendQuote}>{t('sendQuote')}</Button>
+          <Button onClick={sendQuote} data-testid="quote-sendButton">
+            {t('sendQuote')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

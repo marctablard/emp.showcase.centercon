@@ -103,6 +103,7 @@ export function AddressSelector({
                       `${resolvedSelectedId === address.id ? 'bg-surface-action text-text-on-action hover:bg-surface-action-hover hover:text-text-ho' : ''}`,
                     )}
                     onClick={() => handleAddressSelect(address)}
+                    data-testid={`addressSelector-item-${address.id}`}
                   >
                     <div className="flex justify-between items-start mb-1">
                       <p className="font-bold">{address.contactName}</p>

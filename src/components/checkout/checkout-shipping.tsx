@@ -37,6 +37,7 @@ export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
           size="default"
           className="normal-case text-base tracking-normal p-0 gap-1 underline"
           onClick={() => (isShippingEdit ? setIsShippingEdit(false) : setIsShippingEdit(true))}
+          data-testid="shipping-editButton"
         >
           {isShippingEdit ? (
             <>
@@ -107,6 +108,7 @@ export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
                 addressLabel={t('address')}
                 isReadOnly={false}
                 onAddressChange={handleShippingAddressChange}
+                testIdPrefix="shipping"
               />
               {/* Shipping Method */}
               <ShippingMethod />
