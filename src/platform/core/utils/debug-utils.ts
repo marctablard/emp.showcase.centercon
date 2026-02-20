@@ -590,11 +590,9 @@ export function attachDebugHeaders(
  * export const POST = withApiRouteDebug(handler);
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withApiRouteDebug<T extends (...args: any[]) => Promise<Response>>(handler: T): T {
   if (!isDev) return handler; // no-op in production
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wrapped = async (...args: any[]): Promise<Response> => {
     const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
     if (debugResponse === 'off') return handler(...args);

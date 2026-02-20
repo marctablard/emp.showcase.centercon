@@ -10,6 +10,7 @@ import { H2, H3 } from '@/components/ui/h';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useOrder } from '@/hooks/order/useOrder';
+import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { Order } from '@/platform/services/model/order/order';
@@ -118,7 +119,7 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                   <H3 variant="h5" className="mb-2 mt-4">
                     {tOrder('paymentMethod')}
                   </H3>
-                  <p>{tPaymentModes(order.payments[0].method.toLowerCase())}</p>
+                  <p>{tPaymentModes(dk<PaymentModeKey>(order.payments[0].method.toLowerCase()))}</p>
                 </>
               )}
             </div>

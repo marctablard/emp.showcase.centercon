@@ -6,6 +6,7 @@ import { ReceiptText } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useSite } from '@/hooks/site/useSite';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { cn } from '@/lib/utils';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
@@ -75,7 +76,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
                               </FormControl>
                               <FormLabel htmlFor={option.code} className="font-medium w-full ml-3 block">
                                 <div className="flex items-center justify-between">
-                                  {tPayment(option.code)}
+                                  {tPayment(dk<PaymentModeKey>(option.code))}
                                   {option.code === 'invoice' ? <ReceiptText /> : null}
                                 </div>
                               </FormLabel>
@@ -163,7 +164,7 @@ const PaymentMethodComponent: React.FC<PaymentMethodProps> = ({ isReadOnly = fal
         ) : (
           // Read-only view
           <div className="text-text-on-disabled">
-            <p className="font-medium">{tPayment(paymentMethod?.code ?? 'none')}</p>
+            <p className="font-medium">{tPayment(dk<PaymentModeKey>(paymentMethod?.code ?? 'none'))}</p>
 
             {paymentMethod?.code === 'credit-card' && paymentMethod?.customAttributes?.cardNumber && (
               <p className="text-sm text-text-on-disabled mt-1">

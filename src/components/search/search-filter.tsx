@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { FilterValue as SearchFilterValue } from '@/hooks/search/useSearch';
+import { type ProductFilterKey, dk } from '@/i18n/dynamic-key';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { Filter } from '@/platform/services/model/common';
 import { getMinMaxValues, isNumberRange, isSelect } from './util/search';
@@ -150,7 +151,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
 
           return (
             <div key={id} className="space-y-2">
-              <Label>{t(`filters.${name}`)}</Label>
+              <Label>{t(dk<ProductFilterKey>(`filters.${name}`))}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {['min', 'max'].map((input) => {
                   const inputId = `${id}_${input}`;
@@ -190,7 +191,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
         if (isSelect(name || '')) {
           return (
             <div key={id} className="space-y-2">
-              <Label>{t(`filters.${name}`)}</Label>
+              <Label>{t(dk<ProductFilterKey>(`filters.${name}`))}</Label>
               <Select
                 value={formValues[id] as string}
                 onValueChange={(value) => {
@@ -198,7 +199,7 @@ function FilterMenu({ availableFilters, activeFilters, applyAllFacets, onSubmitC
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t(`filters.${name}`)} />
+                  <SelectValue placeholder={t(dk<ProductFilterKey>(`filters.${name}`))} />
                 </SelectTrigger>
                 <SelectContent>
                   {values.map((value) => (

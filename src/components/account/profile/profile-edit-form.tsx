@@ -28,8 +28,8 @@ type ProfileFormData = {
   preferredCurrency: string;
 };
 
-const TITLE_KEYS = ['MR', 'MRS', 'MS'];
-const LANGUAGES = ['de', 'en'];
+const TITLE_KEYS = ['MR', 'MRS', 'MS'] as const;
+const LANGUAGES = ['de', 'en'] as const;
 const CURRENCIES = ['EUR', 'USD', 'GBP'];
 
 export default function ProfileEditForm({ customer }: ProfileEditFormProps) {

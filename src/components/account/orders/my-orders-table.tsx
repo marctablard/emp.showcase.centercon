@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/dashboard-badge';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { type OrderPaymentTypeKey, type OrderStatusLowercaseKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Order } from '@/platform/services/model/order/order';
@@ -69,7 +70,7 @@ export function MyOrdersTable({
   const formatPayment = (payments: any[] | undefined) => {
     if (!payments || payments.length === 0) return '-';
     // Use the translation for the payment method if available
-    return t(`paymentTypes.${payments[0].method.toLowerCase()}`) || payments[0].method;
+    return t(dk<OrderPaymentTypeKey>(`paymentTypes.${payments[0].method.toLowerCase()}`)) || payments[0].method;
   };
 
   const visibleOrders = orders
@@ -123,7 +124,7 @@ export function MyOrdersTable({
                 </TableCell>
                 <TableCell className="px-2 py-4">
                   <Badge variant={getStatusBadge(order.status).variant}>
-                    {t(`status.${order.status.toLowerCase()}`)}
+                    {t(dk<OrderStatusLowercaseKey>(`status.${order.status.toLowerCase()}`))}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-2 py-4">
