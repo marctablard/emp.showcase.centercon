@@ -4,6 +4,7 @@ import type {
   EmporixSessionContext,
 } from '@/platform/integrations/emporix/model/session-context';
 import { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Session, SessionAttribute } from '@/platform/services/model/session/session';
 import { SessionMapper } from '../../model/session';
 import { SiteService } from '../../site/SiteService';
@@ -94,6 +95,15 @@ describe('EmporixSessionService', () => {
       .toConstantValue(mockSessionMapper);
     container.bind<EmporixSessionService>('SessionService').to(EmporixSessionService);
     container.bind<SiteService>('SiteService').toConstantValue(mockSiteService);
+    container.bind<LoggerService>('LoggerService').toConstantValue({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+      fatal: jest.fn(),
+      child: jest.fn().mockReturnThis(),
+    } as unknown as LoggerService);
 
     // Get service instance
     sessionService = container.get<EmporixSessionService>('SessionService');
