@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withApiRouteDebug } from '@/platform/core/utils/debug-utils';
 import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
@@ -7,7 +8,7 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
  * GET /api/approval/requires-approval
  * Check if a cart requires approval
  */
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const cartId = searchParams.get('cartId');
 
@@ -38,3 +39,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export const GET = withApiRouteDebug(handler);

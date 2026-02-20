@@ -426,29 +426,92 @@ NEXT_PUBLIC_DEBUG_API_ENDPOINTS=cart,order  # Optional: filter to specific endpo
 
 When `NEXT_PUBLIC_DEBUG_API_RESPONSE` is set to any value other than `OFF`, the application provides a dual-output debug system that logs upstream API calls to **both** the server terminal and the browser DevTools Console.
 
+### Call Classification
+
+Every debug event is classified along two dimensions:
+
+| Dimension | Values | Description |
+| --- | --- | --- |
+| **Call Type** | `internal` / `external` | **Internal** = browser → Next.js API route (e.g. `/api/approval/requires-approval`). **External** = server → upstream API (e.g. Emporix `POST /approval/{t}/approval/permitted`) |
+| **Source** | `client` / `ssr` / `unknown` | Where the call originated. `client` = triggered by a browser fetch. `ssr` = during server-side rendering |
+
+This lets you instantly see whether a failure is in your own API route logic or in the upstream response, and whether it was triggered by a user action or during page render.
+
+### Colour Coding
+
+**Terminal (ANSI):**
+- Internal calls: **blue** background badge ` INTERNAL `
+- External calls: **magenta** background badge ` EXTERNAL `
+- Client source: cyan `[CLIENT]` badge
+- SSR source: yellow `[SSR]` badge
+
+**Browser Console:**
+- Internal calls: blue `INT` badge with cyan-tinted URL
+- External calls: purple `EXT` badge with magenta-tinted URL
+- Errors (status ≥ 400) auto-expand, successes are collapsed
+
 ### Architecture
 
 ```
-EmporixApiInvoker.fetch()
+Browser fetch('/api/approval/requires-approval')
     │
-    ├─── buildAndLogCurl()      → Terminal: curl command
-    ├─── logRequestPayload()    → Terminal: request body (POST/PUT/PATCH)
-    └─── logResponse()          → Terminal: colorized pretty-printed response
-                │
-                └─── debugEventBus.emit(event)
-                         │
-                         ├─── Ring buffer (50 events, survives SSR→browser gap)
-                         └─── SSE subscribers
-                                  │
-                                  └─── /api/debug/stream (SSE route)
-                                           │
-                                           ├─── Replay buffered events on connect
-                                           └─── Stream live events
-                                                    │
-                                                    └─── ApiDebugPanel (browser)
-                                                              │
-                                                              └─── console.groupCollapsed()
+    ├─── withApiRouteDebug()  ← wraps API route handler
+    │        │
+    │        └─── emits ApiDebugEvent { callType: 'internal', source: 'client' }
+    │
+    └─── API route handler
+              │
+              └─── ApprovalService → EmporixApiInvoker.fetch()
+                       │
+                       ├─── buildAndLogCurl(url, opts, { callType: 'external' })
+                       ├─── logRequestPayload()
+                       └─── logResponse()
+                                │
+                                └─── emits ApiDebugEvent { callType: 'external' }
+                                         │
+                                         └─── debugEventBus
+                                                  │
+                                                  ├─── Ring buffer (50 events)
+                                                  └─── SSE subscribers
+                                                           │
+                                                           └─── /api/debug/stream
+                                                                    │
+                                                                    └─── ApiDebugPanel (browser)
+                                                                              │
+                                                                              └─── console.groupCollapsed()
+                                                                                   with INT/EXT badge
 ```
+
+### Filtering & Output Control
+
+| Env Variable | Values | Description |
+| --- | --- | --- |
+| `NEXT_PUBLIC_DEBUG_API_OUTPUT` | `BOTH` (default), `TERMINAL`, `BROWSER` | Where debug output is sent |
+| `NEXT_PUBLIC_DEBUG_API_CALL_TYPE` | `ALL` (default), `INTERNAL`, `EXTERNAL` | Filter by call direction |
+| `NEXT_PUBLIC_DEBUG_API_SOURCE` | `ALL` (default), `CLIENT`, `SSR` | Filter by call origin |
+| `NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS` | `PAYLOAD,HEADERS,BODY` (default) | Comma-separated list of detail sections shown in browser Console |
+
+### Instrumenting API Routes
+
+To log **internal** API calls (browser → `/api/*`), wrap your route handler with `withApiRouteDebug()`:
+
+```typescript
+import { withApiRouteDebug } from '@/platform/core/utils/debug-utils';
+
+async function handler(request: NextRequest) {
+  // ... your handler logic
+  return NextResponse.json(result);
+}
+
+export const GET  = withApiRouteDebug(handler);
+export const POST = withApiRouteDebug(handler);
+```
+
+This automatically logs:
+- Request method, URL, duration
+- Request payload (for POST/PUT/PATCH)
+- Response status and body
+- Emits an SSE event with `callType: 'internal'` for the browser Console
 
 **Key implementation details:**
 
@@ -463,10 +526,10 @@ EmporixApiInvoker.fetch()
 
 | File | Role |
 | --- | --- |
-| `src/platform/core/utils/debug-utils.ts` | `buildAndLogCurl()`, `logResponse()`, `logRequestPayload()`, `attachDebugHeaders()`, `colorizeJson()` |
-| `src/platform/core/utils/debug-event-bus.ts` | `DebugEventBus` class, `globalThis` singleton, ring buffer, `ApiDebugEvent` interface |
+| `src/platform/core/utils/debug-utils.ts` | `buildAndLogCurl()`, `logResponse()`, `logRequestPayload()`, `attachDebugHeaders()`, `withApiRouteDebug()`, `colorizeJson()` |
+| `src/platform/core/utils/debug-event-bus.ts` | `DebugEventBus` class, `globalThis` singleton, ring buffer, `ApiDebugEvent` interface, `DebugCallType` / `DebugCallSource` types |
 | `src/app/api/debug/stream/route.ts` | SSE endpoint with replay + live subscription |
-| `src/components/debug/ApiDebugPanel.tsx` | Invisible client component that renders events in browser Console |
+| `src/components/debug/ApiDebugPanel.tsx` | Invisible client component that renders events in browser Console with INT/EXT badges |
 
 ### 1. X-Debug Response Headers
 

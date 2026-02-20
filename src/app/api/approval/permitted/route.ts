@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withApiRouteDebug } from '@/platform/core/utils/debug-utils';
 import server from '@/platform/server';
 import { ApprovalService } from '@/platform/services/approval/ApprovalService';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
@@ -8,7 +9,7 @@ import { ApprovalPermittedRequest } from '@/platform/services/model/approval';
  * POST /api/approval/permitted
  * Check if an action is permitted for a resource
  */
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const approvalService = server.get<ApprovalService>('ApprovalService');
 
@@ -33,3 +34,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to check approval permission' }, { status: 500 });
   }
 }
+
+export const POST = withApiRouteDebug(handler);

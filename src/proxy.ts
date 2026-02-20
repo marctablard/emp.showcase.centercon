@@ -8,7 +8,7 @@ import { NEXT_REWRITE_HEADER } from './site/types';
 
 const apiBypassPrefixes = ['/api/auth', '/api/csrf', '/api/notifications', '/api/debug'];
 const accountRegex = /^(.*)\/account\/([^/]+)$/;
-const authSubpageRegex = /^(.*)\/(?:category|browse|product)\/([^/]+)$/;
+const authSubpageRegex = /^(.*)\/(category|browse|product)\/([^/]+)$/;
 const securedPatterns = [accountRegex, authSubpageRegex];
 
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));

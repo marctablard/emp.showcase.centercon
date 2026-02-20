@@ -7,6 +7,20 @@
 
 type DebugEventListener = (event: ApiDebugEvent) => void;
 
+/**
+ * Classifies the direction of the API call:
+ * - `internal`  — browser → Next.js API route (e.g. `/api/approval/requires-approval`)
+ * - `external`  — server  → upstream/external API (e.g. Emporix `POST /approval/{t}/approval/permitted`)
+ */
+export type DebugCallType = 'internal' | 'external';
+
+/**
+ * Classifies where the call originated:
+ * - `client` — triggered by a browser fetch to an API route
+ * - `ssr`    — triggered during server-side rendering / RSC
+ */
+export type DebugCallSource = 'client' | 'ssr' | 'unknown';
+
 export interface ApiDebugEvent {
   /** Unique request identifier */
   id: string;
@@ -30,6 +44,10 @@ export interface ApiDebugEvent {
   prefix?: string;
   /** Whether this was an error response (status >= 400) */
   isError?: boolean;
+  /** Internal (Next.js API route) vs External (upstream API) */
+  callType?: DebugCallType;
+  /** Where the call originated: client / ssr / unknown */
+  source?: DebugCallSource;
 }
 
 const isDev = process.env.NODE_ENV === 'development';

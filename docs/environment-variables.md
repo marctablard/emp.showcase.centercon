@@ -193,6 +193,66 @@ NEXT_DEBUG_API_PAYLOAD=true
 
 **Note:** This is a server-side-only variable (no `NEXT_PUBLIC_` prefix) because request payload logging only makes sense on the server where API calls are made.
 
+#### `NEXT_PUBLIC_DEBUG_API_OUTPUT`
+
+Controls **where** debug output is sent. Useful when you only want terminal output (e.g. CI) or only browser output (e.g. remote debugging):
+
+- `BOTH` – Log to both server terminal and browser DevTools Console (default)
+- `TERMINAL` – Log only to the server terminal (no SSE events emitted)
+- `BROWSER` – Log only to the browser DevTools Console (terminal is silent)
+
+```env
+NEXT_PUBLIC_DEBUG_API_OUTPUT=TERMINAL
+```
+
+#### `NEXT_PUBLIC_DEBUG_API_CALL_TYPE`
+
+Filter debug output by **call direction**. Helps isolate whether an issue is in your internal API routes or in external upstream APIs:
+
+- `ALL` – Log both internal and external calls (default)
+- `INTERNAL` – Log only internal API route calls (browser → `/api/*`)
+- `EXTERNAL` – Log only external upstream API calls (server → Emporix API)
+
+```env
+# Only show external Emporix API calls
+NEXT_PUBLIC_DEBUG_API_CALL_TYPE=EXTERNAL
+```
+
+> **Tip:** Internal calls are logged by API routes that use the `withApiRouteDebug()` wrapper. External calls are logged automatically by `EmporixApiInvoker`.
+
+#### `NEXT_PUBLIC_DEBUG_API_SOURCE`
+
+Filter debug output by **call origin**. Useful for isolating issues in client-triggered flows vs server-side rendering:
+
+- `ALL` – Log calls from all sources (default)
+- `CLIENT` – Log only calls originating from browser requests (via API routes)
+- `SSR` – Log only calls originating from server-side rendering / RSC
+
+```env
+NEXT_PUBLIC_DEBUG_API_SOURCE=CLIENT
+```
+
+#### `NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS`
+
+Controls which detail sections appear in the **browser DevTools Console** for each API call. Comma-separated list:
+
+- `PAYLOAD` – Show the request body (outgoing payload)
+- `HEADERS` – Show response headers
+- `BODY` – Show response body
+
+```env
+# Show everything (default)
+NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS=PAYLOAD,HEADERS,BODY
+
+# Only show payloads and response bodies (skip headers)
+NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS=PAYLOAD,BODY
+
+# Only show response body
+NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS=BODY
+```
+
+> **Note:** This only affects the browser Console output. Terminal output is still controlled by `NEXT_PUBLIC_DEBUG_API_RESPONSE`.
+
 #### Full API Debugging Example
 
 ```env
@@ -202,6 +262,12 @@ NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
 NEXT_PUBLIC_DEBUG_API_ENDPOINTS=order,return
 NEXT_PUBLIC_DEBUG_API_VERBOSE=false
 NEXT_DEBUG_API_PAYLOAD=true
+
+# Advanced: filter by call type or source
+# NEXT_PUBLIC_DEBUG_API_OUTPUT=BOTH
+# NEXT_PUBLIC_DEBUG_API_CALL_TYPE=ALL
+# NEXT_PUBLIC_DEBUG_API_SOURCE=ALL
+# NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS=PAYLOAD,HEADERS,BODY
 ```
 
 ### Multi-Site Support

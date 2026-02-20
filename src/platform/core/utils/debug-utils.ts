@@ -1,10 +1,12 @@
 import pino from 'pino';
 import { getServerLoggerConfig } from '@/platform/core/config/logger-config';
-import { type ApiDebugEvent, debugEventBus } from './debug-event-bus';
+import { type ApiDebugEvent, type DebugCallSource, type DebugCallType, debugEventBus } from './debug-event-bus';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// ---------------------------------------------------------------------------
 // ANSI color codes for terminal output (used only in dev)
+// ---------------------------------------------------------------------------
 const c = {
   cyan: '\x1b[36m',
   yellow: '\x1b[33m',
@@ -12,7 +14,110 @@ const c = {
   green: '\x1b[32m',
   dim: '\x1b[2m',
   reset: '\x1b[0m',
+  blue: '\x1b[34m',
+  red: '\x1b[31m',
+  white: '\x1b[37m',
+  bgBlue: '\x1b[44m',
+  bgMagenta: '\x1b[45m',
+  bgCyan: '\x1b[46m',
+  bgYellow: '\x1b[43m',
+  bold: '\x1b[1m',
 } as const;
+
+// ---------------------------------------------------------------------------
+// Call-type & source colour themes  (terminal ANSI)
+// ---------------------------------------------------------------------------
+const CALL_TYPE_COLORS = {
+  /** Internal API route call — blue theme */
+  internal: { tag: `${c.bgBlue}${c.white}${c.bold}`, prefix: c.blue },
+  /** External upstream API call — magenta theme */
+  external: { tag: `${c.bgMagenta}${c.white}${c.bold}`, prefix: c.magenta },
+} as const;
+
+const SOURCE_COLORS = {
+  client: c.cyan,
+  ssr: c.yellow,
+  unknown: c.dim,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Configuration helpers  (read env vars once per call — cheap string ops)
+// ---------------------------------------------------------------------------
+export type DebugOutput = 'terminal' | 'browser' | 'both';
+export type DebugCallTypeFilter = 'all' | 'internal' | 'external';
+export type DebugSourceFilter = 'all' | 'client' | 'ssr';
+export type BrowserDetail = 'payload' | 'headers' | 'body';
+
+/** Where should debug output be sent? Default: BOTH */
+function getDebugOutput(): DebugOutput {
+  const v = (process.env.NEXT_PUBLIC_DEBUG_API_OUTPUT || 'both').toLowerCase();
+  if (v === 'terminal' || v === 'browser') return v;
+  return 'both';
+}
+
+/** Which call types to log? Default: ALL */
+function getDebugCallTypeFilter(): DebugCallTypeFilter {
+  const v = (process.env.NEXT_PUBLIC_DEBUG_API_CALL_TYPE || 'all').toLowerCase();
+  if (v === 'internal' || v === 'external') return v;
+  return 'all';
+}
+
+/** Which source to log? Default: ALL */
+function getDebugSourceFilter(): DebugSourceFilter {
+  const v = (process.env.NEXT_PUBLIC_DEBUG_API_SOURCE || 'all').toLowerCase();
+  if (v === 'client' || v === 'ssr') return v;
+  return 'all';
+}
+
+/** Which detail sections to show in the browser Console? Default: all three */
+function getBrowserDetails(): Set<BrowserDetail> {
+  const raw = (process.env.NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS || 'payload,headers,body').toLowerCase();
+  const parts = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const allowed = new Set<BrowserDetail>();
+  for (const p of parts) {
+    if (p === 'payload' || p === 'headers' || p === 'body') allowed.add(p);
+  }
+  // If nothing valid was specified, default to all
+  if (allowed.size === 0) {
+    allowed.add('payload');
+    allowed.add('headers');
+    allowed.add('body');
+  }
+  return allowed;
+}
+
+/** Should this event be logged given current call-type + source filters? */
+function shouldLogEvent(callType?: DebugCallType, source?: DebugCallSource): boolean {
+  const ctFilter = getDebugCallTypeFilter();
+  if (ctFilter !== 'all' && callType && callType !== ctFilter) return false;
+  const srcFilter = getDebugSourceFilter();
+  if (srcFilter !== 'all' && source && source !== srcFilter) return false;
+  return true;
+}
+
+/** Should output go to the terminal? */
+function shouldLogToTerminal(): boolean {
+  const out = getDebugOutput();
+  return out === 'terminal' || out === 'both';
+}
+
+/** Should output go to the browser (SSE stream)? */
+function shouldLogToBrowser(): boolean {
+  const out = getDebugOutput();
+  return out === 'browser' || out === 'both';
+}
+
+/**
+ * Optional context passed through the debug logging pipeline.
+ * Callers can provide callType and source to enable richer output.
+ */
+export interface DebugContext {
+  callType?: DebugCallType;
+  source?: DebugCallSource;
+}
 
 /**
  * Colorizes a pretty-printed JSON string for terminal readability.
@@ -34,9 +139,27 @@ let _debugLogger: pino.Logger | null = null;
 // Track request start times for duration calculation (dev only)
 const _requestTimestamps = new Map<string, number>();
 
+// Track debug contexts per request so logResponse can access them (dev only)
+const _requestContexts = new Map<string, DebugContext>();
+
 /** Generate a short unique ID for correlating request/response events */
 function generateRequestId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+/** Format an ANSI-coloured call-type tag for terminal output, e.g. ` EXTERNAL ` */
+function formatCallTypeTag(callType?: DebugCallType): string {
+  if (!isDev || !callType) return '';
+  const theme = CALL_TYPE_COLORS[callType];
+  const label = callType.toUpperCase();
+  return `${theme.tag} ${label} ${c.reset} `;
+}
+
+/** Format a coloured source badge for terminal output */
+function formatSourceBadge(source?: DebugCallSource): string {
+  if (!isDev || !source || source === 'unknown') return '';
+  const colour = SOURCE_COLORS[source];
+  return `${colour}[${source.toUpperCase()}]${c.reset} `;
 }
 
 /**
@@ -191,16 +314,21 @@ function shouldLogEndpoint(url: string): boolean {
  * In dev mode also records a start timestamp for duration calculation.
  * @param url Target URL
  * @param options Request options
+ * @param ctx Optional debug context (call type, source)
  * @returns The log prefix used for this request
  */
-export function buildAndLogCurl(url: string, options: RequestInit): string {
+export function buildAndLogCurl(url: string, options: RequestInit, ctx?: DebugContext): string {
   const debugCurl = process.env.NEXT_PUBLIC_DEBUG_API_CURL === 'true';
   const maskSensitive = shouldMaskSensitive();
   let logPrefix = '';
   if (debugCurl) {
     if (!shouldLogEndpoint(url)) return '';
+    if (!shouldLogEvent(ctx?.callType, ctx?.source)) return '';
     logPrefix = `[${getDebugPrefix(url)}]`;
-    getDebugLogger().debug(`${logPrefix} ${buildCurl(url, options, maskSensitive)}`);
+    if (shouldLogToTerminal()) {
+      const typeTag = formatCallTypeTag(ctx?.callType);
+      getDebugLogger().debug(`${typeTag}${logPrefix} ${buildCurl(url, options, maskSensitive)}`);
+    }
   }
   // Track request start time for the SSE debug stream (always in dev — events are buffered for replay)
   if (isDev) {
@@ -208,6 +336,10 @@ export function buildAndLogCurl(url: string, options: RequestInit): string {
     _requestTimestamps.set(`${(options.method || 'GET').toUpperCase()}:${url}`, Date.now());
     // Store the requestId so logResponse can correlate
     _requestTimestamps.set(`rid:${(options.method || 'GET').toUpperCase()}:${url}`, requestId as unknown as number);
+    // Store the debug context so logResponse can use it
+    if (ctx) {
+      _requestContexts.set(`ctx:${(options.method || 'GET').toUpperCase()}:${url}`, ctx);
+    }
   }
   return logPrefix;
 }
@@ -218,25 +350,40 @@ export function buildAndLogCurl(url: string, options: RequestInit): string {
  * @param url The request URL
  * @param requestOptions The original request options
  * @param prefix Optional log prefix
+ * @param ctx Optional debug context (call type, source). Falls back to stored context from buildAndLogCurl.
  */
 export async function logResponse(
   response: Response,
   url: string,
   requestOptions: RequestInit,
   prefix?: string,
+  ctx?: DebugContext,
 ): Promise<void> {
   const maskSensitive = shouldMaskSensitive();
   const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
   if (debugResponse === 'off') return;
   if (!shouldLogEndpoint(url)) return;
 
+  const method = (requestOptions.method || 'GET').toUpperCase();
+
+  // Recover stored context if not explicitly passed
+  const ctxKey = `ctx:${method}:${url}`;
+  const effectiveCtx: DebugContext = ctx || _requestContexts.get(ctxKey) || {};
+  _requestContexts.delete(ctxKey);
+
+  if (!shouldLogEvent(effectiveCtx.callType, effectiveCtx.source)) return;
+
   const status = response.status;
   const isError = status >= 400;
   const logger = getDebugLogger();
   const log = isError ? logger.error.bind(logger) : logger.debug.bind(logger);
-  const method = (requestOptions.method || 'GET').toUpperCase();
   const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
-  const logPrefix = prefix ? `${prefix} [${method} ${status}]` : `[${method} ${status}]`;
+
+  const typeTag = formatCallTypeTag(effectiveCtx.callType);
+  const srcBadge = formatSourceBadge(effectiveCtx.source);
+  const logPrefix = prefix
+    ? `${typeTag}${srcBadge}${prefix} [${method} ${status}]`
+    : `${typeTag}${srcBadge}[${method} ${status}]`;
 
   // Build a human-readable, pretty-printed log message
   let message = `${logPrefix} ${maskedUrl}`;
@@ -244,7 +391,7 @@ export async function logResponse(
   // --- 1. Handle Headers ---
   const needsHeaders = debugResponse === 'status-headers' || debugResponse === 'full';
   let responseHeaders: Record<string, string> | undefined;
-  if (needsHeaders) {
+  if (needsHeaders && shouldLogToTerminal()) {
     let headers = Object.fromEntries(response.headers.entries());
     if (maskSensitive) {
       headers = maskHeaders(headers);
@@ -261,29 +408,50 @@ export async function logResponse(
     try {
       bodyText = await response.clone().text();
 
-      if (debugResponse.startsWith('status-body-')) {
-        const limit = parseInt(debugResponse.split('-')[2], 10) || 200;
-        message += `\n  Body (max ${limit} chars): ${bodyText.slice(0, limit)}`;
-      } else {
-        // Pretty-print JSON bodies; fall back to raw text for non-JSON
-        try {
-          const parsed = JSON.parse(bodyText);
-          const prettyBody = JSON.stringify(parsed, null, 2).replace(/\n/g, '\n    ');
-          message += `\n  ${c.dim}Body:${c.reset} ${colorizeJson(prettyBody)}`;
-        } catch {
-          message += `\n  ${c.dim}Body:${c.reset} ${bodyText}`;
+      if (shouldLogToTerminal()) {
+        if (debugResponse.startsWith('status-body-')) {
+          const limit = parseInt(debugResponse.split('-')[2], 10) || 200;
+          message += `\n  Body (max ${limit} chars): ${bodyText.slice(0, limit)}`;
+        } else {
+          // Pretty-print JSON bodies; fall back to raw text for non-JSON
+          try {
+            const parsed = JSON.parse(bodyText);
+            const prettyBody = JSON.stringify(parsed, null, 2).replace(/\n/g, '\n    ');
+            message += `\n  ${c.dim}Body:${c.reset} ${colorizeJson(prettyBody)}`;
+          } catch {
+            message += `\n  ${c.dim}Body:${c.reset} ${bodyText}`;
+          }
         }
       }
     } catch (err) {
-      message += `\n  Body error: ${err}`;
+      if (shouldLogToTerminal()) {
+        message += `\n  Body error: ${err}`;
+      }
     }
   }
 
-  // --- 3. Final Log ---
-  log(message);
+  // --- 3. Final Log (terminal) ---
+  if (shouldLogToTerminal()) {
+    log(message);
+  }
 
-  // --- 4. Emit to browser debug stream (dev only, always — events are buffered for replay) ---
-  if (isDev) {
+  // --- 4. Extract request payload string for the browser event ---
+  let requestBodyStr: string | undefined;
+  if (requestOptions.body) {
+    try {
+      const body = requestOptions.body;
+      requestBodyStr =
+        typeof body === 'string' ? body : body instanceof URLSearchParams ? body.toString() : JSON.stringify(body);
+      if (maskSensitive && requestBodyStr && requestBodyStr.length > 500) {
+        requestBodyStr = requestBodyStr.substring(0, 500) + '...(truncated)';
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // --- 5. Emit to browser debug stream (dev only, always — events are buffered for replay) ---
+  if (isDev && shouldLogToBrowser()) {
     const tsKey = `${method}:${url}`;
     const ridKey = `rid:${tsKey}`;
     const startTime = _requestTimestamps.get(tsKey);
@@ -291,11 +459,19 @@ export async function logResponse(
     _requestTimestamps.delete(tsKey);
     _requestTimestamps.delete(ridKey);
 
-    // Reuse headers from section 1, or compute them for the SSE event
+    // Compute headers for the SSE event if not already done for terminal
     if (!responseHeaders && debugResponse !== 'status') {
       let hdrs = Object.fromEntries(response.headers.entries());
       if (maskSensitive) hdrs = maskHeaders(hdrs);
       responseHeaders = hdrs;
+    }
+    // Also read body for the event if not done for terminal
+    if (!bodyText && (debugResponse.startsWith('status-body') || debugResponse === 'full')) {
+      try {
+        bodyText = await response.clone().text();
+      } catch {
+        // already consumed
+      }
     }
 
     const event: ApiDebugEvent = {
@@ -306,11 +482,19 @@ export async function logResponse(
       status,
       responseHeaders,
       responseBody: bodyText,
+      requestBody: requestBodyStr,
       duration: startTime ? Date.now() - startTime : undefined,
       prefix: prefix || undefined,
       isError,
+      callType: effectiveCtx.callType,
+      source: effectiveCtx.source,
     };
     debugEventBus.emit(event);
+  } else if (isDev) {
+    // Clean up timestamps even if we skip browser emit
+    const tsKey = `${method}:${url}`;
+    _requestTimestamps.delete(tsKey);
+    _requestTimestamps.delete(`rid:${tsKey}`);
   }
 }
 
@@ -320,11 +504,14 @@ export async function logResponse(
  * @param url Target URL
  * @param options Request options
  * @param prefix Optional log prefix
+ * @param ctx Optional debug context (call type, source)
  */
-export function logRequestPayload(url: string, options: RequestInit, prefix: string): void {
+export function logRequestPayload(url: string, options: RequestInit, prefix: string, ctx?: DebugContext): void {
   const debugPayload = process.env.NEXT_DEBUG_API_PAYLOAD === 'true';
   if (!debugPayload) return;
   if (!shouldLogEndpoint(url)) return;
+  if (!shouldLogEvent(ctx?.callType, ctx?.source)) return;
+  if (!shouldLogToTerminal()) return;
 
   const method = (options.method || 'GET').toUpperCase();
   if (!['POST', 'PUT', 'PATCH'].includes(method)) return;
@@ -333,6 +520,7 @@ export function logRequestPayload(url: string, options: RequestInit, prefix: str
   if (!body) return;
 
   const logger = getDebugLogger();
+  const typeTag = formatCallTypeTag(ctx?.callType);
   const logPrefix = prefix || `[${getDebugPrefix(url)}]`;
 
   try {
@@ -341,13 +529,13 @@ export function logRequestPayload(url: string, options: RequestInit, prefix: str
     const maskSensitive = shouldMaskSensitive();
     if (maskSensitive) {
       logger.debug(
-        `${logPrefix} [${method} PAYLOAD] ${bodyStr.substring(0, 500)}${bodyStr.length > 500 ? '...(truncated)' : ''}`,
+        `${typeTag}${logPrefix} [${method} PAYLOAD] ${bodyStr.substring(0, 500)}${bodyStr.length > 500 ? '...(truncated)' : ''}`,
       );
     } else {
-      logger.debug(`${logPrefix} [${method} PAYLOAD] ${bodyStr}`);
+      logger.debug(`${typeTag}${logPrefix} [${method} PAYLOAD] ${bodyStr}`);
     }
   } catch {
-    logger.debug(`${logPrefix} [${method} PAYLOAD] <unserializable body>`);
+    logger.debug(`${typeTag}${logPrefix} [${method} PAYLOAD] <unserializable body>`);
   }
 }
 
@@ -382,3 +570,132 @@ export function attachDebugHeaders(
     nextResponse.headers.set('X-Debug-Upstream-Duration', `${Date.now() - startTime}ms`);
   }
 }
+
+// ---------------------------------------------------------------------------
+// API Route Debug Wrapper  — instruments internal Next.js API calls
+// ---------------------------------------------------------------------------
+
+/**
+ * Wraps a Next.js API route handler to automatically log the internal
+ * request / response as an `internal` debug event. The handler itself is
+ * unchanged — this only adds debug logging around it.
+ *
+ * Usage:
+ * ```ts
+ * import { withApiRouteDebug } from '@/platform/core/utils/debug-utils';
+ *
+ * async function handler(request: NextRequest) { ... }
+ *
+ * export const GET  = withApiRouteDebug(handler);
+ * export const POST = withApiRouteDebug(handler);
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function withApiRouteDebug<T extends (...args: any[]) => Promise<Response>>(handler: T): T {
+  if (!isDev) return handler; // no-op in production
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const wrapped = async (...args: any[]): Promise<Response> => {
+    const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
+    if (debugResponse === 'off') return handler(...args);
+
+    const request = args[0] as Request | undefined;
+    if (!request || typeof request.url !== 'string') return handler(...args);
+
+    const ctx: DebugContext = { callType: 'internal', source: 'client' };
+    const method = request.method?.toUpperCase() || 'GET';
+    const url = request.url;
+
+    if (!shouldLogEndpoint(url)) return handler(...args);
+    if (!shouldLogEvent(ctx.callType, ctx.source)) return handler(...args);
+
+    const start = Date.now();
+    const requestId = generateRequestId();
+
+    // Extract request body for POST/PUT/PATCH
+    let reqBodyStr: string | undefined;
+    if (['POST', 'PUT', 'PATCH'].includes(method)) {
+      try {
+        reqBodyStr = await request.clone().text();
+      } catch {
+        // body might not be readable
+      }
+    }
+
+    let response: Response;
+    try {
+      response = await handler(...args);
+    } catch (err) {
+      // Log the error and re-throw
+      const logger = getDebugLogger();
+      const typeTag = formatCallTypeTag('internal');
+      logger.error(`${typeTag}[${method} ERROR] ${url} — ${err instanceof Error ? err.message : String(err)}`);
+      throw err;
+    }
+
+    const duration = Date.now() - start;
+    const status = response.status;
+    const isError = status >= 400;
+    const maskSensitive = shouldMaskSensitive();
+
+    // Terminal log
+    if (shouldLogToTerminal()) {
+      const typeTag = formatCallTypeTag('internal');
+      const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
+      const logger = getDebugLogger();
+      const log = isError ? logger.error.bind(logger) : logger.debug.bind(logger);
+      log(`${typeTag}[${method} ${status}] ${maskedUrl} (${duration}ms)`);
+
+      // Log request payload to terminal
+      if (reqBodyStr && process.env.NEXT_DEBUG_API_PAYLOAD === 'true') {
+        const payloadPreview = maskSensitive ? reqBodyStr.substring(0, 500) : reqBodyStr;
+        logger.debug(
+          `${typeTag}[${method} PAYLOAD] ${payloadPreview}${reqBodyStr.length > 500 ? '...(truncated)' : ''}`,
+        );
+      }
+    }
+
+    // Browser SSE event
+    if (shouldLogToBrowser()) {
+      const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
+      let resBodyText: string | undefined;
+      let resHeaders: Record<string, string> | undefined;
+
+      try {
+        resBodyText = await response.clone().text();
+      } catch {
+        // body already consumed
+      }
+      try {
+        let hdrs = Object.fromEntries(response.headers.entries());
+        if (maskSensitive) hdrs = maskHeaders(hdrs);
+        resHeaders = hdrs;
+      } catch {
+        // ignore
+      }
+
+      const event: ApiDebugEvent = {
+        id: requestId,
+        timestamp: new Date().toISOString(),
+        method,
+        url: maskedUrl,
+        status,
+        responseHeaders: resHeaders,
+        responseBody: resBodyText,
+        requestBody: reqBodyStr,
+        duration,
+        isError,
+        callType: 'internal',
+        source: 'client',
+      };
+      debugEventBus.emit(event);
+    }
+
+    return response;
+  };
+
+  return wrapped as T;
+}
+
+/** Re-export getBrowserDetails for the ApiDebugPanel */
+export { getBrowserDetails };

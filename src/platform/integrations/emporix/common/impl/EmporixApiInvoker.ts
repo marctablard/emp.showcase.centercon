@@ -1,6 +1,12 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
-import { buildAndLogCurl, getDebugLogger, logRequestPayload, logResponse } from '@/platform/core/utils/debug-utils';
+import {
+  type DebugContext,
+  buildAndLogCurl,
+  getDebugLogger,
+  logRequestPayload,
+  logResponse,
+} from '@/platform/core/utils/debug-utils';
 import type { EmporixConfig } from '../../config';
 import type { EmporixTokenManager } from '../EmporixTokenManager';
 
@@ -154,8 +160,9 @@ class EmporixApiInvoker {
 
   async fetch(url: string, options: RequestInit = {}): Promise<Response> {
     url = `${this.config.baseUrl}/${url}`;
-    const prefix = buildAndLogCurl(url, options);
-    logRequestPayload(url, options, prefix);
+    const ctx: DebugContext = { callType: 'external' };
+    const prefix = buildAndLogCurl(url, options, ctx);
+    logRequestPayload(url, options, prefix, ctx);
     const responsePromise = fetch(url, options);
     responsePromise.catch((err) =>
       getDebugLogger().error(
@@ -163,7 +170,7 @@ class EmporixApiInvoker {
         `${prefix} [FETCH ERROR]`,
       ),
     );
-    responsePromise.then((response) => logResponse(response, url, options, prefix));
+    responsePromise.then((response) => logResponse(response, url, options, prefix, ctx));
     return responsePromise;
   }
 
