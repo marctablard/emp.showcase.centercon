@@ -1,5 +1,5 @@
 import { Container } from 'inversify';
-import { TokenManager } from '../../common/TokenManager';
+import { EmporixTokenManager as TokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
 import { EmporixConfig } from '../../config';

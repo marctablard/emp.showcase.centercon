@@ -40,7 +40,7 @@ describe('CartStore - Site Validation', () => {
         items: [],
         totalPrice: { amount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, currency: 'EUR' },
-        tax: { amount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
       };
 
       // Set initial cart state
@@ -68,7 +68,7 @@ describe('CartStore - Site Validation', () => {
         items: [{ id: 'item-1', quantity: 1, price: { amount: 10, currency: 'EUR' } }],
         totalPrice: { amount: 10, currency: 'EUR' },
         subTotalPrice: { amount: 10, currency: 'EUR' },
-        tax: { amount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
       };
 
       const newSiteCart = {
@@ -78,7 +78,7 @@ describe('CartStore - Site Validation', () => {
         items: [],
         totalPrice: { amount: 0, currency: 'USD' },
         subTotalPrice: { amount: 0, currency: 'USD' },
-        tax: { amount: 0, currency: 'USD' },
+        tax: { amount: 0, currency: 'USD', netValue: 0, grossValue: 0 },
       };
 
       mockFetchCurrentCart.mockResolvedValueOnce(newSiteCart);
@@ -112,7 +112,7 @@ describe('CartStore - Site Validation', () => {
         items: [{ id: 'item-1', quantity: 1, price: { amount: 10, currency: 'EUR' } }],
         totalPrice: { amount: 10, currency: 'EUR' },
         subTotalPrice: { amount: 10, currency: 'EUR' },
-        tax: { amount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
       };
 
       // Set initial cart and site
@@ -144,7 +144,7 @@ describe('CartStore - Site Validation', () => {
         items: [],
         totalPrice: { amount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, currency: 'EUR' },
-        tax: { amount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
       };
 
       // Set initial cart and site
@@ -177,7 +177,7 @@ describe('CartStore - Site Validation', () => {
         items: [],
         totalPrice: { amount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, currency: 'EUR' },
-        tax: { amount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
       };
 
       // Set initial cart and site
@@ -212,7 +212,7 @@ describe('CartStore - Site Validation', () => {
         items: [],
         totalPrice: { amount: 0, currency: 'USD' },
         subTotalPrice: { amount: 0, currency: 'USD' },
-        tax: { amount: 0, currency: 'USD' },
+        tax: { amount: 0, currency: 'USD', netValue: 0, grossValue: 0 },
       });
 
       await act(async () => {
@@ -232,7 +232,7 @@ describe('CartStore - Site Validation', () => {
         items: [],
         totalPrice: { amount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, currency: 'EUR' },
-        tax: { amount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
       };
 
       // Set initial cart and site

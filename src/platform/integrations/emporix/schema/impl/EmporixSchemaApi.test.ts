@@ -118,7 +118,7 @@ describe('EmporixSchemaApi', () => {
         expect(createdCustomInstanceId).toBe(sampleCustomInstanceCreation.id);
       }, 10000);
 
-      let customInstance: EmporixCustomEntity | undefined;
+      let customInstance: EmporixCustomEntity | null | undefined;
       it('should get a custom instance by ID', async () => {
         // Get the custom instance we just created
         customInstance = await schemaApi.getCustomEntity('TEST_ENTITY', createdCustomInstanceId);
