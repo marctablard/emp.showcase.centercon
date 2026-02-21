@@ -68,6 +68,11 @@ const defaultState: CartState = {
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
+  // In-flight promise deduplication for fetchCart
+  // Stored outside Zustand state to avoid triggering re-renders
+  let _fetchPromise: Promise<Cart | null | undefined> | null = null;
+  let _fetchPromiseCreate: boolean = false;
+
   return create<CartStore>()(
     subscribeWithSelector((set, get) => ({
       ...initState,
@@ -75,7 +80,17 @@ export const createCartStore = (initState: CartState = defaultState) => {
         const { sessionStatus } = get();
         if (sessionStatus !== newSessionStatus) {
           set({ sessionStatus: newSessionStatus });
-          await get().fetchCart(false);
+          // Only clear cart on actual auth transitions (not initial mount)
+          // On first mount, sessionStatus is null — this is initialization, not an auth change
+          if (sessionStatus !== null) {
+            set({
+              currentCart: null,
+              loading: true,
+              error: null,
+              lastShippingUpdate: null,
+            });
+            await get().fetchCart(false);
+          }
         }
       },
       validateSite: async (newSiteCode: string) => {
@@ -109,25 +124,44 @@ export const createCartStore = (initState: CartState = defaultState) => {
 
       // Cart API operations
       fetchCart: async (createCurrent: boolean = false) => {
-        try {
-          set({ loading: true, error: null });
-
-          // Try to fetch existing cart
-          try {
-            const cartData = await apiFetchCurrentCart(createCurrent);
-            set({ currentCart: cartData, loading: false });
-            return cartData;
-          } catch (_err) {
-            // Silent error when cart is gone
-            set({ currentCart: null, loading: false });
-            return null;
-          }
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error('Failed to fetch cart');
-          set({ error, loading: false });
-          getLogger().error({ err }, 'Error fetching cart');
-          return undefined;
+        // Dedup: if a fetch is already in-flight, reuse it
+        // A create=true call must NOT reuse a create=false in-flight request
+        if (_fetchPromise && (createCurrent === _fetchPromiseCreate || !createCurrent)) {
+          return _fetchPromise;
         }
+
+        _fetchPromiseCreate = createCurrent;
+        const currentFetchPromise = (async () => {
+          try {
+            set({ loading: true, error: null });
+
+            try {
+              const cartData = await apiFetchCurrentCart(createCurrent);
+              set({ currentCart: cartData, loading: false });
+              return cartData;
+            } catch (_err) {
+              // Silent error when cart is gone
+              set({ currentCart: null, loading: false });
+              return null;
+            }
+          } catch (err) {
+            const error = err instanceof Error ? err : new Error('Failed to fetch cart');
+            set({ error, loading: false });
+            getLogger().error({ err }, 'Error fetching cart');
+            return undefined;
+          }
+        })();
+        _fetchPromise = currentFetchPromise;
+
+        // Clean up after completion — only clear if this is still the current in-flight promise
+        // (prevents a later fetchCart(true) from being cleared by an earlier fetchCart(false) completing)
+        void currentFetchPromise.finally(() => {
+          if (_fetchPromise === currentFetchPromise) {
+            _fetchPromise = null;
+          }
+        });
+
+        return _fetchPromise;
       },
 
       loadCart: async (cartId: string, type: string = 'shopping') => {
@@ -321,6 +355,9 @@ export const createCartStore = (initState: CartState = defaultState) => {
       },
 
       syncCurrencyWithSession: async (currency: string, siteCode: string) => {
+        // Skip sync during cart transitions (e.g., login cart merge in progress)
+        if (get().loading) return;
+
         const { currentCart } = get();
         if (!currentCart) return;
 

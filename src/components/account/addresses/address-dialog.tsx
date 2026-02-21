@@ -52,14 +52,14 @@ export function AddressDialog({
       if (addressId) {
         const updatedAddress = await updateAddress(addressId, {
           ...formData,
-          types: [addressType],
+          tags: [addressType],
         });
         if (onSave) onSave(updatedAddress);
       } else {
         // Otherwise create a new address
         const newAddress = await createAddress({
           ...formData,
-          types: [addressType],
+          tags: [addressType],
         });
         if (onSave) onSave(newAddress);
       }

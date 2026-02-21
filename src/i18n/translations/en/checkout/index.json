@@ -53,7 +53,7 @@
     "address": "Shipping Address",
     "shippingMethod": "Shipping Method",
     "loading": "Loading shipping methods...",
-    "noShippingMethodsAvailable": "No shipping methods available for your location",
+    "noShippingMethodsAvailable": "No shipping methods available for your currency or location",
     "enterShippingAddressFirst": "Please enter your shipping address first",
     "freeShipping": "Free Shipping",
     "estimatedDelivery": "Estimated delivery: 3-5 business days",

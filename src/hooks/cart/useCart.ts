@@ -52,8 +52,8 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
   } = useCartStore();
 
   useEffect(() => {
-    if (!cart) {
-      // Initialize with initialCart if provided and cart is undefined
+    if (cart === undefined) {
+      // Cart state is unknown — either hydrate from SSR prop or fetch
       if (initialCart !== undefined) {
         setCurrentCart(initialCart);
       } else {

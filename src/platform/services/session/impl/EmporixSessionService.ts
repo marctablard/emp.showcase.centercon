@@ -101,7 +101,7 @@ class EmporixSessionService implements SessionService {
     if (!session) {
       return;
     }
-    this.sessionContextApi.addOwnSessionContextAttribute({
+    await this.sessionContextApi.addOwnSessionContextAttribute({
       key: 'currentCart',
       value: cartId,
     });

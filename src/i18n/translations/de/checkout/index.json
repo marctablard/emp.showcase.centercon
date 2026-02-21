@@ -49,7 +49,7 @@
     "address": "Lieferadresse",
     "shippingMethod": "Versandart",
     "loading": "Versandarten werden geladen...",
-    "noShippingMethodsAvailable": "Keine Versandarten für Ihren Standort verfügbar",
+    "noShippingMethodsAvailable": "Keine Versandarten für Ihre Währung oder Ihren Standort verfügbar",
     "enterShippingAddressFirst": "Bitte geben Sie zuerst Ihre Lieferadresse ein",
     "freeShipping": "Kostenloser Versand",
     "estimatedDelivery": "Voraussichtliche Lieferung: 3-5 Werktage",

@@ -130,7 +130,9 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
     <Tooltip onOpenChange={openChange}>
       {isAboveMediumScreen ? (
         <>
-          <TooltipTrigger asChild>{renderButton()}</TooltipTrigger>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">{renderButton()}</span>
+          </TooltipTrigger>
           <TooltipPrimitive.Portal>
             <TooltipPrimitive.Content
               data-slot="tooltip-content"

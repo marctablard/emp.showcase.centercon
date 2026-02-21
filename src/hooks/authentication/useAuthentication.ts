@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useLocale } from 'next-intl';
 import { getPathname } from '@/i18n/navigation';
+import { useCartStore } from '@/providers/StoreProvider';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
 import { useSite } from '../site/useSite';
@@ -36,6 +37,7 @@ export const useAuthentication = (): AuthenticationHook => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
+  const { clearCart } = useCartStore();
   const [_isPending, startTransition] = useTransition();
 
   // Update authentication state when session status changes
@@ -68,6 +70,7 @@ export const useAuthentication = (): AuthenticationHook => {
         setIsAuthenticated(false);
       } else {
         setIsAuthenticated(true);
+        clearCart();
         reset();
         if (safeCallbackUrl) {
           window.location.href = getPathname({ href: safeCallbackUrl + '?login=success', locale, site: site?.code });

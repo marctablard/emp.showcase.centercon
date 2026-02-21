@@ -314,5 +314,80 @@ describe('Store Synchronizer', () => {
       expect(syncSpy).toHaveBeenCalledWith('GBP', 'main');
       expect(syncSpy).toHaveBeenCalledWith('CHF', 'main');
     });
+
+    it('should not update currency when cart store is in loading state (e.g., post-login transition)', async () => {
+      // Set up cart with loading state (simulating post-login cart fetch in progress)
+      act(() => {
+        cartStore.setState({
+          currentCart: createMockCart({ site: 'main', currency: 'USD' }),
+          loading: true,
+        });
+      });
+
+      const updateCurrencySpy = jest.spyOn(cartStore.getState(), 'updateCurrency');
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+      });
+
+      // Change session currency while cart is loading
+      await act(async () => {
+        sessionStore.setState({
+          session: createMockSession({ currency: 'EUR' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // syncCurrencyWithSession should be called but should early-return due to loading state,
+      // so updateCurrency should NOT be called
+      expect(updateCurrencySpy).not.toHaveBeenCalled();
+    });
+
+    it('should resume currency sync after loading state clears', async () => {
+      // Start with loading state
+      act(() => {
+        cartStore.setState({
+          currentCart: createMockCart({ site: 'main', currency: 'USD' }),
+          loading: true,
+        });
+      });
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+      });
+
+      // Change currency while loading — should be skipped
+      await act(async () => {
+        sessionStore.setState({
+          session: createMockSession({ currency: 'EUR' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const updateCurrencySpy = jest.spyOn(cartStore.getState(), 'updateCurrency');
+
+      // Clear loading state (simulating fetchCart completed)
+      act(() => {
+        cartStore.setState({ loading: false });
+      });
+
+      // Now change currency again — should trigger sync
+      await act(async () => {
+        sessionStore.setState({
+          session: createMockSession({ currency: 'GBP' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // This time updateCurrency should be called since loading is false
+      expect(updateCurrencySpy).toHaveBeenCalled();
+    });
   });
 });

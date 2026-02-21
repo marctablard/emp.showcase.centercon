@@ -15,7 +15,7 @@ import ShippingMethod from './shipping-method';
 export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
   const t = useTranslations('checkout.shipping');
   const { addresses } = useAddresses();
-  const { shippingAddress, shippingMethod, submitShippingAddress } = useCheckout();
+  const { availableShippingMethods, shippingAddress, shippingMethod, submitShippingAddress } = useCheckout();
   const [isShippingEdit, setIsShippingEdit] = useState(initialEdit || !shippingAddress || !shippingMethod);
 
   const handleShippingAddressChange = (address: Address) => {
@@ -66,6 +66,9 @@ export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
                   </div>
                   <div>
                     <p>{shippingMethod?.methodName}</p>
+                    {!shippingMethod && availableShippingMethods.length === 0 && (
+                      <p className="text-sm text-text-error">{t('noShippingMethodsAvailable')}</p>
+                    )}
                     {/*<p>Arrives on July 12, 2025</p>*/}
                   </div>
                 </div>

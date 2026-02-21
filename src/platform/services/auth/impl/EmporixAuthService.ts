@@ -50,33 +50,92 @@ export class EmporixAuthService implements AuthService {
     }
     let customerCartId: string | undefined;
     if (oldSession) {
-      const siteCode = oldSession.siteCode || 'main';
-      const oldSessionId = oldSession.id || '';
-      const oldCart = await this.cartService.getCartByCriteria(siteCode, oldSessionId, undefined);
-      // only merge carts if the old cart is anonymous
-      if (oldCart && !oldCart.customerId) {
-        // Capture the resulting customer cart id for the return value
-        if (session.customerId) {
+      try {
+        const siteCode = oldSession.siteCode || 'main';
+
+        // Use the cart ID directly from the old session (with service scope via checkSession=false)
+        // instead of searching by criteria. After login, the session token has switched to the
+        // customer token, whose legalEntityId filter prevents finding anonymous carts via criteria search.
+        const oldCartId = oldSession.cartId;
+        const oldCart = oldCartId ? await this.cartService.getCartById(oldCartId, false) : null;
+        // Only merge carts if the old cart is anonymous and has items
+        if (oldCart && !oldCart.customerId && oldCart.items?.length > 0 && session.customerId) {
+          const currency = session.currency ?? oldCart.currency;
           const customerCart = await this.cartService.getCart();
-          let customerCartId: string;
+
           if (!customerCart) {
-            customerCartId = await this.cartService.createCart(siteCode, session.customerId);
+            customerCartId = await this.cartService.createCart(currency, siteCode);
           } else {
             customerCartId = customerCart.id;
           }
+
+          const targetCurrency = customerCart?.currency ?? currency;
+
+          // Align anonymous cart currency to match customer cart before merge
+          if (oldCart.currency !== targetCurrency) {
+            try {
+              await this.cartService.updateCurrency(oldCart.id, targetCurrency);
+            } catch (currencyError) {
+              // updateCurrency does changeCurrency + refreshCart. For anonymous carts with a
+              // customer session token, the changeCurrency succeeds but refreshCart fails with
+              // "Anonymous cart cannot be assigned to a legal entity" (B2B legalEntityId filter).
+              // Since changeCurrency already succeeded, we can safely proceed with the merge —
+              // the refresh is not needed before merge (the customer cart gets its own refresh).
+              const isRefreshOnlyError =
+                currencyError instanceof Error &&
+                currencyError.message.includes('Anonymous cart cannot be assigned to a legal entity');
+
+              if (!isRefreshOnlyError) {
+                // Actual currency change failed — abort merge, switch to customer cart
+                this.logger.error(
+                  {
+                    err: currencyError instanceof Error ? currencyError : String(currencyError),
+                    anonymousCartId: oldCart.id,
+                    customerCartId,
+                    anonymousCurrency: oldCart.currency,
+                    targetCurrency,
+                  },
+                  'Failed to change anonymous cart currency, switching to customer cart without merge',
+                );
+                await this.sessionService.setCart(customerCartId!);
+                return {
+                  sessionId: session.sessionId,
+                  customerId: session.customerId,
+                  siteCode: session.siteCode,
+                  currency: session.currency,
+                  cartId: customerCartId,
+                  country: session.targetLocation,
+                };
+              }
+
+              // Currency was changed but refresh failed — safe to proceed with merge
+              this.logger.info(
+                { anonymousCartId: oldCart.id, customerCartId, targetCurrency },
+                'Anonymous cart currency aligned but refresh skipped (B2B session context) — continuing with merge',
+              );
+            }
+          }
+
           try {
-            await this.cartMigrationService.mergeCarts(oldCart.id, customerCartId);
-          } catch (error) {
+            await this.cartMigrationService.mergeCarts(oldCart.id, customerCartId!);
+            await this.sessionService.setCart(customerCartId!);
+          } catch (mergeError) {
             this.logger.error(
               {
-                err: error instanceof Error ? error : String(error),
+                err: mergeError instanceof Error ? mergeError : String(mergeError),
                 oldCartId: oldCart.id,
                 customerCartId,
               },
-              'Failed to merge carts',
+              'Failed to merge carts during login',
             );
+            await this.sessionService.setCart(customerCartId!);
           }
         }
+      } catch (error) {
+        this.logger.error(
+          { err: error instanceof Error ? error : String(error) },
+          'Cart transition failed during login, continuing without merge',
+        );
       }
     }
 
@@ -127,6 +186,9 @@ export class EmporixAuthService implements AuthService {
     const address: EmporixAddress | undefined = registration.address
       ? this.emporixAddressMapper.mapToSource(registration.address)
       : undefined;
+    if (address && registration.address?.tags) {
+      address.tags = registration.address.tags;
+    }
     const session = await this.emporixCustomerApi.signup({
       email: registration.credentials.username,
       password: registration.credentials.password,

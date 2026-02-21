@@ -94,7 +94,7 @@ export function AddressSelector({
           ) : addresses && addresses.length > 0 ? (
             <div className="max-h-[400px] overflow-y-auto">
               {addresses
-                .filter((address) => !addressType || address.types.includes(addressType))
+                .filter((address) => !addressType || address.tags.includes(addressType))
                 .map((address) => (
                   <div
                     key={address.id}
@@ -110,7 +110,7 @@ export function AddressSelector({
 
                       {showAddressTypes && (
                         <div className="flex gap-1">
-                          {address.types.map((type) => (
+                          {address.tags.map((type) => (
                             <span
                               key={type}
                               className={`text-sm px-2 py-1 rounded-sm 
