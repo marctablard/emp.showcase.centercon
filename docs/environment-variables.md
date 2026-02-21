@@ -253,6 +253,26 @@ NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS=BODY
 
 > **Note:** This only affects the browser Console output. Terminal output is still controlled by `NEXT_PUBLIC_DEBUG_API_RESPONSE`.
 
+#### `NEXT_PUBLIC_DEBUG_API_LEVEL`
+
+Filter debug log output by response severity. Only responses matching the minimum level are logged.
+
+| Value | What is logged |
+| --- | --- |
+| `ALL` (default) | Every request/response |
+| `WARN` | Responses with status ≥ 400 (client + server errors) |
+| `ERROR` | Responses with status ≥ 500 (server errors only) |
+
+```env
+# Show only server errors
+NEXT_PUBLIC_DEBUG_API_LEVEL=ERROR
+
+# Show 4xx and 5xx responses
+NEXT_PUBLIC_DEBUG_API_LEVEL=WARN
+```
+
+> **Note:** Pre-response logs (curl commands, request payloads) are always emitted because the status is not yet known. The filter is applied at response time.
+
 #### Full API Debugging Example
 
 ```env
@@ -268,6 +288,7 @@ NEXT_DEBUG_API_PAYLOAD=true
 # NEXT_PUBLIC_DEBUG_API_CALL_TYPE=ALL
 # NEXT_PUBLIC_DEBUG_API_SOURCE=ALL
 # NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS=PAYLOAD,HEADERS,BODY
+# NEXT_PUBLIC_DEBUG_API_LEVEL=ALL
 ```
 
 ### Multi-Site Support

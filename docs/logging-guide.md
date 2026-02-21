@@ -490,6 +490,7 @@ Browser fetch('/api/approval/requires-approval')
 | `NEXT_PUBLIC_DEBUG_API_CALL_TYPE` | `ALL` (default), `INTERNAL`, `EXTERNAL` | Filter by call direction |
 | `NEXT_PUBLIC_DEBUG_API_SOURCE` | `ALL` (default), `CLIENT`, `SSR` | Filter by call origin |
 | `NEXT_PUBLIC_DEBUG_API_BROWSER_DETAILS` | `PAYLOAD,HEADERS,BODY` (default) | Comma-separated list of detail sections shown in browser Console |
+| `NEXT_PUBLIC_DEBUG_API_LEVEL` | `ALL` (default), `WARN`, `ERROR` | Minimum severity: `ALL` = everything, `WARN` = status ≥ 400, `ERROR` = status ≥ 500 |
 
 ### Instrumenting API Routes
 

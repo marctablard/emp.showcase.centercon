@@ -50,6 +50,10 @@ function getSourceFilter(): string {
   return (process.env.NEXT_PUBLIC_DEBUG_API_SOURCE || 'all').toLowerCase();
 }
 
+function getDebugLevel(): string {
+  return (process.env.NEXT_PUBLIC_DEBUG_API_LEVEL || 'all').toLowerCase();
+}
+
 // ---------------------------------------------------------------------------
 // Style constants for console output — different themes per call type
 // ---------------------------------------------------------------------------
@@ -99,11 +103,14 @@ function tryParseJson(text: string): unknown {
 }
 
 function logEventToConsole(event: ApiDebugEvent): void {
-  // --- Apply call-type and source filters ---
+  // --- Apply call-type, source, and level filters ---
   const ctFilter = getCallTypeFilter();
   if (ctFilter !== 'all' && event.callType && event.callType !== ctFilter) return;
   const srcFilter = getSourceFilter();
   if (srcFilter !== 'all' && event.source && event.source !== srcFilter) return;
+  const level = getDebugLevel();
+  if (level === 'warn' && event.status !== undefined && event.status < 400) return;
+  if (level === 'error' && event.status !== undefined && event.status < 500) return;
 
   const browserDetails = getBrowserDetails();
   const isInternal = event.callType === 'internal';

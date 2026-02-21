@@ -47,6 +47,7 @@ export type DebugOutput = 'terminal' | 'browser' | 'both';
 export type DebugCallTypeFilter = 'all' | 'internal' | 'external';
 export type DebugSourceFilter = 'all' | 'client' | 'ssr';
 export type BrowserDetail = 'payload' | 'headers' | 'body';
+export type DebugLevel = 'all' | 'warn' | 'error';
 
 /** Where should debug output be sent? Default: BOTH */
 function getDebugOutput(): DebugOutput {
@@ -67,6 +68,23 @@ function getDebugSourceFilter(): DebugSourceFilter {
   const v = (process.env.NEXT_PUBLIC_DEBUG_API_SOURCE || 'all').toLowerCase();
   if (v === 'client' || v === 'ssr') return v;
   return 'all';
+}
+
+/** Minimum severity level: ALL (default) | WARN (status >= 400) | ERROR (status >= 500) */
+function getDebugLevel(): DebugLevel {
+  const v = (process.env.NEXT_PUBLIC_DEBUG_API_LEVEL || 'all').toLowerCase();
+  if (v === 'warn' || v === 'error') return v;
+  return 'all';
+}
+
+/** Should this response status be logged given the current level filter? */
+function shouldLogByLevel(status?: number): boolean {
+  const level = getDebugLevel();
+  if (level === 'all') return true;
+  if (!status) return true; // no status yet (pre-response) — let it through
+  if (level === 'warn') return status >= 400;
+  if (level === 'error') return status >= 500;
+  return true;
 }
 
 /** Which detail sections to show in the browser Console? Default: all three */
@@ -374,6 +392,7 @@ export async function logResponse(
   if (!shouldLogEvent(effectiveCtx.callType, effectiveCtx.source)) return;
 
   const status = response.status;
+  if (!shouldLogByLevel(status)) return;
   const isError = status >= 400;
   const logger = getDebugLogger();
   const log = isError ? logger.error.bind(logger) : logger.debug.bind(logger);
@@ -633,6 +652,7 @@ export function withApiRouteDebug<T extends (...args: any[]) => Promise<Response
 
     const duration = Date.now() - start;
     const status = response.status;
+    if (!shouldLogByLevel(status)) return response;
     const isError = status >= 400;
     const maskSensitive = shouldMaskSensitive();
 
