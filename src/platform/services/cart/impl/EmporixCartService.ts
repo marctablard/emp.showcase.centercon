@@ -75,6 +75,15 @@ class EmporixCartService implements CartService {
     if (session.cartId) {
       cart = await this.cartApi.getCart(session.cartId);
 
+      // Site guard: skip cart from a different site (race condition in setSite)
+      if (cart && cart.siteCode !== currentSiteCode) {
+        this.logger.info(
+          { cartId: session.cartId, cartSite: cart.siteCode, currentSite: currentSiteCode },
+          'Skipping cart from different site — searching for current site cart',
+        );
+        cart = undefined;
+      }
+
       // Safety check: if user is logged in but the cached cart is anonymous,
       // discard it and search for the customer's actual cart.
       // This happens when the anonymous→customer cart merge didn't complete during login
@@ -116,26 +125,56 @@ class EmporixCartService implements CartService {
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<ModifyCartItemResult> {
-    const [product, price, session] = await Promise.all([
+    const [rawCart, product, session] = await Promise.all([
+      this.cartApi.getCart(cartId),
       this.productService.getProductById(productId),
-      this.priceService.getProductPrice(productId, quantity),
       this.sessionService.getCurrent(),
     ]);
+    if (!rawCart) {
+      throw new Error('Cart not found');
+    }
+    if (!session) {
+      throw new Error('Failed to get session context');
+    }
     if (!product) {
       throw new Error('Product missing');
     }
+
+    // Determine the cart's effective site code
+    const cartSiteCode = rawCart.siteCode || session.siteCode || 'main';
+
+    // GUARD: If cart belongs to a different site, auto-recover by fetching/creating the correct cart.
+    // This handles race conditions where the session site changed but the cart ID wasn't updated yet.
+    if (cartSiteCode !== session.siteCode) {
+      this.logger.warn(
+        { cartId, cartSite: cartSiteCode, sessionSite: session.siteCode },
+        'Cart belongs to different site — auto-recovering correct cart',
+      );
+      const correctCart = await this.getCart();
+      if (!correctCart) {
+        throw new Error('Failed to get cart for current site');
+      }
+      // Prevent infinite recursion: if we got back the same cart, something is fundamentally wrong
+      if (correctCart.id === cartId) {
+        throw new Error(
+          `Cart site mismatch cannot be resolved: cart ${cartId} site=${cartSiteCode}, session site=${session.siteCode}`,
+        );
+      }
+      return this.addItemToCart(correctCart.id, productId, quantity);
+    }
+
+    // Session and cart are aligned → matchPricesByContext handles currency conversion,
+    // cross-site price fallback, and tax recalculation internally via the session context.
+    const price = await this.priceService.getProductPrice(productId, quantity);
+
     // TODO find existing cartItem and merge if desired
     if (!price) {
       throw new Error('Price missing');
     }
-    const { hasSufficientStock, availableQuantity } = await this.checkStock(
-      session.siteCode || 'main',
-      productId,
-      quantity,
-    );
+    const { hasSufficientStock, availableQuantity } = await this.checkStock(cartSiteCode, productId, quantity);
 
     const addItemRequest: EmporixAddCartItemRequest = {
-      siteCode: session.siteCode || 'main',
+      siteCode: cartSiteCode,
       itemYrn: this.commonUtil.generateProductYrn(productId),
       quantity,
       product: {
@@ -186,12 +225,30 @@ class EmporixCartService implements CartService {
 
   async updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<ModifyCartItemResult> {
     const cart = await this.getCartById(cartId);
-    const cartItem = cart?.items.find((item) => item.id === itemId);
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+    const cartItem = cart.items.find((item) => item.id === itemId);
     if (!cartItem || !cartItem.product?.id) {
       throw new Error('Cart item not found');
     }
 
-    const [price] = await Promise.all([this.priceService.getProductPrice(cartItem.product.id, quantity)]);
+    const cartSiteCode = cart.site || 'main';
+    const session = await this.sessionService.getCurrent();
+
+    // GUARD: Cart-session site alignment check.
+    // Unlike addItemToCart, we don't auto-recover here because the user is interacting
+    // with specific cart items — replacing the cart under them would be confusing.
+    if (session && cartSiteCode !== session.siteCode) {
+      this.logger.warn(
+        { cartId, cartSite: cartSiteCode, sessionSite: session.siteCode },
+        'Cart belongs to different site during quantity update — aborting',
+      );
+      throw new Error('Cart belongs to a different site. Please refresh the page.');
+    }
+
+    // Session-based pricing — matchPricesByContext handles currency/tax internally
+    const price = await this.priceService.getProductPrice(cartItem.product.id, quantity);
 
     if (!price) {
       throw new Error('Price missing');

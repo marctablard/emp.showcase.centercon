@@ -75,6 +75,10 @@ export async function addItemToCart(
   });
 
   if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    if (errorData?.code === 'PRICE_SITE_INCOMPATIBLE') {
+      throw new Error(errorData.error || 'Product price is not available for this site');
+    }
     throw new Error(`Failed to add item to cart: ${response.statusText}`);
   }
 

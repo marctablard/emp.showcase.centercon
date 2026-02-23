@@ -66,9 +66,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
     logger.error(
       {
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
         path: `/api/cart/${cartId}/items`,
         method: 'POST',
@@ -76,6 +78,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       `Error adding item to cart ${cartId}`,
     );
+
+    // Detect Emporix price/tax validation error and return structured 400
+    if (errorMessage.includes('PriceIds') && errorMessage.includes('invalid')) {
+      return NextResponse.json(
+        {
+          error: 'Product price is not available for this site',
+          code: 'PRICE_SITE_INCOMPATIBLE',
+          details: errorMessage,
+        },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json({ error: 'Failed to add item to cart' }, { status: 500 });
   }
 }
