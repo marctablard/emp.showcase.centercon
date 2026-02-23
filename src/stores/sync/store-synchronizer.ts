@@ -8,7 +8,6 @@ type UnsubscribeFn = () => void;
 interface StoreSynchronizerParams {
   sessionStore: SessionStoreApi;
   cartStore: CartStoreApi;
-  /** Reserved for future site-related subscriptions (e.g., site config changes triggering cart updates) */
   siteStore: SiteStoreApi;
 }
 
@@ -26,8 +25,13 @@ interface StoreSynchronizerParams {
  * Subscriptions:
  * 1. Session currency changes → Cart currency update
  * 2. Session site changes → Cart site validation
+ * 3. Session site changes → Site store reset (triggers re-fetch of site config, currencies, etc.)
  */
-export function setupStoreSynchronization({ sessionStore, cartStore }: StoreSynchronizerParams): UnsubscribeFn[] {
+export function setupStoreSynchronization({
+  sessionStore,
+  cartStore,
+  siteStore,
+}: StoreSynchronizerParams): UnsubscribeFn[] {
   const unsubscribers: UnsubscribeFn[] = [];
 
   // Subscription 1: Currency synchronization
@@ -65,6 +69,24 @@ export function setupStoreSynchronization({ sessionStore, cartStore }: StoreSync
     },
   );
   unsubscribers.push(unsubSite);
+
+  // Subscription 3: Site store reset
+  // When session site changes, reset the site store so useSite() re-fetches
+  // the correct site config (currencies, countries, regions, payment modes).
+  // Without this, a soft client-side navigation after site switch keeps stale
+  // site data in the store — e.g., currency switcher shows USD on main site.
+  const unsubSiteStore = sessionStore.subscribe(
+    (state) => state.session?.siteCode,
+    (siteCode, prevSiteCode) => {
+      if (!siteCode || siteCode === prevSiteCode) return;
+
+      const currentSite = siteStore.getState().getSite();
+      if (currentSite && currentSite.code !== siteCode) {
+        siteStore.getState().reset();
+      }
+    },
+  );
+  unsubscribers.push(unsubSiteStore);
 
   return unsubscribers;
 }

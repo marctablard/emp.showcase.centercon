@@ -74,7 +74,7 @@ class EmporixSessionService implements SessionService {
     });
   }
 
-  async setSite(site: string): Promise<void> {
+  async setSite(site: string, defaultCurrency?: string): Promise<void> {
     const session = await this.sessionContextApi.getOwnSessionContext();
     if (!session) {
       return;
@@ -83,12 +83,21 @@ class EmporixSessionService implements SessionService {
     // Check if site is actually changing
     const siteChanged = session.siteCode && session.siteCode !== site;
 
-    await this.sessionContextApi.updateOwnSessionContext({
+    const updatePayload: Partial<EmporixSessionContext> = {
       siteCode: site,
       metadata: {
         version: session.metadata?.version || 1,
       },
-    });
+    };
+
+    // When switching sites, also reset currency to the target site's default.
+    // This aligns with Emporix's session initialization behavior where
+    // anonymous sessions get the site's default currency.
+    if (siteChanged && defaultCurrency) {
+      updatePayload.currency = defaultCurrency;
+    }
+
+    await this.sessionContextApi.updateOwnSessionContext(updatePayload);
 
     // Clear cart association when site changes - cart is site-specific
     if (siteChanged) {

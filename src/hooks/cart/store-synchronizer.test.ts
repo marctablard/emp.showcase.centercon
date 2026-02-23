@@ -109,9 +109,10 @@ describe('Store Synchronizer', () => {
       });
 
       expect(Array.isArray(unsubscribers)).toBe(true);
-      expect(unsubscribers.length).toBe(2); // currency + site subscriptions
+      expect(unsubscribers.length).toBe(3); // currency + site + siteStore subscriptions
       expect(typeof unsubscribers[0]).toBe('function');
       expect(typeof unsubscribers[1]).toBe('function');
+      expect(typeof unsubscribers[2]).toBe('function');
     });
 
     it('should call syncCurrencyWithSession when session currency changes', async () => {
@@ -388,6 +389,50 @@ describe('Store Synchronizer', () => {
 
       // This time updateCurrency should be called since loading is false
       expect(updateCurrencySpy).toHaveBeenCalled();
+    });
+
+    it('should reset site store when session site changes to a different site', async () => {
+      // Site store starts with 'main' site
+      const resetSpy = jest.spyOn(siteStore.getState(), 'reset');
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+      });
+
+      // Switch session to 'us-branch'
+      await act(async () => {
+        sessionStore.setState({
+          session: createMockSession({ siteCode: 'us-branch' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(resetSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not reset site store when session site matches site store', async () => {
+      // Site store starts with 'main', session also starts with 'main'
+      const resetSpy = jest.spyOn(siteStore.getState(), 'reset');
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+      });
+
+      // Set same site again — should not trigger reset
+      await act(async () => {
+        sessionStore.setState({
+          session: createMockSession({ siteCode: 'main', currency: 'GBP' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(resetSpy).not.toHaveBeenCalled();
     });
   });
 });
