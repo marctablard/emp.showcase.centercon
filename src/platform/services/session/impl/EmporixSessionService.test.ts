@@ -168,6 +168,34 @@ describe('EmporixSessionService', () => {
   });
 
   describe('setSite', () => {
+    it('should clear currentCart BEFORE updating siteCode when site changes', async () => {
+      // Arrange
+      const callOrder: string[] = [];
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockImplementation(async () => {
+        callOrder.push('removeOwnSessionContextAttribute');
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockImplementation(async () => {
+        callOrder.push('updateOwnSessionContext');
+      });
+
+      // Act
+      await sessionService.setSite('site-b', 'EUR');
+
+      // Assert — cartId cleared BEFORE siteCode update to prevent race condition
+      expect(callOrder).toEqual(['removeOwnSessionContextAttribute', 'updateOwnSessionContext']);
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        siteCode: 'site-b',
+        currency: 'EUR',
+        metadata: { version: 1 },
+      });
+    });
+
     it('should clear currentCart and reset currency when site changes with defaultCurrency', async () => {
       // Arrange
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue({

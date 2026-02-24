@@ -83,6 +83,17 @@ class EmporixSessionService implements SessionService {
     // Check if site is actually changing
     const siteChanged = session.siteCode && session.siteCode !== site;
 
+    // Step 1: Clear cart association FIRST when site is changing.
+    // This ensures that during the window between this call and the siteCode update,
+    // any concurrent getCart() reads OLD siteCode + NO cartId → falls back to
+    // criteria search with old siteCode → returns correct cart for old context.
+    if (siteChanged) {
+      await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
+    }
+
+    // Step 2: Now update siteCode (and currency if applicable).
+    // After this, the session has new siteCode + no cartId → getCart() falls back to
+    // criteria search with new siteCode → creates/finds correct cart for new context.
     const updatePayload: Partial<EmporixSessionContext> = {
       siteCode: site,
       metadata: {
@@ -98,11 +109,6 @@ class EmporixSessionService implements SessionService {
     }
 
     await this.sessionContextApi.updateOwnSessionContext(updatePayload);
-
-    // Clear cart association when site changes - cart is site-specific
-    if (siteChanged) {
-      await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
-    }
   }
 
   async setCart(cartId: string): Promise<void> {

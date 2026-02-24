@@ -44,6 +44,21 @@ export function setupStoreSynchronization({
     async ({ currency, siteCode }) => {
       if (!currency || !siteCode) return;
 
+      // Wait for any in-progress site validation to complete.
+      // validateSite sets loading=true before async work and fetchCart
+      // sets it back to false. Polling ensures we don't race with it.
+      const maxWait = 3000;
+      const interval = 100;
+      let waited = 0;
+      while (cartStore.getState().loading && waited < maxWait) {
+        await new Promise((r) => setTimeout(r, interval));
+        waited += interval;
+      }
+
+      if (waited >= maxWait) {
+        getLogger().warn({ waited }, 'Currency sync: timed out waiting for cart loading to complete');
+      }
+
       try {
         await cartStore.getState().syncCurrencyWithSession(currency, siteCode);
       } catch (error) {

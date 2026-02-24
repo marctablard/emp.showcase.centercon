@@ -186,12 +186,45 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
       },
 
-      addToCart: async (productId: string, quantity: number) => {
+      addToCart: async (productId: string, quantity: number, _retryCount = 0) => {
+        const { loading, lastSiteCode } = get();
+
+        // Guard 1: Block while a site transition is in progress
+        // (validateSite sets loading=true before async fetchCart)
+        if (loading) {
+          if (_retryCount >= 1) {
+            throw new Error('Site transition in progress. Please try again.');
+          }
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const { loading: stillLoading } = get();
+          if (stillLoading) {
+            throw new Error('Site transition in progress. Please try again.');
+          }
+          // Retry with fresh state after transition completes (max 1 retry)
+          return get().addToCart(productId, quantity, _retryCount + 1);
+        }
+
         // first get a cart (before we block with the loading state)
         let { currentCart } = get();
         if (!currentCart) {
           currentCart = await get().fetchCart(true);
           if (!currentCart) throw new Error('No cart available');
+        }
+
+        // Guard 2: Verify cart-site alignment using lastSiteCode from validateSite()
+        if (lastSiteCode && currentCart.site && currentCart.site !== lastSiteCode) {
+          getLogger().warn(
+            { cartSite: currentCart.site, sessionSite: lastSiteCode },
+            'Cart-site mismatch detected on client — clearing stale cart',
+          );
+          set({ currentCart: null, loading: true, error: null });
+          await get().fetchCart(true);
+          const { currentCart: correctCart } = get();
+          if (!correctCart) {
+            throw new Error('Failed to get correct site cart');
+          }
+          // Use the correct cart directly instead of recursing (max 1 retry)
+          currentCart = correctCart;
         }
 
         set({ loading: true, error: null });

@@ -91,6 +91,33 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
+    // Generic site-specific price unavailability
+    if (errorMessage.includes('price is not available') || errorMessage.includes('not available for this site')) {
+      return NextResponse.json(
+        {
+          error: "This product's price is not available for the current site.",
+          code: 'PRICE_NOT_AVAILABLE',
+          details: errorMessage,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Cart-site mismatch from Emporix
+    if (
+      errorMessage.includes('siteCode') &&
+      (errorMessage.includes('mismatch') || errorMessage.includes('does not match'))
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Your cart belongs to a different site. Please refresh the page.',
+          code: 'CART_SITE_MISMATCH',
+          details: errorMessage,
+        },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json({ error: 'Failed to add item to cart' }, { status: 500 });
   }
 }
