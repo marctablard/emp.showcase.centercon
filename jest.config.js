@@ -151,7 +151,7 @@ const customJestConfig = {
       preset: 'ts-jest',
       displayName: 'Library Tests',
       testEnvironment: 'node',
-      testMatch: ['**/lib/**/?(*.)+(spec|test).ts?(x)'],
+      testMatch: ['**/lib/**/?(*.)+(spec|test).ts?(x)', '**/stores/**/?(*.)+(spec|test).ts?(x)'],
       setupFilesAfterEnv: ['<rootDir>/jest.platform.setup.js'],
       transform: {
         '^.+\\.tsx?$': [
