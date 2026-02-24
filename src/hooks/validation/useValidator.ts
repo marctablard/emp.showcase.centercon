@@ -43,9 +43,9 @@ export function useValidator(
           const currentValues = form.getValues();
           if (isEqual(valuesRef.current, currentValues)) return;
           valuesRef.current = currentValues;
-          // Defer the callback to avoid triggering state updates during render
-          // (react-hook-form subscribe can fire synchronously during Controller render)
-          queueMicrotask(() => onValidatedRef.current?.(currentValues));
+          // Defer the callback to a macrotask to avoid triggering state updates during render
+          // (queueMicrotask is insufficient — microtasks still run within React's render batch)
+          setTimeout(() => onValidatedRef.current?.(currentValues), 0);
         }
       },
     });

@@ -25,7 +25,7 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
   const { toast } = useToast();
 
   // Use the new hook to fetch approvers
-  const { approvers, loading, refetch } = useApproverSearch({
+  const { approvers, loading, error, refetch } = useApproverSearch({
     resourceType: 'CART',
     resourceId: cartId,
     action: 'CHECKOUT',
@@ -67,10 +67,10 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
 
   // Fetch approvers when the component mounts or when cartId changes
   useEffect(() => {
-    if (isOpen && cartId && !loading && !approvers) {
+    if (isOpen && cartId && !loading && !approvers && !error) {
       refetch();
     }
-  }, [isOpen, cartId, refetch, loading, approvers]);
+  }, [isOpen, cartId, refetch, loading, approvers, error]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -114,8 +114,17 @@ export function ApprovalModal({ isOpen, onClose, cartId, approvalSubmit }: Appro
           </div>
         )}
 
-        {!loading && approvers?.length === 0 && (
+        {!loading && approvers?.length === 0 && !error && (
           <div className="text-center text-text-placeholders py-2">{t('noApproversFound')}</div>
+        )}
+
+        {!loading && error && (
+          <div className="text-center py-4 space-y-2">
+            <p className="text-sm text-text-error">{t('errorFetchingApproversDescription')}</p>
+            <Button variant="secondary" size="small" onClick={() => refetch()}>
+              {t('retry')}
+            </Button>
+          </div>
         )}
 
         <div className="space-y-2">

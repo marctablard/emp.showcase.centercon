@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useCart } from '@/hooks/cart/useCart';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { useAddresses } from '@/hooks/customer/useAddresses';
 import useCustomer from '@/hooks/customer/useCustomer';
 import { useToast } from '@/hooks/ui/useToast';
+import { useRouter } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { Address } from '@/platform/services/model/common';
 
@@ -25,9 +27,11 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
   const t = useTranslations('cart.quote');
   const tCheckout = useTranslations('checkout.shipping');
   const { toast } = useToast();
+  const router = useRouter();
 
   const { addresses } = useAddresses();
   const { customer } = useCustomer();
+  const { clearCart } = useCart();
   const { checkoutCart, shippingAddress, billingAddress, shippingMethod, submitShippingAddress, submitBillingAddress } =
     useCheckout();
 
@@ -116,6 +120,11 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
         throw new Error(txt || 'Failed to create quote');
       }
 
+      const data = await res.json();
+
+      // Clear the cart after successful quote creation
+      clearCart();
+
       // Show success toast notification
       toast({
         title: t('submittedTitle'),
@@ -124,6 +133,9 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
       });
 
       onOpenChange(false);
+
+      // Navigate to the newly created quote detail page
+      router.push(`/account/quotes/${data.quoteId}`);
     } catch (err) {
       getLogger().error({ err }, 'Send quote failed');
       // Show error toast notification

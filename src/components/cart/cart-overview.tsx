@@ -23,8 +23,8 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
   const { customer } = useCustomer();
 
   const leftContent = useRef<HTMLDivElement>(null);
-  // this is necessary, because the hook's cart is undefined at the first render
-  const currentCart = cart || initialCart;
+  // Use explicit undefined check so null (cleared cart) shows CartEmpty, not stale initialCart
+  const currentCart = cart !== undefined ? cart : initialCart;
   if (currentCart === undefined) {
     return (
       <div className="max-w-6xl mx-auto mt-8">

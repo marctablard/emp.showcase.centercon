@@ -133,7 +133,8 @@
     "searchError": "Fehler beim Suchen",
     "errorSearchingApprovers": "Es gab einen Fehler beim Suchen von Bestellprüfern",
     "errorFetchingApprovers": "Fehler beim Laden der Bestellprüfer",
-    "errorFetchingApproversDescription": "Beim Laden der Bestellprüferliste ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    "errorFetchingApproversDescription": "Beim Laden der Bestellprüferliste ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+    "retry": "Erneut versuchen"
   },
   "PaymentModes": {
     "creditCard": "Kreditkarte",

@@ -45,7 +45,7 @@ interface CartActions {
 
   // Cart API operations
   fetchCart: (createCurrent?: boolean) => Promise<Cart | null | undefined>;
-  addToCart: (productId: string, quantity: number) => Promise<ModifyCartItemResult>;
+  addToCart: (productId: string, quantity: number, _retryCount?: number) => Promise<ModifyCartItemResult>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
