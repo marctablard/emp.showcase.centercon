@@ -69,8 +69,7 @@ describe('EmporixSessionContextApi', () => {
     // Spy on the authenticatedFetch method to verify calls
     jest.spyOn(apiInvoker, 'authenticatedFetch');
   });
-  // DCPS-16635 <- Wait's for Clarification
-  describe.skip('getSessionContext', () => {
+  describe('getSessionContext', () => {
     it('should fetch a session context by ID', async () => {
       const tokenManager = container.get<TokenManager>('EmporixTokenManager');
       const { accessToken: _token, sessionId } = await tokenManager.getAnonymousToken(config.tenant, config.clientId);
@@ -80,11 +79,12 @@ describe('EmporixSessionContextApi', () => {
 
       expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
         `/session-context/${config.tenant}/context/${sessionId}`,
-        { method: 'GET' },
+        expect.objectContaining({ method: 'GET' }),
+        'service',
       );
 
       expect(result).toBeDefined();
-      expect(result?.sessionId).toEqual(testSessionId);
+      expect(result?.sessionId).toEqual(sessionId);
     });
 
     it('should return undefined when session context is not found', async () => {
@@ -94,14 +94,15 @@ describe('EmporixSessionContextApi', () => {
 
       expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
         `/session-context/${config.tenant}/context/${nonExistentSessionId}`,
-        { method: 'GET' },
+        expect.objectContaining({ method: 'GET' }),
+        'service',
       );
 
       expect(result).toBeUndefined();
     });
   });
 
-  // DCPS-16635 <- Wait's for Clarification
+  // eslint-disable-next-line jest/no-disabled-tests -- Service-level session context operations require saas-token header (see TODO in EmporixSessionContextApi.ts)
   describe.skip('updateSessionContext', () => {
     it('should update a session context with upsert=true', async () => {
       // Create a session context to update
@@ -121,56 +122,65 @@ describe('EmporixSessionContextApi', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(sessionToUpdate),
         },
+        'service',
       );
 
       // Verify the update by fetching the session
-      const updatedSession = await sessionContextApi.getSessionContext(testSessionId);
+      const updatedSession = await sessionContextApi.getSessionContext(sessionId);
       expect(updatedSession?.currency).toEqual('USD');
     });
   });
 
-  // DCPS-16635 <- Wait's for Clarification
+  // eslint-disable-next-line jest/no-disabled-tests -- Service-level session context operations require saas-token header (see TODO in EmporixSessionContextApi.ts)
   describe.skip('addSessionContextAttribute', () => {
     it('should add an attribute to a session context', async () => {
+      const tokenManager = container.get<TokenManager>('EmporixTokenManager');
+      const { accessToken: _token, sessionId } = await tokenManager.getAnonymousToken(config.tenant, config.clientId);
+
       const attributeKey = `test-attribute-${Date.now()}`;
       const attributeToAdd = createTestAttribute(attributeKey);
 
-      await sessionContextApi.addSessionContextAttribute(testSessionId, attributeToAdd);
+      await sessionContextApi.addSessionContextAttribute(sessionId, attributeToAdd);
 
       expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
-        `/session-context/showcasetest/context/${testSessionId}/attributes`,
+        `/session-context/${config.tenant}/context/${sessionId}/attributes`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(attributeToAdd),
         },
+        'service',
       );
 
       // Verify the attribute was added by fetching the session
-      const updatedSession = await sessionContextApi.getSessionContext(testSessionId);
+      const updatedSession = await sessionContextApi.getSessionContext(sessionId);
       expect(updatedSession?.context?.[attributeKey]).toBeDefined();
     });
   });
 
-  // DCPS-16635 <- Wait's for Clarification
+  // eslint-disable-next-line jest/no-disabled-tests -- Service-level session context operations require saas-token header (see TODO in EmporixSessionContextApi.ts)
   describe.skip('removeSessionContextAttribute', () => {
     it('should remove an attribute from a session context', async () => {
+      const tokenManager = container.get<TokenManager>('EmporixTokenManager');
+      const { accessToken: _token, sessionId } = await tokenManager.getAnonymousToken(config.tenant, config.clientId);
+
       // First add an attribute
       const attributeKey = `test-attribute-to-remove-${Date.now()}`;
       const attributeToAdd = createTestAttribute(attributeKey);
 
-      await sessionContextApi.addSessionContextAttribute(testSessionId, attributeToAdd);
+      await sessionContextApi.addSessionContextAttribute(sessionId, attributeToAdd);
 
       // Now remove it
-      await sessionContextApi.removeSessionContextAttribute(testSessionId, attributeKey);
+      await sessionContextApi.removeSessionContextAttribute(sessionId, attributeKey);
 
       expect(apiInvoker.authenticatedFetch).toHaveBeenCalledWith(
-        `/session-context/showcasetest/context/${testSessionId}/attributes/${attributeKey}`,
+        `/session-context/${config.tenant}/context/${sessionId}/attributes/${attributeKey}`,
         { method: 'DELETE' },
+        'service',
       );
 
       // Verify the attribute was removed by fetching the session
-      const updatedSession = await sessionContextApi.getSessionContext(testSessionId);
+      const updatedSession = await sessionContextApi.getSessionContext(sessionId);
       expect(updatedSession?.context?.[attributeKey]).toBeUndefined();
     });
   });
@@ -216,12 +226,15 @@ describe('EmporixSessionContextApi', () => {
   });
 
   describe('updateOwnSessionContext', () => {
-    // SKIPPED until DCPS-16490 is resolved
-    it.skip('should update the current session context', async () => {
+    it('should update the current session context', async () => {
+      // First get the existing context to obtain the correct version
+      const existingContext = await sessionContextApi.getOwnSessionContext();
+
       const partialContext: Partial<EmporixSessionContext> = {
         siteCode: 'test-site',
         currency: 'USD',
         targetLocation: 'US',
+        metadata: existingContext?.metadata ?? {},
       };
 
       await sessionContextApi.updateOwnSessionContext(partialContext);

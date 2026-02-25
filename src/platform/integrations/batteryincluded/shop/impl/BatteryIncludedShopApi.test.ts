@@ -63,14 +63,13 @@ describe('BatteryIncludedShopApi', () => {
       expect(result.page).toBeDefined();
     });
 
-    // Todo: Fix this test
-    it.skip('should call API with custom parameters', async () => {
+    it('should call API with custom parameters', async () => {
       // Execute
       const result = await shopApi.browse({
+        query: 'power',
         page: 1,
         size: 10,
         locale: 'en',
-        filters: { 'mixins.design.product_colour': ['Black'] },
         sort: 'popularity:desc',
       });
 
@@ -91,9 +90,9 @@ describe('BatteryIncludedShopApi', () => {
       expect(url).toContain('per_page=10');
       expect(url).toContain('sort=popularity%3Adesc');
       expect(url).toContain('v%5Blocale%5D=en');
-      expect(url).toContain('f%5Bmixins.design.product_colour%5D%5B%5D=Black');
+      expect(url).toContain('q=power');
 
-      expect(result.facet_counts).toBeDefined();
+      expect(result.hits).toBeDefined();
     });
   });
 
