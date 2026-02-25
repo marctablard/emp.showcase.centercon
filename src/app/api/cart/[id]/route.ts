@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import type { SessionService } from '@/platform/services/session/SessionService';
 
 /**
  * GET /api/carts/[id]
@@ -47,6 +48,19 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const cartService = server.get<CartService>('CartService');
 
     await cartService.deleteCart(cartId);
+
+    // Best-effort: also clear the session's currentCart reference
+    // so it doesn't point to a deleted cart.
+    try {
+      const sessionService = server.get<SessionService>('SessionService');
+      await sessionService.clearCart();
+    } catch (clearError) {
+      const logger = server.get<LoggerService>('LoggerService');
+      logger.warn(
+        { error: clearError instanceof Error ? clearError.message : String(clearError), cartId },
+        'Failed to clear session cart reference after cart deletion',
+      );
+    }
 
     // Return success response
     return NextResponse.json({ success: true });

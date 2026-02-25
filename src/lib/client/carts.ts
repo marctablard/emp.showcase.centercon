@@ -181,6 +181,20 @@ export async function updateCartCurrency(cartId: string, currency: string): Prom
 }
 
 /**
+ * Clear the cart from the server-side session context.
+ * Optionally also deletes the cart entity on the backend.
+ * @param deleteCart Whether to also delete the cart entity (default: false)
+ */
+export async function clearCartSession(deleteCart: boolean = false): Promise<void> {
+  const response = await fetch(`/api/cart/clear?delete=${deleteCart}`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to clear cart session: ${response.statusText}`);
+  }
+}
+
+/**
  * Load a saved cart
  * @param {string} cartId - The ID of the saved cart to load
  * @param {string} type - The type of the cart to load

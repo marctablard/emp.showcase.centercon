@@ -9,6 +9,7 @@ jest.mock('@/lib/client/carts', () => ({
   updateCartItemQuantity: jest.fn(),
   updateShippingInfo: jest.fn(),
   loadSavedCart: jest.fn(),
+  clearCartSession: jest.fn(),
 }));
 
 jest.mock('@/lib/logger/use-logger-client', () => ({
@@ -21,12 +22,14 @@ jest.mock('@/lib/logger/use-logger-client', () => ({
 }));
 
 const mockFetchCurrentCart = require('@/lib/client/carts').fetchCurrentCart;
+const mockClearCartSession = require('@/lib/client/carts').clearCartSession;
 
 describe('CartStore - Site Validation', () => {
   let store: ReturnType<typeof createCartStore>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockClearCartSession.mockResolvedValue(undefined);
     store = createCartStore();
   });
 
@@ -382,6 +385,7 @@ describe('CartStore - Fetch Deduplication', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockClearCartSession.mockResolvedValue(undefined);
     store = createCartStore();
   });
 

@@ -46,4 +46,10 @@ export interface SessionService {
    * Set the cart for the current session context
    */
   setCart(cartId: string): Promise<void>;
+
+  /**
+   * Clear the cart reference from the current session context.
+   * Removes the 'currentCart' attribute from the Emporix session.
+   */
+  clearCart(): Promise<void>;
 }

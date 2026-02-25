@@ -61,8 +61,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete }) => {
           shipping: checkoutData.shipping,
         },
       });
-      // Clear the cart after successful approval creation
-      clearCart();
+      // Clear the cart after successful approval creation (also delete the cart entity
+      // since Emporix does NOT auto-close the cart for approvals)
+      clearCart({ deleteCart: true });
       // Navigate to confirmation page
       router.push(`/confirmation/Approval%20Requested`);
     } else {

@@ -70,7 +70,11 @@ export const useAuthentication = (): AuthenticationHook => {
         setIsAuthenticated(false);
       } else {
         setIsAuthenticated(true);
-        clearCart();
+        // Clear Zustand cart state only — do NOT clear server session.
+        // The server-side merge in EmporixAuthService.login() has already
+        // set sessionService.setCart(customerCartId) with the merged cart.
+        // A server-side clear here would wipe that reference.
+        clearCart({ clearSession: false });
         reset();
         if (safeCallbackUrl) {
           window.location.href = getPathname({ href: safeCallbackUrl + '?login=success', locale, site: site?.code });
@@ -89,7 +93,9 @@ export const useAuthentication = (): AuthenticationHook => {
     try {
       setLoading(true);
       startTransition(async () => {
-        // Clear all persisted store data
+        // Clear cart state (client + server-side session)
+        clearCart();
+        // Clear all persisted store data (localStorage)
         clearAllPersistedStores();
         const logoutTarget = getPathname({ href: '/', locale, site: site?.code });
         // ...then log out (no idea how this could fail)

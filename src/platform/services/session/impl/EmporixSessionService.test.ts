@@ -278,4 +278,32 @@ describe('EmporixSessionService', () => {
       expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
     });
   });
+
+  describe('clearCart', () => {
+    it('should call removeOwnSessionContextAttribute with currentCart', async () => {
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
+
+      await sessionService.clearCart();
+
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledTimes(1);
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+    });
+
+    it('should not throw when attribute does not exist (404)', async () => {
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockRejectedValue(new Error('Not Found'));
+
+      await expect(sessionService.clearCart()).resolves.not.toThrow();
+    });
+
+    it('should log unexpected errors but not throw', async () => {
+      const mockLogger = container.get<LoggerService>('LoggerService');
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockRejectedValue(new Error('Internal Server Error'));
+
+      await expect(sessionService.clearCart()).resolves.not.toThrow();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        { error: 'Internal Server Error' },
+        'Failed to clear cart from session context',
+      );
+    });
+  });
 });

@@ -9,6 +9,7 @@ import {
   updateCartCurrency as apiUpdateCartCurrency,
   updateCartItemQuantity as apiUpdateCartItemQuantity,
   updateShippingInfo as apiUpdateShippingInfo,
+  clearCartSession,
   loadSavedCart,
 } from '@/lib/client/carts';
 import { getLogger } from '@/lib/logger/use-logger-client';
@@ -50,7 +51,7 @@ interface CartActions {
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
   updateCurrency: (currency: string) => Promise<void>;
-  clearCart: () => void;
+  clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => void;
 
   // Cross-store synchronization
   syncCurrencyWithSession: (currency: string, siteCode: string) => Promise<void>;
@@ -376,8 +377,9 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
       },
 
-      clearCart: () => {
-        // Reset all cart-related state to ensure proper cleanup
+      clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => {
+        const { deleteCart = false, clearSession = true } = options ?? {};
+        // 1. Optimistically reset all cart-related state immediately
         set({
           currentCart: null,
           loading: false,
@@ -385,6 +387,13 @@ export const createCartStore = (initState: CartState = defaultState) => {
           lastShippingUpdate: null,
           lastSiteCode: null,
         });
+        // 2. Fire-and-forget: clear server-side session + optionally delete cart
+        //    Skip server-side clear during login — the merge already set the correct cartId
+        if (clearSession) {
+          clearCartSession(deleteCart).catch((err) => {
+            getLogger().error({ err }, 'Failed to clear cart session on server');
+          });
+        }
       },
 
       syncCurrencyWithSession: async (currency: string, siteCode: string) => {

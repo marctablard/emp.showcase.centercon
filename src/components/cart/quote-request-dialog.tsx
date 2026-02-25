@@ -122,8 +122,9 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
 
       const data = await res.json();
 
-      // Clear the cart after successful quote creation
-      clearCart();
+      // Clear the cart after successful quote creation (also delete the cart entity
+      // since the manual quote payload does not include cartId, so Emporix won't auto-close it)
+      clearCart({ deleteCart: true });
 
       // Show success toast notification
       toast({

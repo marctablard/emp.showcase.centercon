@@ -84,12 +84,6 @@ class EmporixApiInvoker {
           ...headers,
           ...this.addPublicHeaders(publicToken),
         };
-        options['cache'] = 'force-cache';
-        if (!options['next']) {
-          options['next'] = {
-            revalidate: 3600,
-          };
-        }
         break;
       case 'customer-saas':
       case 'session':
@@ -134,15 +128,26 @@ class EmporixApiInvoker {
           this.config.serverClientId,
           this.config.serverClientSecret,
         );
-        options['cache'] = 'force-cache';
-        if (!options['next']) {
-          options['next'] = {
-            revalidate: 3600,
-          };
-        }
         break;
       default:
         throw new Error(`Unknown token type: ${tokenType}`);
+    }
+
+    // Unified cache defaults for public and service tokens
+    if (tokenType === 'public' || tokenType === 'service') {
+      const method = (options.method || 'GET').toUpperCase();
+      const isWriteMethod = method !== 'GET' && method !== 'HEAD';
+
+      if (isWriteMethod) {
+        // Write operations must never be cached
+        options['cache'] = 'no-store';
+        delete (options as Record<string, unknown>)['next'];
+      } else if (!options['cache'] && !options['next']) {
+        // Read operations: apply defaults only when caller set neither
+        options['cache'] = 'force-cache';
+        options['next'] = { revalidate: 3600 };
+      }
+      // If caller set either cache or next explicitly → respect both as-is
     }
 
     // Add authorization header to the request

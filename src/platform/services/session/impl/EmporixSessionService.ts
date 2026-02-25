@@ -131,6 +131,18 @@ class EmporixSessionService implements SessionService {
     */
   }
 
+  async clearCart(): Promise<void> {
+    try {
+      await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
+    } catch (error) {
+      // Log but don't throw — clearing is best-effort. The cart attribute may
+      // not exist (e.g., new session, already cleared) which returns 404.
+      if (error instanceof Error && !error.message.includes('Not Found')) {
+        this.logger.error({ error: error.message }, 'Failed to clear cart from session context');
+      }
+    }
+  }
+
   async getById(id: string): Promise<Session | undefined> {
     const sessionContext = await this.sessionContextApi.getSessionContext(id);
     const result = sessionContext ? this.mapper.mapToService(sessionContext) : undefined;
