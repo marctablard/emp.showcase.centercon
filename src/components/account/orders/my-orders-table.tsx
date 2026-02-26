@@ -12,13 +12,11 @@ import { type OrderPaymentTypeKey, type OrderStatusLowercaseKey, dk } from '@/i1
 import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Order, OrderStatus } from '@/platform/services/model/order/order';
+import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
 import { CreateReturnDialog } from './create-return-dialog';
 
-/**
- * Determines if the return action should be enabled based on order status
- */
 function isReturnEnabled(status: OrderStatus): boolean {
-  return status === 'COMPLETED';
+  return status === ORDER_STATUS.COMPLETED;
 }
 
 export interface MyOrdersTableProps {

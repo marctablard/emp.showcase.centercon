@@ -14,22 +14,25 @@ import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { Order, OrderStatus } from '@/platform/services/model/order/order';
+import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
 import { CreateReturnDialog } from './create-return-dialog';
 import { OrderStatusBadge } from './order-status-badge';
 import { TrackingDialog } from './tracking-dialog';
 
-/**
- * Determines if the cancel button should be shown based on order status
- */
 function shouldShowCancelButton(status: OrderStatus): boolean {
-  return ['COMPLETED', 'PROCESSING', 'READY_FOR_PICKUP', 'READY_FOR_SHIPPING', 'CREATED'].includes(status);
+  return (
+    [
+      ORDER_STATUS.COMPLETED,
+      ORDER_STATUS.PROCESSING,
+      ORDER_STATUS.READY_FOR_PICKUP,
+      ORDER_STATUS.READY_FOR_SHIPPING,
+      ORDER_STATUS.CREATED,
+    ] as OrderStatus[]
+  ).includes(status);
 }
 
-/**
- * Determines if the return button should be shown based on order status
- */
 function shouldShowReturnButton(status: OrderStatus): boolean {
-  return status === 'COMPLETED';
+  return status === ORDER_STATUS.COMPLETED;
 }
 
 /**
@@ -220,9 +223,16 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
         {/* Order action buttons at the bottom */}
         {(shouldShowCancelButton(order.status) ||
           shouldShowReturnButton(order.status) ||
-          ['PROCESSING', 'READY_FOR_SHIPPING', 'READY_FOR_PICKUP', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(
-            order.status,
-          )) && (
+          (
+            [
+              ORDER_STATUS.PROCESSING,
+              ORDER_STATUS.READY_FOR_SHIPPING,
+              ORDER_STATUS.READY_FOR_PICKUP,
+              ORDER_STATUS.SHIPPED,
+
+              ORDER_STATUS.DELIVERED,
+            ] as OrderStatus[]
+          ).includes(order.status)) && (
           <CardFooter className="flex flex-col items-start pt-6 border-t">
             <H2 variant="h5" className="mb-3">
               {tOrder('orderActions')}
@@ -251,15 +261,17 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                   {tOrder('returnOrder')}
                 </Button>
               )}
-              {[
-                'PROCESSING',
-                'READY_FOR_SHIPPING',
-                'READY_FOR_PICKUP',
-                'SHIPPED',
-                'OUT_FOR_DELIVERY',
-                'DELIVERED',
-                'COMPLETED',
-              ].includes(order.status) && (
+              {(
+                [
+                  ORDER_STATUS.PROCESSING,
+                  ORDER_STATUS.READY_FOR_SHIPPING,
+                  ORDER_STATUS.READY_FOR_PICKUP,
+                  ORDER_STATUS.SHIPPED,
+
+                  ORDER_STATUS.DELIVERED,
+                  ORDER_STATUS.COMPLETED,
+                ] as OrderStatus[]
+              ).includes(order.status) && (
                 <Button variant="secondary" size="small" onClick={() => setTrackingDialogOpen(true)}>
                   <Truck className="mr-2 h-4 w-4" />
                   {tOrder('trackOrder')}
