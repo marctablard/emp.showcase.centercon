@@ -192,7 +192,7 @@ export function HeaderSearch({ small, show, isCollapsedHeader, className }: Head
           </Button>
         )}
       </form>
-      {showSuggestions && hasInitialSearch && (
+      {show && showSuggestions && hasInitialSearch && (
         <SearchFlyOut
           ref={suggestionsRef}
           suggestions={suggestions}
