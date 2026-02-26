@@ -4,6 +4,7 @@ import type {
   EmporixSessionContext,
 } from '@/platform/integrations/emporix/model/session-context';
 import { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Session, SessionAttribute } from '@/platform/services/model/session/session';
 import { SessionMapper } from '../../model/session';
 import { SiteService } from '../../site/SiteService';
@@ -94,6 +95,15 @@ describe('EmporixSessionService', () => {
       .toConstantValue(mockSessionMapper);
     container.bind<EmporixSessionService>('SessionService').to(EmporixSessionService);
     container.bind<SiteService>('SiteService').toConstantValue(mockSiteService);
+    container.bind<LoggerService>('LoggerService').toConstantValue({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+      fatal: jest.fn(),
+      child: jest.fn().mockReturnThis(),
+    } as unknown as LoggerService);
 
     // Get service instance
     sessionService = container.get<EmporixSessionService>('SessionService');
@@ -158,7 +168,35 @@ describe('EmporixSessionService', () => {
   });
 
   describe('setSite', () => {
-    it('should clear currentCart when site changes', async () => {
+    it('should clear currentCart BEFORE updating siteCode when site changes', async () => {
+      // Arrange
+      const callOrder: string[] = [];
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockImplementation(async () => {
+        callOrder.push('removeOwnSessionContextAttribute');
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockImplementation(async () => {
+        callOrder.push('updateOwnSessionContext');
+      });
+
+      // Act
+      await sessionService.setSite('site-b', 'EUR');
+
+      // Assert — cartId cleared BEFORE siteCode update to prevent race condition
+      expect(callOrder).toEqual(['removeOwnSessionContextAttribute', 'updateOwnSessionContext']);
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        siteCode: 'site-b',
+        currency: 'EUR',
+        metadata: { version: 1 },
+      });
+    });
+
+    it('should clear currentCart and reset currency when site changes with defaultCurrency', async () => {
       // Arrange
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
         sessionId: 'test-session',
@@ -169,17 +207,18 @@ describe('EmporixSessionService', () => {
       mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
 
       // Act
-      await sessionService.setSite('site-b'); // New site
+      await sessionService.setSite('site-b', 'EUR'); // New site with default currency
 
-      // Assert
+      // Assert — single atomic PATCH includes both siteCode and currency
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
         siteCode: 'site-b',
+        currency: 'EUR',
         metadata: { version: 1 },
       });
       expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
     });
 
-    it('should NOT clear currentCart when site is set to same value', async () => {
+    it('should NOT include currency in PATCH when site is set to same value', async () => {
       // Arrange
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
         sessionId: 'test-session',
@@ -189,10 +228,13 @@ describe('EmporixSessionService', () => {
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
 
       // Act
-      await sessionService.setSite('site-a'); // Same site
+      await sessionService.setSite('site-a', 'EUR'); // Same site
 
-      // Assert
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalled();
+      // Assert — currency should NOT be included since site didn't change
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
       expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
     });
 
@@ -205,14 +247,63 @@ describe('EmporixSessionService', () => {
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
 
       // Act
-      await sessionService.setSite('site-a');
+      await sessionService.setSite('site-a', 'EUR');
 
-      // Assert
+      // Assert — first-time site set: siteChanged is false, so no currency reset
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
         siteCode: 'site-a',
         metadata: { version: 1 },
       });
       expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
+    });
+
+    it('should not update currency when defaultCurrency is not provided (backward compatibility)', async () => {
+      // Arrange
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
+
+      // Act — no defaultCurrency argument
+      await sessionService.setSite('site-b');
+
+      // Assert — PATCH only contains siteCode, no currency
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        siteCode: 'site-b',
+        metadata: { version: 1 },
+      });
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+    });
+  });
+
+  describe('clearCart', () => {
+    it('should call removeOwnSessionContextAttribute with currentCart', async () => {
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
+
+      await sessionService.clearCart();
+
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledTimes(1);
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+    });
+
+    it('should not throw when attribute does not exist (404)', async () => {
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockRejectedValue(new Error('Not Found'));
+
+      await expect(sessionService.clearCart()).resolves.not.toThrow();
+    });
+
+    it('should log unexpected errors but not throw', async () => {
+      const mockLogger = container.get<LoggerService>('LoggerService');
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockRejectedValue(new Error('Internal Server Error'));
+
+      await expect(sessionService.clearCart()).resolves.not.toThrow();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        { error: 'Internal Server Error' },
+        'Failed to clear cart from session context',
+      );
     });
   });
 });

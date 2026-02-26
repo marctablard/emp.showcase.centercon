@@ -95,6 +95,7 @@ function handleMisroutedHealthCheck(req: NextRequest): NextResponse {
   const rid = req.headers.get('x-request-id') ?? '';
 
   // Structured log for easy filtering in Azure/App Insights
+  // eslint-disable-next-line no-console -- Edge middleware: Pino logger unavailable
   console.warn(
     JSON.stringify({
       event: 'misrouted_healthcheck',

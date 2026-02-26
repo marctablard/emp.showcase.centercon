@@ -5,6 +5,7 @@ import type {
   EmporixSessionContext,
 } from '@/platform/integrations/emporix/model/session-context';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SessionMapper } from '@/platform/services/model/session/SessionMapper';
 import type { Session } from '@/platform/services/model/session/session';
 import type { SiteService } from '../../site/SiteService';
@@ -27,6 +28,7 @@ class EmporixSessionService implements SessionService {
     @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,
     @inject('EmporixSessionMapper') private mapper: SessionMapper<EmporixSessionContext, EmporixContextAttribute>,
     @inject('SiteService') private siteService: SiteService,
+    @inject('LoggerService') private logger: LoggerService,
   ) {}
 
   async setRegion(region: string): Promise<void> {
@@ -72,7 +74,7 @@ class EmporixSessionService implements SessionService {
     });
   }
 
-  async setSite(site: string): Promise<void> {
+  async setSite(site: string, defaultCurrency?: string): Promise<void> {
     const session = await this.sessionContextApi.getOwnSessionContext();
     if (!session) {
       return;
@@ -81,17 +83,32 @@ class EmporixSessionService implements SessionService {
     // Check if site is actually changing
     const siteChanged = session.siteCode && session.siteCode !== site;
 
-    await this.sessionContextApi.updateOwnSessionContext({
+    // Step 1: Clear cart association FIRST when site is changing.
+    // This ensures that during the window between this call and the siteCode update,
+    // any concurrent getCart() reads OLD siteCode + NO cartId → falls back to
+    // criteria search with old siteCode → returns correct cart for old context.
+    if (siteChanged) {
+      await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
+    }
+
+    // Step 2: Now update siteCode (and currency if applicable).
+    // After this, the session has new siteCode + no cartId → getCart() falls back to
+    // criteria search with new siteCode → creates/finds correct cart for new context.
+    const updatePayload: Partial<EmporixSessionContext> = {
       siteCode: site,
       metadata: {
         version: session.metadata?.version || 1,
       },
-    });
+    };
 
-    // Clear cart association when site changes - cart is site-specific
-    if (siteChanged) {
-      await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
+    // When switching sites, also reset currency to the target site's default.
+    // This aligns with Emporix's session initialization behavior where
+    // anonymous sessions get the site's default currency.
+    if (siteChanged && defaultCurrency) {
+      updatePayload.currency = defaultCurrency;
     }
+
+    await this.sessionContextApi.updateOwnSessionContext(updatePayload);
   }
 
   async setCart(cartId: string): Promise<void> {
@@ -99,7 +116,7 @@ class EmporixSessionService implements SessionService {
     if (!session) {
       return;
     }
-    this.sessionContextApi.addOwnSessionContextAttribute({
+    await this.sessionContextApi.addOwnSessionContextAttribute({
       key: 'currentCart',
       value: cartId,
     });
@@ -112,6 +129,18 @@ class EmporixSessionService implements SessionService {
       },
     });
     */
+  }
+
+  async clearCart(): Promise<void> {
+    try {
+      await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
+    } catch (error) {
+      // Log but don't throw — clearing is best-effort. The cart attribute may
+      // not exist (e.g., new session, already cleared) which returns 404.
+      if (error instanceof Error && !error.message.includes('Not Found')) {
+        this.logger.error({ error: error.message }, 'Failed to clear cart from session context');
+      }
+    }
   }
 
   async getById(id: string): Promise<Session | undefined> {
@@ -183,7 +212,7 @@ class EmporixSessionService implements SessionService {
       this.sessionContextApi.updateOwnSessionContext(updateDefaults).catch((error: Error) => {
         // Only log unexpected errors (not 404s which are expected for new sessions)
         if (!error.message.includes('Not Found')) {
-          console.error('Unexpected error updating session defaults:', error.message);
+          this.logger.error({ error: error.message }, 'Unexpected error updating session defaults');
         }
       });
     }

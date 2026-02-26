@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { Paginated, StockAvailability } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions, ProductService } from '@/platform/services/product';
@@ -7,6 +8,7 @@ import ssr from '@/platform/ssr';
 
 const getProductService = () => ssr.get<ProductService>('ProductService');
 const getStockService = () => ssr.get<StockService>('StockService');
+const getLogger = () => ssr.get<LoggerService>('LoggerService');
 
 // "options" need to be a String, otherwise the cache will not work
 // (every object instance is considered a different parameter, regardless of its contents)
@@ -15,8 +17,11 @@ const _getProduct = cache(async (id: string, optionsJson: string): Promise<Produ
     const options: ProductFetchOptions | undefined = optionsJson ? JSON.parse(optionsJson) : undefined;
     const product = await getProductService().getProductById(id, options);
     return product || null;
-  } catch (_error) {
-    console.error(_error);
+  } catch (error) {
+    getLogger().error(
+      { error: error instanceof Error ? error.message : String(error), productId: id },
+      'SSR getProductById failed',
+    );
     return undefined;
   }
 });
@@ -27,7 +32,7 @@ const _getProducts = cache(async (page: number, size: number, optionsJson: strin
     const products = await getProductService().getProducts(page, size, options);
     return products;
   } catch (_error) {
-    console.error(_error);
+    getLogger().error({ error: _error instanceof Error ? _error.message : String(_error) }, 'SSR getProducts failed');
     return { items: [], total: 0, page: 0, pageSize: 0 };
   }
 });
@@ -36,7 +41,11 @@ const _getAvailability = cache(async (site: string, id: string): Promise<StockAv
   try {
     const availability = await getStockService().getStockAvailability(site, id);
     return availability || null;
-  } catch (_error) {
+  } catch (error) {
+    getLogger().error(
+      { error: error instanceof Error ? error.message : String(error), site, productId: id },
+      'SSR getStockAvailability failed',
+    );
     return undefined;
   }
 });

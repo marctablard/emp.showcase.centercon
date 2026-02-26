@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useLocale } from 'next-intl';
 import { getPathname } from '@/i18n/navigation';
+import { useCartStore } from '@/providers/StoreProvider';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
 import { useCheckout } from '../checkout/useCheckout';
 import { useSite } from '../site/useSite';
@@ -36,6 +37,7 @@ export const useAuthentication = (): AuthenticationHook => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
+  const { clearCart } = useCartStore();
   const [_isPending, startTransition] = useTransition();
 
   // Update authentication state when session status changes
@@ -68,8 +70,12 @@ export const useAuthentication = (): AuthenticationHook => {
         setIsAuthenticated(false);
       } else {
         setIsAuthenticated(true);
+        // Clear Zustand cart state only — do NOT clear server session.
+        // The server-side merge in EmporixAuthService.login() has already
+        // set sessionService.setCart(customerCartId) with the merged cart.
+        // A server-side clear here would wipe that reference.
+        clearCart({ clearSession: false });
         reset();
-        console.log(safeCallbackUrl);
         if (safeCallbackUrl) {
           window.location.href = getPathname({ href: safeCallbackUrl + '?login=success', locale, site: site?.code });
         }
@@ -87,7 +93,9 @@ export const useAuthentication = (): AuthenticationHook => {
     try {
       setLoading(true);
       startTransition(async () => {
-        // Clear all persisted store data
+        // Clear cart state (client + server-side session)
+        clearCart();
+        // Clear all persisted store data (localStorage)
         clearAllPersistedStores();
         const logoutTarget = getPathname({ href: '/', locale, site: site?.code });
         // ...then log out (no idea how this could fail)

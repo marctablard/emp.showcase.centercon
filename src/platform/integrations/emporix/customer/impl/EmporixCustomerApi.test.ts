@@ -254,8 +254,7 @@ describe('EmporixCustomerApi', () => {
       console.log('Tokens cleared after tests');
     }, 10000);
 
-    // TODO needs rework, since it must use a temporary Customer for this to not interfere with other Tests
-    it.skip('should change password and then revert back to original', async () => {
+    it('should change password and then revert back to original', async () => {
       // Skip this test if we don't have valid credentials
       if (!originalUsername || !originalPassword) {
         console.warn('Skipping password change test due to missing credentials');
@@ -367,7 +366,7 @@ describe('EmporixCustomerApi', () => {
       await tokenManager.clearTokens(tenant);
     }, 10000);
 
-    it.skip('should update customer profile and verify changes', async () => {
+    it('should update customer profile and verify changes', async () => {
       if (!isAuthenticated) {
         console.warn('Skipping profile update test due to authentication failure');
         return;

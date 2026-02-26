@@ -130,6 +130,7 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
                     autoComplete="username"
                     id="username"
                     startIcon={User}
+                    data-testid="login-username"
                     {...field}
                   />
                 </FormControl>
@@ -157,6 +158,7 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
                       endIcon={showPassword ? Eye : EyeOff}
                       onEndIconClick={() => setShowPassword(!showPassword)}
                       endIconLabel={showPassword ? t('hidePassword') : t('showPassword')}
+                      data-testid="login-password"
                       {...field}
                     />
                   </FormControl>
@@ -176,7 +178,11 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
             </UiLink>
           </div>
 
-          <Button type="submit" disabled={loading || submitting || !form.formState.isValid}>
+          <Button
+            type="submit"
+            disabled={loading || submitting || !form.formState.isValid}
+            data-testid="login-submitButton"
+          >
             {loading || submitting ? t('loggingIn') : t('logIn')}
           </Button>
         </form>
@@ -196,7 +202,12 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
             }
           }}
         >
-          <Button type="submit" disabled={loading} className={`transition-all`}>
+          <Button
+            type="submit"
+            disabled={loading}
+            className={`transition-all`}
+            data-testid={`login-oauth-${provider.id}`}
+          >
             <span>{t('signInWith', { provider: provider.name })}</span>
           </Button>
         </form>
@@ -205,7 +216,7 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
       <div className="flex flex-col gap-6 w-full">
         {guestCheckout && (
           <Link href="/checkout">
-            <Button variant="secondary" className="w-full">
+            <Button variant="secondary" className="w-full" data-testid="login-guestCheckout">
               {t('guestCheckout')}
             </Button>
           </Link>

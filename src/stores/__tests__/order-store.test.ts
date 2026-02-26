@@ -1,4 +1,3 @@
-import { act, renderHook } from '@testing-library/react';
 import { createOrderStore } from '../order-store';
 
 // Mock the API calls
@@ -7,19 +6,23 @@ jest.mock('@/lib/client/orders', () => ({
 }));
 
 jest.mock('@/platform/integrations/emporix/common/util/common', () => ({
-  buildSearchQuery: jest.fn((params) => ({
-    query: `page=${params.page}&size=${params.size}`,
-    body: JSON.stringify(params.criteria),
-  })),
+  buildSearchQuery: jest.fn(),
 }));
 
 const mockFetchOrders = require('@/lib/client/orders').fetchOrders;
+const { buildSearchQuery: mockBuildSearchQuery } = require('@/platform/integrations/emporix/common/util/common');
 
 describe('OrderStore', () => {
   let store: ReturnType<typeof createOrderStore>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockFetchOrders.mockClear();
+    mockBuildSearchQuery.mockImplementation(
+      (params: { page: number; size: number; criteria: Record<string, unknown> }) => ({
+        query: `page=${params.page}&size=${params.size}`,
+        body: JSON.stringify(params.criteria),
+      }),
+    );
     store = createOrderStore();
   });
 
@@ -86,5 +89,43 @@ describe('OrderStore', () => {
     const queryKey = 'page=1&size=10{}';
     expect(store.getState().getError(queryKey)).toEqual(error);
     expect(store.getState().getLoading(queryKey)).toBe(false);
+  });
+
+  it('should bypass cache and re-fetch when forceRefresh is true', async () => {
+    const mockOrders = [{ id: '1', status: 'CREATED', total: { amount: 100, currency: 'EUR' } }];
+    const updatedOrders = [
+      { id: '1', status: 'SHIPPED', total: { amount: 100, currency: 'EUR' } },
+      { id: '2', status: 'CREATED', total: { amount: 50, currency: 'EUR' } },
+    ];
+
+    mockFetchOrders.mockResolvedValueOnce(mockOrders).mockResolvedValueOnce(updatedOrders);
+
+    // First fetch populates cache
+    await store.getState().fetchOrders(10, 1, {});
+    expect(mockFetchOrders).toHaveBeenCalledTimes(1);
+
+    // Second fetch with forceRefresh should call API again
+    const result = await store.getState().fetchOrders(10, 1, {}, true);
+
+    expect(mockFetchOrders).toHaveBeenCalledTimes(2);
+    expect(result).toEqual(updatedOrders);
+  });
+
+  it('should still deduplicate concurrent forceRefresh calls', async () => {
+    const mockOrders = [{ id: '1', status: 'CREATED', total: { amount: 100, currency: 'EUR' } }];
+
+    mockFetchOrders.mockResolvedValue(mockOrders);
+
+    // Start two concurrent forceRefresh fetches with the same parameters
+    const promise1 = store.getState().fetchOrders(10, 1, {}, true);
+    const promise2 = store.getState().fetchOrders(10, 1, {}, true);
+
+    const [result1, result2] = await Promise.all([promise1, promise2]);
+
+    expect(result1).toEqual(mockOrders);
+    expect(result2).toEqual(mockOrders);
+
+    // API should only be called once due to ongoingFetches deduplication
+    expect(mockFetchOrders).toHaveBeenCalledTimes(1);
   });
 });

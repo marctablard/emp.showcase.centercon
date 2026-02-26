@@ -24,6 +24,6 @@ export interface PriceService {
     productId: string,
     quantity?: number,
     unitCode?: string,
-    params?: { currency?: string; country?: string; siteCode?: string },
+    params?: PriceFetchOptions,
   ): Promise<ProductPrice | null>;
 }

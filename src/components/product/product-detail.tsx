@@ -13,6 +13,7 @@ import { useProduct } from '@/hooks/product/useProduct';
 import { useSession } from '@/hooks/session/useSession';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useL10n } from '@/hooks/useL10n';
+import { type ProductTemplateAttributeKey, type ProductVariantAttributeKey, dk } from '@/i18n/dynamic-key';
 import { fetchProductAvailability } from '@/lib/client/availability';
 import { fetchProductPrice } from '@/lib/client/prices';
 import { cn } from '@/lib/utils';
@@ -162,9 +163,12 @@ export default function ProductDetail({ product: initialProduct, options, classN
                         key={attribute.key}
                         className="font-bold"
                         label={l10n(
-                          t(`filters.mixins.productVariantAttributes.${attribute.key}`, {
-                            defaultValue: attribute.key,
-                          }),
+                          t(
+                            dk<ProductVariantAttributeKey>(`filters.mixins.productVariantAttributes.${attribute.key}`),
+                            {
+                              defaultValue: attribute.key,
+                            },
+                          ),
                         )}
                         variant="white"
                         iconColor="white"
@@ -175,9 +179,12 @@ export default function ProductDetail({ product: initialProduct, options, classN
                       <BulletPoint
                         className="font-bold"
                         key={attribute}
-                        label={t(`filters.mixins.productTemplateAttributes.${attribute}`, {
-                          defaultValue: attribute,
-                        })}
+                        label={t(
+                          dk<ProductTemplateAttributeKey>(`filters.mixins.productTemplateAttributes.${attribute}`),
+                          {
+                            defaultValue: attribute,
+                          },
+                        )}
                         variant="white"
                         iconColor="white"
                         value={l10n(product.templateAttributes?.[attribute] ?? '')}

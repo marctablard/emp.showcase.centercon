@@ -26,6 +26,7 @@ function matchPattern(url: string, pattern: string): { matches: boolean; groups:
     const groups = match.slice(1);
     return { matches: true, groups };
   } catch (error) {
+    // eslint-disable-next-line no-console -- Edge middleware: Pino logger unavailable
     console.error(`Invalid cache rule pattern: ${pattern}`, error);
     return { matches: false, groups: [] };
   }

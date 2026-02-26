@@ -101,7 +101,7 @@ next-env.d.ts
 
 # Specifications directory (local development artifacts)
 /specifications/
-
+.playwright-mcp
 # GitHub agents and prompts (local only, mirrored in .cursor/)
 .github/workflows/agents/
 .github/workflows/prompts/

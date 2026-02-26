@@ -9,6 +9,7 @@ import {
   updateCartCurrency as apiUpdateCartCurrency,
   updateCartItemQuantity as apiUpdateCartItemQuantity,
   updateShippingInfo as apiUpdateShippingInfo,
+  clearCartSession,
   loadSavedCart,
 } from '@/lib/client/carts';
 import { getLogger } from '@/lib/logger/use-logger-client';
@@ -45,12 +46,12 @@ interface CartActions {
 
   // Cart API operations
   fetchCart: (createCurrent?: boolean) => Promise<Cart | null | undefined>;
-  addToCart: (productId: string, quantity: number) => Promise<ModifyCartItemResult>;
+  addToCart: (productId: string, quantity: number, _retryCount?: number) => Promise<ModifyCartItemResult>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
   updateCurrency: (currency: string) => Promise<void>;
-  clearCart: () => void;
+  clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => void;
 
   // Cross-store synchronization
   syncCurrencyWithSession: (currency: string, siteCode: string) => Promise<void>;
@@ -68,6 +69,11 @@ const defaultState: CartState = {
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
+  // In-flight promise deduplication for fetchCart
+  // Stored outside Zustand state to avoid triggering re-renders
+  let _fetchPromise: Promise<Cart | null | undefined> | null = null;
+  let _fetchPromiseCreate: boolean = false;
+
   return create<CartStore>()(
     subscribeWithSelector((set, get) => ({
       ...initState,
@@ -75,7 +81,17 @@ export const createCartStore = (initState: CartState = defaultState) => {
         const { sessionStatus } = get();
         if (sessionStatus !== newSessionStatus) {
           set({ sessionStatus: newSessionStatus });
-          await get().fetchCart(false);
+          // Only clear cart on actual auth transitions (not initial mount)
+          // On first mount, sessionStatus is null — this is initialization, not an auth change
+          if (sessionStatus !== null) {
+            set({
+              currentCart: null,
+              loading: true,
+              error: null,
+              lastShippingUpdate: null,
+            });
+            await get().fetchCart(false);
+          }
         }
       },
       validateSite: async (newSiteCode: string) => {
@@ -109,25 +125,44 @@ export const createCartStore = (initState: CartState = defaultState) => {
 
       // Cart API operations
       fetchCart: async (createCurrent: boolean = false) => {
-        try {
-          set({ loading: true, error: null });
-
-          // Try to fetch existing cart
-          try {
-            const cartData = await apiFetchCurrentCart(createCurrent);
-            set({ currentCart: cartData, loading: false });
-            return cartData;
-          } catch (_err) {
-            // Silent error when cart is gone
-            set({ currentCart: null, loading: false });
-            return null;
-          }
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error('Failed to fetch cart');
-          set({ error, loading: false });
-          getLogger().error({ err }, 'Error fetching cart');
-          return undefined;
+        // Dedup: if a fetch is already in-flight, reuse it
+        // A create=true call must NOT reuse a create=false in-flight request
+        if (_fetchPromise && (createCurrent === _fetchPromiseCreate || !createCurrent)) {
+          return _fetchPromise;
         }
+
+        _fetchPromiseCreate = createCurrent;
+        const currentFetchPromise = (async () => {
+          try {
+            set({ loading: true, error: null });
+
+            try {
+              const cartData = await apiFetchCurrentCart(createCurrent);
+              set({ currentCart: cartData, loading: false });
+              return cartData;
+            } catch (_err) {
+              // Silent error when cart is gone
+              set({ currentCart: null, loading: false });
+              return null;
+            }
+          } catch (err) {
+            const error = err instanceof Error ? err : new Error('Failed to fetch cart');
+            set({ error, loading: false });
+            getLogger().error({ err }, 'Error fetching cart');
+            return undefined;
+          }
+        })();
+        _fetchPromise = currentFetchPromise;
+
+        // Clean up after completion — only clear if this is still the current in-flight promise
+        // (prevents a later fetchCart(true) from being cleared by an earlier fetchCart(false) completing)
+        void currentFetchPromise.finally(() => {
+          if (_fetchPromise === currentFetchPromise) {
+            _fetchPromise = null;
+          }
+        });
+
+        return _fetchPromise;
       },
 
       loadCart: async (cartId: string, type: string = 'shopping') => {
@@ -152,12 +187,45 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
       },
 
-      addToCart: async (productId: string, quantity: number) => {
+      addToCart: async (productId: string, quantity: number, _retryCount = 0) => {
+        const { loading, lastSiteCode } = get();
+
+        // Guard 1: Block while a site transition is in progress
+        // (validateSite sets loading=true before async fetchCart)
+        if (loading) {
+          if (_retryCount >= 1) {
+            throw new Error('Site transition in progress. Please try again.');
+          }
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const { loading: stillLoading } = get();
+          if (stillLoading) {
+            throw new Error('Site transition in progress. Please try again.');
+          }
+          // Retry with fresh state after transition completes (max 1 retry)
+          return get().addToCart(productId, quantity, _retryCount + 1);
+        }
+
         // first get a cart (before we block with the loading state)
         let { currentCart } = get();
         if (!currentCart) {
           currentCart = await get().fetchCart(true);
           if (!currentCart) throw new Error('No cart available');
+        }
+
+        // Guard 2: Verify cart-site alignment using lastSiteCode from validateSite()
+        if (lastSiteCode && currentCart.site && currentCart.site !== lastSiteCode) {
+          getLogger().warn(
+            { cartSite: currentCart.site, sessionSite: lastSiteCode },
+            'Cart-site mismatch detected on client — clearing stale cart',
+          );
+          set({ currentCart: null, loading: true, error: null });
+          await get().fetchCart(true);
+          const { currentCart: correctCart } = get();
+          if (!correctCart) {
+            throw new Error('Failed to get correct site cart');
+          }
+          // Use the correct cart directly instead of recursing (max 1 retry)
+          currentCart = correctCart;
         }
 
         set({ loading: true, error: null });
@@ -309,8 +377,9 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
       },
 
-      clearCart: () => {
-        // Reset all cart-related state to ensure proper cleanup
+      clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => {
+        const { deleteCart = false, clearSession = true } = options ?? {};
+        // 1. Optimistically reset all cart-related state immediately
         set({
           currentCart: null,
           loading: false,
@@ -318,9 +387,19 @@ export const createCartStore = (initState: CartState = defaultState) => {
           lastShippingUpdate: null,
           lastSiteCode: null,
         });
+        // 2. Fire-and-forget: clear server-side session + optionally delete cart
+        //    Skip server-side clear during login — the merge already set the correct cartId
+        if (clearSession) {
+          clearCartSession(deleteCart).catch((err) => {
+            getLogger().error({ err }, 'Failed to clear cart session on server');
+          });
+        }
       },
 
       syncCurrencyWithSession: async (currency: string, siteCode: string) => {
+        // Skip sync during cart transitions (e.g., login cart merge in progress)
+        if (get().loading) return;
+
         const { currentCart } = get();
         if (!currentCart) return;
 

@@ -21,7 +21,7 @@ interface UseCart {
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
-  clearCart: () => void;
+  clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => void;
   loadCart: (cartId: string, type?: string) => Promise<Cart | null | undefined>;
 
   // Utility
@@ -52,8 +52,8 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
   } = useCartStore();
 
   useEffect(() => {
-    if (!cart) {
-      // Initialize with initialCart if provided and cart is undefined
+    if (cart === undefined) {
+      // Cart state is unknown — either hydrate from SSR prop or fetch
       if (initialCart !== undefined) {
         setCurrentCart(initialCart);
       } else {

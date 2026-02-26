@@ -74,6 +74,27 @@ class EmporixCartService implements CartService {
     // Try to get cart by cached ID (trusted - cartId is cleared on site change in setSite())
     if (session.cartId) {
       cart = await this.cartApi.getCart(session.cartId);
+
+      // Site guard: skip cart from a different site (race condition in setSite)
+      if (cart && cart.siteCode !== currentSiteCode) {
+        this.logger.info(
+          { cartId: session.cartId, cartSite: cart.siteCode, currentSite: currentSiteCode },
+          'Skipping cart from different site — searching for current site cart',
+        );
+        cart = undefined;
+      }
+
+      // Safety check: if user is logged in but the cached cart is anonymous,
+      // discard it and search for the customer's actual cart.
+      // This happens when the anonymous→customer cart merge didn't complete during login
+      // (e.g. B2B legalEntityId filtering prevented finding the anonymous cart).
+      if (cart && session.customerId && !cart.customerId) {
+        this.logger.info(
+          { cartId: session.cartId, customerId: session.customerId },
+          'Skipping stale anonymous cart for logged-in user — searching for customer cart',
+        );
+        cart = undefined;
+      }
     }
 
     // Fallback to search by criteria if no valid cart found
@@ -104,26 +125,56 @@ class EmporixCartService implements CartService {
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<ModifyCartItemResult> {
-    const [product, price, session] = await Promise.all([
+    const [rawCart, product, session] = await Promise.all([
+      this.cartApi.getCart(cartId),
       this.productService.getProductById(productId),
-      this.priceService.getProductPrice(productId, quantity),
       this.sessionService.getCurrent(),
     ]);
+    if (!rawCart) {
+      throw new Error('Cart not found');
+    }
+    if (!session) {
+      throw new Error('Failed to get session context');
+    }
     if (!product) {
       throw new Error('Product missing');
     }
+
+    // Determine the cart's effective site code
+    const cartSiteCode = rawCart.siteCode || session.siteCode || 'main';
+
+    // GUARD: If cart belongs to a different site, auto-recover by fetching/creating the correct cart.
+    // This handles race conditions where the session site changed but the cart ID wasn't updated yet.
+    if (cartSiteCode !== session.siteCode) {
+      this.logger.warn(
+        { cartId, cartSite: cartSiteCode, sessionSite: session.siteCode },
+        'Cart belongs to different site — auto-recovering correct cart',
+      );
+      const correctCart = await this.getCart();
+      if (!correctCart) {
+        throw new Error('Failed to get cart for current site');
+      }
+      // Prevent infinite recursion: if we got back the same cart, something is fundamentally wrong
+      if (correctCart.id === cartId) {
+        throw new Error(
+          `Cart site mismatch cannot be resolved: cart ${cartId} site=${cartSiteCode}, session site=${session.siteCode}`,
+        );
+      }
+      return this.addItemToCart(correctCart.id, productId, quantity);
+    }
+
+    // Session and cart are aligned → matchPricesByContext handles currency conversion,
+    // cross-site price fallback, and tax recalculation internally via the session context.
+    const price = await this.priceService.getProductPrice(productId, quantity);
+
     // TODO find existing cartItem and merge if desired
     if (!price) {
       throw new Error('Price missing');
     }
-    const { hasSufficientStock, availableQuantity } = await this.checkStock(
-      session.siteCode || 'main',
-      productId,
-      quantity,
-    );
+    const { hasSufficientStock, availableQuantity } = await this.checkStock(cartSiteCode, productId, quantity);
 
     const addItemRequest: EmporixAddCartItemRequest = {
-      siteCode: session.siteCode || 'main',
+      siteCode: cartSiteCode,
       itemYrn: this.commonUtil.generateProductYrn(productId),
       quantity,
       product: {
@@ -174,12 +225,30 @@ class EmporixCartService implements CartService {
 
   async updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<ModifyCartItemResult> {
     const cart = await this.getCartById(cartId);
-    const cartItem = cart?.items.find((item) => item.id === itemId);
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+    const cartItem = cart.items.find((item) => item.id === itemId);
     if (!cartItem || !cartItem.product?.id) {
       throw new Error('Cart item not found');
     }
 
-    const [price] = await Promise.all([this.priceService.getProductPrice(cartItem.product.id, quantity)]);
+    const cartSiteCode = cart.site || 'main';
+    const session = await this.sessionService.getCurrent();
+
+    // GUARD: Cart-session site alignment check.
+    // Unlike addItemToCart, we don't auto-recover here because the user is interacting
+    // with specific cart items — replacing the cart under them would be confusing.
+    if (session && cartSiteCode !== session.siteCode) {
+      this.logger.warn(
+        { cartId, cartSite: cartSiteCode, sessionSite: session.siteCode },
+        'Cart belongs to different site during quantity update — aborting',
+      );
+      throw new Error('Cart belongs to a different site. Please refresh the page.');
+    }
+
+    // Session-based pricing — matchPricesByContext handles currency/tax internally
+    const price = await this.priceService.getProductPrice(cartItem.product.id, quantity);
 
     if (!price) {
       throw new Error('Price missing');
@@ -223,6 +292,64 @@ class EmporixCartService implements CartService {
     await this.cartApi.deleteCart(cartId);
   }
 
+  /**
+   * Refresh a cart with automatic cleanup of orphaned legalEntityId.
+   *
+   * The Emporix refreshCart endpoint rejects anonymous carts that have a legalEntityId set
+   * ("Anonymous cart cannot be assigned to a legal entity"). This can happen when a previous
+   * bug caused legalEntityId to be spread onto anonymous carts via updateCart. The field is
+   * stored on the backend but may NOT be returned by the GET /carts/{id} endpoint, so we
+   * cannot detect it preemptively — instead we catch the specific error, clear the field,
+   * and retry the refresh.
+   */
+  private async refreshCartWithCleanup(cartId: string): Promise<void> {
+    try {
+      await this.cartApi.refreshCart(cartId);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Anonymous cart cannot be assigned to a legal entity')) {
+        // This error occurs when refreshCart is called on an anonymous cart using a customer
+        // session token whose context includes a legalEntityId (B2B customer).
+        // The legalEntityId comes from the SESSION CONTEXT, not the cart field itself,
+        // so clearing it on the cart object won't help. Check if the cart is actually
+        // anonymous and the session is logged-in — if so, this is a mismatched-cart
+        // situation that should be resolved by switching to the customer's own cart.
+        const freshCart = await this.cartApi.getCart(cartId);
+        const session = await this.sessionService.getCurrent();
+
+        if (freshCart && !freshCart.customerId && session?.customerId) {
+          // The cart is anonymous but the user is logged in — this cart shouldn't be
+          // operated on with the customer session. Log and re-throw to let the caller
+          // handle it (e.g. by fetching the correct customer cart).
+          this.logger.warn(
+            { cartId, customerId: session.customerId },
+            'Cannot refresh anonymous cart with customer session (legalEntityId from session context) — cart/session mismatch',
+          );
+          throw error;
+        }
+
+        // Fallback: if the cart has a customerId but still hits this error, try the
+        // original cleanup approach (clear orphaned legalEntityId on the cart itself)
+        this.logger.warn({ cartId }, 'Detected orphaned legalEntityId on cart — clearing before retry');
+        if (!freshCart) {
+          throw error;
+        }
+
+        await this.cartApi.updateCart(cartId, {
+          metadata: {
+            ...freshCart.metadata,
+            version: (freshCart.metadata?.version ?? 0) + 1,
+          },
+          legalEntityId: '',
+        } as Partial<EmporixCart>);
+
+        // Retry refresh after cleanup
+        await this.cartApi.refreshCart(cartId);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   async updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
     // TODO Not used because of inconsistent Session/cart Handling
     // Get the session cart and update it
@@ -231,7 +358,6 @@ class EmporixCartService implements CartService {
       throw new Error('Cart not found');
     }
     await this.cartApi.updateCart(cartId, {
-      ...cart,
       metadata: {
         ...cart.metadata,
         version: (cart.metadata?.version ?? 0) + 1,
@@ -239,15 +365,15 @@ class EmporixCartService implements CartService {
       countryCode,
       zipCode,
     });
-    await this.cartApi.refreshCart(cartId);
+    await this.refreshCartWithCleanup(cartId);
   }
 
   async updateCurrency(cartId: string, currency: string): Promise<void> {
-    const cart = await this.getCartById(cartId);
-    if (!cart) {
+    const rawCart = await this.cartApi.getCart(cartId);
+    if (!rawCart) {
       throw new Error('Cart not found');
     }
-    const site = await this.siteService.getSite(cart?.site);
+    const site = await this.siteService.getSite(rawCart.siteCode);
     if (!site) {
       throw new Error('Site not found');
     }
@@ -256,12 +382,12 @@ class EmporixCartService implements CartService {
       throw new Error('Currency not supported');
     }
     await this.cartApi.changeCurrency(cartId, currency);
-    await this.cartApi.refreshCart(cartId);
+    await this.refreshCartWithCleanup(cartId);
   }
 
   async updateSite(cartId: string, siteCode: string): Promise<void> {
     await this.cartApi.changeSite(cartId, siteCode);
-    await this.cartApi.refreshCart(cartId);
+    await this.refreshCartWithCleanup(cartId);
   }
 
   async getSavedCarts(pagination: PaginationQuery): Promise<Paginated<Cart>> {

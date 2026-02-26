@@ -41,7 +41,7 @@ interface UseCheckout {
   submitShippingAddress: (address: CheckoutAddress) => void;
   submitBillingAddress: (address: CheckoutAddress) => void;
   submitPaymentMethod: (method: CheckoutPaymentMethod) => void;
-  submitShippingMethod: (method: ShippingMethod) => void;
+  submitShippingMethod: (method: ShippingMethod | null) => void;
   // Operations
   createCheckoutData: () => CheckoutRequest | null;
   processCheckout: () => Promise<CheckoutResponse | null>;
@@ -71,7 +71,7 @@ export const useCheckout = (): UseCheckout => {
   } = useCheckoutStore();
 
   // Get cart from cart store
-  const { cart: checkoutCart, updateShippingInfo, clearCart } = useCart();
+  const { cart: checkoutCart, loading: cartLoading, updateShippingInfo, clearCart } = useCart();
   const { customer } = useCustomer();
   const { getDefaultAddress, loading: addressesLoading } = useAddresses();
   const [loading, setLoading] = useState<boolean>(false);
@@ -124,7 +124,11 @@ export const useCheckout = (): UseCheckout => {
   );
 
   const submitShippingMethod = useCallback(
-    (method: ShippingMethod) => {
+    (method: ShippingMethod | null) => {
+      if (!method) {
+        setShippingMethod(null);
+        return;
+      }
       setShippingMethod({
         methodId: method.id,
         zoneId: method.zoneId,
@@ -261,17 +265,25 @@ export const useCheckout = (): UseCheckout => {
   }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
 
   useEffect(() => {
-    if (checkoutCart && availableShippingMethods.length > 0) {
-      let newShippingMethod: ShippingMethod | null = null;
-      if (shippingMethod) {
-        newShippingMethod = availableShippingMethods.find((method) => method.id === shippingMethod.methodId) || null;
-      }
-      if (!newShippingMethod) {
-        newShippingMethod = availableShippingMethods.sort((a, b) => (a.cost?.amount || 0) - (b.cost?.amount || 0))[0];
-      }
-      submitShippingMethod(newShippingMethod);
+    if (!checkoutCart) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    if (availableShippingMethods.length === 0) {
+      // Clear stale shipping method when no methods are available for this currency/zone
+      submitShippingMethod(null);
+      return;
+    }
+
+    let newShippingMethod: ShippingMethod | null = null;
+    if (shippingMethod) {
+      newShippingMethod = availableShippingMethods.find((method) => method.id === shippingMethod.methodId) || null;
+    }
+    if (!newShippingMethod) {
+      newShippingMethod = availableShippingMethods.sort((a, b) => (a.cost?.amount || 0) - (b.cost?.amount || 0))[0];
+    }
+    submitShippingMethod(newShippingMethod);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- shippingMethod excluded: this effect SETS it, including it would cause an infinite loop
   }, [availableShippingMethods, checkoutCart, submitShippingMethod]);
 
   useEffect(() => {
@@ -294,7 +306,8 @@ export const useCheckout = (): UseCheckout => {
   useEffect(() => {
     // Only load default addresses if we're not on the logout page
     // This prevents re-populating addresses after logout
-    if (!addressesLoading && status === 'authenticated') {
+    // Also wait for cart to finish loading to avoid using stale cart data after login
+    if (!addressesLoading && !cartLoading && status === 'authenticated') {
       if (!shippingAddress) {
         const defaultShippingAddress = getDefaultAddress('SHIPPING');
         if (defaultShippingAddress) {
@@ -317,6 +330,7 @@ export const useCheckout = (): UseCheckout => {
     }
   }, [
     addressesLoading,
+    cartLoading,
     shippingAddress,
     billingAddress,
     getDefaultAddress,

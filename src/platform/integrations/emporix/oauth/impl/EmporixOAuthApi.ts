@@ -1,5 +1,11 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { buildAndLogCurl, logResponse } from '@/platform/core/utils/debug-utils';
+import {
+  type DebugContext,
+  buildAndLogCurl,
+  getDebugLogger,
+  logRequestPayload,
+  logResponse,
+} from '@/platform/core/utils/debug-utils';
 import {
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
@@ -197,10 +203,17 @@ class EmporixOAuthApi implements IEmporixOAuthApi {
    */
   async fetch(url: string, options: RequestInit = {}): Promise<Response> {
     url = `${this.baseUrl}${url.startsWith('/') ? url : '/' + url}`;
-    const prefix = buildAndLogCurl(url, options);
+    const ctx: DebugContext = { callType: 'external' };
+    const prefix = buildAndLogCurl(url, options, ctx);
+    logRequestPayload(url, options, prefix, ctx);
     const responsePromise = fetch(url, options);
-    responsePromise.catch((err) => console.error(`${prefix} [FETCH ERROR] ${url}`, err));
-    responsePromise.then((response) => logResponse(response, url, options, prefix));
+    responsePromise.catch((err) =>
+      getDebugLogger().error(
+        { url, error: err instanceof Error ? err.message : String(err) },
+        `${prefix} [FETCH ERROR]`,
+      ),
+    );
+    responsePromise.then((response) => logResponse(response, url, options, prefix, ctx));
     return responsePromise;
   }
 }

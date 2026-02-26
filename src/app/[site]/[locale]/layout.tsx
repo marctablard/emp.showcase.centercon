@@ -6,6 +6,7 @@ import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import { CsrfProvider } from '@/components/csrf/CsrfProvider';
+import { ApiDebugPanel } from '@/components/debug/ApiDebugPanel';
 import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { redirect } from '@/i18n/edge/navigation';
@@ -111,6 +112,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
               <StoreProvider site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
+                  {process.env.NODE_ENV === 'development' && <ApiDebugPanel />}
                   {children}
                   {dialog}
                   <Toaster />
