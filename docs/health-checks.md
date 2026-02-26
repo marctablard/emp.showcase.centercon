@@ -67,10 +67,16 @@ In addition, the site middleware includes **probe detection** to protect expensi
 - Returns `503 Service Unavailable` if critical configuration is missing
 - Checks only **local configuration** (no upstream calls)
 
-**Required Environment Variables**:
+**Required Environment Variables** (sourced from `REQUIRED_ENV_VARS` in `src/platform/healthcheck/env-validation.ts`):
 - `NEXT_PUBLIC_EMPORIX_BASE_URL`
 - `NEXT_PUBLIC_EMPORIX_TENANT`
 - `NEXT_PUBLIC_EMPORIX_CLIENT_ID`
+- `NEXTAUTH_SECRET`
+- `NEXT_PUBLIC_DEFAULT_CURRENCY`
+- `NEXT_PUBLIC_DEFAULT_SITE`
+- `NEXT_PUBLIC_DEFAULT_LANGUAGE`
+- `NEXT_PUBLIC_DEFAULT_COUNTRY`
+- `NEXT_PUBLIC_AVAILABLE_SITES`
 
 **Success Response** (`200 OK`):
 ```json
@@ -482,6 +488,83 @@ This prevents any intermediate caches (CDN, proxy) from caching health check res
 - They return minimal information (status + timestamp)
 - No sensitive data is exposed
 - Consider IP allowlisting if needed (though typically not required)
+
+## Startup Configuration Validation
+
+The application includes a two-tier configuration validation system that catches misconfigurations as early as possible.
+
+### Tier 1 — Build-Time Env Var Validation
+
+**When:** During `next build` (in `next.config.ts`)
+**Behaviour:** Fails the build if required env vars are missing. Cannot be disabled.
+
+**Required environment variables** (build fails if any are absent):
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_EMPORIX_BASE_URL` | Emporix API base URL |
+| `NEXT_PUBLIC_EMPORIX_TENANT` | Emporix tenant identifier |
+| `NEXT_PUBLIC_EMPORIX_CLIENT_ID` | Emporix public/storefront client ID |
+| `NEXTAUTH_SECRET` | NextAuth session encryption secret |
+| `NEXT_PUBLIC_DEFAULT_CURRENCY` | Default currency code |
+| `NEXT_PUBLIC_DEFAULT_SITE` | Default site code |
+| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | Default language code |
+| `NEXT_PUBLIC_DEFAULT_COUNTRY` | Default country code |
+| `NEXT_PUBLIC_AVAILABLE_SITES` | Comma-separated list of available site codes |
+
+**Optional environment variables** (build warns if absent):
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_EMPORIX_CLIENT_ID` | Emporix server-side client ID |
+| `NEXT_EMPORIX_CLIENT_SECRET` | Emporix server-side client secret |
+
+**Example build failure output:**
+
+```
+[healthcheck] Missing required environment variables:
+  ✗ NEXT_PUBLIC_EMPORIX_TENANT — missing (Emporix tenant identifier)
+  ✗ NEXTAUTH_SECRET — missing (NextAuth session encryption secret)
+
+Error: Build aborted: missing required environment variables. See errors above.
+```
+
+### Tier 2 — Runtime Startup Validation
+
+**When:** At server startup (in `instrumentation.ts register()`)
+**Behaviour:** Validates configured sites, currencies, and languages against the Emporix API. Fails with `process.exit(1)` if critical misconfigurations are detected. Degrades to warnings if the API is unreachable.
+
+**Checks performed:**
+
+1. Each configured site (`NEXT_PUBLIC_AVAILABLE_SITES`) exists in the Emporix tenant
+2. The default currency (`NEXT_PUBLIC_DEFAULT_CURRENCY`) exists in tenant currencies
+3. Each site's currency matches a tenant currency
+4. Each site's languages are present in the configured i18n locales
+
+**Toggle:** Set `NEXT_STARTUP_HEALTHCHECK_ENABLED=false` to disable Tier 2 checks. This only affects Tier 2 — Tier 1 (build-time) always runs.
+
+**Example runtime log output (success):**
+
+```
+INFO: Configuration healthcheck starting...
+INFO: ✓ Default currency "EUR" exists in tenant  { check: "currency:EUR" }
+INFO: ✓ Site "main" exists in tenant  { check: "site:main" }
+INFO: ✓ Site "main" currency "EUR" exists in tenant currencies  { check: "site:main:currency" }
+INFO: ✓ Site "main" languages are all configured in i18n locales  { check: "site:main:languages" }
+INFO: Configuration healthcheck completed: 4 passed, 0 warnings  { passed: 4 }
+```
+
+**Example runtime log output (warnings):**
+
+```
+INFO: Configuration healthcheck starting...
+WARN: ⚠ Site "nonexistent" not found in Emporix tenant  { check: "site:nonexistent" }
+WARN: Configuration healthcheck completed with warnings: 3 passed, 1 warning(s)  { passed: 3, warnings: 1 }
+```
+
+### Relationship to `/api/ready`
+
+The `/api/ready` readiness probe shares the same `REQUIRED_ENV_VARS` constant as Tier 1. This ensures a single source of truth — any env var added to the build-time check is automatically included in the readiness probe.
 
 ## Related Documentation
 
