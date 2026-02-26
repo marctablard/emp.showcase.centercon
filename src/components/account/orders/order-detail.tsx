@@ -13,7 +13,7 @@ import { useOrder } from '@/hooks/order/useOrder';
 import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { Order } from '@/platform/services/model/order/order';
+import { Order, OrderStatus } from '@/platform/services/model/order/order';
 import { CreateReturnDialog } from './create-return-dialog';
 import { OrderStatusBadge } from './order-status-badge';
 import { TrackingDialog } from './tracking-dialog';
@@ -21,14 +21,14 @@ import { TrackingDialog } from './tracking-dialog';
 /**
  * Determines if the cancel button should be shown based on order status
  */
-function shouldShowCancelButton(status: Order['status']): boolean {
+function shouldShowCancelButton(status: OrderStatus): boolean {
   return ['COMPLETED', 'PROCESSING', 'READY_FOR_PICKUP', 'READY_FOR_SHIPPING', 'CREATED'].includes(status);
 }
 
 /**
  * Determines if the return button should be shown based on order status
  */
-function shouldShowReturnButton(status: Order['status']): boolean {
+function shouldShowReturnButton(status: OrderStatus): boolean {
   return status === 'COMPLETED';
 }
 
@@ -273,7 +273,6 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
       {/* Tracking Dialog */}
       <TrackingDialog orderId={orderId} open={trackingDialogOpen} onOpenChange={setTrackingDialogOpen} />
 
-      {/* Return Order Dialog */}
       {order && <CreateReturnDialog order={order} open={returnDialogOpen} onOpenChange={setReturnDialogOpen} />}
     </div>
   );

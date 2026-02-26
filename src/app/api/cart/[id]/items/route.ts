@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import server from '@/platform/server';
 import { CartService } from '@/platform/services/cart';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import { CartErrorCode } from '@/platform/services/model/cart/error-codes';
 
 /**
  * GET /api/carts/[id]/items
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json(
         {
           error: 'Product price is not available for this site',
-          code: 'PRICE_SITE_INCOMPATIBLE',
+          code: CartErrorCode.PRICE_SITE_INCOMPATIBLE,
           details: errorMessage,
         },
         { status: 400 },
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json(
         {
           error: "This product's price is not available for the current site.",
-          code: 'PRICE_NOT_AVAILABLE',
+          code: CartErrorCode.PRICE_NOT_AVAILABLE,
           details: errorMessage,
         },
         { status: 400 },
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json(
         {
           error: 'Your cart belongs to a different site. Please refresh the page.',
-          code: 'CART_SITE_MISMATCH',
+          code: CartErrorCode.CART_SITE_MISMATCH,
           details: errorMessage,
         },
         { status: 400 },

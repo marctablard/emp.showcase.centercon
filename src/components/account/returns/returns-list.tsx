@@ -11,7 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useReturns } from '@/hooks/return/useReturns';
 import { Link } from '@/i18n/navigation';
 import { Return, ReturnStatus } from '@/platform/services/model/return';
+import { formatReturnCurrency, formatReturnDate, getFirstOrderId, getRequestorEmail } from './helpers';
 import { ReturnStatusBadge } from './return-status-badge';
+
+type ReturnSortField = 'date' | 'value' | 'status';
 
 interface ReturnsListProps {
   initialReturns?: Return[];
@@ -22,7 +25,7 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
   const tStatus = useTranslations('account.returns.status');
   const locale = useLocale();
   const [filterStatus, setFilterStatus] = useState<ReturnStatus | '_ALL_'>('_ALL_');
-  const [sortField, setSortField] = useState<'date' | 'value' | 'status' | null>(null);
+  const [sortField, setSortField] = useState<ReturnSortField | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const { returns, loading, error, refreshReturns } = useReturns(initialReturns);
 
@@ -52,39 +55,13 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
-  const toggleSort = (field: 'date' | 'value' | 'status') => {
+  const toggleSort = (field: ReturnSortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('desc');
     }
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(locale, {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }).format(date);
-  };
-
-  const formatCurrency = (value?: number, currency?: string) => {
-    if (value === undefined || !currency) return '-';
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-    }).format(value);
-  };
-
-  const getFirstOrderId = (returnItem: Return): string => {
-    return returnItem.orders[0]?.id || '-';
-  };
-
-  const getRequestorEmail = (returnItem: Return): string => {
-    return returnItem.requestor?.email || '-';
   };
 
   if (loading) {
@@ -197,10 +174,12 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
                     {returnItem.id}
                   </Link>
                 </TableCell>
-                <TableCell>{formatDate(returnItem.createdAt)}</TableCell>
+                <TableCell>{formatReturnDate(returnItem.createdAt, locale)}</TableCell>
                 <TableCell>{getFirstOrderId(returnItem)}</TableCell>
                 <TableCell>{getRequestorEmail(returnItem)}</TableCell>
-                <TableCell>{formatCurrency(returnItem.total?.value, returnItem.total?.currency)}</TableCell>
+                <TableCell>
+                  {formatReturnCurrency(returnItem.total?.value, returnItem.total?.currency, locale)}
+                </TableCell>
                 <TableCell>
                   <ReturnStatusBadge status={returnItem.status} isExpired={returnItem.isExpired} />
                 </TableCell>

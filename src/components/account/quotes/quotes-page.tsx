@@ -14,13 +14,11 @@ interface QuotesPageContentProps {
 
 export default function QuotesPageContent({ initialQuotes }: QuotesPageContentProps) {
   const t = useTranslations('account.quotesList');
-  // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const quotesPerPage = 5;
 
   const { quotes, loading, error } = useQuotes(initialQuotes);
 
-  // Pagination handlers
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };

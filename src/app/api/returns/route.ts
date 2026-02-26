@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { orderId, items, reasonCode } = body;
 
-    // Validate required fields
     if (!orderId || typeof orderId !== 'string') {
       return NextResponse.json({ error: 'orderId is required and must be a string' }, { status: 400 });
     }
@@ -58,7 +57,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'reasonCode is required and must be a string' }, { status: 400 });
     }
 
-    // Validate item structure
     for (const item of items) {
       if (!item.id || typeof item.id !== 'string') {
         return NextResponse.json({ error: 'Each item must have a valid id' }, { status: 400 });

@@ -11,13 +11,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { type OrderPaymentTypeKey, type OrderStatusLowercaseKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { Order } from '@/platform/services/model/order/order';
+import { Order, OrderStatus } from '@/platform/services/model/order/order';
 import { CreateReturnDialog } from './create-return-dialog';
 
 /**
  * Determines if the return action should be enabled based on order status
  */
-function isReturnEnabled(status: Order['status']): boolean {
+function isReturnEnabled(status: OrderStatus): boolean {
   return status === 'COMPLETED';
 }
 
@@ -184,7 +184,6 @@ export function MyOrdersTable({
         </div>
       )}
 
-      {/* Create Return Dialog */}
       {selectedOrder && <CreateReturnDialog open={dialogOpen} onOpenChange={setDialogOpen} order={selectedOrder} />}
     </div>
   );

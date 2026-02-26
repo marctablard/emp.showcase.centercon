@@ -23,17 +23,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function ReturnDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
-  // Get return ID and locale from params
   const { locale, id } = await params;
 
-  // Get translations
   const [tAccount, tReturns, apiReturn] = await Promise.all([
     getTranslations({ locale, namespace: 'account' }),
     getTranslations({ locale, namespace: 'account.returns' }),
     getReturnById(id),
   ]);
 
-  // If return not found, return 404
   if (!apiReturn) {
     notFound();
   }

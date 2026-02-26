@@ -22,7 +22,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function ReturnsPage({ params }: { params: Promise<{ locale: string }> }) {
-  // Fetch returns data during SSR
   const { locale } = await params;
   const [tAccount, tReturns, returns] = await Promise.all([
     getTranslations({ locale, namespace: 'account' }),

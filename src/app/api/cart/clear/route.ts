@@ -14,11 +14,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const sessionService = server.get<SessionService>('SessionService');
     const logger = server.get<LoggerService>('LoggerService');
 
-    // Get current session to find active cartId before clearing
     const session = await sessionService.getCurrent();
     const cartId = session?.cartId;
 
-    // Clear cart reference from session context
     await sessionService.clearCart();
 
     // Optionally delete the cart entity

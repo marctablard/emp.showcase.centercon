@@ -25,10 +25,7 @@ export class EmporixReturnService implements ReturnService {
    * @returns Promise with array of returns
    */
   async getReturns(pageNumber: number = 1, pageSize: number = 60, sort?: string, query?: string): Promise<Return[]> {
-    // Call the API
     const emporixReturns = await this.returnApi.getReturns(pageNumber, pageSize, sort, query);
-
-    // Map each return to service model
     return emporixReturns.map((returnItem) => this.returnMapper.mapToService(returnItem));
   }
 
@@ -38,15 +35,10 @@ export class EmporixReturnService implements ReturnService {
    * @returns Promise with the return or undefined if not found
    */
   async getReturn(returnId: string): Promise<Return | undefined> {
-    // Call the API
     const emporixReturn = await this.returnApi.getReturn(returnId);
-
-    // If not found, return undefined
     if (!emporixReturn) {
       return undefined;
     }
-
-    // Map to service model
     return this.returnMapper.mapToService(emporixReturn);
   }
 

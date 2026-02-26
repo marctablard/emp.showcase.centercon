@@ -62,7 +62,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       );
     }
 
-    // Return success response
     return NextResponse.json({ success: true });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
