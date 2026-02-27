@@ -72,7 +72,7 @@ describe('validateRemoteConfig', () => {
     expect(result.items.every((i) => i.passed)).toBe(true);
   });
 
-  it('should return a warning when a site does not exist (getSite returns null)', async () => {
+  it('should return an error when a site does not exist (getSite returns null)', async () => {
     const siteSettingsApi = createMockSiteSettingsApi({ main: mainSite, missing: null });
     const currencyApi = createMockCurrencyApi([EUR, USD]);
 
@@ -85,14 +85,15 @@ describe('validateRemoteConfig', () => {
       logger: mockLogger,
     });
 
-    expect(result.hasWarnings).toBe(true);
+    expect(result.hasErrors).toBe(true);
     const missingItem = result.items.find((i) => i.name === 'site:missing');
     expect(missingItem).toBeDefined();
     expect(missingItem!.passed).toBe(false);
+    expect(missingItem!.severity).toBe('error');
     expect(missingItem!.message).toContain('not found');
   });
 
-  it('should return a warning when default currency is not in tenant currencies', async () => {
+  it('should return an error when default currency is not in tenant currencies', async () => {
     const siteSettingsApi = createMockSiteSettingsApi({ main: mainSite });
     const currencyApi = createMockCurrencyApi([EUR]);
 
@@ -105,14 +106,15 @@ describe('validateRemoteConfig', () => {
       logger: mockLogger,
     });
 
-    expect(result.hasWarnings).toBe(true);
+    expect(result.hasErrors).toBe(true);
     const currencyItem = result.items.find((i) => i.name === 'currency:GBP');
     expect(currencyItem).toBeDefined();
     expect(currencyItem!.passed).toBe(false);
+    expect(currencyItem!.severity).toBe('error');
     expect(currencyItem!.message).toContain('not found');
   });
 
-  it('should return a warning when site currency is not in tenant currencies', async () => {
+  it('should return an error when site currency is not in tenant currencies', async () => {
     const siteWithBadCurrency: EmporixSite = { code: 'bad', currency: 'GBP', languages: ['en'] };
     const siteSettingsApi = createMockSiteSettingsApi({ bad: siteWithBadCurrency });
     const currencyApi = createMockCurrencyApi([EUR, USD]);
@@ -126,15 +128,16 @@ describe('validateRemoteConfig', () => {
       logger: mockLogger,
     });
 
-    expect(result.hasWarnings).toBe(true);
+    expect(result.hasErrors).toBe(true);
     const item = result.items.find((i) => i.name === 'site:bad:currency');
     expect(item).toBeDefined();
     expect(item!.passed).toBe(false);
+    expect(item!.severity).toBe('error');
     expect(item!.message).toContain('GBP');
     expect(item!.message).toContain('not found');
   });
 
-  it('should return a warning when site language is not in i18n locales', async () => {
+  it('should return an error when site language is not in i18n locales', async () => {
     const siteWithExtraLang: EmporixSite = { code: 'main', currency: 'EUR', languages: ['en', 'de', 'fr'] };
     const siteSettingsApi = createMockSiteSettingsApi({ main: siteWithExtraLang });
     const currencyApi = createMockCurrencyApi([EUR]);
@@ -148,10 +151,11 @@ describe('validateRemoteConfig', () => {
       logger: mockLogger,
     });
 
-    expect(result.hasWarnings).toBe(true);
+    expect(result.hasErrors).toBe(true);
     const langItem = result.items.find((i) => i.name === 'site:main:languages');
     expect(langItem).toBeDefined();
     expect(langItem!.passed).toBe(false);
+    expect(langItem!.severity).toBe('error');
     expect(langItem!.message).toContain('fr');
   });
 
@@ -213,10 +217,11 @@ describe('validateRemoteConfig', () => {
       logger: mockLogger,
     });
 
-    expect(result.hasWarnings).toBe(true);
+    expect(result.hasErrors).toBe(true);
     const failedItems = result.items.filter((i) => !i.passed);
     // GBP not in currencies + main not found + secondary not found = 3 failures
     expect(failedItems).toHaveLength(3);
+    expect(failedItems.every((i) => i.severity === 'error')).toBe(true);
     expect(failedItems.map((i) => i.name)).toEqual(
       expect.arrayContaining(['currency:GBP', 'site:main', 'site:secondary']),
     );

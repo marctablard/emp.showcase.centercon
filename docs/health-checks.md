@@ -532,14 +532,16 @@ Error: Build aborted: missing required environment variables. See errors above.
 ### Tier 2 — Runtime Startup Validation
 
 **When:** At server startup (in `instrumentation.ts register()`)
-**Behaviour:** Validates configured sites, currencies, and languages against the Emporix API. Fails with `process.exit(1)` if critical misconfigurations are detected. Degrades to warnings if the API is unreachable.
+**Behaviour:** Validates configured sites, currencies, and languages against the Emporix API. Site/currency/language mismatches are `'error'` severity and **block startup** via `process.exit(1)`. API unreachability degrades to `'warning'` severity and does **not** block startup (transient infrastructure issue, not a config error).
 
 **Checks performed:**
 
-1. Each configured site (`NEXT_PUBLIC_AVAILABLE_SITES`) exists in the Emporix tenant
-2. The default currency (`NEXT_PUBLIC_DEFAULT_CURRENCY`) exists in tenant currencies
-3. Each site's currency matches a tenant currency
-4. Each site's languages are present in the configured i18n locales
+1. Each configured site (`NEXT_PUBLIC_AVAILABLE_SITES`) exists in the Emporix tenant → `error` if missing
+2. The default currency (`NEXT_PUBLIC_DEFAULT_CURRENCY`) exists in tenant currencies → `error` if missing
+3. Each site's currency matches a tenant currency → `error` if mismatched
+4. Each site's languages are present in the configured i18n locales → `error` if mismatched
+
+> **Note:** If the Emporix API is unreachable during startup, all remote checks are skipped with a `warning`. This avoids blocking startup due to transient network issues or rolling deployments where the API may be temporarily unavailable.
 
 **Toggle:** Set `NEXT_STARTUP_HEALTHCHECK_ENABLED=false` to disable Tier 2 checks. This only affects Tier 2 — Tier 1 (build-time) always runs.
 
@@ -551,15 +553,23 @@ INFO: ✓ Default currency "EUR" exists in tenant  { check: "currency:EUR" }
 INFO: ✓ Site "main" exists in tenant  { check: "site:main" }
 INFO: ✓ Site "main" currency "EUR" exists in tenant currencies  { check: "site:main:currency" }
 INFO: ✓ Site "main" languages are all configured in i18n locales  { check: "site:main:languages" }
-INFO: Configuration healthcheck completed: 4 passed, 0 warnings  { passed: 4 }
+INFO: Configuration healthcheck completed: 4 passed, 0 errors  { passed: 4 }
 ```
 
-**Example runtime log output (warnings):**
+**Example runtime log output (configuration error — blocks startup):**
 
 ```
 INFO: Configuration healthcheck starting...
-WARN: ⚠ Site "nonexistent" not found in Emporix tenant  { check: "site:nonexistent" }
-WARN: Configuration healthcheck completed with warnings: 3 passed, 1 warning(s)  { passed: 3, warnings: 1 }
+ERROR: ✗ Site "nonexistent" not found in Emporix tenant  { check: "site:nonexistent" }
+FATAL: Configuration healthcheck failed with 1 error(s) — aborting startup  { errors: 1 }
+```
+
+**Example runtime log output (API unreachable — continues with warning):**
+
+```
+INFO: Configuration healthcheck starting...
+WARN: Remote validation skipped: API unreachable (Network error)
+WARN: Configuration healthcheck completed with warnings: 0 passed, 1 warning(s)  { warnings: 1 }
 ```
 
 ### Relationship to `/api/ready`

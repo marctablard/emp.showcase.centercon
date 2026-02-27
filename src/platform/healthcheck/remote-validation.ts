@@ -28,8 +28,10 @@ export interface RemoteValidationParams {
  * 3. Each site's currency exists in the tenant currencies.
  * 4. Each site's languages are a subset of the configured i18n locales.
  *
- * All failures are severity `'warning'` (soft fail). API errors are caught
- * gracefully — the function never throws.
+ * Site/currency/language failures are severity `'error'` (hard fail — blocks
+ * startup). API-unreachability errors are severity `'warning'` (soft fail —
+ * transient infrastructure issue, not a config problem). The function never
+ * throws.
  */
 export async function validateRemoteConfig(params: RemoteValidationParams): Promise<HealthcheckResult> {
   const { siteSettingsApi, currencyApi, configuredSites, defaultCurrency, configuredLocales, logger } = params;
@@ -46,14 +48,14 @@ export async function validateRemoteConfig(params: RemoteValidationParams): Prom
       items.push({
         name: `currency:${defaultCurrency}`,
         passed: true,
-        severity: 'warning',
+        severity: 'error',
         message: `Default currency "${defaultCurrency}" exists in tenant`,
       });
     } else {
       items.push({
         name: `currency:${defaultCurrency}`,
         passed: false,
-        severity: 'warning',
+        severity: 'error',
         message: `Default currency "${defaultCurrency}" not found in tenant currencies`,
       });
     }
@@ -66,7 +68,7 @@ export async function validateRemoteConfig(params: RemoteValidationParams): Prom
         items.push({
           name: `site:${siteCode}`,
           passed: false,
-          severity: 'warning',
+          severity: 'error',
           message: `Site "${siteCode}" not found in Emporix tenant`,
         });
         continue;
@@ -75,7 +77,7 @@ export async function validateRemoteConfig(params: RemoteValidationParams): Prom
       items.push({
         name: `site:${siteCode}`,
         passed: true,
-        severity: 'warning',
+        severity: 'error',
         message: `Site "${siteCode}" exists in tenant`,
       });
 
@@ -85,14 +87,14 @@ export async function validateRemoteConfig(params: RemoteValidationParams): Prom
           items.push({
             name: `site:${siteCode}:currency`,
             passed: true,
-            severity: 'warning',
+            severity: 'error',
             message: `Site "${siteCode}" currency "${site.currency}" exists in tenant currencies`,
           });
         } else {
           items.push({
             name: `site:${siteCode}:currency`,
             passed: false,
-            severity: 'warning',
+            severity: 'error',
             message: `Site "${siteCode}" currency "${site.currency}" not found in tenant currencies`,
           });
         }
@@ -105,14 +107,14 @@ export async function validateRemoteConfig(params: RemoteValidationParams): Prom
           items.push({
             name: `site:${siteCode}:languages`,
             passed: true,
-            severity: 'warning',
+            severity: 'error',
             message: `Site "${siteCode}" languages are all configured in i18n locales`,
           });
         } else {
           items.push({
             name: `site:${siteCode}:languages`,
             passed: false,
-            severity: 'warning',
+            severity: 'error',
             message: `Site "${siteCode}" has languages [${missingLocales.join(', ')}] not in configured i18n locales [${configuredLocales.join(', ')}]`,
           });
         }
