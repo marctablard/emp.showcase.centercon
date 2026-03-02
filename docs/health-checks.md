@@ -73,7 +73,6 @@ In addition, the site middleware includes **probe detection** to protect expensi
 - `NEXT_PUBLIC_EMPORIX_CLIENT_ID`
 - `NEXTAUTH_SECRET`
 - `NEXT_PUBLIC_DEFAULT_CURRENCY`
-- `NEXT_PUBLIC_DEFAULT_SITE`
 - `NEXT_PUBLIC_DEFAULT_LANGUAGE`
 - `NEXT_PUBLIC_DEFAULT_COUNTRY`
 - `NEXT_PUBLIC_AVAILABLE_SITES`
@@ -507,7 +506,6 @@ The application includes a two-tier configuration validation system that catches
 | `NEXT_PUBLIC_EMPORIX_CLIENT_ID` | Emporix public/storefront client ID |
 | `NEXTAUTH_SECRET` | NextAuth session encryption secret |
 | `NEXT_PUBLIC_DEFAULT_CURRENCY` | Default currency code |
-| `NEXT_PUBLIC_DEFAULT_SITE` | Default site code |
 | `NEXT_PUBLIC_DEFAULT_LANGUAGE` | Default language code |
 | `NEXT_PUBLIC_DEFAULT_COUNTRY` | Default country code |
 | `NEXT_PUBLIC_AVAILABLE_SITES` | Comma-separated list of available site codes |
@@ -516,6 +514,7 @@ The application includes a two-tier configuration validation system that catches
 
 | Variable | Description |
 |----------|-------------|
+| `NEXT_PUBLIC_DEFAULT_SITE` | Default site code (resolved from `NEXT_PUBLIC_AVAILABLE_SITES` if absent) |
 | `NEXT_EMPORIX_CLIENT_ID` | Emporix server-side client ID |
 | `NEXT_EMPORIX_CLIENT_SECRET` | Emporix server-side client secret |
 

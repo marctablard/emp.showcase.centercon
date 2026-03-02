@@ -10,7 +10,6 @@ export const REQUIRED_ENV_VARS: ReadonlyArray<EnvVarDefinition> = [
   { key: 'NEXT_PUBLIC_EMPORIX_CLIENT_ID', severity: 'error', description: 'Emporix public/storefront client ID' },
   { key: 'NEXTAUTH_SECRET', severity: 'error', description: 'NextAuth session encryption secret' },
   { key: 'NEXT_PUBLIC_DEFAULT_CURRENCY', severity: 'error', description: 'Default currency code' },
-  { key: 'NEXT_PUBLIC_DEFAULT_SITE', severity: 'error', description: 'Default site code' },
   { key: 'NEXT_PUBLIC_DEFAULT_LANGUAGE', severity: 'error', description: 'Default language code' },
   { key: 'NEXT_PUBLIC_DEFAULT_COUNTRY', severity: 'error', description: 'Default country code' },
   {
@@ -25,6 +24,11 @@ export const REQUIRED_ENV_VARS: ReadonlyArray<EnvVarDefinition> = [
  * Missing these produces warnings but does not fail the build.
  */
 export const OPTIONAL_ENV_VARS: ReadonlyArray<EnvVarDefinition> = [
+  {
+    key: 'NEXT_PUBLIC_DEFAULT_SITE',
+    severity: 'warning',
+    description: 'Default site code (resolved from NEXT_PUBLIC_AVAILABLE_SITES if absent)',
+  },
   { key: 'NEXT_EMPORIX_CLIENT_ID', severity: 'warning', description: 'Emporix server-side client ID' },
   { key: 'NEXT_EMPORIX_CLIENT_SECRET', severity: 'warning', description: 'Emporix server-side client secret' },
 ];
