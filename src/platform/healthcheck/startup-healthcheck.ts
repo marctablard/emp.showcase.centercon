@@ -52,8 +52,7 @@ export async function runStartupHealthcheck(container: Container): Promise<void>
     }
   }
 
-  // Defensive: remote-validation currently only produces 'warning' severity.
-  // This branch will trigger if future checks introduce 'error' severity items.
+  // Config mismatches (site/currency/language) are 'error' and trigger shutdown.
   if (result.hasErrors) {
     logger.fatal({ passed, warnings, errors }, `Configuration healthcheck failed: ${errors} error(s). Shutting down.`);
     process.exit(1);

@@ -49,8 +49,8 @@ function allPassedResult(): HealthcheckResult {
   return {
     tier: 'remote',
     items: [
-      { name: 'currency:EUR', passed: true, severity: 'warning', message: 'Default currency "EUR" exists' },
-      { name: 'site:main', passed: true, severity: 'warning', message: 'Site "main" exists' },
+      { name: 'currency:EUR', passed: true, severity: 'error', message: 'Default currency "EUR" exists' },
+      { name: 'site:main', passed: true, severity: 'error', message: 'Site "main" exists' },
     ],
     hasErrors: false,
     hasWarnings: false,
