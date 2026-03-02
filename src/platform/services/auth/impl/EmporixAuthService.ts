@@ -51,7 +51,7 @@ export class EmporixAuthService implements AuthService {
     let customerCartId: string | undefined;
     if (oldSession) {
       try {
-        const siteCode = oldSession.siteCode || 'main';
+        const siteCode = oldSession.siteCode;
 
         // Use the cart ID directly from the old session (with service scope via checkSession=false)
         // instead of searching by criteria. After login, the session token has switched to the
@@ -181,7 +181,7 @@ export class EmporixAuthService implements AuthService {
 
     customer.preferredLanguage = currentSession.language || 'en';
     customer.preferredCurrency = currentSession.currency || 'EUR';
-    customer.preferredSite = currentSession.siteCode || 'main';
+    customer.preferredSite = currentSession.siteCode;
 
     const address: EmporixAddress | undefined = registration.address
       ? this.emporixAddressMapper.mapToSource(registration.address)

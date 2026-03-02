@@ -18,11 +18,11 @@ import type { SessionService } from '../SessionService';
 @injectable('SessionService', 'Singleton')
 class EmporixSessionService implements SessionService {
   // Static default values from environment variables with fallbacks
-  private defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
+  private availableSites = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
+  private defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || this.availableSites[0];
   private defaultLanguage = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE || 'en';
   private defaultCountry = process.env.NEXT_PUBLIC_DEFAULT_COUNTRY || 'DE';
   private defaultRegion = process.env.NEXT_PUBLIC_DEFAULT_REGION || 'Europe';
-  private availableSites = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || ['main'];
 
   constructor(
     @inject('EmporixSessionContextApi') private sessionContextApi: EmporixSessionContextApi,

@@ -1,8 +1,8 @@
 import { SitePrefixMode, SiteRoutingConfig } from './types';
 
 const availableSites = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
-const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
-if (availableSites.length === 0 || availableSites.findIndex((c) => c === defaultSite) === -1) {
+const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || undefined;
+if (defaultSite && (availableSites.length === 0 || !availableSites.includes(defaultSite))) {
   availableSites.push(defaultSite);
 }
 

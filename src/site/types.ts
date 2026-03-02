@@ -10,8 +10,10 @@ export const NEXT_REWRITE_HEADER = 'x-middleware-rewrite';
 // for convenience we imitate LocalePrefixMode
 export type SitePrefixMode = LocalePrefixMode;
 
+export const INTERNAL_SITE_INVALID_HEADER = 'x-site-invalid';
+
 export type SiteConfig = {
-  defaultSite: string;
+  defaultSite?: string;
   availableSites: string[];
   prefix: SitePrefixMode;
   header?: string;
