@@ -8,6 +8,7 @@ import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/s
 import type { LoggerService } from '../../logger/LoggerService';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { Customer, CustomerAddress } from '../../model/customer/customer';
+import { CustomerRole } from '../../model/customer/roles';
 import { CustomerService, CustomerUpdateDto, PasswordChangeDto } from '../CustomerService';
 
 const ANONYMOUS_CUSTOMER_ID = '00000000';
@@ -45,17 +46,23 @@ export class EmporixCustomerService implements CustomerService {
       const roles = iamResponse.items
         .filter((group: EmporixGroup) => group.code)
         .map((group: EmporixGroup) => group.code);
-      roles.push('CUSTOMER');
-      roles.push(response.businessModel ? 'B2B' : 'B2C');
+      roles.push(CustomerRole.CUSTOMER);
+      roles.push(response.businessModel ? CustomerRole.B2B : CustomerRole.B2C);
 
-      // Check if the user is a B2B Admin
       if (response.businessModel === 'B2B') {
-        const isB2BAdmin = iamResponse.items.some((group: EmporixGroup) => {
-          return group.b2b && group.b2b.role === 'Admin';
-        });
-
-        if (isB2BAdmin) {
-          roles.push('B2B_ADMIN');
+        for (const group of iamResponse.items) {
+          if (!group.b2b?.role) continue;
+          switch (group.b2b.role) {
+            case 'Admin':
+              if (!roles.includes(CustomerRole.B2B_ADMIN)) roles.push(CustomerRole.B2B_ADMIN);
+              break;
+            case 'Buyer':
+              if (!roles.includes(CustomerRole.B2B_BUYER)) roles.push(CustomerRole.B2B_BUYER);
+              break;
+            case 'Requester':
+              if (!roles.includes(CustomerRole.B2B_REQUESTER)) roles.push(CustomerRole.B2B_REQUESTER);
+              break;
+          }
         }
       }
       return {
