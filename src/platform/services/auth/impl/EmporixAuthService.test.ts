@@ -97,6 +97,7 @@ describe('EmporixAuthService', () => {
       setSite: jest.fn(),
       setRegion: jest.fn(),
       setCart: jest.fn(),
+      clearCart: jest.fn(),
     };
 
     mockCartService = {

@@ -385,6 +385,7 @@ describe('EmporixCartService', () => {
       mockSessionService.getCurrent.mockResolvedValue({
         id: 'session-1',
         siteCode: 'main',
+        currency: 'EUR',
         customerId: undefined,
       });
       mockCartApi.getCartByCriteria.mockResolvedValue(null);
@@ -406,12 +407,13 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'USD', grossValue: 0, netValue: 0 },
       };
 
       mockSessionService.getCurrent.mockResolvedValue({
         id: 'session-1',
         siteCode: 'main',
+        currency: 'EUR',
         customerId: 'customer-1',
       });
       mockCartApi.getCart
@@ -456,6 +458,7 @@ describe('EmporixCartService', () => {
     const mockSession = {
       id: 'session-1',
       siteCode: 'us-branch',
+      currency: 'USD',
       language: 'en',
       customerId: undefined,
       cartId: 'cart-us',
@@ -511,7 +514,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
         subTotalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
-        tax: { rate: 0, grossValue: 29.99, netValue: 29.99 },
+        tax: { amount: 0, currency: 'USD', grossValue: 29.99, netValue: 29.99 },
       };
 
       // First getCart call returns raw cart (for siteCode), second returns for getCartById
@@ -572,7 +575,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
         subTotalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
-        tax: { rate: 0, grossValue: 29.99, netValue: 29.99 },
+        tax: { amount: 0, currency: 'USD', grossValue: 29.99, netValue: 29.99 },
       };
 
       // First call: addItemToCart('cart-main') → getCart returns mainCart (wrong site)
@@ -632,7 +635,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'EUR', grossValue: 0, netValue: 0 },
       };
 
       // getCart() auto-recovery returns the same cart (shouldn't happen, but guard against it)
@@ -684,7 +687,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
         subTotalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
-        tax: { rate: 0, grossValue: 59.98, netValue: 59.98 },
+        tax: { amount: 0, currency: 'USD', grossValue: 59.98, netValue: 59.98 },
       };
 
       const rawCart: EmporixCart = {
@@ -720,7 +723,7 @@ describe('EmporixCartService', () => {
       mockCartApi.getCart.mockResolvedValue(rawCart);
       mockMapper.mapToService.mockReturnValue(mappedCart);
       // updateCartItemQuantity also fetches session to decide pricing strategy
-      mockSessionService.getCurrent.mockResolvedValue({ siteCode: 'us-branch' });
+      mockSessionService.getCurrent.mockResolvedValue({ id: 'session-1', siteCode: 'us-branch', currency: 'USD' });
       mockPriceService.getProductPrice.mockResolvedValue(updatedPrice);
 
       const result = await cartService.updateCartItemQuantity('cart-us', 'item-1', 3);
@@ -747,7 +750,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
         subTotalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
-        tax: { rate: 0, grossValue: 59.98, netValue: 59.98 },
+        tax: { amount: 0, currency: 'USD', grossValue: 59.98, netValue: 59.98 },
       };
 
       const rawCart: EmporixCart = {
@@ -768,7 +771,7 @@ describe('EmporixCartService', () => {
       mockCartApi.getCart.mockResolvedValue(rawCart);
       mockMapper.mapToService.mockReturnValue(mappedCart);
       // Session is on 'main' but cart is on 'us-branch'
-      mockSessionService.getCurrent.mockResolvedValue({ siteCode: 'main' });
+      mockSessionService.getCurrent.mockResolvedValue({ id: 'session-1', siteCode: 'main', currency: 'EUR' });
 
       await expect(cartService.updateCartItemQuantity('cart-us', 'item-1', 3)).rejects.toThrow(
         'Cart belongs to a different site. Please refresh the page.',
@@ -788,6 +791,7 @@ describe('EmporixCartService', () => {
     const mockSession = {
       id: 'session-1',
       siteCode: 'main',
+      currency: 'EUR',
       customerId: undefined,
       cartId: 'cart-main',
     };
@@ -807,7 +811,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'EUR', grossValue: 0, netValue: 0 },
       };
 
       mockSessionService.getCurrent.mockResolvedValue(mockSession);
@@ -847,7 +851,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'USD', grossValue: 0, netValue: 0 },
       };
 
       mockSessionService.getCurrent.mockResolvedValue(usSession);
@@ -873,7 +877,7 @@ describe('EmporixCartService', () => {
     });
 
     it('should throw when session is not available', async () => {
-      mockSessionService.getCurrent.mockResolvedValue(null);
+      mockSessionService.getCurrent.mockResolvedValue(undefined);
 
       await expect(cartService.getCart()).rejects.toThrow('Failed to get session context');
     });
@@ -898,7 +902,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'USD', grossValue: 0, netValue: 0 },
       };
 
       mockSessionService.getCurrent.mockResolvedValue(anonSession);
@@ -929,6 +933,7 @@ describe('EmporixCartService', () => {
       const authSession = {
         id: 'session-auth',
         siteCode: 'main',
+        currency: 'EUR',
         customerId: 'customer-42',
         cartId: undefined,
       };
@@ -944,7 +949,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'EUR', grossValue: 0, netValue: 0 },
       };
 
       mockSessionService.getCurrent.mockResolvedValue(authSession);
