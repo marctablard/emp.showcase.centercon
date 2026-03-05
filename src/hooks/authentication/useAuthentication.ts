@@ -5,6 +5,7 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import { useLocale } from 'next-intl';
 import { getPathname } from '@/i18n/navigation';
 import { fetchCurrentSession } from '@/lib/client/session';
+import { isAuthenticatedSessionCustomerId } from '@/lib/common/customer-identity';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { useCartStore } from '@/providers/StoreProvider';
 import { clearAllPersistedStores } from '@/utils/storeUtils';
@@ -15,8 +16,6 @@ const LOGIN_SUCCESS_QUERY_PARAM = '?login=success';
 const CANONICAL_SESSION_FETCH_RETRY_COUNT = 3;
 const CANONICAL_SESSION_FETCH_RETRY_DELAY_MS = 250;
 const DEFAULT_SITE_CODE = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
-const ANONYMOUS_CUSTOMER_ID = 'ANONYMOUS';
-
 interface AuthenticationHook {
   isAuthenticated: boolean;
   error: Error | null;
@@ -63,8 +62,7 @@ export const useAuthentication = (): AuthenticationHook => {
     for (let attempt = 0; attempt < CANONICAL_SESSION_FETCH_RETRY_COUNT; attempt++) {
       try {
         const canonicalSession = await fetchCurrentSession(true);
-        const hasAuthenticatedCustomer =
-          canonicalSession?.customerId !== undefined && canonicalSession.customerId !== ANONYMOUS_CUSTOMER_ID;
+        const hasAuthenticatedCustomer = isAuthenticatedSessionCustomerId(canonicalSession?.customerId);
         if (canonicalSession?.siteCode && hasAuthenticatedCustomer) {
           canonicalSiteCode = canonicalSession.siteCode;
           break;

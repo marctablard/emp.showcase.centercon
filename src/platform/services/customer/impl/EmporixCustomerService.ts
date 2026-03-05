@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import { isAnonymousProfileCustomerId } from '@/lib/common/customer-identity';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCustomerApi } from '@/platform/integrations/emporix/customer/EmporixCustomerApi';
 import type { EmporixIamApi } from '@/platform/integrations/emporix/iam/EmporixIamApi';
@@ -9,8 +10,6 @@ import type { LoggerService } from '../../logger/LoggerService';
 import EmporixAddressMapper from '../../model/common/impl/EmporixAddressMapper';
 import { Customer, CustomerAddress } from '../../model/customer/customer';
 import { CustomerService, CustomerUpdateDto, PasswordChangeDto } from '../CustomerService';
-
-const ANONYMOUS_CUSTOMER_ID = '00000000';
 
 /**
  * Emporix implementation of the CustomerService
@@ -37,7 +36,7 @@ export class EmporixCustomerService implements CustomerService {
     try {
       const response = await this.customerApi.getCustomerProfile();
       // return null for Anonymous for clear differentiation
-      if (!response || response.id == ANONYMOUS_CUSTOMER_ID) {
+      if (!response || isAnonymousProfileCustomerId(response.id)) {
         return null;
       }
       const iamResponse = await this.iamApi.getUserGroups(response.id);

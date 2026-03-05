@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import { isAuthenticatedSessionCustomerId } from '@/lib/common/customer-identity';
 import { l10n } from '@/lib/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
@@ -94,7 +95,7 @@ class EmporixCartService implements CartService {
       // discard it and search for the customer's actual cart.
       // This happens when the anonymous→customer cart merge didn't complete during login
       // (e.g. B2B legalEntityId filtering prevented finding the anonymous cart).
-      if (cart && session.customerId && session.customerId !== 'ANONYMOUS' && !cart.customerId) {
+      if (cart && isAuthenticatedSessionCustomerId(session.customerId) && !cart.customerId) {
         this.logger.info(
           { cartId: session.cartId, customerId: session.customerId },
           'Skipping stale anonymous cart for logged-in user — searching for customer cart',
@@ -105,7 +106,7 @@ class EmporixCartService implements CartService {
 
     // Fallback to search by criteria if no valid cart found
     if (!cart) {
-      const isAuthenticated = session.customerId && session.customerId !== 'ANONYMOUS';
+      const isAuthenticated = isAuthenticatedSessionCustomerId(session.customerId);
 
       // For authenticated users, prefer customer-owned cart lookup first.
       if (isAuthenticated) {

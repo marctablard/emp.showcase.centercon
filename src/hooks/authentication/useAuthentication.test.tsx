@@ -1,4 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
+import { CUSTOMER_ID } from '@/lib/common/customer-identity';
 import useAuthentication from './useAuthentication';
 
 const mockSignIn = jest.fn();
@@ -125,7 +126,7 @@ describe('useAuthentication canonical post-login redirect', () => {
 
   it('ignores anonymous snapshots and waits for authenticated canonical site', async () => {
     mockFetchCurrentSession
-      .mockResolvedValueOnce({ siteCode: 'us-branch', customerId: 'ANONYMOUS' })
+      .mockResolvedValueOnce({ siteCode: 'us-branch', customerId: CUSTOMER_ID.SESSION_ANONYMOUS })
       .mockResolvedValueOnce({ siteCode: 'main', customerId: '01964559' });
 
     const { result } = renderHook(() => useAuthentication());
