@@ -27,7 +27,8 @@ export const OPTIONAL_ENV_VARS: ReadonlyArray<EnvVarDefinition> = [
   {
     key: 'NEXT_PUBLIC_DEFAULT_SITE',
     severity: 'warning',
-    description: 'Default site code (resolved from NEXT_PUBLIC_AVAILABLE_SITES if absent)',
+    description:
+      'Default site code (resolved from NEXT_PUBLIC_AVAILABLE_SITES[0] if absent and turns off fallback to default site)',
   },
   { key: 'NEXT_EMPORIX_CLIENT_ID', severity: 'warning', description: 'Emporix server-side client ID' },
   { key: 'NEXT_EMPORIX_CLIENT_SECRET', severity: 'warning', description: 'Emporix server-side client secret' },

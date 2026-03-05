@@ -17,7 +17,7 @@ import type { SessionService } from '../SessionService';
  */
 @injectable('SessionService', 'Singleton')
 class EmporixSessionService implements SessionService {
-  // Static default values from environment variables with fallbacks
+  // Env healthchecks guarantee these required values are present.
   private defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE;
   private defaultLanguage = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE;
   private defaultCountry = process.env.NEXT_PUBLIC_DEFAULT_COUNTRY;
@@ -168,10 +168,11 @@ class EmporixSessionService implements SessionService {
   }
 
   private async adjustSessionsSettings(sessionContext: EmporixSessionContext | undefined, result: Session) {
+    const resolvedDefaultSite = this.defaultSite || this.availableSites[0];
     const updateDefaults: Partial<EmporixSessionContext> = {};
-    if (!sessionContext?.siteCode || !this.availableSites.includes(sessionContext.siteCode)) {
-      updateDefaults.siteCode = this.defaultSite;
-      result.siteCode = this.defaultSite;
+    if (resolvedDefaultSite && (!sessionContext?.siteCode || !this.availableSites.includes(sessionContext.siteCode))) {
+      updateDefaults.siteCode = resolvedDefaultSite;
+      result.siteCode = resolvedDefaultSite;
     }
     const site = await this.siteService.getSite(result.siteCode);
     if (!site) {

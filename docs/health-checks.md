@@ -514,7 +514,7 @@ The application includes a two-tier configuration validation system that catches
 
 | Variable | Description |
 |----------|-------------|
-| `NEXT_PUBLIC_DEFAULT_SITE` | Default site code (resolved from `NEXT_PUBLIC_AVAILABLE_SITES` if absent) |
+| `NEXT_PUBLIC_DEFAULT_SITE` | Default site code (resolved from `NEXT_PUBLIC_AVAILABLE_SITES[0]` if absent and turns off fallback to default site) |
 | `NEXT_EMPORIX_CLIENT_ID` | Emporix server-side client ID |
 | `NEXT_EMPORIX_CLIENT_SECRET` | Emporix server-side client secret |
 
