@@ -13,6 +13,12 @@ import { CustomerService, CustomerUpdateDto, PasswordChangeDto } from '../Custom
 
 const ANONYMOUS_CUSTOMER_ID = '00000000';
 
+enum B2BRole {
+  ADMIN = 'Admin',
+  BUYER = 'Buyer',
+  REQUESTER = 'Requester',
+}
+
 /**
  * Emporix implementation of the CustomerService
  * Currently returns null for getCurrentCustomer as requested
@@ -53,13 +59,13 @@ export class EmporixCustomerService implements CustomerService {
         for (const group of iamResponse.items) {
           if (!group.b2b?.role) continue;
           switch (group.b2b.role) {
-            case 'Admin':
+            case B2BRole.ADMIN:
               if (!roles.includes(CustomerRole.B2B_ADMIN)) roles.push(CustomerRole.B2B_ADMIN);
               break;
-            case 'Buyer':
+            case B2BRole.BUYER:
               if (!roles.includes(CustomerRole.B2B_BUYER)) roles.push(CustomerRole.B2B_BUYER);
               break;
-            case 'Requester':
+            case B2BRole.REQUESTER:
               if (!roles.includes(CustomerRole.B2B_REQUESTER)) roles.push(CustomerRole.B2B_REQUESTER);
               break;
           }
