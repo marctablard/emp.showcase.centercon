@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   fetchCurrentSession,
   updateSessionCountry,
@@ -21,6 +21,7 @@ export function useSession() {
   const sessionStore = useSessionStore();
   const session = sessionStore.session;
   const loading = sessionStore.loading;
+  const mutationInFlightRef = useRef(false);
 
   const fetchSession = useCallback(async () => {
     sessionStore.setLoading(true);
@@ -40,70 +41,110 @@ export function useSession() {
    * Update the session language
    */
   const setLanguage = async (language: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionLanguage(language);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
+    if (mutationInFlightRef.current) {
+      return false;
     }
-    sessionStore.setLoading(false);
-    return success;
+    mutationInFlightRef.current = true;
+    sessionStore.setLoading(true);
+    try {
+      const success = await updateSessionLanguage(language);
+      if (success) {
+        const updatedSession = await fetchCurrentSession();
+        sessionStore.setSession(updatedSession);
+      }
+      return success;
+    } finally {
+      sessionStore.setLoading(false);
+      mutationInFlightRef.current = false;
+    }
   };
 
   /**
    * Update the session currency
    */
   const setCurrency = async (currency: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionCurrency(currency);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
+    if (mutationInFlightRef.current) {
+      return false;
     }
-    sessionStore.setLoading(false);
-    return success;
+    mutationInFlightRef.current = true;
+    sessionStore.setLoading(true);
+    try {
+      const success = await updateSessionCurrency(currency);
+      if (success) {
+        const updatedSession = await fetchCurrentSession();
+        sessionStore.setSession(updatedSession);
+      }
+      return success;
+    } finally {
+      sessionStore.setLoading(false);
+      mutationInFlightRef.current = false;
+    }
   };
 
   /**
    * Update the session country
    */
   const setCountry = async (country: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionCountry(country);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
+    if (mutationInFlightRef.current) {
+      return false;
     }
-    sessionStore.setLoading(false);
-    return success;
+    mutationInFlightRef.current = true;
+    sessionStore.setLoading(true);
+    try {
+      const success = await updateSessionCountry(country);
+      if (success) {
+        const updatedSession = await fetchCurrentSession();
+        sessionStore.setSession(updatedSession);
+      }
+      return success;
+    } finally {
+      sessionStore.setLoading(false);
+      mutationInFlightRef.current = false;
+    }
   };
 
   /**
    * Update the session site
    */
   const setSite = async (site: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionSite(site);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
+    if (mutationInFlightRef.current) {
+      return false;
     }
-    sessionStore.setLoading(false);
-    return success;
+    mutationInFlightRef.current = true;
+    sessionStore.setLoading(true);
+    try {
+      const success = await updateSessionSite(site);
+      if (success) {
+        const updatedSession = await fetchCurrentSession();
+        sessionStore.setSession(updatedSession);
+      }
+      return success;
+    } finally {
+      sessionStore.setLoading(false);
+      mutationInFlightRef.current = false;
+    }
   };
 
   /**
    * Update the session region
    */
   const setRegion = async (region: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionRegion(region);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
+    if (mutationInFlightRef.current) {
+      return false;
     }
-    sessionStore.setLoading(false);
-    return success;
+    mutationInFlightRef.current = true;
+    sessionStore.setLoading(true);
+    try {
+      const success = await updateSessionRegion(region);
+      if (success) {
+        const updatedSession = await fetchCurrentSession();
+        sessionStore.setSession(updatedSession);
+      }
+      return success;
+    } finally {
+      sessionStore.setLoading(false);
+      mutationInFlightRef.current = false;
+    }
   };
 
   /**

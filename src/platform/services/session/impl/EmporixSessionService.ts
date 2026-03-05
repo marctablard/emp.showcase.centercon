@@ -75,13 +75,14 @@ class EmporixSessionService implements SessionService {
   }
 
   async setSite(site: string, defaultCurrency?: string): Promise<void> {
-    const session = await this.sessionContextApi.getOwnSessionContext();
-    if (!session) {
+    const initialSession = await this.sessionContextApi.getOwnSessionContext();
+    if (!initialSession) {
       return;
     }
 
     // Check if site is actually changing
-    const siteChanged = session.siteCode && session.siteCode !== site;
+    const siteChanged = initialSession.siteCode && initialSession.siteCode !== site;
+    let session = initialSession;
 
     // Step 1: Clear cart association FIRST when site is changing.
     // This ensures that during the window between this call and the siteCode update,
@@ -89,26 +90,59 @@ class EmporixSessionService implements SessionService {
     // criteria search with old siteCode → returns correct cart for old context.
     if (siteChanged) {
       await this.sessionContextApi.removeOwnSessionContextAttribute('currentCart');
+
+      // Refresh context to obtain the latest metadata.version after attribute mutation.
+      const refreshedSession = await this.sessionContextApi.getOwnSessionContext();
+      if (!refreshedSession) {
+        return;
+      }
+      session = refreshedSession;
     }
 
-    // Step 2: Now update siteCode (and currency if applicable).
+    // Step 2: Update siteCode (and currency if applicable).
     // After this, the session has new siteCode + no cartId → getCart() falls back to
     // criteria search with new siteCode → creates/finds correct cart for new context.
-    const updatePayload: Partial<EmporixSessionContext> = {
-      siteCode: site,
-      metadata: {
-        version: session.metadata?.version || 1,
-      },
+    const buildUpdatePayload = (context: EmporixSessionContext): Partial<EmporixSessionContext> => {
+      const updatePayload: Partial<EmporixSessionContext> = {
+        siteCode: site,
+        metadata: {
+          version: context.metadata?.version || 1,
+        },
+      };
+      // When switching sites, also reset currency to the target site's default.
+      // This aligns with Emporix's session initialization behavior where
+      // anonymous sessions get the site's default currency.
+      if (siteChanged && defaultCurrency) {
+        updatePayload.currency = defaultCurrency;
+      }
+      return updatePayload;
     };
 
-    // When switching sites, also reset currency to the target site's default.
-    // This aligns with Emporix's session initialization behavior where
-    // anonymous sessions get the site's default currency.
-    if (siteChanged && defaultCurrency) {
-      updatePayload.currency = defaultCurrency;
-    }
+    const updatePayload = buildUpdatePayload(session);
+    try {
+      await this.sessionContextApi.updateOwnSessionContext(updatePayload);
+    } catch (error) {
+      if (!this.isSessionContextVersionConflictError(error)) {
+        throw error;
+      }
 
-    await this.sessionContextApi.updateOwnSessionContext(updatePayload);
+      // Bounded optimistic-lock retry: fetch latest version and retry exactly once.
+      const latestSession = await this.sessionContextApi.getOwnSessionContext();
+      if (!latestSession) {
+        throw error;
+      }
+
+      const retryPayload = buildUpdatePayload(latestSession);
+      this.logger.warn(
+        {
+          site,
+          previousVersion: session.metadata?.version || 1,
+          retryVersion: latestSession.metadata?.version || 1,
+        },
+        'Retrying session site update after version conflict',
+      );
+      await this.sessionContextApi.updateOwnSessionContext(retryPayload);
+    }
   }
 
   async setCart(cartId: string): Promise<void> {
@@ -216,6 +250,19 @@ class EmporixSessionService implements SessionService {
         }
       });
     }
+  }
+
+  private isSessionContextVersionConflictError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('failed to update own session context') &&
+      message.includes('not found') &&
+      message.includes('version') &&
+      message.includes('has not been found')
+    );
   }
 }
 

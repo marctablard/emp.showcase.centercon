@@ -4,9 +4,15 @@ import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
 import { EmporixAddCartItemRequest, EmporixUpdateCartItemRequest } from '@/platform/integrations/emporix/model';
-import { EmporixCart, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
-import type { CartService, ModifyCartItemResult } from '@/platform/services/cart/CartService';
+import { EmporixCart, EmporixCartAddress, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
+import type { CartService, CartShippingAddress, ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import type { CartStatus, CartStatusDetailCode } from '@/platform/services/cart/CartService';
+import {
+  CART_CURRENCY_UPDATE_ERROR_CODE,
+  CartCurrencyUpdateError,
+  extractUpstreamBody,
+  extractUpstreamStatus,
+} from '@/platform/services/cart/errors';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Cart } from '@/platform/services/model/cart/cart';
 import type { PriceService } from '@/platform/services/price/PriceService';
@@ -88,7 +94,7 @@ class EmporixCartService implements CartService {
       // discard it and search for the customer's actual cart.
       // This happens when the anonymous→customer cart merge didn't complete during login
       // (e.g. B2B legalEntityId filtering prevented finding the anonymous cart).
-      if (cart && session.customerId && !cart.customerId) {
+      if (cart && session.customerId && session.customerId !== 'ANONYMOUS' && !cart.customerId) {
         this.logger.info(
           { cartId: session.cartId, customerId: session.customerId },
           'Skipping stale anonymous cart for logged-in user — searching for customer cart',
@@ -99,12 +105,30 @@ class EmporixCartService implements CartService {
 
     // Fallback to search by criteria if no valid cart found
     if (!cart) {
-      // Search by session ID first (anonymous users), with create=true to auto-create if not found
-      cart = await this.cartApi.getCartByCriteria(currentSiteCode, session.id, undefined, 'shopping', true);
+      const isAuthenticated = session.customerId && session.customerId !== 'ANONYMOUS';
 
-      // If no cart found by session ID, try by customer ID (logged-in users)
-      if (!cart && session.customerId) {
-        cart = await this.cartApi.getCartByCriteria(currentSiteCode, undefined, session.customerId, 'shopping', true);
+      // For authenticated users, prefer customer-owned cart lookup first.
+      if (isAuthenticated) {
+        try {
+          cart = await this.cartApi.getCartByCriteria(currentSiteCode, undefined, session.customerId, 'shopping', true);
+        } catch (error) {
+          throw this.mapCartResolutionError(error, {
+            fallbackCode: CART_CURRENCY_UPDATE_ERROR_CODE.FORBIDDEN,
+            fallbackMessage: 'Failed to resolve customer cart after login',
+          });
+        }
+      }
+
+      // Anonymous or fallback lookup by session criteria.
+      if (!cart) {
+        try {
+          cart = await this.cartApi.getCartByCriteria(currentSiteCode, session.id, undefined, 'shopping', true);
+        } catch (error) {
+          throw this.mapCartResolutionError(error, {
+            fallbackCode: CART_CURRENCY_UPDATE_ERROR_CODE.UPSTREAM_FAILURE,
+            fallbackMessage: 'Failed to resolve session cart',
+          });
+        }
       }
 
       // Update session with correct cart ID if found/created
@@ -350,39 +374,57 @@ class EmporixCartService implements CartService {
     }
   }
 
-  async updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
-    // TODO Not used because of inconsistent Session/cart Handling
-    // Get the session cart and update it
+  async updateShippingInfo(
+    cartId: string,
+    shippingAddress: CartShippingAddress,
+    billingAddress?: CartShippingAddress,
+  ): Promise<void> {
     const cart = await this.cartApi.getCart(cartId);
     if (!cart) {
       throw new Error('Cart not found');
     }
+
+    const addresses: EmporixCartAddress[] = [{ ...shippingAddress, type: 'SHIPPING' as const }];
+    if (billingAddress) {
+      addresses.push({ ...billingAddress, type: 'BILLING' as const });
+    }
+
     await this.cartApi.updateCart(cartId, {
       metadata: {
         ...cart.metadata,
         version: (cart.metadata?.version ?? 0) + 1,
       },
-      countryCode,
-      zipCode,
+      addresses,
     });
     await this.refreshCartWithCleanup(cartId);
   }
 
   async updateCurrency(cartId: string, currency: string): Promise<void> {
-    const rawCart = await this.cartApi.getCart(cartId);
-    if (!rawCart) {
-      throw new Error('Cart not found');
-    }
-    const site = await this.siteService.getSite(rawCart.siteCode);
+    const canonicalCart = await this.resolveCanonicalCartForCurrencyUpdate(cartId);
+    const site = await this.siteService.getSite(canonicalCart.siteCode);
     if (!site) {
-      throw new Error('Site not found');
+      throw new CartCurrencyUpdateError(CART_CURRENCY_UPDATE_ERROR_CODE.SITE_NOT_FOUND, 'Site not found');
     }
 
     if (!site.currencies.find((siteCurrency) => siteCurrency.code === currency || siteCurrency.id === currency)) {
-      throw new Error('Currency not supported');
+      throw new CartCurrencyUpdateError(CART_CURRENCY_UPDATE_ERROR_CODE.UNSUPPORTED_CURRENCY, 'Currency not supported');
     }
-    await this.cartApi.changeCurrency(cartId, currency);
-    await this.refreshCartWithCleanup(cartId);
+    try {
+      await this.cartApi.changeCurrency(canonicalCart.id, currency);
+      await this.refreshCartWithCleanup(canonicalCart.id);
+    } catch (error) {
+      throw this.mapCartResolutionError(error, {
+        fallbackCode: CART_CURRENCY_UPDATE_ERROR_CODE.UPSTREAM_FAILURE,
+        fallbackMessage: 'Failed to update cart currency',
+      });
+    }
+
+    if (canonicalCart.id !== cartId) {
+      this.logger.info(
+        { requestedCartId: cartId, canonicalCartId: canonicalCart.id },
+        'Recovered stale cart id during currency update',
+      );
+    }
   }
 
   async updateSite(cartId: string, siteCode: string): Promise<void> {
@@ -463,6 +505,70 @@ class EmporixCartService implements CartService {
       this.logger.error({ err: error }, 'Error getting cart by criteria');
       return null;
     }
+  }
+
+  private async resolveCanonicalCartForCurrencyUpdate(cartId: string): Promise<EmporixCart> {
+    const directCart = await this.cartApi.getCart(cartId);
+    if (directCart) {
+      return directCart;
+    }
+
+    const recoveredCart = await this.getCart();
+    if (!recoveredCart) {
+      throw new CartCurrencyUpdateError(CART_CURRENCY_UPDATE_ERROR_CODE.CART_NOT_FOUND, 'Cart not found');
+    }
+
+    const canonicalRawCart = await this.cartApi.getCart(recoveredCart.id);
+    if (!canonicalRawCart) {
+      throw new CartCurrencyUpdateError(
+        CART_CURRENCY_UPDATE_ERROR_CODE.STALE_CART_ID,
+        'Session cart id is stale and no canonical cart could be resolved',
+      );
+    }
+
+    return canonicalRawCart;
+  }
+
+  private mapCartResolutionError(
+    error: unknown,
+    fallback: {
+      fallbackCode: (typeof CART_CURRENCY_UPDATE_ERROR_CODE)[keyof typeof CART_CURRENCY_UPDATE_ERROR_CODE];
+      fallbackMessage: string;
+    },
+  ): CartCurrencyUpdateError {
+    if (error instanceof CartCurrencyUpdateError) {
+      return error;
+    }
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const upstreamStatus = extractUpstreamStatus(errorMessage);
+    const upstreamBody = extractUpstreamBody(errorMessage);
+
+    if (upstreamStatus === 403) {
+      return new CartCurrencyUpdateError(CART_CURRENCY_UPDATE_ERROR_CODE.FORBIDDEN, 'Forbidden cart context', {
+        upstreamStatus,
+        upstreamBody,
+      });
+    }
+
+    if (upstreamStatus === 400 || upstreamStatus === 409 || upstreamStatus === 422) {
+      return new CartCurrencyUpdateError(CART_CURRENCY_UPDATE_ERROR_CODE.CONTEXT_MISMATCH, 'Cart context mismatch', {
+        upstreamStatus,
+        upstreamBody,
+      });
+    }
+
+    if (upstreamStatus === 404) {
+      return new CartCurrencyUpdateError(CART_CURRENCY_UPDATE_ERROR_CODE.CART_NOT_FOUND, 'Cart not found', {
+        upstreamStatus,
+        upstreamBody,
+      });
+    }
+
+    return new CartCurrencyUpdateError(fallback.fallbackCode, fallback.fallbackMessage, {
+      upstreamStatus,
+      upstreamBody,
+    });
   }
 }
 

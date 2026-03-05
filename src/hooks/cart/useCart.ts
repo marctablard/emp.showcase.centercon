@@ -2,29 +2,25 @@
 
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
+import { CartShippingAddress, ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { useCartStore } from '@/providers/StoreProvider';
 
 interface UseCart {
-  // Cart data
   cart: Cart | null | undefined;
   cartId: string | null;
   totalItems: number;
 
-  // Status
   loading: boolean;
   error: Error | null;
 
-  // Operations
   addItem: (productId: string, quantity: number) => Promise<ModifyCartItemResult>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
-  updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
+  updateShippingInfo: (shippingAddress: CartShippingAddress, billingAddress?: CartShippingAddress) => Promise<void>;
   clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => void;
   loadCart: (cartId: string, type?: string) => Promise<Cart | null | undefined>;
 
-  // Utility
   refetch: () => Promise<void>;
 }
 
