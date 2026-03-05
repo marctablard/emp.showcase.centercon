@@ -50,6 +50,9 @@ function replacePlaceholders(tags: string[], groups: string[]): string[] {
  */
 function buildCacheControlHeader(revalidate?: number): string {
   const maxAge = revalidate ?? DEFAULT_CACHE_REVALIDATE;
+  if (maxAge <= 0) {
+    return 'private, no-store';
+  }
   return `public, max-age=${maxAge}, s-maxage=${maxAge}, stale-while-revalidate=${maxAge * 2}`;
 }
 
