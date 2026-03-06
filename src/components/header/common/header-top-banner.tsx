@@ -29,7 +29,6 @@ export function HeaderTopBanner() {
           <LanguageSwitcher />
           <hr className="w-px h-6 bg-surface-page" />
           <CurrencySwitcher />
-          <hr className="w-px h-6 bg-surface-page" />
           <CompanySwitcher />
         </div>
         {isAboveLargeScreen && (

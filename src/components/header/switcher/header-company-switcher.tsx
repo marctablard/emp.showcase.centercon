@@ -48,9 +48,28 @@ export function CompanySwitcher() {
     if (session?.customerId) {
       fetchCompanies();
     } else {
+      // User logged out - clear companies
+      setCompanies([]);
       setLoading(false);
+      setError(null);
     }
   }, [session?.customerId, fetchCompanies]);
+
+  // Listen for auth events to refresh companies
+  useEffect(() => {
+    const handleLogin = () => {
+      // Wait a bit for session to be updated, then fetch companies
+      setTimeout(() => {
+        fetchCompanies();
+      }, 100);
+    };
+
+    window.addEventListener('auth:login', handleLogin);
+
+    return () => {
+      window.removeEventListener('auth:login', handleLogin);
+    };
+  }, [fetchCompanies]);
 
   const currentCompany = useMemo(() => {
     if (!companies || companies.length === 0) {
@@ -87,7 +106,12 @@ export function CompanySwitcher() {
   };
 
   if (loading || sessionLoading) {
-    return <Spinner color="default" variant="sm" />;
+    return (
+      <>
+        <hr className="w-px h-6 bg-surface-page" />
+        <Spinner color="default" variant="sm" />
+      </>
+    );
   }
 
   if (error) {
@@ -114,12 +138,15 @@ export function CompanySwitcher() {
   );
 
   return (
-    <TopBarSwitcher
-      options={options}
-      current={currentCompany.id}
-      label={t('label')}
-      onSelected={switchCompany}
-      icon={icon}
-    />
+    <>
+      <hr className="w-px h-6 bg-surface-page" />
+      <TopBarSwitcher
+        options={options}
+        current={currentCompany.id}
+        label={t('label')}
+        onSelected={switchCompany}
+        icon={icon}
+      />
+    </>
   );
 }

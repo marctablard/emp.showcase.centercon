@@ -67,6 +67,10 @@ export const useAuthentication = (): AuthenticationHook => {
       } else {
         setIsAuthenticated(true);
         reset();
+
+        // Dispatch custom event to notify other components about login
+        window.dispatchEvent(new CustomEvent('auth:login'));
+
         if (safeCallbackUrl) {
           window.location.href = getPathname({ href: safeCallbackUrl + '?login=success', locale, site: site?.code });
         }
