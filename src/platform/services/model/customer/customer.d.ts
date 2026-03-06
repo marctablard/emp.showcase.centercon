@@ -17,7 +17,7 @@ export interface Customer {
   lastLogin?: Date;
   businessModel?: 'B2B' | 'B2C';
   legalEntityId?: string; // For B2B customers, the legal entity ID
-  roles?: [string];
+  roles?: string[];
 }
 
 export interface CustomerAddress extends Address {
