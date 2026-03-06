@@ -9,6 +9,8 @@
   "returnOrder": "Bestellung zurücksenden",
   "returnLink": "Retoure",
   "returnDisabledTooltip": "Retouren können nur für abgeschlossene Bestellungen erstellt werden",
+  "noRemainingItems": "Es sind keine weiteren Artikel für eine Retoure verfügbar. Für alle Artikel dieser Bestellung wurde bereits eine Retoure beantragt.",
+  "understood": "Verstanden",
   "orderDate": "Bestelldatum",
   "payment": "Zahlung",
   "paymentMethod": "Zahlungsmethode",

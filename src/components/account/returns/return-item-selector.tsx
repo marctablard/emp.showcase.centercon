@@ -16,6 +16,7 @@ export interface ReturnItemSelectorProps {
   quantities: ItemQuantity;
   onUpdateQuantity: (itemId: string, newQty: number, maxQty: number) => void;
   loading: boolean;
+  remainingQuantityMap?: Map<string, number>;
 }
 
 function getItemImage(item: OrderItem): string {
@@ -25,7 +26,13 @@ function getItemImage(item: OrderItem): string {
   return '/images/placeholder.png';
 }
 
-export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loading }: ReturnItemSelectorProps) {
+export function ReturnItemSelector({
+  items,
+  quantities,
+  onUpdateQuantity,
+  loading,
+  remainingQuantityMap,
+}: ReturnItemSelectorProps) {
   const t = useTranslations('account.returns.createDialog');
   const tReturns = useTranslations('account.returns');
 
@@ -40,7 +47,7 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
       <div className="space-y-4 w-full min-w-0">
         {items.map((item) => {
           const currentQty = quantities[item.id] || 0;
-          const maxQty = item.quantity;
+          const maxQty = remainingQuantityMap ? (remainingQuantityMap.get(item.id) ?? item.quantity) : item.quantity;
 
           return (
             <div key={item.id} className="py-4 border-b border-border-secondary w-full min-w-0">

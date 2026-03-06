@@ -1,15 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/dashboard-badge';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type OrderPaymentTypeKey, type OrderStatusLowercaseKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
+import { fetchReturnsForOrderIds } from '@/lib/client/returns';
+import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
 import { cn } from '@/lib/utils';
 import { Order, OrderStatus } from '@/platform/services/model/order/order';
 import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
@@ -48,11 +59,60 @@ export function MyOrdersTable({
   const router = useRouter();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [noItemsDialogOpen, setNoItemsDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [returnabilityMap, setReturnabilityMap] = useState<Record<string, OrderReturnability>>({});
+
+  const visibleOrders = useMemo(
+    () =>
+      orders
+        .slice()
+        .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
+        .slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage),
+    [orders, currentPage, ordersPerPage],
+  );
+
+  const completedOrderIds = useMemo(
+    () => visibleOrders.filter((o) => isReturnEnabled(o.status)).map((o) => o.id),
+    [visibleOrders],
+  );
+
+  useEffect(() => {
+    if (completedOrderIds.length === 0) {
+      setReturnabilityMap({});
+      return;
+    }
+
+    let cancelled = false;
+
+    fetchReturnsForOrderIds(completedOrderIds)
+      .then((returns) => {
+        if (cancelled) return;
+        const map: Record<string, OrderReturnability> = {};
+        for (const order of visibleOrders) {
+          if (isReturnEnabled(order.status)) {
+            map[order.id] = computeOrderReturnability(order.id, order.items, returns);
+          }
+        }
+        setReturnabilityMap(map);
+      })
+      .catch(() => {
+        if (!cancelled) setReturnabilityMap({});
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [completedOrderIds, visibleOrders]);
 
   const handleReturnClick = (order: Order): void => {
     setSelectedOrder(order);
-    setDialogOpen(true);
+    const orderReturnability = returnabilityMap[order.id];
+    if (orderReturnability && !orderReturnability.hasAnyReturnableItem) {
+      setNoItemsDialogOpen(true);
+    } else {
+      setDialogOpen(true);
+    }
   };
 
   const formatDate = (dateString: string | undefined) => {
@@ -67,14 +127,8 @@ export function MyOrdersTable({
 
   const formatPayment = (payments: any[] | undefined) => {
     if (!payments || payments.length === 0) return '-';
-    // Use the translation for the payment method if available
     return t(dk<OrderPaymentTypeKey>(`paymentTypes.${payments[0].method.toLowerCase()}`)) || payments[0].method;
   };
-
-  const visibleOrders = orders
-    .slice()
-    .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
-    .slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage);
 
   return (
     <div className={className}>
@@ -182,7 +236,28 @@ export function MyOrdersTable({
         </div>
       )}
 
-      {selectedOrder && <CreateReturnDialog open={dialogOpen} onOpenChange={setDialogOpen} order={selectedOrder} />}
+      {selectedOrder && (
+        <CreateReturnDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          order={selectedOrder}
+          returnability={returnabilityMap[selectedOrder.id]}
+        />
+      )}
+
+      <Dialog open={noItemsDialogOpen} onOpenChange={setNoItemsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('returnLink')}</DialogTitle>
+            <DialogDescription>{t('noRemainingItems')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="primary">{t('understood')}</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

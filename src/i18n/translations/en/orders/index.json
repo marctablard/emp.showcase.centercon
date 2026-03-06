@@ -10,6 +10,8 @@
   "returnOrder": "Return Order",
   "returnLink": "Return",
   "returnDisabledTooltip": "Returns can only be created for completed orders",
+  "noRemainingItems": "There are no more items available for return. A return for all items in this order has already been requested.",
+  "understood": "Understood",
   "paymentMethod": "Payment Method",
   "shippingMethod": "Shipping Method",
   "orderItems": "Order Items",
