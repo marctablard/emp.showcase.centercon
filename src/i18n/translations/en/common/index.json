@@ -12,7 +12,8 @@
         "label": "Währungen"
     },
     "Regions": {
-        "label": "Site"
+        "label": "Site",
+        "switchFailed": "Unable to switch site. Please try again."
     },
     "hello": {
         "world": "Hello World",

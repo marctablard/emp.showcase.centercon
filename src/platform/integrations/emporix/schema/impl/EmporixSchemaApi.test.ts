@@ -4,6 +4,7 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
+import type { EmporixTokenType } from '../../common/token-types';
 import { EmporixConfig } from '../../config';
 import { EmporixCustomEntity, EmporixPatchOperation } from '../../model/schema';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
@@ -29,16 +30,11 @@ class TestTokenManager extends EmporixTokenManagerAbstract {
   protected writeTokens(tokens: TokenStore): Promise<void> {
     throw new Error('Method not implemented.');
   }
-  private tokenStore: Map<string, StoredToken<any>> = new Map();
-  protected async readToken<T extends StoredToken<K>, K>(
-    type: 'anonymous' | 'customer' | 'service',
-  ): Promise<T | undefined> {
+  private tokenStore: Map<EmporixTokenType, StoredToken<any>> = new Map();
+  protected async readToken<T extends StoredToken<K>, K>(type: EmporixTokenType): Promise<T | undefined> {
     return this.tokenStore.get(type) as T | undefined;
   }
-  protected writeToken<T extends StoredToken<K>, K>(
-    type: 'anonymous' | 'customer' | 'service',
-    token: T | undefined,
-  ): Promise<void> {
+  protected writeToken<T extends StoredToken<K>, K>(type: EmporixTokenType, token: T | undefined): Promise<void> {
     if (token) {
       this.tokenStore.set(type, token);
     } else {

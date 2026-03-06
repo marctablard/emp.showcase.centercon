@@ -12,6 +12,7 @@
     "noAccountYet": "Don't have an account yet?",
     "createAccount": "Create an account",
     "welcomeMessage": "Welcome back, {username}!",
+    "cartMergeFallback": "We couldn't merge items from your previous cart. Your account cart is now active.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "loginFailed": "Login Failed",

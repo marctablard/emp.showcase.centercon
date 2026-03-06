@@ -13,7 +13,7 @@ import {
   loadSavedCart,
 } from '@/lib/client/carts';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
+import { CartShippingAddress, ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
 
 export interface CartState {
@@ -21,15 +21,19 @@ export interface CartState {
   currentCart: Cart | null | undefined;
   loading: boolean;
   error: Error | null;
-  // Track last shipping update to prevent duplicates
   lastShippingUpdate: {
-    countryCode?: string;
+    country?: string;
     zipCode?: string;
     timestamp: number;
   } | null;
   sessionStatus: string | null;
   // Track last site code to detect site changes
   lastSiteCode: string | null;
+  pendingCurrencySync: {
+    currency: string;
+    siteCode: string;
+    attempts: number;
+  } | null;
 }
 
 interface CartActions {
@@ -49,14 +53,17 @@ interface CartActions {
   addToCart: (productId: string, quantity: number, _retryCount?: number) => Promise<ModifyCartItemResult>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
-  updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
+  updateShippingInfo: (shippingAddress: CartShippingAddress, billingAddress?: CartShippingAddress) => Promise<void>;
   updateCurrency: (currency: string) => Promise<void>;
   clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => void;
 
   // Cross-store synchronization
   syncCurrencyWithSession: (currency: string, siteCode: string) => Promise<void>;
+  flushPendingCurrencySync: () => Promise<void>;
 }
 export type CartStore = CartState & CartActions;
+
+const MAX_PENDING_CURRENCY_SYNC_RETRIES = 3;
 
 // default state explicitly 'undefined' since it means, we don't know the cart's state
 const defaultState: CartState = {
@@ -66,6 +73,7 @@ const defaultState: CartState = {
   lastShippingUpdate: null,
   sessionStatus: null,
   lastSiteCode: null,
+  pendingCurrencySync: null,
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
@@ -89,6 +97,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
               loading: true,
               error: null,
               lastShippingUpdate: null,
+              pendingCurrencySync: null,
             });
             await get().fetchCart(false);
           }
@@ -104,6 +113,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
             loading: true,
             error: null,
             lastShippingUpdate: null,
+            pendingCurrencySync: null,
           });
           await get().fetchCart(false);
         } else if (lastSiteCode === null) {
@@ -139,16 +149,19 @@ export const createCartStore = (initState: CartState = defaultState) => {
             try {
               const cartData = await apiFetchCurrentCart(createCurrent);
               set({ currentCart: cartData, loading: false });
+              await get().flushPendingCurrencySync();
               return cartData;
             } catch (_err) {
               // Silent error when cart is gone
               set({ currentCart: null, loading: false });
+              await get().flushPendingCurrencySync();
               return null;
             }
           } catch (err) {
             const error = err instanceof Error ? err : new Error('Failed to fetch cart');
             set({ error, loading: false });
             getLogger().error({ err }, 'Error fetching cart');
+            await get().flushPendingCurrencySync();
             return undefined;
           }
         })();
@@ -303,17 +316,16 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
       },
 
-      updateShippingInfo: async (countryCode?: string, zipCode?: string) => {
+      updateShippingInfo: async (shippingAddress: CartShippingAddress, billingAddress?: CartShippingAddress) => {
         try {
-          // Check if we've recently updated with the same values to prevent duplicate calls to avoid conflict error
           const { lastShippingUpdate } = get();
           const now = Date.now();
           const DEBOUNCE_TIME = 2000;
 
           if (
             lastShippingUpdate &&
-            lastShippingUpdate.countryCode === countryCode &&
-            lastShippingUpdate.zipCode === zipCode &&
+            lastShippingUpdate.country === shippingAddress.country &&
+            lastShippingUpdate.zipCode === shippingAddress.zipCode &&
             now - lastShippingUpdate.timestamp < DEBOUNCE_TIME
           ) {
             return;
@@ -323,8 +335,8 @@ export const createCartStore = (initState: CartState = defaultState) => {
             loading: true,
             error: null,
             lastShippingUpdate: {
-              countryCode,
-              zipCode,
+              country: shippingAddress.country,
+              zipCode: shippingAddress.zipCode,
               timestamp: now,
             },
           });
@@ -342,10 +354,8 @@ export const createCartStore = (initState: CartState = defaultState) => {
             return;
           }
 
-          // Call API to update shipping info
-          await apiUpdateShippingInfo(cart.id, countryCode, zipCode);
+          await apiUpdateShippingInfo(cart.id, shippingAddress, billingAddress);
 
-          // Refetch cart to get updated state
           await get().fetchCart();
         } catch (err) {
           const error = err instanceof Error ? err : new Error('Failed to update shipping info');
@@ -386,6 +396,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
           error: null,
           lastShippingUpdate: null,
           lastSiteCode: null,
+          pendingCurrencySync: null,
         });
         // 2. Fire-and-forget: clear server-side session + optionally delete cart
         //    Skip server-side clear during login — the merge already set the correct cartId
@@ -397,19 +408,65 @@ export const createCartStore = (initState: CartState = defaultState) => {
       },
 
       syncCurrencyWithSession: async (currency: string, siteCode: string) => {
-        // Skip sync during cart transitions (e.g., login cart merge in progress)
-        if (get().loading) return;
+        // Queue retry intent while cart/session transitions are in-flight.
+        if (get().loading) {
+          const pendingCurrencySync = get().pendingCurrencySync;
+          if (
+            pendingCurrencySync &&
+            pendingCurrencySync.currency === currency &&
+            pendingCurrencySync.siteCode === siteCode &&
+            pendingCurrencySync.attempts >= MAX_PENDING_CURRENCY_SYNC_RETRIES
+          ) {
+            getLogger().warn(
+              { currency, siteCode, attempts: pendingCurrencySync.attempts },
+              'Dropping pending currency sync after max retries',
+            );
+            return;
+          }
+
+          const nextAttempts =
+            pendingCurrencySync &&
+            pendingCurrencySync.currency === currency &&
+            pendingCurrencySync.siteCode === siteCode
+              ? pendingCurrencySync.attempts + 1
+              : 1;
+          set({
+            pendingCurrencySync: {
+              currency,
+              siteCode,
+              attempts: nextAttempts,
+            },
+          });
+          return;
+        }
 
         const { currentCart } = get();
-        if (!currentCart) return;
+        if (!currentCart) {
+          return;
+        }
 
         // Don't update if cart belongs to different site
-        if (currentCart.site !== siteCode) return;
+        if (currentCart.site !== siteCode) {
+          return;
+        }
 
         const cartCurrency = currentCart.currency || currentCart.totalPrice?.currency;
         if (cartCurrency && cartCurrency !== currency) {
           await get().updateCurrency(currency);
         }
+
+        // Clear stale intent once currencies converge.
+        set({ pendingCurrencySync: null });
+      },
+
+      flushPendingCurrencySync: async () => {
+        const pendingCurrencySync = get().pendingCurrencySync;
+        if (!pendingCurrencySync || get().loading) {
+          return;
+        }
+
+        set({ pendingCurrencySync: null });
+        await get().syncCurrencyWithSession(pendingCurrencySync.currency, pendingCurrencySync.siteCode);
       },
     })),
   );

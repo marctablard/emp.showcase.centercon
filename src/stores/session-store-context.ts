@@ -13,6 +13,8 @@ export interface SessionState {
 export interface SessionActions {
   setSession: (session: Session | null | undefined) => void;
   setLoading: (loading: boolean) => void;
+  tryAcquireMutationLock: () => boolean;
+  releaseMutationLock: () => void;
   reset: () => void;
 }
 
@@ -24,11 +26,24 @@ const defaultState: SessionState = {
 };
 
 export const createSessionStore = (initState: SessionState = defaultState) => {
+  // Shared mutex for this store instance to serialize session mutations across components.
+  let mutationInFlight = false;
+
   return create<SessionStore>()(
     subscribeWithSelector((set) => ({
       ...initState,
       setSession: (session: Session | null | undefined) => set({ session }),
       setLoading: (loading: boolean) => set({ loading }),
+      tryAcquireMutationLock: () => {
+        if (mutationInFlight) {
+          return false;
+        }
+        mutationInFlight = true;
+        return true;
+      },
+      releaseMutationLock: () => {
+        mutationInFlight = false;
+      },
       reset: () => set(defaultState),
     })),
   );

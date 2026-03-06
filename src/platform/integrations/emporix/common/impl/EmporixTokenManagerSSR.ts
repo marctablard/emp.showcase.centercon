@@ -6,6 +6,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import { StoredToken } from '@/platform/integrations/types/auth';
 import { EmporixCustomerTokenResponse } from '../../model/oauth';
 import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
+import { EMPORIX_TOKEN_TYPE } from '../token-types';
 import { TokenStore } from './EmporixTokenManagerAbstract';
 import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
 
@@ -26,7 +27,7 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     _clientId: string,
   ): Promise<{ accessToken: string; saasToken?: string; sessionId: string }> {
     const customerToken = await this.readToken<StoredToken<EmporixCustomerTokenResponse>, EmporixCustomerTokenResponse>(
-      'customer',
+      EMPORIX_TOKEN_TYPE.CUSTOMER,
       tenant,
     );
     // first check client's customer token
@@ -37,7 +38,7 @@ class EmporixTokenManagerSSR extends EmporixTokenManagerAbstract {
     const anonymousToken = await this.readToken<
       StoredToken<EmporixCustomerTokenResponse>,
       EmporixCustomerTokenResponse
-    >('anonymous', tenant);
+    >(EMPORIX_TOKEN_TYPE.ANONYMOUS, tenant);
     if (this.checkAccessToken(anonymousToken)) {
       return { accessToken: anonymousToken!.token.access_token, sessionId: anonymousToken!.token.session_id };
     }

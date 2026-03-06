@@ -45,6 +45,8 @@ const enrichedProviders = config.providers.map((provider) => {
             name: customerNamingService.getFullName(customer),
             email: customer.email,
             businessModel: customer.businessModel,
+            cartMergeStatus: session.cartMergeStatus,
+            cartMergeReason: session.cartMergeReason,
             roles: [], // Add Roles here, if you like to customize the UX
           };
         } catch (_error) {
@@ -123,5 +125,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 declare module 'next-auth/jwt' {
   interface JWT {
     user?: User;
+  }
+}
+
+declare module 'next-auth' {
+  interface User {
+    cartMergeStatus?: 'MERGED' | 'FALLBACK' | 'NOT_APPLICABLE';
+    cartMergeReason?:
+      | 'ANONYMOUS_CART_NOT_ELIGIBLE'
+      | 'TARGET_CART_UNAVAILABLE'
+      | 'UNSUPPORTED_CURRENCY'
+      | 'CURRENCY_ALIGNMENT_FAILED'
+      | 'MERGE_FAILED'
+      | 'TRANSITION_FAILED';
   }
 }

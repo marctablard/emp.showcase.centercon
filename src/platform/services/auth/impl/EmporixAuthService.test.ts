@@ -2,6 +2,7 @@ import { Container } from 'inversify';
 import type { EmporixSessionContext } from '@/platform/integrations/emporix/model/session-context';
 import type { CartMigrationService } from '@/platform/services/cart/CartMigrationService';
 import type { CartService } from '@/platform/services/cart/CartService';
+import { CART_CURRENCY_UPDATE_ERROR_CODE, CartCurrencyUpdateError } from '@/platform/services/cart/errors';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Cart } from '@/platform/services/model/cart/cart';
 import type { Session as ServiceSession } from '@/platform/services/model/session/session';
@@ -96,6 +97,7 @@ describe('EmporixAuthService', () => {
       setSite: jest.fn(),
       setRegion: jest.fn(),
       setCart: jest.fn(),
+      clearCart: jest.fn(),
     };
 
     mockCartService = {
@@ -158,6 +160,7 @@ describe('EmporixAuthService', () => {
       expect(mockCartMigrationService.mergeCarts).toHaveBeenCalledWith('anon-cart-id', 'new-customer-cart-id');
       expect(mockSessionService.setCart).toHaveBeenCalledWith('new-customer-cart-id');
       expect(result.cartId).toBe('new-customer-cart-id');
+      expect(result.cartMergeStatus).toBe('MERGED');
     });
 
     it('should merge anonymous cart into existing customer cart when both carts exist', async () => {
@@ -174,6 +177,7 @@ describe('EmporixAuthService', () => {
       expect(mockCartMigrationService.mergeCarts).toHaveBeenCalledWith('anon-cart-id', 'customer-cart-id');
       expect(mockSessionService.setCart).toHaveBeenCalledWith('customer-cart-id');
       expect(result.cartId).toBe('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('MERGED');
     });
 
     it('should not merge when anonymous cart has no items', async () => {
@@ -181,36 +185,44 @@ describe('EmporixAuthService', () => {
       mockSessionService.getCurrent.mockResolvedValue(oldServiceSession);
       mockCustomerApi.login.mockResolvedValue(loginSessionContext);
       mockCartService.getCartById.mockResolvedValue(emptyAnonymousCart);
+      mockCartService.getCart.mockResolvedValue(customerCart);
 
       const result = await authService.login(credentials);
 
-      expect(mockCartService.getCart).not.toHaveBeenCalled();
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
-      expect(result.cartId).toBeUndefined();
+      expect(mockCartService.getCart).toHaveBeenCalled();
+      expect(result.cartId).toBe('customer-cart-id');
+      expect(mockSessionService.setCart).toHaveBeenCalledWith('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('NOT_APPLICABLE');
     });
 
     it('should not merge when no anonymous cart exists', async () => {
       mockSessionService.getCurrent.mockResolvedValue(oldServiceSession);
       mockCustomerApi.login.mockResolvedValue(loginSessionContext);
       mockCartService.getCartById.mockResolvedValue(null);
+      mockCartService.getCart.mockResolvedValue(customerCart);
 
       const result = await authService.login(credentials);
 
-      expect(mockCartService.getCart).not.toHaveBeenCalled();
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
-      expect(result.cartId).toBeUndefined();
+      expect(mockCartService.getCart).toHaveBeenCalled();
+      expect(result.cartId).toBe('customer-cart-id');
+      expect(mockSessionService.setCart).toHaveBeenCalledWith('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('NOT_APPLICABLE');
     });
 
     it('should not merge when old session has no cartId', async () => {
       const sessionWithoutCart: ServiceSession = { ...oldServiceSession, cartId: undefined };
       mockSessionService.getCurrent.mockResolvedValue(sessionWithoutCart);
       mockCustomerApi.login.mockResolvedValue(loginSessionContext);
+      mockCartService.getCart.mockResolvedValue(customerCart);
 
       const result = await authService.login(credentials);
 
       expect(mockCartService.getCartById).not.toHaveBeenCalled();
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
-      expect(result.cartId).toBeUndefined();
+      expect(result.cartId).toBe('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('NOT_APPLICABLE');
     });
 
     it('should change anonymous cart currency and merge when currencies differ', async () => {
@@ -231,6 +243,7 @@ describe('EmporixAuthService', () => {
       expect(mockCartMigrationService.mergeCarts).toHaveBeenCalledWith('anon-cart-id', 'customer-cart-id');
       expect(mockSessionService.setCart).toHaveBeenCalledWith('customer-cart-id');
       expect(result.cartId).toBe('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('MERGED');
     });
 
     it('should update session with customer cart ID after successful merge', async () => {
@@ -284,6 +297,8 @@ describe('EmporixAuthService', () => {
       expect(result.sessionId).toBe('customer-session-id');
       expect(result.customerId).toBe('customer-123');
       expect(result.cartId).toBe('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('FALLBACK');
+      expect(result.cartMergeReason).toBe('MERGE_FAILED');
     });
 
     it('should fall back to customer cart when changeCurrency fails with non-refresh error', async () => {
@@ -292,7 +307,9 @@ describe('EmporixAuthService', () => {
       mockCustomerApi.login.mockResolvedValue(loginSessionContext);
       mockCartService.getCartById.mockResolvedValue(gbpAnonymousCart);
       mockCartService.getCart.mockResolvedValue(customerCart);
-      mockCartService.updateCurrency.mockRejectedValue(new Error('Currency change failed'));
+      mockCartService.updateCurrency.mockRejectedValue(
+        new CartCurrencyUpdateError(CART_CURRENCY_UPDATE_ERROR_CODE.UNSUPPORTED_CURRENCY, 'Currency not supported'),
+      );
       mockSessionService.setCart.mockResolvedValue(undefined);
 
       const result = await authService.login(credentials);
@@ -313,6 +330,8 @@ describe('EmporixAuthService', () => {
       expect(result.sessionId).toBe('customer-session-id');
       expect(result.customerId).toBe('customer-123');
       expect(result.cartId).toBe('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('FALLBACK');
+      expect(result.cartMergeReason).toBe('UNSUPPORTED_CURRENCY');
     });
 
     it('should continue with merge when updateCurrency fails with legalEntityId refresh error', async () => {
@@ -344,6 +363,7 @@ describe('EmporixAuthService', () => {
       );
       expect(mockSessionService.setCart).toHaveBeenCalledWith('customer-cart-id');
       expect(result.cartId).toBe('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('MERGED');
     });
 
     it('should fall back to customer cart when merge fails after successful currency change', async () => {
@@ -372,6 +392,8 @@ describe('EmporixAuthService', () => {
       expect(result.sessionId).toBe('customer-session-id');
       expect(result.customerId).toBe('customer-123');
       expect(result.cartId).toBe('customer-cart-id');
+      expect(result.cartMergeStatus).toBe('FALLBACK');
+      expect(result.cartMergeReason).toBe('MERGE_FAILED');
     });
 
     it('should not call updateCurrency when currencies already match', async () => {
@@ -392,12 +414,13 @@ describe('EmporixAuthService', () => {
     it('should not merge when old session does not exist', async () => {
       mockSessionService.getCurrent.mockResolvedValue(undefined);
       mockCustomerApi.login.mockResolvedValue(loginSessionContext);
+      mockCartService.getCart.mockResolvedValue(customerCart);
 
       const result = await authService.login(credentials);
 
       expect(mockCartService.getCartById).not.toHaveBeenCalled();
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
-      expect(result.cartId).toBeUndefined();
+      expect(result.cartId).toBe('customer-cart-id');
     });
 
     it('should not merge when cart already belongs to a customer', async () => {
@@ -405,12 +428,13 @@ describe('EmporixAuthService', () => {
       mockSessionService.getCurrent.mockResolvedValue(oldServiceSession);
       mockCustomerApi.login.mockResolvedValue(loginSessionContext);
       mockCartService.getCartById.mockResolvedValue(customerOwnedCart);
+      mockCartService.getCart.mockResolvedValue(customerCart);
 
       const result = await authService.login(credentials);
 
-      expect(mockCartService.getCart).not.toHaveBeenCalled();
+      expect(mockCartService.getCart).toHaveBeenCalled();
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
-      expect(result.cartId).toBeUndefined();
+      expect(result.cartId).toBe('customer-cart-id');
     });
 
     it('should handle getCartById failure gracefully and still return session', async () => {
@@ -440,7 +464,7 @@ describe('EmporixAuthService', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.objectContaining({ err: expect.any(Error) }),
-        'Cart transition failed during login, continuing without merge',
+        'Failed to ensure customer cart binding',
       );
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
       expect(result.sessionId).toBe('customer-session-id');

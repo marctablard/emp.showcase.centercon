@@ -96,12 +96,22 @@ export const useCheckout = (): UseCheckout => {
 
   const submitShippingAddress = useCallback(
     (address: CheckoutAddress) => {
-      // TODO validation!
       if (
         checkoutCart?.id &&
         (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode)
       ) {
-        updateShippingInfo(address.country, address.zipCode);
+        updateShippingInfo({
+          contactName: address.contactName,
+          companyName: address.companyName,
+          street: address.street,
+          streetNumber: address.streetNumber,
+          streetAppendix: address.streetAppendix,
+          zipCode: address.zipCode,
+          city: address.city,
+          country: address.country,
+          state: address.state,
+          contactPhone: address.contactPhone,
+        });
       }
       setShippingAddress(address);
     },
