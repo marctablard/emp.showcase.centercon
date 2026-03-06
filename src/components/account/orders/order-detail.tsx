@@ -6,18 +6,10 @@ import { format } from 'date-fns';
 import { Ban, RotateCcw, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { H2, H3 } from '@/components/ui/h';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useOrder } from '@/hooks/order/useOrder';
 import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
@@ -55,7 +47,6 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
   const tPaymentModes = useTranslations('checkout.PaymentModes');
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
-  const [noItemsDialogOpen, setNoItemsDialogOpen] = useState(false);
   const [returnability, setReturnability] = useState<OrderReturnability | null>(null);
   const router = useRouter();
 
@@ -284,22 +275,25 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                   {tOrder('cancelOrder')}
                 </Button>
               )}
-              {shouldShowReturnButton(order.status) && (
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={() => {
-                    if (returnability && !returnability.hasAnyReturnableItem) {
-                      setNoItemsDialogOpen(true);
-                    } else {
-                      setReturnDialogOpen(true);
-                    }
-                  }}
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  {tOrder('returnOrder')}
-                </Button>
-              )}
+              {shouldShowReturnButton(order.status) &&
+                (returnability?.hasAnyReturnableItem === false ? (
+                  <Tooltip delayDuration={200}>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button variant="secondary" size="small" disabled>
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          {tOrder('returnOrder')}
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{tOrder('noRemainingItems')}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Button variant="secondary" size="small" onClick={() => setReturnDialogOpen(true)}>
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    {tOrder('returnOrder')}
+                  </Button>
+                ))}
               {(
                 [
                   ORDER_STATUS.PROCESSING,
@@ -332,20 +326,6 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
           returnability={returnability ?? undefined}
         />
       )}
-
-      <Dialog open={noItemsDialogOpen} onOpenChange={setNoItemsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{tOrder('returnOrder')}</DialogTitle>
-            <DialogDescription>{tOrder('noRemainingItems')}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="primary">{tOrder('understood')}</Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
