@@ -55,15 +55,6 @@ export class EmporixCompanyService implements CompanyService {
     const companies: Company[] = [];
     for (const legalEntity of customerProfile.b2b.legalEntities) {
       if (legalEntity.id && legalEntity.name) {
-        // TODO: Optionally fetch full legal entity details for mixins (creditscore)
-        // let creditscore;
-        // try {
-        //   const emporixLegalEntity = await this.customerManagementApi.getLegalEntityById(legalEntity.id);
-        //   creditscore = emporixLegalEntity?.mixins?.['creditscore'];
-        // } catch (_error) {
-        //   // Ignore error and use basic data without creditscore
-        // }
-
         companies.push({
           id: legalEntity.id,
           name: legalEntity.name,
