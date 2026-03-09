@@ -148,7 +148,7 @@ export class EmporixAuthService implements AuthService {
                 const alignedSourceCart = oldCart;
                 const customerCartQuantityBeforeMerge = this.getCartQuantity(verifiedCustomerCart);
                 const anonymousCartQuantity = this.getCartQuantity(alignedSourceCart);
-                this.logger.warn(
+                this.logger.debug(
                   {
                     targetCurrency: finalCurrency,
                     anonymousCart: this.buildCartDebugSnapshot(alignedSourceCart),
@@ -682,7 +682,7 @@ export class EmporixAuthService implements AuthService {
       this.cartService.getCartById(anonymousCart.id, false),
       this.cartService.getCartById(customerCart.id, false),
     ]);
-    this.logger.warn(
+    this.logger.debug(
       {
         anonymousCart: this.buildCartDebugSnapshot(latestAnonymousCart || anonymousCart),
         customerCart: this.buildCartDebugSnapshot(latestCustomerCart || customerCart),
@@ -697,7 +697,7 @@ export class EmporixAuthService implements AuthService {
         this.cartService.getCartById(anonymousCart.id, false),
         this.cartService.getCartById(customerCart.id, false),
       ]);
-      this.logger.error(
+      this.logger.debug(
         {
           err: error instanceof Error ? error : String(error),
           anonymousCart: this.buildCartDebugSnapshot(anonymousAfterError || anonymousCart),
@@ -755,7 +755,7 @@ export class EmporixAuthService implements AuthService {
 
         const refreshedCustomerCart = (await this.getVerifiedCustomerCart(customerCart.id, customerId)) || customerCart;
         if (refreshedCustomerCart.currency !== targetCurrency) {
-          this.logger.warn(
+          this.logger.debug(
             {
               attempt,
               customerCartId: customerCart.id,
@@ -767,7 +767,7 @@ export class EmporixAuthService implements AuthService {
           continue;
         }
 
-        this.logger.warn(
+        this.logger.debug(
           {
             attempt,
             customerCartId: customerCart.id,
@@ -786,7 +786,7 @@ export class EmporixAuthService implements AuthService {
         );
       } catch (retryError) {
         const isFinalAttempt = attempt === this.MERGE_CURRENCY_RETRY_ATTEMPTS;
-        this.logger.error(
+        this.logger.debug(
           {
             attempt,
             maxAttempts: this.MERGE_CURRENCY_RETRY_ATTEMPTS,
