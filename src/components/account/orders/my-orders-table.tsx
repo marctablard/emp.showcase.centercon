@@ -69,15 +69,17 @@ export function MyOrdersTable({
   );
 
   useEffect(() => {
-    if (completedOrderIds.length === 0) {
-      setReturnabilityMap({});
-      return;
-    }
-
     let cancelled = false;
+    const syncReturnability = async () => {
+      if (completedOrderIds.length === 0) {
+        if (!cancelled) {
+          setReturnabilityMap({});
+        }
+        return;
+      }
 
-    fetchReturnsForOrderIds(completedOrderIds)
-      .then((returns) => {
+      try {
+        const returns = await fetchReturnsForOrderIds(completedOrderIds);
         if (cancelled) return;
         const map: Record<string, OrderReturnability> = {};
         for (const order of visibleOrders) {
@@ -86,10 +88,12 @@ export function MyOrdersTable({
           }
         }
         setReturnabilityMap(map);
-      })
-      .catch(() => {
+      } catch (_error) {
         if (!cancelled) setReturnabilityMap({});
-      });
+      }
+    };
+
+    void syncReturnability();
 
     return () => {
       cancelled = true;
