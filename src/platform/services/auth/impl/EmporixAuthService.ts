@@ -235,7 +235,7 @@ export class EmporixAuthService implements AuthService {
 
     customer.preferredLanguage = currentSession.language || 'en';
     customer.preferredCurrency = currentSession.currency || 'EUR';
-    customer.preferredSite = currentSession.siteCode || 'main';
+    customer.preferredSite = currentSession.siteCode;
 
     const address: EmporixAddress | undefined = registration.address
       ? this.emporixAddressMapper.mapToSource(registration.address)
