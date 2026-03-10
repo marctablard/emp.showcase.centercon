@@ -4,6 +4,7 @@ import { routing } from '@/i18n/routing';
 import {
   INTERNAL_APP_PATH_HEADER,
   INTERNAL_SITE_HEADER,
+  INTERNAL_SITE_INVALID_HEADER,
   NEXT_REWRITE_HEADER,
   type SiteConfig,
   type SiteRoutingConfig,
@@ -62,7 +63,7 @@ export function resolveSite(
   cookies: NextRequest['cookies'],
   headers: NextRequest['headers'],
   routing: SiteConfig,
-): { site: string; appPath: string } {
+): { site: string | undefined; appPath: string } {
   const segments = pathname.replace('/', '').split('/');
   let site: string | undefined;
   // first, try to resolve the site from the first path-segment
@@ -148,8 +149,40 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
 
     // First look for the matching routing by Domain
     const routing = resolveApplicableRouting(req.nextUrl.hostname, routingConfig);
-    const { site, appPath } = resolveSite(req.nextUrl.pathname, req.cookies, req.headers, routing);
-    setCachedRequestSite(site);
+    const resolved = resolveSite(req.nextUrl.pathname, req.cookies, req.headers, routing);
+    let { site } = resolved;
+    const { appPath } = resolved;
+    const fallbackEnabled = !!routing.defaultSite;
+    let siteInvalid = false;
+
+    // Post-resolution validation: reject sites not in availableSites (from cookies/headers)
+    if (site && !routing.availableSites.includes(site)) {
+      if (fallbackEnabled) {
+        site = routing.defaultSite;
+      } else {
+        // eslint-disable-next-line no-console -- Edge middleware: Pino logger unavailable
+        console.warn(
+          JSON.stringify({
+            event: 'invalid_site_rejected',
+            site,
+            path: req.nextUrl.pathname,
+            availableSites: routing.availableSites,
+            recommendation: 'Check NEXT_PUBLIC_AVAILABLE_SITES configuration',
+          }),
+        );
+        siteInvalid = true;
+        site = routing.availableSites[0];
+      }
+    }
+
+    // No site resolved at all (no path/cookie/header match, no default)
+    if (!site) {
+      site = routing.availableSites[0];
+    }
+
+    if (!siteInvalid) {
+      setCachedRequestSite(site);
+    }
 
     const originalPathname = req.nextUrl.pathname;
     // fake a reduced path for the intlMiddleware
@@ -160,7 +193,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     req.nextUrl.pathname = originalPathname;
     // if intl requires a redirect, let's
     const intlLocation = intlResponse.headers.get('location');
-    if (intlLocation) {
+    if (intlLocation && !siteInvalid) {
       // build URL from redirectLocation
       const newLocation = new URL(intlLocation);
       // prepend site if necessary
@@ -179,6 +212,20 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     }
     if (site) {
       headers.set(INTERNAL_SITE_HEADER, site);
+    }
+    if (siteInvalid) {
+      headers.set(INTERNAL_SITE_INVALID_HEADER, 'true');
+    }
+
+    // When site is flagged invalid, rewrite to a valid route so the layout can render not-found
+    if (siteInvalid) {
+      const rewrite = new URL(req.nextUrl);
+      rewrite.pathname = `/${site}${appPath === '' || appPath === '/' ? '' : `/${appPath}`}`;
+      const response = NextResponse.rewrite(rewrite, { request: { headers } });
+      intlResponse.cookies.getAll().forEach((cookie) => {
+        response.cookies.set(cookie.name, cookie.value);
+      });
+      return response;
     }
 
     // handle Site-Redirection
