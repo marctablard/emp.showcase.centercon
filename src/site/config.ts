@@ -12,6 +12,7 @@ export default {
     availableSites: availableSites,
     prefix: 'as-needed' as SitePrefixMode,
     cookie: { name: process.env.NEXT_PUBLIC_SITE_COOKIE || 'NEXT_SITE' },
+    cookieOverridesDefault: true,
     domains: [
       {
         domain: 'showcase.emporix.la',
@@ -26,6 +27,7 @@ export default {
     availableSites: availableSites,
     prefix: 'as-needed' as SitePrefixMode,
     cookie: { name: process.env.NEXT_PUBLIC_SITE_COOKIE || 'NEXT_SITE' },
+    cookieOverridesDefault: true,
     domains: [
       {
         domain: 'localhost',

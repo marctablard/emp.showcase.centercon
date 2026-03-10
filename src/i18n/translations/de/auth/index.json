@@ -12,6 +12,7 @@
     "noAccountYet": "Noch kein Konto?",
     "createAccount": "Konto erstellen",
     "welcomeMessage": "Willkommen zurück, {username}!",
+    "cartMergeFallback": "Artikel aus dem vorherigen Warenkorb konnten nicht zusammengeführt werden. Ihr Konto-Warenkorb ist jetzt aktiv.",
     "close": "Schließen",
     "error": "Fehler",
     "showPassword": "Passwort anzeigen",

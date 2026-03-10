@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
 import type { EmporixCart } from '@/platform/integrations/emporix/model/cart';
+import { CartCurrencyUpdateError } from '@/platform/services/cart/errors';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { CartMapper } from '@/platform/services/model/cart/CartMapper';
 import type { Cart } from '@/platform/services/model/cart/cart';
@@ -117,7 +118,7 @@ describe('EmporixCartService', () => {
   });
 
   describe('updateShippingInfo', () => {
-    it('should only send metadata, countryCode, and zipCode to updateCart', async () => {
+    it('should send addresses array with SHIPPING entry to updateCart', async () => {
       const fullCart: EmporixCart = {
         id: 'cart-123',
         yrn: 'yrn:emporix:cart:cart-123',
@@ -126,8 +127,6 @@ describe('EmporixCartService', () => {
         legalEntityId: 'legal-entity-001',
         currency: 'EUR',
         siteCode: 'main',
-        countryCode: 'DE',
-        zipCode: '10115',
         status: 'OPEN',
         type: 'shopping',
         items: [
@@ -145,31 +144,50 @@ describe('EmporixCartService', () => {
 
       mockCartApi.getCart.mockResolvedValue(fullCart);
 
-      await cartService.updateShippingInfo('cart-123', 'US', '10001');
+      await cartService.updateShippingInfo('cart-123', { country: 'US', zipCode: '10001' });
 
       expect(mockCartApi.updateCart).toHaveBeenCalledWith('cart-123', {
-        metadata: {
-          version: 6,
-        },
-        countryCode: 'US',
-        zipCode: '10001',
+        metadata: { version: 6 },
+        addresses: [{ country: 'US', zipCode: '10001', type: 'SHIPPING' }],
       });
 
-      // Verify ownership/read-only fields are NOT sent
       const updatePayload = mockCartApi.updateCart.mock.calls[0][1];
       expect(updatePayload).not.toHaveProperty('id');
       expect(updatePayload).not.toHaveProperty('yrn');
       expect(updatePayload).not.toHaveProperty('customerId');
       expect(updatePayload).not.toHaveProperty('sessionId');
       expect(updatePayload).not.toHaveProperty('legalEntityId');
+      expect(updatePayload).not.toHaveProperty('countryCode');
+      expect(updatePayload).not.toHaveProperty('zipCode');
       expect(updatePayload).not.toHaveProperty('status');
       expect(updatePayload).not.toHaveProperty('items');
-      expect(updatePayload).not.toHaveProperty('calculatedPrice');
-      expect(updatePayload).not.toHaveProperty('totalUnitsCount');
       expect(updatePayload).not.toHaveProperty('currency');
       expect(updatePayload).not.toHaveProperty('siteCode');
-      expect(updatePayload).not.toHaveProperty('type');
-      expect(updatePayload).not.toHaveProperty('channel');
+    });
+
+    it('should send both SHIPPING and BILLING addresses when billing is provided', async () => {
+      const cart: EmporixCart = {
+        id: 'cart-both',
+        currency: 'EUR',
+        siteCode: 'main',
+        metadata: { version: 1 },
+      };
+
+      mockCartApi.getCart.mockResolvedValue(cart);
+
+      await cartService.updateShippingInfo(
+        'cart-both',
+        { country: 'DE', zipCode: '10115', city: 'Berlin', street: 'Friedrichstr.' },
+        { country: 'DE', zipCode: '80331', city: 'München', street: 'Marienplatz' },
+      );
+
+      expect(mockCartApi.updateCart).toHaveBeenCalledWith('cart-both', {
+        metadata: { version: 2 },
+        addresses: [
+          { country: 'DE', zipCode: '10115', city: 'Berlin', street: 'Friedrichstr.', type: 'SHIPPING' },
+          { country: 'DE', zipCode: '80331', city: 'München', street: 'Marienplatz', type: 'BILLING' },
+        ],
+      });
     });
 
     it('should handle cart with no metadata (version starts at 1)', async () => {
@@ -182,21 +200,20 @@ describe('EmporixCartService', () => {
 
       mockCartApi.getCart.mockResolvedValue(cartNoMetadata);
 
-      await cartService.updateShippingInfo('cart-no-meta', 'GB', 'SW1A 1AA');
+      await cartService.updateShippingInfo('cart-no-meta', { country: 'GB', zipCode: 'SW1A 1AA' });
 
       expect(mockCartApi.updateCart).toHaveBeenCalledWith('cart-no-meta', {
-        metadata: {
-          version: 1,
-        },
-        countryCode: 'GB',
-        zipCode: 'SW1A 1AA',
+        metadata: { version: 1 },
+        addresses: [{ country: 'GB', zipCode: 'SW1A 1AA', type: 'SHIPPING' }],
       });
     });
 
     it('should throw when cart not found', async () => {
       mockCartApi.getCart.mockResolvedValue(null);
 
-      await expect(cartService.updateShippingInfo('missing-cart', 'US', '10001')).rejects.toThrow('Cart not found');
+      await expect(cartService.updateShippingInfo('missing-cart', { country: 'US', zipCode: '10001' })).rejects.toThrow(
+        'Cart not found',
+      );
 
       expect(mockCartApi.updateCart).not.toHaveBeenCalled();
     });
@@ -211,10 +228,9 @@ describe('EmporixCartService', () => {
 
       mockCartApi.getCart.mockResolvedValue(cart);
 
-      await cartService.updateShippingInfo('cart-refresh', 'FR', '75001');
+      await cartService.updateShippingInfo('cart-refresh', { country: 'FR', zipCode: '75001' });
 
       expect(mockCartApi.refreshCart).toHaveBeenCalledWith('cart-refresh');
-      // refreshCart should be called AFTER updateCart
       const updateOrder = mockCartApi.updateCart.mock.invocationCallOrder[0];
       const refreshOrder = mockCartApi.refreshCart.mock.invocationCallOrder[0];
       expect(refreshOrder).toBeGreaterThan(updateOrder);
@@ -231,12 +247,10 @@ describe('EmporixCartService', () => {
         id: 'cart-123',
         currency: 'EUR',
         siteCode: 'main',
-        metadata: { version: 2 }, // bumped by our shipping updateCart
+        metadata: { version: 2 },
       };
 
-      mockCartApi.getCart
-        .mockResolvedValueOnce(cart) // initial getCart
-        .mockResolvedValueOnce(freshCart); // re-fetch inside refreshCartWithCleanup
+      mockCartApi.getCart.mockResolvedValueOnce(cart).mockResolvedValueOnce(freshCart);
 
       mockCartApi.refreshCart
         .mockRejectedValueOnce(
@@ -244,11 +258,10 @@ describe('EmporixCartService', () => {
             'Failed to refresh cart: Bad Request {"message":"Anonymous cart cannot be assigned to a legal entity: xyz"}',
           ),
         )
-        .mockResolvedValueOnce(undefined); // retry succeeds
+        .mockResolvedValueOnce(undefined);
 
-      await cartService.updateShippingInfo('cart-123', 'DE', '10115');
+      await cartService.updateShippingInfo('cart-123', { country: 'DE', zipCode: '10115' });
 
-      // First updateCart: shipping info; second: legalEntityId cleanup
       expect(mockCartApi.updateCart).toHaveBeenCalledTimes(2);
       expect(mockCartApi.updateCart).toHaveBeenLastCalledWith('cart-123', {
         metadata: { version: 3 },
@@ -333,8 +346,12 @@ describe('EmporixCartService', () => {
       mockCartApi.getCart.mockResolvedValue(cart);
       mockCartApi.refreshCart.mockRejectedValue(new Error('Failed to refresh cart: Internal Server Error'));
 
-      await expect(cartService.updateCurrency('cart-1', 'EUR')).rejects.toThrow('Internal Server Error');
-
+      await expect(cartService.updateCurrency('cart-1', 'EUR')).rejects.toEqual(
+        expect.objectContaining({
+          code: 'UPSTREAM_FAILURE',
+          message: 'Failed to update cart currency',
+        }),
+      );
       expect(mockCartApi.updateCart).not.toHaveBeenCalled();
     });
 
@@ -352,10 +369,88 @@ describe('EmporixCartService', () => {
       expect(mockCartApi.changeCurrency).not.toHaveBeenCalled();
     });
 
+    it('should throw typed currency update error for unsupported currency', async () => {
+      const cart: EmporixCart = {
+        id: 'cart-1',
+        currency: 'USD',
+        siteCode: 'main',
+      };
+      mockCartApi.getCart.mockResolvedValue(cart);
+
+      await expect(cartService.updateCurrency('cart-1', 'GBP')).rejects.toBeInstanceOf(CartCurrencyUpdateError);
+    });
+
     it('should throw when cart not found', async () => {
       mockCartApi.getCart.mockResolvedValue(null);
+      mockSessionService.getCurrent.mockResolvedValue({
+        id: 'session-1',
+        siteCode: 'main',
+        currency: 'EUR',
+        customerId: undefined,
+      });
+      mockCartApi.getCartByCriteria.mockResolvedValue(null);
 
       await expect(cartService.updateCurrency('missing', 'EUR')).rejects.toThrow('Cart not found');
+    });
+
+    it('should recover with canonical cart when requested cart id is stale', async () => {
+      const canonicalRawCart: EmporixCart = {
+        id: 'cart-canonical',
+        currency: 'USD',
+        siteCode: 'main',
+        metadata: { version: 1 },
+      };
+      const canonicalMappedCart: Cart = {
+        id: 'cart-canonical',
+        currency: 'USD',
+        site: 'main',
+        items: [],
+        totalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
+        subTotalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
+        tax: { amount: 0, currency: 'USD', grossValue: 0, netValue: 0 },
+      };
+
+      mockSessionService.getCurrent.mockResolvedValue({
+        id: 'session-1',
+        siteCode: 'main',
+        currency: 'EUR',
+        customerId: 'customer-1',
+      });
+      mockCartApi.getCart
+        .mockResolvedValueOnce(null) // stale requested cart
+        .mockResolvedValueOnce(canonicalRawCart) // getCart() cache lookup by session.cartId (none) skipped; used later for canonical re-read
+        .mockResolvedValueOnce(canonicalRawCart); // resolveCanonicalCartForCurrencyUpdate final read
+      mockCartApi.getCartByCriteria.mockResolvedValue(canonicalRawCart);
+      mockMapper.mapToService.mockReturnValue(canonicalMappedCart);
+
+      await cartService.updateCurrency('stale-cart-id', 'EUR');
+
+      expect(mockCartApi.changeCurrency).toHaveBeenCalledWith('cart-canonical', 'EUR');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        { requestedCartId: 'stale-cart-id', canonicalCartId: 'cart-canonical' },
+        'Recovered stale cart id during currency update',
+      );
+    });
+
+    it('should throw typed forbidden error when upstream returns 403 during currency change', async () => {
+      const cart: EmporixCart = {
+        id: 'cart-1',
+        currency: 'USD',
+        siteCode: 'main',
+        metadata: { version: 1 },
+      };
+
+      mockCartApi.getCart.mockResolvedValue(cart);
+      mockCartApi.changeCurrency.mockRejectedValue(
+        new Error('Failed to change cart currency: Forbidden {"status":403,"message":"Access denied"}'),
+      );
+
+      await expect(cartService.updateCurrency('cart-1', 'EUR')).rejects.toEqual(
+        expect.objectContaining({
+          code: 'FORBIDDEN',
+          upstreamStatus: 403,
+        }),
+      );
     });
   });
 
@@ -363,6 +458,7 @@ describe('EmporixCartService', () => {
     const mockSession = {
       id: 'session-1',
       siteCode: 'us-branch',
+      currency: 'USD',
       language: 'en',
       customerId: undefined,
       cartId: 'cart-us',
@@ -418,7 +514,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
         subTotalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
-        tax: { rate: 0, grossValue: 29.99, netValue: 29.99 },
+        tax: { amount: 0, currency: 'USD', grossValue: 29.99, netValue: 29.99 },
       };
 
       // First getCart call returns raw cart (for siteCode), second returns for getCartById
@@ -479,7 +575,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
         subTotalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
-        tax: { rate: 0, grossValue: 29.99, netValue: 29.99 },
+        tax: { amount: 0, currency: 'USD', grossValue: 29.99, netValue: 29.99 },
       };
 
       // First call: addItemToCart('cart-main') → getCart returns mainCart (wrong site)
@@ -539,7 +635,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'EUR', grossValue: 0, netValue: 0 },
       };
 
       // getCart() auto-recovery returns the same cart (shouldn't happen, but guard against it)
@@ -591,7 +687,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
         subTotalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
-        tax: { rate: 0, grossValue: 59.98, netValue: 59.98 },
+        tax: { amount: 0, currency: 'USD', grossValue: 59.98, netValue: 59.98 },
       };
 
       const rawCart: EmporixCart = {
@@ -627,7 +723,7 @@ describe('EmporixCartService', () => {
       mockCartApi.getCart.mockResolvedValue(rawCart);
       mockMapper.mapToService.mockReturnValue(mappedCart);
       // updateCartItemQuantity also fetches session to decide pricing strategy
-      mockSessionService.getCurrent.mockResolvedValue({ siteCode: 'us-branch' });
+      mockSessionService.getCurrent.mockResolvedValue({ id: 'session-1', siteCode: 'us-branch', currency: 'USD' });
       mockPriceService.getProductPrice.mockResolvedValue(updatedPrice);
 
       const result = await cartService.updateCartItemQuantity('cart-us', 'item-1', 3);
@@ -654,7 +750,7 @@ describe('EmporixCartService', () => {
         ],
         totalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
         subTotalPrice: { amount: 59.98, originalAmount: 59.98, currency: 'USD' },
-        tax: { rate: 0, grossValue: 59.98, netValue: 59.98 },
+        tax: { amount: 0, currency: 'USD', grossValue: 59.98, netValue: 59.98 },
       };
 
       const rawCart: EmporixCart = {
@@ -675,7 +771,7 @@ describe('EmporixCartService', () => {
       mockCartApi.getCart.mockResolvedValue(rawCart);
       mockMapper.mapToService.mockReturnValue(mappedCart);
       // Session is on 'main' but cart is on 'us-branch'
-      mockSessionService.getCurrent.mockResolvedValue({ siteCode: 'main' });
+      mockSessionService.getCurrent.mockResolvedValue({ id: 'session-1', siteCode: 'main', currency: 'EUR' });
 
       await expect(cartService.updateCartItemQuantity('cart-us', 'item-1', 3)).rejects.toThrow(
         'Cart belongs to a different site. Please refresh the page.',
@@ -695,6 +791,7 @@ describe('EmporixCartService', () => {
     const mockSession = {
       id: 'session-1',
       siteCode: 'main',
+      currency: 'EUR',
       customerId: undefined,
       cartId: 'cart-main',
     };
@@ -714,7 +811,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'EUR', grossValue: 0, netValue: 0 },
       };
 
       mockSessionService.getCurrent.mockResolvedValue(mockSession);
@@ -754,7 +851,7 @@ describe('EmporixCartService', () => {
         items: [],
         totalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
         subTotalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
-        tax: { rate: 0, grossValue: 0, netValue: 0 },
+        tax: { amount: 0, currency: 'USD', grossValue: 0, netValue: 0 },
       };
 
       mockSessionService.getCurrent.mockResolvedValue(usSession);
@@ -780,9 +877,90 @@ describe('EmporixCartService', () => {
     });
 
     it('should throw when session is not available', async () => {
-      mockSessionService.getCurrent.mockResolvedValue(null);
+      mockSessionService.getCurrent.mockResolvedValue(undefined);
 
       await expect(cartService.getCart()).rejects.toThrow('Failed to get session context');
+    });
+
+    it('should use session-based lookup (not customerId) when customerId is ANONYMOUS', async () => {
+      const anonSession = {
+        id: 'session-anon',
+        siteCode: 'us-branch',
+        customerId: 'ANONYMOUS',
+        cartId: undefined,
+        currency: 'USD',
+      };
+      const anonRawCart: EmporixCart = {
+        id: 'anon-cart-1',
+        currency: 'USD',
+        siteCode: 'us-branch',
+      };
+      const anonMappedCart: Cart = {
+        id: 'anon-cart-1',
+        currency: 'USD',
+        site: 'us-branch',
+        items: [],
+        totalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
+        subTotalPrice: { amount: 0, originalAmount: 0, currency: 'USD' },
+        tax: { amount: 0, currency: 'USD', grossValue: 0, netValue: 0 },
+      };
+
+      mockSessionService.getCurrent.mockResolvedValue(anonSession);
+      mockCartApi.getCartByCriteria.mockResolvedValue(anonRawCart);
+      mockMapper.mapToService.mockReturnValue(anonMappedCart);
+
+      const result = await cartService.getCart();
+
+      expect(mockCartApi.getCartByCriteria).toHaveBeenCalledWith(
+        'us-branch',
+        'session-anon',
+        undefined,
+        'shopping',
+        true,
+      );
+      expect(mockCartApi.getCartByCriteria).not.toHaveBeenCalledWith(
+        expect.anything(),
+        undefined,
+        'ANONYMOUS',
+        expect.anything(),
+        expect.anything(),
+      );
+      expect(mockSessionService.setCart).toHaveBeenCalledWith('anon-cart-1');
+      expect(result).toBe(anonMappedCart);
+    });
+
+    it('should prefer customer cart lookup first for authenticated sessions', async () => {
+      const authSession = {
+        id: 'session-auth',
+        siteCode: 'main',
+        currency: 'EUR',
+        customerId: 'customer-42',
+        cartId: undefined,
+      };
+      const customerRawCart: EmporixCart = {
+        id: 'customer-cart-42',
+        currency: 'EUR',
+        siteCode: 'main',
+      };
+      const customerMappedCart: Cart = {
+        id: 'customer-cart-42',
+        currency: 'EUR',
+        site: 'main',
+        items: [],
+        totalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
+        subTotalPrice: { amount: 0, originalAmount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', grossValue: 0, netValue: 0 },
+      };
+
+      mockSessionService.getCurrent.mockResolvedValue(authSession);
+      mockCartApi.getCartByCriteria.mockResolvedValue(customerRawCart);
+      mockMapper.mapToService.mockReturnValue(customerMappedCart);
+
+      const result = await cartService.getCart();
+
+      expect(mockCartApi.getCartByCriteria).toHaveBeenCalledWith('main', undefined, 'customer-42', 'shopping', true);
+      expect(mockSessionService.setCart).toHaveBeenCalledWith('customer-cart-42');
+      expect(result).toBe(customerMappedCart);
     });
   });
 });

@@ -66,6 +66,7 @@ describe('site middleware - domain and prefix handling', () => {
     availableSites: ['main', 'tenant1', 'tenant2'],
     prefix: 'as-needed',
     cookie: { name: 'NEXT_SITE' },
+    cookieOverridesDefault: true,
     header: 'x-emp-site',
     domains: [
       {
@@ -83,6 +84,8 @@ describe('site middleware - domain and prefix handling', () => {
     expect(routing.defaultSite).toBe('tenant2');
     expect(routing.availableSites).toEqual(['tenant2', 'main']);
     expect(routing.cookie?.name).toBe('NEXT_SITE');
+    expect(routing.cookieOverridesDefault).toBe(true);
+    expect(routing.header).toBe('x-emp-site');
   });
 
   test('falls back to base routing when hostname does not match', () => {
@@ -101,12 +104,12 @@ describe('site middleware - domain and prefix handling', () => {
     expect(result.appPath).toBe('en/products');
   });
 
-  test('ignores site from cookie when no path segment is present (cookieOverridesDefault not set)', () => {
+  test('resolves site from cookie when no path segment is present and cookieOverridesDefault is enabled', () => {
     const headers = new Headers();
     const cookies = createCookies({ NEXT_SITE: 'tenant2' }) as unknown as NextRequest['cookies'];
     const result = resolveSite('/en/products', cookies, headers, baseRouting);
 
-    expect(result.site).toBe('main');
+    expect(result.site).toBe('tenant2');
     expect(result.appPath).toBe('en/products');
   });
 

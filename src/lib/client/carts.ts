@@ -1,4 +1,4 @@
-import { ModifyCartItemResult } from '@/platform/services/cart/CartService';
+import { CartShippingAddress, ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import { Cart } from '@/platform/services/model/cart/cart';
 import { CartErrorCode } from '@/platform/services/model/cart/error-codes';
 
@@ -141,18 +141,19 @@ export async function deleteCart(cartId: string): Promise<void> {
 }
 
 /**
- * Update Shipping Info
+ * Update shipping address on the cart for tax/shipping cost recalculation.
  */
-export async function updateShippingInfo(cartId: string, countryCode?: string, zipCode?: string): Promise<void> {
+export async function updateShippingInfo(
+  cartId: string,
+  shippingAddress: CartShippingAddress,
+  billingAddress?: CartShippingAddress,
+): Promise<void> {
   const response = await fetch(`/api/cart/${cartId}/shipping`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      countryCode,
-      zipCode,
-    }),
+    body: JSON.stringify({ shippingAddress, billingAddress }),
   });
 
   if (!response.ok) {

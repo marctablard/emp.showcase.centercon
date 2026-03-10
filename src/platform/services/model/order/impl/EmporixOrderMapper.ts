@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import { CUSTOMER_ID } from '@/lib/common/customer-identity';
 import { injectable } from '@/platform/core/di/injectable';
 import {
   EmporixOrder,
@@ -93,7 +94,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
           : undefined,
       })),
       customer: {
-        id: 'ANONYMOUS',
+        id: CUSTOMER_ID.SESSION_ANONYMOUS,
         email: serviceModel.customerEmail,
       },
       billingAddress: serviceModel.billingAddress

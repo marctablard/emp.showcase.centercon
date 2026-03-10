@@ -197,7 +197,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
       // build URL from redirectLocation
       const newLocation = new URL(intlLocation);
       // prepend site if necessary
-      if (shouldPrefix(site, routingConfig)) {
+      if (shouldPrefix(site, routing)) {
         newLocation.pathname = `/${site}${newLocation.pathname == '/' ? '' : newLocation.pathname}`;
       }
       return withCookies(intlResponse, NextResponse.redirect(newLocation), req, routing, site);
@@ -229,7 +229,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     }
 
     // handle Site-Redirection
-    if (shouldPrefix(site, routingConfig)) {
+    if (shouldPrefix(site, routing)) {
       if (!req.nextUrl.pathname.startsWith(`/${site}`)) {
         const redirect = new URL(req.nextUrl);
         redirect.pathname = `/${site}${redirect.pathname == '/' ? '' : redirect.pathname}`;
@@ -237,7 +237,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
           intlResponse,
           NextResponse.redirect(redirect, { headers }),
           req,
-          routingConfig,
+          routing,
           site,
           resolvedLocale,
         );
@@ -245,8 +245,8 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     } else {
       if (req.nextUrl.pathname.startsWith(`/${site}`)) {
         const redirect = new URL(req.nextUrl);
-        redirect.pathname = appPath;
-        return withCookies(intlResponse, NextResponse.redirect(redirect), req, routingConfig, site, resolvedLocale);
+        redirect.pathname = appPath ? `/${appPath}` : '/';
+        return withCookies(intlResponse, NextResponse.redirect(redirect), req, routing, site, resolvedLocale);
       }
     }
 
@@ -259,7 +259,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
         intlResponse,
         NextResponse.rewrite(newRewrite, { request: { headers } }),
         req,
-        routingConfig,
+        routing,
         site,
         resolvedLocale,
       );
