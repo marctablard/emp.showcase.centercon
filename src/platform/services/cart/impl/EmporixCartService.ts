@@ -75,7 +75,7 @@ class EmporixCartService implements CartService {
     if (!session) {
       throw new Error('Failed to get session context');
     }
-    const currentSiteCode = session.siteCode || 'main';
+    const currentSiteCode = session.siteCode;
     let cart;
 
     // Try to get cart by cached ID (trusted - cartId is cleared on site change in setSite())
@@ -166,7 +166,7 @@ class EmporixCartService implements CartService {
     }
 
     // Determine the cart's effective site code
-    const cartSiteCode = rawCart.siteCode || session.siteCode || 'main';
+    const cartSiteCode = rawCart.siteCode || session.siteCode;
 
     // GUARD: If cart belongs to a different site, auto-recover by fetching/creating the correct cart.
     // This handles race conditions where the session site changed but the cart ID wasn't updated yet.
@@ -258,7 +258,7 @@ class EmporixCartService implements CartService {
       throw new Error('Cart item not found');
     }
 
-    const cartSiteCode = cart.site || 'main';
+    const cartSiteCode = cart.site;
     const session = await this.sessionService.getCurrent();
 
     // GUARD: Cart-session site alignment check.
@@ -288,11 +288,7 @@ class EmporixCartService implements CartService {
       },
     };
 
-    const { hasSufficientStock, availableQuantity } = await this.checkStock(
-      cart?.site || 'main',
-      cartItem.product.id,
-      quantity,
-    );
+    const { hasSufficientStock, availableQuantity } = await this.checkStock(cart?.site, cartItem.product.id, quantity);
     await this.cartApi.updateCartItemQuantity(cartId, itemId, updateRequest);
 
     // Update Item
