@@ -199,6 +199,7 @@ describe('EmporixSessionContextApi', () => {
     const username = 'forrest.gump@alaba.ma';
     async function setupCustomerToken() {
       try {
+        await apiInvoker.clearTokens();
         // Login with test customer credentials
         const password = 'Test1234';
 

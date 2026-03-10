@@ -413,9 +413,12 @@ describe('EmporixCheckoutApi', () => {
     }, 15000);
 
     afterEach(async () => {
-      // Delete the cart
-      if (customerCartId) {
-        await cartApi.deleteCart(customerCartId);
+      try {
+        if (customerCartId) {
+          await cartApi.deleteCart(customerCartId);
+        }
+      } catch (_error) {
+        // The approval flow can consume/delete the cart during checkout attempts.
       }
     }, 15000);
 
