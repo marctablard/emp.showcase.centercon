@@ -325,6 +325,13 @@ To completely disable push notifications in any environment, you can either:
 
 The Setup API (`NEXT_SETUP_API_*`) provides an endpoint for initial system configuration. **Disable in production** or secure with a strong secret.
 
+### Feature Flags
+
+| Variable | Values | Default | Description |
+|----------|--------|---------|-------------|
+| `NEXT_STARTUP_HEALTHCHECK_ENABLED` | `true` / `false` | `true` | Enable Tier 2 runtime startup healthcheck. When enabled, the server validates configured sites, currencies, and languages against the Emporix API at startup. See [Health Checks — Startup Configuration Validation](health-checks.md#startup-configuration-validation). |
+| `NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS` | `true` / `false` | `false` | Explicitly disable push notifications regardless of VAPID key configuration. |
+
 ## Quick Start Checklist
 
 Minimal configuration for local development:
