@@ -1,15 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/dashboard-badge';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { type OrderPaymentTypeKey, type OrderStatusLowercaseKey, dk } from '@/i18n/dynamic-key';
+import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { Order } from '@/platform/services/model/order/order';
+import { Order, OrderStatus } from '@/platform/services/model/order/order';
+import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
+import { CreateReturnDialog } from './create-return-dialog';
+
+function isReturnEnabled(status: OrderStatus): boolean {
+  return status === ORDER_STATUS.COMPLETED;
+}
 
 export interface MyOrdersTableProps {
   orders: Order[];
@@ -39,26 +47,30 @@ export function MyOrdersTable({
   const t = useTranslations('orders');
   const router = useRouter();
 
-  // Format date in the current locale
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const handleReturnClick = (order: Order): void => {
+    setSelectedOrder(order);
+    setDialogOpen(true);
+  };
+
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return '-';
     return format(new Date(dateString), 'dd.MM.yyyy');
   };
 
-  // Format address
   const formatAddress = (address: any) => {
     if (!address) return '-';
     return `${address.city}, ${address.country}`;
   };
 
-  // Format payment method
   const formatPayment = (payments: any[] | undefined) => {
     if (!payments || payments.length === 0) return '-';
     // Use the translation for the payment method if available
-    return t(`paymentTypes.${payments[0].method.toLowerCase()}`) || payments[0].method;
+    return t(dk<OrderPaymentTypeKey>(`paymentTypes.${payments[0].method.toLowerCase()}`)) || payments[0].method;
   };
 
-  // Get visible orders for current page
   const visibleOrders = orders
     .slice()
     .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
@@ -76,19 +88,20 @@ export function MyOrdersTable({
             <TableHead className="w-[100px] font-bold">{t('columns.deliveryDate')}</TableHead>
             <TableHead className="w-[150px] font-bold">{t('columns.deliveryAddress')}</TableHead>
             <TableHead className="w-[120px] font-bold">{t('columns.payment')}</TableHead>
+            <TableHead className="w-[80px] font-bold text-center">{t('columns.action')}</TableHead>
             <TableHead className="w-[100px] font-bold text-right">{t('columns.orderValue')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
+              <TableCell colSpan={9} className="text-center py-4">
                 {t('loading')}
               </TableCell>
             </TableRow>
           ) : visibleOrders.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
+              <TableCell colSpan={9} className="text-center py-4">
                 {t('noOrders')}
               </TableCell>
             </TableRow>
@@ -109,7 +122,7 @@ export function MyOrdersTable({
                 </TableCell>
                 <TableCell className="px-2 py-4">
                   <Badge variant={getStatusBadge(order.status).variant}>
-                    {t(`status.${order.status.toLowerCase()}`)}
+                    {t(dk<OrderStatusLowercaseKey>(`status.${order.status.toLowerCase()}`))}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-2 py-4">
@@ -122,6 +135,23 @@ export function MyOrdersTable({
                 </TableCell>
                 <TableCell className="px-2 py-4">{formatAddress(order.shippingAddress)}</TableCell>
                 <TableCell className="px-2 py-4">{formatPayment(order.payments)}</TableCell>
+                <TableCell className="px-2 py-4 text-center">
+                  {isReturnEnabled(order.status) ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={() => handleReturnClick(order)}
+                        className="font-bold underline text-text-action hover:text-text-action-hover"
+                      >
+                        {t('returnLink')}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-text-disabled text-sm cursor-not-allowed" title={t('returnDisabledTooltip')}>
+                      {t('returnLink')}
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell className="text-right py-4 font-medium">
                   {order.price?.total.gross} {order.currency}
                 </TableCell>
@@ -151,6 +181,8 @@ export function MyOrdersTable({
           </div>
         </div>
       )}
+
+      {selectedOrder && <CreateReturnDialog open={dialogOpen} onOpenChange={setDialogOpen} order={selectedOrder} />}
     </div>
   );
 }

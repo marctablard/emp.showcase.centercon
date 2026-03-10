@@ -44,13 +44,19 @@ const createCookies = (values: Record<string, string>) =>
     get: (name: string) => (values[name] ? { value: values[name] } : undefined),
   }) as unknown as { get: (name: string) => { value: string } | undefined };
 
-const createRequest = (url: string, cookies: Record<string, string> = {}, headers: Record<string, string> = {}) => {
+const createRequest = (
+  url: string,
+  cookies: Record<string, string> = {},
+  headers: Record<string, string> = {},
+  method: string = 'GET',
+) => {
   const nextUrl = new URL(url);
   return {
     url: nextUrl.toString(),
     nextUrl,
     headers: new Headers(headers),
     cookies: createCookies(cookies),
+    method,
   } as unknown as NextRequest;
 };
 
@@ -60,6 +66,7 @@ describe('site middleware - domain and prefix handling', () => {
     availableSites: ['main', 'tenant1', 'tenant2'],
     prefix: 'as-needed',
     cookie: { name: 'NEXT_SITE' },
+    cookieOverridesDefault: true,
     header: 'x-emp-site',
     domains: [
       {
@@ -77,6 +84,8 @@ describe('site middleware - domain and prefix handling', () => {
     expect(routing.defaultSite).toBe('tenant2');
     expect(routing.availableSites).toEqual(['tenant2', 'main']);
     expect(routing.cookie?.name).toBe('NEXT_SITE');
+    expect(routing.cookieOverridesDefault).toBe(true);
+    expect(routing.header).toBe('x-emp-site');
   });
 
   test('falls back to base routing when hostname does not match', () => {
@@ -95,12 +104,12 @@ describe('site middleware - domain and prefix handling', () => {
     expect(result.appPath).toBe('en/products');
   });
 
-  test('ignores site from cookie when no path segment is present (cookieOverridesDefault not set)', () => {
+  test('resolves site from cookie when no path segment is present and cookieOverridesDefault is enabled', () => {
     const headers = new Headers();
     const cookies = createCookies({ NEXT_SITE: 'tenant2' }) as unknown as NextRequest['cookies'];
     const result = resolveSite('/en/products', cookies, headers, baseRouting);
 
-    expect(result.site).toBe('main');
+    expect(result.site).toBe('tenant2');
     expect(result.appPath).toBe('en/products');
   });
 
@@ -192,7 +201,11 @@ describe('createSiteMiddleware redirect/rewrite behavior', () => {
 
   test('redirects to include site when prefix is required', () => {
     const middleware = createSiteMiddleware(routingConfig);
-    const req = createRequest('https://example.com/en/products', { NEXT_SITE: 'tenant1' });
+    const req = createRequest(
+      'https://example.com/en/products',
+      { NEXT_SITE: 'tenant1' },
+      { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    );
     const response = middleware(req);
 
     expect(response?.headers.get('location')).toBe('https://example.com/tenant1/en/products');
@@ -200,7 +213,11 @@ describe('createSiteMiddleware redirect/rewrite behavior', () => {
 
   test('redirects to remove site when prefix is not needed', () => {
     const middleware = createSiteMiddleware(routingConfig);
-    const req = createRequest('https://example.com/main/en/products', { NEXT_SITE: 'main' });
+    const req = createRequest(
+      'https://example.com/main/en/products',
+      { NEXT_SITE: 'main' },
+      { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    );
     const response = middleware(req);
 
     expect(response?.headers.get('location')).toBe('https://example.com/en/products');
@@ -208,7 +225,11 @@ describe('createSiteMiddleware redirect/rewrite behavior', () => {
 
   test('rewrites to include default site when prefix is not needed', () => {
     const middleware = createSiteMiddleware(routingConfig);
-    const req = createRequest('https://example.com/en/products', { NEXT_SITE: 'main' });
+    const req = createRequest(
+      'https://example.com/en/products',
+      { NEXT_SITE: 'main' },
+      { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    );
     const response = middleware(req);
 
     expect(response?.headers.get('x-middleware-rewrite')).toBe('https://example.com/main/en/products');
@@ -216,9 +237,92 @@ describe('createSiteMiddleware redirect/rewrite behavior', () => {
 
   test('prepends site to intl redirect when prefix is required', () => {
     const middleware = createSiteMiddleware(routingConfig);
-    const req = createRequest('https://example.com/en', { NEXT_SITE: 'tenant1' }, { 'x-intl-mode': 'redirect' });
+    const req = createRequest(
+      'https://example.com/en',
+      { NEXT_SITE: 'tenant1' },
+      { 'x-intl-mode': 'redirect', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    );
     const response = middleware(req);
 
     expect(response?.headers.get('location')).toBe('https://example.com/tenant1/en');
+  });
+});
+
+describe('createSiteMiddleware probe detection behavior', () => {
+  const routingConfig: SiteRoutingConfig = {
+    defaultSite: 'main',
+    availableSites: ['main', 'tenant1'],
+    prefix: 'as-needed',
+    cookie: { name: 'NEXT_SITE' },
+    cookieOverridesDefault: true,
+  };
+
+  test('intercepts empty user-agent requests to main routes', () => {
+    const middleware = createSiteMiddleware(routingConfig);
+    const req = createRequest('https://example.com/', {}, { 'User-Agent': '' });
+    const response = middleware(req);
+
+    expect(response?.status).toBe(200);
+    expect(response?.headers.get('x-misrouted-healthcheck')).toBe('1');
+    expect(response?.headers.get('x-recommended-endpoint')).toBe('/api/health');
+    expect(response?.headers.get('x-alternative-endpoint')).toBe('/api/ready');
+  });
+
+  test('intercepts known probe user-agent requests to site routes', () => {
+    const middleware = createSiteMiddleware(routingConfig);
+    const req = createRequest('https://example.com/tenant1/en', {}, { 'User-Agent': 'kube-probe/1.0' });
+    const response = middleware(req);
+
+    expect(response?.status).toBe(200);
+    expect(response?.headers.get('x-misrouted-healthcheck')).toBe('1');
+    expect(response?.headers.get('content-type')).toBe('text/plain; charset=utf-8');
+  });
+
+  test('intercepts HEAD requests to main routes', () => {
+    const middleware = createSiteMiddleware(routingConfig);
+    const req = createRequest('https://example.com/', {}, { 'User-Agent': 'curl/7.68.0' }, 'HEAD');
+    const response = middleware(req);
+
+    expect(response?.status).toBe(200);
+    expect(response?.headers.get('x-misrouted-healthcheck')).toBe('1');
+  });
+
+  test('allows normal browser requests to proceed normally', () => {
+    const middleware = createSiteMiddleware(routingConfig);
+    const req = createRequest(
+      'https://example.com/tenant1/en',
+      {},
+      {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Sec-Fetch-Dest': 'document',
+      },
+    );
+    const response = middleware(req);
+
+    // Should not be intercepted by probe detection
+    expect(response?.headers.get('x-misrouted-healthcheck')).toBeNull();
+    // Should proceed to normal middleware processing
+    expect(response).toBeDefined();
+  });
+
+  test('does not intercept requests to API routes', () => {
+    const middleware = createSiteMiddleware(routingConfig);
+    const req = createRequest('https://example.com/api/health/status', {}, { 'User-Agent': '' });
+    const response = middleware(req);
+
+    // API routes should not be intercepted by probe detection
+    expect(response?.headers.get('x-misrouted-healthcheck')).toBeNull();
+    // Should proceed to normal middleware processing (with site prefix)
+    expect(response?.headers.get('x-middleware-rewrite')).toBe('https://example.com/main/api/health/status');
+  });
+
+  test('does not intercept requests to non-main routes', () => {
+    const middleware = createSiteMiddleware(routingConfig);
+    const req = createRequest('https://example.com/some/other/path', {}, { 'User-Agent': '' });
+    const response = middleware(req);
+
+    expect(response?.headers.get('x-misrouted-healthcheck')).toBeNull();
   });
 });

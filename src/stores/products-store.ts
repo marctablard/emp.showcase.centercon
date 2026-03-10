@@ -8,7 +8,7 @@ export { useProductStore } from '@/providers/StoreProvider';
 export type ProductState = {
   currentProductId: string | null;
   products: {
-    [id: string]: Product;
+    [id: string]: Product | null;
   };
 };
 
@@ -17,7 +17,7 @@ export type ProductActions = {
   getProducts: (ids: string[]) => Product[];
   getCurrentProduct: () => Product | null;
   setCurrentProduct: (product: Product | null) => void;
-  addProduct: (product: Product) => void;
+  addProduct: (product: Product | string) => void;
   addProducts: (products: Product[]) => void;
 };
 
@@ -41,13 +41,20 @@ export const createProductStore = (initState: ProductState = defaultState) => {
         }
         return { currentProductId: null };
       }),
-    addProduct: (product: Product) =>
+    addProduct: (product: Product | string) =>
       set((state) => {
         if (product) {
-          state.products = {
-            ...state.products,
-            [product.id]: product,
-          };
+          if (typeof product === 'string') {
+            state.products = {
+              ...state.products,
+              [product]: null,
+            };
+          } else {
+            state.products = {
+              ...state.products,
+              [product.id]: product,
+            };
+          }
         }
         return state;
       }),
@@ -55,7 +62,9 @@ export const createProductStore = (initState: ProductState = defaultState) => {
       set((state) => {
         const newProducts = { ...state.products };
         products.forEach((product) => {
-          if (product) {
+          if (typeof product === 'string') {
+            newProducts[product] = null;
+          } else {
             newProducts[product.id] = product;
           }
         });

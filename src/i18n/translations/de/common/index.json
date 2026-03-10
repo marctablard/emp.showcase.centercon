@@ -12,7 +12,8 @@
         "label": "Währungen"
     },
     "Regions": {
-        "label": "Site"
+        "label": "Site",
+        "switchFailed": "Der Standortwechsel ist fehlgeschlagen. Bitte versuche es erneut."
     },
     "Companies": {
         "label": "Unternehmen",

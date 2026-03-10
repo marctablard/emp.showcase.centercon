@@ -115,6 +115,9 @@ class EmporixSiteService implements SiteService {
     return {
       code: emporixSite.code,
       name: emporixSite.name || emporixSite.code,
+      // TODO Emporix should supply a separate field for the commercial default country,
+      // currently it is in the address
+      defaultCountry: address.country,
       defaultLanguage: emporixSite.defaultLanguage || 'en',
       defaultCurrency: currencies.find((c) => c.id === emporixSite.currency) || currencies[0],
       countries: countries,

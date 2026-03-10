@@ -1,8 +1,10 @@
 import { Container, inject } from 'inversify';
 import { StoredToken } from '@/platform/integrations/types/auth';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { EmporixTokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTokenManagerAbstract, TokenStore } from '../../common/impl/EmporixTokenManagerAbstract';
+import type { EmporixTokenType } from '../../common/token-types';
 import { EmporixConfig } from '../../config';
 import { EmporixCustomEntity, EmporixPatchOperation } from '../../model/schema';
 import EmporixOAuthApi from '../../oauth/impl/EmporixOAuthApi';
@@ -28,16 +30,11 @@ class TestTokenManager extends EmporixTokenManagerAbstract {
   protected writeTokens(tokens: TokenStore): Promise<void> {
     throw new Error('Method not implemented.');
   }
-  private tokenStore: Map<string, StoredToken<any>> = new Map();
-  protected async readToken<T extends StoredToken<K>, K>(
-    type: 'anonymous' | 'customer' | 'service',
-  ): Promise<T | undefined> {
+  private tokenStore: Map<EmporixTokenType, StoredToken<any>> = new Map();
+  protected async readToken<T extends StoredToken<K>, K>(type: EmporixTokenType): Promise<T | undefined> {
     return this.tokenStore.get(type) as T | undefined;
   }
-  protected writeToken<T extends StoredToken<K>, K>(
-    type: 'anonymous' | 'customer' | 'service',
-    token: T | undefined,
-  ): Promise<void> {
+  protected writeToken<T extends StoredToken<K>, K>(type: EmporixTokenType, token: T | undefined): Promise<void> {
     if (token) {
       this.tokenStore.set(type, token);
     } else {
@@ -50,32 +47,19 @@ class TestTokenManager extends EmporixTokenManagerAbstract {
   }
 }
 
-// Sample custom instance creation request
+// Sample custom instance creation request (no mixins to avoid schema dependency)
 const sampleCustomInstanceCreation: EmporixCustomEntity = {
   id: 'test-instance-1',
   name: { en: 'Test Instance 1' },
   type: 'test-entity-type',
-  mixins: {
-    entity: {
-      name: 'Test Entity',
-      description: 'A test entity for unit testing',
-      active: true,
-      price: 99.99,
-    },
-  },
 };
 
 // Sample patch operations
 const samplePatchOperations: EmporixPatchOperation[] = [
   {
     op: 'replace',
-    path: '/mixins/entity/price',
-    value: 129.99,
-  },
-  {
-    op: 'replace',
-    path: '/mixins/entity/description',
-    value: 'Updated test entity description',
+    path: '/name/en',
+    value: 'Patched Test Instance',
   },
 ];
 
@@ -94,6 +78,14 @@ describe('EmporixSchemaApi', () => {
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
     container.bind<EmporixTokenManager>('EmporixTokenManager').to(TestTokenManager);
     container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
+    container.bind<LoggerService>('LoggerService').toConstantValue({
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    });
     container.bind<EmporixSchemaApi>('EmporixSchemaApi').to(EmporixSchemaApi);
 
     // Get instances from the container
@@ -105,9 +97,9 @@ describe('EmporixSchemaApi', () => {
     // Clean up any tokens
     await apiInvoker.clearTokens();
   });
-  // TODO: Enable tests when Test Data is in place
+  // eslint-disable-next-line jest/no-disabled-tests -- TEST_ENTITY type does not exist on 'showcasetest'. Create the custom entity type in the tenant schema to enable these tests.
   describe.skip('Schema Operations', () => {
-    describe.skip('Custom Instance Operations', () => {
+    describe('Custom Instance Operations', () => {
       it('should create a custom instance', async () => {
         // Create a custom instance
         createdCustomInstanceId = await schemaApi.createCustomEntity('TEST_ENTITY', sampleCustomInstanceCreation);
@@ -118,7 +110,7 @@ describe('EmporixSchemaApi', () => {
         expect(createdCustomInstanceId).toBe(sampleCustomInstanceCreation.id);
       }, 10000);
 
-      let customInstance: EmporixCustomEntity | undefined;
+      let customInstance: EmporixCustomEntity | null | undefined;
       it('should get a custom instance by ID', async () => {
         // Get the custom instance we just created
         customInstance = await schemaApi.getCustomEntity('TEST_ENTITY', createdCustomInstanceId);
@@ -128,7 +120,6 @@ describe('EmporixSchemaApi', () => {
         expect(customInstance?.id).toBe(createdCustomInstanceId);
         expect(customInstance?.name).toEqual(sampleCustomInstanceCreation.name);
         expect(customInstance?.type).toBe('TEST_ENTITY');
-        expect(customInstance?.mixins?.entity).toBeDefined();
       }, 10000);
 
       it('should get all custom instances for a type', async () => {
@@ -151,7 +142,6 @@ describe('EmporixSchemaApi', () => {
         await schemaApi.updateCustomEntity('TEST_ENTITY', createdCustomInstanceId, {
           name: updatedName,
           type: 'TEST_ENTITY',
-          mixins: sampleCustomInstanceCreation.mixins,
         });
 
         // Get the updated custom instance
@@ -171,8 +161,7 @@ describe('EmporixSchemaApi', () => {
 
         // Verify the patch was applied
         expect(patchedInstance).toBeDefined();
-        expect(patchedInstance?.mixins?.entity.price).toBe(129.99);
-        expect(patchedInstance?.mixins?.entity.description).toBe('Updated test entity description');
+        expect(patchedInstance?.name?.en).toBe('Patched Test Instance');
       }, 10000);
 
       it('should search custom instances', async () => {
@@ -192,23 +181,11 @@ describe('EmporixSchemaApi', () => {
             id: 'bulk-test-1',
             type: 'TEST_ENTITY',
             name: { en: 'Bulk Test 1' },
-            mixins: {
-              entity: {
-                name: 'Bulk Entity 1',
-                active: true,
-              },
-            },
           },
           {
             id: 'bulk-test-2',
             type: 'TEST_ENTITY',
             name: { en: 'Bulk Test 2' },
-            mixins: {
-              entity: {
-                name: 'Bulk Entity 2',
-                active: false,
-              },
-            },
           },
         ];
 
@@ -228,23 +205,11 @@ describe('EmporixSchemaApi', () => {
             id: 'bulk-test-1',
             type: 'TEST_ENTITY',
             name: { en: 'Updated Bulk Test 1' },
-            mixins: {
-              entity: {
-                name: 'Updated Bulk Entity 1',
-                active: false,
-              },
-            },
           },
           {
             id: 'bulk-test-2',
             type: 'TEST_ENTITY',
             name: { en: 'Updated Bulk Test 2' },
-            mixins: {
-              entity: {
-                name: 'Updated Bulk Entity 2',
-                active: true,
-              },
-            },
           },
         ];
 

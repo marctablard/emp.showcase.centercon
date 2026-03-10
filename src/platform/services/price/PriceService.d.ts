@@ -1,5 +1,12 @@
 import type { ProductPrice } from '../model/price/price';
 
+export interface PriceFetchOptions {
+  // if supplied, this is mandatory, because the other attributes can be infered from this
+  siteCode: string;
+  currency?: string;
+  country?: string;
+}
+
 /**
  * Interface for price service.
  * Defines methods for price operations.
@@ -17,6 +24,6 @@ export interface PriceService {
     productId: string,
     quantity?: number,
     unitCode?: string,
-    params?: { currency?: string; country?: string; siteCode?: string },
+    params?: PriceFetchOptions,
   ): Promise<ProductPrice | null>;
 }

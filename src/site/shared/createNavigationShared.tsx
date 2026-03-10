@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { createNavigation } from 'next-intl/navigation';
 import { permanentRedirect as nextPermanentRedirect, redirect as nextRedirect } from 'next/navigation';
 import { SiteRoutingConfig } from '@/site/types';
@@ -45,9 +46,11 @@ export function createSiteNavigationShared(siteRouting: SiteRoutingConfig, intlR
     site?: string;
   }
 
-  function Link(props: LinkProps) {
-    return <SiteLink {...props} I18nLink={I18nLink} getSite={getSite} siteRouting={siteRouting} />;
-  }
+  const Link = forwardRef<any, LinkProps>((props, ref) => (
+    <SiteLink {...props} ref={ref} I18nLink={I18nLink} getSite={getSite} siteRouting={siteRouting} />
+  ));
+
+  Link.displayName = 'Link';
 
   return {
     config,

@@ -23,6 +23,27 @@ export function useSession() {
   const session = sessionStore.session;
   const loading = sessionStore.loading;
 
+  const runSessionMutation = useCallback(
+    async (mutation: () => Promise<boolean>): Promise<boolean> => {
+      if (!sessionStore.tryAcquireMutationLock()) {
+        return false;
+      }
+      sessionStore.setLoading(true);
+      try {
+        const success = await mutation();
+        if (success) {
+          const updatedSession = await fetchCurrentSession();
+          sessionStore.setSession(updatedSession);
+        }
+        return success;
+      } finally {
+        sessionStore.setLoading(false);
+        sessionStore.releaseMutationLock();
+      }
+    },
+    [sessionStore],
+  );
+
   const fetchSession = useCallback(async () => {
     sessionStore.setLoading(true);
     const sessionData = await fetchCurrentSession();
@@ -41,70 +62,35 @@ export function useSession() {
    * Update the session language
    */
   const setLanguage = async (language: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionLanguage(language);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
-    }
-    sessionStore.setLoading(false);
-    return success;
+    return runSessionMutation(() => updateSessionLanguage(language));
   };
 
   /**
    * Update the session currency
    */
   const setCurrency = async (currency: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionCurrency(currency);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
-    }
-    sessionStore.setLoading(false);
-    return success;
+    return runSessionMutation(() => updateSessionCurrency(currency));
   };
 
   /**
    * Update the session country
    */
   const setCountry = async (country: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionCountry(country);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
-    }
-    sessionStore.setLoading(false);
-    return success;
+    return runSessionMutation(() => updateSessionCountry(country));
   };
 
   /**
    * Update the session site
    */
   const setSite = async (site: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionSite(site);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
-    }
-    sessionStore.setLoading(false);
-    return success;
+    return runSessionMutation(() => updateSessionSite(site));
   };
 
   /**
    * Update the session region
    */
   const setRegion = async (region: string): Promise<boolean> => {
-    sessionStore.setLoading(true);
-    const success = await updateSessionRegion(region);
-    if (success) {
-      const updatedSession = await fetchCurrentSession();
-      sessionStore.setSession(updatedSession);
-    }
-    sessionStore.setLoading(false);
-    return success;
+    return runSessionMutation(() => updateSessionRegion(region));
   };
 
   /**

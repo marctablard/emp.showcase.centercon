@@ -13,6 +13,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useAvailableVariantValues } from '@/hooks/useAvailableVariantValues';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
+import { type ProductTemplateAttributeKey, dk } from '@/i18n/dynamic-key';
 import { Link } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency, imageSizes } from '@/lib/utils';
@@ -24,7 +25,7 @@ interface ProductTileProps {
   locale?: string;
 }
 
-export function ProductTile({ product, locale = 'de' }: ProductTileProps) {
+export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
   const t = useTranslations('product');
   const { l10n } = useL10n(locale);
   const { addItem, loading: cartLoading } = useCart();
@@ -166,7 +167,7 @@ export function ProductTile({ product, locale = 'de' }: ProductTileProps) {
                   Object.entries(product.templateAttributes).map(([key, value]) => (
                     <div key={key} className="flex justify-between">
                       <p className="text-sm">
-                        {t(`filters.mixins.productTemplateAttributes.${key}`, {
+                        {t(dk<ProductTemplateAttributeKey>(`filters.mixins.productTemplateAttributes.${key}`), {
                           defaultValue: key,
                         })}
                       </p>
