@@ -32,6 +32,7 @@ import ProductAddToCartBar from './product-add-to-cart-bar';
 import { ProductPriceComponent, ProductPriceSkeleton } from './product-price';
 import { ProductShippingInfo } from './product-shipping-info';
 import ProductVariantSelector from './product-variant-selector';
+import { RelatedMaterials } from './related-materials';
 
 export interface ProductDetailProps {
   product?: Product | string;
@@ -347,6 +348,8 @@ export default function ProductDetail({ product: initialProduct, options, classN
           </div>
         </div>
       ) : null}
+
+      <RelatedMaterials relatedItems={product.relatedItems} locale={locale} className={cn(className)} />
 
       <Recommendations
         productId={product.id}
