@@ -3,6 +3,7 @@
 import React from 'react';
 import { storyblokEditable } from '@storyblok/react/rsc';
 import Button from '../button';
+import CategoryGrid from '../category-grid';
 import ColumnTeaser from '../column-teaser';
 import Hero from '../hero';
 import QuickEntry from '../quick-entry';
@@ -42,6 +43,10 @@ export const StoryblokColumnTeaser = ({ blok }: any) => {
 
 export const StoryblokRecommendations = ({ blok }: any) => {
   return <StoryblokComponent blok={blok} child={<Recommendations {...blok} />} />;
+};
+
+export const StoryblokCategoryGrid = ({ blok }: any) => {
+  return <StoryblokComponent blok={blok} child={<CategoryGrid {...blok} />} />;
 };
 
 export default StoryblokComponent;

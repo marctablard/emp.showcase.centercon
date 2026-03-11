@@ -9,6 +9,7 @@ const Hero = dynamic(() => import('./hero'));
 const QuickEntry = dynamic(() => import('./quick-entry'));
 const ColumnTeaser = dynamic(() => import('./column-teaser'));
 const Recommendations = dynamic(() => import('./recommendations'));
+const CategoryGrid = dynamic(() => import('./category-grid'));
 
 // Map of component types to their React components
 const componentMap: Record<string, React.ComponentType<any>> = {
@@ -16,6 +17,7 @@ const componentMap: Record<string, React.ComponentType<any>> = {
   'quick-entry': QuickEntry,
   'column-teaser': ColumnTeaser,
   recommendations: Recommendations,
+  'category-grid': CategoryGrid,
 };
 
 interface CMSComponentRendererProps {

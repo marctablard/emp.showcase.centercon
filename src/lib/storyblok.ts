@@ -1,6 +1,7 @@
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import Article from '@/components/cms/article';
 import Category from '@/components/cms/category';
+import CategoryGrid from '@/components/cms/category-grid';
 import Columns from '@/components/cms/columns';
 import ContentBlock from '@/components/cms/content-block';
 import Feature from '@/components/cms/feature';
@@ -12,6 +13,7 @@ import Page from '@/components/cms/page';
 import Segment from '@/components/cms/segment';
 import {
   StoryblokButton,
+  StoryblokCategoryGrid,
   StoryblokColumnTeaser,
   StoryblokHero,
   StoryblokQuickEntry,
@@ -48,6 +50,7 @@ export const getStoryblokApi = storyblokInit({
     navigation: Navigation,
     content_block: ContentBlock,
     category: Category,
+    category_grid: StoryblokCategoryGrid,
     segment: Segment,
     article: Article,
     button: StoryblokButton,
