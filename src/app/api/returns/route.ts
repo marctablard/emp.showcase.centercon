@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { normalizeReasonCode, normalizeReasonDetails } from '@/lib/common/returns/reason-normalization';
 import { computeOrderReturnability } from '@/lib/common/returns/returnability';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
@@ -6,6 +7,15 @@ import type { OrderService } from '@/platform/services/order/OrderService';
 import { ReturnService } from '@/platform/services/return/ReturnService';
 
 export const revalidate = 0;
+
+const RETURN_REASON_CODES = new Set([
+  'DEFECTIVE',
+  'WRONG_ITEM',
+  'NOT_AS_DESCRIBED',
+  'CHANGED_MIND',
+  'SIZE_FIT',
+  'OTHER',
+]);
 
 /**
  * GET /api/returns
@@ -45,7 +55,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderId, items, reasonCode } = body;
+    const { orderId, items, reasonCode, reasonDetails } = body;
+    const normalizedReasonCode = normalizeReasonCode(reasonCode);
+    const normalizedReasonDetails = normalizeReasonDetails(reasonDetails);
 
     if (!orderId || typeof orderId !== 'string') {
       return NextResponse.json({ error: 'orderId is required and must be a string' }, { status: 400 });
@@ -55,16 +67,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'items array is required and cannot be empty' }, { status: 400 });
     }
 
-    if (!reasonCode || typeof reasonCode !== 'string') {
+    if (!normalizedReasonCode) {
       return NextResponse.json({ error: 'reasonCode is required and must be a string' }, { status: 400 });
+    }
+    if (!RETURN_REASON_CODES.has(normalizedReasonCode)) {
+      return NextResponse.json({ error: 'reasonCode is invalid' }, { status: 400 });
+    }
+    if (reasonDetails !== undefined && typeof reasonDetails !== 'string') {
+      return NextResponse.json({ error: 'reasonDetails must be a string if provided' }, { status: 400 });
     }
 
     for (const item of items) {
       if (!item.id || typeof item.id !== 'string') {
         return NextResponse.json({ error: 'Each item must have a valid id' }, { status: 400 });
       }
-      if (typeof item.quantity !== 'number' || item.quantity <= 0) {
-        return NextResponse.json({ error: 'Each item must have a positive quantity' }, { status: 400 });
+      if (typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity <= 0) {
+        return NextResponse.json({ error: 'Each item must have a positive integer quantity' }, { status: 400 });
+      }
+      if (item.reasonCode !== undefined && typeof item.reasonCode !== 'string') {
+        return NextResponse.json({ error: 'item.reasonCode must be a string if provided' }, { status: 400 });
+      }
+      const normalizedItemReasonCode = normalizeReasonCode(item.reasonCode);
+      if (normalizedItemReasonCode && !RETURN_REASON_CODES.has(normalizedItemReasonCode)) {
+        return NextResponse.json({ error: `item.reasonCode is invalid for item ${item.id}` }, { status: 400 });
+      }
+      if (item.reasonDetails !== undefined && typeof item.reasonDetails !== 'string') {
+        return NextResponse.json({ error: 'item.reasonDetails must be a string if provided' }, { status: 400 });
       }
     }
 
@@ -84,7 +112,10 @@ export async function POST(request: NextRequest) {
 
         for (const item of items) {
           const remaining = remainingMap.get(item.id);
-          if (remaining !== undefined && item.quantity > remaining) {
+          if (remaining === undefined) {
+            return NextResponse.json({ error: `Item ${item.id} does not belong to order ${orderId}` }, { status: 422 });
+          }
+          if (item.quantity > remaining) {
             const logger = server.get<LoggerService>('LoggerService');
             logger.warn(
               { orderId, itemId: item.id, requested: item.quantity, remaining },
@@ -101,13 +132,35 @@ export async function POST(request: NextRequest) {
       }
     } catch (validationError) {
       const logger = server.get<LoggerService>('LoggerService');
-      logger.warn(
+      logger.error(
         { error: validationError instanceof Error ? validationError.message : String(validationError), orderId },
-        'Returnability validation skipped due to error',
+        'Returnability validation failed',
       );
+      return NextResponse.json({ error: 'Failed to validate return request' }, { status: 503 });
     }
 
-    const returnId = await returnService.createReturn(orderId, items, reasonCode);
+    const normalizedItems = items.map((item) => {
+      const normalizedItemReasonCode = normalizeReasonCode(item.reasonCode);
+      const normalizedItemReasonDetails = normalizeReasonDetails(item.reasonDetails);
+
+      return {
+        id: item.id,
+        quantity: item.quantity,
+        reason: normalizedItemReasonCode
+          ? {
+              code: normalizedItemReasonCode,
+              details: normalizedItemReasonDetails,
+            }
+          : undefined,
+      };
+    });
+
+    const returnId = await returnService.createReturn(
+      orderId,
+      normalizedItems,
+      normalizedReasonCode,
+      normalizedReasonDetails,
+    );
 
     return NextResponse.json({ id: returnId }, { status: 201 });
   } catch (error) {

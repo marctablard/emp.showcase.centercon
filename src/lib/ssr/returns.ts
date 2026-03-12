@@ -24,7 +24,19 @@ async function enrichReturnWithOrderData(returnData: Return): Promise<Return> {
     const orderService = ssr.get<OrderService>('OrderService');
     const orders = await Promise.all(orderIds.map((id) => orderService.getCustomerOrderById(id)));
 
-    const orderItemMap = new Map<string, { productId: string; images?: string[]; sku?: string }>();
+    const orderItemMap = new Map<
+      string,
+      {
+        productId: string;
+        images?: string[];
+        sku?: string;
+        netUnitValue?: number;
+        originalNetUnitValue?: number;
+        grossValue?: number;
+        currency?: string;
+        vendorName?: string;
+      }
+    >();
     for (const order of orders) {
       if (!order) continue;
       for (const item of order.items) {
@@ -32,6 +44,11 @@ async function enrichReturnWithOrderData(returnData: Return): Promise<Return> {
           productId: item.productId,
           images: item.images,
           sku: item.sku,
+          netUnitValue: item.price?.netValue ?? item.price?.value,
+          originalNetUnitValue: item.price?.originalValue,
+          grossValue: item.price?.grossValue,
+          currency: item.price?.currency,
+          vendorName: item.vendorName,
         });
       }
     }
@@ -46,6 +63,31 @@ async function enrichReturnWithOrderData(returnData: Return): Promise<Return> {
           productId: item.productId ?? orderItem.productId,
           images: item.images ?? orderItem.images,
           itemNumber: item.itemNumber ?? orderItem.sku,
+          brand: item.brand ?? orderItem.vendorName,
+          vendorName: orderItem.vendorName,
+          calculatedUnitPrice:
+            item.calculatedUnitPrice && !item.calculatedUnitPrice.currency && orderItem.currency
+              ? { ...item.calculatedUnitPrice, currency: orderItem.currency }
+              : item.calculatedUnitPrice,
+          calculatedPrice:
+            item.calculatedPrice && !item.calculatedPrice.finalPrice.currency && orderItem.currency
+              ? {
+                  ...item.calculatedPrice,
+                  finalPrice: { ...item.calculatedPrice.finalPrice, currency: orderItem.currency },
+                }
+              : item.calculatedPrice,
+          grossUnitPrice:
+            item.grossUnitPrice ??
+            (orderItem.grossValue !== undefined && orderItem.currency
+              ? { value: orderItem.grossValue, currency: orderItem.currency }
+              : undefined),
+          netPrice:
+            item.netPrice ??
+            (orderItem.netUnitValue !== undefined && orderItem.currency
+              ? { value: orderItem.netUnitValue, currency: orderItem.currency }
+              : orderItem.originalNetUnitValue !== undefined && orderItem.currency
+                ? { value: orderItem.originalNetUnitValue, currency: orderItem.currency }
+                : undefined),
         };
       }),
     }));

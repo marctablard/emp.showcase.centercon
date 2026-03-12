@@ -25,6 +25,20 @@ export interface ReturnPrice {
   formattedValue?: string;
 }
 
+export interface ReturnCalculatedValue {
+  netValue: number;
+  grossValue: number;
+  taxValue: number;
+  taxCode?: string;
+  taxRate?: number;
+  valid?: boolean;
+  currency?: string;
+}
+
+export interface ReturnCalculatedPrice {
+  finalPrice: ReturnCalculatedValue;
+}
+
 /**
  * Individual item within a return order
  */
@@ -33,11 +47,15 @@ export interface ReturnItem {
   name: string;
   quantity: number;
   unitPrice?: ReturnPrice;
+  grossUnitPrice?: ReturnPrice;
   total?: ReturnPrice;
+  calculatedUnitPrice?: ReturnCalculatedValue;
+  calculatedPrice?: ReturnCalculatedPrice;
   reason?: ReturnReason;
   productId?: string;
   images?: string[];
   brand?: string;
+  vendorName?: string;
   itemNumber?: string;
   netPrice?: ReturnPrice;
 }
@@ -71,6 +89,7 @@ export interface Return {
   expiryDate?: string;
   isExpired: boolean;
   total?: ReturnPrice;
+  calculatedPrice?: ReturnCalculatedPrice;
   reason?: ReturnReason;
   orders: ReturnOrder[];
   requestor?: ReturnRequestor;

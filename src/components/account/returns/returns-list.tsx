@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowRight, ChevronsUpDown } from 'lucide-react';
+import { ArrowDown, ArrowRight, ArrowUp, ChevronsUpDown, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReturns } from '@/hooks/return/useReturns';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
-import { Return, ReturnStatus } from '@/platform/services/model/return';
+import { Return } from '@/platform/services/model/return';
 import { formatReturnCurrency, formatReturnDate, getFirstOrderId, getRequestorEmail } from './helpers';
 import { ReturnStatusBadge } from './return-status-badge';
 
@@ -22,21 +23,30 @@ interface ReturnsListProps {
 
 export function ReturnsList({ initialReturns }: ReturnsListProps) {
   const t = useTranslations('account.returns');
-  const tStatus = useTranslations('account.returns.status');
   const locale = useLocale();
-  const [filterStatus, setFilterStatus] = useState<ReturnStatus | '_ALL_'>('_ALL_');
+  const [quickSearch, setQuickSearch] = useState('');
   const [sortField, setSortField] = useState<ReturnSortField | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const isTabletUp = useBreakpoint('sm');
   const { returns, loading, error, refreshReturns } = useReturns(initialReturns);
 
-  const filteredReturns =
-    filterStatus === '_ALL_'
-      ? returns
-      : returns.filter(
-          (r) => r.status === filterStatus || (filterStatus === ('EXPIRED' as ReturnStatus) && r.isExpired),
-        );
+  const filteredReturns = returns;
 
-  const sortedReturns = [...filteredReturns].sort((a, b) => {
+  const normalizedSearch = quickSearch.trim().toLowerCase();
+  const searchedReturns =
+    normalizedSearch.length === 0
+      ? filteredReturns
+      : filteredReturns.filter((r) => {
+          const orderId = getFirstOrderId(r).toLowerCase();
+          const email = getRequestorEmail(r).toLowerCase();
+          return (
+            r.id.toLowerCase().includes(normalizedSearch) ||
+            orderId.includes(normalizedSearch) ||
+            email.includes(normalizedSearch)
+          );
+        });
+
+  const sortedReturns = [...searchedReturns].sort((a, b) => {
     if (!sortField) return 0;
 
     let comparison = 0;
@@ -63,6 +73,15 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
       setSortDirection('desc');
     }
   };
+
+  const getSortIcon = (field: ReturnSortField) => {
+    if (sortField !== field) return <ChevronsUpDown className="h-4 w-4" />;
+    if (sortDirection === 'asc') return <ArrowUp className="h-4 w-4" />;
+    return <ArrowDown className="h-4 w-4" />;
+  };
+
+  const getSortAriaSort = (field: ReturnSortField): 'none' | 'ascending' | 'descending' =>
+    sortField !== field ? 'none' : sortDirection === 'asc' ? 'ascending' : 'descending';
 
   if (loading) {
     return (
@@ -116,82 +135,138 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-[48px] font-bold leading-[52px] text-text-headings font-primary">{t('title')}</h1>
+      <h1 className="text-[40px] leading-[44px] lg:text-[52px] lg:leading-[56px] font-bold text-text-headings font-primary">
+        {t('title')}
+      </h1>
 
-      <div className="bg-surface-primary border border-border-primary rounded-md p-4">
-        <div className="mb-4 flex flex-wrap gap-4">
-          <div className="min-w-[200px]">
-            <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as ReturnStatus | '_ALL_')}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('filterByStatus')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_ALL_">{t('allStatuses')}</SelectItem>
-                <SelectItem value="PENDING">{tStatus('PENDING')}</SelectItem>
-                <SelectItem value="APPROVED">{tStatus('APPROVED')}</SelectItem>
-                <SelectItem value="REJECTED">{tStatus('REJECTED')}</SelectItem>
-                <SelectItem value="CLOSED">{tStatus('CLOSED')}</SelectItem>
-              </SelectContent>
-            </Select>
+      <div className="bg-surface-primary border border-border-primary rounded-md p-4 min-[768px]:p-6 shadow-sm">
+        <div className="mb-4">
+          <div className="relative w-full min-[768px]:max-w-[380px]">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-on-disabled" />
+            <Input
+              value={quickSearch}
+              onChange={(event) => setQuickSearch(event.target.value)}
+              placeholder={t('searchPlaceholder')}
+              className="pl-9"
+              aria-label={t('searchPlaceholder')}
+            />
           </div>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="font-medium">{t('returnNumber')}</TableHead>
-              <TableHead className="font-medium">
-                <button onClick={() => toggleSort('date')} className="flex items-center gap-1 hover:text-text-action">
-                  {t('returnDate')}
-                  <ChevronsUpDown className="h-4 w-4" />
-                </button>
-              </TableHead>
-              <TableHead className="font-medium">{t('orderNumber')}</TableHead>
-              <TableHead className="font-medium">{t('email')}</TableHead>
-              <TableHead className="font-medium">
-                <button onClick={() => toggleSort('value')} className="flex items-center gap-1 hover:text-text-action">
-                  {t('returnValue')}
-                  <ChevronsUpDown className="h-4 w-4" />
-                </button>
-              </TableHead>
-              <TableHead className="font-medium">
-                <button onClick={() => toggleSort('status')} className="flex items-center gap-1 hover:text-text-action">
-                  {t('statusLabel')}
-                  <ChevronsUpDown className="h-4 w-4" />
-                </button>
-              </TableHead>
-              <TableHead className="font-medium text-right">{t('view')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedReturns.map((returnItem) => (
-              <TableRow key={returnItem.id} className="border-t border-border-primary">
-                <TableCell>
-                  <Link
-                    href={`/account/returns/${returnItem.id}`}
-                    className="text-text-action underline decoration-solid font-bold hover:text-text-action/80"
+        {sortedReturns.length === 0 && (
+          <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
+            {t('noMatches')}
+          </div>
+        )}
+
+        {isTabletUp && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="font-medium">{t('returnNumber')}</TableHead>
+                <TableHead className="font-medium" aria-sort={getSortAriaSort('date')}>
+                  <button onClick={() => toggleSort('date')} className="flex items-center gap-1 hover:text-text-action">
+                    {t('returnDate')}
+                    {getSortIcon('date')}
+                  </button>
+                </TableHead>
+                <TableHead className="font-medium">{t('orderNumber')}</TableHead>
+                <TableHead className="hidden min-[1280px]:table-cell font-medium">{t('email')}</TableHead>
+                <TableHead className="font-medium" aria-sort={getSortAriaSort('value')}>
+                  <button
+                    onClick={() => toggleSort('value')}
+                    className="flex items-center gap-1 hover:text-text-action"
                   >
-                    {returnItem.id}
-                  </Link>
-                </TableCell>
-                <TableCell>{formatReturnDate(returnItem.createdAt, locale)}</TableCell>
-                <TableCell>{getFirstOrderId(returnItem)}</TableCell>
-                <TableCell>{getRequestorEmail(returnItem)}</TableCell>
-                <TableCell>
-                  {formatReturnCurrency(returnItem.total?.value, returnItem.total?.currency, locale)}
-                </TableCell>
-                <TableCell>
-                  <ReturnStatusBadge status={returnItem.status} isExpired={returnItem.isExpired} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link href={`/account/returns/${returnItem.id}`} className="inline-flex items-center justify-end">
-                    <ArrowRight className="h-6 w-6 text-text-headings hover:text-text-action" />
-                  </Link>
-                </TableCell>
+                    {t('returnValue')}
+                    {getSortIcon('value')}
+                  </button>
+                </TableHead>
+                <TableHead className="font-medium" aria-sort={getSortAriaSort('status')}>
+                  <button
+                    onClick={() => toggleSort('status')}
+                    className="flex items-center gap-1 hover:text-text-action"
+                  >
+                    {t('statusLabel')}
+                    {getSortIcon('status')}
+                  </button>
+                </TableHead>
+                <TableHead className="font-medium text-right">{t('view')}</TableHead>
               </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedReturns.map((returnItem) => (
+                <TableRow key={returnItem.id} className="border-t border-border-primary">
+                  <TableCell>
+                    <Link
+                      href={`/account/returns/${returnItem.id}`}
+                      className="text-text-action underline decoration-solid font-bold hover:text-text-action/80"
+                    >
+                      {returnItem.id}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{formatReturnDate(returnItem.createdAt, locale)}</TableCell>
+                  <TableCell>{getFirstOrderId(returnItem)}</TableCell>
+                  <TableCell className="hidden min-[1280px]:table-cell">{getRequestorEmail(returnItem)}</TableCell>
+                  <TableCell>
+                    {formatReturnCurrency(returnItem.total?.value, returnItem.total?.currency, locale)}
+                  </TableCell>
+                  <TableCell>
+                    <ReturnStatusBadge status={returnItem.status} isExpired={returnItem.isExpired} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link href={`/account/returns/${returnItem.id}`} className="inline-flex items-center justify-end">
+                      <ArrowRight className="h-6 w-6 text-text-headings hover:text-text-action" />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+
+        {!isTabletUp && (
+          <div className="space-y-3">
+            {sortedReturns.map((returnItem) => (
+              <Card key={returnItem.id} className="border border-border-primary shadow-none">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/account/returns/${returnItem.id}`}
+                        className="text-text-action underline decoration-solid font-bold hover:text-text-action/80 break-all"
+                      >
+                        {returnItem.id}
+                      </Link>
+                      <div className="text-xs text-text-on-disabled mt-1">
+                        {formatReturnDate(returnItem.createdAt, locale)}
+                      </div>
+                    </div>
+                    <ReturnStatusBadge status={returnItem.status} isExpired={returnItem.isExpired} />
+                  </div>
+                  <div className="text-sm space-y-1">
+                    <div>
+                      <span className="text-text-on-disabled">{t('orderNumber')}: </span>
+                      <span>{getFirstOrderId(returnItem)}</span>
+                    </div>
+                    <div>
+                      <span className="text-text-on-disabled">{t('email')}: </span>
+                      <span className="break-all">{getRequestorEmail(returnItem)}</span>
+                    </div>
+                    <div>
+                      <span className="text-text-on-disabled">{t('returnValue')}: </span>
+                      <span>{formatReturnCurrency(returnItem.total?.value, returnItem.total?.currency, locale)}</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Link href={`/account/returns/${returnItem.id}`} className="inline-flex items-center justify-end">
+                      <ArrowRight className="h-6 w-6 text-text-headings hover:text-text-action" />
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        )}
       </div>
     </div>
   );

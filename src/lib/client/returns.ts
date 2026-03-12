@@ -6,6 +6,8 @@ import type { Return } from '@/platform/services/model/return';
 export interface CreateReturnItem {
   id: string;
   quantity: number;
+  reasonCode?: ReturnReasonCode;
+  reasonDetails?: string;
 }
 
 /**
@@ -39,13 +41,20 @@ export async function createReturn(
   orderId: string,
   items: CreateReturnItem[],
   reasonCode: ReturnReasonCode,
+  reasonDetails?: string,
 ): Promise<CreateReturnResponse> {
+  const normalizedReasonDetails = typeof reasonDetails === 'string' ? reasonDetails.trim() : '';
   const response = await fetch('/api/returns', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ orderId, items, reasonCode }),
+    body: JSON.stringify({
+      orderId,
+      items,
+      reasonCode,
+      reasonDetails: normalizedReasonDetails || undefined,
+    }),
   });
 
   if (!response.ok) {

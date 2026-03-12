@@ -1,5 +1,7 @@
 import { injectable } from '@/platform/core/di/injectable';
 import {
+  EmporixReturnCalculatedPrice,
+  EmporixReturnCalculatedValue,
   EmporixReturnOrder,
   EmporixReturnOrderItem,
   EmporixReturnPrice,
@@ -9,6 +11,8 @@ import {
 } from '@/platform/integrations/emporix/model/return';
 import {
   Return,
+  ReturnCalculatedPrice,
+  ReturnCalculatedValue,
   ReturnItem,
   ReturnOrder,
   ReturnPrice,
@@ -39,6 +43,7 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       expiryDate: source.expiryDate,
       isExpired,
       total: source.total ? this.mapPrice(source.total) : undefined,
+      calculatedPrice: source.calculatedPrice ? this.mapCalculatedPrice(source.calculatedPrice) : undefined,
       reason: source.reason ? this.mapReason(source.reason) : undefined,
       orders: this.mapOrders(source.orders),
       requestor: source.requestor ? this.mapRequestor(source.requestor) : undefined,
@@ -61,6 +66,7 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       received: service.received,
       expiryDate: service.expiryDate,
       total: service.total ? this.mapPriceToSource(service.total) : undefined,
+      calculatedPrice: service.calculatedPrice ? this.mapCalculatedPriceToSource(service.calculatedPrice) : undefined,
       reason: service.reason ? this.mapReasonToSource(service.reason) : undefined,
       orders: this.mapOrdersToSource(service.orders),
       requestor: service.requestor ? this.mapRequestorToSource(service.requestor) : undefined,
@@ -104,6 +110,42 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
     return {
       value: service.value,
       currency: service.currency,
+    };
+  }
+
+  private mapCalculatedValue(source: EmporixReturnCalculatedValue, currency?: string): ReturnCalculatedValue {
+    return {
+      netValue: source.netValue,
+      grossValue: source.grossValue,
+      taxValue: source.taxValue,
+      taxCode: source.taxCode,
+      taxRate: source.taxRate,
+      valid: source.valid,
+      currency: source.currency ?? currency,
+    };
+  }
+
+  private mapCalculatedValueToSource(service: ReturnCalculatedValue): EmporixReturnCalculatedValue {
+    return {
+      netValue: service.netValue,
+      grossValue: service.grossValue,
+      taxValue: service.taxValue,
+      taxCode: service.taxCode,
+      taxRate: service.taxRate,
+      valid: service.valid,
+      currency: service.currency,
+    };
+  }
+
+  private mapCalculatedPrice(source: EmporixReturnCalculatedPrice, currency?: string): ReturnCalculatedPrice {
+    return {
+      finalPrice: this.mapCalculatedValue(source.finalPrice, currency),
+    };
+  }
+
+  private mapCalculatedPriceToSource(service: ReturnCalculatedPrice): EmporixReturnCalculatedPrice {
+    return {
+      finalPrice: this.mapCalculatedValueToSource(service.finalPrice),
     };
   }
 
@@ -177,6 +219,12 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       quantity: source.quantity,
       unitPrice: source.unitPrice ? this.mapPrice(source.unitPrice) : undefined,
       total: source.total ? this.mapPrice(source.total) : undefined,
+      calculatedUnitPrice: source.calculatedUnitPrice
+        ? this.mapCalculatedValue(source.calculatedUnitPrice, source.unitPrice?.currency ?? source.total?.currency)
+        : undefined,
+      calculatedPrice: source.calculatedPrice
+        ? this.mapCalculatedPrice(source.calculatedPrice, source.total?.currency)
+        : undefined,
       reason: source.reason ? this.mapReason(source.reason) : undefined,
     };
   }
@@ -191,6 +239,10 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       quantity: item.quantity,
       unitPrice: item.unitPrice ? this.mapPriceToSource(item.unitPrice) : undefined,
       total: item.total ? this.mapPriceToSource(item.total) : undefined,
+      calculatedUnitPrice: item.calculatedUnitPrice
+        ? this.mapCalculatedValueToSource(item.calculatedUnitPrice)
+        : undefined,
+      calculatedPrice: item.calculatedPrice ? this.mapCalculatedPriceToSource(item.calculatedPrice) : undefined,
       reason: item.reason ? this.mapReasonToSource(item.reason) : undefined,
     }));
   }

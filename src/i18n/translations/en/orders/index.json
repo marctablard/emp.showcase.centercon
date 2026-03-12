@@ -41,13 +41,16 @@
   "columns": {
     "orderNumber": "Order #",
     "status": "Status",
+    "totalShippingCost": "Total Shipping Cost",
     "customer": "Customer",
     "orderDate": "Order Date",
+    "expectedDeliveryDate": "Expected Delivery Date",
     "deliveryDate": "Delivery Date",
     "deliveryAddress": "Delivery Address",
     "payment": "Payment",
     "orderValue": "Order Value",
-    "action": "Actions"
+    "action": "Action",
+    "view": "View"
   },
   "status": {
     "in_checkout": "In Checkout",

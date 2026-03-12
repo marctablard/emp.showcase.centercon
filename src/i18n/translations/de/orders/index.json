@@ -35,13 +35,16 @@
   "columns": {
     "orderNumber": "Bestell-Nr.",
     "status": "Status",
+    "totalShippingCost": "Gesamtversandkosten",
     "customer": "Kunde",
     "orderDate": "Bestelldatum",
+    "expectedDeliveryDate": "Vorauss. Lieferdatum",
     "deliveryDate": "Lieferdatum",
     "deliveryAddress": "Lieferadresse",
     "payment": "Zahlungsart",
     "orderValue": "Bestellwert",
-    "action": "Aktionen"
+    "action": "Aktion",
+    "view": "Ansicht"
   },
   "status": {
     "in_checkout": "Im Warenkorb",

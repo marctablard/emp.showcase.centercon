@@ -5,16 +5,21 @@ import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { AlertCircle, Minus, Plus, ReceiptText, Trash2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { H1, H4 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useReturn } from '@/hooks/return/useReturn';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
 import { Return } from '@/platform/services/model/return';
+import { formatReturnCurrency } from './helpers';
+import { RETURN_REASON_LABEL_KEYS, getReturnReasonLabel, getReturnReasonTranslationKey } from './reason-labels';
 import { ReturnStatusBadge } from './return-status-badge';
 
 const MAX_DESCRIPTION_CHARACTERS = 500;
@@ -24,11 +29,33 @@ interface ExtendedReturnItem {
   name: string;
   quantity: number;
   unitPrice?: { value: number; currency: string };
+  grossUnitPrice?: { value: number; currency: string };
   total?: { value: number; currency: string };
   netPrice?: { value: number; currency: string };
+  calculatedUnitPrice?: {
+    netValue: number;
+    grossValue: number;
+    taxValue: number;
+    taxCode?: string;
+    taxRate?: number;
+    valid?: boolean;
+    currency?: string;
+  };
+  calculatedPrice?: {
+    finalPrice: {
+      netValue: number;
+      grossValue: number;
+      taxValue: number;
+      taxCode?: string;
+      taxRate?: number;
+      valid?: boolean;
+      currency?: string;
+    };
+  };
   reason?: { code?: string; details?: string };
   images?: string[];
   brand?: string;
+  vendorName?: string;
   itemNumber?: string;
   productId?: string;
 }
@@ -40,20 +67,7 @@ interface ExtendedReturn extends Omit<Return, 'orders'> {
   }[];
 }
 
-const claimReasonValues = [
-  'DEFECTIVE',
-  'DAMAGED',
-  'WRONG_ITEM',
-  'NOT_AS_DESCRIBED',
-  'CHANGED_MIND',
-  'WARRANTY',
-  'OTHER',
-] as const;
-
-const formatCurrency = (value: number | undefined, currency: string | undefined, locale: string): string => {
-  if (value === undefined || !currency) return '-';
-  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
-};
+const claimReasonValues = Object.keys(RETURN_REASON_LABEL_KEYS) as (keyof typeof RETURN_REASON_LABEL_KEYS)[];
 
 interface ReturnDetailProps {
   returnId: string;
@@ -76,183 +90,271 @@ interface ReturnItemsListProps {
   items: ExtendedReturnItem[];
   locale: string;
   t: ReturnType<typeof useTranslations<'account.returns'>>;
+  generalReasonCode?: string;
+}
+
+function renderReturnReasonLabel(t: ReturnType<typeof useTranslations<'account.returns'>>, code: string): string {
+  const translationKey = getReturnReasonTranslationKey(code);
+  if (translationKey) {
+    return t(translationKey);
+  }
+
+  return getReturnReasonLabel(code);
 }
 
 function ReturnOverview({ returnItem, locale, t }: ReturnOverviewProps) {
-  const totalValue = formatCurrency(returnItem.total?.value, returnItem.total?.currency, locale);
+  const totalValue = formatReturnCurrency(returnItem.total?.value, returnItem.total?.currency, locale);
 
   return (
     <div className="bg-surface-action-hover-2 p-6 rounded-lg shadow-sm">
       <div className="bg-surface-page p-4 rounded-lg space-y-4">
         <div className="flex items-center gap-2">
-          <ReceiptText className="h-6 w-6 shrink-0 text-text-headings" />
-          <h3 className="text-[28px] leading-[36px] md:text-[28px] md:leading-[36px] max-md:text-[20px] max-md:leading-[20px] font-bold text-text-headings font-primary">
+          <ReceiptText className="h-6 w-6 shrink-0 text-text-action" />
+          <H4 variant="h5" className="text-[20px] leading-[24px] lg:text-[28px] lg:leading-[36px] font-bold">
             {t('returnOverview')}
-          </h3>
+          </H4>
         </div>
-        <div className="flex items-start gap-4 text-[20px] leading-[24px] max-md:text-[16px] max-md:leading-[16px] font-bold text-text-body font-primary">
-          <span className="flex-1">{t('totalReturnValue')}</span>
-          <span className="flex-1 text-right">{totalValue}</span>
+        <div className="flex items-start gap-4">
+          <span className="flex-1 text-[16px] leading-[24px] lg:text-[20px] lg:leading-[24px] font-medium text-text-on-disabled font-secondary">
+            {t('totalReturnValue')}
+          </span>
+          <span className="flex-1 text-right text-[16px] leading-[24px] lg:text-[20px] lg:leading-[24px] font-bold text-text-headings font-primary">
+            {totalValue}
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
-function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
+function ReturnItemsList({ items, locale, t, generalReasonCode }: ReturnItemsListProps) {
+  const isTabletUp = useBreakpoint('sm');
+  const reasonBadgeClassName =
+    'inline-flex h-7 !p-1 !text-[12px] !leading-[20px] font-bold normal-case !tracking-normal rounded-[4px] text-text-headings border bg-surface-warning border-border-warning font-secondary';
+  const generalReasonBadgeClassName =
+    'inline-flex h-7 !p-1 !text-[12px] !leading-[20px] font-bold normal-case !tracking-normal rounded-[4px] text-text-headings border bg-surface-disabled border-border-primary font-secondary';
+
   const getItemRefund = (item: ExtendedReturnItem) => {
-    if (item.total?.value !== undefined && item.total?.currency) {
-      return { value: item.total.value, currency: item.total.currency };
+    if (item.calculatedPrice?.finalPrice?.grossValue !== undefined) {
+      return {
+        value: item.calculatedPrice.finalPrice.grossValue,
+        currency: item.calculatedPrice.finalPrice.currency ?? item.total?.currency ?? item.unitPrice?.currency,
+      };
+    }
+    if (item.grossUnitPrice?.value !== undefined && item.grossUnitPrice?.currency) {
+      return { value: item.grossUnitPrice.value * item.quantity, currency: item.grossUnitPrice.currency };
     }
     if (item.unitPrice?.value !== undefined && item.unitPrice?.currency) {
       return { value: item.unitPrice.value * item.quantity, currency: item.unitPrice.currency };
     }
+    if (item.total?.value !== undefined && item.total?.currency) {
+      return { value: item.total.value, currency: item.total.currency };
+    }
     return { value: undefined, currency: undefined };
+  };
+
+  const getItemUnitPrice = (item: ExtendedReturnItem) => ({
+    grossValue: item.calculatedUnitPrice?.grossValue ?? item.grossUnitPrice?.value ?? item.unitPrice?.value,
+    netValue: item.calculatedUnitPrice?.netValue ?? item.netPrice?.value ?? item.unitPrice?.value,
+    currency:
+      item.calculatedUnitPrice?.currency ??
+      item.grossUnitPrice?.currency ??
+      item.netPrice?.currency ??
+      item.unitPrice?.currency,
+  });
+
+  const getItemRefundNet = (item: ExtendedReturnItem) => {
+    if (item.calculatedPrice?.finalPrice?.netValue !== undefined) {
+      return {
+        value: item.calculatedPrice.finalPrice.netValue,
+        currency: item.calculatedPrice.finalPrice.currency ?? item.total?.currency ?? item.unitPrice?.currency,
+      };
+    }
+
+    return {
+      value: (item.netPrice?.value ?? item.unitPrice?.value ?? 0) * item.quantity,
+      currency: item.netPrice?.currency ?? item.unitPrice?.currency,
+    };
   };
 
   return (
     <Card className="border border-border-primary shadow-sm">
       <CardContent className="p-6">
-        <div className="hidden md:block">
-          <div className="flex gap-6 items-start pb-4 border-b border-border-primary text-[16px] leading-[20px] font-bold text-text-headings font-primary">
-            <div className="w-[420px] shrink-0">{t('product')}</div>
-            <div className="flex-1 min-w-0">{t('price')}</div>
-            <div className="flex-1 min-w-0">{t('quantity')}</div>
-            <div className="flex-1 min-w-0 text-right">{t('refundAmount')}</div>
-          </div>
+        <div className="flex items-center justify-between gap-3 pb-4 border-b border-border-primary">
+          <H4 variant="h5" className="text-[32px] leading-[40px] font-bold text-text-headings font-primary">
+            {t('returnedProducts')}
+          </H4>
+          {generalReasonCode && (
+            <Badge className={generalReasonBadgeClassName}>{renderReturnReasonLabel(t, generalReasonCode)}</Badge>
+          )}
+        </div>
 
-          {items.map((item) => {
-            const refund = getItemRefund(item);
-            const firstImage = item.images?.[0];
-            return (
-              <div
-                key={item.id}
-                className="flex gap-6 items-center pb-6 pt-6 border-b border-border-primary last:border-b-0"
-              >
-                <div className="flex gap-4 items-start w-[420px] shrink-0">
-                  <div className="bg-surface-image-background w-[80px] h-[52px] shrink-0 rounded-tl-lg rounded-br-lg overflow-hidden flex items-center justify-center">
-                    {firstImage ? (
-                      <Image
-                        src={firstImage}
-                        alt={item.name}
-                        width={80}
-                        height={52}
-                        className="object-contain w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-surface-image-background" />
+        {isTabletUp && (
+          <div className="overflow-x-auto">
+            <div className="grid grid-cols-[minmax(280px,1.6fr)_minmax(120px,1fr)_80px_minmax(140px,1fr)] gap-6 items-start pt-4 pb-4 border-b border-border-primary text-[16px] leading-[20px] font-bold text-text-headings font-primary min-w-[760px]">
+              <div>{t('product')}</div>
+              <div>{t('price')}</div>
+              <div>{t('quantity')}</div>
+              <div className="text-right">{t('refundAmount')}</div>
+            </div>
+
+            {items.map((item) => {
+              const refund = getItemRefund(item);
+              const refundNet = getItemRefundNet(item);
+              const unitPrice = getItemUnitPrice(item);
+              const firstImage = item.images?.[0];
+              return (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-[minmax(280px,1.6fr)_minmax(120px,1fr)_80px_minmax(140px,1fr)] gap-6 items-center pb-6 pt-6 border-b border-border-primary last:border-b-0 min-w-[760px]"
+                >
+                  <div className="flex gap-4 items-start min-w-0">
+                    <div className="bg-surface-image-background w-[80px] h-[52px] shrink-0 rounded-tl-lg rounded-br-lg overflow-hidden flex items-center justify-center">
+                      {firstImage ? (
+                        <Image
+                          src={firstImage}
+                          alt={item.name}
+                          width={80}
+                          height={52}
+                          className="object-contain w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-surface-image-background" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col gap-2 justify-center">
+                      <div className="flex flex-col gap-1">
+                        {item.vendorName && (
+                          <span className="text-[12px] leading-[20px] text-text-body font-secondary">
+                            {item.vendorName}
+                          </span>
+                        )}
+                        {item.productId ? (
+                          <Link
+                            href={`/product/${item.productId}`}
+                            className="text-[16px] leading-[20px] font-bold text-text-headings hover:underline font-primary break-words"
+                          >
+                            {item.name}
+                          </Link>
+                        ) : (
+                          <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary break-words">
+                            {item.name}
+                          </span>
+                        )}
+                      </div>
+                      {item.itemNumber && (
+                        <span className="text-[12px] leading-[20px] text-text-body font-secondary">
+                          {t('itemNumberLabel')}: {item.itemNumber}
+                        </span>
+                      )}
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        {item.reason?.code && (
+                          <Badge className={reasonBadgeClassName}>{renderReturnReasonLabel(t, item.reason.code)}</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex flex-col gap-1">
+                    <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary">
+                      {formatReturnCurrency(unitPrice.grossValue, unitPrice.currency, locale)}
+                    </span>
+                    {unitPrice.netValue !== undefined && (
+                      <span className="text-[12px] leading-[20px] text-text-on-disabled font-secondary">
+                        {t('net')} {formatReturnCurrency(unitPrice.netValue, unitPrice.currency, locale)}
+                      </span>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0 flex flex-col gap-2 justify-center">
-                    <div className="flex flex-col gap-1">
-                      {item.brand && (
-                        <span className="text-[12px] leading-[20px] text-text-body font-secondary">{item.brand}</span>
+                  <div className="text-[16px] leading-[24px] text-text-body font-secondary">{item.quantity}</div>
+                  <div className="min-w-0 flex flex-col gap-1 items-end text-right">
+                    <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary">
+                      {formatReturnCurrency(refund.value, refund.currency, locale)}
+                    </span>
+                    {(item.calculatedPrice?.finalPrice?.netValue !== undefined || item.netPrice || item.unitPrice) && (
+                      <span className="text-[12px] leading-[20px] text-text-on-disabled font-secondary">
+                        {t('net')} {formatReturnCurrency(refundNet.value, refundNet.currency, locale)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {!isTabletUp && (
+          <div className="space-y-4">
+            {items.map((item) => {
+              const refund = getItemRefund(item);
+              const refundNet = getItemRefundNet(item);
+              const firstImage = item.images?.[0];
+              return (
+                <div key={item.id} className="border-b border-border-primary pb-4 last:border-b-0">
+                  <div className="flex gap-3 items-start">
+                    <div className="bg-surface-image-background w-[64px] h-[42px] shrink-0 rounded-tl-lg rounded-br-lg overflow-hidden flex items-center justify-center">
+                      {firstImage ? (
+                        <Image
+                          src={firstImage}
+                          alt={item.name}
+                          width={64}
+                          height={42}
+                          className="object-contain w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-surface-image-background" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {item.vendorName && (
+                        <span className="text-[12px] leading-[20px] text-text-body font-secondary block">
+                          {item.vendorName}
+                        </span>
                       )}
                       {item.productId ? (
                         <Link
                           href={`/product/${item.productId}`}
-                          className="text-[16px] leading-[20px] font-bold text-text-action hover:text-text-action-hover hover:underline font-primary break-words"
+                          className="text-[14px] leading-[18px] font-bold text-text-headings hover:underline font-primary break-words"
                         >
                           {item.name}
                         </Link>
                       ) : (
-                        <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary break-words">
+                        <span className="text-[14px] leading-[18px] font-bold text-text-headings font-primary break-words">
                           {item.name}
                         </span>
                       )}
-                    </div>
-                    {item.itemNumber && (
-                      <span className="text-[12px] leading-[20px] text-text-body font-secondary">
-                        {t('itemNumberLabel')}: {item.itemNumber}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0 text-[16px] leading-[24px] text-text-body font-secondary">
-                  {formatCurrency(item.unitPrice?.value, item.unitPrice?.currency, locale)}
-                </div>
-                <div className="flex-1 min-w-0 text-[16px] leading-[24px] text-text-body font-secondary">
-                  {item.quantity}
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col gap-1 items-end text-right">
-                  <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary">
-                    {formatCurrency(refund.value, refund.currency, locale)}
-                  </span>
-                  {item.netPrice && (
-                    <span className="text-[12px] leading-[20px] text-text-on-disabled font-secondary">
-                      {t('net')} {formatCurrency(item.netPrice.value, item.netPrice.currency, locale)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="space-y-4 md:hidden">
-          {items.map((item) => {
-            const refund = getItemRefund(item);
-            const firstImage = item.images?.[0];
-            return (
-              <div key={item.id} className="border-b border-border-primary pb-4 last:border-b-0">
-                <div className="flex gap-3 items-start">
-                  <div className="bg-surface-image-background w-[64px] h-[42px] shrink-0 rounded-tl-lg rounded-br-lg overflow-hidden flex items-center justify-center">
-                    {firstImage ? (
-                      <Image
-                        src={firstImage}
-                        alt={item.name}
-                        width={64}
-                        height={42}
-                        className="object-contain w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-surface-image-background" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    {item.brand && (
-                      <span className="text-[12px] leading-[20px] text-text-body font-secondary block">
-                        {item.brand}
-                      </span>
-                    )}
-                    {item.productId ? (
-                      <Link
-                        href={`/product/${item.productId}`}
-                        className="text-[14px] leading-[18px] font-bold text-text-action hover:text-text-action-hover hover:underline font-primary break-words"
-                      >
-                        {item.name}
-                      </Link>
-                    ) : (
-                      <span className="text-[14px] leading-[18px] font-bold text-text-headings font-primary break-words">
-                        {item.name}
-                      </span>
-                    )}
-                    {item.itemNumber && (
-                      <span className="text-[12px] leading-[20px] text-text-body font-secondary block mt-1">
-                        {t('itemNumberLabel')}: {item.itemNumber}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center justify-between text-sm">
-                  <div className="text-text-body">
-                    <span className="font-semibold">{t('quantity')}:</span> {item.quantity}
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-text-headings">
-                      {formatCurrency(refund.value, refund.currency, locale)}
-                    </div>
-                    {item.netPrice && (
-                      <div className="text-[12px] text-text-on-disabled">
-                        {t('net')} {formatCurrency(item.netPrice.value, item.netPrice.currency, locale)}
+                      {item.itemNumber && (
+                        <span className="text-[12px] leading-[20px] text-text-body font-secondary block mt-1">
+                          {t('itemNumberLabel')}: {item.itemNumber}
+                        </span>
+                      )}
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {item.reason?.code && (
+                          <Badge className={reasonBadgeClassName}>{renderReturnReasonLabel(t, item.reason.code)}</Badge>
+                        )}
                       </div>
-                    )}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-sm">
+                    <div className="text-text-body">
+                      <span className="font-semibold">{t('quantity')}:</span> {item.quantity}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-text-headings">
+                        {formatReturnCurrency(refund.value, refund.currency, locale)}
+                      </div>
+                      {(item.calculatedPrice?.finalPrice?.netValue !== undefined ||
+                        item.netPrice ||
+                        item.unitPrice) && (
+                        <div className="text-[12px] text-text-on-disabled">
+                          {t('net')} {formatReturnCurrency(refundNet.value, refundNet.currency, locale)}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -348,7 +450,7 @@ function ProductDetailCard({ item, locale: _locale, t }: ProductDetailCardProps)
                 <SelectContent>
                   {claimReasonValues.map((value) => (
                     <SelectItem key={value} value={value}>
-                      {t(`claimReasons.${value}`)}
+                      {t(RETURN_REASON_LABEL_KEYS[value])}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -393,9 +495,9 @@ export function ReturnDetail({ returnId, initialReturn }: ReturnDetailProps) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-5xl font-bold">
+          <H1 variant="h3">
             {t('title')}: {returnId}
-          </h1>
+          </H1>
         </div>
         <Card>
           <CardContent className="flex justify-center py-12">
@@ -413,9 +515,9 @@ export function ReturnDetail({ returnId, initialReturn }: ReturnDetailProps) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-5xl font-bold">
+          <H1 variant="h3">
             {t('title')}: {returnId}
-          </h1>
+          </H1>
         </div>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -438,15 +540,15 @@ export function ReturnDetail({ returnId, initialReturn }: ReturnDetailProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 flex-wrap">
-        <h1 className="text-5xl font-bold">
+        <H1 variant="h3">
           {t('title')}: {returnItem.id}
-        </h1>
+        </H1>
         <ReturnStatusBadge status={returnItem.status} isExpired={returnItem.isExpired} />
       </div>
 
       <div className="grid gap-6 min-[1920px]:grid-cols-[minmax(0,1fr)_444px]">
         <div className="space-y-6 order-1">
-          <ReturnItemsList items={allItems} locale={locale} t={t} />
+          <ReturnItemsList items={allItems} locale={locale} t={t} generalReasonCode={returnItem.reason?.code} />
 
           {editMode && allItems.map((item) => <ProductDetailCard key={item.id} item={item} locale={locale} t={t} />)}
         </div>
