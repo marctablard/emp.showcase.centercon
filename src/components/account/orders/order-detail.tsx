@@ -55,14 +55,16 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
   useEffect(() => {
     if (!order || order.status !== ORDER_STATUS.COMPLETED) return;
     let cancelled = false;
-    fetchReturnsForOrder(order.id)
-      .then((existingReturns) => {
+    const syncReturnability = async () => {
+      try {
+        const existingReturns = await fetchReturnsForOrder(order.id);
         if (cancelled) return;
         setReturnability(computeOrderReturnability(order.id, order.items, existingReturns));
-      })
-      .catch(() => {
+      } catch (_error) {
         if (!cancelled) setReturnability(null);
-      });
+      }
+    };
+    void syncReturnability();
     return () => {
       cancelled = true;
     };
