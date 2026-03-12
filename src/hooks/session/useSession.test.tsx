@@ -142,11 +142,13 @@ describe('useSession fetch resilience', () => {
     mockFetchCurrentSession.mockRejectedValue(new Error('Temporary fetch failure'));
 
     const { result } = renderHook(() => useSession());
+    let mutationResult: boolean;
 
     await act(async () => {
-      await result.current.setCurrency('EUR');
+      mutationResult = await result.current.setCurrency('EUR');
     });
 
+    expect(mutationResult!).toBe(false);
     expect(store.session).toEqual({ id: 'session-existing', currency: 'USD', siteCode: 'main' });
     expect(store.setSession).not.toHaveBeenCalledWith(null);
   });
@@ -219,6 +221,43 @@ describe('useSession fetch resilience', () => {
       await result.current.refreshSession();
     });
 
+    expect(store.setSession).toHaveBeenCalledWith(null);
+    expect(store.session).toBeNull();
+  });
+
+  it('sets null fallback when refresh fails without cached session', async () => {
+    let mutationInFlight = false;
+    const store = {
+      session: undefined,
+      loading: false,
+      setSession: jest.fn((session) => {
+        store.session = session;
+      }),
+      setLoading: jest.fn((loading) => {
+        store.loading = loading;
+      }),
+      tryAcquireMutationLock: jest.fn(() => {
+        if (mutationInFlight) {
+          return false;
+        }
+        mutationInFlight = true;
+        return true;
+      }),
+      releaseMutationLock: jest.fn(() => {
+        mutationInFlight = false;
+      }),
+    };
+
+    mockUseSessionStore.mockReturnValue(store);
+    mockFetchCurrentSession.mockRejectedValue(new Error('Temporary fetch failure'));
+
+    const { result } = renderHook(() => useSession());
+    let refreshed;
+    await act(async () => {
+      refreshed = await result.current.refreshSession();
+    });
+
+    expect(refreshed).toBeNull();
     expect(store.setSession).toHaveBeenCalledWith(null);
     expect(store.session).toBeNull();
   });

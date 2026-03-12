@@ -41,10 +41,11 @@ export function useSession() {
         const success = await mutation();
         if (success) {
           const { session: updatedSession, hasError } = await fetchSessionWithStatus();
-          // Preserve last known session only on fetch errors.
-          if (!hasError) {
-            sessionStore.setSession(updatedSession);
+          if (hasError) {
+            // Treat mutation as incomplete when we cannot confirm updated session state.
+            return false;
           }
+          sessionStore.setSession(updatedSession);
         }
         return success;
       } finally {
@@ -117,6 +118,9 @@ export function useSession() {
     const { session: updatedSession, hasError } = await fetchSessionWithStatus();
     if (!hasError) {
       sessionStore.setSession(updatedSession);
+    } else if (sessionStore.session === undefined) {
+      // Keep refresh behavior consistent with initial fetch fallback.
+      sessionStore.setSession(null);
     }
     sessionStore.setLoading(false);
     return hasError ? sessionStore.session : updatedSession;
