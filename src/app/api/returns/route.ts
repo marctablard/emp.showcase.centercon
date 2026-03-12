@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { computeOrderReturnability } from '@/lib/common/returns/returnability';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import type { OrderService } from '@/platform/services/order/OrderService';
 import { ReturnService } from '@/platform/services/return/ReturnService';
 
 export const revalidate = 0;
@@ -67,6 +69,44 @@ export async function POST(request: NextRequest) {
     }
 
     const returnService = server.get<ReturnService>('ReturnService');
+
+    try {
+      const orderService = server.get<OrderService>('OrderService');
+      const [order, orderReturns] = await Promise.all([
+        orderService.getCustomerOrderById(orderId),
+        returnService.getReturns(undefined, undefined, undefined, `orders._id:${orderId}`),
+      ]);
+
+      if (order) {
+        const returnability = computeOrderReturnability(orderId, order.items, orderReturns);
+
+        const remainingMap = new Map(returnability.orderItemSummaries.map((s) => [s.itemId, s.remaining]));
+
+        for (const item of items) {
+          const remaining = remainingMap.get(item.id);
+          if (remaining !== undefined && item.quantity > remaining) {
+            const logger = server.get<LoggerService>('LoggerService');
+            logger.warn(
+              { orderId, itemId: item.id, requested: item.quantity, remaining },
+              'Over-return attempt blocked',
+            );
+            return NextResponse.json(
+              {
+                error: `Item ${item.id} exceeds returnable quantity (requested: ${item.quantity}, remaining: ${remaining})`,
+              },
+              { status: 422 },
+            );
+          }
+        }
+      }
+    } catch (validationError) {
+      const logger = server.get<LoggerService>('LoggerService');
+      logger.warn(
+        { error: validationError instanceof Error ? validationError.message : String(validationError), orderId },
+        'Returnability validation skipped due to error',
+      );
+    }
+
     const returnId = await returnService.createReturn(orderId, items, reasonCode);
 
     return NextResponse.json({ id: returnId }, { status: 201 });
