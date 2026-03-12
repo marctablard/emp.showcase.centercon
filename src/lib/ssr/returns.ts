@@ -2,7 +2,8 @@
 
 import { cache } from 'react';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
-import { Return } from '@/platform/services/model/return';
+import type { Return, ReturnItem } from '@/platform/services/model/return';
+import type { OrderService } from '@/platform/services/order/OrderService';
 import { ReturnService } from '@/platform/services/return/ReturnService';
 import ssr from '@/platform/ssr';
 
@@ -13,13 +14,58 @@ const getReturnService = () => ssr.get<ReturnService>('ReturnService');
 const getLogger = () => ssr.get<LoggerService>('LoggerService');
 
 /**
+ * Enriches return items with product metadata from original order data.
+ */
+async function enrichReturnWithOrderData(returnData: Return): Promise<Return> {
+  const orderIds = returnData.orders.map((o) => o.id);
+  if (orderIds.length === 0) return returnData;
+
+  try {
+    const orderService = ssr.get<OrderService>('OrderService');
+    const orders = await Promise.all(orderIds.map((id) => orderService.getCustomerOrderById(id)));
+
+    const orderItemMap = new Map<string, { productId: string; images?: string[]; sku?: string }>();
+    for (const order of orders) {
+      if (!order) continue;
+      for (const item of order.items) {
+        orderItemMap.set(`${order.id}:${item.id}`, {
+          productId: item.productId,
+          images: item.images,
+          sku: item.sku,
+        });
+      }
+    }
+
+    const enrichedOrders = returnData.orders.map((returnOrder) => ({
+      ...returnOrder,
+      items: returnOrder.items.map((item): ReturnItem => {
+        const orderItem = orderItemMap.get(`${returnOrder.id}:${item.id}`);
+        if (!orderItem) return item;
+        return {
+          ...item,
+          productId: item.productId ?? orderItem.productId,
+          images: item.images ?? orderItem.images,
+          itemNumber: item.itemNumber ?? orderItem.sku,
+        };
+      }),
+    }));
+
+    return { ...returnData, orders: enrichedOrders };
+  } catch {
+    return returnData;
+  }
+}
+
+/**
  * Get a specific return by ID
  * This function is cached to prevent multiple return fetches in a single request
  */
 export const getReturnById = cache(async (returnId: string): Promise<Return | null | undefined> => {
   try {
     const returnService = getReturnService();
-    return await returnService.getReturn(returnId);
+    const returnItem = await returnService.getReturn(returnId);
+    if (!returnItem) return null;
+    return await enrichReturnWithOrderData(returnItem);
   } catch (error) {
     getLogger().error(
       { error: error instanceof Error ? error.message : String(error), returnId },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -8,8 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/dashboard-badge';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { type OrderPaymentTypeKey, type OrderStatusLowercaseKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
+import { fetchReturnsForOrderIds } from '@/lib/client/returns';
+import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
 import { cn } from '@/lib/utils';
 import { Order, OrderStatus } from '@/platform/services/model/order/order';
 import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
@@ -49,6 +52,52 @@ export function MyOrdersTable({
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [returnabilityMap, setReturnabilityMap] = useState<Record<string, OrderReturnability>>({});
+
+  const visibleOrders = useMemo(
+    () =>
+      [...orders]
+        .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
+        .slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage),
+    [orders, currentPage, ordersPerPage],
+  );
+
+  const completedOrderIds = useMemo(
+    () => visibleOrders.filter((o) => isReturnEnabled(o.status)).map((o) => o.id),
+    [visibleOrders],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    const syncReturnability = async () => {
+      if (completedOrderIds.length === 0) {
+        if (!cancelled) {
+          setReturnabilityMap({});
+        }
+        return;
+      }
+
+      try {
+        const returns = await fetchReturnsForOrderIds(completedOrderIds);
+        if (cancelled) return;
+        const map: Record<string, OrderReturnability> = {};
+        for (const order of visibleOrders) {
+          if (isReturnEnabled(order.status)) {
+            map[order.id] = computeOrderReturnability(order.id, order.items, returns);
+          }
+        }
+        setReturnabilityMap(map);
+      } catch (_error) {
+        if (!cancelled) setReturnabilityMap({});
+      }
+    };
+
+    void syncReturnability();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [completedOrderIds, visibleOrders]);
 
   const handleReturnClick = (order: Order): void => {
     setSelectedOrder(order);
@@ -67,14 +116,8 @@ export function MyOrdersTable({
 
   const formatPayment = (payments: any[] | undefined) => {
     if (!payments || payments.length === 0) return '-';
-    // Use the translation for the payment method if available
     return t(dk<OrderPaymentTypeKey>(`paymentTypes.${payments[0].method.toLowerCase()}`)) || payments[0].method;
   };
-
-  const visibleOrders = orders
-    .slice()
-    .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
-    .slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage);
 
   return (
     <div className={className}>
@@ -138,18 +181,30 @@ export function MyOrdersTable({
                 <TableCell className="px-2 py-4 text-center">
                   {isReturnEnabled(order.status) ? (
                     <div onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        onClick={() => handleReturnClick(order)}
-                        className="font-bold underline text-text-action hover:text-text-action-hover"
-                      >
-                        {t('returnLink')}
-                      </button>
+                      {returnabilityMap[order.id]?.hasAnyReturnableItem === false ? (
+                        <Tooltip delayDuration={200}>
+                          <TooltipTrigger asChild>
+                            <span className="font-bold text-text-disabled cursor-not-allowed">{t('returnLink')}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{t('noRemainingItems')}</TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleReturnClick(order)}
+                          className="font-bold underline text-text-action hover:text-text-action-hover"
+                        >
+                          {t('returnLink')}
+                        </button>
+                      )}
                     </div>
                   ) : (
-                    <span className="text-text-disabled text-sm cursor-not-allowed" title={t('returnDisabledTooltip')}>
-                      {t('returnLink')}
-                    </span>
+                    <Tooltip delayDuration={200}>
+                      <TooltipTrigger asChild>
+                        <span className="text-text-disabled text-sm cursor-not-allowed">{t('returnLink')}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{t('returnDisabledTooltip')}</TooltipContent>
+                    </Tooltip>
                   )}
                 </TableCell>
                 <TableCell className="text-right py-4 font-medium">
@@ -182,7 +237,14 @@ export function MyOrdersTable({
         </div>
       )}
 
-      {selectedOrder && <CreateReturnDialog open={dialogOpen} onOpenChange={setDialogOpen} order={selectedOrder} />}
+      {selectedOrder && (
+        <CreateReturnDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          order={selectedOrder}
+          returnability={returnabilityMap[selectedOrder.id]}
+        />
+      )}
     </div>
   );
 }

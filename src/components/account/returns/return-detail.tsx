@@ -30,6 +30,7 @@ interface ExtendedReturnItem {
   images?: string[];
   brand?: string;
   itemNumber?: string;
+  productId?: string;
 }
 
 interface ExtendedReturn extends Omit<Return, 'orders'> {
@@ -147,9 +148,18 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
                       {item.brand && (
                         <span className="text-[12px] leading-[20px] text-text-body font-secondary">{item.brand}</span>
                       )}
-                      <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary break-words">
-                        {item.name}
-                      </span>
+                      {item.productId ? (
+                        <Link
+                          href={`/product/${item.productId}`}
+                          className="text-[16px] leading-[20px] font-bold text-text-action hover:text-text-action-hover hover:underline font-primary break-words"
+                        >
+                          {item.name}
+                        </Link>
+                      ) : (
+                        <span className="text-[16px] leading-[20px] font-bold text-text-headings font-primary break-words">
+                          {item.name}
+                        </span>
+                      )}
                     </div>
                     {item.itemNumber && (
                       <span className="text-[12px] leading-[20px] text-text-body font-secondary">
@@ -205,9 +215,18 @@ function ReturnItemsList({ items, locale, t }: ReturnItemsListProps) {
                         {item.brand}
                       </span>
                     )}
-                    <span className="text-[14px] leading-[18px] font-bold text-text-headings font-primary break-words">
-                      {item.name}
-                    </span>
+                    {item.productId ? (
+                      <Link
+                        href={`/product/${item.productId}`}
+                        className="text-[14px] leading-[18px] font-bold text-text-action hover:text-text-action-hover hover:underline font-primary break-words"
+                      >
+                        {item.name}
+                      </Link>
+                    ) : (
+                      <span className="text-[14px] leading-[18px] font-bold text-text-headings font-primary break-words">
+                        {item.name}
+                      </span>
+                    )}
                     {item.itemNumber && (
                       <span className="text-[12px] leading-[20px] text-text-body font-secondary block mt-1">
                         {t('itemNumberLabel')}: {item.itemNumber}
