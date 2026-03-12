@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useLocale } from 'next-intl';
+import { useAuthEvents } from '@/hooks/auth/useAuthEvents';
 import { getPathname } from '@/i18n/navigation';
 import { fetchCurrentSession } from '@/lib/client/session';
 import { isAuthenticatedSessionCustomerId } from '@/lib/common/customer-identity';
@@ -31,6 +32,7 @@ interface AuthenticationHook {
 export const useAuthentication = (): AuthenticationHook => {
   const locale = useLocale();
   const { site } = useSite();
+  const { notifyLogin, notifyLogout } = useAuthEvents();
   const session = useSession({
     required: true,
     onUnauthenticated: () => {
@@ -40,8 +42,8 @@ export const useAuthentication = (): AuthenticationHook => {
   });
 
   // State for authentication status and user data
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(session.status === 'authenticated');
+  const [loading, setLoading] = useState<boolean>(session.status === 'loading');
   const [error, setError] = useState<Error | null>(null);
   const { reset } = useCheckout();
   const { clearCart } = useCartStore();
@@ -120,8 +122,8 @@ export const useAuthentication = (): AuthenticationHook => {
         clearCart({ clearSession: false });
         reset();
 
-        // Dispatch custom event to notify other components about login
-        window.dispatchEvent(new CustomEvent('auth:login'));
+        // Notify other components about login
+        notifyLogin();
 
         if (safeCallbackUrl) {
           const postLoginHref = safeCallbackUrl + LOGIN_SUCCESS_QUERY_PARAM;
@@ -152,6 +154,10 @@ export const useAuthentication = (): AuthenticationHook => {
         clearCart();
         // Clear all persisted store data (localStorage)
         clearAllPersistedStores();
+
+        // Notify other components about logout
+        notifyLogout();
+
         const logoutTarget = getPathname({ href: '/', locale, site: site?.code });
         // ...then log out (no idea how this could fail)
         await signOut({

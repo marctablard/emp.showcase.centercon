@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Building2 } from 'lucide-react';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuthEvents } from '@/hooks/auth/useAuthEvents';
 import { useSession } from '@/hooks/session/useSession';
 import { useToast } from '@/hooks/ui/useToast';
 import { Company } from '@/platform/services/model/company/company';
 
 export function CompanySwitcher() {
   const { session, loading: sessionLoading, setCompany } = useSession();
+  const { onLogin, onLogout } = useAuthEvents();
   const router = useRouter();
   const t = useTranslations('common.Companies');
   const { toast } = useToast();
@@ -56,20 +58,26 @@ export function CompanySwitcher() {
   }, [session?.customerId, fetchCompanies]);
 
   // Listen for auth events to refresh companies
+  // If the login doesn't trigger a refresh of the page, we need to fetch companies manually
   useEffect(() => {
-    const handleLogin = () => {
+    const unsubscribeLogin = onLogin(() => {
       // Wait a bit for session to be updated, then fetch companies
       setTimeout(() => {
         fetchCompanies();
       }, 100);
-    };
+    });
 
-    window.addEventListener('auth:login', handleLogin);
+    const unsubscribeLogout = onLogout(() => {
+      setCompanies([]);
+      setLoading(false);
+      setError(null);
+    });
 
     return () => {
-      window.removeEventListener('auth:login', handleLogin);
+      unsubscribeLogin();
+      unsubscribeLogout();
     };
-  }, [fetchCompanies]);
+  }, [onLogin, onLogout, fetchCompanies]);
 
   const currentCompany = useMemo(() => {
     if (!companies || companies.length === 0) {
