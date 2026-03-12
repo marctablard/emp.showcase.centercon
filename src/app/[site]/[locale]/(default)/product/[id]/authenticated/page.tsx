@@ -15,8 +15,7 @@ const AUTHENTICATED_PRODUCT_OPTIONS = {
   customerSegments: true,
 };
 
-// ISR with shorter revalidation for authenticated content
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(
   { params }: { params: Promise<AuthenticatedProductPageProps> },
