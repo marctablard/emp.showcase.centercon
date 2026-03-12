@@ -22,6 +22,7 @@ jest.mock('@/lib/logger/use-logger-client', () => ({
 }));
 
 const mockFetchCurrentCart = require('@/lib/client/carts').fetchCurrentCart;
+const mockAddItemToCart = require('@/lib/client/carts').addItemToCart;
 const mockClearCartSession = require('@/lib/client/carts').clearCartSession;
 
 describe('CartStore - Site Validation', () => {
@@ -585,5 +586,52 @@ describe('CartStore - Fetch Deduplication', () => {
     // Only one API call
     expect(mockFetchCurrentCart).toHaveBeenCalledTimes(1);
     expect(store.getState().currentCart).toBeNull();
+  });
+
+  it('should create the next cart through fetchCart(true) after clear and use the returned currency', async () => {
+    const clearedStore = createCartStore({
+      currentCart: {
+        id: 'old-cart',
+        currency: 'EUR',
+        site: 'main',
+        items: [],
+        totalPrice: { amount: 0, currency: 'EUR' },
+        subTotalPrice: { amount: 0, currency: 'EUR' },
+        tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
+      },
+      loading: false,
+      error: null,
+      lastShippingUpdate: null,
+      sessionStatus: null,
+      lastSiteCode: 'main',
+      pendingCurrencySync: null,
+    });
+    const createdCart = {
+      id: 'cart-usd',
+      currency: 'USD',
+      site: 'main',
+      items: [],
+      totalPrice: { amount: 0, currency: 'USD' },
+      subTotalPrice: { amount: 0, currency: 'USD' },
+      tax: { amount: 0, currency: 'USD', netValue: 0, grossValue: 0 },
+    };
+    const updatedCart = {
+      ...createdCart,
+      items: [{ id: 'item-1', quantity: 1, price: { amount: 10, currency: 'USD' } }],
+      totalPrice: { amount: 10, currency: 'USD' },
+      subTotalPrice: { amount: 10, currency: 'USD' },
+    };
+
+    clearedStore.getState().clearCart({ clearSession: false });
+    mockFetchCurrentCart.mockResolvedValueOnce(createdCart);
+    mockAddItemToCart.mockResolvedValueOnce({ cart: updatedCart });
+
+    await act(async () => {
+      await clearedStore.getState().addToCart('product-1', 1);
+    });
+
+    expect(mockFetchCurrentCart).toHaveBeenCalledWith(true);
+    expect(mockAddItemToCart).toHaveBeenCalledWith('cart-usd', 'product-1', 1);
+    expect(clearedStore.getState().currentCart?.currency).toBe('USD');
   });
 });
