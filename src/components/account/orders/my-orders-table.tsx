@@ -83,8 +83,7 @@ export function MyOrdersTable({
 
   const visibleOrders = useMemo(
     () =>
-      orders
-        .slice()
+      [...orders]
         .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
         .slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage),
     [orders, currentPage, ordersPerPage],
