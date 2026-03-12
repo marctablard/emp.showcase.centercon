@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { createSiteMiddleware, resolveSite } from '@/site/middleware';
-import type { SiteRoutingConfig } from '@/site/types';
+import { INTERNAL_SITE_INVALID_HEADER, type SiteRoutingConfig } from '@/site/types';
 import { resolveApplicableRouting, shouldPrefix } from '@/site/utils';
 
 jest.mock('next-intl/middleware', () => {
@@ -59,6 +59,16 @@ const createRequest = (
     method,
   } as unknown as NextRequest;
 };
+
+let consoleWarnSpy: jest.SpiedFunction<typeof console.warn>;
+
+beforeEach(() => {
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  consoleWarnSpy.mockRestore();
+});
 
 describe('site middleware - domain and prefix handling', () => {
   const baseRouting: SiteRoutingConfig = {
@@ -324,5 +334,134 @@ describe('createSiteMiddleware probe detection behavior', () => {
     const response = middleware(req);
 
     expect(response?.headers.get('x-misrouted-healthcheck')).toBeNull();
+  });
+});
+
+describe('fallback-OFF behavior (no defaultSite)', () => {
+  const noFallbackRouting: SiteRoutingConfig = {
+    defaultSite: undefined,
+    availableSites: ['site-a', 'site-b'],
+    prefix: 'as-needed',
+    cookie: { name: 'NEXT_SITE' },
+    cookieOverridesDefault: true,
+    header: 'x-emp-site',
+  };
+
+  const browserUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+
+  describe('resolveSite with no defaultSite', () => {
+    test('resolves valid site from path segment normally', () => {
+      const result = resolveSite(
+        '/site-a/en/products',
+        createCookies({}) as unknown as NextRequest['cookies'],
+        new Headers(),
+        noFallbackRouting,
+      );
+
+      expect(result.site).toBe('site-a');
+      expect(result.appPath).toBe('en/products');
+    });
+
+    test('returns undefined when no hints are present', () => {
+      const result = resolveSite(
+        '/en/products',
+        createCookies({}) as unknown as NextRequest['cookies'],
+        new Headers(),
+        noFallbackRouting,
+      );
+
+      expect(result.site).toBeUndefined();
+      expect(result.appPath).toBe('en/products');
+    });
+
+    test('returns header value even if invalid (pre-validation)', () => {
+      const result = resolveSite(
+        '/en/products',
+        createCookies({}) as unknown as NextRequest['cookies'],
+        new Headers({ 'x-emp-site': 'bad-site' }),
+        noFallbackRouting,
+      );
+
+      expect(result.site).toBe('bad-site');
+    });
+  });
+
+  describe('shouldPrefix with no defaultSite', () => {
+    test('always returns true for as-needed mode', () => {
+      expect(shouldPrefix('site-a', noFallbackRouting)).toBe(true);
+      expect(shouldPrefix('site-b', noFallbackRouting)).toBe(true);
+    });
+  });
+
+  describe('createSiteMiddleware with no defaultSite', () => {
+    test('proceeds normally with valid site in path', () => {
+      const middleware = createSiteMiddleware(noFallbackRouting);
+      const req = createRequest('https://example.com/site-a/en/products', {}, { 'User-Agent': browserUA });
+      const response = middleware(req);
+
+      expect(response?.headers.get(INTERNAL_SITE_INVALID_HEADER)).toBeNull();
+      expect(response?.headers.get('x-misrouted-healthcheck')).toBeNull();
+    });
+
+    test('uses 1st available site when no site specified (no 404 flag)', () => {
+      const middleware = createSiteMiddleware(noFallbackRouting);
+      const req = createRequest('https://example.com/en/products', {}, { 'User-Agent': browserUA });
+      const response = middleware(req);
+
+      expect(response?.headers.get(INTERNAL_SITE_INVALID_HEADER)).toBeNull();
+      // No defaultSite → shouldPrefix returns true → redirect to include site prefix
+      const location = response?.headers.get('location');
+      expect(location).toBe('https://example.com/site-a/en/products');
+    });
+
+    test('sets x-site-invalid header for cookie with invalid site', () => {
+      const middleware = createSiteMiddleware(noFallbackRouting);
+      const req = createRequest(
+        'https://example.com/en/products',
+        { NEXT_SITE: 'bad-site' },
+        { 'User-Agent': browserUA },
+      );
+      const response = middleware(req);
+
+      expect(response?.headers.get('x-middleware-rewrite')).toBeDefined();
+      const rewriteUrl = new URL(response!.headers.get('x-middleware-rewrite')!);
+      expect(rewriteUrl.pathname).toContain('/site-a');
+      // Header is forwarded as x-middleware-request-<header-name> by NextResponse.rewrite
+      expect(response?.headers.get(`x-middleware-request-${INTERNAL_SITE_INVALID_HEADER}`)).toBe('true');
+    });
+
+    test('sets x-site-invalid header for header with invalid site', () => {
+      const middleware = createSiteMiddleware(noFallbackRouting);
+      const req = createRequest(
+        'https://example.com/en/products',
+        {},
+        { 'x-emp-site': 'bad-site', 'User-Agent': browserUA },
+      );
+      const response = middleware(req);
+
+      const rewrite = response?.headers.get('x-middleware-rewrite');
+      expect(rewrite).toBeDefined();
+      expect(new URL(rewrite!).pathname).toContain('/site-a');
+      expect(response?.headers.get(`x-middleware-request-${INTERNAL_SITE_INVALID_HEADER}`)).toBe('true');
+    });
+
+    test('fallback ON: cookie with invalid site falls back to defaultSite', () => {
+      const withFallback: SiteRoutingConfig = {
+        ...noFallbackRouting,
+        defaultSite: 'site-a',
+      };
+      const middleware = createSiteMiddleware(withFallback);
+      const req = createRequest(
+        'https://example.com/en/products',
+        { NEXT_SITE: 'bad-site' },
+        { 'User-Agent': browserUA },
+      );
+      const response = middleware(req);
+
+      expect(response?.headers.get(INTERNAL_SITE_INVALID_HEADER)).toBeNull();
+      const rewrite = response?.headers.get('x-middleware-rewrite');
+      expect(rewrite).toBeDefined();
+      expect(new URL(rewrite!).pathname).toContain('/site-a');
+    });
   });
 });

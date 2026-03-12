@@ -193,6 +193,27 @@ NEXT_DEBUG_API_PAYLOAD=true
 
 **Note:** This is a server-side-only variable (no `NEXT_PUBLIC_` prefix) because request payload logging only makes sense on the server where API calls are made.
 
+#### `JEST_DEBUG_API` (Test Runs)
+
+Controls API debug verbosity specifically during Jest runs.
+
+- `false` (default) - Keep test output concise by forcing API debug logs off in Jest setup
+- `true` - Re-enable API debug output during tests for troubleshooting
+
+When `JEST_DEBUG_API` is not set to `true`, Jest setup forces:
+
+```env
+NEXT_PUBLIC_DEBUG_API_CURL=false
+NEXT_PUBLIC_DEBUG_API_RESPONSE=off
+NEXT_DEBUG_API_PAYLOAD=false
+```
+
+**Example:**
+```bash
+# Enable verbose API debug logs only for this Jest run
+JEST_DEBUG_API=true npm run jest
+```
+
 #### `NEXT_PUBLIC_DEBUG_API_OUTPUT`
 
 Controls **where** debug output is sent. Useful when you only want terminal output (e.g. CI) or only browser output (e.g. remote debugging):
@@ -324,6 +345,13 @@ To completely disable push notifications in any environment, you can either:
 ### Setup API
 
 The Setup API (`NEXT_SETUP_API_*`) provides an endpoint for initial system configuration. **Disable in production** or secure with a strong secret.
+
+### Feature Flags
+
+| Variable | Values | Default | Description |
+|----------|--------|---------|-------------|
+| `NEXT_STARTUP_HEALTHCHECK_ENABLED` | `true` / `false` | `true` | Enable Tier 2 runtime startup healthcheck. When enabled, the server validates configured sites, currencies, and languages against the Emporix API at startup. See [Health Checks — Startup Configuration Validation](health-checks.md#startup-configuration-validation). |
+| `NEXT_PUBLIC_DISABLE_PUSH_NOTIFICATIONS` | `true` / `false` | `false` | Explicitly disable push notifications regardless of VAPID key configuration. |
 
 ## Quick Start Checklist
 

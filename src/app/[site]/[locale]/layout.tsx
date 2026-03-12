@@ -3,6 +3,7 @@ import { SessionProvider as AuthSessionProvider } from 'next-auth/react';
 import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import { CsrfProvider } from '@/components/csrf/CsrfProvider';
@@ -17,8 +18,10 @@ import SiteProvider from '@/providers/SiteProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import { setRequestSite } from '@/site/server/';
+import { INTERNAL_SITE_INVALID_HEADER } from '@/site/types';
 
-const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
+const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || undefined;
+const availableSiteCodes = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
 
 const fontHeadlines = Ubuntu({
   subsets: ['latin'],
@@ -46,7 +49,11 @@ export const viewport = {
 };
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale, site: defaultSiteCode }));
+  const siteForSSG = defaultSiteCode || availableSiteCodes[0];
+  if (!siteForSSG) {
+    return [];
+  }
+  return routing.locales.map((locale) => ({ locale, site: siteForSSG }));
 }
 
 export async function generateMetadata(props: Omit<Props, 'children'>) {
@@ -71,12 +78,18 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
     notFound();
   }
 
+  // Early exit: middleware flagged this request as having an invalid site
+  const headerStore = await headers();
+  if (headerStore.get(INTERNAL_SITE_INVALID_HEADER)) {
+    notFound();
+  }
+
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
 
-  // Handle invalid site: redirect to valid site or show 404
+  // Handle invalid site: redirect to valid site (fallback ON) or show 404 (fallback OFF)
   if (!site) {
-    if (availableSites && availableSites.length > 0) {
-      // Redirect to first available site, preserving locale if possible
+    const fallbackEnabled = !!defaultSiteCode;
+    if (fallbackEnabled && availableSites && availableSites.length > 0) {
       const targetSite = availableSites[0];
       const targetLocale = targetSite.languages?.includes(locale) ? locale : targetSite.languages?.[0] || locale;
       redirect({ href: '/', locale: targetLocale, site: targetSite.code, forcePrefix: true });
