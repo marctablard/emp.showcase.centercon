@@ -50,7 +50,6 @@ export function CompanySwitcher() {
     if (session?.customerId) {
       fetchCompanies();
     } else {
-      // User logged out - clear companies
       setCompanies([]);
       setLoading(false);
       setError(null);
@@ -61,7 +60,6 @@ export function CompanySwitcher() {
   // If the login doesn't trigger a refresh of the page, we need to fetch companies manually
   useEffect(() => {
     const unsubscribeLogin = onLogin(() => {
-      // Wait a bit for session to be updated, then fetch companies
       setTimeout(() => {
         fetchCompanies();
       }, 100);
