@@ -127,6 +127,7 @@ class EmporixApiInvoker {
           this.config.tenant,
           this.config.serverClientId,
           this.config.serverClientSecret,
+          authOptions?.scopes,
         );
         break;
       default:
