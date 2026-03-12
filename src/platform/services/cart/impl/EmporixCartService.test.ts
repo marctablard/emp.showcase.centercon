@@ -868,7 +868,13 @@ describe('EmporixCartService', () => {
       );
 
       // Should have fallen through to getCartByCriteria
-      expect(mockCartApi.getCartByCriteria).toHaveBeenCalledWith('us-branch', 'session-1', undefined, 'shopping', true);
+      expect(mockCartApi.getCartByCriteria).toHaveBeenCalledWith(
+        'us-branch',
+        'session-1',
+        undefined,
+        'shopping',
+        false,
+      );
 
       // Should have updated session with new cart ID
       expect(mockSessionService.setCart).toHaveBeenCalledWith('cart-us');
@@ -916,7 +922,7 @@ describe('EmporixCartService', () => {
         'session-anon',
         undefined,
         'shopping',
-        true,
+        false,
       );
       expect(mockCartApi.getCartByCriteria).not.toHaveBeenCalledWith(
         expect.anything(),
@@ -958,7 +964,7 @@ describe('EmporixCartService', () => {
 
       const result = await cartService.getCart();
 
-      expect(mockCartApi.getCartByCriteria).toHaveBeenCalledWith('main', undefined, 'customer-42', 'shopping', true);
+      expect(mockCartApi.getCartByCriteria).toHaveBeenCalledWith('main', undefined, 'customer-42', 'shopping', false);
       expect(mockSessionService.setCart).toHaveBeenCalledWith('customer-cart-42');
       expect(result).toBe(customerMappedCart);
     });

@@ -109,9 +109,18 @@ class EmporixCartService implements CartService {
       const isAuthenticated = isAuthenticatedSessionCustomerId(session.customerId);
 
       // For authenticated users, prefer customer-owned cart lookup first.
+      // Never pass create=true here — auto-created carts use the site's default
+      // currency which silently overwrites the session currency chosen by the user.
+      // Cart creation with the correct currency is handled by the caller (API route).
       if (isAuthenticated) {
         try {
-          cart = await this.cartApi.getCartByCriteria(currentSiteCode, undefined, session.customerId, 'shopping', true);
+          cart = await this.cartApi.getCartByCriteria(
+            currentSiteCode,
+            undefined,
+            session.customerId,
+            'shopping',
+            false,
+          );
         } catch (error) {
           throw this.mapCartResolutionError(error, {
             fallbackCode: CART_CURRENCY_UPDATE_ERROR_CODE.FORBIDDEN,
@@ -123,7 +132,7 @@ class EmporixCartService implements CartService {
       // Anonymous or fallback lookup by session criteria.
       if (!cart) {
         try {
-          cart = await this.cartApi.getCartByCriteria(currentSiteCode, session.id, undefined, 'shopping', true);
+          cart = await this.cartApi.getCartByCriteria(currentSiteCode, session.id, undefined, 'shopping', false);
         } catch (error) {
           throw this.mapCartResolutionError(error, {
             fallbackCode: CART_CURRENCY_UPDATE_ERROR_CODE.UPSTREAM_FAILURE,
