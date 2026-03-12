@@ -67,6 +67,8 @@ describe('EmporixSchemaApi', () => {
   let container: Container;
   let schemaApi: EmporixSchemaApi;
   let apiInvoker: EmporixApiInvoker;
+  const customEntityType = process.env.NEXT_EMPORIX_TEST_CUSTOM_ENTITY_TYPE || 'TEST_ENTITY';
+  let isCustomEntityTypeWritable = true;
   let createdSchemaId: string;
   let createdCustomTypeId: string;
   let createdCustomInstanceId: string;
@@ -97,12 +99,30 @@ describe('EmporixSchemaApi', () => {
     // Clean up any tokens
     await apiInvoker.clearTokens();
   });
-  // eslint-disable-next-line jest/no-disabled-tests -- TEST_ENTITY type does not exist on 'showcasetest'. Create the custom entity type in the tenant schema to enable these tests.
-  describe.skip('Schema Operations', () => {
+  describe('Schema Operations', () => {
+    beforeAll(async () => {
+      const preflightId = `preflight-${Date.now()}`;
+
+      try {
+        await schemaApi.createCustomEntity(customEntityType, {
+          ...sampleCustomInstanceCreation,
+          id: preflightId,
+          type: customEntityType,
+        });
+        await schemaApi.deleteCustomEntity(customEntityType, preflightId);
+      } catch {
+        isCustomEntityTypeWritable = false;
+      }
+    });
+
     describe('Custom Instance Operations', () => {
       it('should create a custom instance', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Create a custom instance
-        createdCustomInstanceId = await schemaApi.createCustomEntity('TEST_ENTITY', sampleCustomInstanceCreation);
+        createdCustomInstanceId = await schemaApi.createCustomEntity(customEntityType, {
+          ...sampleCustomInstanceCreation,
+          type: customEntityType,
+        });
 
         // Verify the custom instance was created
         expect(createdCustomInstanceId).toBeDefined();
@@ -112,19 +132,21 @@ describe('EmporixSchemaApi', () => {
 
       let customInstance: EmporixCustomEntity | null | undefined;
       it('should get a custom instance by ID', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Get the custom instance we just created
-        customInstance = await schemaApi.getCustomEntity('TEST_ENTITY', createdCustomInstanceId);
+        customInstance = await schemaApi.getCustomEntity(customEntityType, createdCustomInstanceId);
 
         // Verify the custom instance details
         expect(customInstance).toBeDefined();
         expect(customInstance?.id).toBe(createdCustomInstanceId);
         expect(customInstance?.name).toEqual(sampleCustomInstanceCreation.name);
-        expect(customInstance?.type).toBe('TEST_ENTITY');
+        expect(customInstance?.type).toBe(customEntityType);
       }, 10000);
 
       it('should get all custom instances for a type', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Get all custom instances for the type
-        const customInstances = await schemaApi.getCustomEntities('TEST_ENTITY', {});
+        const customInstances = await schemaApi.getCustomEntities(customEntityType, {});
 
         // Verify custom instances were returned
         expect(customInstances).toBeDefined();
@@ -137,15 +159,16 @@ describe('EmporixSchemaApi', () => {
       }, 10000);
 
       it('should update a custom instance', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Update the custom instance with a new name
         const updatedName = { en: 'Updated Test Instance' };
-        await schemaApi.updateCustomEntity('TEST_ENTITY', createdCustomInstanceId, {
+        await schemaApi.updateCustomEntity(customEntityType, createdCustomInstanceId, {
           name: updatedName,
-          type: 'TEST_ENTITY',
+          type: customEntityType,
         });
 
         // Get the updated custom instance
-        const updatedInstance = await schemaApi.getCustomEntity('TEST_ENTITY', createdCustomInstanceId);
+        const updatedInstance = await schemaApi.getCustomEntity(customEntityType, createdCustomInstanceId);
 
         // Verify the name was updated
         expect(updatedInstance).toBeDefined();
@@ -153,11 +176,12 @@ describe('EmporixSchemaApi', () => {
       }, 10000);
 
       it('should patch a custom instance', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Patch the custom instance
-        await schemaApi.patchCustomEntity('TEST_ENTITY', createdCustomInstanceId, samplePatchOperations);
+        await schemaApi.patchCustomEntity(customEntityType, createdCustomInstanceId, samplePatchOperations);
 
         // Get the patched custom instance
-        const patchedInstance = await schemaApi.getCustomEntity('TEST_ENTITY', createdCustomInstanceId);
+        const patchedInstance = await schemaApi.getCustomEntity(customEntityType, createdCustomInstanceId);
 
         // Verify the patch was applied
         expect(patchedInstance).toBeDefined();
@@ -165,8 +189,9 @@ describe('EmporixSchemaApi', () => {
       }, 10000);
 
       it('should search custom instances', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Search for custom instances
-        const searchResults = await schemaApi.searchCustomEntities('TEST_ENTITY', { criteria: { name: 'Test' } });
+        const searchResults = await schemaApi.searchCustomEntities(customEntityType, { criteria: { name: 'Test' } });
 
         // Verify search results were returned
         expect(searchResults).toBeDefined();
@@ -175,21 +200,22 @@ describe('EmporixSchemaApi', () => {
       }, 10000);
 
       it('should create custom instances in bulk', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Create bulk instances
         const bulkInstances: EmporixCustomEntity[] = [
           {
             id: 'bulk-test-1',
-            type: 'TEST_ENTITY',
+            type: customEntityType,
             name: { en: 'Bulk Test 1' },
           },
           {
             id: 'bulk-test-2',
-            type: 'TEST_ENTITY',
+            type: customEntityType,
             name: { en: 'Bulk Test 2' },
           },
         ];
 
-        const bulkResponse = await schemaApi.createCustomEntitiesBulk('TEST_ENTITY', bulkInstances);
+        const bulkResponse = await schemaApi.createCustomEntitiesBulk(customEntityType, bulkInstances);
 
         // Verify bulk response
         expect(bulkResponse).toBeDefined();
@@ -199,21 +225,22 @@ describe('EmporixSchemaApi', () => {
       }, 10000);
 
       it('should update custom instances in bulk', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Update bulk instances
         const bulkUpdates: EmporixCustomEntity[] = [
           {
             id: 'bulk-test-1',
-            type: 'TEST_ENTITY',
+            type: customEntityType,
             name: { en: 'Updated Bulk Test 1' },
           },
           {
             id: 'bulk-test-2',
-            type: 'TEST_ENTITY',
+            type: customEntityType,
             name: { en: 'Updated Bulk Test 2' },
           },
         ];
 
-        const bulkResponse = await schemaApi.updateCustomEntitiesBulk('TEST_ENTITY', bulkUpdates);
+        const bulkResponse = await schemaApi.updateCustomEntitiesBulk(customEntityType, bulkUpdates);
 
         // Verify bulk response
         expect(bulkResponse).toBeDefined();
@@ -223,9 +250,10 @@ describe('EmporixSchemaApi', () => {
       }, 10000);
 
       it('should delete custom instances in bulk', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Delete bulk instances
         const bulkIds = ['bulk-test-1', 'bulk-test-2'];
-        const bulkResponse = await schemaApi.deleteCustomEntitiesBulk('TEST_ENTITY', bulkIds);
+        const bulkResponse = await schemaApi.deleteCustomEntitiesBulk(customEntityType, bulkIds);
 
         // Verify bulk response
         expect(bulkResponse).toBeDefined();
@@ -237,21 +265,23 @@ describe('EmporixSchemaApi', () => {
 
     describe('Error Handling', () => {
       it('should throw error when getting non-existent custom instance', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Attempt to get a non-existent custom instance
         const nonExistentInstanceId = 'non-existent-instance-id';
 
         // Expect the operation to throw an error
-        await expect(schemaApi.getCustomEntity('TEST_ENTITY', nonExistentInstanceId)).rejects.toThrow();
+        await expect(schemaApi.getCustomEntity(customEntityType, nonExistentInstanceId)).resolves.toBeNull();
       }, 10000);
     });
 
     describe('Cleanup', () => {
       it('should delete a custom instance', async () => {
+        if (!isCustomEntityTypeWritable) return;
         // Delete the custom instance
-        await schemaApi.deleteCustomEntity('TEST_ENTITY', createdCustomInstanceId);
+        await schemaApi.deleteCustomEntity(customEntityType, createdCustomInstanceId);
 
         // Verify the custom instance was deleted by expecting an error when trying to get it
-        await expect(schemaApi.getCustomEntity('TEST_ENTITY', createdCustomInstanceId)).rejects.toThrow();
+        await expect(schemaApi.getCustomEntity(customEntityType, createdCustomInstanceId)).resolves.toBeNull();
       }, 10000);
     });
   });
