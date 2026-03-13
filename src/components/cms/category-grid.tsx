@@ -47,7 +47,7 @@ const CategoryCard = ({ category, index }: CategoryCardProps) => {
 
   // Get the first media item if available
   const hasImage = category.media && category.media.length > 0;
-  const imageUrl = hasImage ? category.media[0].url : null;
+  const imageUrl = hasImage ? category.media![0].url : null;
   const gradientClass = gradients[index % gradients.length];
 
   return (
@@ -130,13 +130,13 @@ const CategoryGridSkeleton = ({ columns }: { columns: number }) => {
 const CategoryGrid = ({
   title = 'Shop by Category',
   subtitle,
-  showAllCategories = true,
+  showAllCategories: _showAllCategories = true,
   categoryId = 'productroot',
   maxCategories,
   columns = 4,
   blok,
 }: CategoryGridProps) => {
-  const { categoryTree, loading, error, notFound } = useCategoryTree(null, categoryId, false);
+  const { categoryTree: _categoryTree, loading, error, notFound: _notFound } = useCategoryTree(null, categoryId, false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [fallbackLoading, setFallbackLoading] = useState(false);
 

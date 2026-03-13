@@ -7,7 +7,7 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
  * API endpoint to get all product categories
  * GET /api/categories/all
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const categoryService = server.get<CategoryService>('CategoryService');
 

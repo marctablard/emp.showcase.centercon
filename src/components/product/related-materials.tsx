@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProducts } from '@/hooks/product/useProducts';
 import { useL10n } from '@/hooks/useL10n';
+import { RelatedMaterialTypeKey, dk } from '@/i18n/dynamic-key';
 import { cn } from '@/lib/utils';
 import { RelatedItem } from '@/platform/services/model/product';
 import { H2, Overline } from '../ui/h';
@@ -105,7 +106,7 @@ export function RelatedMaterials({ relatedItems, locale, className }: RelatedMat
               <SelectContent>
                 {RELATED_ITEM_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {t(`types.${type.toLowerCase()}`)}
+                    {t(dk<RelatedMaterialTypeKey>(`types.${type.toLowerCase()}`))}
                   </SelectItem>
                 ))}
               </SelectContent>

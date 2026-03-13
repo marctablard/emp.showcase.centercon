@@ -1,7 +1,6 @@
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import Article from '@/components/cms/article';
 import Category from '@/components/cms/category';
-import CategoryGrid from '@/components/cms/category-grid';
 import Columns from '@/components/cms/columns';
 import ContentBlock from '@/components/cms/content-block';
 import Feature from '@/components/cms/feature';

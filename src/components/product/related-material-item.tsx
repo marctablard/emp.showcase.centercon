@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/cart/useCart';
 import { useL10n } from '@/hooks/useL10n';
+import { RelatedMaterialTypeKey, dk } from '@/i18n/dynamic-key';
 import { Link } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { Product } from '@/platform/services/model/product';
@@ -102,7 +103,11 @@ export function RelatedMaterialItem({ product, locale, relationType }: RelatedMa
 
         {/* Relation Type */}
         <div className="w-32 flex-shrink-0 hidden sm:block">
-          {relationType && <p className="text-sm text-text-body">{tRelated(`types.${relationType.toLowerCase()}`)}</p>}
+          {relationType && (
+            <p className="text-sm text-text-body">
+              {tRelated(dk<RelatedMaterialTypeKey>(`types.${relationType.toLowerCase()}`))}
+            </p>
+          )}
         </div>
 
         {/* Price */}

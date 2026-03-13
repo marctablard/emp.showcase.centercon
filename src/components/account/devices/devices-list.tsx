@@ -248,23 +248,23 @@ export function DevicesList({ initialDevices }: DevicesListProps) {
                         <div className="flex items-center justify-end gap-1">
                           {hasRelatedProducts ? (
                             <Button
-                              variant="ghost"
+                              variant="link"
                               size="icon"
                               onClick={() => handleViewRelatedProducts(device)}
                               title={t('viewRelatedProducts')}
                             >
-                              <Layers className="h-5 w-5 text-text-headings hover:text-text-action" />
+                              <Layers className="h-5 w-5" />
                             </Button>
                           ) : (
                             <span className="text-text-placeholders text-sm mr-2">{t('noRelatedProducts')}</span>
                           )}
                           <Button
-                            variant="ghost"
+                            variant="link"
                             size="icon"
                             onClick={() => handleOpenHealthMonitor(device)}
                             title={t('viewHealthMonitor')}
                           >
-                            <Activity className="h-5 w-5 text-text-headings hover:text-text-action" />
+                            <Activity className="h-5 w-5" />
                           </Button>
                         </div>
                       </TableCell>

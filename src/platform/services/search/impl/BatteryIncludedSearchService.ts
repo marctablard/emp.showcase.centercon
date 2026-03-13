@@ -46,8 +46,6 @@ class BatteryIncludedSearchService implements SearchService {
   }
 
   async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
-    const currentCustomer = await this.customerService.getCustomer();
-
     // Add filter with segmentIds if customer is logged in and has segments assigned.
     let filters = params.filters;
     if (params.customerSegments) {
@@ -63,6 +61,7 @@ class BatteryIncludedSearchService implements SearchService {
       }
     }
 
+    let site = params.site;
     if (!site) {
       const session = await this.sessionService.getCurrent();
       site = session?.siteCode;

@@ -339,3 +339,16 @@ export type ProductTemplateAttributeKey =
 export type ProductAttributeKey =
   | ProductVariantAttributeKey
   | ProductTemplateAttributeKey;
+
+// ---------------------------------------------------------------------------
+// Namespace: product.relatedMaterials (sub-path: types.*)
+// Used by: related-material-item.tsx
+// ---------------------------------------------------------------------------
+export type RelatedMaterialTypeKey =
+  | 'types.all'
+  | 'types.accessory'
+  | 'types.compulsory'
+  | 'types.consumable'
+  | 'types.part'
+  | 'types.similar'
+  | 'types.upsell';
