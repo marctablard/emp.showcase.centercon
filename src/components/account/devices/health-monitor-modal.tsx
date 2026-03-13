@@ -23,20 +23,22 @@ interface HealthMonitorModalProps {
 const WEBHOOK_URL = 'https://hook.emporix-cop.integromat.celonis.com/fvardsdlvw3gj3xabzniaep3ih3wwj83';
 const COOLANT_THRESHOLD = 25;
 
-// Colour palette — defined once so every element uses the same tokens
+// All colours reference the app's CSS design tokens so the modal
+// automatically stays in sync with the brand theme.
 const C = {
-  bg: '#0d1117',
-  card: '#161b22',
-  input: '#21262d',
-  border: '#30363d',
-  cyan: '#22d3ee',
-  green: '#4ade80',
-  red: '#f87171',
-  yellow: '#facc15',
-  blue: '#3b82f6',
-  white: '#ffffff',
-  muted: '#9ca3af', // secondary labels
-  body: '#d1d5db', // body text / log text
+  bg: 'var(--color-surface-page)', // white
+  card: 'var(--color-surface-disabled)', // neutral-100 (light grey)
+  imageBg: 'var(--color-surface-image-background)', // grey-50
+  border: 'var(--color-border-primary)', // neutral-200
+  accent: 'var(--color-surface-action)', // primary blue — used as fill / active bg
+  accentText: 'var(--color-text-action)', // primary blue — used for text / icons
+  onAccent: 'var(--color-text-on-action)', // white — text on action bg
+  success: 'var(--color-text-success)',
+  error: 'var(--color-text-error)',
+  warning: 'var(--color-text-warning)',
+  headings: 'var(--color-text-headings)', // near-black
+  body: 'var(--color-text-body)', // dark grey
+  muted: 'var(--color-text-placeholders)', // neutral-600
 } as const;
 
 export function HealthMonitorModal({
@@ -52,7 +54,7 @@ export function HealthMonitorModal({
   const [coolantLevel, setCoolantLevel] = useState(initialLevel);
   const [webhookStatus, setWebhookStatus] = useState<WebhookStatus>('Ready');
   const [logs, setLogs] = useState<string[]>([]);
-  const wasAboveThreshold = useRef(true);
+  const wasAboveThreshold = useRef(initialLevel >= COOLANT_THRESHOLD);
   const logsRef = useRef<HTMLDivElement>(null);
 
   const addLog = useCallback((message: string) => {
@@ -121,34 +123,28 @@ export function HealthMonitorModal({
   };
 
   const isCritical = coolantLevel < COOLANT_THRESHOLD;
-
-  const webhookColor = webhookStatus === 'Ready' ? C.green : webhookStatus === 'Error' ? C.red : C.yellow;
+  const webhookColor = webhookStatus === 'Ready' ? C.success : webhookStatus === 'Error' ? C.error : C.warning;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-2xl w-full p-0 overflow-hidden"
-        style={{ backgroundColor: C.bg, borderColor: C.border, color: C.white }}
-      >
-        {/* sr-only titles for accessibility */}
-        <DialogTitle className="sr-only">SunGrid Asset Health Monitor</DialogTitle>
-        <DialogDescription className="sr-only">
-          Industrial IoT Diagnostics Platform — Model: {productName}
-        </DialogDescription>
+      <DialogContent className="sm:max-w-2xl w-full p-0 overflow-hidden">
+        {/* sr-only titles satisfy Radix ARIA requirements */}
+        <DialogTitle className="sr-only">Asset Health Monitor</DialogTitle>
+        <DialogDescription className="sr-only">Health monitor for device — Model: {productName}</DialogDescription>
 
-        <div className="p-6 flex flex-col gap-5">
-          {/* ── Header ───────────────────────────────────────── */}
+        <div className="p-6 flex flex-col gap-5" style={{ color: C.body }}>
+          {/* ── Header ───────────────────────────── */}
           <div>
-            <div className="flex items-center gap-2 text-xl font-bold" style={{ color: C.cyan }}>
-              <Activity className="h-5 w-5" />
-              SunGrid Asset Health Monitor
+            <div className="flex items-center gap-2 text-xl font-bold" style={{ color: C.headings }}>
+              <Activity className="h-5 w-5" style={{ color: C.accentText }} />
+              Asset Health Monitor
             </div>
-            <p className="text-xs mt-1" style={{ color: C.body }}>
-              Industrial IoT Diagnostics Platform — Model: {productName}
+            <p className="text-xs mt-1" style={{ color: C.muted }}>
+              {productName} · Serial: {device.serialNumber}
             </p>
           </div>
 
-          {/* ── Two-column body ───────────────────────────────── */}
+          {/* ── Two-column body ───────────────────── */}
           <div className="grid grid-cols-5 gap-4">
             {/* Left (3/5) */}
             <div className="col-span-3 flex flex-col gap-4">
@@ -156,7 +152,7 @@ export function HealthMonitorModal({
               <div className="rounded-md p-4" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
                 <p
                   className="flex items-center gap-2 text-xs font-semibold mb-3 uppercase tracking-wider"
-                  style={{ color: C.cyan }}
+                  style={{ color: C.accentText }}
                 >
                   <Activity className="h-3.5 w-3.5" />
                   Operation Mode
@@ -169,8 +165,8 @@ export function HealthMonitorModal({
                       className="flex-1 py-2 text-sm font-medium transition-colors"
                       style={
                         mode === m
-                          ? { backgroundColor: C.cyan, color: C.bg }
-                          : { backgroundColor: C.input, color: C.body }
+                          ? { backgroundColor: C.accent, color: C.onAccent }
+                          : { backgroundColor: C.bg, color: C.body }
                       }
                     >
                       {m === 'agentic' ? 'Agentic Mode' : 'Autonomous Mode'}
@@ -179,19 +175,22 @@ export function HealthMonitorModal({
                 </div>
               </div>
 
-              {/* Inverter Status */}
+              {/* Device Status */}
               <div className="rounded-md p-4" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
                 <p
                   className="flex items-center gap-2 text-xs font-semibold mb-3 uppercase tracking-wider"
-                  style={{ color: C.green }}
+                  style={{ color: C.success }}
                 >
-                  <span className="h-2 w-2 rounded-full inline-block" style={{ backgroundColor: C.green }} />
-                  Inverter Status
+                  <span className="h-2 w-2 rounded-full inline-block" style={{ backgroundColor: C.success }} />
+                  Device Status
                 </p>
                 <div className="flex gap-4">
                   <div
                     className="relative h-28 w-28 flex-shrink-0 rounded overflow-hidden"
-                    style={{ backgroundColor: C.input, border: `1px solid ${C.border}` }}
+                    style={{
+                      backgroundColor: C.imageBg,
+                      border: `1px solid ${C.border}`,
+                    }}
                   >
                     {product?.images && product.images.length > 0 ? (
                       <Image src={product.images[0].url} alt={productName} fill className="object-contain p-2" />
@@ -206,7 +205,7 @@ export function HealthMonitorModal({
                       <p className="text-xs mb-0.5" style={{ color: C.muted }}>
                         Inverter ID
                       </p>
-                      <p className="font-bold" style={{ color: C.cyan }}>
+                      <p className="font-bold" style={{ color: C.accentText }}>
                         {device.serialNumber}
                       </p>
                     </div>
@@ -214,7 +213,7 @@ export function HealthMonitorModal({
                       <p className="text-xs mb-0.5" style={{ color: C.muted }}>
                         Model
                       </p>
-                      <p className="font-medium" style={{ color: C.white }}>
+                      <p className="font-medium" style={{ color: C.headings }}>
                         {productName}
                       </p>
                     </div>
@@ -222,7 +221,7 @@ export function HealthMonitorModal({
                       <p className="text-xs mb-0.5" style={{ color: C.muted }}>
                         Status
                       </p>
-                      <p className="font-bold" style={{ color: C.green }}>
+                      <p className="font-bold" style={{ color: C.success }}>
                         Active
                       </p>
                     </div>
@@ -238,33 +237,31 @@ export function HealthMonitorModal({
             >
               <p
                 className="flex items-center gap-2 text-xs font-semibold mb-4 uppercase tracking-wider"
-                style={{ color: C.cyan }}
+                style={{ color: C.accentText }}
               >
                 <Droplets className="h-3.5 w-3.5" />
-                Dielectric Coolant Level
+                Coolant Level
               </p>
 
               <div className="flex-1 flex flex-col items-center gap-3">
                 {/* Gauge bar */}
                 <div
                   className="relative w-20 h-36 rounded overflow-hidden"
-                  style={{ backgroundColor: C.input, border: `1px solid ${C.border}` }}
+                  style={{ backgroundColor: C.imageBg, border: `1px solid ${C.border}` }}
                 >
                   <div
                     className="absolute bottom-0 left-0 right-0 transition-all duration-300"
-                    style={{ height: `${coolantLevel}%`, backgroundColor: isCritical ? C.red : C.blue }}
+                    style={{
+                      height: `${coolantLevel}%`,
+                      backgroundColor: isCritical ? C.error : C.accent,
+                      opacity: 0.85,
+                    }}
                   />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span
-                      className="font-bold text-xl leading-none"
-                      style={{ color: C.white, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
-                    >
+                    <span className="font-bold text-xl leading-none" style={{ color: C.headings }}>
                       {coolantLevel}%
                     </span>
-                    <span
-                      className="text-[10px] mt-0.5"
-                      style={{ color: C.body, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
-                    >
+                    <span className="text-[10px] mt-0.5" style={{ color: C.muted }}>
                       Current Level
                     </span>
                   </div>
@@ -278,14 +275,13 @@ export function HealthMonitorModal({
                   value={coolantLevel}
                   onChange={(e) => setCoolantLevel(Number(e.target.value))}
                   className="w-full cursor-pointer"
-                  style={{ accentColor: C.blue }}
                 />
 
                 {/* Stats */}
                 <div className="w-full space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <span style={{ color: C.body }}>Threshold</span>
-                    <span style={{ color: C.red, fontWeight: 500 }}>&lt; 25%</span>
+                    <span style={{ color: C.error, fontWeight: 500 }}>&lt; 25%</span>
                   </div>
                   <div className="flex justify-between">
                     <span style={{ color: C.body }}>Webhook Status</span>
@@ -297,7 +293,11 @@ export function HealthMonitorModal({
                 <button
                   onClick={handleReset}
                   className="w-full flex items-center justify-center gap-2 py-2 text-sm rounded transition-colors"
-                  style={{ backgroundColor: C.input, border: `1px solid ${C.border}`, color: C.white }}
+                  style={{
+                    backgroundColor: C.bg,
+                    border: `1px solid ${C.border}`,
+                    color: C.body,
+                  }}
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   Reset System
@@ -306,9 +306,9 @@ export function HealthMonitorModal({
             </div>
           </div>
 
-          {/* ── System Logs ────────────────────────────────────── */}
+          {/* ── System Logs ───────────────────────── */}
           <div className="rounded-md p-4" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-            <p className="text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: C.white }}>
+            <p className="text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: C.headings }}>
               System Logs
             </p>
             <div
