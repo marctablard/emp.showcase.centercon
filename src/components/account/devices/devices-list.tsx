@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { ChevronsUpDown, Layers, Search } from 'lucide-react';
+import { Activity, ChevronsUpDown, Layers, Search } from 'lucide-react';
 import { DashboardCard } from '@/components/account/dashboard/cards/dashboard-card';
 import { Button } from '@/components/ui/button';
 import { CardTitle } from '@/components/ui/card';
@@ -13,11 +13,13 @@ import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCustomer } from '@/hooks/customer/useCustomer';
 import { useDevices } from '@/hooks/device/useDevices';
 import { useProducts } from '@/hooks/product/useProducts';
 import { useL10n } from '@/hooks/useL10n';
 import { cn } from '@/lib/utils';
 import type { Device } from '@/types/device';
+import { HealthMonitorModal } from './health-monitor-modal';
 import { RelatedProductsModal } from './related-products-modal';
 
 type DeviceSortField = 'productName' | 'serialNumber' | 'health';
@@ -41,7 +43,11 @@ export function DevicesList({ initialDevices }: DevicesListProps) {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [healthDevice, setHealthDevice] = useState<Device | null>(null);
+  const [healthModalOpen, setHealthModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const { customer } = useCustomer();
 
   const { devices, loading, error, refreshDevices } = useDevices(initialDevices);
 
@@ -108,7 +114,13 @@ export function DevicesList({ initialDevices }: DevicesListProps) {
     }
   };
 
+  const handleOpenHealthMonitor = (device: Device) => {
+    setHealthDevice(device);
+    setHealthModalOpen(true);
+  };
+
   const selectedProduct = selectedDevice ? productMap.get(selectedDevice.productId) : null;
+  const healthProduct = healthDevice ? productMap.get(healthDevice.productId) : null;
   const colSpan = 4;
 
   return (
@@ -233,18 +245,28 @@ export function DevicesList({ initialDevices }: DevicesListProps) {
                         <Badge variant={getHealthBadgeVariant(device.health)}>{device.health}%</Badge>
                       </TableCell>
                       <TableCell className="px-2 py-4 text-right">
-                        {hasRelatedProducts ? (
+                        <div className="flex items-center justify-end gap-1">
+                          {hasRelatedProducts ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleViewRelatedProducts(device)}
+                              title={t('viewRelatedProducts')}
+                            >
+                              <Layers className="h-5 w-5 text-text-headings hover:text-text-action" />
+                            </Button>
+                          ) : (
+                            <span className="text-text-placeholders text-sm mr-2">{t('noRelatedProducts')}</span>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleViewRelatedProducts(device)}
-                            title={t('viewRelatedProducts')}
+                            onClick={() => handleOpenHealthMonitor(device)}
+                            title={t('viewHealthMonitor')}
                           >
-                            <Layers className="h-5 w-5 text-text-headings hover:text-text-action" />
+                            <Activity className="h-5 w-5 text-text-headings hover:text-text-action" />
                           </Button>
-                        ) : (
-                          <span className="text-text-placeholders text-sm">{t('noRelatedProducts')}</span>
-                        )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -262,6 +284,17 @@ export function DevicesList({ initialDevices }: DevicesListProps) {
           relatedItems={selectedProduct.relatedItems}
           locale={locale}
           deviceName={l10n(selectedDevice.name)}
+        />
+      )}
+
+      {healthDevice && (
+        <HealthMonitorModal
+          open={healthModalOpen}
+          onOpenChange={setHealthModalOpen}
+          device={healthDevice}
+          product={healthProduct ?? null}
+          productName={healthProduct ? l10n(healthProduct.name) : l10n(healthDevice.name)}
+          customerId={customer?.id ?? ''}
         />
       )}
     </>
