@@ -150,7 +150,7 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-2rem)] mt-17 sm:mt-36 md:mt-52 sm:max-w-screen-lg lg:max-w-[1220px] max-h-[calc(100dvh-5.25rem)] sm:max-h-[calc(100dvh-10rem)] md:max-h-[calc(100dvh-14rem)] flex min-h-0 flex-col">
+      <DialogContent className="w-[calc(100%-2rem)] sm:max-w-screen-lg lg:max-w-[1220px] flex min-h-0 flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <p className="text-sm text-text-on-disabled">{t('subtitle')}</p>
