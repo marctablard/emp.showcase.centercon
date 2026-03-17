@@ -29,7 +29,7 @@ interface SearchClientWrapperProps {
 export function SearchResultsComponent({ initialSearch, initialResults, locale }: SearchClientWrapperProps) {
   const t = useTranslations('search.searchResults');
   const searchParams = useSearchParams();
-  const [layout, setLayout] = useState<'list' | 'grid'>('list');
+  const [layout, setLayout] = useState<'list' | 'grid'>('grid');
   // Initialize the search hook with Product type and initial results
   const {
     data: products,
