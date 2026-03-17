@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { fetchReturns } from '@/lib/client/returns';
+import { fetchReturnsPage } from '@/lib/client/returns';
 import { Return } from '@/platform/services/model/return';
 
 interface UseReturnsReturn {
   returns: Return[];
+  totalCount?: number;
   loading: boolean;
   error: Error | null;
   refreshReturns: () => Promise<void>;
@@ -27,6 +28,7 @@ interface UseReturnsOptions {
 export function useReturns(initialReturns?: Return[], options: UseReturnsOptions = {}): UseReturnsReturn {
   const { pageSize, pageNumber, sort, query } = options;
   const [returns, setReturns] = useState<Return[]>(initialReturns || []);
+  const [totalCount, setTotalCount] = useState<number | undefined>(initialReturns?.length);
   const [loading, setLoading] = useState<boolean>(!initialReturns || pageNumber !== 1 || !!query || !!sort);
   const [error, setError] = useState<Error | null>(null);
 
@@ -34,8 +36,9 @@ export function useReturns(initialReturns?: Return[], options: UseReturnsOptions
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchReturns(pageSize, pageNumber, query, sort);
-      setReturns(data);
+      const data = await fetchReturnsPage(pageSize, pageNumber, query, sort);
+      setReturns(data.items);
+      setTotalCount(data.totalCount);
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
@@ -57,6 +60,7 @@ export function useReturns(initialReturns?: Return[], options: UseReturnsOptions
 
   return {
     returns,
+    totalCount,
     loading,
     error,
     refreshReturns,

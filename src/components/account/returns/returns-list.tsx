@@ -41,6 +41,7 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
   const apiQuery = normalizedSearch.length > 0 ? normalizedSearch : undefined;
   const {
     returns: visibleReturns,
+    totalCount,
     loading,
     error,
     refreshReturns,
@@ -50,7 +51,14 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
     sort: apiSort,
     query: apiQuery,
   });
-  const hasNextPage = visibleReturns.length === RETURNS_PER_PAGE;
+  const displayedCount = Math.min(
+    currentPage * RETURNS_PER_PAGE,
+    totalCount ?? (currentPage - 1) * RETURNS_PER_PAGE + visibleReturns.length,
+  );
+  const hasNextPage =
+    totalCount !== undefined
+      ? currentPage < Math.ceil(totalCount / RETURNS_PER_PAGE)
+      : visibleReturns.length === RETURNS_PER_PAGE;
 
   const toggleSort = (field: ReturnSortField) => {
     setCurrentPage(1);
@@ -288,7 +296,9 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
                   {tQuotesList('previous')}
                 </Button>
               )}
-              <span className="text-sm">{currentPage}</span>
+              <span className="text-sm">
+                {displayedCount} / {totalCount ?? displayedCount}
+              </span>
               {hasNextPage && (
                 <Button variant="neutral" size="small" onClick={handleNextPage}>
                   {tQuotesList('next')} <ChevronRight className="h-4 w-4" />

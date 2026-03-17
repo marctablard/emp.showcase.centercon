@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { normalizeReasonCode, normalizeReasonDetails } from '@/lib/common/returns/reason-normalization';
 import { computeOrderReturnability } from '@/lib/common/returns/returnability';
+import type { EmporixReturnApi } from '@/platform/integrations/emporix/return/EmporixReturnApi';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import { EmporixReturnMapper } from '@/platform/services/model/return/impl/EmporixReturnMapper';
 import type { OrderService } from '@/platform/services/order/OrderService';
 import { ReturnService } from '@/platform/services/return/ReturnService';
 
@@ -29,10 +31,14 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || undefined;
     const query = searchParams.get('query') || undefined;
 
-    const returnService = server.get<ReturnService>('ReturnService');
-    const returns = await returnService.getReturns(pageNumber, pageSize, sort, query);
+    const returnApi = server.get<EmporixReturnApi>('EmporixReturnApi');
+    const returnMapper = server.get<EmporixReturnMapper>('EmporixReturnMapper');
+    const { items, totalCount } = await returnApi.getReturns(pageNumber, pageSize, sort, query);
+    const returns = items.map((returnItem) => returnMapper.mapToService(returnItem));
 
-    return NextResponse.json(returns);
+    return NextResponse.json(returns, {
+      headers: totalCount !== undefined ? { 'x-total-count': String(totalCount) } : undefined,
+    });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
     logger.error(

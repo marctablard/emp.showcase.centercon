@@ -26,7 +26,7 @@ export class EmporixReturnService implements ReturnService {
    */
   async getReturns(pageNumber: number = 1, pageSize: number = 60, sort?: string, query?: string): Promise<Return[]> {
     const emporixReturns = await this.returnApi.getReturns(pageNumber, pageSize, sort, query);
-    return emporixReturns.map((returnItem) => this.returnMapper.mapToService(returnItem));
+    return emporixReturns.items.map((returnItem) => this.returnMapper.mapToService(returnItem));
   }
 
   /**

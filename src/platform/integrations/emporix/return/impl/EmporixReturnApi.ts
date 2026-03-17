@@ -28,7 +28,7 @@ class EmporixReturnApi implements IEmporixReturnApi {
     pageSize: number = 16,
     sort?: string,
     query?: string,
-  ): Promise<EmporixReturnResponse[]> {
+  ): Promise<{ items: EmporixReturnResponse[]; totalCount?: number }> {
     let url = `/return/${this.config.tenant}/returns?pageNumber=${pageNumber}&pageSize=${pageSize}`;
 
     if (sort) {
@@ -55,7 +55,14 @@ class EmporixReturnApi implements IEmporixReturnApi {
       throw new Error(`Failed to get returns: ${JSON.stringify(error)}`);
     }
 
-    return await response.json();
+    const totalCountHeader = response.headers.get('x-total-count');
+    const parsedTotalCount = totalCountHeader ? parseInt(totalCountHeader, 10) : Number.NaN;
+    const items = (await response.json()) as EmporixReturnResponse[];
+
+    return {
+      items,
+      totalCount: Number.isFinite(parsedTotalCount) ? parsedTotalCount : undefined,
+    };
   }
 
   /**
