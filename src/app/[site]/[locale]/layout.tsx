@@ -11,6 +11,7 @@ import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { redirect } from '@/i18n/edge/navigation';
 import { routing } from '@/i18n/routing';
+import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
 import { setSessionLanguage } from '@/lib/ssr/session';
 import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
@@ -108,7 +109,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
               <StoreProvider site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
-                  {process.env.NODE_ENV === 'development' && <ApiDebugPanel />}
+                  {isDebugApiEnabled() && isBrowserDebugOutputEnabled() && <ApiDebugPanel />}
                   {children}
                   {dialog}
                   <Toaster />

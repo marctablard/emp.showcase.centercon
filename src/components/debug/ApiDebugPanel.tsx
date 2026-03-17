@@ -2,6 +2,7 @@
 
 /* eslint-disable no-console -- This component intentionally logs to the browser console for DevTools debugging */
 import { useEffect, useRef } from 'react';
+import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
 
 interface ApiDebugEvent {
   id: string;
@@ -176,7 +177,7 @@ function logEventToConsole(event: ApiDebugEvent): void {
 }
 
 /**
- * Invisible dev-only component that connects to the server-side debug
+ * Invisible component that connects to the server-side debug
  * event stream (SSE) and pretty-prints upstream API calls in the
  * browser DevTools console.
  *
@@ -190,9 +191,8 @@ export function ApiDebugPanel(): null {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Only connect in development and when debug is enabled
-    const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
-    if (debugResponse === 'off') return;
+    // Connect only when debug response logging is enabled
+    if (!isDebugApiEnabled() || !isBrowserDebugOutputEnabled()) return;
 
     let isMounted = true;
 
