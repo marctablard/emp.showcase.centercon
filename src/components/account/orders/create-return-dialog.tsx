@@ -103,7 +103,7 @@ export function CreateReturnDialog({ open, onOpenChange, order, returnability }:
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[calc(100vw-32px)] max-w-[736px] lg:max-w-[1106px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
+      <DialogContent className="w-[calc(100vw-32px)] max-w-[736px] lg:max-w-[1106px] overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="text-xl md:text-2xl font-bold">{t('title')}</DialogTitle>
           <DialogDescription className="sr-only">{t('description')}</DialogDescription>
