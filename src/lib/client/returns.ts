@@ -71,11 +71,17 @@ export async function createReturn(
  * @param options.pageNumber Page number (default: 1)
  * @param options.query Emporix q-parameter value for server-side filtering
  */
-export async function fetchReturns(pageSize?: number, pageNumber?: number, query?: string): Promise<Return[]> {
+export async function fetchReturns(
+  pageSize?: number,
+  pageNumber?: number,
+  query?: string,
+  sort?: string,
+): Promise<Return[]> {
   const params = new URLSearchParams();
   if (pageSize) params.set('pageSize', pageSize.toString());
   if (pageNumber) params.set('pageNumber', pageNumber.toString());
   if (query) params.set('query', query);
+  if (sort) params.set('sort', sort);
 
   const queryString = params.toString();
   const url = `/api/returns${queryString ? `?${queryString}` : ''}`;

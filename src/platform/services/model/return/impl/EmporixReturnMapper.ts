@@ -1,5 +1,7 @@
 import { injectable } from '@/platform/core/di/injectable';
+import { EmporixMetadata, EmporixMixins } from '@/platform/integrations/emporix/model/common';
 import {
+  EmporixReturnAssistedBuyingEntry,
   EmporixReturnCalculatedPrice,
   EmporixReturnCalculatedValue,
   EmporixReturnOrder,
@@ -8,16 +10,20 @@ import {
   EmporixReturnReason,
   EmporixReturnRequestor,
   EmporixReturnResponse,
+  EmporixReturnSubmitter,
 } from '@/platform/integrations/emporix/model/return';
 import {
   Return,
+  ReturnAssistedBuyingEntry,
   ReturnCalculatedPrice,
   ReturnCalculatedValue,
   ReturnItem,
+  ReturnMetadata,
   ReturnOrder,
   ReturnPrice,
   ReturnReason,
   ReturnRequestor,
+  ReturnSubmitter,
 } from '@/platform/services/model/return';
 import { ReturnMapper } from '../ReturnMapper';
 
@@ -27,6 +33,10 @@ import { ReturnMapper } from '../ReturnMapper';
  */
 @injectable('EmporixReturnMapper', 'Singleton')
 export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> {
+  private mapOptional<S, T>(value: S | undefined, mapper: (v: S) => T): T | undefined {
+    return value === undefined ? undefined : mapper(value);
+  }
+
   /**
    * Maps an Emporix return to the internal Return model.
    *
@@ -39,14 +49,19 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
     return {
       id: source.id,
       status: source.approvalStatus,
+      approvalStatus: source.approvalStatus,
       received: source.received ?? false,
       expiryDate: source.expiryDate,
       isExpired,
-      total: source.total ? this.mapPrice(source.total) : undefined,
-      calculatedPrice: source.calculatedPrice ? this.mapCalculatedPrice(source.calculatedPrice) : undefined,
-      reason: source.reason ? this.mapReason(source.reason) : undefined,
+      total: this.mapOptional(source.total, this.mapPrice),
+      calculatedPrice: this.mapOptional(source.calculatedPrice, (value) => this.mapCalculatedPrice(value)),
+      reason: this.mapOptional(source.reason, this.mapReason),
       orders: this.mapOrders(source.orders),
-      requestor: source.requestor ? this.mapRequestor(source.requestor) : undefined,
+      requestor: this.mapOptional(source.requestor, this.mapRequestor),
+      submitter: this.mapOptional(source.submitter, this.mapSubmitter),
+      entries: this.mapOptional(source.entries, (value) => this.mapEntries(value)),
+      metadata: this.mapOptional(source.metadata, this.mapMetadata),
+      mixins: this.mapOptional(source.mixins, this.mapMixins),
       createdAt: source.metadata?.createdAt,
       updatedAt: source.metadata?.modifiedAt,
     };
@@ -65,15 +80,20 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       approvalStatus: service.status,
       received: service.received,
       expiryDate: service.expiryDate,
-      total: service.total ? this.mapPriceToSource(service.total) : undefined,
-      calculatedPrice: service.calculatedPrice ? this.mapCalculatedPriceToSource(service.calculatedPrice) : undefined,
-      reason: service.reason ? this.mapReasonToSource(service.reason) : undefined,
+      total: this.mapOptional(service.total, this.mapPriceToSource),
+      calculatedPrice: this.mapOptional(service.calculatedPrice, (value) => this.mapCalculatedPriceToSource(value)),
+      reason: this.mapOptional(service.reason, this.mapReasonToSource),
       orders: this.mapOrdersToSource(service.orders),
-      requestor: service.requestor ? this.mapRequestorToSource(service.requestor) : undefined,
-      metadata: {
-        createdAt: service.createdAt,
-        modifiedAt: service.updatedAt,
-      },
+      requestor: this.mapOptional(service.requestor, this.mapRequestorToSource),
+      submitter: this.mapOptional(service.submitter, this.mapSubmitterToSource),
+      entries: this.mapOptional(service.entries, (value) => this.mapEntriesToSource(value)),
+      metadata: service.metadata
+        ? this.mapMetadataToSource(service.metadata)
+        : {
+            createdAt: service.createdAt,
+            modifiedAt: service.updatedAt,
+          },
+      mixins: this.mapOptional(service.mixins, this.mapMixinsToSource),
     };
   }
 
@@ -173,10 +193,7 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
    * Maps Emporix orders array to service orders.
    */
   private mapOrders(orders?: EmporixReturnOrder[]): ReturnOrder[] {
-    if (!orders) {
-      return [];
-    }
-    return orders.map((order) => this.mapOrder(order));
+    return orders?.map((order) => this.mapOrder(order)) ?? [];
   }
 
   /**
@@ -203,10 +220,7 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
    * Maps Emporix items array to service items.
    */
   private mapItems(items?: EmporixReturnOrderItem[]): ReturnItem[] {
-    if (!items) {
-      return [];
-    }
-    return items.map((item) => this.mapItem(item));
+    return items?.map((item) => this.mapItem(item)) ?? [];
   }
 
   /**
@@ -217,15 +231,15 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       id: source.id,
       name: source.name,
       quantity: source.quantity,
-      unitPrice: source.unitPrice ? this.mapPrice(source.unitPrice) : undefined,
-      total: source.total ? this.mapPrice(source.total) : undefined,
-      calculatedUnitPrice: source.calculatedUnitPrice
-        ? this.mapCalculatedValue(source.calculatedUnitPrice, source.unitPrice?.currency ?? source.total?.currency)
-        : undefined,
-      calculatedPrice: source.calculatedPrice
-        ? this.mapCalculatedPrice(source.calculatedPrice, source.total?.currency)
-        : undefined,
-      reason: source.reason ? this.mapReason(source.reason) : undefined,
+      unitPrice: this.mapOptional(source.unitPrice, this.mapPrice),
+      total: this.mapOptional(source.total, this.mapPrice),
+      calculatedUnitPrice: this.mapOptional(source.calculatedUnitPrice, (value) =>
+        this.mapCalculatedValue(value, source.unitPrice?.currency ?? source.total?.currency),
+      ),
+      calculatedPrice: this.mapOptional(source.calculatedPrice, (value) =>
+        this.mapCalculatedPrice(value, source.total?.currency),
+      ),
+      reason: this.mapOptional(source.reason, this.mapReason),
     };
   }
 
@@ -237,13 +251,11 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       id: item.id,
       name: item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice ? this.mapPriceToSource(item.unitPrice) : undefined,
-      total: item.total ? this.mapPriceToSource(item.total) : undefined,
-      calculatedUnitPrice: item.calculatedUnitPrice
-        ? this.mapCalculatedValueToSource(item.calculatedUnitPrice)
-        : undefined,
-      calculatedPrice: item.calculatedPrice ? this.mapCalculatedPriceToSource(item.calculatedPrice) : undefined,
-      reason: item.reason ? this.mapReasonToSource(item.reason) : undefined,
+      unitPrice: this.mapOptional(item.unitPrice, this.mapPriceToSource),
+      total: this.mapOptional(item.total, this.mapPriceToSource),
+      calculatedUnitPrice: this.mapOptional(item.calculatedUnitPrice, this.mapCalculatedValueToSource),
+      calculatedPrice: this.mapOptional(item.calculatedPrice, this.mapCalculatedPriceToSource),
+      reason: this.mapOptional(item.reason, this.mapReasonToSource),
     }));
   }
 
@@ -260,6 +272,7 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       firstName: source.firstName,
       lastName: source.lastName,
       email: source.email,
+      anonymous: source.anonymous,
       fullName,
     };
   }
@@ -273,7 +286,58 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
       firstName: service.firstName,
       lastName: service.lastName,
       email: service.email,
+      anonymous: service.anonymous,
     };
+  }
+
+  private mapSubmitter(source: EmporixReturnSubmitter): ReturnSubmitter {
+    return {
+      userType: source.userType,
+      firstName: source.firstName,
+      lastName: source.lastName,
+      email: source.email,
+    };
+  }
+
+  private mapSubmitterToSource(service: ReturnSubmitter): EmporixReturnSubmitter {
+    return {
+      userType: service.userType,
+      firstName: service.firstName,
+      lastName: service.lastName,
+      email: service.email,
+    };
+  }
+
+  private mapEntries(source: EmporixReturnAssistedBuyingEntry[]): ReturnAssistedBuyingEntry[] {
+    return source.map((entry) => ({
+      employeeId: entry.employeeId,
+      operation: entry.operation,
+      timestamp: entry.timestamp,
+    }));
+  }
+
+  private mapEntriesToSource(service: ReturnAssistedBuyingEntry[]): EmporixReturnAssistedBuyingEntry[] {
+    return service.map((entry) => ({
+      employeeId: entry.employeeId,
+      operation: entry.operation,
+      timestamp: entry.timestamp,
+    }));
+  }
+
+  private mapMetadata(source: EmporixMetadata): ReturnMetadata {
+    return { ...source };
+  }
+
+  private mapMetadataToSource(service: ReturnMetadata): EmporixMetadata {
+    return { ...service };
+  }
+
+  private mapMixins(source: EmporixMixins): Record<string, unknown> {
+    return { ...source };
+  }
+
+  private mapMixinsToSource(service: Record<string, unknown>): EmporixMixins {
+    return service as unknown as EmporixMixins;
   }
 }
 

@@ -103,7 +103,9 @@ function renderReturnReasonLabel(t: ReturnType<typeof useTranslations<'account.r
 }
 
 function ReturnOverview({ returnItem, locale, t }: ReturnOverviewProps) {
-  const totalValue = formatReturnCurrency(returnItem.total?.value, returnItem.total?.currency, locale);
+  const totalGrossValue = returnItem.calculatedPrice?.finalPrice?.grossValue;
+  const totalNetValue = returnItem.calculatedPrice?.finalPrice?.netValue ?? returnItem.total?.value;
+  const totalCurrency = returnItem.calculatedPrice?.finalPrice?.currency ?? returnItem.total?.currency;
 
   return (
     <div className="bg-surface-action-hover-2 p-6 rounded-lg shadow-sm">
@@ -119,7 +121,15 @@ function ReturnOverview({ returnItem, locale, t }: ReturnOverviewProps) {
             {t('totalReturnValue')}
           </span>
           <span className="flex-1 text-right text-[16px] leading-[24px] lg:text-[20px] lg:leading-[24px] font-bold text-text-headings font-primary">
-            {totalValue}
+            {totalGrossValue !== undefined ? formatReturnCurrency(totalGrossValue, totalCurrency, locale) : '-'}
+          </span>
+        </div>
+        <div className="flex items-start gap-4">
+          <span className="flex-1 text-[12px] leading-[20px] lg:text-[14px] lg:leading-[20px] font-medium text-text-on-disabled font-secondary">
+            {t('net')}
+          </span>
+          <span className="flex-1 text-right text-[12px] leading-[20px] lg:text-[14px] lg:leading-[20px] text-text-on-disabled font-secondary">
+            {formatReturnCurrency(totalNetValue, totalCurrency, locale)}
           </span>
         </div>
       </div>

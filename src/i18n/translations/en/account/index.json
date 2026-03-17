@@ -215,6 +215,8 @@
     "createdAt": "Created",
     "actions": "Actions",
     "view": "View",
+    "next": "Next",
+    "previous": "Previous",
     "returnDetails": "Return Details",
     "returnDetailsDescription": "View details of your return request",
     "returnedProducts": "Returned Products",

@@ -163,6 +163,8 @@
     "createdAt": "Erstellt",
     "actions": "Aktionen",
     "view": "Anzeigen",
+    "next": "Weiter",
+    "previous": "Zurück",
     "returnDetails": "Rücksendungsdetails",
     "returnDetailsDescription": "Details Ihrer Rücksendeanfrage anzeigen",
     "returnedProducts": "Zurückgesendete Produkte",
