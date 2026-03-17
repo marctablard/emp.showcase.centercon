@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { isEqual } from 'lodash';
 import { checkout } from '@/lib/client/checkout';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { PaymentMode } from '@/platform/services/model';
@@ -85,6 +86,7 @@ export const useCheckout = (): UseCheckout => {
   } = useShippingMethods();
   const { paymentModes } = useSite();
   const { status } = useSession();
+  const lastShippingMethodsFetchKeyRef = useRef<string | null>(null);
 
   const submitContactData = useCallback(
     (contactData: ContactData) => {
@@ -96,6 +98,10 @@ export const useCheckout = (): UseCheckout => {
 
   const submitShippingAddress = useCallback(
     (address: CheckoutAddress) => {
+      if (isEqual(shippingAddress, address)) {
+        return;
+      }
+
       if (
         checkoutCart?.id &&
         (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode)
@@ -265,14 +271,37 @@ export const useCheckout = (): UseCheckout => {
   };
 
   useEffect(() => {
-    if (checkoutCart && shippingAddress) {
-      if (shippingAddress.country && shippingAddress.zipCode) {
-        fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode, checkoutCart.totalPrice);
-      }
-    } else {
+    const countryCode = shippingAddress?.country;
+    const postalCode = shippingAddress?.zipCode;
+    const amount = checkoutCart?.totalPrice?.amount;
+    const currency = checkoutCart?.totalPrice?.currency;
+    const cartId = checkoutCart?.id;
+
+    if (!cartId || !countryCode || !postalCode || amount === undefined || !currency) {
+      lastShippingMethodsFetchKeyRef.current = null;
       clearShippingMethods();
+      return;
     }
-  }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
+
+    const fetchKey = `${cartId}|${countryCode}|${postalCode}|${amount}|${currency}`;
+    if (lastShippingMethodsFetchKeyRef.current === fetchKey) {
+      return;
+    }
+    lastShippingMethodsFetchKeyRef.current = fetchKey;
+
+    fetchShippingMethods(countryCode, postalCode, {
+      amount,
+      currency,
+    });
+  }, [
+    shippingAddress?.country,
+    shippingAddress?.zipCode,
+    checkoutCart?.id,
+    checkoutCart?.totalPrice?.amount,
+    checkoutCart?.totalPrice?.currency,
+    fetchShippingMethods,
+    clearShippingMethods,
+  ]);
 
   useEffect(() => {
     if (!checkoutCart) {
@@ -290,7 +319,9 @@ export const useCheckout = (): UseCheckout => {
       newShippingMethod = availableShippingMethods.find((method) => method.id === shippingMethod.methodId) || null;
     }
     if (!newShippingMethod) {
-      newShippingMethod = availableShippingMethods.sort((a, b) => (a.cost?.amount || 0) - (b.cost?.amount || 0))[0];
+      newShippingMethod = [...availableShippingMethods].sort(
+        (a, b) => (a.cost?.amount || 0) - (b.cost?.amount || 0),
+      )[0];
     }
     submitShippingMethod(newShippingMethod);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- shippingMethod excluded: this effect SETS it, including it would cause an infinite loop
