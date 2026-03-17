@@ -233,7 +233,9 @@ export function MyOrdersTable({
                               {t('returnLink')}
                             </span>
                           </TooltipTrigger>
-                          <TooltipContent>{t('noRemainingItems')}</TooltipContent>
+                          <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
+                            {t('noRemainingItems')}
+                          </TooltipContent>
                         </Tooltip>
                       ) : (
                         <button
@@ -251,7 +253,9 @@ export function MyOrdersTable({
                             {t('returnLink')}
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent>{t('returnDisabledTooltip')}</TooltipContent>
+                        <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
+                          {t('returnDisabledTooltip')}
+                        </TooltipContent>
                       </Tooltip>
                     )}
                     <UiLink type="Link" href={`/account/orders/${order.id}`} variant="primary" size="m">

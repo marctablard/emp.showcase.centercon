@@ -17,9 +17,11 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { ToastType, notify } from '@/components/ui/toast-notification';
 import { useRouter } from '@/i18n/navigation';
 import { CreateReturnItem, RETURN_REASON_CODES, ReturnReasonCode, createReturn } from '@/lib/client/returns';
 import { type OrderReturnability, buildRemainingQuantityMap } from '@/lib/common/returns/returnability';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { Order } from '@/platform/services/model/order/order';
 
 interface CreateReturnDialogProps {
@@ -45,7 +47,6 @@ export function CreateReturnDialog({ open, onOpenChange, order, returnability }:
   const [itemReasons, setItemReasons] = useState<Record<string, ReturnReasonCode | ''>>({});
   const [itemReasonDetails, setItemReasonDetails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const detailsPerItemId = `return-details-per-item-${order.id}`;
   const globalReasonSelectId = `return-reason-global-${order.id}`;
   const globalReasonDescriptionId = `return-reason-description-global-${order.id}`;
@@ -97,7 +98,6 @@ export function CreateReturnDialog({ open, onOpenChange, order, returnability }:
 
   const handleSubmit = async (): Promise<void> => {
     setLoading(true);
-    setError(null);
 
     try {
       const selectedItems = Object.entries(quantities).filter(([, qty]) => qty > 0);
@@ -109,14 +109,18 @@ export function CreateReturnDialog({ open, onOpenChange, order, returnability }:
       }));
 
       if (items.length === 0) {
-        setError(t('noItemsSelected'));
-        setLoading(false);
+        notify({
+          title: t('noItemsSelected'),
+          type: ToastType.Error,
+        });
         return;
       }
 
       if (!reasonCode) {
-        setError(t('reasonRequired'));
-        setLoading(false);
+        notify({
+          title: t('reasonRequired'),
+          type: ToastType.Error,
+        });
         return;
       }
 
@@ -125,7 +129,15 @@ export function CreateReturnDialog({ open, onOpenChange, order, returnability }:
       onOpenChange(false);
       router.push(`/account/returns/${response.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('submitError'));
+      const errorMessage = err instanceof Error ? err.message : t('submitError');
+      getLogger().error(
+        { err, orderId: order.id, selectedItems: Object.keys(quantities).length },
+        'Failed to create return',
+      );
+      notify({
+        title: errorMessage,
+        type: ToastType.Error,
+      });
     } finally {
       setLoading(false);
     }
@@ -139,7 +151,6 @@ export function CreateReturnDialog({ open, onOpenChange, order, returnability }:
       setProvideAdditionalPerItemDetails(false);
       setItemReasons({});
       setItemReasonDetails({});
-      setError(null);
     }
     onOpenChange(newOpen);
   };
@@ -236,9 +247,6 @@ export function CreateReturnDialog({ open, onOpenChange, order, returnability }:
           onItemReasonDetailsChange={setItemReasonDescription}
           reasonOptions={RETURN_REASON_CODES}
         />
-
-        {/* Error Message */}
-        {error && <div className="p-4 bg-surface-error-soft rounded text-text-error text-sm">{error}</div>}
 
         {/* Footer */}
         <DialogFooter className="!justify-start flex flex-row gap-6 pt-4">
