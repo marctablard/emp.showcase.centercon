@@ -100,7 +100,18 @@ function getBrowserDetails(): Set<BrowserDetail> {
     .filter(Boolean);
   const allowed = new Set<BrowserDetail>();
   for (const p of parts) {
-    if (p === 'payload' || p === 'headers' || p === 'body') allowed.add(p);
+    if (p === 'payload') {
+      allowed.add('payload');
+      continue;
+    }
+    if (p === 'headers') {
+      allowed.add('headers');
+      continue;
+    }
+    // Accept BODY and BODY-{n} forms so env values like BODY-200 still enable body output.
+    if (p === 'body' || /^body-\d+$/.test(p)) {
+      allowed.add('body');
+    }
   }
   // If nothing valid was specified, default to all
   if (allowed.size === 0) {
@@ -487,14 +498,14 @@ export async function logResponse(
     _requestTimestamps.delete(tsKey);
     _requestTimestamps.delete(ridKey);
 
-    // Compute headers for the SSE event if not already done for terminal
-    if (!responseHeaders && debugResponse !== 'status') {
+    // Compute headers for SSE independently from terminal mode.
+    if (!responseHeaders) {
       let hdrs = Object.fromEntries(response.headers.entries());
       if (maskSensitive) hdrs = maskHeaders(hdrs);
       responseHeaders = hdrs;
     }
-    // Also read body for the event if not done for terminal
-    if (!bodyText && (debugResponse.startsWith('status-body') || debugResponse === 'full')) {
+    // Always include full raw response body in browser events so DevTools can show unmapped fields.
+    if (!bodyText) {
       try {
         bodyText = await response.clone().text();
       } catch {

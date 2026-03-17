@@ -262,6 +262,11 @@ function ReturnItemsList({ items, locale, t, generalReasonCode }: ReturnItemsLis
                           <Badge className={reasonBadgeClassName}>{renderReturnReasonLabel(t, item.reason.code)}</Badge>
                         )}
                       </div>
+                      {item.reason?.details && (
+                        <p className="text-[12px] leading-[20px] text-text-body font-secondary">
+                          {item.reason.details}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="min-w-0 flex flex-col gap-1">
@@ -341,6 +346,11 @@ function ReturnItemsList({ items, locale, t, generalReasonCode }: ReturnItemsLis
                           <Badge className={reasonBadgeClassName}>{renderReturnReasonLabel(t, item.reason.code)}</Badge>
                         )}
                       </div>
+                      {item.reason?.details && (
+                        <p className="mt-1 text-[12px] leading-[20px] text-text-body font-secondary">
+                          {t('reason')}: {item.reason.details}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between text-sm">

@@ -33,7 +33,18 @@ function getBrowserDetails(): Set<BrowserDetail> {
     .filter(Boolean);
   const allowed = new Set<BrowserDetail>();
   for (const p of parts) {
-    if (p === 'payload' || p === 'headers' || p === 'body') allowed.add(p);
+    if (p === 'payload') {
+      allowed.add('payload');
+      continue;
+    }
+    if (p === 'headers') {
+      allowed.add('headers');
+      continue;
+    }
+    // Accept BODY and BODY-{n} forms so env values like BODY-200 still enable body output.
+    if (p === 'body' || /^body-\d+$/.test(p)) {
+      allowed.add('body');
+    }
   }
   if (allowed.size === 0) {
     allowed.add('payload');
