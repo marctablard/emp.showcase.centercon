@@ -60,6 +60,16 @@ const createRequest = (
   } as unknown as NextRequest;
 };
 
+let consoleWarnSpy: jest.SpiedFunction<typeof console.warn>;
+
+beforeEach(() => {
+  consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  consoleWarnSpy.mockRestore();
+});
+
 describe('site middleware - domain and prefix handling', () => {
   const baseRouting: SiteRoutingConfig = {
     defaultSite: 'main',

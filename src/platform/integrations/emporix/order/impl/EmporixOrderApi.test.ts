@@ -330,13 +330,8 @@ describe('EmporixOrderApi', () => {
     }, 10000);
 
     // Customer order endpoint does not support PUT (405 Method Not Allowed)
-    it.skip('should update a customer order', async () => {
-      await orderApi.updateCustomerOrder(customerOrderId, sampleUpdateOrderRequest);
-
-      const updatedOrder = await orderApi.getCustomerOrder(customerOrderId);
-
-      expect(updatedOrder).toBeDefined();
-      expect(updatedOrder?.status).toBe(sampleUpdateOrderRequest.status);
+    it('should reject updating a customer order', async () => {
+      await expect(orderApi.updateCustomerOrder(customerOrderId, sampleUpdateOrderRequest)).rejects.toThrow();
     }, 10000);
 
     it('should get customer order status transitions', async () => {

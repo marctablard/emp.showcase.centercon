@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { Ban, RotateCcw, Truck } from 'lucide-react';
@@ -9,9 +9,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { H2, H3 } from '@/components/ui/h';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useOrder } from '@/hooks/order/useOrder';
 import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
+import { fetchReturnsForOrder } from '@/lib/client/returns';
+import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { Order, OrderStatus } from '@/platform/services/model/order/order';
 import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
@@ -44,9 +47,28 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
   const tPaymentModes = useTranslations('checkout.PaymentModes');
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [returnability, setReturnability] = useState<OrderReturnability | null>(null);
   const router = useRouter();
 
   const { order, loading, error, cancelOrder } = useOrder({ orderId, initialOrder });
+
+  useEffect(() => {
+    if (!order || order.status !== ORDER_STATUS.COMPLETED) return;
+    let cancelled = false;
+    const syncReturnability = async () => {
+      try {
+        const existingReturns = await fetchReturnsForOrder(order.id);
+        if (cancelled) return;
+        setReturnability(computeOrderReturnability(order.id, order.items, existingReturns));
+      } catch (_error) {
+        if (!cancelled) setReturnability(null);
+      }
+    };
+    void syncReturnability();
+    return () => {
+      cancelled = true;
+    };
+  }, [order]);
 
   if (loading) {
     return (
@@ -255,12 +277,25 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                   {tOrder('cancelOrder')}
                 </Button>
               )}
-              {shouldShowReturnButton(order.status) && (
-                <Button variant="secondary" size="small" onClick={() => setReturnDialogOpen(true)}>
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  {tOrder('returnOrder')}
-                </Button>
-              )}
+              {shouldShowReturnButton(order.status) &&
+                (returnability?.hasAnyReturnableItem === false ? (
+                  <Tooltip delayDuration={200}>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button variant="secondary" size="small" disabled>
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          {tOrder('returnOrder')}
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{tOrder('noRemainingItems')}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Button variant="secondary" size="small" onClick={() => setReturnDialogOpen(true)}>
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    {tOrder('returnOrder')}
+                  </Button>
+                ))}
               {(
                 [
                   ORDER_STATUS.PROCESSING,
@@ -285,7 +320,14 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
       {/* Tracking Dialog */}
       <TrackingDialog orderId={orderId} open={trackingDialogOpen} onOpenChange={setTrackingDialogOpen} />
 
-      {order && <CreateReturnDialog order={order} open={returnDialogOpen} onOpenChange={setReturnDialogOpen} />}
+      {order && (
+        <CreateReturnDialog
+          order={order}
+          open={returnDialogOpen}
+          onOpenChange={setReturnDialogOpen}
+          returnability={returnability ?? undefined}
+        />
+      )}
     </div>
   );
 }

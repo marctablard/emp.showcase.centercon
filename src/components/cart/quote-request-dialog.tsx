@@ -150,14 +150,14 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-2rem)] sm:max-w-screen-lg lg:max-w-[1220px] max-h-[90vh] flex flex-col">
+      <DialogContent className="w-[calc(100%-2rem)] sm:max-w-screen-lg lg:max-w-[1220px] flex min-h-0 flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <p className="text-sm text-text-on-disabled">{t('subtitle')}</p>
         </DialogHeader>
 
         {/* Scrollable content area */}
-        <div className="grid grid-cols-1 gap-6 flex-1 overflow-y-auto px-1 overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="grid grid-cols-1 gap-6 flex-1 min-h-0 overflow-y-auto px-1 overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* Shipping address selector + form */}
           {addresses && addresses.length > 0 && (
             <AddressSelector
@@ -242,7 +242,7 @@ export default function QuoteRequestDialog({ open, onOpenChange }: QuoteRequestD
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0 border-t pt-4 bg-surface-page">
           <Button variant="secondary" onClick={() => onOpenChange(false)} data-testid="quote-cancelButton">
             {t('cancel')}
           </Button>

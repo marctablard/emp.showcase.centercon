@@ -57,15 +57,16 @@ export async function createReturn(
 }
 
 /**
- * Fetch all returns for the current customer
- * @param pageSize Optional page size (default: 60)
- * @param pageNumber Optional page number (default: 1)
- * @returns Promise with array of returns
+ * Fetch returns for the current customer with optional filtering.
+ * @param options.pageSize Page size (default: 60, API max: 60)
+ * @param options.pageNumber Page number (default: 1)
+ * @param options.query Emporix q-parameter value for server-side filtering
  */
-export async function fetchReturns(pageSize?: number, pageNumber?: number): Promise<Return[]> {
+export async function fetchReturns(pageSize?: number, pageNumber?: number, query?: string): Promise<Return[]> {
   const params = new URLSearchParams();
   if (pageSize) params.set('pageSize', pageSize.toString());
   if (pageNumber) params.set('pageNumber', pageNumber.toString());
+  if (query) params.set('query', query);
 
   const queryString = params.toString();
   const url = `/api/returns${queryString ? `?${queryString}` : ''}`;
@@ -83,6 +84,35 @@ export async function fetchReturns(pageSize?: number, pageNumber?: number): Prom
   }
 
   return response.json();
+}
+
+/**
+ * Builds the Emporix `q` value to filter returns by one or more order IDs.
+ * Uses the `orders._id` field supported by the Returns API.
+ * @see https://developer.emporix.io/api-references-1/readme/api-reference-29/returns
+ */
+function buildOrderIdsQuery(orderIds: string[]): string {
+  if (orderIds.length === 1) {
+    return `orders._id:${orderIds[0]}`;
+  }
+  return `orders._id:(${orderIds.join(',')})`;
+}
+
+/**
+ * Fetch all returns that reference the given order IDs.
+ * Filters server-side via the Emporix `q` parameter so pagination
+ * is scoped per-order (a single order won't exceed 60 returns).
+ */
+export async function fetchReturnsForOrderIds(orderIds: string[]): Promise<Return[]> {
+  if (orderIds.length === 0) return [];
+  return fetchReturns(undefined, undefined, buildOrderIdsQuery(orderIds));
+}
+
+/**
+ * Fetch all returns that reference a specific order.
+ */
+export async function fetchReturnsForOrder(orderId: string): Promise<Return[]> {
+  return fetchReturnsForOrderIds([orderId]);
 }
 
 /**

@@ -17,19 +17,21 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from '@/i18n/navigation';
 import { CreateReturnItem, RETURN_REASON_CODES, ReturnReasonCode, createReturn } from '@/lib/client/returns';
+import { type OrderReturnability, buildRemainingQuantityMap } from '@/lib/common/returns/returnability';
 import { Order } from '@/platform/services/model/order/order';
 
 interface CreateReturnDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   order: Order;
+  returnability?: OrderReturnability;
 }
 
 /**
  * Dialog for creating a return request for an order
  * Displays order details and allows selecting quantities to return
  */
-export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDialogProps) {
+export function CreateReturnDialog({ open, onOpenChange, order, returnability }: CreateReturnDialogProps) {
   const t = useTranslations('account.returns.createDialog');
   const tReturns = useTranslations('account.returns');
   const router = useRouter();
@@ -37,6 +39,11 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
   const [reasonCode, setReasonCode] = useState<ReturnReasonCode | ''>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const remainingMap = returnability ? buildRemainingQuantityMap(returnability) : null;
+  const returnableItems = remainingMap
+    ? order.items.filter((item) => (remainingMap.get(item.id) ?? item.quantity) > 0)
+    : order.items;
 
   const totalSelectedItems = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
 
@@ -96,7 +103,7 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[calc(100vw-32px)] max-w-[736px] lg:max-w-[1106px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
+      <DialogContent className="w-[calc(100vw-32px)] max-w-[736px] lg:max-w-[1106px] overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="text-xl md:text-2xl font-bold">{t('title')}</DialogTitle>
           <DialogDescription className="sr-only">{t('description')}</DialogDescription>
@@ -115,10 +122,11 @@ export function CreateReturnDialog({ open, onOpenChange, order }: CreateReturnDi
         </div>
 
         <ReturnItemSelector
-          items={order.items}
+          items={returnableItems}
           quantities={quantities}
           onUpdateQuantity={updateQuantity}
           loading={loading}
+          remainingQuantityMap={remainingMap ?? undefined}
         />
 
         {/* Return Reason */}

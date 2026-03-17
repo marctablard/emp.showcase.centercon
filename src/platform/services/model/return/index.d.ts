@@ -35,6 +35,11 @@ export interface ReturnItem {
   unitPrice?: ReturnPrice;
   total?: ReturnPrice;
   reason?: ReturnReason;
+  productId?: string;
+  images?: string[];
+  brand?: string;
+  itemNumber?: string;
+  netPrice?: ReturnPrice;
 }
 
 /**

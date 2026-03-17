@@ -32,6 +32,7 @@ export function HeaderActionBar() {
   const [showMenu, setShowMenu] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [activeDesktopMenu, setActiveDesktopMenu] = useState<MenuItem | null>(null);
+  const actionBarRef = useRef<HTMLDivElement>(null);
   const menuLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMenuLeave = () => {
@@ -59,8 +60,36 @@ export function HeaderActionBar() {
     setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    const actionBar = actionBarRef.current;
+    const fixedHeaderContainer = actionBar?.parentElement;
+    if (!fixedHeaderContainer) {
+      return;
+    }
+
+    const updateDialogSafeTop = () => {
+      const headerHeight = Math.ceil(fixedHeaderContainer.getBoundingClientRect().height);
+      // Keep a small visual gap between fixed header and dialog.
+      const safeTop = headerHeight + 16;
+      document.documentElement.style.setProperty('--dialog-safe-top', `${safeTop}px`);
+    };
+
+    updateDialogSafeTop();
+
+    const resizeObserver = new ResizeObserver(updateDialogSafeTop);
+    resizeObserver.observe(fixedHeaderContainer);
+
+    window.addEventListener('resize', updateDialogSafeTop, { passive: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateDialogSafeTop);
+    };
+  }, [scrolled]);
+
   return (
     <div
+      ref={actionBarRef}
       className={cn(
         'bg-surface-page/95 backdrop-blur-default shadow-sm px-4 py-2 sm:px-6 sm:pt-5 sm:rounded-b-lg sm:group',
         scrolled && 'sm:rounded-t-lg sm:pt-2',
