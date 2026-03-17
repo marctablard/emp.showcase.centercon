@@ -1,5 +1,5 @@
 import { injectable } from '@/platform/core/di/injectable';
-import { EmporixMetadata, EmporixMixins } from '@/platform/integrations/emporix/model/common';
+import { EmporixMetadata } from '@/platform/integrations/emporix/model/common';
 import {
   EmporixReturnAssistedBuyingEntry,
   EmporixReturnCalculatedPrice,
@@ -332,12 +332,12 @@ export class EmporixReturnMapper implements ReturnMapper<EmporixReturnResponse> 
     return { ...service };
   }
 
-  private mapMixins(source: EmporixMixins): Record<string, unknown> {
+  private mapMixins(source: Record<string, unknown>): Record<string, unknown> {
     return { ...source };
   }
 
-  private mapMixinsToSource(service: Record<string, unknown>): EmporixMixins {
-    return service as unknown as EmporixMixins;
+  private mapMixinsToSource(service: Record<string, unknown>): Record<string, unknown> {
+    return { ...service };
   }
 }
 
