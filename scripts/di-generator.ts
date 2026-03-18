@@ -115,35 +115,31 @@ type Layer = 'integration' | 'service' | 'repository' | 'platform';
 // Configuration for each layer
 const LAYER_CONFIGS: Record<
   Layer,
-  { directory: string; serverOutputFile: string; clientOutputFile: string; ssrOutputFile: string; mdOutputFile: string }
+  { directory: string; serverOutputFile: string; clientOutputFile: string; ssrOutputFile: string }
 > = {
   integration: {
     directory: path.join(process.cwd(), 'src/platform/integrations'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/integrations/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/integrations/server.ts'),
-    clientOutputFile: path.join(process.cwd(), 'src/platform/integrations/client.ts'),
-    mdOutputFile: path.join(process.cwd(), 'src/platform/integrations/md.ts'),
+    clientOutputFile: path.join(process.cwd(), 'src/platform/integrations/client.ts')
   },
   service: {
     directory: path.join(process.cwd(), 'src/platform/services'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/services/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/services/server.ts'),
-    clientOutputFile: path.join(process.cwd(), 'src/platform/services/client.ts'),
-    mdOutputFile: path.join(process.cwd(), 'src/platform/services/md.ts'),
+    clientOutputFile: path.join(process.cwd(), 'src/platform/services/client.ts')
   },
   repository: {
     directory: path.join(process.cwd(), 'src/platform/repositories'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/repositories/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/repositories/server.ts'),
-    clientOutputFile: path.join(process.cwd(), 'src/platform/repositories/client.ts'),
-    mdOutputFile: path.join(process.cwd(), 'src/platform/repositories/md.ts'),
+    clientOutputFile: path.join(process.cwd(), 'src/platform/repositories/client.ts')
   },
   platform: {
     directory: path.join(process.cwd(), 'src/platform'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/server.ts'),
-    clientOutputFile: path.join(process.cwd(), 'src/platform/client.ts'),
-    mdOutputFile: path.join(process.cwd(), 'src/platform/md.ts'),
+    clientOutputFile: path.join(process.cwd(), 'src/platform/client.ts')
   }
 };
 
@@ -310,7 +306,7 @@ async function scanExtensions(): Promise<ExtensionInfo[]> {
  * @param layer The layer for which to generate the container
  */
 async function generateContainerFiles(layer: Layer): Promise<void> {
-  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile, mdOutputFile } = LAYER_CONFIGS[layer];
+  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile } = LAYER_CONFIGS[layer];
   if (DEBUG) console.debug(`Scanning ${layer} layer in directory: ${directory}`);
   
   // Scan for injectables in this specific directory
@@ -566,7 +562,7 @@ async function generateAllContainers() {
  */
 function watchForChanges() {
   const layer = 'platform';
-  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile, mdOutputFile } = LAYER_CONFIGS[layer];
+  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile } = LAYER_CONFIGS[layer];
   
   // Watch both the platform directory and extensions directory
   const watchPaths = [directory];
@@ -584,8 +580,7 @@ function watchForChanges() {
       '**/build/**',
       serverOutputFile,
       clientOutputFile,
-      ssrOutputFile,
-      mdOutputFile,
+      ssrOutputFile
     ],
     persistent: true,
     // Prevent firing events during initial scan
