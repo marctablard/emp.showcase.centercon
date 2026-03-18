@@ -153,7 +153,6 @@ interface InjectableInfo {
   isClientOnly: boolean;
   isServerOnly: boolean;
   isSsrOnly: boolean;
-  isMdOnly: boolean;
 }
 
 /**
@@ -222,7 +221,6 @@ async function scanForInjectables(directory: string): Promise<InjectableInfo[]> 
               const isClientOnly = className.endsWith('Client');
               const isServerOnly = className.endsWith('Server');
               const isSsrOnly = className.endsWith('SSR');
-              const isMdOnly = className.endsWith('Md');
               
               // gather information about all injectables that we have
               injectables.push({
@@ -233,8 +231,7 @@ async function scanForInjectables(directory: string): Promise<InjectableInfo[]> 
                 relativePath,
                 isClientOnly,
                 isServerOnly,
-                isSsrOnly,
-                isMdOnly,
+                isSsrOnly
               });
               
               if (DEBUG) console.debug(`Found injectable class: ${className} (${serviceId}, ${scope}) in ${relativePath}`);
@@ -329,7 +326,7 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
   }
 
   // Build injectables for a specific environment
-  const buildEnvironmentInjectables = (env: 'server' | 'client' | 'ssr' | 'md') => {
+  const buildEnvironmentInjectables = (env: 'server' | 'client' | 'ssr') => {
     let envInjectables : InjectableInfo[];
     switch (env) {
       case 'server':
@@ -341,14 +338,11 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
       case 'ssr':
         envInjectables = injectables.filter(i => i.isSsrOnly)
         break;
-      case 'md':
-        envInjectables = injectables.filter((i) => i.isMdOnly);
-        break;
       default:
         envInjectables = [] 
     }
     const isCommon = (injectable: InjectableInfo) =>
-      !injectable.isClientOnly && !injectable.isServerOnly && !injectable.isSsrOnly && !injectable.isMdOnly;
+      !injectable.isClientOnly && !injectable.isServerOnly && !injectable.isSsrOnly;
     const isAlreadyInEnv = (i : InjectableInfo) => envInjectables.find((envI : InjectableInfo) => i.serviceId == envI.serviceId)
     // we reduce the injectables to those that are usable for all environments
     // and which are NOT present in the environment specific injectables
@@ -408,7 +402,7 @@ async function generateContainerFile(
         (type === 'server' && extInjectable.isServerOnly) ||
         (type === 'client' && extInjectable.isClientOnly) ||
         (type === 'ssr' && extInjectable.isSsrOnly) ||
-        (!extInjectable.isClientOnly && !extInjectable.isServerOnly && !extInjectable.isSsrOnly && !extInjectable.isMdOnly);
+        (!extInjectable.isClientOnly && !extInjectable.isServerOnly && !extInjectable.isSsrOnly);
 
       if (!isForEnv) continue;
 
