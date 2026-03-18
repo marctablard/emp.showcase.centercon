@@ -1,0 +1,52 @@
+import { NextRequest, NextResponse } from 'next/server';
+import server from '@/platform/server';
+import { CartService } from '@/platform/services/cart';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import { SessionService } from '@/platform/services/session/SessionService';
+
+/**
+ * PUT /api/cart/[id]/currency
+ * Update the currency for a cart
+ */
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const cartId = resolvedParams.id;
+
+  try {
+    const cartService = server.get<CartService>('CartService');
+    const sessionService = server.get<SessionService>('SessionService');
+    const session = await sessionService.getCurrent();
+    if (!session) {
+      return NextResponse.json({ error: 'Session not found' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const currency = typeof body?.currency === 'string' ? body.currency.trim() : '';
+
+    if (!currency) {
+      return NextResponse.json({ error: 'Currency is required' }, { status: 400 });
+    }
+
+    await cartService.updateCurrency(cartId, currency);
+    const updatedCart = await cartService.getCartById(cartId);
+
+    if (!updatedCart) {
+      return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedCart);
+  } catch (error) {
+    const logger = server.get<LoggerService>('LoggerService');
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        path: `/api/cart/${cartId}/currency`,
+        method: 'PUT',
+        cartId,
+      },
+      `Error updating cart currency for ${cartId}`,
+    );
+    return NextResponse.json({ error: 'Failed to update cart currency' }, { status: 500 });
+  }
+}

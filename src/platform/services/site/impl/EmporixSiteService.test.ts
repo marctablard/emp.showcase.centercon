@@ -17,6 +17,8 @@ describe('EmporixSiteService', () => {
   let mockCurrencyApi: jest.Mocked<EmporixCurrencyApi>;
   let mockPaymentService: jest.Mocked<PaymentService>;
   let mockLoggerService: jest.Mocked<LoggerService>;
+  let consoleErrorSpy: jest.SpyInstance;
+  let consoleWarnSpy: jest.SpyInstance;
 
   const mockSite: EmporixSite = {
     code: 'main',
@@ -44,6 +46,8 @@ describe('EmporixSiteService', () => {
   beforeEach(() => {
     container = new Container();
     jest.clearAllMocks();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     // Create mocks
     mockSiteSettingsApi = {
@@ -100,6 +104,8 @@ describe('EmporixSiteService', () => {
   afterEach(() => {
     // Reset environment variable
     delete process.env.NEXT_PUBLIC_DEFAULT_SITE;
+    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   describe('getSite - recursion prevention', () => {

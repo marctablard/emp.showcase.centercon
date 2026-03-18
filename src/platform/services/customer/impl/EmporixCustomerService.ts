@@ -232,16 +232,7 @@ export class EmporixCustomerService implements CustomerService {
 
   private mapFromCustomerAddress(source: CustomerAddress): EmporixAddress {
     const emporixAddress = this.addressMapper.mapToSource(source);
-    emporixAddress.tags =
-      source.types?.map((type) => {
-        switch (type) {
-          default:
-          case 'SHIPPING':
-            return 'shipping';
-          case 'BILLING':
-            return 'billing';
-        }
-      }) || [];
+    emporixAddress.tags = source.tags || [];
     return emporixAddress;
   }
 
@@ -249,16 +240,7 @@ export class EmporixCustomerService implements CustomerService {
     const address = this.addressMapper.mapToService(source);
     const customerAddress: CustomerAddress = {
       ...address,
-      types:
-        source?.tags?.map((tag) => {
-          switch (tag) {
-            default:
-            case 'shipping':
-              return 'SHIPPING';
-            case 'billing':
-              return 'BILLING';
-          }
-        }) || [],
+      tags: source?.tags || [],
     };
     return customerAddress;
   }

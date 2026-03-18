@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from 'react';
 import { StoreApi, create, useStore } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 import { Session } from '@/platform/services/model/session/session';
 
 export interface SessionState {
@@ -23,12 +24,14 @@ const defaultState: SessionState = {
 };
 
 export const createSessionStore = (initState: SessionState = defaultState) => {
-  return create<SessionStore>()((set) => ({
-    ...initState,
-    setSession: (session: Session | null | undefined) => set({ session }),
-    setLoading: (loading: boolean) => set({ loading }),
-    reset: () => set(defaultState),
-  }));
+  return create<SessionStore>()(
+    subscribeWithSelector((set) => ({
+      ...initState,
+      setSession: (session: Session | null | undefined) => set({ session }),
+      setLoading: (loading: boolean) => set({ loading }),
+      reset: () => set(defaultState),
+    })),
+  );
 };
 
 export const SessionStoreContext = createContext<StoreApi<SessionStore> | null>(null);

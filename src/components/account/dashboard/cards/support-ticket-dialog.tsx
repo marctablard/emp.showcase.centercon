@@ -58,6 +58,7 @@ export function SupportTicketDialog({ onSubmit }: SupportTicketDialogProps) {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder={t('serviceTicketDialog.subjectPlaceholder')}
+              data-testid="supportTicket-subject"
             />
           </div>
 
@@ -69,12 +70,15 @@ export function SupportTicketDialog({ onSubmit }: SupportTicketDialogProps) {
               onChange={(e) => setMessage(e.target.value)}
               placeholder={t('serviceTicketDialog.messagePlaceholder')}
               maxLength={500}
+              data-testid="supportTicket-message"
             />
           </div>
         </div>
 
         <DialogFooter>
-          <Button onClick={handleSubmit}>{t('serviceTicketDialog.send')}</Button>
+          <Button onClick={handleSubmit} data-testid="supportTicket-sendButton">
+            {t('serviceTicketDialog.send')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

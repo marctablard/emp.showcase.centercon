@@ -21,5 +21,5 @@ export interface Customer {
 }
 
 export interface CustomerAddress extends Address {
-  types: AddressType[];
+  tags: string[];
 }

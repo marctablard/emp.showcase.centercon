@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import useAuthDialog from '@/hooks/authentication/useAuthDialog';
 import { Link } from '@/i18n/navigation';
 
 const formSchema = z
@@ -36,7 +35,6 @@ export function PasswordUpdateForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { openDialog } = useAuthDialog();
 
   const token = searchParams.get('token');
 
@@ -87,10 +85,10 @@ export function PasswordUpdateForm() {
 
   useEffect(() => {
     if (!token) {
-      // re-open reset-dialog if no token was supplied
-      openDialog('reset');
+      // force redirect to password-reset page if no token was supplied
+      router.replace('/password-reset');
     }
-  }, [token, openDialog]);
+  }, [token, router]);
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -113,7 +111,7 @@ export function PasswordUpdateForm() {
                   <FormItem>
                     <FormLabel>{t('newPassword')}</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" {...field} data-testid="passwordUpdate-password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,7 +125,7 @@ export function PasswordUpdateForm() {
                   <FormItem>
                     <FormLabel>{t('confirmPassword')}</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" {...field} data-testid="passwordUpdate-confirmPassword" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -140,7 +138,12 @@ export function PasswordUpdateForm() {
                 </Alert>
               )}
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting}
+                data-testid="passwordUpdate-submitButton"
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -156,9 +159,7 @@ export function PasswordUpdateForm() {
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" asChild>
-          <Link href="#" onClick={() => openDialog('login')}>
-            {t('backToLogin')}
-          </Link>
+          <Link href="/login">{t('backToLogin')}</Link>
         </Button>
       </CardFooter>
     </Card>

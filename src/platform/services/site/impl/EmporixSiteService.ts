@@ -54,21 +54,21 @@ class EmporixSiteService implements SiteService {
         // 2. Don't recurse if the current code is already the default site
         // 3. Don't recurse if default site is undefined or empty
         if (defaultSite && code !== defaultSite && !hasTriedDefaultSite) {
-          console.warn(`Site '${code}' not found, attempting fallback to default site '${defaultSite}'`);
+          this.logger.warn(`Site '${code}' not found, attempting fallback to default site '${defaultSite}'`);
           const fallbackSite = await this.getSite(defaultSite, true);
           if (!fallbackSite) {
-            console.error(`Failed to get site '${code}' and fallback to default site '${defaultSite}' also failed`);
+            this.logger.error(`Failed to get site '${code}' and fallback to default site '${defaultSite}' also failed`);
           }
           return fallbackSite;
         }
 
         // If we've already tried default or it's the same code, return null
         if (defaultSite && code === defaultSite) {
-          console.error(`Site '${code}' not found and it is the configured default site`);
+          this.logger.error(`Site '${code}' not found and it is the configured default site`);
         } else if (hasTriedDefaultSite) {
-          console.error(`Site '${code}' not found and default site fallback has already been attempted`);
+          this.logger.error(`Site '${code}' not found and default site fallback has already been attempted`);
         } else if (!defaultSite) {
-          console.error(`Site '${code}' not found and no default site is configured`);
+          this.logger.error(`Site '${code}' not found and no default site is configured`);
         }
         return null;
       }
@@ -108,13 +108,16 @@ class EmporixSiteService implements SiteService {
       emporixSite.availableCurrencies?.map((currency) => currencies.find((c) => c.id === currency)) || undefined;
     if (!availableCurrencies) {
       // TODO is empty on Emporix side
-      availableCurrencies = currencies;
+      availableCurrencies = [currencies.find((c) => c.id === emporixSite.currency)];
     }
     // TODO use what the site returns
     const availablePaymentModes = paymentModes;
     return {
       code: emporixSite.code,
       name: emporixSite.name || emporixSite.code,
+      // TODO Emporix should supply a separate field for the commercial default country,
+      // currently it is in the address
+      defaultCountry: address.country,
       defaultLanguage: emporixSite.defaultLanguage || 'en',
       defaultCurrency: currencies.find((c) => c.id === emporixSite.currency) || currencies[0],
       countries: countries,
@@ -202,9 +205,16 @@ class EmporixSiteService implements SiteService {
   }
 
   // Currency methods
-  async getCurrencies(): Promise<Currency[]> {
+  async getCurrencies(site?: string): Promise<Currency[]> {
     try {
-      const emporixCurrencies = await this.currencyApi.getCurrencies();
+      let emporixCurrencies = await this.currencyApi.getCurrencies();
+      if (site) {
+        const siteCurrencies = await this.siteSettingsApi.getSite(site);
+        if (!siteCurrencies) {
+          return emporixCurrencies.map((currency) => this.mapCurrency(currency));
+        }
+        emporixCurrencies = emporixCurrencies.filter((c) => siteCurrencies.availableCurrencies?.includes(c.code));
+      }
       return emporixCurrencies.map((currency) => this.mapCurrency(currency));
     } catch (error) {
       this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting currencies');

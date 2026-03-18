@@ -4,8 +4,6 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { SessionService } from '@/platform/services/session/SessionService';
 import { SiteService } from '@/platform/services/site/SiteService';
 
-export const dynamic = 'force-dynamic';
-
 /**
  * PUT /api/session/site
  * Update session site
@@ -23,7 +21,7 @@ export async function PUT(request: NextRequest) {
     if (!newSite) {
       return NextResponse.json({ error: 'Unknown Site' }, { status: 400 });
     }
-    await sessionService.setSite(newSite.code);
+    await sessionService.setSite(newSite.code, newSite.defaultCurrency.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');

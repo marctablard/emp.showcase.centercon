@@ -45,8 +45,8 @@ class EmporixCartApi implements IEmporixCartApi {
     );
 
     if (!response.ok) {
-      const errorDetails = await response.text();
-      throw new Error(`Failed to create cart: ${response.statusText} ${errorDetails}`);
+      const errorDetails = await response.json();
+      throw new Error(`Failed to create cart: ${response.statusText}`, errorDetails);
     }
 
     const createdCart: EmporixCreatedCart = await response.json();
@@ -72,7 +72,6 @@ class EmporixCartApi implements IEmporixCartApi {
     return await response.json();
   }
 
-  // TODO needs resolution of DCPS-16828
   async getCartByCriteria(
     siteCode: string,
     sessionId?: string,
@@ -102,7 +101,7 @@ class EmporixCartApi implements IEmporixCartApi {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts?${queryParams.toString()}`,
       { method: 'GET' },
-      'service',
+      'session',
     );
 
     if (!response.ok) {
@@ -119,7 +118,14 @@ class EmporixCartApi implements IEmporixCartApi {
     const { query, body } = buildSearchQuery(searchParams);
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/search?${query}`,
-      { method: 'POST', body: JSON.stringify(body) },
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(body),
+      },
       'session',
     );
 

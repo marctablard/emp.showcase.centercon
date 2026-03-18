@@ -17,6 +17,7 @@ import { Rating } from '@/components/ui/rating';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
+import { useLogger } from '@/hooks/common/useLogger';
 
 const FormSchemaInput = z.object({
   noIcon: z.string().optional(),
@@ -97,9 +98,10 @@ export default function FormFieldStyleguide() {
 
   const [value, setValue] = React.useState([30, 80]);
   const [valueDis, setValueDis] = React.useState([10, 90]);
+  const logger = useLogger();
 
-  function onSubmit(data: z.infer<typeof FormSchemaRadio>) {
-    console.log(JSON.stringify(data, null, 2));
+  function onSubmit(data: z.infer<typeof FormSchemaRadio>): void {
+    logger.debug({ data }, 'Form submitted');
   }
 
   return (
@@ -228,12 +230,12 @@ export default function FormFieldStyleguide() {
           </Form>
         </div>
 
-        <div className="flex flex-col gap-6 w-full">
+        <div className="flex w-full flex-col gap-6">
           <H5>Validatable Form Elements</H5>
           <div className="flex flex-col gap-10 sm:flex-row">
-            <div className="flex flex-col gap-10 w-full sm:flex-row sm:w-1/2">
+            <div className="flex w-full flex-col gap-10 sm:w-1/2 sm:flex-row">
               <Form {...formVal}>
-                <form className="flex flex-col gap-10 w-full sm:w-1/2">
+                <form className="flex w-full flex-col gap-10 sm:w-1/2">
                   <div className="flex flex-col gap-2">
                     <FormField
                       control={formVal.control}
@@ -319,6 +321,7 @@ export default function FormFieldStyleguide() {
                               <SelectItem value="ghi@google.com" startIcon={User} endIcon={Eye}>
                                 ghi@email.com
                               </SelectItem>
+                              <SelectItem value="ghi@email.com">ghi@email.com</SelectItem>
                               <SelectItem value="jkl@support.com" startIcon={User} endIcon={Eye} disabled>
                                 jkl@email.com
                               </SelectItem>
@@ -425,7 +428,7 @@ export default function FormFieldStyleguide() {
               </Form>
 
               <Form {...formRadio}>
-                <form className="flex flex-col gap-10 w-full sm:w-1/2" onSubmit={formRadio.handleSubmit(onSubmit)}>
+                <form className="flex w-full flex-col gap-10 sm:w-1/2" onSubmit={formRadio.handleSubmit(onSubmit)}>
                   <div className="flex flex-col gap-2">
                     <FormField
                       control={formRadio.control}
@@ -478,20 +481,20 @@ export default function FormFieldStyleguide() {
                 </form>
               </Form>
             </div>
-            <div className="flex flex-col gap-10 w-full sm:flex-row sm:w-1/2">
-              <div className="flex flex-col gap-10 w-1/2">
+            <div className="flex w-full flex-col gap-10 sm:w-1/2 sm:flex-row">
+              <div className="flex w-1/2 flex-col gap-10">
                 <div className="flex flex-col gap-5">
                   <div className="text-base font-bold">Slider</div>
-                  <div className="w-full max-w-sm mx-auto">
-                    <div className="w-full flex items-center justify-between gap-2">
+                  <div className="mx-auto w-full max-w-sm">
+                    <div className="flex w-full items-center justify-between gap-2">
                       <Slider value={value} onValueChange={setValue} max={100} step={1} />
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-col gap-5">
                   <div className="text-base font-bold">Slider Disabled</div>
-                  <div className="w-full max-w-sm mx-auto">
-                    <div className="w-full flex items-center justify-between gap-2">
+                  <div className="mx-auto w-full max-w-sm">
+                    <div className="flex w-full items-center justify-between gap-2">
                       <Slider value={valueDis} onValueChange={setValueDis} max={100} step={1} disabled />
                     </div>
                   </div>
@@ -505,7 +508,7 @@ export default function FormFieldStyleguide() {
                   <Rating starsCount={5} disabled></Rating>
                 </div>
               </div>
-              <div className="flex flex-col gap-10 w-1/2">
+              <div className="flex w-1/2 flex-col gap-10">
                 <div className="flex flex-col gap-2">
                   <div className="text-base font-bold">Color Filter</div>
                   <ColorFilter className="bg-text-warning" color="Color 1" />

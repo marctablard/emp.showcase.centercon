@@ -13,6 +13,7 @@ import { useCart } from '@/hooks/cart/useCart';
 import { useAvailableVariantValues } from '@/hooks/useAvailableVariantValues';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
+import { type ProductTemplateAttributeKey, dk } from '@/i18n/dynamic-key';
 import { Link } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency, imageSizes } from '@/lib/utils';
@@ -71,15 +72,15 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
   }
 
   return (
-    <Link href={`/product/${product.id}`} className="h-full block">
-      <Card shadow="default" rounded="md" className="border-0 gap-4 h-full flex flex-col hover:shadow-xl transition">
+    <Link href={`/product/${product.id}`} className="block h-full">
+      <Card shadow="default" rounded="md" className="flex h-full flex-col gap-4 border-0 transition hover:shadow-xl">
         <CardHeader className="flex-shrink-0 no-underline">
-          <CardDescription className="font-medium text-base text-text-body h-6">
+          <CardDescription className="text-text-body h-6 text-base font-medium">
             {l10n(
               product.brand?.name || product.specifications?.find((spec) => spec.key === 'manufacturer')?.value || '',
             )}
           </CardDescription>
-          <CardTitle className="flex gap-2 justify-between">
+          <CardTitle className="flex justify-between gap-2">
             <Heading variant="h5" as="div" className="md:hidden">
               <p className="line-clamp-3">{l10n(product.name)}</p>
             </Heading>
@@ -97,11 +98,11 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-4 flex-grow">
-          <div className="relative bg-surface-image-background p-4">
+        <CardContent className="flex flex-grow flex-col gap-4">
+          <div className="bg-surface-image-background relative p-4">
             <div className="relative aspect-square rounded-ss-md rounded-ee-md p-4">
               {product.primaryImage ? (
-                <div className="relative w-full h-full">
+                <div className="relative h-full w-full">
                   <Image
                     src={product.primaryImage.url}
                     alt={product.primaryImage.altText ? l10n(product.primaryImage.altText) : l10n(product.name)}
@@ -111,13 +112,13 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                   />
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex h-full items-center justify-center">
                   <Image src={'/images/no_image_alt.png'} alt={l10n(product.name)} width={220} height={220} />
                 </div>
               )}
             </div>
 
-            <div className="absolute right-4 bottom-4 flex flex-row gap-2 justify-end">
+            <div className="absolute right-4 bottom-4 flex flex-row justify-end gap-2">
               {!variantLoading && availableValues.length > 0 && (
                 <>
                   {availableValues.slice(0, 3).map((value) => {
@@ -141,7 +142,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                     );
                   })}
                   {availableValues.length > 3 && (
-                    <div className="flex items-center justify-center w-8 h-8 bg-surface-disabled text-text-on-disabled text-sm font-medium rounded">
+                    <div className="bg-surface-disabled text-text-on-disabled flex h-8 w-8 items-center justify-center rounded text-sm font-medium">
                       +{availableValues.length - 3}
                     </div>
                   )}
@@ -149,7 +150,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
               )}
             </div>
 
-            <div className="flex flex-col gap-2 absolute top-4 -left-6">
+            <div className="absolute top-4 -left-6 flex flex-col gap-2">
               {product.labels?.map((label) => (
                 <Badge key={label.id} variant="info" rounded="roundedRight">
                   {label.name}
@@ -166,7 +167,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                   Object.entries(product.templateAttributes).map(([key, value]) => (
                     <div key={key} className="flex justify-between">
                       <p className="text-sm">
-                        {t(`filters.mixins.productTemplateAttributes.${key}`, {
+                        {t(dk<ProductTemplateAttributeKey>(`filters.mixins.productTemplateAttributes.${key}`), {
                           defaultValue: key,
                         })}
                       </p>
@@ -179,7 +180,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                   ))}
               </div>
             )}
-            <div ref={horizontalScrollRef} className="flex gap-2 max-w-full overflow-x-scroll hide-scrollbar">
+            <div ref={horizontalScrollRef} className="hide-scrollbar flex max-w-full gap-2 overflow-x-scroll">
               {product.usps?.map((usp) => (
                 <ProductTag icon={getIcon(usp.icon)} text={l10n(usp.description)} key={l10n(usp.description)} />
               ))}
@@ -188,18 +189,18 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
         </CardContent>
 
         <CardFooter>
-          <div className="flex flex-col gap-1 w-full">
-            <div className="flex gap-2 text-text-success text-sm items-center">
+          <div className="flex w-full flex-col gap-1">
+            <div className="text-text-success flex items-center gap-2 text-sm">
               {/* Todo: read availability from product */}
               <Truck />
               <p>{t('shipping.onlineAvailable')}</p>
             </div>
-            <div className="flex gap-2 text-text-success text-sm items-center">
+            <div className="text-text-success flex items-center gap-2 text-sm">
               {/* Todo: read pickup availability from product */}
               <MapPin />
               <p>{t('shipping.canBeReservedExample')}</p>
             </div>
-            <div className="flex justify-between items-end">
+            <div className="flex items-end justify-between">
               <div className="flex flex-col gap-1">
                 {product.price ? (
                   product.price.originalAmount && product.price.originalAmount !== product.price.amount ? (
@@ -207,7 +208,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                       <p className="line-through">
                         {formatCurrency(product.price.originalAmount, product.price.currency)}
                       </p>
-                      <p className="text-lg text-text-error font-bold">
+                      <p className="text-text-error text-lg font-bold">
                         {formatCurrency(product.price.amount, product.price.currency)}
                       </p>
                     </>

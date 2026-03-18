@@ -5,7 +5,6 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Cart } from '@/platform/services/model/cart';
 import { SessionService } from '@/platform/services/session';
 
-export const revalidate = 0;
 /**
  * GET /api/carts
  * Get the current cart or create a new one if none exists

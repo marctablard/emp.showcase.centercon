@@ -1,7 +1,14 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from '@/i18n/routing';
-import { INTERNAL_SITE_HEADER, NEXT_REWRITE_HEADER, type SiteConfig, type SiteRoutingConfig } from '@/site/types';
+import {
+  INTERNAL_APP_PATH_HEADER,
+  INTERNAL_SITE_HEADER,
+  NEXT_REWRITE_HEADER,
+  type SiteConfig,
+  type SiteRoutingConfig,
+} from '@/site/types';
+import { isLikelyProbe } from './probe-detection';
 import { setCachedRequestSite } from './server/RequestSiteCache';
 import { resolveApplicableRouting, shouldPrefix } from './utils';
 
@@ -63,7 +70,7 @@ export function resolveSite(
     site = segments.shift();
   }
   // second, try to look for an existing site-cookie
-  if (!site && routing.cookie) {
+  if (!site && routing.cookie && routing.cookieOverridesDefault) {
     site = cookies.get(routing.cookie.name)?.value;
   }
   // third, try to look for an existing site-header
@@ -82,6 +89,37 @@ const INTL_MIDDLEWARE_HEADER = NEXT_MIDDLEWARE_PREFIX + INTL_LOCALE_HEADER;
 
 const intlMiddleware = createIntlMiddleware(routing);
 
+function handleMisroutedHealthCheck(req: NextRequest): NextResponse {
+  const ua = req.headers.get('user-agent') ?? '';
+  const xff = req.headers.get('x-forwarded-for') ?? '';
+  const rid = req.headers.get('x-request-id') ?? '';
+
+  // Structured log for easy filtering in Azure/App Insights
+  // eslint-disable-next-line no-console -- Edge middleware: Pino logger unavailable
+  console.warn(
+    JSON.stringify({
+      event: 'misrouted_healthcheck',
+      path: req.nextUrl.pathname,
+      method: req.method,
+      ua,
+      xff,
+      rid,
+      recommendation: 'Configure health checks to use /api/health or /api/ready',
+    }),
+  );
+
+  return new NextResponse('OK', {
+    status: 200,
+    headers: {
+      'content-type': 'text/plain; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-misrouted-healthcheck': '1',
+      'x-recommended-endpoint': '/api/health',
+      'x-alternative-endpoint': '/api/ready',
+    },
+  });
+}
+
 const withCookies = function (
   from: NextResponse,
   to: NextResponse,
@@ -99,6 +137,15 @@ const withCookies = function (
 
 export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
   return (req: NextRequest) => {
+    const path = req.nextUrl.pathname;
+
+    // Only protect the expensive "main routes"
+    if (path === '/' || /^\/[^/]+\/[^/]+$/.test(path)) {
+      if (isLikelyProbe(req)) {
+        return handleMisroutedHealthCheck(req);
+      }
+    }
+
     // First look for the matching routing by Domain
     const routing = resolveApplicableRouting(req.nextUrl.hostname, routingConfig);
     const { site, appPath } = resolveSite(req.nextUrl.pathname, req.cookies, req.headers, routing);
@@ -126,12 +173,36 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     const locale = intlResponse.headers.get(INTL_MIDDLEWARE_HEADER);
     const resolvedLocale = locale || 'en';
     const headers = new Headers(req.headers);
+    headers.set(INTERNAL_APP_PATH_HEADER, appPath);
     if (locale) {
       headers.set(INTL_LOCALE_HEADER, locale);
     }
     if (site) {
       headers.set(INTERNAL_SITE_HEADER, site);
     }
+
+    // handle Site-Redirection
+    if (shouldPrefix(site, routingConfig)) {
+      if (!req.nextUrl.pathname.startsWith(`/${site}`)) {
+        const redirect = new URL(req.nextUrl);
+        redirect.pathname = `/${site}${redirect.pathname == '/' ? '' : redirect.pathname}`;
+        return withCookies(
+          intlResponse,
+          NextResponse.redirect(redirect, { headers }),
+          req,
+          routingConfig,
+          site,
+          resolvedLocale,
+        );
+      }
+    } else {
+      if (req.nextUrl.pathname.startsWith(`/${site}`)) {
+        const redirect = new URL(req.nextUrl);
+        redirect.pathname = appPath;
+        return withCookies(intlResponse, NextResponse.redirect(redirect), req, routingConfig, site, resolvedLocale);
+      }
+    }
+
     const intlRewrite = intlResponse.headers.get(NEXT_REWRITE_HEADER);
     if (intlRewrite) {
       // next-intl responded with rewrite, so we have to prepend our site
@@ -145,44 +216,18 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
         site,
         resolvedLocale,
       );
+    } else {
     }
 
-    // Last but not least, we might need a rewrite or redirect
-    if (shouldPrefix(site, routingConfig)) {
-      if (req.nextUrl.pathname.startsWith(`/${site}`)) {
-        return withCookies(
-          intlResponse,
-          NextResponse.next({ request: { headers } }),
-          req,
-          routingConfig,
-          site,
-          resolvedLocale,
-        );
-      } else {
-        const redirect = new URL(req.nextUrl);
-        redirect.pathname = `/${site}${redirect.pathname == '/' ? '' : redirect.pathname}`;
-        return withCookies(intlResponse, NextResponse.redirect(redirect), req, routingConfig, site, resolvedLocale);
-      }
+    // Last but not least, we might need a rewrite on our own
+    let siteResponse;
+    if (req.nextUrl.pathname.startsWith(`/${site}`)) {
+      siteResponse = NextResponse.next({ request: { headers } });
     } else {
-      // no routing desired or it's the defaultSite and not needed
-      // since it's either not desired or not needed
-      // we need to redirect if site is part of the actual path,
-      if (req.nextUrl.pathname.startsWith(`/${site}`)) {
-        const redirect = new URL(req.nextUrl);
-        redirect.pathname = appPath;
-        return withCookies(intlResponse, NextResponse.redirect(redirect), req, routingConfig, site, resolvedLocale);
-      } else {
-        const rewrite = new URL(req.nextUrl);
-        rewrite.pathname = `/${site}${rewrite.pathname == '/' ? '' : rewrite.pathname}`;
-        return withCookies(
-          intlResponse,
-          NextResponse.rewrite(rewrite, { request: { headers } }),
-          req,
-          routingConfig,
-          site,
-          resolvedLocale,
-        );
-      }
+      const rewrite = new URL(req.nextUrl);
+      rewrite.pathname = `/${site}${rewrite.pathname == '/' ? '' : rewrite.pathname}`;
+      siteResponse = NextResponse.rewrite(rewrite, { request: { headers } });
     }
+    return withCookies(intlResponse, siteResponse, req, routingConfig, site, resolvedLocale);
   };
 }

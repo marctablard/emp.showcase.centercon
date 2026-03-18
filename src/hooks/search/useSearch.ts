@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import useHistory from '@/hooks/history/useHistory';
+import { useSiteCode } from '@/hooks/site/useSiteCode';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
@@ -36,6 +38,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
     products: [],
     categories: [],
   });
+  const siteCode = useSiteCode();
+  const locale = useLocale();
 
   // Keep track of the last search params for pagination
   const lastSearchParams = useRef<SearchParams<T>>({
@@ -124,6 +128,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
           url.searchParams.append('sort', params.sort);
           setCurrentSort(params.sort);
         }
+        url.searchParams.append('site', siteCode);
+        url.searchParams.append('locale', locale);
 
         // Add filters if present
         if (params.filters) {
@@ -174,7 +180,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
         setLoading(false);
       }
     },
-    [updateBrowserUrl],
+    [updateBrowserUrl, locale, siteCode],
   );
 
   /**

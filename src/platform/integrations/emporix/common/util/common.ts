@@ -26,13 +26,17 @@ export function buildSearchQuery<T>(
   let query: string = '';
   if (params.criteria) {
     Object.entries(params.criteria).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        return;
+      }
       if (filterAsQuery) {
         queryParams.append(key, '' + value);
       } else {
         if (query.length > 0) {
           query += ' ';
         }
-        query += `${key}:${value}`;
+        const safeValue = String(value).includes(' ') ? `(${value})` : String(value);
+        query += `${key}:${safeValue}`;
       }
     });
   }

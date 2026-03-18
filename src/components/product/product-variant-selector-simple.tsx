@@ -5,7 +5,9 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { CheckCircle2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useSession } from '@/hooks/session/useSession';
 import { useL10n } from '@/hooks/useL10n';
+import { type ProductVariantAttributeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { fetchProductPrice } from '@/lib/client/prices';
 import { fetchProductVariants } from '@/lib/client/products';
@@ -32,6 +34,15 @@ export default function ProductVariantSelectorSimple({
   const router = useRouter();
   const t = useTranslations('product');
   const { l10n } = useL10n();
+  const { session } = useSession();
+
+  // Reset variant prices when currency changes to trigger re-fetch
+  useEffect(() => {
+    if (session?.currency && variantPrices !== undefined && variants.length > 0) {
+      setVariantPrices(undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.currency]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -42,27 +53,39 @@ export default function ProductVariantSelectorSimple({
       }
 
       try {
-        setVariantPrices(undefined);
+        // Only reset prices if variants are already loaded (currency change case)
+        if (variants.length === 0) {
+          setVariantPrices(undefined);
 
-        const fetchedVariants = await fetchProductVariants(product.parentVariantId || product.id);
+          const fetchedVariants = await fetchProductVariants(product.parentVariantId || product.id);
 
-        if (isCancelled) {
-          return;
+          if (isCancelled) {
+            return;
+          }
+
+          setVariants(fetchedVariants);
+
+          if (!soloVariant || fetchedVariants.length === 0) {
+            return;
+          }
+
+          const fetchedPrices = await Promise.all(fetchedVariants.map((variant) => fetchProductPrice(variant.id)));
+
+          if (isCancelled) {
+            return;
+          }
+
+          setVariantPrices(fetchedPrices.filter((price): price is ProductPrice => price !== null));
+        } else if (variantPrices === undefined) {
+          // Re-fetch only prices when currency changes (variants already loaded)
+          const fetchedPrices = await Promise.all(variants.map((variant) => fetchProductPrice(variant.id)));
+
+          if (isCancelled) {
+            return;
+          }
+
+          setVariantPrices(fetchedPrices.filter((price): price is ProductPrice => price !== null));
         }
-
-        setVariants(fetchedVariants);
-
-        if (!soloVariant || fetchedVariants.length === 0) {
-          return;
-        }
-
-        const fetchedPrices = await Promise.all(fetchedVariants.map((variant) => fetchProductPrice(variant.id)));
-
-        if (isCancelled) {
-          return;
-        }
-
-        setVariantPrices(fetchedPrices.filter((price): price is ProductPrice => price !== null));
       } catch {
         if (isCancelled) {
           return;
@@ -78,7 +101,7 @@ export default function ProductVariantSelectorSimple({
     return () => {
       isCancelled = true;
     };
-  }, [product.id, product.parentVariantId, soloVariant]);
+  }, [product.id, product.parentVariantId, soloVariant, variants, variantPrices]);
 
   // Handle variant selection via tiles
   const handleVariantTileClick = (variant: Product) => {
@@ -159,7 +182,7 @@ export default function ProductVariantSelectorSimple({
                 <p>
                   {soloVariant.name
                     ? l10n(soloVariant.name)
-                    : t(`filters.mixins.productVariantAttributes.${soloVariant?.key}`, {
+                    : t(dk<ProductVariantAttributeKey>(`filters.mixins.productVariantAttributes.${soloVariant?.key}`), {
                         defaultValue: soloVariant?.key,
                       })}
                 </p>

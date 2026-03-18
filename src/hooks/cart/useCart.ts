@@ -21,7 +21,7 @@ interface UseCart {
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateShippingInfo: (countryCode?: string, zipCode?: string) => Promise<void>;
-  clearCart: () => void;
+  clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => void;
   loadCart: (cartId: string, type?: string) => Promise<Cart | null | undefined>;
 
   // Utility
@@ -52,17 +52,26 @@ export const useCart = (initialCart?: Cart | null): UseCart => {
   } = useCartStore();
 
   useEffect(() => {
-    // Initialize with initialCart if provided and cart is undefined
-    if (initialCart !== undefined) {
-      setCurrentCart(initialCart);
+    if (cart === undefined) {
+      // Cart state is unknown — either hydrate from SSR prop or fetch
+      if (initialCart !== undefined) {
+        setCurrentCart(initialCart);
+      } else {
+        fetchCart(false);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialCart]);
+  }, [cart, initialCart]);
 
+  // Track authentication status changes to refresh cart
   const { status: sessionStatus } = useSession();
   useEffect(() => {
     validateCart(sessionStatus);
   }, [sessionStatus, validateCart]);
+
+  // NOTE: Currency sync and site validation effects have been moved to
+  // store-level subscriptions in src/stores/sync/store-synchronizer.ts
+  // This eliminates duplicate API calls when multiple components use useCart.
 
   return {
     cart,

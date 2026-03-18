@@ -1,0 +1,6 @@
+Services:
+  SearchService: EmporixSearchService
+  ProductService: EmporixProductService
+
+Integrations:
+  EmporixProductApi: EmporixProductApi
