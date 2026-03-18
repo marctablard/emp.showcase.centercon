@@ -27,7 +27,10 @@ export function initializeContainer(): Container {
   modules.forEach(module => {
     addInjectableModule(module, container);
   });
-  
+
+  // Extension aliases
+  {{aliases}}
+
   return container;
 }
 

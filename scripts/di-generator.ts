@@ -3,42 +3,67 @@ import * as fs from 'fs';
 import * as path from 'path';
 require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
 import * as ts from 'typescript';
-import type { Node, ClassDeclaration, Decorator } from 'typescript';
+import type { Decorator } from 'typescript';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
-import { baseUrl } from '../src/lib/utils';
 
 // Configuration
 const DEBUG = process.env.DEBUG === 'true';
+const EXTENSIONS_DIR = path.join(process.cwd(), 'extensions');
+
+// Extension plugin manifest
+interface PluginManifest {
+  name: string;
+  description?: string;
+  version?: string;
+  enabled: boolean;
+  aliases?: Record<string, string>;
+  setup?: string[];
+}
+
+// Information about a discovered extension
+interface ExtensionInfo {
+  name: string;
+  directory: string;
+  manifest: PluginManifest;
+  injectables: InjectableInfo[];
+}
 
 // Define the layers we support
 type Layer = 'integration' | 'service' | 'repository' | 'platform';
 
 // Configuration for each layer
-const LAYER_CONFIGS: Record<Layer, { directory: string; serverOutputFile: string; clientOutputFile: string, ssrOutputFile: string }> = {
+const LAYER_CONFIGS: Record<
+  Layer,
+  { directory: string; serverOutputFile: string; clientOutputFile: string; ssrOutputFile: string; mdOutputFile: string }
+> = {
   integration: {
     directory: path.join(process.cwd(), 'src/platform/integrations'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/integrations/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/integrations/server.ts'),
     clientOutputFile: path.join(process.cwd(), 'src/platform/integrations/client.ts'),
+    mdOutputFile: path.join(process.cwd(), 'src/platform/integrations/md.ts'),
   },
   service: {
     directory: path.join(process.cwd(), 'src/platform/services'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/services/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/services/server.ts'),
     clientOutputFile: path.join(process.cwd(), 'src/platform/services/client.ts'),
+    mdOutputFile: path.join(process.cwd(), 'src/platform/services/md.ts'),
   },
   repository: {
     directory: path.join(process.cwd(), 'src/platform/repositories'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/repositories/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/repositories/server.ts'),
     clientOutputFile: path.join(process.cwd(), 'src/platform/repositories/client.ts'),
+    mdOutputFile: path.join(process.cwd(), 'src/platform/repositories/md.ts'),
   },
   platform: {
     directory: path.join(process.cwd(), 'src/platform'),
     ssrOutputFile: path.join(process.cwd(), 'src/platform/ssr.ts'),
     serverOutputFile: path.join(process.cwd(), 'src/platform/server.ts'),
     clientOutputFile: path.join(process.cwd(), 'src/platform/client.ts'),
+    mdOutputFile: path.join(process.cwd(), 'src/platform/md.ts'),
   }
 };
 
@@ -52,6 +77,7 @@ interface InjectableInfo {
   isClientOnly: boolean;
   isServerOnly: boolean;
   isSsrOnly: boolean;
+  isMdOnly: boolean;
 }
 
 /**
@@ -120,6 +146,7 @@ async function scanForInjectables(directory: string): Promise<InjectableInfo[]> 
               const isClientOnly = className.endsWith('Client');
               const isServerOnly = className.endsWith('Server');
               const isSsrOnly = className.endsWith('SSR');
+              const isMdOnly = className.endsWith('Md');
               
               // gather information about all injectables that we have
               injectables.push({
@@ -130,7 +157,8 @@ async function scanForInjectables(directory: string): Promise<InjectableInfo[]> 
                 relativePath,
                 isClientOnly,
                 isServerOnly,
-                isSsrOnly
+                isSsrOnly,
+                isMdOnly,
               });
               
               if (DEBUG) console.debug(`Found injectable class: ${className} (${serviceId}, ${scope}) in ${relativePath}`);
@@ -147,19 +175,85 @@ async function scanForInjectables(directory: string): Promise<InjectableInfo[]> 
 }
 
 /**
+ * Scans the extensions/ directory for plugin.json manifests and discovers their injectables.
+ */
+async function scanExtensions(): Promise<ExtensionInfo[]> {
+  const extensions: ExtensionInfo[] = [];
+
+  if (!fs.existsSync(EXTENSIONS_DIR)) {
+    if (DEBUG) console.debug('No extensions directory found, skipping extension scan');
+    return extensions;
+  }
+
+  const entries = fs.readdirSync(EXTENSIONS_DIR, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+
+    const pluginDir = path.join(EXTENSIONS_DIR, entry.name);
+    const manifestPath = path.join(pluginDir, 'plugin.json');
+
+    if (!fs.existsSync(manifestPath)) {
+      if (DEBUG) console.debug(`Skipping ${entry.name}: no plugin.json found`);
+      continue;
+    }
+
+    try {
+      const manifest: PluginManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+      if (!manifest.enabled) {
+        console.log(`Extension '${manifest.name}' is disabled, skipping`);
+        continue;
+      }
+
+      // Scan for injectables inside the extension directory
+      const extInjectables = (await scanForInjectables(pluginDir))
+        .filter(injectable => injectable.className !== 'default');
+
+      console.log(`Extension '${manifest.name}': found ${extInjectables.length} injectable(s)`);
+
+      extensions.push({
+        name: manifest.name,
+        directory: pluginDir,
+        manifest,
+        injectables: extInjectables,
+      });
+    } catch (error) {
+      console.error(`Error loading extension '${entry.name}':`, error);
+    }
+  }
+
+  return extensions;
+}
+
+/**
  * Generates the container files with static imports
  * @param layer The layer for which to generate the container
  */
 async function generateContainerFiles(layer: Layer): Promise<void> {
-  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile } = LAYER_CONFIGS[layer];
+  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile, mdOutputFile } = LAYER_CONFIGS[layer];
   if (DEBUG) console.debug(`Scanning ${layer} layer in directory: ${directory}`);
   
   // Scan for injectables in this specific directory
   const injectables = (await scanForInjectables(directory)).filter(injectable => injectable.className !== 'default');
   if (DEBUG) console.info(`Found ${injectables.length} injectable classes for ${layer} layer`);
 
+  // Scan extensions
+  const extensions = await scanExtensions();
+  const extensionInjectables = extensions.flatMap(ext => ext.injectables);
+  if (extensionInjectables.length > 0) {
+    console.log(`Found ${extensionInjectables.length} injectable(s) from ${extensions.length} extension(s)`);
+  }
+
+  // Collect all aliases from enabled extensions
+  const aliases: Record<string, string> = {};
+  for (const ext of extensions) {
+    if (ext.manifest.aliases) {
+      Object.assign(aliases, ext.manifest.aliases);
+    }
+  }
+
   // Build injectables for a specific environment
-  const buildEnvironmentInjectables = (env : 'server' | 'client' | 'ssr') => {
+  const buildEnvironmentInjectables = (env: 'server' | 'client' | 'ssr' | 'md') => {
     let envInjectables : InjectableInfo[];
     switch (env) {
       case 'server':
@@ -171,10 +265,14 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
       case 'ssr':
         envInjectables = injectables.filter(i => i.isSsrOnly)
         break;
+      case 'md':
+        envInjectables = injectables.filter((i) => i.isMdOnly);
+        break;
       default:
         envInjectables = [] 
     }
-    const isCommon = (injectable : InjectableInfo) => !injectable.isClientOnly && !injectable.isServerOnly && !injectable.isSsrOnly;
+    const isCommon = (injectable: InjectableInfo) =>
+      !injectable.isClientOnly && !injectable.isServerOnly && !injectable.isSsrOnly && !injectable.isMdOnly;
     const isAlreadyInEnv = (i : InjectableInfo) => envInjectables.find((envI : InjectableInfo) => i.serviceId == envI.serviceId)
     // we reduce the injectables to those that are usable for all environments
     // and which are NOT present in the environment specific injectables
@@ -183,9 +281,9 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
     return common.concat(envInjectables);
   }
   
-  await generateContainerFile(layer,  buildEnvironmentInjectables('server'), serverOutputFile, 'server');
-  await generateContainerFile(layer, buildEnvironmentInjectables('client'), clientOutputFile, 'client');
-  await generateContainerFile(layer,  buildEnvironmentInjectables('ssr'), ssrOutputFile, 'ssr');
+  await generateContainerFile(layer,  buildEnvironmentInjectables('server'), serverOutputFile, 'server', extensions, aliases);
+  await generateContainerFile(layer, buildEnvironmentInjectables('client'), clientOutputFile, 'client', extensions, aliases);
+  await generateContainerFile(layer,  buildEnvironmentInjectables('ssr'), ssrOutputFile, 'ssr', extensions, aliases);
 }
 
 /**
@@ -199,9 +297,11 @@ async function generateContainerFile(
   layer: Layer,
   injectables: InjectableInfo[],
   outputFile: string,
-  type: 'server' | 'client' | 'ssr'
+  type: 'server' | 'client' | 'ssr',
+  extensions: ExtensionInfo[] = [],
+  aliases: Record<string, string> = {},
 ): Promise<string> {
-  // Generate static imports for all injectables
+  // Generate static imports for all platform injectables
   const imports = injectables.map((injectable) => {
     // Create a module name from the file path
     const moduleName = path.basename(injectable.relativePath)
@@ -211,15 +311,75 @@ async function generateContainerFile(
     return `import ${moduleName} from './${injectable.relativePath}';`;
   }).join('\n');
   
-  // Create an array of module names
+  // Create an array of module names for platform injectables
   const moduleNames = injectables.map((injectable) => {
     return path.basename(injectable.relativePath)
       .replace(/[^a-zA-Z0-9_]/g, '_')
       .replace(/^_+|_+$/g, '');
   });
+
+  // Generate extension imports and module names
+  const extensionImportLines: string[] = [];
+  const extensionModuleNames: string[] = [];
+
+  for (const ext of extensions) {
+    for (const extInjectable of ext.injectables) {
+      // Determine environment filtering for extension injectables
+      const isForEnv =
+        (type === 'server' && extInjectable.isServerOnly) ||
+        (type === 'client' && extInjectable.isClientOnly) ||
+        (type === 'ssr' && extInjectable.isSsrOnly) ||
+        (!extInjectable.isClientOnly && !extInjectable.isServerOnly && !extInjectable.isSsrOnly && !extInjectable.isMdOnly);
+
+      if (!isForEnv) continue;
+
+      // Build a unique module name prefixed by extension name
+      const baseName = path.basename(extInjectable.relativePath)
+        .replace(/[^a-zA-Z0-9_]/g, '_')
+        .replace(/^_+|_+$/g, '');
+      const uniqueName = `ext_${ext.name.replace(/[^a-zA-Z0-9_]/g, '_')}_${baseName}`;
+
+      // Build the import path relative to the output file
+      const outputDir = path.dirname(outputFile);
+      let relImportPath = path.relative(outputDir, extInjectable.filePath)
+        .replace(/\\/g, '/')
+        .replace(/\.tsx?$/, '');
+      if (!relImportPath.startsWith('.')) {
+        relImportPath = './' + relImportPath;
+      }
+
+      extensionImportLines.push(`import ${uniqueName} from '${relImportPath}';`);
+      extensionModuleNames.push(uniqueName);
+    }
+  }
+
+  // Combine all imports
+  const allImports = [imports, ...extensionImportLines].filter(Boolean).join('\n');
+
+  // Combine all module names
+  const allModuleNames = [...moduleNames, ...extensionModuleNames];
   
   // Generate the module array string
-  const moduleArray = `const modules : any[] = [${moduleNames.join(', ')}];`;
+  const moduleArray = `const modules : any[] = [${allModuleNames.join(', ')}];`;
+
+  // Generate alias code
+  let aliasCode = '';
+  if (Object.keys(aliases).length > 0) {
+    const aliasLines = Object.entries(aliases).map(([interfaceId, implId]) => {
+      return [
+        `  // Extension alias: ${interfaceId} -> ${implId}`,
+        `  if (!container.isBound('${implId}')) {`,
+        `    console.warn('[DI] Extension alias target not bound: ${implId} (for alias: ${interfaceId})');`,
+        `  } else {`,
+        `    if (container.isBound('${interfaceId}')) {`,
+        `      container.unbind('${interfaceId}');`,
+        `    }`,
+        `    container.bind('${interfaceId}').toService('${implId}');`,
+        `  }`,
+      ].join('\n');
+    });
+    aliasCode = '\n' + aliasLines.join('\n\n') + '\n';
+  }
   
   // Read the template file
   const templatePath = path.join(process.cwd(), 'scripts/templates/container.ts.tmpl');
@@ -273,8 +433,9 @@ export default container;
   
   // Replace placeholders in the template
   const output = template
-    .replace('{{imports}}', imports)
+    .replace('{{imports}}', allImports)
     .replace('{{moduleArray}}', moduleArray)
+    .replace('{{aliases}}', aliasCode)
     .replace('{{layer}}', layer);
   
   // Write the output file
@@ -296,13 +457,27 @@ async function generateAllContainers() {
  */
 function watchForChanges() {
   const layer = 'platform';
-  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile } = LAYER_CONFIGS[layer];
+  const { directory, serverOutputFile, clientOutputFile, ssrOutputFile, mdOutputFile } = LAYER_CONFIGS[layer];
   
-  console.log(`Setting up watcher for ${directory}...`);
+  // Watch both the platform directory and extensions directory
+  const watchPaths = [directory];
+  if (fs.existsSync(EXTENSIONS_DIR)) {
+    watchPaths.push(EXTENSIONS_DIR);
+  }
+  console.log(`Setting up watcher for ${watchPaths.join(', ')}...`);
   
-  // Watch for changes in the directory
-  const watcher = chokidar.watch(directory, {
-    ignored: ['**/*.d.ts', '**/node_modules/**', '**/dist/**', '**/build/**', serverOutputFile, clientOutputFile, ssrOutputFile],
+  // Watch for changes in the directories
+  const watcher = chokidar.watch(watchPaths, {
+    ignored: [
+      '**/*.d.ts',
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      serverOutputFile,
+      clientOutputFile,
+      ssrOutputFile,
+      mdOutputFile,
+    ],
     persistent: true,
     // Prevent firing events during initial scan
     ignoreInitial: true
