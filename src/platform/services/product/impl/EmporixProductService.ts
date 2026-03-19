@@ -252,7 +252,7 @@ class EmporixProductService implements ProductService {
     }
 
     const priceMap = new Map<string, ProductPrice>();
-    batchPriceMap.forEach((price, productId) => {
+    batchPriceMap.forEach((price: ProductPrice | null, productId: string) => {
       if (price) priceMap.set(productId, price);
     });
 
