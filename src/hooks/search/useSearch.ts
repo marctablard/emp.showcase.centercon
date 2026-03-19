@@ -6,6 +6,7 @@ import { useSiteCode } from '@/hooks/site/useSiteCode';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
+import { buildSearchPaginationUrl } from './build-search-pagination-url';
 
 const DEFAULT_PAGE_INDEX = 0;
 const DEFAULT_PAGE_SIZE = 16;
@@ -314,13 +315,15 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
       setLoadingMore(true);
       setError(null);
 
-      const url = new URL('/api/search', window.location.origin);
-      if (lastSearchParams.current.query) url.searchParams.append('query', lastSearchParams.current.query);
-      url.searchParams.append('page', nextPage.toString());
-      url.searchParams.append('size', pageSize.toString());
-      if (lastSearchParams.current.sort) url.searchParams.append('sort', lastSearchParams.current.sort);
-      url.searchParams.append('site', siteCode);
-      url.searchParams.append('locale', locale);
+      const url = buildSearchPaginationUrl({
+        origin: window.location.origin,
+        nextPage,
+        pageSize,
+        siteCode,
+        locale,
+        query: lastSearchParams.current.query,
+        sort: lastSearchParams.current.sort,
+      });
 
       if (lastSearchParams.current.filters) {
         Object.entries(lastSearchParams.current.filters).forEach(([key, value]) => {
