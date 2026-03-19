@@ -152,7 +152,7 @@
   "hello": "Hello",
   "sidebar": {
     "dashboard": "Dashboard",
-    "menu": "Menu",
+    "menu": "Account Menu",
     "groups": {
       "selfService": "Self Service",
       "orderManagement": "Order Management",
