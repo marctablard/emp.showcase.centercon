@@ -103,7 +103,7 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
         </UiLink>
       </div>
       {/* search */}
-      <div className="mb-4 w-[60%]">
+      <div className="mb-4 w-full max-w-[380px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSearch)} className="w-full">
             <FormField

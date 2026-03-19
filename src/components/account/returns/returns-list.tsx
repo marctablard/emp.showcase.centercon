@@ -61,6 +61,8 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
     totalCount !== undefined
       ? currentPage < Math.ceil(totalCount / RETURNS_PER_PAGE)
       : visibleReturns.length === RETURNS_PER_PAGE;
+  const isInitialLoading = loading && visibleReturns.length === 0 && !quickSearch && currentPage === 1;
+  const isTableReloading = loading && !isInitialLoading;
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -108,7 +110,7 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
       returnItem.orders[0]?.items[0]?.unitPrice?.currency,
   });
 
-  if (loading) {
+  if (isInitialLoading) {
     return (
       <Card>
         <CardHeader>
@@ -166,8 +168,7 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
 
       <div className="bg-surface-primary border border-border-primary rounded-md p-4 min-[768px]:p-6 shadow-sm">
         <div className="mb-4">
-          <div className="relative w-full min-[768px]:max-w-[380px]">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-on-disabled" />
+          <div className="relative w-full max-w-[380px]">
             <Input
               value={quickSearch}
               onChange={(event) => {
@@ -175,86 +176,120 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
                 setQuickSearch(event.target.value);
               }}
               placeholder={t('searchPlaceholder')}
-              className="pl-9"
+              className="pr-10"
+              endIcon={isTableReloading ? undefined : Search}
               aria-label={t('searchPlaceholder')}
             />
+            {isTableReloading && (
+              <Spinner
+                variant="sm"
+                color="primary"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                loadingText={t('loading')}
+              />
+            )}
           </div>
         </div>
 
-        {visibleReturns.length === 0 && quickSearch && (
+        {!loading && visibleReturns.length === 0 && quickSearch && (
           <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
             {t('noMatches')}
           </div>
         )}
 
         {isTabletUp && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-medium">{t('returnNumber')}</TableHead>
-                <TableHead className="font-medium" aria-sort={getSortAriaSort('date')}>
-                  <button onClick={() => toggleSort('date')} className="flex items-center gap-1 hover:text-text-action">
-                    {t('returnDate')}
-                    {getSortIcon('date')}
-                  </button>
-                </TableHead>
-                <TableHead className="font-medium">{t('orderNumber')}</TableHead>
-                <TableHead className="hidden min-[1280px]:table-cell font-medium">{t('email')}</TableHead>
-                <TableHead className="font-medium" aria-sort={getSortAriaSort('value')}>
-                  <button
-                    onClick={() => toggleSort('value')}
-                    className="flex items-center gap-1 hover:text-text-action"
+          <div className={`transition-opacity ${isTableReloading ? 'opacity-70' : 'opacity-100'}`}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold text-base leading-5 font-primary text-text-headings">
+                    {t('returnNumber')}
+                  </TableHead>
+                  <TableHead
+                    className="font-bold text-base leading-5 font-primary text-text-headings"
+                    aria-sort={getSortAriaSort('date')}
                   >
-                    {t('returnValue')}
-                    {getSortIcon('value')}
-                  </button>
-                </TableHead>
-                <TableHead className="font-medium" aria-sort={getSortAriaSort('status')}>
-                  <button
-                    onClick={() => toggleSort('status')}
-                    className="flex items-center gap-1 hover:text-text-action"
+                    <button
+                      onClick={() => toggleSort('date')}
+                      className="flex items-center gap-2 hover:text-text-action"
+                    >
+                      {t('returnDate')}
+                      {getSortIcon('date')}
+                    </button>
+                  </TableHead>
+                  <TableHead className="font-bold text-base leading-5 font-primary text-text-headings">
+                    {t('orderNumber')}
+                  </TableHead>
+                  <TableHead className="hidden min-[1280px]:table-cell font-bold text-base leading-5 font-primary text-text-headings">
+                    {t('email')}
+                  </TableHead>
+                  <TableHead
+                    className="font-bold text-base leading-5 font-primary text-text-headings"
+                    aria-sort={getSortAriaSort('value')}
                   >
-                    {t('statusLabel')}
-                    {getSortIcon('status')}
-                  </button>
-                </TableHead>
-                <TableHead className="font-medium text-right">{t('view')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visibleReturns.map((returnItem) => {
-                const displayAmount = getDisplayReturnAmount(returnItem);
-                return (
-                  <TableRow key={returnItem.id} className="border-t border-border-primary">
-                    <TableCell>
-                      <Link
-                        href={`/account/returns/${returnItem.id}`}
-                        className="text-text-action underline decoration-solid font-bold hover:text-text-action/80"
-                      >
-                        {returnItem.id}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{formatReturnDate(returnItem.createdAt, locale)}</TableCell>
-                    <TableCell>{getFirstOrderId(returnItem)}</TableCell>
-                    <TableCell className="hidden min-[1280px]:table-cell">{getRequestorEmail(returnItem)}</TableCell>
-                    <TableCell>{formatReturnCurrency(displayAmount.value, displayAmount.currency, locale)}</TableCell>
-                    <TableCell>
-                      <ReturnStatusBadge status={returnItem.status} isExpired={returnItem.isExpired} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link href={`/account/returns/${returnItem.id}`} className="inline-flex items-center justify-end">
-                        <ArrowRight className="h-6 w-6 text-text-headings hover:text-text-action" />
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                    <button
+                      onClick={() => toggleSort('value')}
+                      className="flex items-center gap-2 hover:text-text-action"
+                    >
+                      {t('returnValue')}
+                      {getSortIcon('value')}
+                    </button>
+                  </TableHead>
+                  <TableHead
+                    className="font-bold text-base leading-5 font-primary text-text-headings"
+                    aria-sort={getSortAriaSort('status')}
+                  >
+                    <button
+                      onClick={() => toggleSort('status')}
+                      className="flex items-center gap-2 hover:text-text-action"
+                    >
+                      {t('statusLabel')}
+                      {getSortIcon('status')}
+                    </button>
+                  </TableHead>
+                  <TableHead className="font-bold text-base leading-5 font-primary text-text-headings text-right">
+                    {t('view')}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visibleReturns.map((returnItem) => {
+                  const displayAmount = getDisplayReturnAmount(returnItem);
+                  return (
+                    <TableRow key={returnItem.id} className="border-t border-border-primary">
+                      <TableCell>
+                        <Link
+                          href={`/account/returns/${returnItem.id}`}
+                          className="text-text-action underline decoration-solid font-bold hover:text-text-action/80"
+                        >
+                          {returnItem.id}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{formatReturnDate(returnItem.createdAt, locale)}</TableCell>
+                      <TableCell>{getFirstOrderId(returnItem)}</TableCell>
+                      <TableCell className="hidden min-[1280px]:table-cell">{getRequestorEmail(returnItem)}</TableCell>
+                      <TableCell>{formatReturnCurrency(displayAmount.value, displayAmount.currency, locale)}</TableCell>
+                      <TableCell>
+                        <ReturnStatusBadge status={returnItem.status} isExpired={returnItem.isExpired} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link
+                          href={`/account/returns/${returnItem.id}`}
+                          className="inline-flex items-center justify-end"
+                        >
+                          <ArrowRight className="h-6 w-6 text-text-headings hover:text-text-action" />
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         )}
 
         {!isTabletUp && (
-          <div className="space-y-3">
+          <div className={`space-y-3 transition-opacity ${isTableReloading ? 'opacity-70' : 'opacity-100'}`}>
             {visibleReturns.map((returnItem) => {
               const displayAmount = getDisplayReturnAmount(returnItem);
               return (
