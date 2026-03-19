@@ -3,13 +3,10 @@ import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/product/product-detail';
 import { JsonLd } from '@/components/seo/json-ld';
 import { UiBreadcrumb } from '@/components/ui/molecules/ui-breadcrumb';
-import { routingConfig } from '@/i18n/routing';
 import { generateBreadcrumbForProduct } from '@/lib/breadcrumb';
-import { getProductById, getProducts } from '@/lib/ssr/products';
+import { getProductById } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
-import { getAvailableSites } from '@/lib/ssr/site';
 import { isProductSsrEnabled } from '@/lib/ssr/ssr-config';
-import { Product } from '@/platform/services/model/product';
 import { ProductFetchOptions } from '@/platform/services/product';
 
 interface ProductPageProps {
@@ -26,31 +23,7 @@ export const PUBLIC_PRODUCT_OPTIONS = {
   customerSegments: false,
 };
 
-// Cached page will become stale and regenrated in the background at most once every 360 seconds.
-export const revalidate = 360;
-
-export async function generateStaticParams() {
-  const ssgProductCount = parseInt(process.env.NEXT_SSG_PRODUCT_COUNT || '0', 0);
-  if (ssgProductCount <= 0) {
-    return [];
-  }
-  const sites = await getAvailableSites();
-  const products = await getProducts(0, ssgProductCount, PUBLIC_PRODUCT_OPTIONS);
-  const params: { site: string; locale: string; id: string }[] = [];
-  for (const site of sites) {
-    // TODO filter on site level depending on implementation
-    products.items.forEach((product: Product) => {
-      routingConfig.locales.forEach((locale) => {
-        params.push({
-          site: site.code,
-          locale: locale,
-          id: product.id,
-        });
-      });
-    });
-  }
-  return params;
-}
+export const dynamic = 'force-dynamic';
 
 export function createProductOptions(
   baseOptions: ProductFetchOptions,

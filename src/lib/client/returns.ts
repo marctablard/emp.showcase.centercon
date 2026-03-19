@@ -6,6 +6,8 @@ import type { Return } from '@/platform/services/model/return';
 export interface CreateReturnItem {
   id: string;
   quantity: number;
+  reasonCode?: ReturnReasonCode;
+  reasonDetails?: string;
 }
 
 /**
@@ -29,6 +31,11 @@ export interface CreateReturnResponse {
   id: string;
 }
 
+export interface ReturnsPageResult {
+  items: Return[];
+  totalCount?: number;
+}
+
 /**
  * Create a new return for an order
  * @param orderId The ID of the order to create return for
@@ -39,13 +46,20 @@ export async function createReturn(
   orderId: string,
   items: CreateReturnItem[],
   reasonCode: ReturnReasonCode,
+  reasonDetails?: string,
 ): Promise<CreateReturnResponse> {
+  const normalizedReasonDetails = typeof reasonDetails === 'string' ? reasonDetails.trim() : '';
   const response = await fetch('/api/returns', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ orderId, items, reasonCode }),
+    body: JSON.stringify({
+      orderId,
+      items,
+      reasonCode,
+      reasonDetails: normalizedReasonDetails || undefined,
+    }),
   });
 
   if (!response.ok) {
@@ -62,11 +76,27 @@ export async function createReturn(
  * @param options.pageNumber Page number (default: 1)
  * @param options.query Emporix q-parameter value for server-side filtering
  */
-export async function fetchReturns(pageSize?: number, pageNumber?: number, query?: string): Promise<Return[]> {
+export async function fetchReturns(
+  pageSize?: number,
+  pageNumber?: number,
+  query?: string,
+  sort?: string,
+): Promise<Return[]> {
+  const result = await fetchReturnsPage(pageSize, pageNumber, query, sort);
+  return result.items;
+}
+
+export async function fetchReturnsPage(
+  pageSize?: number,
+  pageNumber?: number,
+  query?: string,
+  sort?: string,
+): Promise<ReturnsPageResult> {
   const params = new URLSearchParams();
   if (pageSize) params.set('pageSize', pageSize.toString());
   if (pageNumber) params.set('pageNumber', pageNumber.toString());
   if (query) params.set('query', query);
+  if (sort) params.set('sort', sort);
 
   const queryString = params.toString();
   const url = `/api/returns${queryString ? `?${queryString}` : ''}`;
@@ -83,7 +113,14 @@ export async function fetchReturns(pageSize?: number, pageNumber?: number, query
     throw new Error(errorData.error || 'Failed to fetch returns');
   }
 
-  return response.json();
+  const totalCountHeader = response.headers.get('x-total-count');
+  const parsedTotalCount = totalCountHeader ? parseInt(totalCountHeader, 10) : Number.NaN;
+  const items = (await response.json()) as Return[];
+
+  return {
+    items,
+    totalCount: Number.isFinite(parsedTotalCount) ? parsedTotalCount : undefined,
+  };
 }
 
 /**
