@@ -263,14 +263,61 @@ Reference setup files in `plugin.json`:
 }
 ```
 
+## Dependency Inversion Pattern
+
+Extensions can define service interfaces that the storefront must implement. This achieves **true loose coupling** through the **Dependency Inversion Principle**.
+
+### Example: CMSComponentDefinitionService
+
+```
+Extension (High-Level)              Storefront (Low-Level)
+┌─────────────────────┐            ┌──────────────────────┐
+│ Defines Interface   │            │ Implements Interface │
+│ CMSComponentDef...  │◄───────────│ StorefrontCMSDef...  │
+│                     │  implements│                      │
+│ Uses via DI:        │            │ Provides:            │
+│ client.get(...)     │            │ @injectable(...)     │
+└─────────────────────┘            └──────────────────────┘
+```
+
+**Benefits:**
+- Extension owns the contract (interface)
+- Storefront fulfills the contract (implementation)
+- Extension is portable to any storefront that implements the interface
+- No tight coupling between extension and storefront
+
+**Example:**
+
+```typescript
+// Extension defines what it needs
+// extensions/my-extension/MyService.d.ts
+export interface MyService {
+  getData(): Promise<Data>;
+}
+
+// Extension uses it
+import type { MyService } from '../MyService';
+const service = client.get<MyService>('MyService');
+
+// Storefront implements it
+// src/platform/services/my-service/impl/MyServiceImpl.ts
+@injectable('MyService', 'Singleton')
+export class MyServiceImpl implements MyService {
+  getData(): Promise<Data> {
+    // Implementation
+  }
+}
+```
+
 ## Best Practices
 
 ### 1. Keep Extensions Self-Contained
 
 - All extension code should live within its directory
 - Avoid modifying core application files
--- If this is necessary, document why and provide a migration path
+- If this is necessary, document why and provide a migration path
 - Use dependency injection for integration points
+- **Define service interfaces in the extension** for true dependency inversion
 
 ### 2. Follow Naming Conventions
 

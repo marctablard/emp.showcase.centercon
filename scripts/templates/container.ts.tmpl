@@ -31,9 +31,6 @@ export function initializeContainer(): Container {
     addInjectableModule(module, container);
   });
 
-  // Extension aliases
-  {{aliasExtensions}}
-
   {{aliasBindings}}
   
   return container;

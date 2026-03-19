@@ -435,22 +435,42 @@ async function generateContainerFile(
   // Generate the module array string
   const moduleArray = `const modules : any[] = [${allModuleNames.join(', ')}];`;
 
-  // Generate alias code
-  let aliasExtensions = '';
-  if (Object.keys(aliases).length > 0) {
-    const aliasLines = Object.entries(aliases).map(([interfaceId, implId]) => {
+  /**
+   * Helper function to generate alias binding code.
+   * Checks if target is bound before creating the alias.
+   */
+  function generateAliasBindings(aliasMap: Record<string, string>, comment: string): string {
+    const entries = Object.entries(aliasMap);
+    if (entries.length === 0) return '';
+
+    const aliasLines = entries.map(([alias, target]) => {
+      // Skip if alias === target (no-op)
+      if (alias === target) return null;
+
       return [
-        `  // Extension alias: ${interfaceId} -> ${implId}`,
-        `  if (container.isBound('${implId}')) {`,
-        `    if (container.isBound('${interfaceId}')) {`,
-        `      container.unbind('${interfaceId}');`,
+        `  // ${comment}: ${alias} -> ${target}`,
+        `  if (container.isBound('${target}')) {`,
+        `    if (container.isBound('${alias}')) {`,
+        `      container.unbind('${alias}');`,
         `    }`,
-        `    container.bind('${interfaceId}').toService('${implId}');`,
+        `    container.bind('${alias}').toService('${target}');`,
         `  }`,
       ].join('\n');
-    });
-    aliasExtensions = '\n' + aliasLines.join('\n\n') + '\n';
+    }).filter(Boolean);
+
+    return aliasLines.length > 0 ? '\n' + aliasLines.join('\n\n') + '\n' : '';
   }
+
+  // Combine extension aliases and dependency aliases into a single map
+  const dependencyAliasMap = dependencyAliases.reduce((acc, { alias, target }) => {
+    acc[alias] = target;
+    return acc;
+  }, {} as Record<string, string>);
+  
+  const allAliases = { ...dependencyAliasMap, ...aliases };
+  
+  // Generate all alias bindings using the helper function
+  const aliasBindings = generateAliasBindings(allAliases, 'Alias');
   
   // Read the template file
   const templatePath = path.join(process.cwd(), 'scripts/templates/container.ts.tmpl');
@@ -463,36 +483,10 @@ async function generateContainerFile(
     return;
   }
   
-  // Replace placeholders in the template
-  const aliasBindings = (() => {
-    if (!dependencyAliases.length) return '';
-
-    const lines: string[] = [];
-    lines.push('// Dependency aliases from src/platform/depency.yml');
-
-    for (const { alias, target } of dependencyAliases) {
-      // If alias === target, skip (no-op)
-      if (alias === target) continue;
-
-      // Only bind alias if target exists, otherwise inversify will throw on `toService`.
-      // In that case we just warn to keep dev experience smooth.
-      lines.push(`if (!container.isBound('${target}')) {`);
-      lines.push(`  diLogger.warn('[DI] Alias target not bound: ${target} (for alias: ${alias})');`);
-      lines.push('} else {');
-      lines.push(`  if (container.isBound('${alias}')) {`);
-      lines.push(`    container.unbind('${alias}');`);
-      lines.push('  }');
-      lines.push(`  container.bind('${alias}').toService('${target}');`);
-      lines.push('}');
-    }
-
-    return lines.map((l) => `  ${l}`).join('\n');
-  })();
 
   const output = template
     .replace('{{imports}}', allImports)
     .replace('{{moduleArray}}', moduleArray)
-    .replace('{{aliasExtensions}}', aliasExtensions)
     .replace('{{aliasBindings}}', aliasBindings)
     .replace('{{layer}}', layer);
   
