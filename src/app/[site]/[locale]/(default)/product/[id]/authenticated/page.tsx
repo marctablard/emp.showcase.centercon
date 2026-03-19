@@ -15,8 +15,9 @@ const AUTHENTICATED_PRODUCT_OPTIONS = {
   customerSegments: true,
 };
 
-// ISR with shorter revalidation for authenticated content
-export const revalidate = 60;
+// Authenticated product pages are request-bound and must stay dynamic.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata(
   { params }: { params: Promise<AuthenticatedProductPageProps> },
