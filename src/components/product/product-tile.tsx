@@ -23,17 +23,22 @@ import { ToastType, notify } from '../ui/toast-notification';
 interface ProductTileProps {
   product: Product;
   locale?: string;
+  skipVariantFetch?: boolean;
 }
 
-export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
+export function ProductTile({ product, locale = 'en', skipVariantFetch = false }: ProductTileProps) {
   const t = useTranslations('product');
   const { l10n } = useL10n(locale);
   const { addItem, loading: cartLoading } = useCart();
   const horizontalScrollRef = useHorizontalScroll();
 
-  // Get available variant values for the first variant attribute
-  const firstAttributeKey = product.variantAttributes?.[0]?.key;
-  const { values: availableValues, loading: variantLoading } = useAvailableVariantValues(product, firstAttributeKey);
+  const firstAttribute = product.variantAttributes?.[0];
+  const { values: fetchedValues, loading: fetchedLoading } = useAvailableVariantValues(
+    product,
+    skipVariantFetch ? undefined : firstAttribute?.key,
+  );
+  const availableValues = skipVariantFetch ? (firstAttribute?.values ?? []) : fetchedValues;
+  const variantLoading = skipVariantFetch ? false : fetchedLoading;
 
   const handleAddToCart = async (e: any) => {
     try {
@@ -122,8 +127,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
               {!variantLoading && availableValues.length > 0 && (
                 <>
                   {availableValues.slice(0, 3).map((value) => {
-                    const firstAttribute = product.variantAttributes![0];
-                    const isColorAttribute = firstAttribute.key === 'color' || firstAttribute.key === 'farbe';
+                    const isColorAttribute = firstAttribute!.key === 'color' || firstAttribute!.key === 'farbe';
 
                     return isColorAttribute ? (
                       <ProductColorTile
@@ -137,7 +141,7 @@ export function ProductTile({ product, locale = 'en' }: ProductTileProps) {
                       <ProductCharacteristic
                         key={value.key}
                         value={value.name ? l10n(value.name) : value.key}
-                        unit={firstAttribute.name ? l10n(firstAttribute.name) : firstAttribute.key}
+                        unit={firstAttribute!.name ? l10n(firstAttribute!.name) : firstAttribute!.key}
                       />
                     );
                   })}

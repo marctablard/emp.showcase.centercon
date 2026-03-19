@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import useHistory from '@/hooks/history/useHistory';
@@ -8,7 +8,7 @@ import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platfo
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
 
 const DEFAULT_PAGE_INDEX = 0;
-const DEFAULT_PAGE_SIZE = 12;
+const DEFAULT_PAGE_SIZE = 16;
 
 // Extend the SearchParams type to support nested objects in filters
 export type FilterValue = string | string[] | Record<string, string>;
@@ -23,6 +23,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   const pathname = usePathname();
   const [data, setData] = useState<T[]>(initialResult?.items || []);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
   const [facets, setFacets] = useState<Filter[]>([]);
@@ -300,9 +301,58 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
     [search],
   );
 
+  const hasMore = useMemo(() => (currentPage + 1) * pageSize < total, [currentPage, pageSize, total]);
+
   /**
-   * Change the sort order
+   * Fetch the next page of results and append to the existing data
    */
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || loading) return;
+
+    const nextPage = currentPage + 1;
+    try {
+      setLoadingMore(true);
+      setError(null);
+
+      const url = new URL('/api/search', window.location.origin);
+      if (lastSearchParams.current.query) url.searchParams.append('query', lastSearchParams.current.query);
+      url.searchParams.append('page', nextPage.toString());
+      url.searchParams.append('size', pageSize.toString());
+      if (lastSearchParams.current.sort) url.searchParams.append('sort', lastSearchParams.current.sort);
+      url.searchParams.append('site', siteCode);
+      url.searchParams.append('locale', locale);
+
+      if (lastSearchParams.current.filters) {
+        Object.entries(lastSearchParams.current.filters).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((val) => url.searchParams.append(`filters[${key}][]`, val));
+          } else if (typeof value === 'object' && value !== null) {
+            Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+              url.searchParams.append(`filters[${key}][${nestedKey}]`, String(nestedValue));
+            });
+          } else {
+            url.searchParams.append(`filters[${key}]`, String(value));
+          }
+        });
+      }
+
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error(`Search failed: ${response.statusText}`);
+
+      const result: SearchResult<T> = await response.json();
+
+      setData((prev) => [...prev, ...result.items]);
+      setCurrentPage(nextPage);
+      setTotal(result.total);
+
+      lastSearchParams.current = { ...lastSearchParams.current, page: nextPage };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, loading, currentPage, pageSize, siteCode, locale]);
+
   const getSuggestions = useCallback(async (query: string, locale?: string): Promise<void> => {
     setLoading(true);
     if (!query?.trim()) {
@@ -355,6 +405,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
     // State
     data,
     loading,
+    loadingMore,
+    hasMore,
     facets,
     total,
     currentPage,
@@ -365,6 +417,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
 
     // Functions
     search,
+    loadMore,
     applyAllFacets,
     applyFacet,
     applyRangeFacet,
