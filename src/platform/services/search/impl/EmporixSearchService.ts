@@ -7,7 +7,7 @@ import type { EmporixProductApi } from '@/platform/integrations/emporix/product/
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Product } from '@/platform/services/model/product';
-import type { ProductService } from '@/platform/services/product/ProductService';
+import type { ProductFetchOptions, ProductService } from '@/platform/services/product/ProductService';
 import type { SearchService } from '@/platform/services/search/SearchService';
 import type { SessionService } from '@/platform/services/session/SessionService';
 import type { ProductMapper } from '../../model/product/ProductMapper';
@@ -49,7 +49,11 @@ class EmporixSearchService implements SearchService {
     this.logger = logger;
   }
 
-  private async filterMapAndEnrichProducts(items: EmporixProduct[], site?: string) {
+  private async filterMapAndEnrichProducts(
+    items: EmporixProduct[],
+    site?: string,
+    enrichOptions?: ProductFetchOptions,
+  ) {
     const beforeFiltering = items.length;
 
     // TODO : this should be cached somehow,
@@ -65,11 +69,10 @@ class EmporixSearchService implements SearchService {
     )) as EmporixProduct[];
 
     const products = filteredItems.map((item) => this.productMapper.mapToService(item));
-    const enrichedProducts = await this.productService.addAdditionalData(products, {
-      prices: true,
-      variants: true,
-      categories: false,
-    });
+    const enrichedProducts = await this.productService.addAdditionalData(
+      products,
+      enrichOptions ?? { prices: true, variants: true, categories: false },
+    );
 
     return {
       enrichedProducts,
@@ -79,9 +82,10 @@ class EmporixSearchService implements SearchService {
   }
 
   async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
+    const requestedSize = params.size ?? 16;
     const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: (params.page || 0) + 1, // normalize page
-      size: 1000,
+      size: requestedSize,
       criteria: {
         ...(params.query && { name: '~' + params.query }),
       },
@@ -92,11 +96,12 @@ class EmporixSearchService implements SearchService {
     const { enrichedProducts, beforeFiltering, filteredCount } = await this.filterMapAndEnrichProducts(
       searchResult.items,
       params.site,
+      { prices: true, variants: false, categories: false },
     );
     return {
-      items: enrichedProducts.splice(0, searchResult.size),
+      items: enrichedProducts,
       page: searchResult.page - 1, // normalize page
-      pageSize: Math.min(searchResult.size, filteredCount),
+      pageSize: requestedSize,
       total: searchResult.total - (beforeFiltering - filteredCount), // ~approximation
       availableFilters: [],
     };
@@ -105,7 +110,7 @@ class EmporixSearchService implements SearchService {
   async getSuggestions(params: SearchParams<Product>): Promise<SearchSuggestions> {
     const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: 1,
-      size: 1000,
+      size: 8,
       criteria: {
         name: '~' + params.query,
       },
@@ -113,7 +118,11 @@ class EmporixSearchService implements SearchService {
       filters: undefined,
     });
 
-    const { enrichedProducts } = await this.filterMapAndEnrichProducts(searchResult.items, params.site);
+    const { enrichedProducts } = await this.filterMapAndEnrichProducts(searchResult.items, params.site, {
+      prices: true,
+      variants: false,
+      categories: false,
+    });
     return {
       queryCompletions: [],
       products: enrichedProducts,
