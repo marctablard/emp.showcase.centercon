@@ -26,9 +26,10 @@ const RETURN_SORT_FIELD_MAP: Record<ReturnSortField, string> = {
 
 interface ReturnsListProps {
   initialReturns?: Return[];
+  forceRefreshOnMount?: boolean;
 }
 
-export function ReturnsList({ initialReturns }: ReturnsListProps) {
+export function ReturnsList({ initialReturns, forceRefreshOnMount = false }: ReturnsListProps) {
   const t = useTranslations('account.returns');
   const tQuotesList = useTranslations('account.quotesList');
   const locale = useLocale();
@@ -52,6 +53,7 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
     pageSize: RETURNS_PER_PAGE,
     sort: apiSort,
     query: apiQuery,
+    forceRefreshOnMount,
   });
   const displayedCount = Math.min(
     currentPage * RETURNS_PER_PAGE,

@@ -21,9 +21,10 @@ type OrderSearchFormData = {
 
 interface MyOrdersCardProps extends Omit<DashboardCardProps, 'children'> {
   className?: string;
+  forceRefreshOnMount?: boolean;
 }
 
-export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) {
+export function MyOrdersCard({ className, title, forceRefreshOnMount = false, ...props }: MyOrdersCardProps) {
   const t = useTranslations('orders');
 
   const { form } = useValidator('OrderSearchValidationService', {
@@ -38,11 +39,12 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
   // Fetch orders from the hook
   const { orders, loading, refetchOrders } = useOrders();
 
-  // Fetch fresh order data when component mounts
   useEffect(() => {
+    if (!forceRefreshOnMount) {
+      return;
+    }
     refetchOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [forceRefreshOnMount, refetchOrders]);
 
   // Get the appropriate status badge variant
   const getStatusBadge = (status: string) => {
