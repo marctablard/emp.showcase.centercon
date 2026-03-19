@@ -3,7 +3,6 @@ import { SessionProvider as AuthSessionProvider } from 'next-auth/react';
 import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import '@/app/globals.css';
 import { CsrfProvider } from '@/components/csrf/CsrfProvider';
@@ -12,16 +11,15 @@ import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { redirect } from '@/i18n/edge/navigation';
 import { routing } from '@/i18n/routing';
+import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
 import { setSessionLanguage } from '@/lib/ssr/session';
 import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import { setRequestSite } from '@/site/server/';
-import { INTERNAL_SITE_INVALID_HEADER } from '@/site/types';
 
 const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || undefined;
-const availableSiteCodes = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
 
 const fontHeadlines = Ubuntu({
   subsets: ['latin'],
@@ -48,14 +46,6 @@ export const viewport = {
   initialScale: 1,
 };
 
-export function generateStaticParams() {
-  const siteForSSG = defaultSiteCode || availableSiteCodes[0];
-  if (!siteForSSG) {
-    return [];
-  }
-  return routing.locales.map((locale) => ({ locale, site: siteForSSG }));
-}
-
 export async function generateMetadata(props: Omit<Props, 'children'>) {
   const { locale } = await props.params;
   const t = await getTranslations({ locale, namespace: 'seo' });
@@ -75,12 +65,6 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
   // Ensure that the incoming `locale` is valid
   const { locale, site: siteCode } = await params;
   if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
-  // Early exit: middleware flagged this request as having an invalid site
-  const headerStore = await headers();
-  if (headerStore.get(INTERNAL_SITE_INVALID_HEADER)) {
     notFound();
   }
 
@@ -125,7 +109,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
               <StoreProvider site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
-                  {process.env.NODE_ENV === 'development' && <ApiDebugPanel />}
+                  {isDebugApiEnabled() && isBrowserDebugOutputEnabled() && <ApiDebugPanel />}
                   {children}
                   {dialog}
                   <Toaster />

@@ -34,5 +34,12 @@ export function OrderStatusBadge({ status }: { status: Order['status'] }) {
     }
   };
 
-  return <Badge variant={getVariant()}>{tOrderStatus(dk<OrderStatusKey>(status))}</Badge>;
+  return (
+    <Badge
+      variant={getVariant()}
+      className="h-7 px-3 text-[12px] leading-[16px] font-bold uppercase tracking-wide rounded-[4px]"
+    >
+      {tOrderStatus(dk<OrderStatusKey>(status))}
+    </Badge>
+  );
 }

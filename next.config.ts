@@ -34,9 +34,12 @@ if (!envResult.hasErrors && !envResult.hasWarnings) {
 let outputMode = undefined;
 switch (process.env.NEXT_SERVER_OUTPUTMODE) {
   case 'standalone':
-  case 'export':
     outputMode = process.env.NEXT_SERVER_OUTPUTMODE;
     break;
+  case 'export':
+    throw new Error(
+      'NEXT_SERVER_OUTPUTMODE=export is not supported for this application. The storefront relies on App Router SSR, middleware, and route handlers that require the Next.js server runtime.',
+    );
 }
 
 let nextConfig: NextConfig = {

@@ -546,7 +546,7 @@ These headers are automatically attached by `attachDebugHeaders()` when called i
 
 ### 2. SSE Console Stream (ApiDebugPanel)
 
-The SSE stream at `/api/debug/stream` pushes upstream API debug events to the browser in real time. The `ApiDebugPanel` component (loaded in the root layout in dev mode) connects to this stream and pretty-prints each event in the browser **Console**:
+The SSE stream at `/api/debug/stream` pushes upstream API debug events to the browser in real time. The `ApiDebugPanel` component (loaded in the root layout whenever `NEXT_PUBLIC_DEBUG_API_RESPONSE` is not `OFF`) connects to this stream and pretty-prints each event in the browser **Console**:
 
 - **Collapsible groups** — each API call is a `console.groupCollapsed` (or `console.group` for errors)
 - **Color-coded** — green for 2xx, orange for 4xx, red for 5xx
@@ -576,7 +576,7 @@ JSON bodies and headers are multi-line indented for easy visual scanning.
    NEXT_PUBLIC_DEBUG_API_CURL=true
    NEXT_PUBLIC_DEBUG_API_RESPONSE=STATUS-BODY
    ```
-2. Start the dev server with `npm run dev`
+2. Start the app in your target environment
 3. Open your browser's DevTools Console
 4. You'll see a "🔌 API Debug Stream connected" message
 5. Every upstream API call will appear as a collapsible group in the Console **and** as colorized output in the terminal
