@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowDown, ArrowRight, ArrowUp, ChevronLeft, ChevronRight, ChevronsUpDown, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,11 @@ import { ReturnStatusBadge } from './return-status-badge';
 
 type ReturnSortField = 'date' | 'value' | 'status';
 const RETURNS_PER_PAGE = 5;
+const SEARCH_DEBOUNCE_MS = 500;
 const RETURN_SORT_FIELD_MAP: Record<ReturnSortField, string> = {
   date: 'metadata.createdAt',
   value: 'total.value',
-  status: 'status',
+  status: 'approvalStatus',
 };
 
 interface ReturnsListProps {
@@ -32,13 +33,14 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
   const tQuotesList = useTranslations('account.quotesList');
   const locale = useLocale();
   const [quickSearch, setQuickSearch] = useState('');
+  const [debouncedQuickSearch, setDebouncedQuickSearch] = useState('');
   const [sortField, setSortField] = useState<ReturnSortField>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const isTabletUp = useBreakpoint('sm');
-  const normalizedSearch = quickSearch.trim().toLowerCase();
+  const normalizedSearch = debouncedQuickSearch.trim();
   const apiSort = `${RETURN_SORT_FIELD_MAP[sortField]}:${sortDirection === 'asc' ? 'ASC' : 'DESC'}`;
-  const apiQuery = normalizedSearch.length > 0 ? normalizedSearch : undefined;
+  const apiQuery = normalizedSearch.length > 0 ? `id:~(${normalizedSearch})` : undefined;
   const {
     returns: visibleReturns,
     totalCount,
@@ -59,6 +61,16 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
     totalCount !== undefined
       ? currentPage < Math.ceil(totalCount / RETURNS_PER_PAGE)
       : visibleReturns.length === RETURNS_PER_PAGE;
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedQuickSearch(quickSearch);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [quickSearch]);
 
   const toggleSort = (field: ReturnSortField) => {
     setCurrentPage(1);
