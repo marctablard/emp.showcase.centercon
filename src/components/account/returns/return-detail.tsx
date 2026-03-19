@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { H1, H4 } from '@/components/ui/h';
+import { H1, H4, H5 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -117,12 +117,10 @@ function ReturnOverview({ returnItem, locale, t }: ReturnOverviewProps) {
           </H4>
         </div>
         <div className="flex items-start gap-4">
-          <span className="flex-1 text-[16px] leading-[24px] lg:text-[20px] lg:leading-[24px] font-medium text-text-on-disabled font-secondary">
-            {t('totalReturnValue')}
-          </span>
-          <span className="flex-1 text-right text-[16px] leading-[24px] lg:text-[20px] lg:leading-[24px] font-bold text-text-headings font-primary">
+          <H5 className="flex-1 text-text-body">{t('totalReturnValue')}</H5>
+          <H5 className="flex-1 text-right text-text-body">
             {totalGrossValue !== undefined ? formatReturnCurrency(totalGrossValue, totalCurrency, locale) : '-'}
-          </span>
+          </H5>
         </div>
         <div className="flex items-start gap-4">
           <span className="flex-1 text-[12px] leading-[20px] lg:text-[14px] lg:leading-[20px] font-medium text-text-on-disabled font-secondary">
