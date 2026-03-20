@@ -82,6 +82,8 @@ export interface Product {
   templateAttributes?: Record<string, string>;
   variantAttributes?: ProductVariantAttribute[];
   variantAttributeValues?: Record<string, string>;
+  /** Emporix product category roots when provided by API */
+  categoryIds?: string[];
 }
 
 export interface ProductRecommendations {

@@ -79,6 +79,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
     return {
       id: source.id || source.code,
       parentVariantId: source.parentVariantId,
+      categoryIds: source.categoryIds,
       brand: source.brandId ? { id: source.brandId } : undefined,
       labels: source.labelIds ? source.labelIds.map((id) => ({ id })) : undefined,
       name,
@@ -155,6 +156,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       description: service.description,
       media: media,
       published: true,
+      ...(service.categoryIds?.length ? { categoryIds: service.categoryIds } : {}),
     };
   }
 
