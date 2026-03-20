@@ -44,36 +44,6 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Get the appropriate status badge variant
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'IN_CHECKOUT':
-        return { variant: 'default' as const };
-      case 'CREATED':
-        return { variant: 'default' as const };
-      case 'CONFIRMED':
-        return { variant: 'warning' as const };
-      case 'PROCESSING':
-        return { variant: 'warning' as const };
-      case 'READY_FOR_PICKUP':
-        return { variant: 'warning' as const };
-      case 'READY_FOR_SHIPPING':
-        return { variant: 'warning' as const };
-      case 'SHIPPED':
-        return { variant: 'success' as const };
-      case 'DELIVERED':
-        return { variant: 'success' as const };
-      case 'COMPLETED':
-        return { variant: 'success' as const };
-      case 'CANCELLED':
-        return { variant: 'default' as const };
-      default:
-        return { variant: 'default' as const };
-    }
-  };
-
-  // No formatting functions needed here anymore as they're moved to MyOrdersTable component
-
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const ordersPerPage = 5; // Anzahl der Bestellungen pro Seite
@@ -129,7 +99,6 @@ export function MyOrdersCard({ className, title, ...props }: MyOrdersCardProps) 
           loading={loading}
           onPreviousPage={handlePreviousPage}
           onNextPage={handleNextPage}
-          getStatusBadge={getStatusBadge}
         />
       </div>
     </DashboardCard>
