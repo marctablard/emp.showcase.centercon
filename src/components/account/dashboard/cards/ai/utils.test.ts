@@ -145,6 +145,14 @@ describe('getQuoteStatusBadgeVariantForAi', () => {
     expect(getQuoteStatusBadgeVariantForAi('accepted')).toBe('success');
   });
 
+  it('should return outline for EXPIRED', () => {
+    expect(getQuoteStatusBadgeVariantForAi('EXPIRED')).toBe('outline');
+  });
+
+  it('should return destructive for CHANGE', () => {
+    expect(getQuoteStatusBadgeVariantForAi('CHANGE')).toBe('destructive');
+  });
+
   it('should return outline for unknown status', () => {
     expect(getQuoteStatusBadgeVariantForAi('UNKNOWN')).toBe('outline');
   });
@@ -173,6 +181,10 @@ describe('getOrderStatusBadgeVariantForAi', () => {
 
   it('should return destructive for CANCELLED', () => {
     expect(getOrderStatusBadgeVariantForAi('CANCELLED')).toBe('destructive');
+  });
+
+  it('should return destructive for DECLINED', () => {
+    expect(getOrderStatusBadgeVariantForAi('DECLINED')).toBe('destructive');
   });
 
   it('should return outline for unknown status', () => {

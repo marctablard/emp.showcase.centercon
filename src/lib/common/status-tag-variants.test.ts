@@ -26,6 +26,10 @@ describe('status-tag-variants', () => {
     it('maps CREATED to information', () => {
       expect(getOrderStatusVariant('CREATED')).toBe('information');
     });
+
+    it('maps DECLINED to destructive', () => {
+      expect(getOrderStatusVariant('DECLINED')).toBe('destructive');
+    });
   });
 
   describe('getQuoteStatusVariant', () => {
@@ -37,6 +41,10 @@ describe('status-tag-variants', () => {
       'ACCEPTED',
       'ORDER_CREATED',
       'CLOSED',
+      'CHANGE',
+      'DECLINE',
+      'DECLINED_BY_MERCHANT',
+      'EXPIRED',
     ] as const;
 
     it('maps every QuoteStatus value', () => {
@@ -48,6 +56,14 @@ describe('status-tag-variants', () => {
 
     it('maps OPEN to information', () => {
       expect(getQuoteStatusVariant('OPEN')).toBe('information');
+    });
+
+    it('maps EXPIRED to outline', () => {
+      expect(getQuoteStatusVariant('EXPIRED')).toBe('outline');
+    });
+
+    it('maps CHANGE to destructive', () => {
+      expect(getQuoteStatusVariant('CHANGE')).toBe('destructive');
     });
   });
 

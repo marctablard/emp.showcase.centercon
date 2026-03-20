@@ -56,7 +56,8 @@
     "shipped": "Versendet",
     "delivered": "Geliefert",
     "completed": "Abgeschlossen",
-    "cancelled": "Storniert"
+    "cancelled": "Storniert",
+    "declined": "Abgelehnt"
   },
   "paymentTypes": {
     "creditcard": "Kreditkarte",
@@ -96,7 +97,7 @@
     "CONFIRMED": "Bestätigt",
     "SHIPPED": "Versandt",
     "COMPLETED": "Abgeschlossen",
-    "DECLINED": "Storniert"
+    "DECLINED": "Abgelehnt"
   },
   "Confirmation": {
     "title": "Bestellbestätigung",

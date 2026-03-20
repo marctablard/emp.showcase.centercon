@@ -313,7 +313,11 @@
     "order_created": "Bestellung erstellt",
     "creating": "Wird erstellt",
     "closed": "Geschlossen",
-    "open": "Offen"
+    "open": "Offen",
+    "change": "Änderung",
+    "decline": "Ablehnung",
+    "declined_by_merchant": "Vom Händler abgelehnt",
+    "expired": "Abgelaufen"
   },
   "quoteDetails": {
     "title": "Angebotsdetails",

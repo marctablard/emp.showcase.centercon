@@ -14,6 +14,10 @@ const QUOTE_STATUS_KEYS: Record<QuoteStatus, true> = {
   ACCEPTED: true,
   ORDER_CREATED: true,
   CLOSED: true,
+  CHANGE: true,
+  DECLINE: true,
+  DECLINED_BY_MERCHANT: true,
+  EXPIRED: true,
 };
 
 /** Compile-time check: every {@link ReturnStatus} must appear below and in {@link getReturnStatusVariant}. */
@@ -68,6 +72,7 @@ export function getOrderStatusVariant(status: Order['status']): BadgeVariant {
     case 'COMPLETED':
       return 'success';
     case 'CANCELLED':
+    case 'DECLINED':
       return 'destructive';
     default:
       return 'outline';
@@ -79,12 +84,16 @@ export function getQuoteStatusVariant(status: QuoteStatus): BadgeVariant {
   switch (status) {
     case 'CREATING':
     case 'CLOSED':
+    case 'EXPIRED':
       return 'outline';
     case 'OPEN':
       return 'information';
     case 'IN_PROGRESS':
       return 'warning';
     case 'DECLINED':
+    case 'CHANGE':
+    case 'DECLINE':
+    case 'DECLINED_BY_MERCHANT':
       return 'destructive';
     case 'ACCEPTED':
     case 'ORDER_CREATED':
