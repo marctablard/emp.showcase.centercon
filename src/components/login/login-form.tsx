@@ -85,6 +85,9 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
     }
   }
 
+  // Dialog login: @dialog onCloseAction calls router.back() when the URL still ends in /login.
+  // Fixes client Link → dialog closes first → back() races /register (no redirect or bad history).
+  // assign() is a full navigation that avoids that stack; no extra onCloseAction branches needed.
   const handleRegisterRedirect = (): void => {
     if (!isDialog) return;
     window.location.assign(
