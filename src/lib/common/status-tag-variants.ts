@@ -63,14 +63,15 @@ export function getOrderStatusVariant(status: Order['status']): BadgeVariant {
       return 'information';
     case 'CONFIRMED':
     case 'SHIPPED':
+      return 'success';
     case 'DELIVERED':
-      return 'secondary';
+      return 'muted';
     case 'PROCESSING':
     case 'READY_FOR_PICKUP':
     case 'READY_FOR_SHIPPING':
       return 'warning';
     case 'COMPLETED':
-      return 'success';
+      return 'muted';
     case 'CANCELLED':
     case 'DECLINED':
       return 'destructive';
@@ -83,7 +84,9 @@ export function getOrderStatusVariant(status: Order['status']): BadgeVariant {
 export function getQuoteStatusVariant(status: QuoteStatus): BadgeVariant {
   switch (status) {
     case 'CREATING':
+      return 'information';
     case 'CLOSED':
+      return 'muted';
     case 'EXPIRED':
       return 'outline';
     case 'OPEN':
@@ -103,28 +106,24 @@ export function getQuoteStatusVariant(status: QuoteStatus): BadgeVariant {
   }
 }
 
-/**
- * Maps every {@link ReturnStatus}.
- * `REVIEWED` and unknown values use `default` like the legacy {@link ReturnStatusBadge} fallback.
- */
+/** Maps every {@link ReturnStatus}. */
 export function getReturnStatusVariant(status: ReturnStatus): BadgeVariant {
   switch (status) {
     case 'APPROVED':
       return 'success';
     case 'PENDING':
+    case 'REVIEWED':
       return 'warning';
     case 'REJECTED':
       return 'destructive';
     case 'CLOSED':
-      return 'secondary';
-    case 'REVIEWED':
-      return 'default';
+      return 'muted';
     default:
       return 'default';
   }
 }
 
-/** Maps every {@link ApprovalStatus}; default matches legacy badge fallback. */
+/** Maps every {@link ApprovalStatus}; default covers unknown runtime values. */
 export function getApprovalStatusVariant(status: ApprovalStatus): BadgeVariant {
   switch (status) {
     case 'APPROVED':
@@ -134,9 +133,9 @@ export function getApprovalStatusVariant(status: ApprovalStatus): BadgeVariant {
     case 'DECLINED':
       return 'destructive';
     case 'EXPIRED':
-      return 'outline';
+      return 'muted';
     case 'CLOSED':
-      return 'secondary';
+      return 'muted';
     default:
       return 'default';
   }

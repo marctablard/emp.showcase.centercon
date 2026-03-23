@@ -149,6 +149,14 @@ describe('getQuoteStatusBadgeVariantForAi', () => {
     expect(getQuoteStatusBadgeVariantForAi('EXPIRED')).toBe('outline');
   });
 
+  it('should return information for CREATING', () => {
+    expect(getQuoteStatusBadgeVariantForAi('CREATING')).toBe('information');
+  });
+
+  it('should return muted for CLOSED', () => {
+    expect(getQuoteStatusBadgeVariantForAi('CLOSED')).toBe('muted');
+  });
+
   it('should return destructive for CHANGE', () => {
     expect(getQuoteStatusBadgeVariantForAi('CHANGE')).toBe('destructive');
   });
@@ -159,16 +167,20 @@ describe('getQuoteStatusBadgeVariantForAi', () => {
 });
 
 describe('getOrderStatusBadgeVariantForAi', () => {
-  it('should return success for COMPLETED', () => {
-    expect(getOrderStatusBadgeVariantForAi('COMPLETED')).toBe('success');
+  it('should return muted for COMPLETED', () => {
+    expect(getOrderStatusBadgeVariantForAi('COMPLETED')).toBe('muted');
   });
 
-  it('should return secondary for SHIPPED', () => {
-    expect(getOrderStatusBadgeVariantForAi('SHIPPED')).toBe('secondary');
+  it('should return success for CONFIRMED', () => {
+    expect(getOrderStatusBadgeVariantForAi('CONFIRMED')).toBe('success');
   });
 
-  it('should return secondary for DELIVERED', () => {
-    expect(getOrderStatusBadgeVariantForAi('DELIVERED')).toBe('secondary');
+  it('should return success for SHIPPED', () => {
+    expect(getOrderStatusBadgeVariantForAi('SHIPPED')).toBe('success');
+  });
+
+  it('should return muted for DELIVERED', () => {
+    expect(getOrderStatusBadgeVariantForAi('DELIVERED')).toBe('muted');
   });
 
   it('should return outline for PENDING (non-order enum)', () => {
@@ -205,12 +217,12 @@ describe('getReturnStatusBadgeVariantForAi', () => {
     expect(getReturnStatusBadgeVariantForAi('REJECTED')).toBe('destructive');
   });
 
-  it('should return secondary for CLOSED', () => {
-    expect(getReturnStatusBadgeVariantForAi('CLOSED')).toBe('secondary');
+  it('should return muted for CLOSED', () => {
+    expect(getReturnStatusBadgeVariantForAi('CLOSED')).toBe('muted');
   });
 
-  it('should return default for REVIEWED', () => {
-    expect(getReturnStatusBadgeVariantForAi('REVIEWED')).toBe('default');
+  it('should return warning for REVIEWED', () => {
+    expect(getReturnStatusBadgeVariantForAi('REVIEWED')).toBe('warning');
   });
 
   it('should return default for unknown status', () => {

@@ -19,8 +19,20 @@ describe('status-tag-variants', () => {
       }
     });
 
-    it('maps CONFIRMED to secondary', () => {
-      expect(getOrderStatusVariant('CONFIRMED')).toBe('secondary');
+    it('maps CONFIRMED to success (Figma order tag)', () => {
+      expect(getOrderStatusVariant('CONFIRMED')).toBe('success');
+    });
+
+    it('maps COMPLETED to muted (Figma final gray tag)', () => {
+      expect(getOrderStatusVariant('COMPLETED')).toBe('muted');
+    });
+
+    it('maps SHIPPED to success', () => {
+      expect(getOrderStatusVariant('SHIPPED')).toBe('success');
+    });
+
+    it('maps DELIVERED to muted', () => {
+      expect(getOrderStatusVariant('DELIVERED')).toBe('muted');
     });
 
     it('maps CREATED to information', () => {
@@ -62,6 +74,14 @@ describe('status-tag-variants', () => {
       expect(getQuoteStatusVariant('EXPIRED')).toBe('outline');
     });
 
+    it('maps CLOSED to muted', () => {
+      expect(getQuoteStatusVariant('CLOSED')).toBe('muted');
+    });
+
+    it('maps CREATING to information', () => {
+      expect(getQuoteStatusVariant('CREATING')).toBe('information');
+    });
+
     it('maps CHANGE to destructive', () => {
       expect(getQuoteStatusVariant('CHANGE')).toBe('destructive');
     });
@@ -81,8 +101,12 @@ describe('status-tag-variants', () => {
       expect(getReturnStatusVariant('APPROVED')).toBe('success');
     });
 
-    it('maps REVIEWED to default (legacy ReturnStatusBadge)', () => {
-      expect(getReturnStatusVariant('REVIEWED')).toBe('default');
+    it('maps REVIEWED to warning (same in-progress family as PENDING)', () => {
+      expect(getReturnStatusVariant('REVIEWED')).toBe('warning');
+    });
+
+    it('maps CLOSED to muted', () => {
+      expect(getReturnStatusVariant('CLOSED')).toBe('muted');
     });
   });
 
@@ -98,6 +122,14 @@ describe('status-tag-variants', () => {
 
     it('maps PENDING to warning', () => {
       expect(getApprovalStatusVariant('PENDING')).toBe('warning');
+    });
+
+    it('maps EXPIRED to muted', () => {
+      expect(getApprovalStatusVariant('EXPIRED')).toBe('muted');
+    });
+
+    it('maps CLOSED to muted', () => {
+      expect(getApprovalStatusVariant('CLOSED')).toBe('muted');
     });
 
     it('falls back to default variant for unknown runtime values', () => {

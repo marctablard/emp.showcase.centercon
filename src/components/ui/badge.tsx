@@ -17,6 +17,8 @@ const badgeVariants = cva(
         destructive: 'border-transparent bg-surface-error text-text-error [a&]:hover:bg-surface-error/90',
         sale: 'border-transparent bg-icon-error text-text-on-action [a&]:hover:bg-surface-icon-error/90',
         outline: 'text-text-body [a&]:hover:bg-surface-page [a&]:hover:bg-surface-page/90',
+        /** Figma Tags — final / inactive (surface/disabled + border/primary) */
+        muted: 'border-transparent bg-surface-disabled text-text-secondary [a&]:hover:bg-surface-disabled/90',
         information:
           'border-transparent bg-surface-information text-text-action-hover [a&]:hover:bg-surface-information/90',
         info: 'border-transparent bg-surface-warning uppercase [a&]:hover:bg-surface-error/90',
@@ -67,6 +69,11 @@ const badgeVariants = cva(
         variant: 'secondary',
         size: 'status',
         class: 'border-border-primary bg-surface-secondary text-text-headings',
+      },
+      {
+        variant: 'muted',
+        size: 'status',
+        class: 'border-border-primary bg-surface-disabled text-text-headings',
       },
       {
         variant: 'outline',
