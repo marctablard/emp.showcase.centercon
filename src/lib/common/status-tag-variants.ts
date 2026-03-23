@@ -5,75 +5,138 @@ import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
 import type { QuoteStatus } from '@/platform/services/model/quote';
 import type { ReturnStatus } from '@/platform/services/model/return';
 
-/** Compile-time check: every {@link QuoteStatus} must appear below and in {@link getQuoteStatusVariant}. */
-const QUOTE_STATUS_KEYS: Record<QuoteStatus, true> = {
-  CREATING: true,
-  OPEN: true,
-  IN_PROGRESS: true,
-  DECLINED: true,
-  ACCEPTED: true,
-  ORDER_CREATED: true,
-  CLOSED: true,
-  CHANGE: true,
-  DECLINE: true,
-  DECLINED_BY_MERCHANT: true,
-  EXPIRED: true,
+enum OrderStatusTag {
+  IN_CHECKOUT = 'IN_CHECKOUT',
+  CREATED = 'CREATED',
+  CONFIRMED = 'CONFIRMED',
+  PROCESSING = 'PROCESSING',
+  READY_FOR_PICKUP = 'READY_FOR_PICKUP',
+  READY_FOR_SHIPPING = 'READY_FOR_SHIPPING',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  DECLINED = 'DECLINED',
+}
+
+enum QuoteStatusTag {
+  CREATING = 'CREATING',
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DECLINED = 'DECLINED',
+  ACCEPTED = 'ACCEPTED',
+  ORDER_CREATED = 'ORDER_CREATED',
+  CLOSED = 'CLOSED',
+  CHANGE = 'CHANGE',
+  DECLINE = 'DECLINE',
+  DECLINED_BY_MERCHANT = 'DECLINED_BY_MERCHANT',
+  EXPIRED = 'EXPIRED',
+}
+
+enum ReturnStatusTag {
+  APPROVED = 'APPROVED',
+  PENDING = 'PENDING',
+  REJECTED = 'REJECTED',
+  REVIEWED = 'REVIEWED',
+  CLOSED = 'CLOSED',
+}
+
+enum ApprovalStatusTag {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  CLOSED = 'CLOSED',
+  EXPIRED = 'EXPIRED',
+  DECLINED = 'DECLINED',
+}
+
+const _orderStatusTagExhaustive: Record<Order['status'], true> = {
+  [OrderStatusTag.IN_CHECKOUT]: true,
+  [OrderStatusTag.CREATED]: true,
+  [OrderStatusTag.CONFIRMED]: true,
+  [OrderStatusTag.PROCESSING]: true,
+  [OrderStatusTag.READY_FOR_PICKUP]: true,
+  [OrderStatusTag.READY_FOR_SHIPPING]: true,
+  [OrderStatusTag.SHIPPED]: true,
+  [OrderStatusTag.DELIVERED]: true,
+  [OrderStatusTag.COMPLETED]: true,
+  [OrderStatusTag.CANCELLED]: true,
+  [OrderStatusTag.DECLINED]: true,
 };
 
-/** Compile-time check: every {@link ReturnStatus} must appear below and in {@link getReturnStatusVariant}. */
-const RETURN_STATUS_KEYS: Record<ReturnStatus, true> = {
-  APPROVED: true,
-  PENDING: true,
-  REJECTED: true,
-  REVIEWED: true,
-  CLOSED: true,
+void _orderStatusTagExhaustive;
+
+const _quoteStatusTagExhaustive: Record<QuoteStatus, true> = {
+  [QuoteStatusTag.CREATING]: true,
+  [QuoteStatusTag.OPEN]: true,
+  [QuoteStatusTag.IN_PROGRESS]: true,
+  [QuoteStatusTag.DECLINED]: true,
+  [QuoteStatusTag.ACCEPTED]: true,
+  [QuoteStatusTag.ORDER_CREATED]: true,
+  [QuoteStatusTag.CLOSED]: true,
+  [QuoteStatusTag.CHANGE]: true,
+  [QuoteStatusTag.DECLINE]: true,
+  [QuoteStatusTag.DECLINED_BY_MERCHANT]: true,
+  [QuoteStatusTag.EXPIRED]: true,
 };
 
-/** Compile-time check: every {@link ApprovalStatus} must appear below and in {@link getApprovalStatusVariant}. */
-const APPROVAL_STATUS_KEYS: Record<ApprovalStatus, true> = {
-  PENDING: true,
-  APPROVED: true,
-  CLOSED: true,
-  EXPIRED: true,
-  DECLINED: true,
+void _quoteStatusTagExhaustive;
+
+const _returnStatusTagExhaustive: Record<ReturnStatus, true> = {
+  [ReturnStatusTag.APPROVED]: true,
+  [ReturnStatusTag.PENDING]: true,
+  [ReturnStatusTag.REJECTED]: true,
+  [ReturnStatusTag.REVIEWED]: true,
+  [ReturnStatusTag.CLOSED]: true,
 };
+
+void _returnStatusTagExhaustive;
+
+const _approvalStatusTagExhaustive: Record<ApprovalStatus, true> = {
+  [ApprovalStatusTag.PENDING]: true,
+  [ApprovalStatusTag.APPROVED]: true,
+  [ApprovalStatusTag.CLOSED]: true,
+  [ApprovalStatusTag.EXPIRED]: true,
+  [ApprovalStatusTag.DECLINED]: true,
+};
+
+void _approvalStatusTagExhaustive;
 
 export function isOrderStatusValue(value: string): value is Order['status'] {
   return Object.prototype.hasOwnProperty.call(ORDER_STATUS, value);
 }
 
 export function isQuoteStatusValue(value: string): value is QuoteStatus {
-  return Object.prototype.hasOwnProperty.call(QUOTE_STATUS_KEYS, value);
+  return (Object.values(QuoteStatusTag) as string[]).includes(value);
 }
 
 export function isReturnStatusValue(value: string): value is ReturnStatus {
-  return Object.prototype.hasOwnProperty.call(RETURN_STATUS_KEYS, value);
+  return (Object.values(ReturnStatusTag) as string[]).includes(value);
 }
 
 export function isApprovalStatusValue(value: string): value is ApprovalStatus {
-  return Object.prototype.hasOwnProperty.call(APPROVAL_STATUS_KEYS, value);
+  return (Object.values(ApprovalStatusTag) as string[]).includes(value);
 }
 
 /** Maps every {@link Order['status']}; default covers malformed strings (e.g. AI). */
 export function getOrderStatusVariant(status: Order['status']): BadgeVariant {
   switch (status) {
-    case 'IN_CHECKOUT':
+    case OrderStatusTag.IN_CHECKOUT:
       return 'outline';
-    case 'CREATED':
+    case OrderStatusTag.CREATED:
       return 'information';
-    case 'CONFIRMED':
-    case 'SHIPPED':
+    case OrderStatusTag.CONFIRMED:
+    case OrderStatusTag.SHIPPED:
       return 'success';
-    case 'DELIVERED':
+    case OrderStatusTag.DELIVERED:
       return 'muted';
-    case 'PROCESSING':
-    case 'READY_FOR_PICKUP':
-    case 'READY_FOR_SHIPPING':
+    case OrderStatusTag.PROCESSING:
+    case OrderStatusTag.READY_FOR_PICKUP:
+    case OrderStatusTag.READY_FOR_SHIPPING:
       return 'warning';
-    case 'COMPLETED':
+    case OrderStatusTag.COMPLETED:
       return 'muted';
-    case 'CANCELLED':
-    case 'DECLINED':
+    case OrderStatusTag.CANCELLED:
+    case OrderStatusTag.DECLINED:
       return 'destructive';
     default:
       return 'outline';
@@ -83,23 +146,23 @@ export function getOrderStatusVariant(status: Order['status']): BadgeVariant {
 /** Maps every {@link QuoteStatus}; default covers malformed strings (e.g. AI). */
 export function getQuoteStatusVariant(status: QuoteStatus): BadgeVariant {
   switch (status) {
-    case 'CREATING':
+    case QuoteStatusTag.CREATING:
       return 'information';
-    case 'CLOSED':
+    case QuoteStatusTag.CLOSED:
       return 'muted';
-    case 'EXPIRED':
+    case QuoteStatusTag.EXPIRED:
       return 'outline';
-    case 'OPEN':
+    case QuoteStatusTag.OPEN:
       return 'information';
-    case 'IN_PROGRESS':
+    case QuoteStatusTag.IN_PROGRESS:
       return 'warning';
-    case 'DECLINED':
-    case 'CHANGE':
-    case 'DECLINE':
-    case 'DECLINED_BY_MERCHANT':
+    case QuoteStatusTag.DECLINED:
+    case QuoteStatusTag.CHANGE:
+    case QuoteStatusTag.DECLINE:
+    case QuoteStatusTag.DECLINED_BY_MERCHANT:
       return 'destructive';
-    case 'ACCEPTED':
-    case 'ORDER_CREATED':
+    case QuoteStatusTag.ACCEPTED:
+    case QuoteStatusTag.ORDER_CREATED:
       return 'success';
     default:
       return 'outline';
@@ -109,14 +172,14 @@ export function getQuoteStatusVariant(status: QuoteStatus): BadgeVariant {
 /** Maps every {@link ReturnStatus}. */
 export function getReturnStatusVariant(status: ReturnStatus): BadgeVariant {
   switch (status) {
-    case 'APPROVED':
+    case ReturnStatusTag.APPROVED:
       return 'success';
-    case 'PENDING':
-    case 'REVIEWED':
+    case ReturnStatusTag.PENDING:
+    case ReturnStatusTag.REVIEWED:
       return 'warning';
-    case 'REJECTED':
+    case ReturnStatusTag.REJECTED:
       return 'destructive';
-    case 'CLOSED':
+    case ReturnStatusTag.CLOSED:
       return 'muted';
     default:
       return 'default';
@@ -126,15 +189,15 @@ export function getReturnStatusVariant(status: ReturnStatus): BadgeVariant {
 /** Maps every {@link ApprovalStatus}; default covers unknown runtime values. */
 export function getApprovalStatusVariant(status: ApprovalStatus): BadgeVariant {
   switch (status) {
-    case 'APPROVED':
+    case ApprovalStatusTag.APPROVED:
       return 'success';
-    case 'PENDING':
+    case ApprovalStatusTag.PENDING:
       return 'warning';
-    case 'DECLINED':
+    case ApprovalStatusTag.DECLINED:
       return 'destructive';
-    case 'EXPIRED':
+    case ApprovalStatusTag.EXPIRED:
       return 'muted';
-    case 'CLOSED':
+    case ApprovalStatusTag.CLOSED:
       return 'muted';
     default:
       return 'default';
