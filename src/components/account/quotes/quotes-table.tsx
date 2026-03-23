@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AccountTablePagination } from '@/components/account/account-table-pagination';
 import UiLink from '@/components/ui/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
@@ -42,6 +41,7 @@ export function QuotesTable({
   });
 
   const visibleQuotes = sortedQuotes.slice((currentPage - 1) * quotesPerPage, currentPage * quotesPerPage);
+  const totalPages = Math.max(1, Math.ceil(sortedQuotes.length / quotesPerPage));
 
   const formatPrice = (price: number, currency: string) => {
     try {
@@ -139,27 +139,18 @@ export function QuotesTable({
         </Table>
       </div>
 
-      {/* Pagination controls */}
-      {quotes && quotes.length > quotesPerPage && (
-        <div className="flex items-center justify-end p-3">
-          <div className="flex items-center space-x-6">
-            {currentPage > 1 && onPreviousPage && (
-              <Button variant="neutral" size="small" onClick={onPreviousPage}>
-                <ChevronLeft className="h-4 w-4" />
-                {t('previous')}
-              </Button>
-            )}
-            <span className="text-sm">
-              {Math.min(currentPage * quotesPerPage, quotes.length)} / {quotes?.length || 0}
-            </span>
-            {currentPage < Math.ceil(quotes.length / quotesPerPage) && onNextPage && (
-              <Button variant="neutral" size="small" onClick={onNextPage}>
-                {t('next')} <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+      {quotes && quotes.length > quotesPerPage ? (
+        <AccountTablePagination
+          className="px-3"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageIndicator={t('pageIndicator', { current: currentPage, total: totalPages })}
+          previousLabel={t('previous')}
+          nextLabel={t('next')}
+          onPreviousPage={onPreviousPage}
+          onNextPage={onNextPage}
+        />
+      ) : null}
     </div>
   );
 }

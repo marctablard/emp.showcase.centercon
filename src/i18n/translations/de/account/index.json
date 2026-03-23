@@ -165,6 +165,7 @@
     "view": "Anzeigen",
     "next": "Weiter",
     "previous": "Zurück",
+    "pageIndicator": "Seite {current} / {total}",
     "returnDetails": "Rücksendungsdetails",
     "returnDetailsDescription": "Details Ihrer Rücksendeanfrage anzeigen",
     "returnedProducts": "Zurückgesendete Produkte",
@@ -386,7 +387,8 @@
     "noQuotes": "Sie haben noch keine Angebote",
     "viewQuote": "Angebotsansicht",
     "next": "Weiter",
-    "previous": "Zurück"
+    "previous": "Zurück",
+    "pageIndicator": "Seite {current} / {total}"
   },
   "shoppingListsPageDescription": "Einkaufslisten anzeigen und verwalten",
   "shoppingListsPagePlaceholder": "Einkaufslisten werden hier angezeigt",

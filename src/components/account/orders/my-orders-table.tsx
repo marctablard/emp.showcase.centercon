@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import { AccountTablePagination } from '@/components/account/account-table-pagination';
 import { Badge } from '@/components/ui/dashboard-badge';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -269,26 +269,21 @@ export function MyOrdersTable({
         </TableBody>
       </Table>
 
-      {orders && orders.length > ordersPerPage && (
-        <div className="flex items-center justify-end p-3">
-          <div className="flex items-center space-x-6">
-            {currentPage > 1 && (
-              <Button variant="neutral" size="small" onClick={onPreviousPage}>
-                <ChevronLeft className="h-4 w-4" />
-                {t('previous')}
-              </Button>
-            )}
-            <span className="text-sm">
-              {currentPage * ordersPerPage} / {orders?.length || 0}
-            </span>
-            {currentPage < Math.ceil(orders.length / ordersPerPage) && (
-              <Button variant="neutral" size="small" onClick={onNextPage}>
-                {t('next')} <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+      {orders && orders.length > ordersPerPage ? (
+        <AccountTablePagination
+          className="px-3"
+          currentPage={currentPage}
+          totalPages={Math.max(1, Math.ceil(orders.length / ordersPerPage))}
+          pageIndicator={t('pageIndicator', {
+            current: currentPage,
+            total: Math.max(1, Math.ceil(orders.length / ordersPerPage)),
+          })}
+          previousLabel={t('previous')}
+          nextLabel={t('next')}
+          onPreviousPage={onPreviousPage}
+          onNextPage={onNextPage}
+        />
+      ) : null}
 
       {selectedOrder && (
         <CreateReturnDialog

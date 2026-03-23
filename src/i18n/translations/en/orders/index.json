@@ -20,6 +20,7 @@
   "total": "Total",
   "previous": "Previous",
   "next": "Next",
+  "pageIndicator": "Page {current} / {total}",
   "showAllOrders": "Show all orders",
   "billingAddress": "Billing address",
   "shippingAddress": "Shipping address",
@@ -187,7 +188,10 @@
     "enterApproverComment": "Enter approver comment...",
     "enterRequestorComment": "Enter requestor comment...",
     "saveApproverComment": "Save Approver Comment",
-    "saveRequestorComment": "Save Requestor Comment"
+    "saveRequestorComment": "Save Requestor Comment",
+    "previous": "Previous",
+    "next": "Next",
+    "pageIndicator": "Page {current} / {total}"
   },
   "ApprovalAction": {
     "CHECKOUT": "Order"

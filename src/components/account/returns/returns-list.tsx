@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowDown, ArrowRight, ArrowUp, ChevronLeft, ChevronRight, ChevronsUpDown, Search } from 'lucide-react';
+import { ArrowDown, ArrowRight, ArrowUp, ChevronsUpDown, Search } from 'lucide-react';
+import { AccountTablePagination } from '@/components/account/account-table-pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,7 +30,6 @@ interface ReturnsListProps {
 
 export function ReturnsList({ initialReturns }: ReturnsListProps) {
   const t = useTranslations('account.returns');
-  const tQuotesList = useTranslations('account.quotesList');
   const locale = useLocale();
   const [quickSearch, setQuickSearch] = useState('');
   const [sortField, setSortField] = useState<ReturnSortField>('date');
@@ -51,14 +51,14 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
     sort: apiSort,
     query: apiQuery,
   });
-  const displayedCount = Math.min(
-    currentPage * RETURNS_PER_PAGE,
-    totalCount ?? (currentPage - 1) * RETURNS_PER_PAGE + visibleReturns.length,
-  );
   const hasNextPage =
     totalCount !== undefined
       ? currentPage < Math.ceil(totalCount / RETURNS_PER_PAGE)
       : visibleReturns.length === RETURNS_PER_PAGE;
+  const totalPages =
+    totalCount !== undefined
+      ? Math.max(1, Math.ceil(totalCount / RETURNS_PER_PAGE))
+      : Math.max(currentPage, currentPage + (hasNextPage ? 1 : 0));
 
   const toggleSort = (field: ReturnSortField) => {
     setCurrentPage(1);
@@ -287,26 +287,16 @@ export function ReturnsList({ initialReturns }: ReturnsListProps) {
             })}
           </div>
         )}
-        {(currentPage > 1 || hasNextPage) && (
-          <div className="flex items-center justify-end p-3">
-            <div className="flex items-center space-x-6">
-              {currentPage > 1 && (
-                <Button variant="neutral" size="small" onClick={handlePreviousPage}>
-                  <ChevronLeft className="h-4 w-4" />
-                  {tQuotesList('previous')}
-                </Button>
-              )}
-              <span className="text-sm">
-                {displayedCount} / {totalCount ?? displayedCount}
-              </span>
-              {hasNextPage && (
-                <Button variant="neutral" size="small" onClick={handleNextPage}>
-                  {tQuotesList('next')} <ChevronRight className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+        <AccountTablePagination
+          className="px-3"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageIndicator={t('pageIndicator', { current: currentPage, total: totalPages })}
+          previousLabel={t('previous')}
+          nextLabel={t('next')}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+        />
       </div>
     </div>
   );
