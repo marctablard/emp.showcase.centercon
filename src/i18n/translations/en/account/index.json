@@ -200,7 +200,7 @@
     "noReturns": "You don't have any returns yet",
     "noMatches": "No returns match your search criteria",
     "filterByStatus": "Filter by status",
-    "searchPlaceholder": "Search by return, order or e-mail",
+    "searchPlaceholder": "Search by return ID",
     "allStatuses": "All Statuses",
     "returnNumber": "Return Number",
     "returnDate": "Return Date",

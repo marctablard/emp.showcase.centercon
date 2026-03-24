@@ -148,7 +148,7 @@
     "noReturns": "Sie haben noch keine Rücksendungen",
     "noMatches": "Keine Rücksendungen entsprechen Ihrer Suche",
     "filterByStatus": "Nach Status filtern",
-    "searchPlaceholder": "Nach Retoure, Bestellung oder E-Mail suchen",
+    "searchPlaceholder": "Nach Retouren-ID suchen",
     "allStatuses": "Alle Status",
     "returnNumber": "Rücksendenummer",
     "returnDate": "Rücksendedatum",
