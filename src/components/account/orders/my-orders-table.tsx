@@ -4,12 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { OrderStatusBadge } from '@/components/account/orders/order-status-badge';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/dashboard-badge';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { type OrderStatusLowercaseKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { fetchReturnsForOrderIds } from '@/lib/client/returns';
 import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
@@ -57,7 +56,6 @@ export interface MyOrdersTableProps {
   className?: string;
   onPreviousPage: () => void;
   onNextPage: () => void;
-  getStatusBadge: (status: string) => { variant: 'default' | 'warning' | 'success' };
 }
 
 /**
@@ -72,7 +70,6 @@ export function MyOrdersTable({
   className,
   onPreviousPage,
   onNextPage,
-  getStatusBadge,
 }: MyOrdersTableProps) {
   const t = useTranslations('orders');
   const router = useRouter();
@@ -200,12 +197,7 @@ export function MyOrdersTable({
                   </UiLink>
                 </TableCell>
                 <TableCell className="px-2 py-4">
-                  <Badge
-                    variant={getStatusBadge(order.status).variant}
-                    className="w-[121px] h-7 !py-1 px-4 !text-[12px] !leading-[12px] font-bold uppercase !tracking-[2px] rounded-[4px] text-text-headings border font-primary"
-                  >
-                    {t(dk<OrderStatusLowercaseKey>(`status.${order.status.toLowerCase()}`))}
-                  </Badge>
+                  <OrderStatusBadge status={order.status} />
                 </TableCell>
                 <TableCell className="py-4 font-medium">
                   {formatOrderValue(order.price?.total?.gross, order.price?.total?.currency || order.currency)}

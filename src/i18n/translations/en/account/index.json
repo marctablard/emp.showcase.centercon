@@ -352,12 +352,16 @@
     "requested": "Requested",
     "available": "Available",
     "in_progress": "In progress",
-    "declined": "Rejected",
+    "declined": "Declined",
     "accepted": "Accepted",
     "order_created": "Order Created",
     "creating": "Creating",
     "closed": "Closed",
-    "open": "Open"
+    "open": "Open",
+    "change": "Change",
+    "decline": "Decline",
+    "declined_by_merchant": "Declined by merchant",
+    "expired": "Expired"
   },
   "quoteDetails": {
     "title": "Quote Details",

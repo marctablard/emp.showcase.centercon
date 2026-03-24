@@ -119,7 +119,8 @@ export type OrderStatusLowercaseKey =
   | 'status.shipped'
   | 'status.delivered'
   | 'status.completed'
-  | 'status.cancelled';
+  | 'status.cancelled'
+  | 'status.declined';
 
 // ---------------------------------------------------------------------------
 // Namespace: orders  (sub-path: paymentTypes.*)
@@ -184,7 +185,11 @@ export type QuoteStatusKey =
   | 'order_created'
   | 'creating'
   | 'closed'
-  | 'open';
+  | 'open'
+  | 'change'
+  | 'decline'
+  | 'declined_by_merchant'
+  | 'expired';
 
 // ---------------------------------------------------------------------------
 // Namespace: common.Languages
