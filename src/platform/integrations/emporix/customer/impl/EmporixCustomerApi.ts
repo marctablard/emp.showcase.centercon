@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
 import type { EmporixTokenManager } from '../../common/EmporixTokenManager';

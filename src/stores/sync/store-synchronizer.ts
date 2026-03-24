@@ -1,6 +1,6 @@
 // src/stores/sync/store-synchronizer.ts
 import { shallow } from 'zustand/shallow';
-import { getLogger } from '@/lib/logger/use-logger-client';
+import { getLogger } from '@/lib/logger/browser-logger';
 import type { CartStoreApi, SessionStoreApi, SiteStoreApi } from '@/providers/StoreProvider';
 
 type UnsubscribeFn = () => void;

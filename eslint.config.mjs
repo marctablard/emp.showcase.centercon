@@ -17,6 +17,22 @@ const eslintConfig = defineConfig([
       ],
       '@typescript-eslint/no-unsafe-function-type': 'off',
       'no-console': ['warn'], // Use Pino LoggerService instead of console.*. See docs/logging-guide.md
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/platform/client',
+              message:
+                'Client Inversify container removed. Use @/lib/logger/browser-logger and @/lib/client/validation-registry.',
+            },
+            {
+              name: '@/lib/client/service',
+              message: 'Removed. Use @/lib/logger/browser-logger or @/lib/client/validation-registry.',
+            },
+          ],
+        },
+      ],
     },
   },
   globalIgnores([

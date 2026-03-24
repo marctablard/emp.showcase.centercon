@@ -1,5 +1,6 @@
 import { StoredToken } from '@platform/integrations/types/auth';
 import { inject } from 'inversify';
+import 'server-only';
 import type {
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,

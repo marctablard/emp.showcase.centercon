@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import { EmporixBrand, EmporixPaginatedResponse, EmporixSearchParams } from '@/platform/integrations/emporix/model';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';

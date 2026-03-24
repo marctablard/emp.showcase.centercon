@@ -301,9 +301,9 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
     return common.concat(envInjectables);
   }
   
-  await generateContainerFile(layer,  buildEnvironmentInjectables('server'), serverOutputFile, 'server');
-  await generateContainerFile(layer, buildEnvironmentInjectables('client'), clientOutputFile, 'client');
-  await generateContainerFile(layer,  buildEnvironmentInjectables('ssr'), ssrOutputFile, 'ssr');
+  await generateContainerFile(layer, buildEnvironmentInjectables('server'), serverOutputFile, 'server');
+  // Browser client container removed. No DI in client code.
+  await generateContainerFile(layer, buildEnvironmentInjectables('ssr'), ssrOutputFile, 'ssr');
 }
 
 /**
@@ -417,7 +417,16 @@ export default container;
     return lines.map((l) => `  ${l}`).join('\n');
   })();
 
-  const output = template
+  //  it's additional safety rail so the auto-generated DI entrypoints stay on the server and never compile into the browser bundle.
+  let processedTemplate = template;
+  if (type !== 'client') {
+    processedTemplate = processedTemplate.replace(
+      ' */\n\nimport { addInjectableModule }',
+      " */\n\nimport 'server-only';\n\nimport { addInjectableModule }",
+    );
+  }
+
+  const output = processedTemplate
     .replace('{{imports}}', imports)
     .replace('{{moduleArray}}', moduleArray)
     .replace('{{aliasBindings}}', aliasBindings)

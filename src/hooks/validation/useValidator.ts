@@ -3,8 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { isEqual } from 'lodash';
 import z from 'zod/v4';
-import { getService } from '@/lib/client/service';
-import { ValidationService } from '@/platform/services/validation';
+import { getValidator } from '@/lib/client/validation-registry';
 
 /**
  * Hook for using a validation service with a React Hook Form instance
@@ -26,7 +25,7 @@ export function useValidator(
     onValidatedRef.current = onValidated;
   }, [onValidated]);
 
-  const validator = getService<ValidationService>(validatorId);
+  const validator = getValidator(validatorId);
   const schema = validator.getSchema();
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
