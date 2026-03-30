@@ -21,7 +21,7 @@ interface HealthMonitorModalProps {
 }
 
 const WEBHOOK_URL = process.env.NEXT_PUBLIC_DEVICE_HEALTH_WEBHOOK_URL ?? '';
-const HEALTH_THRESHOLD = Number(process.env.NEXT_PUBLIC_HEALTH_THRESHOLD) ?? 25;
+const HEALTH_THRESHOLD = Number(process.env.NEXT_PUBLIC_HEALTH_THRESHOLD ?? 25);
 
 // All colours reference the app's CSS design tokens so the modal
 // automatically stays in sync with the brand theme.
@@ -82,7 +82,7 @@ export function HealthMonitorModal({
     };
     console.log('[HealthMonitor] Calling webhook', { url: WEBHOOK_URL, payload });
     setWebhookStatus('Triggered');
-    addLog(`Coolant below ${COOLANT_THRESHOLD}% — calling ${currentMode} webhook…`);
+    addLog(`Coolant below ${HEALTH_THRESHOLD}% — calling ${currentMode} webhook…`);
     try {
       const res = await fetch(WEBHOOK_URL, {
         method: 'POST',
@@ -111,7 +111,7 @@ export function HealthMonitorModal({
   triggerWebhookRef.current = triggerWebhook;
 
   useEffect(() => {
-    const isBelow = coolantLevel < COOLANT_THRESHOLD;
+    const isBelow = coolantLevel < HEALTH_THRESHOLD;
     if (isBelow && wasAboveThreshold.current) {
       wasAboveThreshold.current = false;
       triggerWebhookRef.current();
@@ -128,18 +128,18 @@ export function HealthMonitorModal({
       setCoolantLevel(initialLevel);
       setWebhookStatus('Ready');
       setLogs([]);
-      wasAboveThreshold.current = initialLevel >= COOLANT_THRESHOLD;
+      wasAboveThreshold.current = initialLevel >= HEALTH_THRESHOLD;
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleReset = () => {
     setCoolantLevel(initialLevel);
     setWebhookStatus('Ready');
-    wasAboveThreshold.current = initialLevel >= COOLANT_THRESHOLD;
+    wasAboveThreshold.current = initialLevel >= HEALTH_THRESHOLD;
     addLog(`System reset — coolant level restored to ${initialLevel}%`);
   };
 
-  const isCritical = coolantLevel < COOLANT_THRESHOLD;
+  const isCritical = coolantLevel < HEALTH_THRESHOLD;
   const webhookColor = webhookStatus === 'Ready' ? C.success : webhookStatus === 'Error' ? C.error : C.warning;
 
   return (
