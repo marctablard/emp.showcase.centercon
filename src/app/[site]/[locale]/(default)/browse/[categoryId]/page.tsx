@@ -3,25 +3,19 @@ import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { CategoryProductGrid } from '@/components/category/category-product-grid';
 import { Heading } from '@/components/ui/h';
-import { getCategoryById, getProductsForCategory } from '@/lib/ssr/category';
-import { resolveLocalizedName } from '@/lib/ssr/category';
+import { getCategoryById, getProductsForCategory, resolveLocalizedName } from '@/lib/ssr/category';
 import { getPageTitle } from '@/lib/ssr/seo';
+import { LocalizedString } from '@/platform/services/model/common';
 
 interface CategoryPageParams {
   params: Promise<{ locale: string; categoryId: string }>;
   searchParams: Promise<Record<string, string | string[]>>;
 }
 
-function resolveCategoryName(name: any, locale: string): string {
-  if (!name) return '';
-  if (typeof name === 'string') return name;
-  return resolveLocalizedName(name, locale);
-}
-
 export async function generateMetadata({ params }: CategoryPageParams): Promise<Metadata> {
   const { locale, categoryId } = await params;
   const category = await getCategoryById(categoryId);
-  const categoryName = category ? resolveCategoryName(category.name, locale) : categoryId;
+  const categoryName = category ? resolveLocalizedName(category.name as LocalizedString | string, locale) : categoryId;
 
   return {
     title: await getPageTitle(categoryName, locale),
@@ -47,7 +41,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   }
 
   const t = await getTranslations({ locale, namespace: 'search.searchResults' });
-  const categoryName = resolveCategoryName(category.name, locale);
+  const categoryName = resolveLocalizedName(category.name as LocalizedString | string, locale);
 
   return (
     <div className="max-w-6xl mx-auto px-4 lg:px-9 pb-32">

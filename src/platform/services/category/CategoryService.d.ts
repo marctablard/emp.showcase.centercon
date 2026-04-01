@@ -29,11 +29,17 @@ export interface CategoryService {
 
   /**
    * Retrieve all category trees for the tenant.
-   * Calls GET /category/{tenant}/category-trees with a customer token.
    * Each returned Category already has its children populated recursively.
-   * Site-filtering is done by the caller using catalog categoryIds.
    */
   getCategoryTrees(): Promise<Category[]>;
+
+  /**
+   * Retrieve category trees scoped to a specific site.
+   * Fetches the site's catalogs to determine root category IDs, then returns
+   * only the trees whose root IDs are published for that site.
+   * @param siteCode The site code (e.g. "main", "showcasedemo")
+   */
+  getCategoryTreesForSite(siteCode: string): Promise<Category[]>;
 
   /**
    * Get the product IDs assigned to a category.

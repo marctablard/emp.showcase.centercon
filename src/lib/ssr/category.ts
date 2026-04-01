@@ -1,9 +1,9 @@
 import { cache } from 'react';
 import { SubMenuItem } from '@/data/navigation-menu';
-import type { EmporixCatalogApi } from '@/platform/integrations/emporix/catalog/EmporixCatalogApi';
 import { CategoryService } from '@/platform/services/category/CategoryService';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { Category } from '@/platform/services/model/category';
+import { LocalizedString } from '@/platform/services/model/common';
 import { Product } from '@/platform/services/model/product';
 import { ProductService } from '@/platform/services/product/ProductService';
 import ssr from '@/platform/ssr';
@@ -11,7 +11,6 @@ import { getRequestSite } from '@/site/server/RequestSite';
 
 const getCategoryService = () => ssr.get<CategoryService>('CategoryService');
 const getProductService = () => ssr.get<ProductService>('ProductService');
-const getCatalogApi = () => ssr.get<EmporixCatalogApi>('EmporixCatalogApi');
 const getLogger = () => ssr.get<LoggerService>('LoggerService');
 
 // ---------------------------------------------------------------------------
@@ -19,24 +18,21 @@ const getLogger = () => ssr.get<LoggerService>('LoggerService');
 // ---------------------------------------------------------------------------
 
 /**
- * Resolves a localized string (or plain string) for the given locale.
- * Mirrors the b2b-showcase getCategoryTree helper:
- *   const categoryName = category.name || category.localizedName[lang]
- * but adds a proper type guard.
+ * Returns the display name for a category in the requested locale.
+ * Category names can be a plain string or a LocalizedString map depending
+ * on which API endpoint returned the data.
  */
-export function resolveLocalizedName(name: Record<string, string> | string | undefined, locale: string): string {
+export function resolveLocalizedName(name: LocalizedString | string | undefined, locale: string): string {
   if (!name) return '';
   if (typeof name === 'string') return name;
   return name[locale] ?? name['en'] ?? Object.values(name)[0] ?? '';
 }
 
 /**
- * Recursively converts a Category tree into SubMenuItem[].
- * Only the first two levels are returned:
- *   level-1 → category.children
- *   level-2 → child.children
+ * Converts a list of Category objects into SubMenuItems (two levels deep).
+ * Each category becomes a level-1 nav item; its children become level-2 items.
  */
-function categoryTreeToNavItems(categories: Category[], locale: string): SubMenuItem[] {
+function categoriesToNavItems(categories: Category[], locale: string): SubMenuItem[] {
   return categories
     .filter((cat) => cat.published !== false)
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
@@ -47,11 +43,11 @@ function categoryTreeToNavItems(categories: Category[], locale: string): SubMenu
         .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
       return {
-        label: resolveLocalizedName(cat.name as any, locale),
+        label: resolveLocalizedName(cat.name as LocalizedString | string, locale),
         href: `/browse/${cat.id}`,
         hasSubmenu: publishedChildren.length > 0,
         submenuItems: publishedChildren.map((child) => ({
-          label: resolveLocalizedName(child.name as any, locale),
+          label: resolveLocalizedName(child.name as LocalizedString | string, locale),
           href: `/browse/${child.id}`,
           hasSubmenu: false,
           submenuItems: [],
@@ -60,51 +56,17 @@ function categoryTreeToNavItems(categories: Category[], locale: string): SubMenu
     });
 }
 
-// ---------------------------------------------------------------------------
-// Navigation categories (used by the Header server component)
-// ---------------------------------------------------------------------------
-
 /**
- * Build nav items from the /category-trees response (preferred path).
- * Trees may wrap leaf categories in a container root (e.g. "ProductRoot").
- * When a root has children we promote those children to level-1.
- */
-function navItemsFromTrees(trees: Category[], locale: string): SubMenuItem[] {
-  const navItems: SubMenuItem[] = [];
-
-  for (const tree of trees.filter((t) => t.published !== false)) {
-    const children = (tree.children as Category[] | undefined) ?? [];
-    const publishedChildren = children.filter((c) => c.published !== false);
-
-    if (publishedChildren.length > 0) {
-      navItems.push(...categoryTreeToNavItems(publishedChildren, locale));
-    } else {
-      navItems.push({
-        label: resolveLocalizedName(tree.name as any, locale),
-        href: `/browse/${tree.id}`,
-        hasSubmenu: false,
-        submenuItems: [],
-      });
-    }
-  }
-
-  return navItems;
-}
-
-/**
- * Fallback: build nav items from the flat /categories list.
- * Used when the tenant has no /category-trees configured.
- *
- * Mirrors the b2b-showcase getCategoryTree() approach but applied to the flat
- * categories list: find roots, attach their children, then promote container
- * roots (those that have published children) so their children become level-1.
+ * Fallback: builds nav items from the flat /categories endpoint.
+ * Used when the tenant has no catalogs or category-trees configured.
+ * Reconstructs a two-level tree from parent–child relationships and
+ * promotes children of container roots (e.g. "ProductRoot") to level-1.
  */
 async function navItemsFromFlatCategories(locale: string): Promise<SubMenuItem[]> {
   const allCategories = await getCategoryService().getCategories();
   if (allCategories.length === 0) return [];
 
-  // Build a map from parent-id → direct children
-  const childrenOf: Map<string, Category[]> = new Map();
+  const childrenOf = new Map<string, Category[]>();
   for (const cat of allCategories) {
     const parentId = cat.parent as string | undefined;
     if (parentId) {
@@ -113,66 +75,38 @@ async function navItemsFromFlatCategories(locale: string): Promise<SubMenuItem[]
     }
   }
 
-  // Roots = categories without a parent
   const roots = allCategories.filter((c) => !c.parent && c.published !== false);
-
   const navItems: SubMenuItem[] = [];
 
   for (const root of roots) {
     const directChildren = (childrenOf.get(root.id) ?? []).filter((c) => c.published !== false);
 
     if (directChildren.length > 0) {
-      // Root is a container — promote its children to level-1
-      for (const child of directChildren.sort((a, b) => (a.position ?? 0) - (b.position ?? 0))) {
-        const grandChildren = (childrenOf.get(child.id) ?? [])
-          .filter((c) => c.published !== false)
-          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-
-        navItems.push({
-          label: resolveLocalizedName(child.name as any, locale),
-          href: `/browse/${child.id}`,
-          hasSubmenu: grandChildren.length > 0,
-          submenuItems: grandChildren.map((gc) => ({
-            label: resolveLocalizedName(gc.name as any, locale),
-            href: `/browse/${gc.id}`,
-            hasSubmenu: false,
-            submenuItems: [],
-          })),
-        } satisfies SubMenuItem);
-      }
+      navItems.push(...categoriesToNavItems(directChildren, locale));
     }
-    // Leaf roots (no children) are skipped — they are typically organisational
-    // containers like "ContentRoot" that don't belong in the navigation.
+    // Leaf roots without children are skipped (organisational containers that
+    // have no navigable content, e.g. "ContentRoot").
   }
 
   return navItems;
 }
 
-// locale + site are both cache-key dimensions: each site has its own category tree.
+// ---------------------------------------------------------------------------
+// Navigation categories (used by the Header server component)
+// ---------------------------------------------------------------------------
+
+// locale + site are both cache-key dimensions so each site gets its own result.
 const _getNavCategories = cache(async (locale: string, site: string): Promise<SubMenuItem[]> => {
   try {
-    // 1. Fetch catalogs published for this site to get the root category IDs.
-    //    This mirrors the b2b-showcase approach in product-list-context.js:
-    //      fetchCatalogs(tenant, site) → catalog.categoryIds → filter category-trees
-    const catalogResponse = await getCatalogApi().getCatalogs({
-      size: 100,
-      criteria: { publishedSite: site },
-    });
-    const rootCategoryIds = new Set((catalogResponse.items ?? []).flatMap((c) => c.categoryIds ?? []));
-
-    // 2. Fetch all category trees (requires X-Version: v2 header)
-    const allTrees = await getCategoryService().getCategoryTrees();
-
-    // 3. Filter trees to only the roots published for this site
-    const siteTrees = rootCategoryIds.size > 0 ? allTrees.filter((t) => rootCategoryIds.has(t.id)) : allTrees;
+    // Fetch category trees scoped to this site (catalog-filtered) then fall
+    // back to the flat /categories endpoint when no trees are available.
+    const siteTrees = await getCategoryService().getCategoryTreesForSite(site);
 
     if (siteTrees.length > 0) {
-      const items = navItemsFromTrees(siteTrees, locale);
+      const items = categoriesToNavItems(siteTrees, locale);
       if (items.length > 0) return items;
     }
 
-    // 4. Fallback: build tree from flat /categories list.
-    //    Used when the tenant has no catalogs or category-trees configured.
     return await navItemsFromFlatCategories(locale);
   } catch (error) {
     getLogger().error({ error: error instanceof Error ? error.message : String(error) }, 'SSR getNavCategories failed');

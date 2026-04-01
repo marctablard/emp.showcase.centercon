@@ -5,14 +5,15 @@ import { HeaderTopBanner } from '@/components/header/common/header-top-banner';
 import { HeaderSearchProvider } from '@/components/header/search/search-context';
 import { SubMenuItem } from '@/data/navigation-menu';
 import { getNavCategories } from '@/lib/ssr/category';
+import server from '@/platform/server';
 
 export async function Header() {
   let categoryItems: SubMenuItem[] = [];
   try {
     const locale = await getLocale();
     categoryItems = await getNavCategories(locale);
-  } catch {
-    // Silently fall back to hardcoded menu on any error
+  } catch (error) {
+    server.get('LoggerService')?.error?.({ err: error }, 'Header: failed to load nav categories');
   }
 
   return (
