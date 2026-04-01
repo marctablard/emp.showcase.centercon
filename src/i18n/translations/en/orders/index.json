@@ -63,7 +63,8 @@
     "shipped": "Shipped",
     "delivered": "Delivered",
     "completed": "Completed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "declined": "Declined"
   },
   "paymentTypes": {
     "creditcard": "Credit Card",
@@ -100,7 +101,7 @@
     "CONFIRMED": "Confirmed",
     "SHIPPED": "Shipped",
     "COMPLETED": "Completed",
-    "DECLINED": "Cancelled"
+    "DECLINED": "Declined"
   },
   "Confirmation": {
     "title": "Order Confirmation",

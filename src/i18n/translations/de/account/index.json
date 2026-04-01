@@ -148,7 +148,7 @@
     "noReturns": "Sie haben noch keine Rücksendungen",
     "noMatches": "Keine Rücksendungen entsprechen Ihrer Suche",
     "filterByStatus": "Nach Status filtern",
-    "searchPlaceholder": "Nach Retoure, Bestellung oder E-Mail suchen",
+    "searchPlaceholder": "Nach Retouren-ID suchen",
     "allStatuses": "Alle Status",
     "returnNumber": "Rücksendenummer",
     "returnDate": "Rücksendedatum",
@@ -314,7 +314,11 @@
     "order_created": "Bestellung erstellt",
     "creating": "Wird erstellt",
     "closed": "Geschlossen",
-    "open": "Offen"
+    "open": "Offen",
+    "change": "Änderung",
+    "decline": "Ablehnung",
+    "declined_by_merchant": "Vom Händler abgelehnt",
+    "expired": "Abgelaufen"
   },
   "quoteDetails": {
     "title": "Angebotsdetails",

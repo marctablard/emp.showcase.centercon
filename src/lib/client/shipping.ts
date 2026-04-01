@@ -1,6 +1,10 @@
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { ShippingMethod } from '@/platform/services/model/shipping';
 
+const SHIPPING_REQUEST_CACHE_TTL_MS = 60_000;
+const shippingRequestCache = new Map<string, { expiresAt: number; value: ShippingMethod[] }>();
+const inflightShippingRequests = new Map<string, Promise<ShippingMethod[]>>();
+
 /**
  * Get shipping methods for a country and postal code
  * @param countryCode The country code
@@ -21,15 +25,40 @@ export async function getShippingMethods(
       url += `&amount=${encodeURIComponent(orderValue.amount)}&currency=${encodeURIComponent(orderValue.currency)}`;
     }
 
-    const response = await fetch(url, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch shipping methods: ${response.statusText}`);
+    const now = Date.now();
+    const cached = shippingRequestCache.get(url);
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
     }
 
-    return await response.json();
+    const inflightRequest = inflightShippingRequests.get(url);
+    if (inflightRequest) {
+      return inflightRequest;
+    }
+
+    const requestPromise = (async (): Promise<ShippingMethod[]> => {
+      const response = await fetch(url, {
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch shipping methods: ${response.statusText}`);
+      }
+
+      const methods = (await response.json()) as ShippingMethod[];
+      shippingRequestCache.set(url, {
+        expiresAt: Date.now() + SHIPPING_REQUEST_CACHE_TTL_MS,
+        value: methods,
+      });
+      return methods;
+    })();
+
+    inflightShippingRequests.set(url, requestPromise);
+    try {
+      return await requestPromise;
+    } finally {
+      inflightShippingRequests.delete(url);
+    }
   } catch (error) {
     getLogger().error({ err: error, countryCode, postalCode }, 'Error fetching shipping methods');
     throw error;

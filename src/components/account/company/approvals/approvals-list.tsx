@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
 import { AccountTablePagination } from '@/components/account/account-table-pagination';
+import { ApprovalStatusBadge } from '@/components/account/approvals/approval-status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useApprovals } from '@/hooks/approval/useApprovals';
 import { Approval, ApprovalStatus } from '@/platform/services/model/approval';
-import { ApprovalStatusBadge } from './approval-status-badge';
 
 interface ApprovalsListProps {
   initialApprovals?: Approval[];
