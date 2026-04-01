@@ -6,18 +6,22 @@ import { ArrowLeft, ChevronDown, MapPin } from 'lucide-react';
 import { HeaderPromo } from '@/components/header/common/header-promo';
 import { LocationSettingsDialog } from '@/components/header/mobile/location-settings-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { navigationMenuItems, serviceMenuItems } from '@/data/navigation-menu';
+import { MenuItem, navigationMenuItems, serviceMenuItems } from '@/data/navigation-menu';
 import { Link } from '@/i18n/navigation';
 
 interface MobileMenuNavigationProps {
   onClose?: () => void;
+  menuItems?: MenuItem[];
 }
 
-export function MobileMenuNavigation({ onClose }: MobileMenuNavigationProps) {
+export function MobileMenuNavigation({
+  onClose,
+  menuItems: menuItemsProp = navigationMenuItems,
+}: MobileMenuNavigationProps) {
   const t = useTranslations('layout.header');
 
   // Transform menu items with translations
-  const menuItems = navigationMenuItems.map((item) => ({
+  const menuItems = menuItemsProp.map((item) => ({
     ...item,
     label: t(item.labelKey as any),
   }));

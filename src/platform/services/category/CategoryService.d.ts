@@ -26,4 +26,23 @@ export interface CategoryService {
    * @returns Promise with the category tree or null if not found
    */
   getCategoryTree(categoryId: string, showUnpublished?: boolean): Promise<Category | null>;
+
+  /**
+   * Retrieve all category trees for the tenant.
+   * Calls GET /category/{tenant}/category-trees with a customer token.
+   * Each returned Category already has its children populated recursively.
+   * Site-filtering is done by the caller using catalog categoryIds.
+   */
+  getCategoryTrees(): Promise<Category[]>;
+
+  /**
+   * Get the product IDs assigned to a category.
+   * @param categoryId The category ID
+   * @param options Pagination options
+   * @returns The product IDs and total count
+   */
+  getProductIdsForCategory(
+    categoryId: string,
+    options?: { page?: number; pageSize?: number },
+  ): Promise<{ ids: string[]; total: number; page: number; pageSize: number }>;
 }

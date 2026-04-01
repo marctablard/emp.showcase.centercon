@@ -4,14 +4,18 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { HeaderPromo } from '@/components/header/common/header-promo';
-import { navigationMenuItems } from '@/data/navigation-menu';
+import { MenuItem, navigationMenuItems } from '@/data/navigation-menu';
 import { Link } from '@/i18n/navigation';
 
-export function TabletMenuFlyout() {
+interface TabletMenuFlyoutProps {
+  menuItems?: MenuItem[];
+}
+
+export function TabletMenuFlyout({ menuItems: menuItemsProp = navigationMenuItems }: TabletMenuFlyoutProps) {
   const t = useTranslations('layout.header');
 
   // Transform menu items with translations
-  const menuItems = navigationMenuItems.map((item) => ({
+  const menuItems = menuItemsProp.map((item) => ({
     ...item,
     label: t(item.labelKey as any),
   }));

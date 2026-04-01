@@ -209,6 +209,42 @@ export class EmporixCategoryService implements CategoryService {
     }
   }
 
+  /**
+   * Retrieve all category trees for the tenant (site-aware, customer-aware).
+   */
+  async getCategoryTrees(): Promise<Category[]> {
+    try {
+      const trees = await this.categoryApi.getCategoryTrees();
+      return trees.map((tree) => this.categoryMapper.mapToService(tree));
+    } catch (error) {
+      this.logger.error({ err: error }, 'Error fetching category trees');
+      return [];
+    }
+  }
+
+  /**
+   * Get the product IDs assigned to a category.
+   */
+  async getProductIdsForCategory(
+    categoryId: string,
+    options?: { page?: number; pageSize?: number },
+  ): Promise<{ ids: string[]; total: number; page: number; pageSize: number }> {
+    try {
+      const page = options?.page ?? 0;
+      const pageSize = options?.pageSize ?? 20;
+      const response = await this.categoryApi.getCategoryAssignments(categoryId, {
+        page,
+        size: pageSize,
+        criteria: { assignmentType: 'PRODUCT' },
+      });
+      const ids = (response.items ?? []).filter((a) => a.ref?.type === 'PRODUCT').map((a) => a.ref.id);
+      return { ids, total: response.total ?? 0, page, pageSize };
+    } catch (error) {
+      this.logger.error({ err: error, categoryId }, 'Error fetching product IDs for category');
+      return { ids: [], total: 0, page: 0, pageSize: options?.pageSize ?? 20 };
+    }
+  }
+
   async assignParents(category: Category, parents: Map<string, Category>) {
     if (category.parent && typeof category.parent === 'string') {
       category.parent = parents.get(category.parent);
