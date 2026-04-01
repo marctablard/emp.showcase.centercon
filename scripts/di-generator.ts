@@ -129,6 +129,12 @@ function tryParseDependencyAliases(): Array<{ alias: string; target: string }> {
 // Configuration
 const DEBUG = process.env.DEBUG === 'true';
 
+/** When true (see .env.template): also emit `src/platform/client.ts` for browser Inversify. Default: off. */
+function isClientContainerGenerationEnabled(): boolean {
+  const raw = (process.env.NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT ?? '').trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}
+
 // Define the layers we support
 type Layer = 'integration' | 'service' | 'repository' | 'platform';
 
@@ -302,8 +308,16 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
   }
   
   await generateContainerFile(layer, buildEnvironmentInjectables('server'), serverOutputFile, 'server');
-  // Browser client container removed. No DI in client code.
   await generateContainerFile(layer, buildEnvironmentInjectables('ssr'), ssrOutputFile, 'ssr');
+
+  if (isClientContainerGenerationEnabled()) {
+    await generateContainerFile(layer, buildEnvironmentInjectables('client'), clientOutputFile, 'client');
+  } else if (fs.existsSync(clientOutputFile)) {
+    fs.unlinkSync(clientOutputFile);
+    console.log(
+      `Removed client container file (NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT not enabled): ${clientOutputFile}`,
+    );
+  }
 }
 
 /**

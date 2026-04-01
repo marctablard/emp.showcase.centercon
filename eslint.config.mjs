@@ -3,6 +3,13 @@ import nextTs from 'eslint-config-next/typescript';
 import prettier from 'eslint-config-prettier/flat';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
+function isNextPublicClientDiGenerationEnabled() {
+  const raw = (process.env.NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT ?? '').trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}
+
+const restrictPlatformClientImport = !isNextPublicClientDiGenerationEnabled();
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -21,11 +28,15 @@ const eslintConfig = defineConfig([
         'error',
         {
           paths: [
-            {
-              name: '@/platform/client',
-              message:
-                'Client Inversify container removed. Use @/lib/logger/browser-logger and @/lib/client/validation-registry.',
-            },
+            ...(restrictPlatformClientImport
+              ? [
+                  {
+                    name: '@/platform/client',
+                    message:
+                      'Client Inversify container is off by default. Use @/lib/logger/browser-logger and @/lib/client/validation-registry, or set NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT=true, run npm run generate, and import the generated client container.',
+                  },
+                ]
+              : []),
             {
               name: '@/lib/client/service',
               message: 'Removed. Use @/lib/logger/browser-logger or @/lib/client/validation-registry.',

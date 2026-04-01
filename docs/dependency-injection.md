@@ -12,7 +12,7 @@ Our Dependency Injection (DI) framework provides a robust, type-safe way to mana
 
 3. **Code Reusability**: Services and components can be reused across different parts of the application.
 
-4. **Environment-Specific Implementations**: The framework supports different implementations for **server** and **SSR** runtimes. The **browser does not use an Inversify container**; client code uses `@/lib/logger/browser-logger`, `@/lib/client/validation-registry`, and `fetch` to `/api/*`.
+4. **Environment-Specific Implementations**: The framework supports **server** and **SSR** runtimes for all builds. **By default** the browser does not use an Inversify container; client code uses `@/lib/logger/browser-logger`, `@/lib/client/validation-registry`, and `fetch` to `/api/*`. Optionally, set `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` to `true` (or `1` / `yes`) and run `npm run generate` to emit `src/platform/client.ts` for advanced or fork use (see [How Generation Works](#how-generation-works)).
 
 5. **Centralized Configuration**: All service registrations are managed in one place, making it easier to understand and modify the application's architecture.
 
@@ -21,17 +21,17 @@ Our Dependency Injection (DI) framework provides a robust, type-safe way to mana
 Our DI framework is built on [InversifyJS](https://inversify.io/), a powerful inversion of control container for TypeScript & JavaScript applications. We've extended Inversify with custom functionality to support:
 
 - Automatic container generation
-- **Server** and **SSR** containers only (no browser Inversify container)
-- Unified platform container (`server.ts` / `ssr.ts`) for services, integrations, and repositories
+- **Server** and **SSR** containers in all configurations; **optional** browser `client.ts` when `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is enabled
+- Unified platform container (`server.ts` / `ssr.ts`, and optionally `client.ts`) for services, integrations, and repositories
 - File watching for development
 
 ## Core Principles
 
 1. **Interface-Based Design**: Services are defined by interfaces, allowing for multiple implementations.
 
-2. **Unified Platform Container**: Generated `src/platform/server.ts` and `src/platform/ssr.ts` register integrations, services, and repositories together. There is no generated `client.ts`.
+2. **Unified Platform Container**: Generated `src/platform/server.ts` and `src/platform/ssr.ts` always register integrations, services, and repositories together. `src/platform/client.ts` is generated only when `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is truthy (`true`, `1`, or `yes`) before `npm run generate`.
 
-3. **Environment Awareness**: The generator emits **server** and **SSR** containers; privileged Emporix integrations are marked with `import 'server-only'` under `src/platform/integrations/**/impl/`.
+3. **Environment Awareness**: The generator always emits **server** and **SSR** containers (`import 'server-only'` on those entrypoints). **Optional** `client.ts` has no `server-only` import. Privileged Emporix integrations remain marked with `import 'server-only'` under `src/platform/integrations/**/impl/` where applicable.
 
 4. **Code Generation**: Container configurations are automatically generated, reducing boilerplate and potential errors.
 
@@ -77,7 +77,7 @@ export default UserAgentServiceServer;
 
 #### Optional `*Client` implementations
 
-Classes whose names end with `Client` are still recognized by naming convention for **tests or rare server-side dual bindings**. The browser does **not** load an Inversify client container; UI code uses APIs under `src/lib/client/*` instead of `*Client` injectables.
+Classes whose names end with `Client` are included in **`src/platform/client.ts` only when** `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is enabled and containers are regenerated. **Default (flag off):** those classes are **not** emitted to any generated container; use APIs under `src/lib/client/*` in the browser. **Security:** enabling client generation binds `*Client` and shared injectables into a browser-loadable graph—audit bindings and run `npm run verify:client-chunks` after builds.
 
 ### Using the Injectable Decorator
 
@@ -128,9 +128,9 @@ export default HelloAgentService;
 
 1. **Server** (`*Server`): API routes, auth, and other Node-only code use `import server from '@/platform/server'` (the generated file starts with `import 'server-only'`).
 2. **SSR** (`*SSR` or common classes picked up by the SSR graph): Server Components and `src/lib/ssr/*` use `import ssr from '@/platform/ssr'` (also `server-only`).
-3. **Browser**: No container — use `@/lib/logger/browser-logger`, `@/lib/client/validation-registry`, and `fetch('/api/…')`.
+3. **Browser**: **Default:** no container — use `@/lib/logger/browser-logger`, `@/lib/client/validation-registry`, and `fetch('/api/…')`. **Opt-in:** `import client from '@/platform/client'` after enabling `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` and running `npm run generate`.
 
-The generator merges **common** injectables (no `Client` / `Server` / `SSR` suffix) into both `server.ts` and `ssr.ts` unless a suffixed class overrides the same service id for that environment. Classes ending in `Client` are not added to either generated container (the browser does not use Inversify); prefer server-side `*Server` bindings and browser helpers instead.
+The generator merges **common** injectables (no `Client` / `Server` / `SSR` suffix) into `server.ts` and `ssr.ts` unless a suffixed class overrides the same service id for that environment. Classes ending in `Client` are merged into **`client.ts` only when** client generation is enabled; otherwise they are omitted from all generated containers.
 
 ## Container Generation
 
@@ -188,12 +188,14 @@ Resolution order:
 2. Naming convention per class:
    - `*Server` → included only in `server.ts`
    - `*SSR` → included only in `ssr.ts`
-   - `*Client` → intended for non-browser or legacy use; **not** emitted to a browser container (there is none)
-   - No suffix → **common**: included in both `server.ts` and `ssr.ts` unless an environment-specific class for the same id replaces it
-3. It generates **two** files:
+   - `*Client` → included in `client.ts` **only if** `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is `true` / `1` / `yes` when `npm run generate` runs; otherwise not emitted
+   - No suffix → **common**: included in both `server.ts` and `ssr.ts` unless an environment-specific class for the same id replaces it; when client generation is enabled, common bindings also appear in `client.ts` per generator rules
+3. It always generates **two** files, and **optionally a third**:
    - `src/platform/server.ts` — `import 'server-only'`; API routes, middleware, `lib/server`, etc.
    - `src/platform/ssr.ts` — `import 'server-only'`; Server Components and `src/lib/ssr/*`
-4. Each file statically imports all bound modules and applies aliases from `depency.yml` where configured.
+   - `src/platform/client.ts` — **only when** `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is enabled; **no** `server-only` import (browser bundle)
+4. If client generation is **disabled** after it was previously enabled, the next `npm run generate` **removes** `client.ts` if present.
+5. Each file statically imports all bound modules and applies aliases from `depency.yml` where configured.
 
 After a production build, `npm run verify:client-chunks` checks that known Emporix integration symbols do not appear under `.next/static/chunks` (run manually or in CI if needed).
 
@@ -203,7 +205,7 @@ Containers are initialized in different ways depending on the environment:
 
 1. **Server Container**: Initialized through Next.js instrumentation in `src/instrumentation.ts` (`src/platform/server.ts`, `import 'server-only'`)
 2. **SSR Container**: Used from Server Components and SSR libs (`src/platform/ssr.ts`, `import 'server-only'`)
-3. **Browser**: No DI container. Use `getLogger()` from `@/lib/logger/browser-logger` (or `@/lib/logger/use-logger-client`), `getValidator(id)` from `@/lib/client/validation-registry`, and API routes for Emporix-backed work.
+3. **Browser**: **Default:** no DI container — use `getLogger()` from `@/lib/logger/browser-logger` (or `@/lib/logger/use-logger-client`), `getValidator(id)` from `@/lib/client/validation-registry`, and API routes for Emporix-backed work. **Opt-in:** use the generated `src/platform/client.ts` container when `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is enabled (same env is read by ESLint to allow `@/platform/client` imports).
 
 ### Watch Mode
 
@@ -215,7 +217,7 @@ The watch mode feature:
 
 ## Client components (browser)
 
-Do **not** import `@/platform/server` or `@/platform/ssr` from Client Components or other browser bundles (those entry modules are `server-only`). ESLint blocks removed paths such as `@/platform/client` and `@/lib/client/service`.
+Do **not** import `@/platform/server` or `@/platform/ssr` from Client Components or other browser bundles (those entry modules are `server-only`). ESLint blocks `@/platform/client` unless `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is enabled (same truthy values as the generator). `@/lib/client/service` remains blocked.
 
 **Logging**
 
@@ -356,8 +358,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 | ---------- | ---------------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
 | **SSR**    | Server Components, RSC data fetching     | `import ssr from '@/platform/ssr'`<br/>`ssr.get<T>(id)` | Product pages, category listings, server-rendered content |
 | **Server** | API routes, middleware, server utilities | `import server from '@/platform/server'`<br/>`server.get<T>(id)` | REST endpoints, authentication, server-only operations    |
-| **Browser** | Client Components, browser-only code   | No DI — `lib/client/*`, `fetch('/api/…')` | Forms (Zod registry), logging, interactive UI              |
+| **Browser** | Client Components, browser-only code   | **Default:** `lib/client/*`, `fetch('/api/…')` — **Opt-in:** `import client from '@/platform/client'` when `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT` is set and containers are regenerated | Forms (Zod registry), logging, interactive UI; optional Inversify in forks |
 
 ## Conclusion
 
-Our Dependency Injection framework covers **server** and **SSR** Node runtimes only. The browser stays free of the integration/service graph, which keeps bundles smaller and avoids leaking server-only APIs. Use `server.get` / `ssr.get` on the server and thin `lib/client` helpers plus `/api/*` in the browser.
+Our Dependency Injection framework always covers **server** and **SSR** Node runtimes. **By default** the browser stays free of the Inversify integration/service graph for smaller bundles and safer defaults. Use `server.get` / `ssr.get` on the server and thin `lib/client` helpers plus `/api/*` in the browser. Forks that need a browser container can enable `NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT`, regenerate, and use the emitted `client.ts` with appropriate security review.
