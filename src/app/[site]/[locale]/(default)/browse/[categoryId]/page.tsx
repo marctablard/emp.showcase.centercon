@@ -29,9 +29,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const rawParams = await searchParams;
 
   const page = rawParams.page ? parseInt(rawParams.page as string, 10) : 0;
-  const pageSize = 12;
+  const pageSize = 100;
 
-  const [category, { products, total }] = await Promise.all([
+  const [category, { products }] = await Promise.all([
     getCategoryById(categoryId),
     getProductsForCategory(categoryId, page, pageSize),
   ]);
@@ -49,17 +49,15 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         {categoryName}
       </Heading>
 
-      {total > 0 && (
+      {products.length > 0 && (
         <p className="text-sm text-text-subtle mb-6">
-          {t('showing', { start: page * pageSize + 1, end: page * pageSize + products.length, total })}
+          {t('showing', { start: 1, end: products.length, total: products.length })}
         </p>
       )}
 
       <CategoryProductGrid products={products} locale={locale} />
 
-      {products.length === 0 && total === 0 && (
-        <p className="text-text-subtle py-12 text-center">{t('noProductsFound')}</p>
-      )}
+      {products.length === 0 && <p className="text-text-subtle py-12 text-center">{t('noProductsFound')}</p>}
     </div>
   );
 }

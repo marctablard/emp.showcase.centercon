@@ -154,7 +154,9 @@ const _getProductsForCategory = cache(
         ids.map((id) => getProductService().getProductById(id, { prices: true })),
       );
 
-      const products = productResults.filter((p: Product | undefined): p is Product => !!p);
+      // Exclude variant children — only show parent/basic/bundle products.
+      // Variants are identified by having a parentVariantId (they belong to a parent product).
+      const products = productResults.filter((p: Product | undefined): p is Product => !!p && !p.parentVariantId);
       return { products, total };
     } catch (error) {
       getLogger().error(

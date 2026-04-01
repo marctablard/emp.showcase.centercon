@@ -33,7 +33,7 @@ export interface EmporixCategoryParent extends EmporixCategory {
   level?: number;
 }
 
-export const EmporixCategoryAssignmentType = 'PRODUCT';
+export type EmporixCategoryAssignmentType = 'product';
 
 export interface EmporixCategoryAssignment {
   id: string;

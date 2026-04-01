@@ -262,9 +262,9 @@ export class EmporixCategoryService implements CategoryService {
       const response = await this.categoryApi.getCategoryAssignments(categoryId, {
         page,
         size: pageSize,
-        criteria: { assignmentType: 'PRODUCT' },
+        criteria: { assignmentType: 'product' },
       });
-      const ids = (response.items ?? []).filter((a) => a.ref?.type === 'PRODUCT').map((a) => a.ref.id);
+      const ids = (response.items ?? []).filter((a) => a.ref?.type === 'product').map((a) => a.ref.id);
       return { ids, total: response.total ?? 0, page, pageSize };
     } catch (error) {
       this.logger.error({ err: error, categoryId }, 'Error fetching product IDs for category');
