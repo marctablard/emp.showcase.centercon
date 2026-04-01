@@ -4,12 +4,12 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
-import { AccountTablePagination } from '@/components/account/account-table-pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { useApprovals } from '@/hooks/approval/useApprovals';
 import { Approval, ApprovalStatus } from '@/platform/services/model/approval';
 import { ApprovalStatusBadge } from './approval-status-badge';
@@ -165,7 +165,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
             </TableBody>
           </Table>
         </div>
-        <AccountTablePagination
+        <TablePagination
           className="px-3"
           currentPage={safeCurrentPage}
           totalPages={totalPages}

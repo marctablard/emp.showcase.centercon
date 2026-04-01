@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AccountTablePagination } from '@/components/account/account-table-pagination';
 import UiLink from '@/components/ui/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { formatDate } from '@/lib/date-utils';
 import { cn } from '@/lib/utils';
 import { Quote } from '@/platform/services/model/quote';
@@ -140,7 +140,7 @@ export function QuotesTable({
       </div>
 
       {quotes && quotes.length > quotesPerPage ? (
-        <AccountTablePagination
+        <TablePagination
           className="px-3"
           currentPage={currentPage}
           totalPages={totalPages}

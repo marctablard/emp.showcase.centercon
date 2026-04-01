@@ -4,10 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
-import { AccountTablePagination } from '@/components/account/account-table-pagination';
 import { OrderStatusBadge } from '@/components/account/orders/order-status-badge';
 import UiLink from '@/components/ui/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useRouter } from '@/i18n/navigation';
 import { fetchReturnsForOrderIds } from '@/lib/client/returns';
@@ -262,7 +262,7 @@ export function MyOrdersTable({
       </Table>
 
       {orders && orders.length > ordersPerPage ? (
-        <AccountTablePagination
+        <TablePagination
           className="px-3"
           currentPage={currentPage}
           totalPages={Math.max(1, Math.ceil(orders.length / ordersPerPage))}

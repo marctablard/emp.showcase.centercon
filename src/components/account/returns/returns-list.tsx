@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowDown, ArrowRight, ArrowUp, ChevronsUpDown, Search } from 'lucide-react';
-import { AccountTablePagination } from '@/components/account/account-table-pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { useReturns } from '@/hooks/return/useReturns';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
@@ -336,7 +336,7 @@ export function ReturnsList({ initialReturns, forceRefreshOnMount = false }: Ret
             })}
           </div>
         )}
-        <AccountTablePagination
+        <TablePagination
           className="px-3"
           currentPage={currentPage}
           totalPages={totalPages}

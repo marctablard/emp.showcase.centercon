@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export interface AccountTablePaginationProps {
+export interface TablePaginationProps {
   currentPage: number;
   totalPages: number;
   pageIndicator: string;
@@ -15,7 +15,7 @@ export interface AccountTablePaginationProps {
   className?: string;
 }
 
-export function AccountTablePagination({
+export function TablePagination({
   currentPage,
   totalPages,
   pageIndicator,
@@ -24,7 +24,7 @@ export function AccountTablePagination({
   onPreviousPage,
   onNextPage,
   className,
-}: AccountTablePaginationProps) {
+}: TablePaginationProps) {
   if (totalPages <= 1) {
     return null;
   }
