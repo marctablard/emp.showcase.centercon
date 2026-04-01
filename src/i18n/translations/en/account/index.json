@@ -217,6 +217,7 @@
     "view": "View",
     "next": "Next",
     "previous": "Previous",
+    "pageIndicator": "Page {current} / {total}",
     "returnDetails": "Return Details",
     "returnDetailsDescription": "View details of your return request",
     "returnedProducts": "Returned Products",
@@ -434,7 +435,8 @@
     "noQuotes": "You don't have any quotes yet",
     "viewQuote": "View quote",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "pageIndicator": "Page {current} / {total}"
   },
   "shoppingListsPageDescription": "View and manage your shopping lists",
   "shoppingListsPagePlaceholder": "Shopping lists will be displayed here",
