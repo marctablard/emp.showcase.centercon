@@ -479,8 +479,7 @@ async function generateContainerFile(
   try {
     template = fs.readFileSync(templatePath, 'utf8');
   } catch (error) {
-    console.error(`Error reading template file ${templatePath}:`, error);
-    return;
+    throw new Error(`Error reading template file ${templatePath}: ${error}`);
   }
   
 
