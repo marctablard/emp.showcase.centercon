@@ -110,3 +110,6 @@ next-env.d.ts
 /docs/cursor/
 /docs/pr-analysis/
 /docs/testing-plans/
+
+# Extensions (local only)
+/extensions/*/
