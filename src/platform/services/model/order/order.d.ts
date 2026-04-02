@@ -13,7 +13,8 @@ export type OrderStatus =
   | 'SHIPPED'
   | 'DELIVERED'
   | 'COMPLETED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'DECLINED';
 
 /**
  * Order item representing a product in the order
@@ -24,11 +25,14 @@ export interface OrderItem {
   quantity: number;
   name?: string;
   description?: string;
+  vendorName?: string;
   sku?: string;
   images?: string[];
   price?: {
     value: number;
+    netValue?: number;
     originalValue?: number;
+    grossValue?: number;
     currency: string;
   };
 }

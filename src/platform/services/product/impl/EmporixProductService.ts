@@ -212,7 +212,7 @@ class EmporixProductService implements ProductService {
     });
 
     // Fetch all brands, labels, and categories in parallel
-    const [brands, labels, productCategoriesArray, priceArray, variantArray] = await Promise.all([
+    const [brands, labels, productCategoriesArray, batchPriceMap, variantArray] = await Promise.all([
       Promise.all([...brandIds].map((id) => this.brandApi.getBrand(id))),
       Promise.all([...labelIds].map((id) => this.labelApi.getLabel(id))),
       Promise.all(
@@ -220,16 +220,15 @@ class EmporixProductService implements ProductService {
           options?.categories ? this.categoryService.getCategoriesForProduct(id, true) : undefined,
         ),
       ),
-      Promise.all(
-        [...productIds].map((id) => {
-          if (typeof options?.prices === 'object' && options.prices !== null) {
-            return this.priceService.getProductPrice(id, undefined, undefined, options.prices);
-          } else if (options?.prices === true) {
-            return this.priceService.getProductPrice(id);
-          }
-          return undefined;
-        }),
-      ),
+      (async () => {
+        const ids = [...productIds];
+        if (typeof options?.prices === 'object' && options.prices !== null) {
+          return this.priceService.getProductPrices(ids, undefined, undefined, options.prices);
+        } else if (options?.prices === true) {
+          return this.priceService.getProductPrices(ids);
+        }
+        return new Map<string, ProductPrice | null>();
+      })(),
       Promise.all([...productIds].map((id) => (options?.variants ? this.getVariantProducts(id) : undefined))),
     ]);
 
@@ -253,7 +252,9 @@ class EmporixProductService implements ProductService {
     }
 
     const priceMap = new Map<string, ProductPrice>();
-    priceArray.filter(Boolean).forEach((price: ProductPrice) => price && priceMap.set(price.productId, price));
+    batchPriceMap.forEach((price: ProductPrice | null, productId: string) => {
+      if (price) priceMap.set(productId, price);
+    });
 
     const variantMap = new Map<string, Product[]>();
     variantArray

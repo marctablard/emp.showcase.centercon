@@ -2,6 +2,7 @@
 
 /* eslint-disable no-console -- This component intentionally logs to the browser console for DevTools debugging */
 import { useEffect, useRef } from 'react';
+import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
 
 interface ApiDebugEvent {
   id: string;
@@ -32,7 +33,18 @@ function getBrowserDetails(): Set<BrowserDetail> {
     .filter(Boolean);
   const allowed = new Set<BrowserDetail>();
   for (const p of parts) {
-    if (p === 'payload' || p === 'headers' || p === 'body') allowed.add(p);
+    if (p === 'payload') {
+      allowed.add('payload');
+      continue;
+    }
+    if (p === 'headers') {
+      allowed.add('headers');
+      continue;
+    }
+    // Accept BODY and BODY-{n} forms so env values like BODY-200 still enable body output.
+    if (p === 'body' || /^body-\d+$/.test(p)) {
+      allowed.add('body');
+    }
   }
   if (allowed.size === 0) {
     allowed.add('payload');
@@ -176,7 +188,7 @@ function logEventToConsole(event: ApiDebugEvent): void {
 }
 
 /**
- * Invisible dev-only component that connects to the server-side debug
+ * Invisible component that connects to the server-side debug
  * event stream (SSE) and pretty-prints upstream API calls in the
  * browser DevTools console.
  *
@@ -190,9 +202,8 @@ export function ApiDebugPanel(): null {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Only connect in development and when debug is enabled
-    const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
-    if (debugResponse === 'off') return;
+    // Connect only when debug response logging is enabled
+    if (!isDebugApiEnabled() || !isBrowserDebugOutputEnabled()) return;
 
     let isMounted = true;
 

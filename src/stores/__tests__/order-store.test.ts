@@ -5,18 +5,41 @@ jest.mock('@/lib/client/orders', () => ({
   fetchOrders: jest.fn(),
 }));
 
+jest.mock('@/lib/logger/use-logger-client', () => ({
+  getLogger: jest.fn(() => ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+  })),
+}));
+
 jest.mock('@/platform/integrations/emporix/common/util/common', () => ({
   buildSearchQuery: jest.fn(),
 }));
 
 const mockFetchOrders = require('@/lib/client/orders').fetchOrders;
 const { buildSearchQuery: mockBuildSearchQuery } = require('@/platform/integrations/emporix/common/util/common');
+const { getLogger: mockGetLogger } = require('@/lib/logger/use-logger-client');
+const mockLogger = {
+  error: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+  debug: jest.fn(),
+  trace: jest.fn(),
+  fatal: jest.fn(),
+};
 
 describe('OrderStore', () => {
   let store: ReturnType<typeof createOrderStore>;
 
   beforeEach(() => {
     mockFetchOrders.mockClear();
+    Object.values(mockLogger).forEach((fn) => fn.mockClear());
+    mockGetLogger.mockReset();
+    mockGetLogger.mockReturnValue(mockLogger);
     mockBuildSearchQuery.mockImplementation(
       (params: { page: number; size: number; criteria: Record<string, unknown> }) => ({
         query: `page=${params.page}&size=${params.size}`,
@@ -89,6 +112,8 @@ describe('OrderStore', () => {
     const queryKey = 'page=1&size=10{}';
     expect(store.getState().getError(queryKey)).toEqual(error);
     expect(store.getState().getLoading(queryKey)).toBe(false);
+
+    expect(mockLogger.error).toHaveBeenCalledWith({ err: error }, 'Error fetching orders');
   });
 
   it('should bypass cache and re-fetch when forceRefresh is true', async () => {

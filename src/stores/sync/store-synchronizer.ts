@@ -11,6 +11,8 @@ interface StoreSynchronizerParams {
   siteStore: SiteStoreApi;
 }
 
+const CURRENCY_SYNC_RETRY_DELAYS_MS = [0, 250, 750];
+
 /**
  * Sets up cross-store subscriptions for state synchronization.
  * Returns an array of unsubscribe functions that should be called on cleanup.
@@ -33,6 +35,39 @@ export function setupStoreSynchronization({
   siteStore,
 }: StoreSynchronizerParams): UnsubscribeFn[] {
   const unsubscribers: UnsubscribeFn[] = [];
+  let activeCurrencySyncToken = 0;
+
+  const runCurrencySync = async (currency: string, siteCode: string) => {
+    const syncToken = ++activeCurrencySyncToken;
+    for (let i = 0; i < CURRENCY_SYNC_RETRY_DELAYS_MS.length; i++) {
+      const delay = CURRENCY_SYNC_RETRY_DELAYS_MS[i];
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+
+      // Cancel stale scheduled attempts if newer currency/site changes arrived.
+      if (syncToken !== activeCurrencySyncToken) {
+        return;
+      }
+
+      const latestSession = sessionStore.getState().session;
+      if (!latestSession || latestSession.currency !== currency || latestSession.siteCode !== siteCode) {
+        return;
+      }
+
+      try {
+        await cartStore.getState().syncCurrencyWithSession(currency, siteCode);
+      } catch (error) {
+        getLogger().error({ error, currency, siteCode, attempt: i + 1 }, 'Failed to sync cart currency with session');
+      }
+    }
+
+    try {
+      await cartStore.getState().flushPendingCurrencySync();
+    } catch (error) {
+      getLogger().error({ error, currency, siteCode }, 'Failed to flush pending currency sync intent');
+    }
+  };
 
   // Subscription 1: Currency synchronization
   // When session currency changes, update cart currency to match
@@ -43,27 +78,7 @@ export function setupStoreSynchronization({
     }),
     async ({ currency, siteCode }) => {
       if (!currency || !siteCode) return;
-
-      // Wait for any in-progress site validation to complete.
-      // validateSite sets loading=true before async work and fetchCart
-      // sets it back to false. Polling ensures we don't race with it.
-      const maxWait = 3000;
-      const interval = 100;
-      let waited = 0;
-      while (cartStore.getState().loading && waited < maxWait) {
-        await new Promise((r) => setTimeout(r, interval));
-        waited += interval;
-      }
-
-      if (waited >= maxWait) {
-        getLogger().warn({ waited }, 'Currency sync: timed out waiting for cart loading to complete');
-      }
-
-      try {
-        await cartStore.getState().syncCurrencyWithSession(currency, siteCode);
-      } catch (error) {
-        getLogger().error({ error }, 'Failed to sync cart currency with session');
-      }
+      await runCurrencySync(currency, siteCode);
     },
     { equalityFn: shallow },
   );

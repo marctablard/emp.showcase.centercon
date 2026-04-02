@@ -4,6 +4,9 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { ReturnReasonCode } from '@/lib/client/returns';
 import { formatCurrency } from '@/lib/utils';
 import { OrderItem } from '@/platform/services/model/order/order';
 
@@ -16,6 +19,13 @@ export interface ReturnItemSelectorProps {
   quantities: ItemQuantity;
   onUpdateQuantity: (itemId: string, newQty: number, maxQty: number) => void;
   loading: boolean;
+  remainingQuantityMap?: Map<string, number>;
+  reasonMode: 'single' | 'per-item';
+  itemReasons: Record<string, ReturnReasonCode | ''>;
+  onItemReasonChange: (itemId: string, reason: ReturnReasonCode | '') => void;
+  itemReasonDetails: Record<string, string>;
+  onItemReasonDetailsChange: (itemId: string, details: string) => void;
+  reasonOptions: ReturnReasonCode[];
 }
 
 function getItemImage(item: OrderItem): string {
@@ -25,7 +35,20 @@ function getItemImage(item: OrderItem): string {
   return '/images/placeholder.png';
 }
 
-export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loading }: ReturnItemSelectorProps) {
+export function ReturnItemSelector({
+  items,
+  quantities,
+  onUpdateQuantity,
+  loading,
+  remainingQuantityMap,
+  reasonMode,
+  itemReasons,
+  onItemReasonChange,
+  itemReasonDetails,
+  onItemReasonDetailsChange,
+  reasonOptions,
+}: ReturnItemSelectorProps) {
+  const MAX_DESCRIPTION_LENGTH = 500;
   const t = useTranslations('account.returns.createDialog');
   const tReturns = useTranslations('account.returns');
 
@@ -40,7 +63,12 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
       <div className="space-y-4 w-full min-w-0">
         {items.map((item) => {
           const currentQty = quantities[item.id] || 0;
-          const maxQty = item.quantity;
+          const maxQty = remainingQuantityMap ? (remainingQuantityMap.get(item.id) ?? item.quantity) : item.quantity;
+          const unitNetValue = item.price?.netValue ?? item.price?.value;
+          const unitGrossValue = item.price?.grossValue ?? unitNetValue;
+          const totalGrossValue = unitGrossValue !== undefined ? unitGrossValue * currentQty : undefined;
+          const totalNetValue = unitNetValue !== undefined ? unitNetValue * currentQty : undefined;
+          const priceCurrency = item.price?.currency;
 
           return (
             <div key={item.id} className="py-4 border-b border-border-secondary w-full min-w-0">
@@ -54,7 +82,7 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
                     {item.sku && <span className="text-sm text-text-on-disabled">{item.sku}</span>}
                     <span className="font-medium">{item.name}</span>
                     <span className="text-sm text-text-on-disabled">
-                      {t('itemNumber')}: {item.productId || '-'}
+                      {t('itemNumber')}: {item.sku || item.productId || '-'}
                     </span>
                   </div>
                 </div>
@@ -92,12 +120,12 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
                 </div>
 
                 <div className="text-right">
-                  {item.price ? (
+                  {priceCurrency && totalGrossValue !== undefined ? (
                     <>
-                      <p className="font-medium">{formatCurrency(item.price.value, item.price.currency)}</p>
-                      {item.price.originalValue && item.price.originalValue !== item.price.value && (
-                        <p className="text-sm text-text-on-disabled line-through">
-                          {formatCurrency(item.price.originalValue, item.price.currency)}
+                      <p className="font-medium">{formatCurrency(totalGrossValue, priceCurrency)}</p>
+                      {totalNetValue !== undefined && (
+                        <p className="text-sm text-text-on-disabled">
+                          {tReturns('net')} {formatCurrency(totalNetValue, priceCurrency)}
                         </p>
                       )}
                     </>
@@ -106,6 +134,49 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
                   )}
                 </div>
               </div>
+              {reasonMode === 'per-item' && (
+                <div className="hidden md:block mt-4 max-w-xs">
+                  <label htmlFor={`item-reason-${item.id}`} className="block text-xs font-semibold text-text-body mb-2">
+                    {t('returnReasonOptional' as any)}
+                  </label>
+                  <Select
+                    value={itemReasons[item.id] || ''}
+                    onValueChange={(value: string) => onItemReasonChange(item.id, value as ReturnReasonCode)}
+                    disabled={loading || currentQty <= 0}
+                  >
+                    <SelectTrigger id={`item-reason-${item.id}`} className="w-full">
+                      <SelectValue placeholder={t('selectReason')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reasonOptions.map((reason) => (
+                        <SelectItem key={reason} value={reason}>
+                          {t(`reasons.${reason}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <label
+                    htmlFor={`item-reason-description-${item.id}`}
+                    className="mt-4 block text-xs font-semibold text-text-body mb-2"
+                  >
+                    {t('descriptionOptional' as any)}
+                  </label>
+                  <Textarea
+                    id={`item-reason-description-${item.id}`}
+                    value={itemReasonDetails[item.id] || ''}
+                    onChange={(event) =>
+                      onItemReasonDetailsChange(item.id, event.target.value.slice(0, MAX_DESCRIPTION_LENGTH))
+                    }
+                    maxLength={MAX_DESCRIPTION_LENGTH}
+                    disabled={loading || currentQty <= 0}
+                    className="min-h-[144px] w-full resize-none"
+                    placeholder={t('descriptionPlaceholder' as any)}
+                  />
+                  <p className="mt-2 text-xs text-text-on-disabled">
+                    {(itemReasonDetails[item.id] || '').length}/{MAX_DESCRIPTION_LENGTH}
+                  </p>
+                </div>
+              )}
 
               {/* Mobile Layout */}
               <div className="flex flex-col gap-4 md:hidden w-full min-w-0">
@@ -121,14 +192,14 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
 
                   <div className="flex flex-col gap-3 flex-1 min-w-0">
                     <div className="flex flex-col gap-1">
-                      {item.price ? (
+                      {priceCurrency && totalGrossValue !== undefined ? (
                         <>
                           <p className="text-sm font-bold text-text-headings">
-                            {formatCurrency(item.price.value, item.price.currency)}
+                            {formatCurrency(totalGrossValue, priceCurrency)}
                           </p>
-                          {item.price.originalValue && item.price.originalValue !== item.price.value && (
+                          {totalNetValue !== undefined && (
                             <p className="text-xs text-text-on-disabled">
-                              Net {formatCurrency(item.price.originalValue, item.price.currency)}
+                              {tReturns('net')} {formatCurrency(totalNetValue, priceCurrency)}
                             </p>
                           )}
                         </>
@@ -139,7 +210,7 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
 
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-text-body truncate">
-                        {t('itemNumber')}: {item.productId || '-'}
+                        {t('itemNumber')}: {item.sku || item.productId || '-'}
                       </span>
                     </div>
                   </div>
@@ -174,6 +245,52 @@ export function ReturnItemSelector({ items, quantities, onUpdateQuantity, loadin
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
+                {reasonMode === 'per-item' && (
+                  <div>
+                    <label
+                      htmlFor={`item-reason-mobile-${item.id}`}
+                      className="block text-xs font-semibold text-text-body mb-2"
+                    >
+                      {t('returnReasonOptional' as any)}
+                    </label>
+                    <Select
+                      value={itemReasons[item.id] || ''}
+                      onValueChange={(value: string) => onItemReasonChange(item.id, value as ReturnReasonCode)}
+                      disabled={loading || currentQty <= 0}
+                    >
+                      <SelectTrigger id={`item-reason-mobile-${item.id}`} className="w-full">
+                        <SelectValue placeholder={t('selectReason')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {reasonOptions.map((reason) => (
+                          <SelectItem key={reason} value={reason}>
+                            {t(`reasons.${reason}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <label
+                      htmlFor={`item-reason-description-mobile-${item.id}`}
+                      className="mt-4 block text-xs font-semibold text-text-body mb-2"
+                    >
+                      {t('descriptionOptional' as any)}
+                    </label>
+                    <Textarea
+                      id={`item-reason-description-mobile-${item.id}`}
+                      value={itemReasonDetails[item.id] || ''}
+                      onChange={(event) =>
+                        onItemReasonDetailsChange(item.id, event.target.value.slice(0, MAX_DESCRIPTION_LENGTH))
+                      }
+                      maxLength={MAX_DESCRIPTION_LENGTH}
+                      disabled={loading || currentQty <= 0}
+                      className="min-h-[144px] w-full resize-none"
+                      placeholder={t('descriptionPlaceholder' as any)}
+                    />
+                    <p className="mt-2 text-xs text-text-on-disabled">
+                      {(itemReasonDetails[item.id] || '').length}/{MAX_DESCRIPTION_LENGTH}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           );

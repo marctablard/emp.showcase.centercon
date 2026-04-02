@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/lib/utils';
 import { Return } from '@/platform/services/model/return';
 
 export function formatReturnDate(dateString: string | undefined, locale: string): string {
@@ -10,12 +11,9 @@ export function formatReturnDate(dateString: string | undefined, locale: string)
   }).format(date);
 }
 
-export function formatReturnCurrency(value: number | undefined, currency: string | undefined, locale: string): string {
+export function formatReturnCurrency(value: number | undefined, currency: string | undefined, locale?: string): string {
   if (value === undefined || !currency) return '-';
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-  }).format(value);
+  return formatCurrency(value, currency, locale);
 }
 
 export function getFirstOrderId(returnItem: Return): string {

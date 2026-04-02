@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { DynamicIcon, IconName } from 'lucide-react/dynamic';
@@ -16,6 +16,7 @@ function CurrencySwitcherContent() {
   const router = useRouter();
   const t = useTranslations('common.Currencies');
   const { currencies, loading: siteLoading, site } = useSite();
+  const [isSwitching, setIsSwitching] = useState(false);
   const currentCurrency = useMemo(() => {
     // First, try to find session currency in available currencies
     if (currencies && currencies.length > 0) {
@@ -37,10 +38,22 @@ function CurrencySwitcherContent() {
   }, [currencies, session, site]);
 
   const switchCurrency = async (currency: string) => {
-    const success = await setCurrency(currency);
-    if (success) {
-      // Refresh page after session update completes to reload prices with new currency
-      router.refresh();
+    if (isSwitching || sessionLoading) {
+      return;
+    }
+    if (currency === currentCurrency?.id || currency === session?.currency) {
+      return;
+    }
+
+    setIsSwitching(true);
+    try {
+      const success = await setCurrency(currency);
+      if (success) {
+        // Refresh page after session update completes to reload prices with new currency
+        router.refresh();
+      }
+    } finally {
+      setIsSwitching(false);
     }
   };
 
@@ -95,6 +108,7 @@ function CurrencySwitcherContent() {
       label={t('label')}
       onSelected={switchCurrency}
       icon={icon}
+      disabled={isSwitching || sessionLoading}
     />
   );
 }

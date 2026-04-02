@@ -7,7 +7,7 @@ import { useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { type AuthErrorKey, type NotificationOnboardingKey, dk } from '@/i18n/dynamic-key';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { stripAuthNotificationQueryParams } from '@/lib/notification/auth-notification-utils';
 import { l10n } from '@/lib/utils';
 import type { CompanyOnboardingStatus } from '@/platform/services/model/company/company';
 import type { StorefrontNotification } from '@/platform/services/model/notification/notification';
@@ -18,10 +18,10 @@ import { ToastType, notify } from '../ui/toast-notification';
  */
 function WelcomeNotification() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const { data: session } = useSession();
   const hasShownWelcome = useRef(false);
+  const hasCleanedAuthQuery = useRef(false);
+  const hasPendingLoginNotification = useRef(false);
   const tLogin = useTranslations('auth.login');
   const tErrors = useTranslations('auth.errors');
   const t = useTranslations('common.Notification');
@@ -51,13 +51,25 @@ function WelcomeNotification() {
 
       // Mark as shown
       hasShownWelcome.current = true;
-      router.push(pathname);
+      if (!hasCleanedAuthQuery.current) {
+        hasCleanedAuthQuery.current = true;
+        window.history.replaceState({}, '', stripAuthNotificationQueryParams(window.location.href));
+      }
       return;
     }
 
     // Check if login parameter is present
     const loginParam = searchParams.get('login');
-    if (!loginParam) {
+    if (loginParam) {
+      hasPendingLoginNotification.current = true;
+      if (!hasCleanedAuthQuery.current) {
+        hasCleanedAuthQuery.current = true;
+        // Strip auth query params immediately to avoid stale URL cleanup racing with user navigation.
+        window.history.replaceState({}, '', stripAuthNotificationQueryParams(window.location.href));
+      }
+    }
+
+    if (!hasPendingLoginNotification.current) {
       return;
     }
 
@@ -82,8 +94,7 @@ function WelcomeNotification() {
 
     // Mark as shown
     hasShownWelcome.current = true;
-    router.push(pathname);
-  }, [searchParams, session, t, pathname, router, tLogin, tErrors]);
+  }, [searchParams, session, t, tLogin, tErrors]);
 
   return null;
 }

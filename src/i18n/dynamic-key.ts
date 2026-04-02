@@ -103,13 +103,7 @@ export type WeatherKey =
 // Namespace: orders.OrderStatus
 // Used by: order-status-badge.tsx, order-confirmation.tsx
 // ---------------------------------------------------------------------------
-export type OrderStatusKey =
-  | 'IN_CHECKOUT'
-  | 'CREATED'
-  | 'CONFIRMED'
-  | 'SHIPPED'
-  | 'COMPLETED'
-  | 'DECLINED';
+export type OrderStatusKey = 'IN_CHECKOUT' | 'CREATED' | 'CONFIRMED' | 'SHIPPED' | 'COMPLETED' | 'DECLINED';
 
 // ---------------------------------------------------------------------------
 // Namespace: orders  (sub-path: status.*)
@@ -125,7 +119,8 @@ export type OrderStatusLowercaseKey =
   | 'status.shipped'
   | 'status.delivered'
   | 'status.completed'
-  | 'status.cancelled';
+  | 'status.cancelled'
+  | 'status.declined';
 
 // ---------------------------------------------------------------------------
 // Namespace: orders  (sub-path: paymentTypes.*)
@@ -168,21 +163,14 @@ export type TrackingKey =
 // Namespace: orders.Invoices  (sub-path: status.*)
 // Used by: my-invoices-card.tsx
 // ---------------------------------------------------------------------------
-export type InvoiceStatusKey =
-  | 'status.open'
-  | 'status.overdue'
-  | 'status.paid';
+export type InvoiceStatusKey = 'status.open' | 'status.overdue' | 'status.paid';
 
 // ---------------------------------------------------------------------------
 // Namespace: checkout.PaymentModes
 // Used by: checkout-payment.tsx, order-confirmation.tsx, payment-method.tsx,
 //          order-detail.tsx, order-cards.tsx
 // ---------------------------------------------------------------------------
-export type PaymentModeKey =
-  | 'creditCard'
-  | 'paypal'
-  | 'invoice'
-  | 'none';
+export type PaymentModeKey = 'creditCard' | 'paypal' | 'invoice' | 'none';
 
 // ---------------------------------------------------------------------------
 // Namespace: account.quoteStatus
@@ -197,16 +185,17 @@ export type QuoteStatusKey =
   | 'order_created'
   | 'creating'
   | 'closed'
-  | 'open';
+  | 'open'
+  | 'change'
+  | 'decline'
+  | 'declined_by_merchant'
+  | 'expired';
 
 // ---------------------------------------------------------------------------
 // Namespace: common.Languages
 // Used by: header-language-switcher.tsx
 // ---------------------------------------------------------------------------
-export type LanguageKey =
-  | 'label'
-  | 'en'
-  | 'de';
+export type LanguageKey = 'label' | 'en' | 'de';
 
 // ---------------------------------------------------------------------------
 // Namespace: common.Notification  (sub-path: company.onboarding.*)
@@ -221,20 +210,13 @@ export type NotificationOnboardingKey =
 // Namespace: auth.errors
 // Used by: notification.tsx
 // ---------------------------------------------------------------------------
-export type AuthErrorKey =
-  | 'AccessDenied'
-  | 'Configuration'
-  | 'Verification'
-  | 'Default';
+export type AuthErrorKey = 'AccessDenied' | 'Configuration' | 'Verification' | 'Default';
 
 // ---------------------------------------------------------------------------
 // Namespace: notifications
 // Used by: DefaultNotificationPayloadServiceServer.ts
 // ---------------------------------------------------------------------------
-export type NotificationCodeKey =
-  | 'SUBSTITUTION_AVAILABLE'
-  | 'ITEM_PRICE_CHANGE'
-  | 'actions.goToCart';
+export type NotificationCodeKey = 'SUBSTITUTION_AVAILABLE' | 'ITEM_PRICE_CHANGE' | 'actions.goToCart';
 
 // ---------------------------------------------------------------------------
 // Namespace: account.Documents
@@ -336,6 +318,4 @@ export type ProductTemplateAttributeKey =
 // ---------------------------------------------------------------------------
 // Combined type for product-tile-fly-out.tsx renderAttributes helper
 // ---------------------------------------------------------------------------
-export type ProductAttributeKey =
-  | ProductVariantAttributeKey
-  | ProductTemplateAttributeKey;
+export type ProductAttributeKey = ProductVariantAttributeKey | ProductTemplateAttributeKey;

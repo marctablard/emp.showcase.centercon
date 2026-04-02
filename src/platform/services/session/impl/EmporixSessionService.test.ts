@@ -16,6 +16,7 @@ describe('EmporixSessionService', () => {
   let mockSessionContextApi: jest.Mocked<EmporixSessionContextApi>;
   let mockSiteService: jest.Mocked<SiteService>;
   let mockSessionMapper: jest.Mocked<SessionMapper<EmporixSessionContext, EmporixContextAttribute>>;
+  let mockLogger: jest.Mocked<LoggerService>;
 
   const mockSessionContext: EmporixSessionContext = {
     sessionId: 'test-session-id',
@@ -88,6 +89,15 @@ describe('EmporixSessionService', () => {
       getCurrency: jest.fn(),
     };
 
+    mockLogger = {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+      fatal: jest.fn(),
+    } as unknown as jest.Mocked<LoggerService>;
+
     // Register mocks
     container.bind<EmporixSessionContextApi>('EmporixSessionContextApi').toConstantValue(mockSessionContextApi);
     container
@@ -95,15 +105,7 @@ describe('EmporixSessionService', () => {
       .toConstantValue(mockSessionMapper);
     container.bind<EmporixSessionService>('SessionService').to(EmporixSessionService);
     container.bind<SiteService>('SiteService').toConstantValue(mockSiteService);
-    container.bind<LoggerService>('LoggerService').toConstantValue({
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-      trace: jest.fn(),
-      fatal: jest.fn(),
-      child: jest.fn().mockReturnThis(),
-    } as unknown as LoggerService);
+    container.bind<LoggerService>('LoggerService').toConstantValue(mockLogger);
 
     // Get service instance
     sessionService = container.get<EmporixSessionService>('SessionService');
@@ -176,6 +178,16 @@ describe('EmporixSessionService', () => {
         siteCode: 'site-a',
         metadata: { version: 1 },
       });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
       mockSessionContextApi.removeOwnSessionContextAttribute.mockImplementation(async () => {
         callOrder.push('removeOwnSessionContextAttribute');
       });
@@ -201,6 +213,16 @@ describe('EmporixSessionService', () => {
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
         sessionId: 'test-session',
         siteCode: 'site-a', // Current site
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
         metadata: { version: 1 },
       });
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
@@ -264,6 +286,16 @@ describe('EmporixSessionService', () => {
         siteCode: 'site-a',
         metadata: { version: 1 },
       });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
       mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
 
@@ -276,6 +308,87 @@ describe('EmporixSessionService', () => {
         metadata: { version: 1 },
       });
       expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+    });
+
+    it('should retry once with refreshed version when first PATCH fails with version conflict', async () => {
+      mockSessionContextApi.getOwnSessionContext
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 3 },
+        })
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 4 },
+        })
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 5 },
+        });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
+      mockSessionContextApi.updateOwnSessionContext
+        .mockRejectedValueOnce(
+          new Error(
+            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 4 has not been found."}',
+          ),
+        )
+        .mockResolvedValueOnce();
+
+      await sessionService.setSite('site-b', 'EUR');
+
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenNthCalledWith(1, {
+        siteCode: 'site-b',
+        currency: 'EUR',
+        metadata: { version: 4 },
+      });
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenNthCalledWith(2, {
+        siteCode: 'site-b',
+        currency: 'EUR',
+        metadata: { version: 5 },
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        {
+          site: 'site-b',
+          previousVersion: 4,
+          retryVersion: 5,
+        },
+        'Retrying session site update after version conflict',
+      );
+    });
+
+    it('should throw when retry also fails after version conflict', async () => {
+      mockSessionContextApi.getOwnSessionContext
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 2 },
+        })
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 3 },
+        })
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 4 },
+        });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
+      mockSessionContextApi.updateOwnSessionContext
+        .mockRejectedValueOnce(
+          new Error(
+            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 3 has not been found."}',
+          ),
+        )
+        .mockRejectedValueOnce(
+          new Error(
+            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 4 has not been found."}',
+          ),
+        );
+
+      await expect(sessionService.setSite('site-b', 'EUR')).rejects.toThrow('Failed to update own session context');
     });
   });
 
@@ -296,7 +409,6 @@ describe('EmporixSessionService', () => {
     });
 
     it('should log unexpected errors but not throw', async () => {
-      const mockLogger = container.get<LoggerService>('LoggerService');
       mockSessionContextApi.removeOwnSessionContextAttribute.mockRejectedValue(new Error('Internal Server Error'));
 
       await expect(sessionService.clearCart()).resolves.not.toThrow();

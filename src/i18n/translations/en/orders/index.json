@@ -10,6 +10,7 @@
   "returnOrder": "Return Order",
   "returnLink": "Return",
   "returnDisabledTooltip": "Returns can only be created for completed orders",
+  "noRemainingItems": "A return for all items in this order has already been requested.",
   "paymentMethod": "Payment Method",
   "shippingMethod": "Shipping Method",
   "orderItems": "Order Items",
@@ -19,6 +20,7 @@
   "total": "Total",
   "previous": "Previous",
   "next": "Next",
+  "pageIndicator": "Page {current} / {total}",
   "showAllOrders": "Show all orders",
   "billingAddress": "Billing address",
   "shippingAddress": "Shipping address",
@@ -40,13 +42,16 @@
   "columns": {
     "orderNumber": "Order #",
     "status": "Status",
+    "totalShippingCost": "Total Shipping Cost",
     "customer": "Customer",
     "orderDate": "Order Date",
+    "expectedDeliveryDate": "Expected Delivery Date",
     "deliveryDate": "Delivery Date",
     "deliveryAddress": "Delivery Address",
     "payment": "Payment",
     "orderValue": "Order Value",
-    "action": "Actions"
+    "action": "Action",
+    "view": "View"
   },
   "status": {
     "in_checkout": "In Checkout",
@@ -58,7 +63,8 @@
     "shipped": "Shipped",
     "delivered": "Delivered",
     "completed": "Completed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "declined": "Declined"
   },
   "paymentTypes": {
     "creditcard": "Credit Card",
@@ -95,7 +101,7 @@
     "CONFIRMED": "Confirmed",
     "SHIPPED": "Shipped",
     "COMPLETED": "Completed",
-    "DECLINED": "Cancelled"
+    "DECLINED": "Declined"
   },
   "Confirmation": {
     "title": "Order Confirmation",
@@ -106,6 +112,7 @@
     "emailConfirmation": "A confirmation email has been sent to",
     "continueShopping": "Continue Shopping",
     "viewOrders": "View Orders",
+    "viewApprovals": "My Approvals",
     "freightShipping": "Freight Shipping",
     "freightInfo": "After the order is completed, the contracted shipping company will contact you with further information."
   },
@@ -182,7 +189,10 @@
     "enterApproverComment": "Enter approver comment...",
     "enterRequestorComment": "Enter requestor comment...",
     "saveApproverComment": "Save Approver Comment",
-    "saveRequestorComment": "Save Requestor Comment"
+    "saveRequestorComment": "Save Requestor Comment",
+    "previous": "Previous",
+    "next": "Next",
+    "pageIndicator": "Page {current} / {total}"
   },
   "ApprovalAction": {
     "CHECKOUT": "Order"

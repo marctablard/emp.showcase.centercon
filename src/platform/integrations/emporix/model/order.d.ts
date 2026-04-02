@@ -14,7 +14,8 @@ export type EmporixOrderStatus =
   | 'SHIPPED'
   | 'DELIVERED'
   | 'COMPLETED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'DECLINED';
 
 /**
  * Order entry representing an item in the order
@@ -30,6 +31,10 @@ export interface EmporixOrderEntry {
     name: string;
     description?: string;
     sku?: string;
+    vendor?: {
+      id?: string;
+      name?: string;
+    };
     images?: Array<{
       id: string;
       url: string;

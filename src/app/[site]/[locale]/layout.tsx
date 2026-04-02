@@ -11,6 +11,7 @@ import { Notification } from '@/components/notification/notification';
 import { Toaster } from '@/components/ui/sonner';
 import { redirect } from '@/i18n/edge/navigation';
 import { routing } from '@/i18n/routing';
+import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
 import { setSessionLanguage } from '@/lib/ssr/session';
 import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
@@ -18,7 +19,7 @@ import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import { setRequestSite } from '@/site/server/';
 
-const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
+const defaultSiteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE || undefined;
 
 const fontHeadlines = Ubuntu({
   subsets: ['latin'],
@@ -45,10 +46,6 @@ export const viewport = {
   initialScale: 1,
 };
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale, site: defaultSiteCode }));
-}
-
 export async function generateMetadata(props: Omit<Props, 'children'>) {
   const { locale } = await props.params;
   const t = await getTranslations({ locale, namespace: 'seo' });
@@ -73,10 +70,10 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
 
   const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
 
-  // Handle invalid site: redirect to valid site or show 404
+  // Handle invalid site: redirect to valid site (fallback ON) or show 404 (fallback OFF)
   if (!site) {
-    if (availableSites && availableSites.length > 0) {
-      // Redirect to first available site, preserving locale if possible
+    const fallbackEnabled = !!defaultSiteCode;
+    if (fallbackEnabled && availableSites && availableSites.length > 0) {
       const targetSite = availableSites[0];
       const targetLocale = targetSite.languages?.includes(locale) ? locale : targetSite.languages?.[0] || locale;
       redirect({ href: '/', locale: targetLocale, site: targetSite.code, forcePrefix: true });
@@ -112,7 +109,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
               <StoreProvider site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
-                  {process.env.NODE_ENV === 'development' && <ApiDebugPanel />}
+                  {isDebugApiEnabled() && isBrowserDebugOutputEnabled() && <ApiDebugPanel />}
                   {children}
                   {dialog}
                   <Toaster />

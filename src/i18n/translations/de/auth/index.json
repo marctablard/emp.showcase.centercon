@@ -12,6 +12,7 @@
     "noAccountYet": "Noch kein Konto?",
     "createAccount": "Konto erstellen",
     "welcomeMessage": "Willkommen zurück, {username}!",
+    "cartMergeFallback": "Artikel aus dem vorherigen Warenkorb konnten nicht zusammengeführt werden. Ihr Konto-Warenkorb ist jetzt aktiv.",
     "close": "Schließen",
     "error": "Fehler",
     "showPassword": "Passwort anzeigen",
@@ -66,7 +67,8 @@
       "emailExists": "Diese E-Mail-Adresse ist bereits registriert.",
       "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "serverError": "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-      "usernameTaken": "Dieser Benutzername ist bereits vergeben."
+      "usernameTaken": "Dieser Benutzername ist bereits vergeben.",
+      "signInAfterRegisterFailed": "Ihr Konto wurde erstellt, die automatische Anmeldung ist jedoch fehlgeschlagen. Bitte melden Sie sich manuell an."
     }
   },
   "Password": {

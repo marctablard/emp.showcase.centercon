@@ -1,5 +1,10 @@
 import { EmporixReturnCreateRequest, EmporixReturnId, EmporixReturnResponse } from '../model/return';
 
+export interface EmporixReturnsPage {
+  items: EmporixReturnResponse[];
+  totalCount?: number;
+}
+
 /**
  * Interface for the Emporix Return API
  */
@@ -10,9 +15,9 @@ export interface EmporixReturnApi {
    * @param pageSize Optional page size (default: 16)
    * @param sort Optional sort parameter
    * @param query Optional query parameter for filtering
-   * @returns Promise with array of returns
+   * @returns Promise with returns and optional total count
    */
-  getReturns(pageNumber?: number, pageSize?: number, sort?: string, query?: string): Promise<EmporixReturnResponse[]>;
+  getReturns(pageNumber?: number, pageSize?: number, sort?: string, query?: string): Promise<EmporixReturnsPage>;
 
   /**
    * Get a specific return by ID

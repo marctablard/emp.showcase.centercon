@@ -25,15 +25,34 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isVersionConflictError =
+      errorMessage.includes('Failed to update own session context: Not Found') &&
+      errorMessage.includes('version') &&
+      errorMessage.includes('has not been found');
+
     logger.error(
       {
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
+        errorType: isVersionConflictError ? 'SESSION_CONTEXT_VERSION_CONFLICT' : 'UNKNOWN',
         path: '/api/session/site',
         method: 'PUT',
       },
       'Error updating session site',
     );
-    return NextResponse.json({ error: 'Failed to update session site' }, { status: 500 });
+    if (isVersionConflictError) {
+      return NextResponse.json(
+        {
+          error: 'Failed to update session site',
+          code: 'SESSION_CONTEXT_VERSION_CONFLICT',
+        },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json(
+      { error: 'Failed to update session site', code: 'SESSION_SITE_UPDATE_FAILED' },
+      { status: 500 },
+    );
   }
 }

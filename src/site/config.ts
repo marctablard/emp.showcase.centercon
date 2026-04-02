@@ -1,9 +1,13 @@
 import { SitePrefixMode, SiteRoutingConfig } from './types';
 
-const availableSites = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
-const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || 'main';
-if (availableSites.length === 0 || availableSites.findIndex((c) => c === defaultSite) === -1) {
-  availableSites.push(defaultSite);
+const availableSites = (process.env.NEXT_PUBLIC_AVAILABLE_SITES ?? '')
+  .split(',')
+  .map((site) => site.trim())
+  .filter(Boolean);
+const configuredDefaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE?.trim() || undefined;
+const defaultSite = configuredDefaultSite || availableSites[0];
+if (configuredDefaultSite && !availableSites.includes(configuredDefaultSite)) {
+  availableSites.push(configuredDefaultSite);
 }
 
 export default {
@@ -12,6 +16,7 @@ export default {
     availableSites: availableSites,
     prefix: 'as-needed' as SitePrefixMode,
     cookie: { name: process.env.NEXT_PUBLIC_SITE_COOKIE || 'NEXT_SITE' },
+    cookieOverridesDefault: true,
     domains: [
       {
         domain: 'showcase.emporix.la',
@@ -26,6 +31,7 @@ export default {
     availableSites: availableSites,
     prefix: 'as-needed' as SitePrefixMode,
     cookie: { name: process.env.NEXT_PUBLIC_SITE_COOKIE || 'NEXT_SITE' },
+    cookieOverridesDefault: true,
     domains: [
       {
         domain: 'localhost',

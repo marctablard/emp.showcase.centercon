@@ -38,8 +38,8 @@ export const cacheRules: CacheRule[] = [
   {
     url: '/api/products/(.*)/price',
     cache: {
-      revalidate: 3600,
-      tags: ['product-price-$1'],
+      revalidate: 0,
+      tags: [],
     },
   },
   {

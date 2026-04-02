@@ -1,4 +1,10 @@
 import pino from 'pino';
+import {
+  getDebugApiOutput,
+  getDebugApiResponseMode,
+  isDebugApiEnabled,
+  isDebugApiResponseEnabled,
+} from '@/lib/common/debug-env';
 import { getServerLoggerConfig } from '@/platform/core/config/logger-config';
 import { type ApiDebugEvent, type DebugCallSource, type DebugCallType, debugEventBus } from './debug-event-bus';
 
@@ -49,11 +55,9 @@ export type DebugSourceFilter = 'all' | 'client' | 'ssr';
 export type BrowserDetail = 'payload' | 'headers' | 'body';
 export type DebugLevel = 'all' | 'warn' | 'error';
 
-/** Where should debug output be sent? Default: BOTH */
-function getDebugOutput(): DebugOutput {
-  const v = (process.env.NEXT_PUBLIC_DEBUG_API_OUTPUT || 'both').toLowerCase();
-  if (v === 'terminal' || v === 'browser') return v;
-  return 'both';
+/** Where should debug output be sent? Invalid/missing value disables output. */
+function getDebugOutput(): DebugOutput | null {
+  return getDebugApiOutput();
 }
 
 /** Which call types to log? Default: ALL */
@@ -96,7 +100,18 @@ function getBrowserDetails(): Set<BrowserDetail> {
     .filter(Boolean);
   const allowed = new Set<BrowserDetail>();
   for (const p of parts) {
-    if (p === 'payload' || p === 'headers' || p === 'body') allowed.add(p);
+    if (p === 'payload') {
+      allowed.add('payload');
+      continue;
+    }
+    if (p === 'headers') {
+      allowed.add('headers');
+      continue;
+    }
+    // Accept BODY and BODY-{n} forms so env values like BODY-200 still enable body output.
+    if (p === 'body' || /^body-\d+$/.test(p)) {
+      allowed.add('body');
+    }
   }
   // If nothing valid was specified, default to all
   if (allowed.size === 0) {
@@ -126,6 +141,11 @@ function shouldLogToTerminal(): boolean {
 function shouldLogToBrowser(): boolean {
   const out = getDebugOutput();
   return out === 'browser' || out === 'both';
+}
+
+/** Is browser debug stream functionally enabled (response logging + browser output)? */
+function isBrowserDebugEnabled(): boolean {
+  return isDebugApiEnabled() && shouldLogToBrowser();
 }
 
 /**
@@ -348,8 +368,8 @@ export function buildAndLogCurl(url: string, options: RequestInit, ctx?: DebugCo
       getDebugLogger().debug(`${typeTag}${logPrefix} ${buildCurl(url, options, maskSensitive)}`);
     }
   }
-  // Track request start time for the SSE debug stream (always in dev — events are buffered for replay)
-  if (isDev) {
+  // Track request start time for the SSE debug stream whenever browser debug is enabled.
+  if (isBrowserDebugEnabled()) {
     const requestId = generateRequestId();
     _requestTimestamps.set(`${(options.method || 'GET').toUpperCase()}:${url}`, Date.now());
     // Store the requestId so logResponse can correlate
@@ -378,8 +398,8 @@ export async function logResponse(
   ctx?: DebugContext,
 ): Promise<void> {
   const maskSensitive = shouldMaskSensitive();
-  const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
-  if (debugResponse === 'off') return;
+  const debugResponse = getDebugApiResponseMode();
+  if (!debugResponse) return;
   if (!shouldLogEndpoint(url)) return;
 
   const method = (requestOptions.method || 'GET').toUpperCase();
@@ -469,8 +489,8 @@ export async function logResponse(
     }
   }
 
-  // --- 5. Emit to browser debug stream (dev only, always — events are buffered for replay) ---
-  if (isDev && shouldLogToBrowser()) {
+  // --- 5. Emit to browser debug stream whenever enabled by env flags ---
+  if (isBrowserDebugEnabled()) {
     const tsKey = `${method}:${url}`;
     const ridKey = `rid:${tsKey}`;
     const startTime = _requestTimestamps.get(tsKey);
@@ -478,14 +498,14 @@ export async function logResponse(
     _requestTimestamps.delete(tsKey);
     _requestTimestamps.delete(ridKey);
 
-    // Compute headers for the SSE event if not already done for terminal
-    if (!responseHeaders && debugResponse !== 'status') {
+    // Compute headers for SSE independently from terminal mode.
+    if (!responseHeaders) {
       let hdrs = Object.fromEntries(response.headers.entries());
       if (maskSensitive) hdrs = maskHeaders(hdrs);
       responseHeaders = hdrs;
     }
-    // Also read body for the event if not done for terminal
-    if (!bodyText && (debugResponse.startsWith('status-body') || debugResponse === 'full')) {
+    // Always include full raw response body in browser events so DevTools can show unmapped fields.
+    if (!bodyText) {
       try {
         bodyText = await response.clone().text();
       } catch {
@@ -509,7 +529,7 @@ export async function logResponse(
       source: effectiveCtx.source,
     };
     debugEventBus.emit(event);
-  } else if (isDev) {
+  } else {
     // Clean up timestamps even if we skip browser emit
     const tsKey = `${method}:${url}`;
     _requestTimestamps.delete(tsKey);
@@ -576,9 +596,7 @@ export function attachDebugHeaders(
   url: string,
   startTime?: number,
 ): void {
-  if (process.env.NODE_ENV !== 'development') return;
-  const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
-  if (debugResponse === 'off') return;
+  if (!isDebugApiResponseEnabled()) return;
 
   const maskSensitive = shouldMaskSensitive();
   const maskedUrl = maskSensitive ? maskSensitiveQueryParams(url) : url;
@@ -610,11 +628,8 @@ export function attachDebugHeaders(
  * ```
  */
 export function withApiRouteDebug<T extends (...args: any[]) => Promise<Response>>(handler: T): T {
-  if (!isDev) return handler; // no-op in production
-
   const wrapped = async (...args: any[]): Promise<Response> => {
-    const debugResponse = (process.env.NEXT_PUBLIC_DEBUG_API_RESPONSE || 'off').toLowerCase();
-    if (debugResponse === 'off') return handler(...args);
+    if (!isDebugApiResponseEnabled()) return handler(...args);
 
     const request = args[0] as Request | undefined;
     if (!request || typeof request.url !== 'string') return handler(...args);
