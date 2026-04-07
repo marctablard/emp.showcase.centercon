@@ -1,7 +1,7 @@
 // src/stores/sync/store-synchronizer.ts
 import { shallow } from 'zustand/shallow';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import type { CartStoreApi, SessionStoreApi, SiteStoreApi } from '@/providers/StoreProvider';
+import type { CartStoreApi, CustomerStoreApi, SessionStoreApi, SiteStoreApi } from '@/providers/StoreProvider';
 
 type UnsubscribeFn = () => void;
 
@@ -9,6 +9,7 @@ interface StoreSynchronizerParams {
   sessionStore: SessionStoreApi;
   cartStore: CartStoreApi;
   siteStore: SiteStoreApi;
+  customerStore: CustomerStoreApi;
 }
 
 const CURRENCY_SYNC_RETRY_DELAYS_MS = [0, 250, 750];
@@ -28,11 +29,14 @@ const CURRENCY_SYNC_RETRY_DELAYS_MS = [0, 250, 750];
  * 1. Session currency changes → Cart currency update
  * 2. Session site changes → Cart site validation
  * 3. Session site changes → Site store reset (triggers re-fetch of site config, currencies, etc.)
+ * 4. Session legalEntityId changes (B2B company switcher) → Cart re-fetch for current company
+ * 5. Session site / legal entity changes → Invalidate cached legal-entity checkout addresses (single refetch per new key)
  */
 export function setupStoreSynchronization({
   sessionStore,
   cartStore,
   siteStore,
+  customerStore,
 }: StoreSynchronizerParams): UnsubscribeFn[] {
   const unsubscribers: UnsubscribeFn[] = [];
   let activeCurrencySyncToken = 0;
@@ -112,11 +116,31 @@ export function setupStoreSynchronization({
 
       const currentSite = siteStore.getState().getSite();
       if (currentSite && currentSite.code !== siteCode) {
+        customerStore.getState().invalidateLegalEntityCheckoutAddresses();
         siteStore.getState().reset();
       }
     },
   );
   unsubscribers.push(unsubSiteStore);
+
+  const unsubLegalEntity = sessionStore.subscribe(
+    (state) => {
+      const le = state.session?.legalEntityId;
+      return typeof le === 'string' ? le.trim() : '';
+    },
+    async (legalEntityId, previousLegalEntityId) => {
+      if (legalEntityId === previousLegalEntityId) {
+        return;
+      }
+      customerStore.getState().invalidateLegalEntityCheckoutAddresses();
+      try {
+        await cartStore.getState().validateLegalEntity(legalEntityId === '' ? undefined : legalEntityId);
+      } catch (error) {
+        getLogger().error({ error }, 'Failed to validate cart legal entity');
+      }
+    },
+  );
+  unsubscribers.push(unsubLegalEntity);
 
   return unsubscribers;
 }

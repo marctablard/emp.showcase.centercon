@@ -1,4 +1,5 @@
 import { Company } from '../model/company/company';
+import { CustomerAddress } from '../model/customer/customer';
 
 /**
  * Service for company-related operations
@@ -16,4 +17,10 @@ export interface CompanyService {
    * @returns Promise with array of companies
    */
   getCompanies(): Promise<Company[]>;
+
+  /**
+   * Addresses derived from the current session legal entity locations (Customer Management).
+   * Used for B2B checkout address book; not persisted customer profile addresses.
+   */
+  getLegalEntityCheckoutAddresses(): Promise<CustomerAddress[]>;
 }

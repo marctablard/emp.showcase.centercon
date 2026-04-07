@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAddresses } from '@/hooks/customer/useAddresses';
+import { useLegalEntityCheckoutAddresses } from '@/hooks/customer/useLegalEntityCheckoutAddresses';
+import { ADDRESS_TYPE } from '@/lib/common/address-type-constants';
 import { cn } from '@/lib/utils';
 import { Address, AddressType } from '@/platform/services/model/common';
+import { CustomerAddress } from '@/platform/services/model/customer/customer';
 
-interface AddressSelectorProps {
+export interface AddressSelectorProps {
   onSelect: (address: Address) => void;
   triggerElement?: ReactNode;
   selectedAddressId?: string;
@@ -17,18 +20,16 @@ interface AddressSelectorProps {
   showAddressTypes?: boolean;
   addressType?: AddressType;
   className?: string;
+  /** `customer` = profile addresses; `legalEntity` = legal entity locations (B2B checkout). */
+  addressBook?: 'customer' | 'legalEntity';
 }
 
-/**
- * Address selector component that shows a dialog with available addresses
- * @param onSelect - Callback function when an address is selected
- * @param triggerElement - Custom trigger element (optional)
- * @param selectedAddressId - Currently selected address ID (optional)
- * @param title - Dialog title (default: "Select an Address")
- * @param showAddressTypes - Whether to display address types badges (default: true)
- * @param className - Additional CSS class for the component
- */
-export function AddressSelector({
+interface AddressSelectorInnerProps extends Omit<AddressSelectorProps, 'addressBook'> {
+  addresses: CustomerAddress[] | undefined;
+  loading: boolean;
+}
+
+function AddressSelectorInner({
   onSelect,
   triggerElement,
   selectedAddressId,
@@ -36,11 +37,12 @@ export function AddressSelector({
   showAddressTypes = true,
   addressType,
   className,
-}: AddressSelectorProps) {
+  addresses,
+  loading,
+}: AddressSelectorInnerProps) {
   const t = useTranslations('account.AddressForm');
   const [open, setOpen] = useState(false);
   const [internalSelectedId, setInternalSelectedId] = useState<string | undefined>(selectedAddressId);
-  const { addresses, loading } = useAddresses();
 
   const resolvedSelectedId = selectedAddressId ?? internalSelectedId;
 
@@ -53,9 +55,13 @@ export function AddressSelector({
   };
 
   const formatAddress = (address: Address): string => {
+    const streetSegments = [address.street, address.streetNumber].flatMap((s) => {
+      const v = s?.trim();
+      return v ? [v] : [];
+    });
     const parts = [
       address.contactName,
-      address.street + (address.streetNumber ? ` ${address.streetNumber}` : ''),
+      ...streetSegments,
       address.streetAppendix,
       `${address.zipCode} ${address.city}`,
       address.state,
@@ -65,7 +71,6 @@ export function AddressSelector({
     return parts.join(', ');
   };
 
-  // Get the selected address object based on the ID
   const selectedAddress = resolvedSelectedId ? addresses?.find((addr) => addr.id === resolvedSelectedId) : undefined;
 
   return (
@@ -114,9 +119,13 @@ export function AddressSelector({
                             <span
                               key={type}
                               className={`text-sm px-2 py-1 rounded-sm 
-                              ${type === 'SHIPPING' ? 'bg-surface-information text-text-action-hover' : 'bg-surface-warning text-text-warning'}`}
+                              ${type === ADDRESS_TYPE.SHIPPING ? 'bg-surface-information text-text-action-hover' : 'bg-surface-warning text-text-warning'}`}
                             >
-                              {type === 'SHIPPING' ? t('shipping') : type === 'BILLING' ? t('billing') : type}
+                              {type === ADDRESS_TYPE.SHIPPING
+                                ? t('shipping')
+                                : type === ADDRESS_TYPE.BILLING
+                                  ? t('billing')
+                                  : type}
                             </span>
                           ))}
                         </div>
@@ -140,4 +149,33 @@ export function AddressSelector({
       </DialogContent>
     </Dialog>
   );
+}
+
+function AddressSelectorCustomerBook(props: Omit<AddressSelectorProps, 'addressBook'>) {
+  const { addresses, loading } = useAddresses();
+  return <AddressSelectorInner {...props} addresses={addresses} loading={loading} />;
+}
+
+function AddressSelectorLegalEntityBook(props: Omit<AddressSelectorProps, 'addressBook'>) {
+  const { addresses, loading } = useLegalEntityCheckoutAddresses();
+  return <AddressSelectorInner {...props} addresses={addresses} loading={loading} />;
+}
+
+/**
+ * Dialog to pick an address from the customer profile book or the B2B legal-entity location book.
+ *
+ * @param onSelect - Callback when the user picks a row; receives the {@link Address} and closes the dialog.
+ * @param triggerElement - Optional element that opens the dialog (default: secondary button with truncated label or “select address”).
+ * @param selectedAddressId - Controlled selection id; when set, that row is highlighted and internal selection is not used for that id.
+ * @param title - Dialog title override (default: translated “select an address”).
+ * @param showAddressTypes - When true (default), show SHIPPING/BILLING chips from each address’s `tags`.
+ * @param addressType - When set, filter to addresses whose `tags` include this role (e.g. checkout shipping passes shipping).
+ * @param className - Extra classes on the default trigger button when `triggerElement` is omitted.
+ * @param addressBook - `customer`: profile addresses via {@link useAddresses} → `/api/customer/current/addresses`. `legalEntity`: B2B locations via {@link useLegalEntityCheckoutAddresses} → `/api/customer/current/legal-entity-addresses`.
+ */
+export function AddressSelector({ addressBook = 'customer', ...props }: AddressSelectorProps) {
+  if (addressBook === 'legalEntity') {
+    return <AddressSelectorLegalEntityBook {...props} />;
+  }
+  return <AddressSelectorCustomerBook {...props} />;
 }
