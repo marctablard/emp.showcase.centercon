@@ -28,6 +28,7 @@ export const PUBLIC_PRODUCT_OPTIONS = {
 
 // Uncomment this, if you want to use Incremental Site Regeneration
 // https://nextjs.org/docs/app/guides/incremental-static-regeneration
+// NEXT_SSG_PRODUCT_COUNT must be set to a value greater than 0 to enable SSG
 // export const revalidate = 360;
 
 export async function generateStaticParams() {
