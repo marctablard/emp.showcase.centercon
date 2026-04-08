@@ -140,6 +140,18 @@ export const createCartStore = (initState: CartState = defaultState) => {
           await get().fetchCart(false);
         } else if (lastLegalEntityId === null) {
           set({ lastLegalEntityId: normalized });
+          // First bound session legal entity (e.g. B2B company selection): re-resolve cart server-side
+          // so we never keep a cart from another company or from before LE context existed.
+          if (normalized !== '') {
+            set({
+              currentCart: null,
+              loading: true,
+              error: null,
+              lastShippingUpdate: null,
+              pendingCurrencySync: null,
+            });
+            await get().fetchCart(false);
+          }
         }
       },
       // State setters
