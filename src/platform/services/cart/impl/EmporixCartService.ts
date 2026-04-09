@@ -46,6 +46,14 @@ class EmporixCartService implements CartService {
     return typeof value === 'string' ? value.trim() : '';
   }
 
+  private isCartOptimisticLockConflict(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+    const m = error.message;
+    return m.includes('optimistic_locking') && m.includes('metadata.version');
+  }
+
   /**
    * B2B: when the session carries a legal entity, the cart must use the same `legalEntityId`.
    * Otherwise we clear the session cart pointer and return null so callers can create an empty cart.
@@ -385,7 +393,7 @@ class EmporixCartService implements CartService {
    * cannot detect it preemptively — instead we catch the specific error, clear the field,
    * and retry the refresh.
    */
-  private async refreshCartWithCleanup(cartId: string): Promise<void> {
+  private async refreshCartOnceWithCleanup(cartId: string): Promise<void> {
     try {
       await this.cartApi.refreshCart(cartId);
     } catch (error) {
@@ -433,7 +441,28 @@ class EmporixCartService implements CartService {
     }
   }
 
-  async updateShippingInfo(
+  /**
+   * Emporix persists carts with optimistic locking. Concurrent updates (e.g. parallel
+   * shipping PATCHes) can yield 409 on refresh; bounded retries with backoff match API guidance.
+   */
+  private async refreshCartWithCleanup(cartId: string): Promise<void> {
+    const maxAttempts = 4;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        await this.refreshCartOnceWithCleanup(cartId);
+        return;
+      } catch (error) {
+        if (this.isCartOptimisticLockConflict(error) && attempt < maxAttempts - 1) {
+          this.logger.warn({ cartId, attempt }, 'Cart refresh hit optimistic lock — retrying');
+          await new Promise((r) => setTimeout(r, 45 * (attempt + 1)));
+          continue;
+        }
+        throw error;
+      }
+    }
+  }
+
+  private async updateShippingInfoOnce(
     cartId: string,
     shippingAddress: CartShippingAddress,
     billingAddress?: CartShippingAddress,
@@ -456,6 +485,30 @@ class EmporixCartService implements CartService {
       addresses,
     });
     await this.refreshCartWithCleanup(cartId);
+  }
+
+  async updateShippingInfo(
+    cartId: string,
+    shippingAddress: CartShippingAddress,
+    billingAddress?: CartShippingAddress,
+  ): Promise<void> {
+    const maxAttempts = 3;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        await this.updateShippingInfoOnce(cartId, shippingAddress, billingAddress);
+        return;
+      } catch (error) {
+        if (this.isCartOptimisticLockConflict(error) && attempt < maxAttempts - 1) {
+          this.logger.warn(
+            { cartId, attempt },
+            'Cart shipping update hit optimistic lock — retrying with fresh version',
+          );
+          await new Promise((r) => setTimeout(r, 55 * (attempt + 1)));
+          continue;
+        }
+        throw error;
+      }
+    }
   }
 
   async updateCurrency(cartId: string, currency: string): Promise<void> {

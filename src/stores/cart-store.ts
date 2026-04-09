@@ -85,6 +85,8 @@ export const createCartStore = (initState: CartState = defaultState) => {
   // Stored outside Zustand state to avoid triggering re-renders
   let _fetchPromise: Promise<Cart | null | undefined> | null = null;
   let _fetchPromiseCreate: boolean = false;
+  /** Serializes PATCH /shipping so parallel callers cannot race Emporix optimistic locking. */
+  let _shippingUpdateGate: Promise<void> = Promise.resolve();
 
   return create<CartStore>()(
     subscribeWithSelector((set, get) => ({
@@ -350,6 +352,13 @@ export const createCartStore = (initState: CartState = defaultState) => {
       },
 
       updateShippingInfo: async (shippingAddress: CartShippingAddress, billingAddress?: CartShippingAddress) => {
+        const afterPrevious = _shippingUpdateGate;
+        let releaseNext!: () => void;
+        _shippingUpdateGate = new Promise<void>((resolve) => {
+          releaseNext = resolve;
+        });
+        await afterPrevious.catch(() => {});
+
         try {
           const { lastShippingUpdate } = get();
           const now = Date.now();
@@ -394,6 +403,8 @@ export const createCartStore = (initState: CartState = defaultState) => {
           const error = err instanceof Error ? err : new Error('Failed to update shipping info');
           set({ error, loading: false });
           getLogger().error({ err }, 'Error updating shipping info');
+        } finally {
+          releaseNext();
         }
       },
 

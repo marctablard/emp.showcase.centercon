@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { checkout } from '@/lib/client/checkout';
 import { getLogger } from '@/lib/logger/use-logger-client';
@@ -96,10 +96,10 @@ export const useCheckout = (): UseCheckout => {
 
   const submitShippingAddress = useCallback(
     (address: CheckoutAddress) => {
-      if (
-        checkoutCart?.id &&
-        (address.country != shippingAddress?.country || address.zipCode != shippingAddress?.zipCode)
-      ) {
+      const countryOrPostalChanged =
+        !shippingAddress || address.country !== shippingAddress.country || address.zipCode !== shippingAddress.zipCode;
+
+      if (checkoutCart?.id && countryOrPostalChanged) {
         updateShippingInfo({
           contactName: address.contactName,
           companyName: address.companyName,
@@ -264,18 +264,49 @@ export const useCheckout = (): UseCheckout => {
     storeReset();
   };
 
-  useEffect(() => {
-    if (checkoutCart && shippingAddress) {
-      if (shippingAddress.country && shippingAddress.zipCode) {
-        fetchShippingMethods(shippingAddress.country, shippingAddress.zipCode, checkoutCart.totalPrice);
-      }
-    } else {
-      clearShippingMethods();
-    }
-  }, [shippingAddress, checkoutCart, fetchShippingMethods, clearShippingMethods]);
+  const shippingCountry = shippingAddress?.country;
+  const shippingZip = shippingAddress?.zipCode;
+  const checkoutCartId = checkoutCart?.id;
+  const orderAmount = checkoutCart?.totalPrice?.amount;
+  const orderCurrency = checkoutCart?.totalPrice?.currency;
+
+  const lastShippingRatesKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!checkoutCart) {
+    if (!checkoutCartId || !shippingCountry || !shippingZip) {
+      lastShippingRatesKeyRef.current = null;
+      clearShippingMethods();
+      return;
+    }
+
+    const amountKey =
+      orderAmount !== undefined && orderCurrency !== undefined && orderCurrency !== ''
+        ? `${orderCurrency}:${Number.isFinite(orderAmount) ? (Math.round(orderAmount * 100) / 100).toFixed(2) : String(orderAmount)}`
+        : '';
+
+    const ratesKey = `${checkoutCartId}|${shippingCountry}|${shippingZip}|${amountKey}`;
+    if (ratesKey === lastShippingRatesKeyRef.current) {
+      return;
+    }
+    lastShippingRatesKeyRef.current = ratesKey;
+
+    const orderValue =
+      orderAmount !== undefined && orderCurrency !== undefined && orderCurrency !== ''
+        ? { amount: orderAmount, currency: orderCurrency }
+        : undefined;
+    void fetchShippingMethods(shippingCountry, shippingZip, orderValue);
+  }, [
+    checkoutCartId,
+    shippingCountry,
+    shippingZip,
+    orderAmount,
+    orderCurrency,
+    fetchShippingMethods,
+    clearShippingMethods,
+  ]);
+
+  useEffect(() => {
+    if (!checkoutCartId) {
       return;
     }
 
@@ -294,7 +325,7 @@ export const useCheckout = (): UseCheckout => {
     }
     submitShippingMethod(newShippingMethod);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- shippingMethod excluded: this effect SETS it, including it would cause an infinite loop
-  }, [availableShippingMethods, checkoutCart, submitShippingMethod]);
+  }, [availableShippingMethods, checkoutCartId, submitShippingMethod]);
 
   useEffect(() => {
     if (checkoutCart && paymentModes && paymentModes.length > 0) {
@@ -313,6 +344,11 @@ export const useCheckout = (): UseCheckout => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentModes, checkoutCart, submitPaymentMethod]);
 
+  const submitShippingAddressRef = useRef(submitShippingAddress);
+  submitShippingAddressRef.current = submitShippingAddress;
+  const submitBillingAddressRef = useRef(submitBillingAddress);
+  submitBillingAddressRef.current = submitBillingAddress;
+
   useEffect(() => {
     // Only load default addresses if we're not on the logout page
     // This prevents re-populating addresses after logout
@@ -321,7 +357,7 @@ export const useCheckout = (): UseCheckout => {
       if (!shippingAddress) {
         const defaultShippingAddress = getDefaultAddress('SHIPPING');
         if (defaultShippingAddress) {
-          submitShippingAddress({
+          submitShippingAddressRef.current({
             ...defaultShippingAddress,
             type: 'SHIPPING',
           });
@@ -330,7 +366,7 @@ export const useCheckout = (): UseCheckout => {
       if (!billingAddress) {
         const defaultBillingAddress = getDefaultAddress('BILLING');
         if (defaultBillingAddress) {
-          submitBillingAddress({
+          submitBillingAddressRef.current({
             ...defaultBillingAddress,
             type: 'BILLING',
           });
@@ -338,17 +374,9 @@ export const useCheckout = (): UseCheckout => {
       }
       setLoading(false);
     }
-  }, [
-    addressesLoading,
-    cartLoading,
-    shippingAddress,
-    billingAddress,
-    getDefaultAddress,
-    submitBillingAddress,
-    submitShippingAddress,
-    setLoading,
-    status,
-  ]);
+    // Intentionally omit submitShippingAddress / submitBillingAddress — refs keep latest callbacks
+    // so this effect does not re-run when those identities change (avoids duplicate default hydration).
+  }, [addressesLoading, cartLoading, shippingAddress, billingAddress, getDefaultAddress, setLoading, status]);
 
   return {
     loading,

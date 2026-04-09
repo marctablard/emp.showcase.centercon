@@ -114,11 +114,12 @@ describe('Store Synchronizer', () => {
       });
 
       expect(Array.isArray(unsubscribers)).toBe(true);
-      expect(unsubscribers.length).toBe(4); // currency + site + siteStore + legalEntity
+      expect(unsubscribers.length).toBe(5); // shipping cache + currency + site + siteStore + legalEntity
       expect(typeof unsubscribers[0]).toBe('function');
       expect(typeof unsubscribers[1]).toBe('function');
       expect(typeof unsubscribers[2]).toBe('function');
       expect(typeof unsubscribers[3]).toBe('function');
+      expect(typeof unsubscribers[4]).toBe('function');
     });
 
     it('should call syncCurrencyWithSession when session currency changes', async () => {

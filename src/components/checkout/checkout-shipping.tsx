@@ -2,10 +2,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Check, NotebookText, Package, Pencil } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { useAddresses } from '@/hooks/customer/useAddresses';
-import useCustomer from '@/hooks/customer/useCustomer';
-import { useSession as useShopSession } from '@/hooks/session/useSession';
-import { resolveLegalEntityIdFromSessionAndCustomer } from '@/lib/common/legal-entity-context';
 import { Address } from '@/platform/services/model/common';
 import { AddressSelector } from '../address/address-selector';
 import { AddressDisplay } from '../common/address-display';
@@ -17,11 +13,6 @@ import ShippingMethod from './shipping-method';
 
 export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
   const t = useTranslations('checkout.shipping');
-  const { customer } = useCustomer();
-  const { session: shopSession } = useShopSession();
-  const useLegalEntityAddressBook =
-    customer?.businessModel === 'B2B' && Boolean(resolveLegalEntityIdFromSessionAndCustomer(shopSession, customer));
-  const { addresses } = useAddresses();
   const { availableShippingMethods, shippingAddress, shippingMethod, submitShippingAddress } = useCheckout();
   const [isShippingEdit, setIsShippingEdit] = useState(initialEdit || !shippingAddress || !shippingMethod);
 
@@ -99,20 +90,18 @@ export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
           <>
             <div className="col-span-2 flex flex-col gap-4">
               {/* Addresses */}
-              {(useLegalEntityAddressBook || (addresses && addresses.length > 0)) && (
-                <AddressSelector
-                  addressBook={useLegalEntityAddressBook ? 'legalEntity' : 'customer'}
-                  addressType="SHIPPING"
-                  selectedAddressId={shippingAddress?.id}
-                  onSelect={handleShippingAddressChange}
-                  triggerElement={
-                    <div className="flex gap-1 text-text-action font-bold mb-4 cursor-pointer">
-                      <p>{t('fromAddressbook')}</p>
-                      <NotebookText />
-                    </div>
-                  }
-                />
-              )}
+              <AddressSelector
+                addressBook="companyAndCustomer"
+                addressType="SHIPPING"
+                selectedAddressId={shippingAddress?.id}
+                onSelect={handleShippingAddressChange}
+                triggerElement={
+                  <div className="flex gap-1 text-text-action font-bold mb-4 cursor-pointer">
+                    <p>{t('fromAddressbook')}</p>
+                    <NotebookText />
+                  </div>
+                }
+              />
               {/* Address Input */}
               <CheckoutAddress
                 address={shippingAddress}

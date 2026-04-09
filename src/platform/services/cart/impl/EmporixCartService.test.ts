@@ -237,6 +237,31 @@ describe('EmporixCartService', () => {
       expect(refreshOrder).toBeGreaterThan(updateOrder);
     });
 
+    it('should retry refreshCart when Emporix returns optimistic lock conflict', async () => {
+      jest.useFakeTimers();
+      const cart: EmporixCart = {
+        id: 'cart-ol',
+        currency: 'EUR',
+        siteCode: 'main',
+        metadata: { version: 10 },
+      };
+      mockCartApi.getCart.mockResolvedValue(cart);
+
+      const conflict = new Error('Failed to refresh cart: Conflict {"message":"optimistic_locking: metadata.version"}');
+      mockCartApi.refreshCart.mockRejectedValueOnce(conflict).mockResolvedValueOnce(undefined);
+
+      const done = cartService.updateShippingInfo('cart-ol', { country: 'DE', zipCode: '10115' });
+      await jest.runAllTimersAsync();
+      await done;
+
+      expect(mockCartApi.refreshCart).toHaveBeenCalledTimes(2);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        { cartId: 'cart-ol', attempt: 0 },
+        'Cart refresh hit optimistic lock — retrying',
+      );
+      jest.useRealTimers();
+    });
+
     it('should retry refreshCart after clearing orphaned legalEntityId', async () => {
       const cart: EmporixCart = {
         id: 'cart-123',

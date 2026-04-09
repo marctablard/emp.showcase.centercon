@@ -1,5 +1,6 @@
 // src/stores/sync/store-synchronizer.ts
 import { shallow } from 'zustand/shallow';
+import { invalidateShippingMethodsResponseCache } from '@/lib/client/shipping-methods-response-cache';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { CartStoreApi, CustomerStoreApi, SessionStoreApi, SiteStoreApi } from '@/providers/StoreProvider';
 
@@ -31,6 +32,7 @@ const CURRENCY_SYNC_RETRY_DELAYS_MS = [0, 250, 750];
  * 3. Session site changes → Site store reset (triggers re-fetch of site config, currencies, etc.)
  * 4. Session legalEntityId changes (B2B company switcher) → Cart re-fetch for current company
  * 5. Session site / legal entity changes → Invalidate cached legal-entity checkout addresses (single refetch per new key)
+ * 6. Session site / currency / legal entity changes → Invalidate client shipping-methods response cache (GET /api/shipping)
  */
 export function setupStoreSynchronization({
   sessionStore,
@@ -40,6 +42,19 @@ export function setupStoreSynchronization({
 }: StoreSynchronizerParams): UnsubscribeFn[] {
   const unsubscribers: UnsubscribeFn[] = [];
   let activeCurrencySyncToken = 0;
+
+  const unsubShippingMethodsCache = sessionStore.subscribe(
+    (state) => ({
+      currency: state.session?.currency,
+      siteCode: state.session?.siteCode,
+      legalEntityId: typeof state.session?.legalEntityId === 'string' ? state.session.legalEntityId.trim() : '',
+    }),
+    () => {
+      invalidateShippingMethodsResponseCache();
+    },
+    { equalityFn: shallow },
+  );
+  unsubscribers.push(unsubShippingMethodsCache);
 
   const runCurrencySync = async (currency: string, siteCode: string) => {
     const syncToken = ++activeCurrencySyncToken;
