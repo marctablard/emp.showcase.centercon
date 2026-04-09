@@ -1,8 +1,6 @@
 /**
  * Server-side event bus for API debug events.
  * Used to relay upstream API request/response info to the browser via SSE.
- *
- * DEV ONLY — the bus is a no-op singleton in production.
  */
 
 type DebugEventListener = (event: ApiDebugEvent) => void;
@@ -50,8 +48,6 @@ export interface ApiDebugEvent {
   source?: DebugCallSource;
 }
 
-const isDev = process.env.NODE_ENV === 'development';
-
 /** Maximum number of recent events to buffer for replay on new SSE connections */
 const REPLAY_BUFFER_SIZE = 50;
 
@@ -74,11 +70,8 @@ class DebugEventBus {
    * Emit a debug event to all subscribers and buffer it for replay.
    * Events are always buffered so SSR calls (which happen before any
    * browser connects) can be replayed when the EventSource connects.
-   * No-op in production.
    */
   emit(event: ApiDebugEvent): void {
-    if (!isDev) return;
-
     // Always buffer — SSR events happen before any browser connects
     this.recentEvents.push(event);
     if (this.recentEvents.length > REPLAY_BUFFER_SIZE) {

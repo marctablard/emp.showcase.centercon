@@ -29,8 +29,14 @@ describe('formatReturnDate', () => {
 describe('formatReturnCurrency', () => {
   it('formats a valid amount with currency', () => {
     const result = formatReturnCurrency(42.5, 'EUR', 'en-US');
-    expect(result).toContain('42.50');
-    expect(result).toContain('€');
+    const expected = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(42.5);
+
+    expect(result).toBe(expected);
   });
 
   it('returns "-" when value is undefined', () => {
@@ -43,7 +49,14 @@ describe('formatReturnCurrency', () => {
 
   it('formats zero value', () => {
     const result = formatReturnCurrency(0, 'USD', 'en-US');
-    expect(result).toContain('0.00');
+    const expected = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(0);
+
+    expect(result).toBe(expected);
   });
 });
 

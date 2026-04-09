@@ -25,6 +25,20 @@ export interface ReturnPrice {
   formattedValue?: string;
 }
 
+export interface ReturnCalculatedValue {
+  netValue: number;
+  grossValue: number;
+  taxValue: number;
+  taxCode?: string;
+  taxRate?: number;
+  valid?: boolean;
+  currency?: string;
+}
+
+export interface ReturnCalculatedPrice {
+  finalPrice: ReturnCalculatedValue;
+}
+
 /**
  * Individual item within a return order
  */
@@ -33,11 +47,15 @@ export interface ReturnItem {
   name: string;
   quantity: number;
   unitPrice?: ReturnPrice;
+  grossUnitPrice?: ReturnPrice;
   total?: ReturnPrice;
+  calculatedUnitPrice?: ReturnCalculatedValue;
+  calculatedPrice?: ReturnCalculatedPrice;
   reason?: ReturnReason;
   productId?: string;
   images?: string[];
   brand?: string;
+  vendorName?: string;
   itemNumber?: string;
   netPrice?: ReturnPrice;
 }
@@ -58,7 +76,32 @@ export interface ReturnRequestor {
   firstName?: string;
   lastName?: string;
   email?: string;
+  anonymous?: boolean;
   fullName?: string;
+}
+
+export interface ReturnSubmitter {
+  userType?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+export interface ReturnAssistedBuyingEntry {
+  employeeId: string;
+  operation: 'CREATE' | 'UPDATE_STATUS';
+  timestamp: string;
+}
+
+export interface ReturnMetadata {
+  createdAt?: string;
+  modifiedAt?: string;
+  calculatedAt?: string;
+  version?: number;
+  mixins?: {
+    [key: string]: string;
+  };
+  [key: string]: string | number | object | Array<unknown> | null | undefined;
 }
 
 /**
@@ -67,13 +110,19 @@ export interface ReturnRequestor {
 export interface Return {
   id: string;
   status: ReturnStatus;
+  approvalStatus?: ReturnStatus;
   received: boolean;
   expiryDate?: string;
   isExpired: boolean;
   total?: ReturnPrice;
+  calculatedPrice?: ReturnCalculatedPrice;
   reason?: ReturnReason;
   orders: ReturnOrder[];
   requestor?: ReturnRequestor;
+  submitter?: ReturnSubmitter;
+  entries?: ReturnAssistedBuyingEntry[];
+  metadata?: ReturnMetadata;
+  mixins?: Record<string, unknown>;
   createdAt?: string;
   updatedAt?: string;
 }

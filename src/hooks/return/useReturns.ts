@@ -1,14 +1,23 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { fetchReturns } from '@/lib/client/returns';
+import { fetchReturnsPage } from '@/lib/client/returns';
 import { Return } from '@/platform/services/model/return';
 
 interface UseReturnsReturn {
   returns: Return[];
+  totalCount?: number;
   loading: boolean;
   error: Error | null;
   refreshReturns: () => Promise<void>;
+}
+
+interface UseReturnsOptions {
+  pageSize?: number;
+  pageNumber?: number;
+  sort?: string;
+  query?: string;
+  forceRefreshOnMount?: boolean;
 }
 
 /**
@@ -17,36 +26,45 @@ interface UseReturnsReturn {
  * @param pageSize Optional page size (default: 60)
  * @param pageNumber Optional page number (default: 1)
  */
-export function useReturns(initialReturns?: Return[], pageSize?: number, pageNumber?: number): UseReturnsReturn {
+export function useReturns(initialReturns?: Return[], options: UseReturnsOptions = {}): UseReturnsReturn {
+  const { pageSize, pageNumber, sort, query, forceRefreshOnMount = false } = options;
   const [returns, setReturns] = useState<Return[]>(initialReturns || []);
-  const [loading, setLoading] = useState<boolean>(!initialReturns);
+  const [totalCount, setTotalCount] = useState<number | undefined>(initialReturns?.length);
+  const [loading, setLoading] = useState<boolean>(!initialReturns || pageNumber !== 1 || !!query || !!sort);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchReturnsData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchReturns(pageSize, pageNumber);
-      setReturns(data);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-    } finally {
-      setLoading(false);
-    }
-  }, [pageSize, pageNumber]);
+  const fetchReturnsData = useCallback(
+    async (forceRefresh: boolean = false) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchReturnsPage(pageSize, pageNumber, query, sort, forceRefresh);
+        setReturns(data.items);
+        setTotalCount(data.totalCount);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pageSize, pageNumber, query, sort],
+  );
 
   const refreshReturns = useCallback(async () => {
-    await fetchReturnsData();
+    await fetchReturnsData(true);
   }, [fetchReturnsData]);
 
   useEffect(() => {
-    if (!initialReturns) {
-      fetchReturnsData();
+    // Use SSR-provided returns only for the default first-page, no-query/no-sort-load.
+    const canReuseInitialData = !!initialReturns && pageNumber === 1 && !query && !sort;
+    if (!canReuseInitialData || forceRefreshOnMount) {
+      fetchReturnsData(forceRefreshOnMount);
     }
-  }, [initialReturns, fetchReturnsData]);
+  }, [initialReturns, pageNumber, query, sort, forceRefreshOnMount, fetchReturnsData]);
 
   return {
     returns,
+    totalCount,
     loading,
     error,
     refreshReturns,

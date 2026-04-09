@@ -26,7 +26,7 @@ export class EmporixReturnService implements ReturnService {
    */
   async getReturns(pageNumber: number = 1, pageSize: number = 60, sort?: string, query?: string): Promise<Return[]> {
     const emporixReturns = await this.returnApi.getReturns(pageNumber, pageSize, sort, query);
-    return emporixReturns.map((returnItem) => this.returnMapper.mapToService(returnItem));
+    return emporixReturns.items.map((returnItem) => this.returnMapper.mapToService(returnItem));
   }
 
   /**
@@ -49,7 +49,12 @@ export class EmporixReturnService implements ReturnService {
    * @param reasonCode The reason code for the return (mandatory per Emporix API)
    * @returns Promise with the created return ID
    */
-  async createReturn(orderId: string, items: CreateReturnItem[], reasonCode: string): Promise<string> {
+  async createReturn(
+    orderId: string,
+    items: CreateReturnItem[],
+    reasonCode: string,
+    reasonDetails?: string,
+  ): Promise<string> {
     const request: EmporixReturnCreateRequest = {
       orders: [
         {
@@ -57,11 +62,13 @@ export class EmporixReturnService implements ReturnService {
           items: items.map((item) => ({
             id: item.id,
             quantity: item.quantity,
+            reason: item.reason,
           })),
         },
       ],
       reason: {
         code: reasonCode,
+        details: reasonDetails,
       },
     };
 

@@ -1,7 +1,12 @@
+import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
 import { debugEventBus } from '@/platform/core/utils/debug-event-bus';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+function isBrowserDebugEnabled(): boolean {
+  return isDebugApiEnabled() && isBrowserDebugOutputEnabled();
+}
 
 /**
  * GET /api/debug/stream
@@ -14,8 +19,7 @@ export const runtime = 'nodejs';
  * browser DevTools console with pretty formatting.
  */
 export async function GET(): Promise<Response> {
-  // Only available in development
-  if (process.env.NODE_ENV !== 'development') {
+  if (!isBrowserDebugEnabled()) {
     return new Response('Not available', { status: 404 });
   }
 

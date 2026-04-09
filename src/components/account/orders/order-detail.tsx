@@ -288,7 +288,9 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                         </Button>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>{tOrder('noRemainingItems')}</TooltipContent>
+                    <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
+                      {tOrder('noRemainingItems')}
+                    </TooltipContent>
                   </Tooltip>
                 ) : (
                   <Button variant="secondary" size="small" onClick={() => setReturnDialogOpen(true)}>

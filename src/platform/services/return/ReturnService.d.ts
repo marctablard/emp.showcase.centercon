@@ -6,6 +6,10 @@ import { Return } from '../model/return';
 export interface CreateReturnItem {
   id: string;
   quantity: number;
+  reason?: {
+    code: string;
+    details?: string;
+  };
 }
 
 /**
@@ -37,5 +41,5 @@ export interface ReturnService {
    * @param reasonCode The reason code for the return (mandatory per Emporix API)
    * @returns Promise with the created return ID
    */
-  createReturn(orderId: string, items: CreateReturnItem[], reasonCode: string): Promise<string>;
+  createReturn(orderId: string, items: CreateReturnItem[], reasonCode: string, reasonDetails?: string): Promise<string>;
 }

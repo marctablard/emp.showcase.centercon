@@ -17,6 +17,20 @@ export interface EmporixReturnPrice {
   currency: string;
 }
 
+export interface EmporixReturnCalculatedValue {
+  netValue: number;
+  grossValue: number;
+  taxValue: number;
+  taxCode?: string;
+  taxRate?: number;
+  valid?: boolean;
+  currency?: string;
+}
+
+export interface EmporixReturnCalculatedPrice {
+  finalPrice: EmporixReturnCalculatedValue;
+}
+
 /**
  * Reason for return (at return or item level)
  */
@@ -34,6 +48,8 @@ export interface EmporixReturnOrderItem {
   quantity: number;
   unitPrice?: EmporixReturnPrice;
   total?: EmporixReturnPrice;
+  calculatedUnitPrice?: EmporixReturnCalculatedValue;
+  calculatedPrice?: EmporixReturnCalculatedPrice;
   reason?: EmporixReturnReason;
 }
 
@@ -84,6 +100,7 @@ export interface EmporixReturnResponse {
   received?: boolean;
   expiryDate?: string;
   total?: EmporixReturnPrice;
+  calculatedPrice?: EmporixReturnCalculatedPrice;
   reason?: EmporixReturnReason;
   orders?: EmporixReturnOrder[];
   metadata?: EmporixMetadata;

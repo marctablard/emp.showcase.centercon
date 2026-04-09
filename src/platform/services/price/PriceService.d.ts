@@ -26,4 +26,16 @@ export interface PriceService {
     unitCode?: string,
     params?: PriceFetchOptions,
   ): Promise<ProductPrice | null>;
+
+  /**
+   * Batch-match prices for multiple products in a single API call.
+   * Results are keyed by product ID; missing prices map to null.
+   * Arrays larger than 200 items are automatically chunked.
+   */
+  getProductPrices(
+    productIds: string[],
+    quantity?: number,
+    unitCode?: string,
+    params?: PriceFetchOptions,
+  ): Promise<Map<string, ProductPrice | null>>;
 }

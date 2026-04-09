@@ -10,6 +10,7 @@ export type ProductState = {
   products: {
     [id: string]: Product | null;
   };
+  variantsByParentId: Record<string, Product[]>;
 };
 
 export type ProductActions = {
@@ -19,6 +20,8 @@ export type ProductActions = {
   setCurrentProduct: (product: Product | null) => void;
   addProduct: (product: Product | string) => void;
   addProducts: (products: Product[]) => void;
+  getVariants: (parentId: string) => Product[] | undefined;
+  setVariants: (parentId: string, variants: Product[]) => void;
 };
 
 export type ProductStore = ProductState & ProductActions;
@@ -26,6 +29,7 @@ export type ProductStore = ProductState & ProductActions;
 const defaultState: ProductState = {
   currentProductId: null,
   products: {},
+  variantsByParentId: {},
 };
 
 export const createProductStore = (initState: ProductState = defaultState) => {
@@ -82,5 +86,12 @@ export const createProductStore = (initState: ProductState = defaultState) => {
       const state = get();
       return ids.map((id) => state.products[id]).filter(Boolean) as Product[];
     },
+    getVariants: (parentId: string) => {
+      return get().variantsByParentId[parentId];
+    },
+    setVariants: (parentId: string, variants: Product[]) =>
+      set((state) => ({
+        variantsByParentId: { ...state.variantsByParentId, [parentId]: variants },
+      })),
   }));
 };

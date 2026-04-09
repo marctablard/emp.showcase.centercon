@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import useHistory from '@/hooks/history/useHistory';
@@ -6,6 +6,7 @@ import { useSiteCode } from '@/hooks/site/useSiteCode';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
 import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
+import { buildSearchPaginationUrl } from './build-search-pagination-url';
 
 const DEFAULT_PAGE_INDEX = 0;
 const DEFAULT_PAGE_SIZE = 12;
@@ -23,6 +24,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
   const pathname = usePathname();
   const [data, setData] = useState<T[]>(initialResult?.items || []);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
   const [facets, setFacets] = useState<Filter[]>([]);
@@ -300,39 +302,95 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
     [search],
   );
 
-  /**
-   * Change the sort order
-   */
-  const getSuggestions = useCallback(async (query: string, locale?: string): Promise<void> => {
-    setLoading(true);
-    if (!query?.trim()) {
-      setSuggestions({
-        queryCompletions: [],
-        products: [],
-        categories: [],
-      });
-      return;
-    }
-    try {
-      const url = new URL('/api/search/suggestions', window.location.origin);
-      url.searchParams.append('query', query);
-      if (locale) {
-        url.searchParams.append('locale', locale);
-      }
-      const response = await fetch(url.toString());
-      if (!response.ok) {
-        throw new Error(`Suggestions failed: ${response.statusText}`);
-      }
-      const data = await response.json();
+  const hasMore = useMemo(() => (currentPage + 1) * pageSize < total, [currentPage, pageSize, total]);
 
-      // Set suggestions directly from API response
-      setSuggestions(data);
+  /**
+   * Fetch the next page of results and append to the existing data
+   */
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || loading) return;
+
+    const nextPage = currentPage + 1;
+    try {
+      setLoadingMore(true);
+      setError(null);
+
+      const url = buildSearchPaginationUrl({
+        origin: window.location.origin,
+        nextPage,
+        pageSize,
+        siteCode,
+        locale,
+        query: lastSearchParams.current.query,
+        sort: lastSearchParams.current.sort,
+      });
+
+      if (lastSearchParams.current.filters) {
+        Object.entries(lastSearchParams.current.filters).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((val) => url.searchParams.append(`filters[${key}][]`, val));
+          } else if (typeof value === 'object' && value !== null) {
+            Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+              url.searchParams.append(`filters[${key}][${nestedKey}]`, String(nestedValue));
+            });
+          } else {
+            url.searchParams.append(`filters[${key}]`, String(value));
+          }
+        });
+      }
+
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error(`Search failed: ${response.statusText}`);
+
+      const result: SearchResult<T> = await response.json();
+
+      setData((prev) => [...prev, ...result.items]);
+      setCurrentPage(nextPage);
+      setTotal(result.total);
+
+      lastSearchParams.current = { ...lastSearchParams.current, page: nextPage };
     } catch (err) {
-      getLogger().error({ err, query }, 'Error fetching suggestions');
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setLoading(false);
+      setLoadingMore(false);
     }
-  }, []);
+  }, [hasMore, loadingMore, loading, currentPage, pageSize, siteCode, locale]);
+
+  const getSuggestions = useCallback(
+    async (query: string, locale?: string): Promise<void> => {
+      setLoading(true);
+      if (!query?.trim()) {
+        setSuggestions({
+          queryCompletions: [],
+          products: [],
+          categories: [],
+        });
+        setLoading(false);
+        return;
+      }
+      try {
+        const url = new URL('/api/search/suggestions', window.location.origin);
+        url.searchParams.append('query', query);
+        url.searchParams.append('site', siteCode);
+        if (locale) {
+          url.searchParams.append('locale', locale);
+        }
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          throw new Error(`Suggestions failed: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        // Set suggestions directly from API response
+        setSuggestions(data);
+      } catch (err) {
+        getLogger().error({ err, query }, 'Error fetching suggestions');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [siteCode],
+  );
 
   const changeSort = useCallback(
     (sort: string) => {
@@ -355,6 +413,8 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
     // State
     data,
     loading,
+    loadingMore,
+    hasMore,
     facets,
     total,
     currentPage,
@@ -365,6 +425,7 @@ export function useSearch<T>(initialSearch?: SearchParams<T>, initialResult?: Se
 
     // Functions
     search,
+    loadMore,
     applyAllFacets,
     applyFacet,
     applyRangeFacet,

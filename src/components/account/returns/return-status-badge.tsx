@@ -2,9 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
+import { getReturnStatusVariant } from '@/lib/common/status-tag-variants';
 import { ReturnStatus } from '@/platform/services/model/return';
-
-type BadgeVariant = 'default' | 'success' | 'secondary' | 'warning' | 'destructive' | 'outline';
 
 interface ReturnStatusBadgeProps {
   status: ReturnStatus;
@@ -15,23 +14,18 @@ export function ReturnStatusBadge({ status, isExpired }: ReturnStatusBadgeProps)
   const t = useTranslations('account.returns.status');
 
   if (isExpired) {
-    return <Badge variant="outline">{t('EXPIRED')}</Badge>;
+    return (
+      <Badge variant="outline" size="status" className="bg-surface-secondary">
+        {t('EXPIRED')}
+      </Badge>
+    );
   }
 
-  const getVariant = (): BadgeVariant => {
-    switch (status) {
-      case 'APPROVED':
-        return 'success';
-      case 'PENDING':
-        return 'warning';
-      case 'REJECTED':
-        return 'destructive';
-      case 'CLOSED':
-        return 'secondary';
-      default:
-        return 'default';
-    }
-  };
-
-  return <Badge variant={getVariant()}>{t(status)}</Badge>;
+  return (
+    <Badge variant={getReturnStatusVariant(status)} size="status">
+      {t(status)}
+    </Badge>
+  );
 }
+
+export { getReturnStatusVariant } from '@/lib/common/status-tag-variants';

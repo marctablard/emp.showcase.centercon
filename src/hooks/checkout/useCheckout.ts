@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { isEqual } from 'lodash';
 import { checkout } from '@/lib/client/checkout';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { PaymentMode } from '@/platform/services/model';
@@ -96,6 +97,10 @@ export const useCheckout = (): UseCheckout => {
 
   const submitShippingAddress = useCallback(
     (address: CheckoutAddress) => {
+      if (isEqual(shippingAddress, address)) {
+        return;
+      }
+
       const countryOrPostalChanged =
         !shippingAddress || address.country !== shippingAddress.country || address.zipCode !== shippingAddress.zipCode;
 
@@ -321,7 +326,9 @@ export const useCheckout = (): UseCheckout => {
       newShippingMethod = availableShippingMethods.find((method) => method.id === shippingMethod.methodId) || null;
     }
     if (!newShippingMethod) {
-      newShippingMethod = availableShippingMethods.sort((a, b) => (a.cost?.amount || 0) - (b.cost?.amount || 0))[0];
+      newShippingMethod = [...availableShippingMethods].sort(
+        (a, b) => (a.cost?.amount || 0) - (b.cost?.amount || 0),
+      )[0];
     }
     submitShippingMethod(newShippingMethod);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- shippingMethod excluded: this effect SETS it, including it would cause an infinite loop
