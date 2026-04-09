@@ -13,44 +13,6 @@ type DependencyAliasConfig = {
   Repositories?: Record<string, string> | Array<Record<string, string>>;
 };
 
-const SEARCH_SERVICE_ALIAS = 'SearchService';
-const DEFAULT_SEARCH_SERVICE_TARGET = 'EmporixSearchService';
-const SUPPORTED_SEARCH_SERVICE_TARGETS = [
-  'EmporixSearchService',
-  'BatteryIncludedSearchService',
-] as const;
-
-function applySearchServiceEnvOverride(aliases: Array<{ alias: string; target: string }>) {
-  const rawOverride = process.env.DI_SEARCH_SERVICE?.trim();
-  const resolvedTarget = rawOverride || DEFAULT_SEARCH_SERVICE_TARGET;
-  if (!SUPPORTED_SEARCH_SERVICE_TARGETS.includes(resolvedTarget as (typeof SUPPORTED_SEARCH_SERVICE_TARGETS)[number])) {
-    console.warn(
-      `[DI] Unsupported DI_SEARCH_SERVICE value: "${resolvedTarget}". ` +
-        `Supported values: ${SUPPORTED_SEARCH_SERVICE_TARGETS.join(', ')}. Falling back to ${DEFAULT_SEARCH_SERVICE_TARGET}.`,
-    );
-  }
-
-  const target =
-    SUPPORTED_SEARCH_SERVICE_TARGETS.includes(resolvedTarget as (typeof SUPPORTED_SEARCH_SERVICE_TARGETS)[number])
-      ? resolvedTarget
-      : DEFAULT_SEARCH_SERVICE_TARGET;
-
-  if (!rawOverride) {
-    console.log(`[DI] DI_SEARCH_SERVICE not set. Defaulting SearchService to ${target}.`);
-  }
-
-  const filteredAliases = aliases.filter(({ alias }) => alias !== SEARCH_SERVICE_ALIAS);
-  filteredAliases.push({
-    alias: SEARCH_SERVICE_ALIAS,
-    target,
-  });
-
-  if (rawOverride) {
-    console.log(`[DI] Applying SearchService override from DI_SEARCH_SERVICE=${target}`);
-  }
-  return filteredAliases;
-}
-
 function resolveDependencyFilePath(): string | null {
   const explicit = process.env.DI_DEPENDENCY_FILE;
   if (explicit) {
@@ -118,7 +80,7 @@ function tryParseDependencyAliases(): Array<{ alias: string; target: string }> {
       }
     }
 
-    return applySearchServiceEnvOverride(aliases);
+    return aliases;
   } catch (error) {
     console.error('Error reading/parsing src/platform/depency.yml:', error);
     return [];
