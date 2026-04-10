@@ -26,12 +26,14 @@ export const PUBLIC_PRODUCT_OPTIONS = {
   customerSegments: false,
 };
 
-// Cached page will become stale and regenerated in the background at most once every revalidate seconds.
-// TODO: set to 360 (or desired TTL) when ready for production ISR caching
+// Uncomment this, if you want to use Incremental Site Regeneration
+// https://nextjs.org/docs/app/guides/incremental-static-regeneration
+// NEXT_SSG_PRODUCT_COUNT must be set to a value greater than 0 to enable SSG
+// export const revalidate = 360;
 export const revalidate = 0;
 
 export async function generateStaticParams() {
-  const ssgProductCount = parseInt(process.env.NEXT_SSG_PRODUCT_COUNT || '0', 10);
+  const ssgProductCount = parseInt(process.env.NEXT_SSG_PRODUCT_COUNT || '0', 0);
   if (ssgProductCount <= 0) {
     return [];
   }
