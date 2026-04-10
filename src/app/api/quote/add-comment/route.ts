@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import server from '@/platform/server';
 import type { EmporixQuoteApi } from '@/platform/integrations/emporix/quote/EmporixQuoteApi';
+import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import type { QuoteService } from '@/platform/services/quote/QuoteService';
@@ -21,10 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (typeof comment !== 'string' || comment.length > MAX_COMMENT_LENGTH) {
-      return NextResponse.json(
-        { error: `Comment must be at most ${MAX_COMMENT_LENGTH} characters` },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: `Comment must be at most ${MAX_COMMENT_LENGTH} characters` }, { status: 400 });
     }
 
     const quoteApi = server.get<EmporixQuoteApi>('EmporixQuoteApi');
