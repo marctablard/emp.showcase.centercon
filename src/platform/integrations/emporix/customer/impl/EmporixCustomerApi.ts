@@ -10,7 +10,7 @@ import type {
   EmporixPasswordChangeRequest,
   EmporixSignupRequest,
 } from '../../model/customer';
-import { EmporixSessionContext } from '../../model/session-context';
+import type { EmporixSessionContext } from '../../model/session-context';
 import type { EmporixCustomerApi as IEmporixCustomerApi } from '../EmporixCustomerApi';
 
 @injectable('EmporixCustomerApi', 'Singleton')

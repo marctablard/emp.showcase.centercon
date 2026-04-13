@@ -1,6 +1,7 @@
 'use client';
 
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
@@ -13,8 +14,8 @@ import { useSession as useShopSession } from '@/hooks/session/useSession';
 import { ADDRESS_TYPE } from '@/lib/common/address-type-constants';
 import { resolveLegalEntityIdFromSessionAndCustomer } from '@/lib/common/legal-entity-context';
 import { cn } from '@/lib/utils';
-import { Address, AddressType } from '@/platform/services/model/common';
-import { CustomerAddress } from '@/platform/services/model/customer/customer';
+import type { Address, AddressType } from '@/platform/services/model/common';
+import type { CustomerAddress } from '@/platform/services/model/customer/customer';
 
 export type AddressBookMode = 'customer' | 'legalEntity' | 'companyAndCustomer';
 

@@ -5,7 +5,7 @@ import {
   writeShippingMethodsCache,
 } from '@/lib/client/shipping-methods-response-cache';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { ShippingMethod } from '@/platform/services/model/shipping';
+import type { ShippingMethod } from '@/platform/services/model/shipping';
 
 export type { ShippingMethodsSessionScope } from '@/lib/client/shipping-methods-response-cache';
 export { invalidateShippingMethodsResponseCache } from '@/lib/client/shipping-methods-response-cache';

@@ -4,7 +4,11 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixCartApi from '../../cart/impl/EmporixCartApi';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import { EmporixCartCheckoutRequest, EmporixCheckoutResponse, EmporixQuoteCheckoutRequest } from '../../model/checkout';
+import type {
+  EmporixCartCheckoutRequest,
+  EmporixCheckoutResponse,
+  EmporixQuoteCheckoutRequest,
+} from '../../model/checkout';
 import type { EmporixCheckoutApi as IEmporixCheckoutApi } from '../EmporixCheckoutApi';
 
 @injectable('EmporixCheckoutApi', 'Singleton')

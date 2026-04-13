@@ -13,7 +13,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { useApprovals } from '@/hooks/approval/useApprovals';
-import { Approval, ApprovalStatus } from '@/platform/services/model/approval';
+import type { Approval, ApprovalStatus } from '@/platform/services/model/approval';
 
 interface ApprovalsListProps {
   initialApprovals?: Approval[];

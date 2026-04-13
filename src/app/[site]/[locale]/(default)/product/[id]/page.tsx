@@ -1,4 +1,4 @@
-import { Metadata, ResolvingMetadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/product/product-detail';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -9,8 +9,8 @@ import { getProductById, getProducts } from '@/lib/ssr/products';
 import { generateProductJsonLd, generateProductMetadata } from '@/lib/ssr/seo';
 import { getAvailableSites } from '@/lib/ssr/site';
 import { isProductSsrEnabled } from '@/lib/ssr/ssr-config';
-import { Product } from '@/platform/services/model/product';
-import { ProductFetchOptions } from '@/platform/services/product';
+import type { Product } from '@/platform/services/model/product';
+import type { ProductFetchOptions } from '@/platform/services/product';
 
 interface ProductPageProps {
   id: string;

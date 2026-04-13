@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { TablePagination } from '@/components/ui/table-pagination';
 import { formatDate } from '@/lib/date-utils';
 import { cn } from '@/lib/utils';
-import { Quote } from '@/platform/services/model/quote';
+import type { Quote } from '@/platform/services/model/quote';
 import { QuoteStatusBadge } from './quote-status-badge';
 
 interface QuotesTableProps {

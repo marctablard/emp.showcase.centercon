@@ -2,7 +2,7 @@ import { inject } from 'inversify';
 import { omit } from 'lodash';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
-import {
+import type {
   EmporixCategory,
   EmporixCategoryAssignment,
   EmporixCategoryAssignmentQuery,
@@ -10,11 +10,11 @@ import {
   EmporixPaginatedResponse,
   EmporixSearchParams,
 } from '@/platform/integrations/emporix/model';
-import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
-import EmporixCommonUtil from '../../common/util/EmporixCommonUtil';
+import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
+import type EmporixCommonUtil from '../../common/util/EmporixCommonUtil';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
-import { EmporixCategoryQuery } from '../EmporixCategoryApi';
+import type { EmporixCategoryQuery } from '../EmporixCategoryApi';
 import type { EmporixCategoryApi as IEmporixCategoryApi } from '../EmporixCategoryApi';
 
 /**

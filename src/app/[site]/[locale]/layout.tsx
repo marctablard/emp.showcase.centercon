@@ -1,6 +1,7 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { SessionProvider as AuthSessionProvider } from 'next-auth/react';
-import { Locale, NextIntlClientProvider, hasLocale } from 'next-intl';
+import type { Locale } from 'next-intl';
+import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Open_Sans, Ubuntu } from 'next/font/google';
 import { notFound } from 'next/navigation';

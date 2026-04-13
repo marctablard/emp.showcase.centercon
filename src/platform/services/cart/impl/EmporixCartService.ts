@@ -4,8 +4,8 @@ import { l10n } from '@/lib/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
-import { EmporixAddCartItemRequest, EmporixUpdateCartItemRequest } from '@/platform/integrations/emporix/model';
-import { EmporixCart, EmporixCartAddress, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
+import type { EmporixAddCartItemRequest, EmporixUpdateCartItemRequest } from '@/platform/integrations/emporix/model';
+import type { EmporixCart, EmporixCartAddress, EmporixCartItem } from '@/platform/integrations/emporix/model/cart';
 import type { CartService, CartShippingAddress, ModifyCartItemResult } from '@/platform/services/cart/CartService';
 import type { CartStatus, CartStatusDetailCode } from '@/platform/services/cart/CartService';
 import {
@@ -20,7 +20,7 @@ import type { PriceService } from '@/platform/services/price/PriceService';
 import type { ProductService } from '@/platform/services/product/ProductService';
 import type { StockService } from '@/platform/services/stock/StockService';
 import type { CartMapper } from '../../model/cart/CartMapper';
-import { Media, Paginated, PaginationQuery } from '../../model/common';
+import type { Media, Paginated, PaginationQuery } from '../../model/common';
 import type { SessionService } from '../../session/SessionService';
 import type { SiteService } from '../../site/SiteService';
 

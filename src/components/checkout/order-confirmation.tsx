@@ -10,7 +10,7 @@ import useCustomer from '@/hooks/customer/useCustomer';
 import { useOrder } from '@/hooks/order/useOrder';
 import { type OrderStatusKey, type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { formatCurrency } from '@/lib/utils';
-import { Order } from '@/platform/services/model/order/order';
+import type { Order } from '@/platform/services/model/order/order';
 import { AddressDisplay } from '../common/address-display';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { H1, H2, H3 } from '../ui/h';

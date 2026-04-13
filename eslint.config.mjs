@@ -16,6 +16,7 @@ const eslintConfig = defineConfig([
   prettier,
   {
     rules: {
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports', fixStyle: 'separate-type-imports' }],
       '@typescript-eslint/no-explicit-any': 'off', // we are more lax about any-types, especially in regards to Mixins
       '@typescript-eslint/no-empty-object-type': 'off', //  Empty Object Types are necessary for specific Mapper<T,K> declarations
       '@typescript-eslint/no-unused-vars': [
@@ -56,6 +57,7 @@ const eslintConfig = defineConfig([
     'test-results/**',
     'next-env.d.ts',
     'scripts/**',
+    'specifications/**',
     'public/**',
     '**/*.test.ts',
     '**/*.test.tsx',

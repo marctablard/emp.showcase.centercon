@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { createNavigation } from 'next-intl/navigation';
 import { permanentRedirect as nextPermanentRedirect, redirect as nextRedirect } from 'next/navigation';
-import { SiteRoutingConfig } from '@/site/types';
+import type { SiteRoutingConfig } from '@/site/types';
 import { addPrefixIfNeeded } from '@/site/utils';
 import { SiteLink } from './SiteLink';
 

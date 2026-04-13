@@ -2,8 +2,8 @@
 
 import { create } from 'zustand';
 import { fetchLegalEntityCheckoutAddresses } from '@/lib/client/customer';
-import { Customer } from '@/platform/services/model/customer/customer';
-import { CustomerAddress } from '@/platform/services/model/customer/customer';
+import type { Customer } from '@/platform/services/model/customer/customer';
+import type { CustomerAddress } from '@/platform/services/model/customer/customer';
 
 const leAddressInFlight = new Map<string, Promise<void>>();
 

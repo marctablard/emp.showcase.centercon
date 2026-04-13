@@ -4,7 +4,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
-import {
+import type {
   EmporixAddCartItemRequest,
   EmporixCart,
   EmporixCartItem,

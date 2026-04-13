@@ -12,7 +12,7 @@ import { TablePagination } from '@/components/ui/table-pagination';
 import { useReturns } from '@/hooks/return/useReturns';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Link } from '@/i18n/navigation';
-import { Return } from '@/platform/services/model/return';
+import type { Return } from '@/platform/services/model/return';
 import { formatReturnCurrency, formatReturnDate, getFirstOrderId, getRequestorEmail } from './helpers';
 import { ReturnStatusBadge } from './return-status-badge';
 

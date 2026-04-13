@@ -4,7 +4,7 @@ import { useLocale } from 'next-intl';
 import { usePathname as useNextPathname, useRouter as useNextRouter } from 'next/navigation';
 import { useSiteCode } from '@/hooks/site/useSiteCode';
 import { createSiteNavigationShared } from '../shared/createNavigationShared';
-import { SiteRoutingConfig } from '../types';
+import type { SiteRoutingConfig } from '../types';
 import { addPrefixIfNeeded, getLocalePrefix, hasPathnamePrefixed, prependPrefix, unprefixPathname } from '../utils';
 
 export default function createNavigation(siteRouting: SiteRoutingConfig, intlRouting: any) {

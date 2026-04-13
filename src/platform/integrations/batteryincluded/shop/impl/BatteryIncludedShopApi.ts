@@ -5,7 +5,7 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type BatteryIncludedApiInvoker from '../../common/impl/BatteryIncludedApiInvoker';
 import { buildSearchParams } from '../../common/util/common';
 import type { BatteryIncludedConfig } from '../../config';
-import {
+import type {
   BatteryIncludedHighlight,
   BatteryIncludedPreset,
   BatteryIncludedProduct,

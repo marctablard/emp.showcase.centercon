@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Check, NotebookText, Package, Pencil } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { Address } from '@/platform/services/model/common';
+import type { Address } from '@/platform/services/model/common';
 import { AddressSelector } from '../address/address-selector';
 import { AddressDisplay } from '../common/address-display';
 import { Button } from '../ui/button';

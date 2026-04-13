@@ -4,8 +4,8 @@ import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
-import { EmporixCatalog, EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
-import { EmporixCatalogApi as IEmporixCatalogApi } from '../EmporixCatalogApi';
+import type { EmporixCatalog, EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
+import type { EmporixCatalogApi as IEmporixCatalogApi } from '../EmporixCatalogApi';
 
 @injectable('EmporixCatalogApi', 'Singleton')
 class EmporixCatalogApi implements IEmporixCatalogApi {

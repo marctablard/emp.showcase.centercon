@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { isEqual } from 'lodash';
-import z from 'zod/v4';
+import type z from 'zod/v4';
 import { getValidator } from '@/lib/client/validation-registry';
 
 /**

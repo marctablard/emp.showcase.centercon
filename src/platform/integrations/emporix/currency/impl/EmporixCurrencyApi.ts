@@ -3,8 +3,8 @@ import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import { EmporixCurrency, EmporixExchangeRate } from '../../model/currency';
-import { EmporixCurrencyApi as IEmporixCurrencyApi } from '../EmporixCurrencyApi';
+import type { EmporixCurrency, EmporixExchangeRate } from '../../model/currency';
+import type { EmporixCurrencyApi as IEmporixCurrencyApi } from '../EmporixCurrencyApi';
 
 @injectable('EmporixCurrencyApi', 'Singleton')
 class EmporixCurrencyApi implements IEmporixCurrencyApi {

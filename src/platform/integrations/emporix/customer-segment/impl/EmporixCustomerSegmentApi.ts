@@ -3,7 +3,7 @@ import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
-import { CategoryTreeItemResponse, CustomerSegmentQueryParams, ItemAssignmentResponse } from '../../model';
+import type { CategoryTreeItemResponse, CustomerSegmentQueryParams, ItemAssignmentResponse } from '../../model';
 import type { EmporixCustomerSegmentApi as IEmporixCustomerSegmentApi } from '../EmporixCustomerSegmentApi';
 
 @injectable('EmporixCustomerSegmentApi', 'Singleton')

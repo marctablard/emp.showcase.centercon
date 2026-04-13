@@ -1,5 +1,5 @@
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { Session } from '@/platform/services/model/session/session';
+import type { Session } from '@/platform/services/model/session/session';
 
 /**
  * Fetch the current session information

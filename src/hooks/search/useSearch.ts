@@ -4,8 +4,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import useHistory from '@/hooks/history/useHistory';
 import { useSiteCode } from '@/hooks/site/useSiteCode';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
-import { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
+import type { SearchParams as BaseSearchParams, Filter, SearchResult } from '@/platform/services/model/common';
+import type { SearchSuggestions } from '@/platform/services/model/search/SearchSuggestions';
 import { buildSearchPaginationUrl } from './build-search-pagination-url';
 
 const DEFAULT_PAGE_INDEX = 0;

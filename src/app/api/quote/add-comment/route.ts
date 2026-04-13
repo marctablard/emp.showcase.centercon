@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import type { EmporixQuoteApi } from '@/platform/integrations/emporix/quote/EmporixQuoteApi';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
-import { QuoteUpdateRequest } from '@/platform/services/model/quote';
+import type { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import type { QuoteService } from '@/platform/services/quote/QuoteService';
 import type { SchemaService } from '@/platform/services/schema/SchemaService';
 

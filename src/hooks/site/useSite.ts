@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getSites as apiGetSites } from '@/lib/client/site';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { Country, Currency, Region } from '@/platform/services/model/common';
-import { PaymentMode } from '@/platform/services/model/payment';
+import type { Country, Currency, Region } from '@/platform/services/model/common';
+import type { PaymentMode } from '@/platform/services/model/payment';
 import { useSiteStore } from '@/providers/StoreProvider';
 
 /**

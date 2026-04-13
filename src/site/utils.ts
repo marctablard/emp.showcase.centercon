@@ -1,4 +1,4 @@
-import { SiteConfig, SiteRoutingConfig } from '@/site/types';
+import type { SiteConfig, SiteRoutingConfig } from '@/site/types';
 
 export function shouldPrefix(newSite: string | undefined, routing: SiteRoutingConfig) {
   if (routing.prefix === 'never') {

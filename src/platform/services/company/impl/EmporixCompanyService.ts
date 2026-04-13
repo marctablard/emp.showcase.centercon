@@ -7,7 +7,7 @@ import type { EmporixCustomerManagementApi } from '@/platform/integrations/empor
 import type { EmporixLegalEntity, EmporixLocation, EmporixResourceId } from '@/platform/integrations/emporix/model';
 import type { CustomerService } from '../../customer/CustomerService';
 import type { LoggerService } from '../../logger/LoggerService';
-import { Company } from '../../model/company/company';
+import type { Company } from '../../model/company/company';
 import type { CustomerAddress } from '../../model/customer/customer';
 import type { SessionService } from '../../session';
 import type { CompanyService } from '../CompanyService';

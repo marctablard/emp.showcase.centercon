@@ -1,4 +1,4 @@
-import { StoredToken } from '@platform/integrations/types/auth';
+import type { StoredToken } from '@platform/integrations/types/auth';
 import { inject } from 'inversify';
 import 'server-only';
 import type {
@@ -7,7 +7,7 @@ import type {
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
 import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
-import { EmporixTokenManager as IEmporixTokenManager } from '../EmporixTokenManager';
+import type { EmporixTokenManager as IEmporixTokenManager } from '../EmporixTokenManager';
 import { EMPORIX_TOKEN_TYPE, type EmporixTokenType } from '../token-types';
 import { checkTokenValidity } from '../util/common';
 

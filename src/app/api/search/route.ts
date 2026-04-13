@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
-import { SearchService } from '@/platform/services/search';
+import type { SearchService } from '@/platform/services/search';
 
 /**
  * API endpoint to search for products

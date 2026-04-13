@@ -3,7 +3,7 @@ import { inject } from 'inversify';
 import path from 'path';
 import { injectable } from '@/platform/core/di/injectable';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
-import { SetupResult, SetupService } from '@/platform/services/model/setup/setup';
+import type { SetupResult, SetupService } from '@/platform/services/model/setup/setup';
 import type { SetupOperation } from '@/platform/services/model/setup/setup';
 import type { EmporixSetupService } from '../EmporixSetupService';
 
