@@ -35,7 +35,12 @@ describe('EmporixShippingApi', () => {
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
     container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
-    container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
+    container
+      .bind<EmporixApiInvoker>('EmporixApiInvoker')
+      .toDynamicValue(
+        (ctx) =>
+          new EmporixApiInvoker(ctx.get<EmporixConfig>('EmporixConfig'), ctx.get<TokenManager>('EmporixTokenManager')),
+      );
     container.bind<EmporixShippingApi>('EmporixShippingApi').to(EmporixShippingApi);
 
     // Get instances from the container

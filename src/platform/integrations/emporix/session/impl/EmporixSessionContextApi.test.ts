@@ -55,7 +55,12 @@ describe('EmporixSessionContextApi', () => {
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
     container.bind<TokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
     container.bind<EmporixCustomerApi>('EmporixCustomerApi').to(EmporixCustomerApi);
-    container.bind<EmporixApiInvoker>('EmporixApiInvoker').to(EmporixApiInvoker);
+    container
+      .bind<EmporixApiInvoker>('EmporixApiInvoker')
+      .toDynamicValue(
+        (ctx) =>
+          new EmporixApiInvoker(ctx.get<EmporixConfig>('EmporixConfig'), ctx.get<TokenManager>('EmporixTokenManager')),
+      );
     container.bind<EmporixSessionContextApi>('EmporixSessionContextApi').to(EmporixSessionContextApi);
     // enable for debug output as curl
     // container.bind<boolean>('debugCurl').toConstantValue(true);
