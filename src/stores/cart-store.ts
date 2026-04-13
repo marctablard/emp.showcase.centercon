@@ -13,8 +13,8 @@ import {
   loadSavedCart,
 } from '@/lib/client/carts';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { CartShippingAddress, ModifyCartItemResult } from '@/platform/services/cart/CartService';
-import { Cart } from '@/platform/services/model/cart/cart';
+import type { CartShippingAddress, ModifyCartItemResult } from '@/platform/services/cart/CartService';
+import type { Cart } from '@/platform/services/model/cart/cart';
 
 export interface CartState {
   // Cart data, null means no cart, undefined means unknown state

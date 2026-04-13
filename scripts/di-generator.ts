@@ -109,6 +109,12 @@ interface ExtensionInfo {
   injectables: InjectableInfo[];
 }
 
+/** When true (see .env.template): also emit `src/platform/client.ts` for browser Inversify. Default: off. */
+function isClientContainerGenerationEnabled(): boolean {
+  const raw = (process.env.NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT ?? '').trim().toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}
+
 // Define the layers we support
 type Layer = 'integration' | 'service' | 'repository' | 'platform';
 
@@ -351,9 +357,17 @@ async function generateContainerFiles(layer: Layer): Promise<void> {
     return common.concat(envInjectables);
   }
   
-  await generateContainerFile(layer,  buildEnvironmentInjectables('server'), serverOutputFile, 'server', extensions, aliases);
-  await generateContainerFile(layer, buildEnvironmentInjectables('client'), clientOutputFile, 'client', extensions, aliases);
-  await generateContainerFile(layer,  buildEnvironmentInjectables('ssr'), ssrOutputFile, 'ssr', extensions, aliases);
+  await generateContainerFile(layer, buildEnvironmentInjectables('server'), serverOutputFile, 'server', extensions, aliases);
+  await generateContainerFile(layer, buildEnvironmentInjectables('ssr'), ssrOutputFile, 'ssr', extensions, aliases);
+
+  if (isClientContainerGenerationEnabled()) {
+    await generateContainerFile(layer, buildEnvironmentInjectables('client'), clientOutputFile, 'client', extensions, aliases);
+  } else if (fs.existsSync(clientOutputFile)) {
+    fs.unlinkSync(clientOutputFile);
+    console.log(
+      `Removed client container file (NEXT_PUBLIC_ENABLE_DI_GENERATE_CLIENT not enabled): ${clientOutputFile}`,
+    );
+  }
 }
 
 /**
@@ -371,25 +385,34 @@ async function generateContainerFile(
   extensions: ExtensionInfo[] = [],
   aliases: Record<string, string> = {},
 ): Promise<string> {
-  // Generate static imports for all platform injectables
   const dependencyAliases = tryParseDependencyAliases();
 
-  // Generate static imports for all injectables
+  const toModuleName = (relativePath: string): string =>
+    path.basename(relativePath)
+      .replace(/[^a-zA-Z0-9_]/g, '_')
+      .replace(/^_+|_+$/g, '');
+
+  // Fail fast if two injectables produce the same import identifier.
+  const seenModuleNames = new Map<string, string>();
+  for (const injectable of injectables) {
+    const moduleName = toModuleName(injectable.relativePath);
+    const prev = seenModuleNames.get(moduleName);
+    if (prev) {
+      throw new Error(
+        `DI generator: import name collision "${moduleName}" between ` +
+        `"${prev}" and "${injectable.relativePath}". ` +
+        `Rename one of the files to avoid ambiguity.`,
+      );
+    }
+    seenModuleNames.set(moduleName, injectable.relativePath);
+  }
+
   const imports = injectables.map((injectable) => {
-    // Create a module name from the file path
-    const moduleName = path.basename(injectable.relativePath)
-      .replace(/[^a-zA-Z0-9_]/g, '_') // Replace non-alphanumeric chars with underscore
-      .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
-    
+    const moduleName = toModuleName(injectable.relativePath);
     return `import ${moduleName} from './${injectable.relativePath}';`;
   }).join('\n');
   
-  // Create an array of module names for platform injectables
-  const moduleNames = injectables.map((injectable) => {
-    return path.basename(injectable.relativePath)
-      .replace(/[^a-zA-Z0-9_]/g, '_')
-      .replace(/^_+|_+$/g, '');
-  });
+  const moduleNames = injectables.map((injectable) => toModuleName(injectable.relativePath));
 
   // Generate extension imports and module names
   const extensionImportLines: string[] = [];
@@ -483,7 +506,15 @@ async function generateContainerFile(
   }
   
 
-  const output = template
+  let processedTemplate = template;
+  if (type !== 'client') {
+    processedTemplate = processedTemplate.replace(
+      ' */\n\nimport { addInjectableModule }',
+      " */\n\nimport 'server-only';\n\nimport { addInjectableModule }",
+    );
+  }
+
+  const output = processedTemplate
     .replace('{{imports}}', allImports)
     .replace('{{moduleArray}}', moduleArray)
     .replace('{{aliasBindings}}', aliasBindings)

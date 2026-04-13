@@ -15,7 +15,7 @@ import useCustomer from '@/hooks/customer/useCustomer';
 import { useToast } from '@/hooks/ui/useToast';
 import { useRouter } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { Address } from '@/platform/services/model/common';
+import type { Address } from '@/platform/services/model/common';
 
 interface QuoteRequestDialogProps {
   open: boolean;

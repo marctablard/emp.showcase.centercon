@@ -10,7 +10,7 @@ import {
   updateSessionRegion,
   updateSessionSite,
 } from '@/lib/client/session';
-import { Session } from '@/platform/services/model/session/session';
+import type { Session } from '@/platform/services/model/session/session';
 import { useSessionStore } from '@/providers/StoreProvider';
 
 /**

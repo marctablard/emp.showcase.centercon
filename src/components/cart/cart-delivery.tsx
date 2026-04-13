@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Pencil } from 'lucide-react';
 import { H5 } from '@/components/ui/h';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
-import { Address } from '@/platform/services/model/common';
+import type { Address } from '@/platform/services/model/common';
 import { AddressSelector } from '../address/address-selector';
 import ShippingMethod from '../checkout/shipping-method';
 import { AddressDisplay } from '../common/address-display';

@@ -5,8 +5,8 @@ import { useSession } from 'next-auth/react';
 import { isEqual } from 'lodash';
 import { checkout } from '@/lib/client/checkout';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { PaymentMode } from '@/platform/services/model';
-import { Cart } from '@/platform/services/model/cart/cart';
+import type { PaymentMode } from '@/platform/services/model';
+import type { Cart } from '@/platform/services/model/cart/cart';
 import type {
   CheckoutAddress,
   CheckoutPaymentMethod,
@@ -15,7 +15,7 @@ import type {
   ContactData,
   OrderShipping,
 } from '@/platform/services/model/checkout';
-import { ShippingMethod } from '@/platform/services/model/shipping';
+import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { useCheckoutStore } from '@/providers/StoreProvider';
 import { useCart } from '../cart/useCart';
 import { useAddresses } from '../customer/useAddresses';

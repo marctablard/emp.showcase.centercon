@@ -2,8 +2,8 @@
 
 import { type ReactNode, createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand/react';
-import { Site } from '@/platform/services/model/common/site';
-import { Session } from '@/platform/services/model/session';
+import type { Site } from '@/platform/services/model/common/site';
+import type { Session } from '@/platform/services/model/session';
 import { createAvailabilityStore } from '@/stores/availability-store';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';

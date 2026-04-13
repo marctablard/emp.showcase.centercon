@@ -1,6 +1,6 @@
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { CustomerUpdateDto, PasswordChangeDto } from '@/platform/services/customer/CustomerService';
-import { Customer, CustomerAddress } from '@/platform/services/model/customer/customer';
+import type { CustomerUpdateDto, PasswordChangeDto } from '@/platform/services/customer/CustomerService';
+import type { Customer, CustomerAddress } from '@/platform/services/model/customer/customer';
 
 /**
  * Fetch the current customer information

@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef } from 'react';
-import { SiteRoutingConfig } from '@/site/types';
+import type { SiteRoutingConfig } from '@/site/types';
 import { addPrefixIfNeeded } from '@/site/utils';
 
 interface SiteLinkProps extends React.ComponentPropsWithoutRef<any> {

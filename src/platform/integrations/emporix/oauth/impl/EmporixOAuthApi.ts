@@ -1,3 +1,4 @@
+import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import {
   type DebugContext,
@@ -6,12 +7,12 @@ import {
   logRequestPayload,
   logResponse,
 } from '@/platform/core/utils/debug-utils';
-import {
+import type {
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
 } from '../../model/oauth';
-import { EmporixOAuthApi as IEmporixOAuthApi } from '../EmporixOAuthApi';
+import type { EmporixOAuthApi as IEmporixOAuthApi } from '../EmporixOAuthApi';
 
 /**
  * Implementation of the Emporix OAuth API

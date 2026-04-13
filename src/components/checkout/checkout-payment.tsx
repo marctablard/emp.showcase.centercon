@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Check, NotebookText, Pencil, ReceiptText } from 'lucide-react';
 import { useCheckout } from '@/hooks/checkout/useCheckout';
 import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
-import { Address } from '@/platform/services/model/common';
+import type { Address } from '@/platform/services/model/common';
 import { AddressSelector } from '../address/address-selector';
 import { AddressDisplay } from '../common/address-display';
 import { Button } from '../ui/button';

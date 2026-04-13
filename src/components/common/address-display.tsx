@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { MapPin } from 'lucide-react';
-import { Address } from '@/platform/services/model/common';
+import type { Address } from '@/platform/services/model/common';
 
 interface AddressDisplayProps {
   address: Address;

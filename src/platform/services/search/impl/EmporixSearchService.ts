@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCategoryApi } from '@/platform/integrations/emporix/category/EmporixCategoryApi';
-import { EmporixPaginatedResponse, EmporixProduct } from '@/platform/integrations/emporix/model';
+import type { EmporixPaginatedResponse, EmporixProduct } from '@/platform/integrations/emporix/model';
 import type { EmporixProductApi } from '@/platform/integrations/emporix/product/EmporixProductApi';
 import { buildProductCategoryIdsCriteriaValue } from '@/platform/integrations/emporix/product/buildProductCatalogScopeQ';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
@@ -12,7 +12,7 @@ import type { SearchService } from '@/platform/services/search/SearchService';
 import type { SessionService } from '@/platform/services/session/SessionService';
 import type { ProductMapper } from '../../model/product/ProductMapper';
 import type { SearchSuggestions } from '../../model/search';
-import { CatalogPublishedRootCategoryService } from './CatalogPublishedRootCategoryService';
+import type { CatalogPublishedRootCategoryService } from './CatalogPublishedRootCategoryService';
 import type SegmentFilterService from './SegmentFilterService';
 
 function isOmitCatalogCategoryFilterEnv(): boolean {

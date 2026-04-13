@@ -1,10 +1,11 @@
 import { inject } from 'inversify';
+import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
-import { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
-import {
+import type { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
+import type {
   EmporixCreateQuoteReasonRequest,
   EmporixCreateQuoteRequest,
   EmporixQuoteCreationResponse,
@@ -12,7 +13,7 @@ import {
   EmporixQuoteReason,
   EmporixQuoteReasonCreationResponse,
 } from '../../model/quote';
-import { EmporixQuote } from '../../model/quote';
+import type { EmporixQuote } from '../../model/quote';
 import type { EmporixQuoteApi as IEmporixQuoteApi } from '../EmporixQuoteApi';
 
 @injectable('EmporixQuoteApi', 'Singleton')

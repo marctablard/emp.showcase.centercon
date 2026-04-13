@@ -8,7 +8,7 @@ import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { Spinner } from '@/components/ui/spinner';
 import { useSession } from '@/hooks/session/useSession';
 import { useToast } from '@/hooks/ui/useToast';
-import { Company } from '@/platform/services/model/company/company';
+import type { Company } from '@/platform/services/model/company/company';
 
 export function CompanySwitcher() {
   const { session, loading: sessionLoading, setCompany } = useSession();

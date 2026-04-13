@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSearch } from '@/hooks/search/useSearch';
 import { cn } from '@/lib/utils';
-import { Product } from '@/platform/services/model/product';
+import type { Product } from '@/platform/services/model/product';
 
 export interface HeaderSearchProps {
   small?: boolean;

@@ -13,7 +13,7 @@ import { useRouter } from '@/i18n/navigation';
 import { fetchReturnsForOrderIds } from '@/lib/client/returns';
 import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
 import { cn, formatCurrency } from '@/lib/utils';
-import { Order, OrderStatus } from '@/platform/services/model/order/order';
+import type { Order, OrderStatus } from '@/platform/services/model/order/order';
 import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
 import { CreateReturnDialog } from './create-return-dialog';
 
