@@ -1,10 +1,13 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCurrency, EmporixExchangeRate } from '../../model/currency';
 import type { EmporixCurrencyApi as IEmporixCurrencyApi } from '../EmporixCurrencyApi';
+
+const createCurrencyMetrics = (route: string) => createFetchMetricsParams('currency', route);
 
 @injectable('EmporixCurrencyApi', 'Singleton')
 class EmporixCurrencyApi implements IEmporixCurrencyApi {
@@ -21,6 +24,8 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       `/currency/${this.config.tenant}/currencies`,
       { method: 'GET' },
       'public',
+      undefined,
+      createCurrencyMetrics('/currency/{tenant}/currencies'),
     );
 
     if (!response.ok) {
@@ -35,6 +40,8 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       `/currency/${this.config.tenant}/currencies/${currencyCode}`,
       { method: 'GET' },
       'public',
+      undefined,
+      createCurrencyMetrics('/currency/{tenant}/currencies/{id}'),
     );
 
     if (!response.ok) {
@@ -53,6 +60,8 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       `/currency/${this.config.tenant}/exchanges`,
       { method: 'GET' },
       'public',
+      undefined,
+      createCurrencyMetrics('/currency/{tenant}/exchanges'),
     );
 
     if (!response.ok) {
@@ -67,6 +76,8 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       `/currency/${this.config.tenant}/exchanges?sourceCurrency=${sourceCurrency}&targetCurrency=${targetCurrency}`,
       { method: 'GET' },
       'public',
+      undefined,
+      createCurrencyMetrics('/currency/{tenant}/exchanges'),
     );
 
     if (!response.ok) {

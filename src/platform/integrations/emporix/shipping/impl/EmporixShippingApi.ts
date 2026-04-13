@@ -1,11 +1,14 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import type { EmporixFindSiteRequest, EmporixShippingSite } from '../../model';
 import type { EmporixShippingMethod } from '../../model/shipping';
 import type { EmporixShippingApi as IEmporixShippingApi } from '../EmporixShippingApi';
+
+const createShippingMetrics = (route: string) => createFetchMetricsParams('shipping', route);
 
 @injectable('EmporixShippingApi', 'Singleton')
 class EmporixShippingApi implements IEmporixShippingApi {
@@ -22,6 +25,8 @@ class EmporixShippingApi implements IEmporixShippingApi {
       `/shipping/${this.config.tenant}/${siteId}/zones/${zoneId}/methods/${methodId}`,
       { method: 'GET' },
       'public',
+      undefined,
+      createShippingMetrics('/shipping/{tenant}/{id}/zones/{id}/methods/{id}'),
     );
     if (!response.ok) {
       if (response.status === 404) {
@@ -38,6 +43,8 @@ class EmporixShippingApi implements IEmporixShippingApi {
       `/shipping/${this.config.tenant}/${siteId}/zones/${zoneId}/methods`,
       { method: 'GET' },
       'public',
+      undefined,
+      createShippingMetrics('/shipping/{tenant}/{id}/zones/{id}/methods'),
     );
 
     if (!response.ok) {
@@ -58,6 +65,8 @@ class EmporixShippingApi implements IEmporixShippingApi {
         body: JSON.stringify(request),
       },
       'public',
+      undefined,
+      createShippingMetrics('/shipping/{tenant}/findSite'),
     );
 
     if (!response.ok) {

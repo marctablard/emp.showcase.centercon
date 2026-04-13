@@ -1,4 +1,6 @@
+import { inject } from 'inversify';
 import 'server-only';
+import { injectable } from '@/platform/core/di/injectable';
 import {
   type DebugContext,
   buildAndLogCurl,
@@ -6,36 +8,45 @@ import {
   logRequestPayload,
   logResponse,
 } from '@/platform/core/utils/debug-utils';
+import type { FetchMetrics } from '@/platform/integrations/emporix/model/metrics';
+import type { MetricsService } from '@/platform/services/metrics/MetricsService';
+import type { TokenType } from '@/platform/services/model/auth';
+import type { RequestContextService } from '@/platform/services/request-context/RequestContextService';
+import { getFirstUrlSegment } from '@/utils/getFirstUrlSegment';
 import type { EmporixConfig } from '../../config';
-import type { FetchMetrics } from '../../model/metrics';
 import type { EmporixTokenManager } from '../EmporixTokenManager';
 
-/**
- * @deprecated Use EmporixApiInvokerServer or EmporixApiInvokerSSR instead.
- * Kept as non-injectable base for test compatibility.
- */
-class EmporixApiInvoker {
+const METRICS_DEFAULT_SITE = 'unknown';
+
+const METRIC_FETCH_TOTAL = 'emx_bff_api_fetch_total';
+const METRIC_FETCH_ERRORS_TOTAL = 'emx_bff_api_fetch_errors_total';
+const METRIC_FETCH_DURATION = 'emx_bff_api_fetch_duration_seconds';
+const METRIC_LABEL_NAMES = ['site', 'method', 'status_code', 'source', 'token_type', 'route'] as const;
+const HISTOGRAM_BUCKETS = [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
+
+@injectable('EmporixApiInvoker', 'Singleton')
+class EmporixApiInvokerServer {
   protected config: EmporixConfig;
   protected tokenManager: EmporixTokenManager;
+  private metricsService: MetricsService;
+  private requestContext: RequestContextService;
 
-  constructor(config: EmporixConfig, tokenManager: EmporixTokenManager) {
+  constructor(
+    @inject('EmporixConfig') config: EmporixConfig,
+    @inject('EmporixTokenManager') tokenManager: EmporixTokenManager,
+    @inject('MetricsService') metricsService: MetricsService,
+    @inject('RequestContextService') requestContext: RequestContextService,
+  ) {
     this.config = config;
     this.tokenManager = tokenManager;
+    this.metricsService = metricsService;
+    this.requestContext = requestContext;
   }
 
-  /**
-   * Get an anonymous token for accessing public resources
-   * @returns Promise with the token string
-   */
   async getAnonymousToken(): Promise<{ accessToken: string; sessionId: string }> {
     return this.tokenManager.getAnonymousToken(this.config.tenant, this.config.clientId);
   }
 
-  /**
-   * Get a service access token for administrative operations
-   * @param scopes Optional cscopes (uses config value if not provided)
-   * @returns Promise with the token string
-   */
   async getServiceAccessToken(scopes?: string[]): Promise<string> {
     if (!this.config.serverClientId || !this.config.serverClientSecret) {
       throw new Error('Service Credentials not available');
@@ -48,31 +59,22 @@ class EmporixApiInvoker {
     );
   }
 
-  /**
-   * Create a fetch request with the appropriate authentication headers
-   * @param url API endpoint URL
-   * @param options Fetch options
-   * @param tokenType Type of token to use for authentication
-   * @param authOptions Optional authOptions for customer (username/password)
-   * @returns Promise with the fetch response
-   */
   async authenticatedFetch(
     url: string,
     options: RequestInit = {},
-    tokenType: 'public' | 'session' | 'customer-saas' | 'ai' | 'service' = 'public',
+    tokenType: TokenType = 'public',
     authOptions?: {
       credentials?: { username: string; password: string };
       scopes?: string[];
     },
-    _metrics?: FetchMetrics,
+    metrics?: FetchMetrics,
   ): Promise<Response> {
     let token: string;
 
-    // Add authorization header to the request
     let headers = {
       ...options.headers,
     };
-    // Get the appropriate token based on the token type
+
     switch (tokenType) {
       case 'public':
         const publicToken = await this.tokenManager.getPublicToken(this.config.tenant, this.config.clientId);
@@ -131,24 +133,19 @@ class EmporixApiInvoker {
         throw new Error(`Unknown token type: ${tokenType}`);
     }
 
-    // Unified cache defaults for public and service tokens
     if (tokenType === 'public' || tokenType === 'service') {
       const method = (options.method || 'GET').toUpperCase();
       const isWriteMethod = method !== 'GET' && method !== 'HEAD';
 
       if (isWriteMethod) {
-        // Write operations must never be cached
         options['cache'] = 'no-store';
         delete (options as Record<string, unknown>)['next'];
       } else if (!options['cache'] && !options['next']) {
-        // Read operations: apply defaults only when caller set neither
         options['cache'] = 'force-cache';
         options['next'] = { revalidate: 3600 };
       }
-      // If caller set either cache or next explicitly → respect both as-is
     }
 
-    // Add authorization header to the request
     headers = {
       ...headers,
       Authorization: `Bearer ${token}`,
@@ -158,7 +155,86 @@ class EmporixApiInvoker {
       url = url.substring(1);
     }
 
-    return this.fetch(url, { ...options, headers });
+    const metricsEnabled = this.metricsService.isEnabled();
+    let site: string | undefined;
+    let startTime: number | undefined;
+
+    if (metricsEnabled && metrics) {
+      try {
+        site = await this.requestContext.getSite();
+      } catch {
+        site = METRICS_DEFAULT_SITE;
+      }
+      startTime = performance.now();
+    }
+
+    let response: Response;
+    try {
+      response = await this.fetch(url, { ...options, headers });
+    } catch (error) {
+      if (metricsEnabled && metrics && startTime !== undefined) {
+        const method = (options.method || 'GET').toUpperCase();
+        const source = metrics.source || getFirstUrlSegment(url, 'unknown');
+        const route = metrics.routePattern || url;
+        const labels = {
+          site: site || METRICS_DEFAULT_SITE,
+          method,
+          status_code: '0',
+          source,
+          token_type: tokenType,
+          route,
+        };
+        this.metricsService
+          .getOrCreateCounter(METRIC_FETCH_TOTAL, 'Total upstream API fetch calls', METRIC_LABEL_NAMES)
+          .inc(labels);
+        this.metricsService
+          .getOrCreateCounter(METRIC_FETCH_ERRORS_TOTAL, 'Total upstream API fetch errors', METRIC_LABEL_NAMES)
+          .inc(labels);
+        const duration = (performance.now() - startTime) / 1000;
+        this.metricsService
+          .getOrCreateHistogram(
+            METRIC_FETCH_DURATION,
+            'Upstream API fetch duration in seconds',
+            METRIC_LABEL_NAMES,
+            HISTOGRAM_BUCKETS,
+          )
+          .observe(labels, duration);
+      }
+      throw error;
+    }
+
+    if (metricsEnabled && metrics && startTime !== undefined) {
+      const method = (options.method || 'GET').toUpperCase();
+      const source = metrics.source || getFirstUrlSegment(url, 'unknown');
+      const route = metrics.routePattern || url;
+      const labels = {
+        site: site || METRICS_DEFAULT_SITE,
+        method,
+        status_code: String(response.status),
+        source,
+        token_type: tokenType,
+        route,
+      };
+      this.metricsService
+        .getOrCreateCounter(METRIC_FETCH_TOTAL, 'Total upstream API fetch calls', METRIC_LABEL_NAMES)
+        .inc(labels);
+      if (!response.ok) {
+        this.metricsService
+          .getOrCreateCounter(METRIC_FETCH_ERRORS_TOTAL, 'Total upstream API fetch errors', METRIC_LABEL_NAMES)
+          .inc(labels);
+      }
+      const duration = (performance.now() - startTime) / 1000;
+      this.metricsService
+        .getOrCreateHistogram(
+          METRIC_FETCH_DURATION,
+          'Upstream API fetch duration in seconds',
+          METRIC_LABEL_NAMES,
+          HISTOGRAM_BUCKETS,
+        )
+        .observe(labels, duration);
+    }
+
+    return response;
   }
 
   async fetch(url: string, options: RequestInit = {}): Promise<Response> {
@@ -177,18 +253,10 @@ class EmporixApiInvoker {
     return responsePromise;
   }
 
-  /**
-   * Clear all stored tokens
-   */
   async clearTokens(): Promise<void> {
     this.tokenManager.clearTokens(this.config.tenant);
   }
 
-  /**
-   * Returns additional headers for the customer-saas token case.
-   * @param sessionToken The session token object, possibly containing a saasToken.
-   * @returns An object with the 'saas-token' header if available, otherwise an empty object.
-   */
   protected addCustomerHeaders(sessionToken: {
     accessToken: string;
     saasToken?: string;
@@ -200,11 +268,6 @@ class EmporixApiInvoker {
     return {};
   }
 
-  /**
-   * Returns additional headers for the session token case.
-   * @param sessionToken The session token object, possibly containing a sessionId.
-   * @returns An object with the 'session-id' header if available, otherwise an empty object.
-   */
   protected addSessionHeaders(sessionToken: {
     accessToken: string;
     saasToken?: string;
@@ -216,13 +279,8 @@ class EmporixApiInvoker {
     return {};
   }
 
-  /**
-   * Returns additional headers for the public token case.
-   * @param _publicToken The anonymous token object (unused in base implementation, available for subclasses).
-   * @returns An empty object (no additional headers for public tokens).
-   */
   protected addPublicHeaders(_publicToken: { accessToken: string }): Record<string, string> {
     return {};
   }
 }
-export default EmporixApiInvoker;
+export default EmporixApiInvokerServer;

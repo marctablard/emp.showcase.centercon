@@ -1,11 +1,14 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCatalog, EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 import type { EmporixCatalogApi as IEmporixCatalogApi } from '../EmporixCatalogApi';
+
+const createCatalogMetrics = (route: string) => createFetchMetricsParams('catalog', route);
 
 @injectable('EmporixCatalogApi', 'Singleton')
 class EmporixCatalogApi implements IEmporixCatalogApi {
@@ -20,6 +23,8 @@ class EmporixCatalogApi implements IEmporixCatalogApi {
       `/catalog/${this.config.tenant}/catalogs?${query}`,
       { method: 'GET', headers: { 'X-Total-Count': 'true' } },
       'public',
+      undefined,
+      createCatalogMetrics('/catalog/{tenant}/catalogs'),
     );
 
     return buildPaginatedResponse(params, response);
@@ -30,6 +35,8 @@ class EmporixCatalogApi implements IEmporixCatalogApi {
       `/catalog/${this.config.tenant}/catalogs/${id}`,
       { method: 'GET' },
       'public',
+      undefined,
+      createCatalogMetrics('/catalog/{tenant}/catalogs/{id}'),
     );
     if (!response.ok) {
       if (response.status == 404) {

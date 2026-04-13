@@ -1,10 +1,13 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import type { EmporixContextAttribute, EmporixSessionContext } from '../../model/session-context';
 import type { EmporixSessionContextApi as IEmporixSessionContextApi } from '../EmporixSessionContextApi';
+
+const createSessionMetrics = (route: string) => createFetchMetricsParams('session', route);
 
 @injectable('EmporixSessionContextApi', 'Singleton')
 class EmporixSessionContextApi implements IEmporixSessionContextApi {
@@ -21,6 +24,8 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
       `/session-context/${this.config.tenant}/context/${sessionId}`,
       { method: 'GET' },
       'service',
+      undefined,
+      createSessionMetrics('/session-context/{tenant}/context/{id}'),
     );
 
     if (!response.ok) {
@@ -48,6 +53,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
       },
       'service',
       { scopes: ['sessioncontext.context_manage'] },
+      createSessionMetrics('/session-context/{tenant}/context/{id}'),
     );
 
     if (!response.ok) {
@@ -66,6 +72,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
       },
       'service',
       { scopes: ['sessioncontext.context_manage'] },
+      createSessionMetrics('/session-context/{tenant}/context/{id}/attributes'),
     );
 
     if (!response.ok) {
@@ -79,6 +86,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
       { method: 'DELETE' },
       'service',
       { scopes: ['sessioncontext.context_manage'] },
+      createSessionMetrics('/session-context/{tenant}/context/{id}/attributes/{id}'),
     );
 
     if (!response.ok) {
@@ -91,6 +99,8 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
       `/session-context/${this.config.tenant}/me/context`,
       { method: 'GET' },
       'session',
+      undefined,
+      createSessionMetrics('/session-context/{tenant}/me/context'),
     );
 
     if (!response.ok) {
@@ -112,6 +122,8 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
         body: JSON.stringify(sessionContext),
       },
       'session',
+      undefined,
+      createSessionMetrics('/session-context/{tenant}/me/context'),
     );
 
     if (!response.ok) {
@@ -129,6 +141,8 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
         body: JSON.stringify(attribute),
       },
       'session',
+      undefined,
+      createSessionMetrics('/session-context/{tenant}/me/context/attributes'),
     );
 
     if (!response.ok) {
@@ -143,6 +157,8 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
       `/session-context/${this.config.tenant}/me/context/attributes/${attributeName}`,
       { method: 'DELETE' },
       'session',
+      undefined,
+      createSessionMetrics('/session-context/{tenant}/me/context/attributes/{id}'),
     );
 
     if (!response.ok) {

@@ -1,6 +1,7 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type {
   EmporixBrand,
   EmporixPaginatedResponse,
@@ -9,6 +10,8 @@ import type {
 import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixBrandApi as IEmporixBrandApi } from '../EmporixBrandApi';
+
+const createBrandMetrics = (route: string) => createFetchMetricsParams('brand', route);
 
 /**
  * Implementation of BrandApi for Emporix brand data.
@@ -34,6 +37,8 @@ class EmporixBrandApi implements IEmporixBrandApi {
       `/brand/brands?${query}`,
       { method: 'GET', headers: { 'X-Total-Count': 'true' } },
       'public',
+      undefined,
+      createBrandMetrics('/brand/brands'),
     );
 
     return buildPaginatedResponse(params, response);
@@ -45,7 +50,13 @@ class EmporixBrandApi implements IEmporixBrandApi {
    * @returns The brand data or undefined if not found
    */
   async getBrand(id: string): Promise<EmporixBrand | undefined> {
-    const response = await this.apiInvoker.authenticatedFetch(`/brand/brands/${id}`, { method: 'GET' }, 'public');
+    const response = await this.apiInvoker.authenticatedFetch(
+      `/brand/brands/${id}`,
+      { method: 'GET' },
+      'public',
+      undefined,
+      createBrandMetrics('/brand/brands/{id}'),
+    );
 
     if (!response.ok) {
       if (response.status === 404) {

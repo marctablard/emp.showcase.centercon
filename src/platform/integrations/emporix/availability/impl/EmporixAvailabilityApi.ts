@@ -1,12 +1,15 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
 import type { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 import type { EmporixAvailability } from '../../model/availability';
 import type { EmporixAvailabilityApi as IEmporixAvailabilityApi } from '../EmporixAvailabilityApi';
+
+const createAvailabilityMetrics = (route: string) => createFetchMetricsParams('availability', route);
 
 @injectable('EmporixAvailabilityApi', 'Singleton')
 class EmporixAvailabilityApi implements IEmporixAvailabilityApi {
@@ -31,6 +34,8 @@ class EmporixAvailabilityApi implements IEmporixAvailabilityApi {
       `/availability/${this.config.tenant}/availability/site/${site}${queryString}`,
       { method: 'GET', headers: { 'X-Total-Count': 'true' } },
       'public',
+      undefined,
+      createAvailabilityMetrics('/availability/{tenant}/availability/site/{site}'),
     );
 
     if (!response.ok) {
@@ -65,6 +70,8 @@ class EmporixAvailabilityApi implements IEmporixAvailabilityApi {
         body: JSON.stringify(productIds),
       },
       'public',
+      undefined,
+      createAvailabilityMetrics('/availability/{tenant}/availability/search'),
     );
 
     if (!response.ok) {
@@ -80,6 +87,8 @@ class EmporixAvailabilityApi implements IEmporixAvailabilityApi {
       `/availability/${this.config.tenant}/availability/${productId}/${site}`,
       { method: 'GET' },
       'public',
+      undefined,
+      createAvailabilityMetrics('/availability/{tenant}/availability/{id}/{site}'),
     );
 
     if (!response.ok) {

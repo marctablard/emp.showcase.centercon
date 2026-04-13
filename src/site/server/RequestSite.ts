@@ -12,7 +12,13 @@ async function getSiteFromHeaderImpl(): Promise<string> {
     site = (await headers()).get(INTERNAL_SITE_HEADER) || undefined;
     server.get<LoggerService>('LoggerService').debug({ site }, 'Request site resolved');
   } catch (error) {
-    server.get<LoggerService>('LoggerService').error({ err: error }, 'Error getting headers');
+    const isOutsideRequestScope = error instanceof Error && error.message.includes('outside a request scope');
+    const logger = server.get<LoggerService>('LoggerService');
+    if (isOutsideRequestScope) {
+      logger.debug('headers() called outside request scope — falling back to default site');
+    } else {
+      logger.error({ err: error }, 'Error getting headers');
+    }
   }
 
   const availableSites = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];

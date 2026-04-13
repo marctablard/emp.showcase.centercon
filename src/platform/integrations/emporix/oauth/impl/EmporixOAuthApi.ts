@@ -1,5 +1,4 @@
 import 'server-only';
-import { injectable } from '@/platform/core/di/injectable';
 import {
   type DebugContext,
   buildAndLogCurl,
@@ -15,9 +14,9 @@ import type {
 import type { EmporixOAuthApi as IEmporixOAuthApi } from '../EmporixOAuthApi';
 
 /**
- * Implementation of the Emporix OAuth API
+ * @deprecated Use EmporixOAuthApiServer or EmporixOAuthApiSSR instead.
+ * Kept as non-injectable base for test compatibility.
  */
-@injectable('EmporixOAuthApi', 'Singleton')
 class EmporixOAuthApi implements IEmporixOAuthApi {
   protected readonly baseUrl: string = process.env.NEXT_PUBLIC_EMPORIX_BASE_URL || 'https://api.emporix.io';
 

@@ -1,10 +1,13 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCountry, EmporixRegion } from '../../model/country';
 import type { EmporixCountryApi as IEmporixCountryApi } from '../EmporixCountryApi';
+
+const createCountryMetrics = (route: string) => createFetchMetricsParams('country', route);
 
 @injectable('EmporixCountryApi', 'Singleton')
 class EmporixCountryApi implements IEmporixCountryApi {
@@ -26,6 +29,8 @@ class EmporixCountryApi implements IEmporixCountryApi {
         },
       },
       'public',
+      undefined,
+      createCountryMetrics('/country/{tenant}/countries'),
     );
 
     if (!response.ok) {
@@ -45,6 +50,8 @@ class EmporixCountryApi implements IEmporixCountryApi {
         },
       },
       'public',
+      undefined,
+      createCountryMetrics('/country/{tenant}/countries/{id}'),
     );
 
     if (!response.ok) {
@@ -68,6 +75,8 @@ class EmporixCountryApi implements IEmporixCountryApi {
         },
       },
       'public',
+      undefined,
+      createCountryMetrics('/country/{tenant}/regions'),
     );
 
     if (!response.ok) {
@@ -87,6 +96,8 @@ class EmporixCountryApi implements IEmporixCountryApi {
         },
       },
       'public',
+      undefined,
+      createCountryMetrics('/country/{tenant}/regions/{id}'),
     );
 
     if (!response.ok) {

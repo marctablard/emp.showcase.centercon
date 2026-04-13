@@ -1,12 +1,15 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
 import type { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 import type { EmporixSite } from '../../model/site-settings';
 import type { EmporixSiteSettingsApi as IEmporixSiteSettingsApi } from '../EmporixSiteSettingsApi';
+
+const createSiteSettingsMetrics = (route: string) => createFetchMetricsParams('site-settings', route);
 
 @injectable('EmporixSiteSettingsApi', 'Singleton')
 class EmporixSiteSettingsApi implements IEmporixSiteSettingsApi {
@@ -30,7 +33,13 @@ class EmporixSiteSettingsApi implements IEmporixSiteSettingsApi {
 
     const url = `/site/${this.config.tenant}/sites?${queryParams.toString()}`;
 
-    const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'public');
+    const response = await this.apiClient.authenticatedFetch(
+      url,
+      { method: 'GET' },
+      'public',
+      undefined,
+      createSiteSettingsMetrics('/site/{tenant}/sites'),
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to get sites: ${response.statusText}`);
@@ -43,6 +52,8 @@ class EmporixSiteSettingsApi implements IEmporixSiteSettingsApi {
       `/site/${this.config.tenant}/sites/${siteCode}`,
       { method: 'GET' },
       'public',
+      undefined,
+      createSiteSettingsMetrics('/site/{tenant}/sites/{id}'),
     );
 
     if (!response.ok) {
@@ -63,7 +74,13 @@ class EmporixSiteSettingsApi implements IEmporixSiteSettingsApi {
 
     const url = `/site/${this.config.tenant}/siteslist${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    const response = await this.apiClient.authenticatedFetch(url, { method: 'GET' }, 'public');
+    const response = await this.apiClient.authenticatedFetch(
+      url,
+      { method: 'GET' },
+      'public',
+      undefined,
+      createSiteSettingsMetrics('/site/{tenant}/siteslist'),
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to get site codes: ${response.statusText}`);

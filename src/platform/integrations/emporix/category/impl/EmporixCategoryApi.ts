@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import { omit } from 'lodash';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type {
   EmporixCategory,
   EmporixCategoryAssignment,
@@ -16,6 +17,8 @@ import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/comm
 import type { EmporixConfig } from '../../config';
 import type { EmporixCategoryQuery } from '../EmporixCategoryApi';
 import type { EmporixCategoryApi as IEmporixCategoryApi } from '../EmporixCategoryApi';
+
+const createCategoryMetrics = (route: string) => createFetchMetricsParams('category', route);
 
 /**
  * Implementation of CategoryApi for Emporix category data.
@@ -54,6 +57,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
       url,
       { method: 'GET', headers: { 'X-Total-Count': 'true' } },
       'public',
+      undefined,
+      createCategoryMetrics('/category/{tenant}/categories'),
     );
 
     return buildPaginatedResponse(params, response);
@@ -74,6 +79,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         },
       },
       'public',
+      undefined,
+      createCategoryMetrics('/category/{tenant}/categories/{id}'),
     );
 
     if (!response.ok) {
@@ -102,6 +109,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         },
       },
       'public',
+      undefined,
+      createCategoryMetrics('/category/{tenant}/categories/{id}/parents'),
     );
 
     if (!response.ok) {
@@ -145,6 +154,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
           },
         },
         'public',
+        undefined,
+        createCategoryMetrics('/category/{tenant}/categories/{id}/subcategories'),
       );
       return buildPaginatedResponse(params, response);
     } catch (error: any) {
@@ -193,6 +204,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
           },
         },
         'public',
+        undefined,
+        createCategoryMetrics('/category/{tenant}/assignments/references/{id}'),
       );
       return buildPaginatedResponse(params, response);
     } catch (error: any) {
@@ -234,6 +247,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         },
         tokenType,
         authOptions,
+        createCategoryMetrics('/category/{tenant}/category-trees/{id}'),
       );
 
       if (!response.ok) {
@@ -282,6 +296,8 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
           },
         },
         'public',
+        undefined,
+        createCategoryMetrics('/category/{tenant}/categories/{id}/assignments'),
       );
       return buildPaginatedResponse(params, response);
     } catch (error: any) {
