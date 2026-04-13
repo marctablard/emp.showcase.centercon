@@ -99,7 +99,7 @@ describe('EmporixCartApi', () => {
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
-    container.bind<EmporixTokenManager>('EmporixTokenManager').to(TestTokenManager);
+    container.bind<EmporixTokenManager>('EmporixTokenManager').to(TestTokenManager).inSingletonScope();
     container
       .bind<EmporixApiInvoker>('EmporixApiInvoker')
       .toDynamicValue(
@@ -108,7 +108,8 @@ describe('EmporixCartApi', () => {
             ctx.get<EmporixConfig>('EmporixConfig'),
             ctx.get<EmporixTokenManager>('EmporixTokenManager'),
           ),
-      );
+      )
+      .inSingletonScope();
     container.bind<EmporixCartApi>('EmporixCartApi').to(EmporixCartApi);
 
     // Get instances from the container

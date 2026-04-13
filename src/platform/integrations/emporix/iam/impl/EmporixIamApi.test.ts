@@ -62,7 +62,7 @@ describe('EmporixIamApi', () => {
     // Set up the container with our test config
     container = new Container();
     container.bind<EmporixConfig>('EmporixConfig').to(TestEmporixConfig);
-    container.bind<EmporixTestTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager);
+    container.bind<EmporixTestTokenManager>('EmporixTokenManager').to(EmporixTestTokenManager).inSingletonScope();
     container
       .bind<EmporixApiInvoker>('EmporixApiInvoker')
       .toDynamicValue(
@@ -71,7 +71,8 @@ describe('EmporixIamApi', () => {
             ctx.get<EmporixConfig>('EmporixConfig'),
             ctx.get<EmporixTokenManager>('EmporixTokenManager'),
           ),
-      );
+      )
+      .inSingletonScope();
     container.bind<EmporixOAuthApi>('EmporixOAuthApi').to(EmporixOAuthApi);
     container.bind<EmporixCustomerApi>('EmporixCustomerApi').to(EmporixCustomerApi);
     container.bind<EmporixIamApi>('EmporixIamApi').to(EmporixIamApi);
