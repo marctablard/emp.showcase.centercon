@@ -10,6 +10,12 @@ export async function register() {
   // Only initialize in Node.js runtime (not Edge Runtime)
   // The server container uses Node.js APIs that aren't available in Edge Runtime
   if (process.env.NEXT_RUNTIME === 'nodejs') {
+    // Raise the default listener cap so HTTP keep-alive sockets shared by
+    // concurrent SSE / long-poll / Playwright connections don't trigger the
+    // spurious MaxListenersExceededWarning. 20 is plenty for legitimate use
+    // while still catching real leaks (default 10 is too low for dev servers).
+    const { EventEmitter } = await import('events');
+    EventEmitter.defaultMaxListeners = 20;
     // Dynamic import to avoid loading Node.js modules in Edge Runtime
     const server = await import('@/platform/server');
     const logger = server.default.get<LoggerService>('LoggerService');

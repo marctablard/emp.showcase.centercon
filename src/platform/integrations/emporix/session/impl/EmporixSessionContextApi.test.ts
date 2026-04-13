@@ -48,6 +48,8 @@ describe('EmporixSessionContextApi', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Clear the globalThis-based session context cache between tests
+    delete (globalThis as Record<string, unknown>)['__emporix_session_ctx_cache'];
 
     // Set up the container with our test config
     container = new Container();
@@ -87,6 +89,8 @@ describe('EmporixSessionContextApi', () => {
         `/session-context/${config.tenant}/context/${sessionId}`,
         expect.objectContaining({ method: 'GET' }),
         'service',
+        undefined,
+        expect.anything(),
       );
 
       expect(result).toBeDefined();
@@ -102,6 +106,8 @@ describe('EmporixSessionContextApi', () => {
         `/session-context/${config.tenant}/context/${nonExistentSessionId}`,
         expect.objectContaining({ method: 'GET' }),
         'service',
+        undefined,
+        expect.anything(),
       );
 
       expect(result).toBeUndefined();
@@ -131,6 +137,7 @@ describe('EmporixSessionContextApi', () => {
         }),
         'service',
         { scopes: ['sessioncontext.context_manage'] },
+        expect.anything(),
       );
     });
   });
@@ -154,6 +161,7 @@ describe('EmporixSessionContextApi', () => {
         }),
         'service',
         { scopes: ['sessioncontext.context_manage'] },
+        expect.anything(),
       );
 
       // Verify the attribute was added by fetching the session
@@ -181,6 +189,7 @@ describe('EmporixSessionContextApi', () => {
         expect.objectContaining({ method: 'DELETE' }),
         'service',
         { scopes: ['sessioncontext.context_manage'] },
+        expect.anything(),
       );
 
       // Verify the attribute was removed by fetching the session
