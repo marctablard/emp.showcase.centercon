@@ -56,4 +56,6 @@ export interface EmporixProduct {
   variantAttributes?: {
     [key: string]: [{ key: string }];
   };
+  /** Catalog / navigation root category ids (Product Service). */
+  categoryIds?: string[];
 }
