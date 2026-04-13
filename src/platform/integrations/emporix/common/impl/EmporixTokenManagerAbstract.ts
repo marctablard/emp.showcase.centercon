@@ -2,6 +2,7 @@ import type { StoredToken } from '@platform/integrations/types/auth';
 import { inject } from 'inversify';
 import 'server-only';
 import type {
+  AnonymousTokenSessionParams,
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
@@ -22,6 +23,9 @@ export interface TokenStore {
 }
 
 export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManager {
+  private static readonly ANON_TOKEN_DEDUP_GRACE_MS = 2_000;
+  private _anonymousTokenInflight = new Map<string, Promise<StoredToken<EmporixAnonymousTokenResponse>>>();
+
   constructor(@inject('EmporixOAuthApi') protected oauthApi: EmporixOAuthApi) {}
   abstract clearTokens(tenant: string): void;
 
@@ -31,14 +35,39 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
     return { accessToken: publicToken.access_token };
   }
 
-  async getAnonymousToken(tenant: string, clientId: string): Promise<{ accessToken: string; sessionId: string }> {
+  async getAnonymousToken(
+    tenant: string,
+    clientId: string,
+    sessionParams?: AnonymousTokenSessionParams,
+  ): Promise<{ accessToken: string; sessionId: string }> {
     let anonymousToken = await this.readToken<
       StoredToken<EmporixAnonymousTokenResponse>,
       EmporixAnonymousTokenResponse
     >(EMPORIX_TOKEN_TYPE.ANONYMOUS, tenant);
-    // Check if token is expired or about to expire (within 5 minutes)
     if (!this.checkAccessToken(anonymousToken)) {
-      anonymousToken = await this.fetchAnonymousToken(anonymousToken, tenant, clientId);
+      // Deduplicate concurrent token creation requests (thundering herd prevention).
+      // When multiple API route handlers fire simultaneously without a stored token,
+      // they all share a single upstream call instead of each creating a new token.
+      const inflight = this._anonymousTokenInflight.get(tenant);
+      if (inflight) {
+        anonymousToken = await inflight;
+      } else {
+        const promise = this.fetchAnonymousToken(anonymousToken, tenant, clientId, sessionParams);
+        this._anonymousTokenInflight.set(tenant, promise);
+        try {
+          anonymousToken = await promise;
+        } finally {
+          // Keep the resolved promise in the map for a grace period so sequential
+          // callers (arriving after the first completes but before the cookie is
+          // readable) still coalesce instead of creating a new token.
+          const ref = promise;
+          setTimeout(() => {
+            if (this._anonymousTokenInflight.get(tenant) === ref) {
+              this._anonymousTokenInflight.delete(tenant);
+            }
+          }, EmporixTokenManagerAbstract.ANON_TOKEN_DEDUP_GRACE_MS);
+        }
+      }
       await this.writeToken<StoredToken<EmporixAnonymousTokenResponse>, EmporixAnonymousTokenResponse>(
         EMPORIX_TOKEN_TYPE.ANONYMOUS,
         anonymousToken,
@@ -52,10 +81,11 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
     anonymousToken: StoredToken<EmporixAnonymousTokenResponse> | undefined,
     tenant: string,
     clientId: string,
+    sessionParams?: AnonymousTokenSessionParams,
   ) {
     const now = Date.now();
     let response;
-    // Try refresh token
+    // Try refresh token — session params are NOT passed on refresh (only on new creation)
     if (anonymousToken && checkTokenValidity(anonymousToken.token.refresh_token, anonymousToken.refreshExpiryAt)) {
       try {
         response = await this.oauthApi.refreshAnonymousToken(tenant, anonymousToken.token.refresh_token!, clientId);
@@ -63,9 +93,8 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
         response = undefined;
       }
     }
-    // final resort, we have to get a new token
     if (!response) {
-      response = await this.oauthApi.getAnonymousToken(tenant, clientId);
+      response = await this.oauthApi.getAnonymousToken(tenant, clientId, sessionParams);
     }
     anonymousToken = {
       token: response,

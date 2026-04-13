@@ -637,6 +637,123 @@ export async function GET() {
 }
 ```
 
+## Prometheus Metrics
+
+The application exposes Prometheus-format metrics for monitoring upstream API call volume, latency, and error rates. These are essential for detecting redundant calls, regressions, and performance bottlenecks.
+
+### Accessing Metrics
+
+Metrics are served at `http://localhost:3001/metrics/prometheus` (metrics port is separate from the app port). In production, the endpoint path depends on your deployment configuration.
+
+### Available Counters
+
+#### `emx_bff_oauth_fetch_total`
+
+Counts every outbound OAuth/token fetch. Labels:
+
+| Label | Description | Example values |
+|---|---|---|
+| `site` | Resolved site code | `main`, `us-branch`, `unknown` |
+| `method` | HTTP method | `GET`, `POST` |
+| `status_code` | HTTP status | `200`, `401` |
+| `source` | Always `oauth` | `oauth` |
+| `route` | Route pattern (see below) | `/customerlogin/auth/public/login` |
+
+**Route patterns:**
+
+| Pattern | Token type | Description |
+|---|---|---|
+| `/customerlogin/auth/public/login` | Public (shared) | Read-only token for SSR and server; cached via `next: { revalidate: 3200 }` in production |
+| `/customerlogin/auth/anonymous/login` | Anonymous (per-session) | Session-bound token with site/currency/language; creates a new Emporix session |
+| `/oauth/token` | Service | Client-credentials token for admin operations (cart ownership, IAM) |
+| `/customer/{tenant}/login` | Customer | User login (email + password) |
+
+> **Note:** Public and anonymous tokens hit the **same** upstream Emporix endpoint but serve different purposes and are tracked under separate route labels for accurate visibility.
+
+#### `emx_bff_api_fetch_total`
+
+Counts every outbound API fetch to Emporix services. Labels:
+
+| Label | Description | Example values |
+|---|---|---|
+| `site` | Resolved site code | `main`, `us-branch` |
+| `method` | HTTP method | `GET`, `POST`, `PATCH`, `PUT`, `DELETE` |
+| `status_code` | HTTP status | `200`, `404`, `204` |
+| `source` | Service domain | `site-settings`, `session`, `currency`, `country`, `payment`, `cart`, `product`, `order`, etc. |
+| `token_type` | Auth token used | `public`, `session`, `service` |
+| `route` | URL pattern | `/site/{tenant}/sites/{id}`, `/session-context/{tenant}/me/context` |
+
+#### `emx_bff_api_fetch_errors_total`
+
+Same labels as `emx_bff_api_fetch_total`, but only incremented for responses with status >= 400.
+
+#### `emx_bff_oauth_fetch_duration_seconds` / `emx_bff_api_fetch_duration_seconds`
+
+Histograms measuring round-trip time in seconds. Buckets: `0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10`.
+
+### What to Watch For
+
+| Metric pattern | Healthy range (full session) | Investigation trigger |
+|---|---|---|
+| `route="/customerlogin/auth/public/login"` | 1–2 | >5 indicates cache miss or container isolation |
+| `route="/customerlogin/auth/anonymous/login"` | 1–3 | >10 indicates deduplication failure |
+| `source="site-settings"` | 10–25 (depends on site count) | >50 indicates cache expiration storm |
+| `source="session"` GET | 5–15 | >30 indicates missing cache or excessive callers |
+| `source="currency"` / `"country"` / `"payment"` | 3–6 each | >10 indicates reference data cache miss |
+
+### Server-Side Caching Architecture
+
+The application uses `globalThis`-backed in-memory caches to share data across Next.js module scopes (SSR container and Server container run as separate Inversify singletons in the same process). This prevents duplicate upstream fetches when both containers need the same data within a short window.
+
+```
+┌──────────────────────────────────────────────────┐
+│                   globalThis                      │
+│                                                   │
+│  __emporix_site_cache         (30s TTL)           │
+│  __emporix_session_ctx_cache  (5s TTL)            │
+└────────────┬───────────────────┬──────────────────┘
+             │                   │
+    ┌────────▼────────┐ ┌───────▼─────────┐
+    │  SSR Container  │ │ Server Container │
+    │  (ssr.ts)       │ │ (server.ts)      │
+    │                 │ │                  │
+    │ SiteService     │ │ SiteService      │
+    │ SessionCtxApi   │ │ SessionCtxApi    │
+    └─────────────────┘ └──────────────────┘
+```
+
+**Cache details:**
+
+| `globalThis` key | Owner class | TTL | Invalidation | What it caches |
+|---|---|---|---|---|
+| `__emporix_site_cache` | `EmporixSiteService` | 30s (per-site and ref data) | TTL expiry only | Site config, currencies, countries, regions, payment modes |
+| `__emporix_session_ctx_cache` | `EmporixSessionContextApi` | 5s | On any session mutation (PATCH, POST attribute, DELETE attribute) | Own session context (site, currency, country, language, region, cartId) |
+
+Public token caching relies on Next.js `fetch` cache with `next: { revalidate: 3200 }` in production. Both SSR and Server containers share the Next.js fetch cache natively, so no `globalThis` wrapper is needed.
+
+**When caches are NOT shared:**
+- Anonymous session tokens (`EmporixTokenManagerAbstract`) use per-instance inflight deduplication with a 2s grace period — not shared via `globalThis` because session tokens are user-specific.
+
+### Adding Metrics to New API Integrations
+
+Use `createFetchMetricsParams()` to generate standard metric labels:
+
+```typescript
+import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+
+const metrics = createFetchMetricsParams('my-service', '/my-service/{tenant}/endpoint');
+
+const response = await this.apiClient.authenticatedFetch(
+  `/my-service/${tenant}/endpoint`,
+  { method: 'GET' },
+  'public',
+  undefined,
+  metrics,
+);
+```
+
+For OAuth-level metrics in `EmporixOAuthApi*` subclasses, use `fetchWithMetrics()` directly with a route pattern string.
+
 ## Troubleshooting
 
 ### Logs Not Appearing

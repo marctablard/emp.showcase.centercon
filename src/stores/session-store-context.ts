@@ -4,6 +4,7 @@ import { createContext, useContext } from 'react';
 import type { StoreApi } from 'zustand';
 import { create, useStore } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { fetchCurrentSession } from '@/lib/client/session';
 import type { Session } from '@/platform/services/model/session/session';
 
 export interface SessionState {
@@ -14,6 +15,7 @@ export interface SessionState {
 export interface SessionActions {
   setSession: (session: Session | null | undefined) => void;
   setLoading: (loading: boolean) => void;
+  fetchSession: () => Promise<Session | null>;
   tryAcquireMutationLock: () => boolean;
   releaseMutationLock: () => void;
   reset: () => void;
@@ -27,14 +29,34 @@ const defaultState: SessionState = {
 };
 
 export const createSessionStore = (initState: SessionState = defaultState) => {
-  // Shared mutex for this store instance to serialize session mutations across components.
   let mutationInFlight = false;
+  let _fetchPromise: Promise<Session | null> | null = null;
 
   return create<SessionStore>()(
-    subscribeWithSelector((set) => ({
+    subscribeWithSelector((set, get) => ({
       ...initState,
       setSession: (session: Session | null | undefined) => set({ session }),
       setLoading: (loading: boolean) => set({ loading }),
+      fetchSession: async (): Promise<Session | null> => {
+        if (_fetchPromise) return _fetchPromise;
+        const promise = (async () => {
+          set({ loading: true });
+          try {
+            const session = await fetchCurrentSession(true);
+            set({ session, loading: false });
+            return session;
+          } catch {
+            if (get().session === undefined) set({ session: null });
+            set({ loading: false });
+            return null;
+          }
+        })();
+        _fetchPromise = promise;
+        void promise.finally(() => {
+          if (_fetchPromise === promise) _fetchPromise = null;
+        });
+        return promise;
+      },
       tryAcquireMutationLock: () => {
         if (mutationInFlight) {
           return false;

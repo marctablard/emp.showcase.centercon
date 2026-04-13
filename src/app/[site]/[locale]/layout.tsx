@@ -13,7 +13,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { redirect } from '@/i18n/edge/navigation';
 import { routing } from '@/i18n/routing';
 import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
-import { setSessionLanguage } from '@/lib/ssr/session';
+import { getSession, setSessionLanguage } from '@/lib/ssr/session';
 import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
@@ -69,7 +69,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
     notFound();
   }
 
-  const [site, availableSites] = await Promise.all([getSite(siteCode), getAvailableSites()]);
+  const [site, availableSites, shopSession] = await Promise.all([getSite(siteCode), getAvailableSites(), getSession()]);
 
   // Handle invalid site: redirect to valid site (fallback ON) or show 404 (fallback OFF)
   if (!site) {
@@ -107,7 +107,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
         <AuthSessionProvider>
           <SiteProvider siteCode={siteCode}>
             <NextIntlClientProvider locale={locale}>
-              <StoreProvider site={site} availableSites={availableSites}>
+              <StoreProvider shopSession={shopSession} site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
                   {isDebugApiEnabled() && isBrowserDebugOutputEnabled() && <ApiDebugPanel />}

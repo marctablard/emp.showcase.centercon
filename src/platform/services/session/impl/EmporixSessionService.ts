@@ -220,6 +220,20 @@ class EmporixSessionService implements SessionService {
       updateDefaults.siteCode = resolvedDefaultSite;
       result.siteCode = resolvedDefaultSite;
     }
+
+    // Fast path: skip the expensive getSite() call when the session is already
+    // fully populated (returning visitor). getSite() is only needed to validate
+    // currency against site.currencies and fill missing defaults.
+    if (
+      Object.keys(updateDefaults).length === 0 &&
+      result.currency &&
+      result.country &&
+      result.language &&
+      result.region
+    ) {
+      return;
+    }
+
     const site = await this.siteService.getSite(result.siteCode);
     if (!site) {
       return;

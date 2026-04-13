@@ -11,6 +11,7 @@ import {
 import type { MetricsService } from '@/platform/services/metrics/MetricsService';
 import type { RequestContextService } from '@/platform/services/request-context/RequestContextService';
 import type {
+  AnonymousTokenSessionParams,
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
@@ -109,7 +110,7 @@ class EmporixOAuthApiSSR implements IEmporixOAuthApi {
         headers: { Accept: 'application/json' },
         next: { revalidate: 3200 },
       },
-      '/customerlogin/auth/anonymous/login',
+      '/customerlogin/auth/public/login',
     );
 
     if (!response.ok) {
@@ -120,8 +121,18 @@ class EmporixOAuthApiSSR implements IEmporixOAuthApi {
     return (await response.json()) as EmporixAnonymousTokenResponse;
   }
 
-  async getAnonymousToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
-    const url = `/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+  async getAnonymousToken(
+    tenant: string,
+    clientId: string,
+    sessionParams?: AnonymousTokenSessionParams,
+  ): Promise<EmporixAnonymousTokenResponse> {
+    let url = `/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+    if (sessionParams) {
+      if (sessionParams.siteCode) url += `&siteCode=${encodeURIComponent(sessionParams.siteCode)}`;
+      if (sessionParams.currency) url += `&currency=${encodeURIComponent(sessionParams.currency)}`;
+      if (sessionParams.language) url += `&language=${encodeURIComponent(sessionParams.language)}`;
+      if (sessionParams.targetLocation) url += `&targetLocation=${encodeURIComponent(sessionParams.targetLocation)}`;
+    }
 
     const response = await this.fetchWithMetrics(
       url,

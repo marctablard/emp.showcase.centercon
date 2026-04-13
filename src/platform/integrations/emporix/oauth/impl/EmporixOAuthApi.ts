@@ -7,6 +7,7 @@ import {
   logResponse,
 } from '@/platform/core/utils/debug-utils';
 import type {
+  AnonymousTokenSessionParams,
   EmporixAccessTokenResponse,
   EmporixAnonymousTokenResponse,
   EmporixCustomerTokenResponse,
@@ -51,10 +52,21 @@ class EmporixOAuthApi implements IEmporixOAuthApi {
    * Get an anonymous token
    * @param tenant The tenant ID
    * @param clientId Client ID for anonymous access
+   * @param sessionParams Optional session context values to pre-seed the new session (COP-5047)
    * @returns Promise with the anonymous token response
    */
-  async getAnonymousToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
-    const url = `/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+  async getAnonymousToken(
+    tenant: string,
+    clientId: string,
+    sessionParams?: AnonymousTokenSessionParams,
+  ): Promise<EmporixAnonymousTokenResponse> {
+    let url = `/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+    if (sessionParams) {
+      if (sessionParams.siteCode) url += `&siteCode=${encodeURIComponent(sessionParams.siteCode)}`;
+      if (sessionParams.currency) url += `&currency=${encodeURIComponent(sessionParams.currency)}`;
+      if (sessionParams.language) url += `&language=${encodeURIComponent(sessionParams.language)}`;
+      if (sessionParams.targetLocation) url += `&targetLocation=${encodeURIComponent(sessionParams.targetLocation)}`;
+    }
 
     const response = await this.fetch(url, {
       method: 'GET',

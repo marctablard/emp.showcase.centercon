@@ -5,7 +5,8 @@ import { omit } from 'lodash';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import type { StoredToken } from '@/platform/integrations/types/auth';
-import type { EmporixAccessTokenResponse } from '../../model/oauth';
+import type { RequestContextService } from '@/platform/services/request-context/RequestContextService';
+import type { AnonymousTokenSessionParams, EmporixAccessTokenResponse } from '../../model/oauth';
 import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
 import type { TokenStore } from './EmporixTokenManagerAbstract';
 import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
@@ -13,9 +14,40 @@ import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
 @injectable('EmporixTokenManager', 'Singleton')
 class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
   protected serviceToken: StoredToken<EmporixAccessTokenResponse> | undefined;
+  private requestContext: RequestContextService;
 
-  constructor(@inject('EmporixOAuthApi') oauthApi: EmporixOAuthApi) {
+  constructor(
+    @inject('EmporixOAuthApi') oauthApi: EmporixOAuthApi,
+    @inject('RequestContextService') requestContext: RequestContextService,
+  ) {
     super(oauthApi);
+    this.requestContext = requestContext;
+  }
+
+  async getAnonymousToken(
+    tenant: string,
+    clientId: string,
+    sessionParams?: AnonymousTokenSessionParams,
+  ): Promise<{ accessToken: string; sessionId: string }> {
+    if (!sessionParams) {
+      sessionParams = await this.resolveSessionParams();
+    }
+    return super.getAnonymousToken(tenant, clientId, sessionParams);
+  }
+
+  private async resolveSessionParams(): Promise<AnonymousTokenSessionParams> {
+    let siteCode: string | undefined;
+    try {
+      siteCode = await this.requestContext.getSite();
+    } catch {
+      siteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE;
+    }
+    return {
+      siteCode: siteCode || process.env.NEXT_PUBLIC_DEFAULT_SITE,
+      currency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY,
+      language: process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE,
+      targetLocation: process.env.NEXT_PUBLIC_DEFAULT_COUNTRY,
+    };
   }
 
   public clearTokens(tenant: string): void {

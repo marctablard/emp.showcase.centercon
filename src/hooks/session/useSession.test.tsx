@@ -38,31 +38,38 @@ const createDeferred = <T,>(): Deferred<T> => {
   return { promise, resolve };
 };
 
+const createMockStore = (overrides: Record<string, unknown> = {}) => {
+  let mutationInFlight = false;
+  const store: Record<string, unknown> = {
+    session: null,
+    loading: false,
+    setSession: jest.fn((session) => {
+      store.session = session;
+    }),
+    setLoading: jest.fn((loading) => {
+      store.loading = loading;
+    }),
+    fetchSession: jest.fn().mockResolvedValue(null),
+    tryAcquireMutationLock: jest.fn(() => {
+      if (mutationInFlight) {
+        return false;
+      }
+      mutationInFlight = true;
+      return true;
+    }),
+    releaseMutationLock: jest.fn(() => {
+      mutationInFlight = false;
+    }),
+    ...overrides,
+  };
+  return store;
+};
+
 describe('useSession mutation lock', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    let mutationInFlight = false;
-    const store = {
-      session: null,
-      loading: false,
-      setSession: jest.fn((session) => {
-        store.session = session;
-      }),
-      setLoading: jest.fn((loading) => {
-        store.loading = loading;
-      }),
-      tryAcquireMutationLock: jest.fn(() => {
-        if (mutationInFlight) {
-          return false;
-        }
-        mutationInFlight = true;
-        return true;
-      }),
-      releaseMutationLock: jest.fn(() => {
-        mutationInFlight = false;
-      }),
-    };
+    const store = createMockStore();
 
     mockUseSessionStore.mockReturnValue(store);
     mockFetchCurrentSession.mockResolvedValue({ id: 'session-1', siteCode: 'main' });
@@ -115,27 +122,9 @@ describe('useSession fetch resilience', () => {
   });
 
   it('keeps last known session when mutation refetch returns null', async () => {
-    let mutationInFlight = false;
-    const store = {
+    const store = createMockStore({
       session: { id: 'session-existing', currency: 'USD', siteCode: 'main' },
-      loading: false,
-      setSession: jest.fn((session) => {
-        store.session = session;
-      }),
-      setLoading: jest.fn((loading) => {
-        store.loading = loading;
-      }),
-      tryAcquireMutationLock: jest.fn(() => {
-        if (mutationInFlight) {
-          return false;
-        }
-        mutationInFlight = true;
-        return true;
-      }),
-      releaseMutationLock: jest.fn(() => {
-        mutationInFlight = false;
-      }),
-    };
+    });
 
     mockUseSessionStore.mockReturnValue(store);
     mockUpdateSessionCurrency.mockResolvedValue(true);
@@ -154,27 +143,9 @@ describe('useSession fetch resilience', () => {
   });
 
   it('returns cached session when refresh fetch throws', async () => {
-    let mutationInFlight = false;
-    const store = {
+    const store = createMockStore({
       session: { id: 'session-existing', currency: 'USD', siteCode: 'main' },
-      loading: false,
-      setSession: jest.fn((session) => {
-        store.session = session;
-      }),
-      setLoading: jest.fn((loading) => {
-        store.loading = loading;
-      }),
-      tryAcquireMutationLock: jest.fn(() => {
-        if (mutationInFlight) {
-          return false;
-        }
-        mutationInFlight = true;
-        return true;
-      }),
-      releaseMutationLock: jest.fn(() => {
-        mutationInFlight = false;
-      }),
-    };
+    });
 
     mockUseSessionStore.mockReturnValue(store);
     mockFetchCurrentSession.mockRejectedValue(new Error('Temporary fetch failure'));
@@ -190,27 +161,9 @@ describe('useSession fetch resilience', () => {
   });
 
   it('clears session when refresh succeeds with explicit null session', async () => {
-    let mutationInFlight = false;
-    const store = {
+    const store = createMockStore({
       session: { id: 'session-existing', currency: 'USD', siteCode: 'main' },
-      loading: false,
-      setSession: jest.fn((session) => {
-        store.session = session;
-      }),
-      setLoading: jest.fn((loading) => {
-        store.loading = loading;
-      }),
-      tryAcquireMutationLock: jest.fn(() => {
-        if (mutationInFlight) {
-          return false;
-        }
-        mutationInFlight = true;
-        return true;
-      }),
-      releaseMutationLock: jest.fn(() => {
-        mutationInFlight = false;
-      }),
-    };
+    });
 
     mockUseSessionStore.mockReturnValue(store);
     mockFetchCurrentSession.mockResolvedValue(null);
@@ -226,27 +179,7 @@ describe('useSession fetch resilience', () => {
   });
 
   it('sets null fallback when refresh fails without cached session', async () => {
-    let mutationInFlight = false;
-    const store = {
-      session: undefined,
-      loading: false,
-      setSession: jest.fn((session) => {
-        store.session = session;
-      }),
-      setLoading: jest.fn((loading) => {
-        store.loading = loading;
-      }),
-      tryAcquireMutationLock: jest.fn(() => {
-        if (mutationInFlight) {
-          return false;
-        }
-        mutationInFlight = true;
-        return true;
-      }),
-      releaseMutationLock: jest.fn(() => {
-        mutationInFlight = false;
-      }),
-    };
+    const store = createMockStore({ session: undefined });
 
     mockUseSessionStore.mockReturnValue(store);
     mockFetchCurrentSession.mockRejectedValue(new Error('Temporary fetch failure'));

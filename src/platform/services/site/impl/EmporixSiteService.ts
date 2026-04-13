@@ -13,12 +13,63 @@ import type { Site } from '../../model/common/site';
 import type { PaymentService } from '../../payment/PaymentService';
 import type { SiteService } from '../SiteService';
 
+interface TenantReferenceData {
+  currencies: Currency[];
+  countries: Country[];
+  regions: Region[];
+  paymentModes: PaymentMode[];
+}
+
+interface SiteSharedCache {
+  refData: { data: TenantReferenceData; expiresAt: number } | null;
+  refDataInflight: Promise<TenantReferenceData> | null;
+  site: Map<string, { data: Site; expiresAt: number }>;
+  siteInflight: Map<string, Promise<Site | null>>;
+}
+
+const SITE_CACHE_KEY = '__emporix_site_cache' as const;
+
+function getSharedSiteCache(): SiteSharedCache {
+  const g = globalThis as unknown as Record<string, SiteSharedCache>;
+  if (!g[SITE_CACHE_KEY]) {
+    g[SITE_CACHE_KEY] = {
+      refData: null,
+      refDataInflight: null,
+      site: new Map(),
+      siteInflight: new Map(),
+    };
+  }
+  return g[SITE_CACHE_KEY];
+}
+
 /**
  * Implementation of SiteService for Emporix platform
  * Combines functionality from Country, Currency, Shipping, and Payment APIs
  */
 @injectable('SiteService', 'Singleton')
 class EmporixSiteService implements SiteService {
+  private static readonly REF_DATA_TTL_MS = 30_000;
+  private static readonly SITE_TTL_MS = 30_000;
+
+  private get _refDataCache() {
+    return getSharedSiteCache().refData;
+  }
+  private set _refDataCache(v: SiteSharedCache['refData']) {
+    getSharedSiteCache().refData = v;
+  }
+  private get _refDataInflight() {
+    return getSharedSiteCache().refDataInflight;
+  }
+  private set _refDataInflight(v: SiteSharedCache['refDataInflight']) {
+    getSharedSiteCache().refDataInflight = v;
+  }
+  private get _siteCache() {
+    return getSharedSiteCache().site;
+  }
+  private get _siteInflight() {
+    return getSharedSiteCache().siteInflight;
+  }
+
   constructor(
     @inject('EmporixCountryApi') private countryApi: EmporixCountryApi,
     @inject('EmporixCurrencyApi') private currencyApi: EmporixCurrencyApi,
@@ -27,7 +78,39 @@ class EmporixSiteService implements SiteService {
     @inject('LoggerService') private logger: LoggerService,
   ) {}
 
-  async getSite(code?: string, hasTriedDefaultSite: boolean = false): Promise<Site | null> {
+  private async getTenantReferenceData(): Promise<TenantReferenceData> {
+    const now = Date.now();
+    if (this._refDataCache && now < this._refDataCache.expiresAt) {
+      return this._refDataCache.data;
+    }
+    if (this._refDataInflight) {
+      return this._refDataInflight;
+    }
+    this._refDataInflight = this._fetchTenantReferenceData(now);
+    try {
+      return await this._refDataInflight;
+    } finally {
+      this._refDataInflight = null;
+    }
+  }
+
+  private async _fetchTenantReferenceData(now: number): Promise<TenantReferenceData> {
+    const [currencies, countries, regions, paymentModes] = await Promise.all([
+      this.getCurrencies(),
+      this.getCountries(true),
+      this.getRegions(),
+      this.paymentService.getPaymentModes(),
+    ]);
+    const data = { currencies, countries, regions, paymentModes };
+    this._refDataCache = { data, expiresAt: now + EmporixSiteService.REF_DATA_TTL_MS };
+    return data;
+  }
+
+  async getSite(
+    code?: string,
+    hasTriedDefaultSite: boolean = false,
+    refData?: TenantReferenceData,
+  ): Promise<Site | null> {
     if (!code) {
       const sites = await this.siteSettingsApi.getSites({}, false);
       // TODO we could be faster, by using this result below
@@ -37,32 +120,50 @@ class EmporixSiteService implements SiteService {
     if (!code) {
       return null;
     }
+
+    const now = Date.now();
+    const cached = this._siteCache.get(code);
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const inflight = this._siteInflight.get(code);
+    if (inflight) {
+      return inflight;
+    }
+
+    const promise = this._fetchSite(code, hasTriedDefaultSite, refData, now);
+    this._siteInflight.set(code, promise);
     try {
-      const [emporixSite, currencies, countries, regions, paymentModes] = await Promise.all([
+      return await promise;
+    } finally {
+      this._siteInflight.delete(code);
+    }
+  }
+
+  private async _fetchSite(
+    code: string,
+    hasTriedDefaultSite: boolean,
+    refData: TenantReferenceData | undefined,
+    now: number,
+  ): Promise<Site | null> {
+    try {
+      const [emporixSite, { currencies, countries, regions, paymentModes }] = await Promise.all([
         this.siteSettingsApi.getSite(code),
-        this.getCurrencies(),
-        this.getCountries(true),
-        this.getRegions(),
-        this.paymentService.getPaymentModes(),
+        refData ? Promise.resolve(refData) : this.getTenantReferenceData(),
       ]);
-      // Get Default Site as fallback
       if (!emporixSite) {
         const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE;
 
-        // Prevent infinite recursion:
-        // 1. Don't recurse if we've already tried the default site
-        // 2. Don't recurse if the current code is already the default site
-        // 3. Don't recurse if default site is undefined or empty
         if (defaultSite && code !== defaultSite && !hasTriedDefaultSite) {
           this.logger.warn(`Site '${code}' not found, attempting fallback to default site '${defaultSite}'`);
-          const fallbackSite = await this.getSite(defaultSite, true);
+          const fallbackSite = await this.getSite(defaultSite, true, refData);
           if (!fallbackSite) {
             this.logger.error(`Failed to get site '${code}' and fallback to default site '${defaultSite}' also failed`);
           }
           return fallbackSite;
         }
 
-        // If we've already tried default or it's the same code, return null
         if (defaultSite && code === defaultSite) {
           this.logger.error(`Site '${code}' not found and it is the configured default site`);
         } else if (hasTriedDefaultSite) {
@@ -73,7 +174,9 @@ class EmporixSiteService implements SiteService {
         return null;
       }
 
-      return this.mapSite(emporixSite, currencies, countries, regions, paymentModes);
+      const site = this.mapSite(emporixSite, currencies, countries, regions, paymentModes);
+      this._siteCache.set(code, { data: site, expiresAt: now + EmporixSiteService.SITE_TTL_MS });
+      return site;
     } catch (error) {
       this.logger.error({ err: error instanceof Error ? error : String(error), code }, 'Error getting site');
       return null;
@@ -87,7 +190,8 @@ class EmporixSiteService implements SiteService {
       if (defaultSite && (config.length === 0 || !config.includes(defaultSite))) {
         config.push(defaultSite);
       }
-      const sites = await Promise.all(config.map(async (code) => this.getSite(code)));
+      const refData = await this.getTenantReferenceData();
+      const sites = await Promise.all(config.map(async (code) => this.getSite(code, false, refData)));
       return sites.filter((site) => site !== null) as Site[];
     } catch (error) {
       this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting available sites');

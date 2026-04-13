@@ -9,14 +9,48 @@ import type { EmporixSessionContextApi as IEmporixSessionContextApi } from '../E
 
 const createSessionMetrics = (route: string) => createFetchMetricsParams('session', route);
 
+interface SessionContextSharedCache {
+  data: { data: EmporixSessionContext | undefined; expiresAt: number } | null;
+  inflight: Promise<EmporixSessionContext | undefined> | null;
+}
+
+const SESSION_CTX_CACHE_KEY = '__emporix_session_ctx_cache' as const;
+
+function getSharedSessionCtxCache(): SessionContextSharedCache {
+  const g = globalThis as unknown as Record<string, SessionContextSharedCache>;
+  if (!g[SESSION_CTX_CACHE_KEY]) {
+    g[SESSION_CTX_CACHE_KEY] = { data: null, inflight: null };
+  }
+  return g[SESSION_CTX_CACHE_KEY];
+}
+
 @injectable('EmporixSessionContextApi', 'Singleton')
 class EmporixSessionContextApi implements IEmporixSessionContextApi {
+  private static readonly OWN_CONTEXT_TTL_MS = 5_000;
+
+  private get _ownContextCache() {
+    return getSharedSessionCtxCache().data;
+  }
+  private set _ownContextCache(v: SessionContextSharedCache['data']) {
+    getSharedSessionCtxCache().data = v;
+  }
+  private get _ownContextInflight() {
+    return getSharedSessionCtxCache().inflight;
+  }
+  private set _ownContextInflight(v: SessionContextSharedCache['inflight']) {
+    getSharedSessionCtxCache().inflight = v;
+  }
+
   constructor(
     @inject('EmporixApiInvoker') protected apiClient: EmporixApiClient,
     @inject('EmporixConfig') protected config: EmporixConfig,
   ) {
     this.apiClient = apiClient;
     this.config = config;
+  }
+
+  private invalidateOwnContextCache(): void {
+    this._ownContextCache = null;
   }
 
   async getSessionContext(sessionId: string): Promise<EmporixSessionContext | undefined> {
@@ -95,6 +129,22 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
   }
 
   async getOwnSessionContext(): Promise<EmporixSessionContext | undefined> {
+    const now = Date.now();
+    if (this._ownContextCache && now < this._ownContextCache.expiresAt) {
+      return this._ownContextCache.data;
+    }
+    if (this._ownContextInflight) {
+      return this._ownContextInflight;
+    }
+    this._ownContextInflight = this._fetchOwnSessionContext(now);
+    try {
+      return await this._ownContextInflight;
+    } finally {
+      this._ownContextInflight = null;
+    }
+  }
+
+  private async _fetchOwnSessionContext(now: number): Promise<EmporixSessionContext | undefined> {
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/me/context`,
       { method: 'GET' },
@@ -110,10 +160,13 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
       throw new Error(`Failed to get own session context: ${response.statusText}`);
     }
 
-    return await response.json();
+    const data: EmporixSessionContext = await response.json();
+    this._ownContextCache = { data, expiresAt: now + EmporixSessionContextApi.OWN_CONTEXT_TTL_MS };
+    return data;
   }
 
   async updateOwnSessionContext(sessionContext: Partial<EmporixSessionContext>): Promise<void> {
+    this.invalidateOwnContextCache();
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/me/context`,
       {
@@ -133,6 +186,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
   }
 
   async addOwnSessionContextAttribute(attribute: EmporixContextAttribute): Promise<string> {
+    this.invalidateOwnContextCache();
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/me/context/attributes`,
       {
@@ -153,6 +207,7 @@ class EmporixSessionContextApi implements IEmporixSessionContextApi {
   }
 
   async removeOwnSessionContextAttribute(attributeName: string): Promise<void> {
+    this.invalidateOwnContextCache();
     const response = await this.apiClient.authenticatedFetch(
       `/session-context/${this.config.tenant}/me/context/attributes/${attributeName}`,
       { method: 'DELETE' },
