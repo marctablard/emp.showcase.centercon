@@ -34,9 +34,19 @@ test.describe('Auth + Site synchronization', () => {
     await expect(page).toHaveURL(/\/us-branch/);
 
     await page.goto('/us-branch/login');
-    await page.locator('#username').fill(LOGIN_EMAIL!);
-    await page.locator('#password').fill(LOGIN_PASSWORD!);
-    await page.getByRole('button', { name: /log in/i }).click();
+
+    // Wait for the form to be fully hydrated before interacting.
+    // Playwright's fill() can race with React hydration on controlled inputs,
+    // causing the filled values to be overwritten by the default empty state.
+    const usernameInput = page.getByTestId('login-username');
+    await expect(usernameInput).toBeVisible({ timeout: 15_000 });
+
+    await usernameInput.fill(LOGIN_EMAIL!);
+    await page.getByTestId('login-password').fill(LOGIN_PASSWORD!);
+
+    const submitButton = page.getByTestId('login-submitButton');
+    await expect(submitButton).toBeEnabled({ timeout: 10_000 });
+    await submitButton.click();
 
     // Wait for authenticated landing to settle.
     await expect

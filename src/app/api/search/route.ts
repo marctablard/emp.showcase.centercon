@@ -6,7 +6,7 @@ import type { SearchService } from '@/platform/services/search';
 
 /**
  * API endpoint to search for products
- * GET /api/search?query=term&page=0&size=12&sort=name:asc&site=main
+ * GET /api/search?query=term&page=0&size=12&sort=name:asc&site=main&currency=EUR
  *
  * Catalog `categoryIds` in product search `q` can be disabled with `NEXT_PUBLIC_SEARCH_OMIT_CATALOG_CATALOG_FILTER=true`
  * (e.g. old DBs without product `categoryIds`). Per-request unscoped search: set `SEARCH_ALLOW_UNSCOPED_PRODUCT_SEARCH=true`
@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     const sort = url.searchParams.get('sort') || undefined;
     const locale = url.searchParams.get('locale') || undefined;
     const site = url.searchParams.get('site') || undefined;
+    const currency = url.searchParams.get('currency') || undefined;
 
     let searchAllProducts = false;
     if (process.env.SEARCH_ALLOW_UNSCOPED_PRODUCT_SEARCH === 'true') {
@@ -49,7 +50,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Perform the search
     const searchResults = await searchService.searchProducts(
       {
         query,
@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
         filters: Object.keys(filters).length > 0 ? filters : undefined,
         site: site || undefined,
         locale: locale || undefined,
+        currency,
         searchAllProducts,
       },
       locale,

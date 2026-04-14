@@ -16,6 +16,7 @@ import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/deb
 import { getSession, setSessionLanguage } from '@/lib/ssr/session';
 import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
+import { SiteSessionAligner } from '@/providers/SiteSessionAligner';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { StoryblokProvider } from '@/providers/StoryblokProvider';
 import { setRequestSite } from '@/site/server/';
@@ -110,6 +111,7 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
               <StoreProvider shopSession={shopSession} site={site} availableSites={availableSites}>
                 <StoryblokProvider>
                   <CsrfProvider />
+                  <SiteSessionAligner />
                   {isDebugApiEnabled() && isBrowserDebugOutputEnabled() && <ApiDebugPanel />}
                   {children}
                   {dialog}
