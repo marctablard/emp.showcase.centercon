@@ -12,6 +12,21 @@ const envPath = process.env.DOTENV_CONFIG_PATH || path.resolve(__dirname, '.env.
 if (!isCi || process.env.DOTENV_CONFIG_PATH) {
   dotenv.config({ path: envPath, quiet: true });
 }
+
+(function sanitizeProcessNodeOptions() {
+  const raw = process.env.NODE_OPTIONS;
+  if (!raw) return;
+  const filtered = raw
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((p) => !p.startsWith('--localstorage-file') && !p.startsWith('--experimental-webstorage'));
+  if (filtered.length === 0) {
+    delete process.env.NODE_OPTIONS;
+  } else {
+    process.env.NODE_OPTIONS = filtered.join(' ');
+  }
+})();
+
 const hasEmporixTestConfig = Boolean(
   process.env.NEXT_EMPORIX_TEST_TENANT &&
     process.env.NEXT_EMPORIX_TEST_CLIENT_ID &&

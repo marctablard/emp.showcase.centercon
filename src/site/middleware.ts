@@ -2,6 +2,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { routing } from '@/i18n/routing';
+import { edgeLog } from '@/lib/server/edge-stderr-log';
 import {
   INTERNAL_APP_PATH_HEADER,
   INTERNAL_SITE_HEADER,
@@ -96,19 +97,14 @@ function handleMisroutedHealthCheck(req: NextRequest): NextResponse {
   const xff = req.headers.get('x-forwarded-for') ?? '';
   const rid = req.headers.get('x-request-id') ?? '';
 
-  // Structured log for easy filtering in Azure/App Insights
-  // eslint-disable-next-line no-console -- Edge middleware: Pino logger unavailable
-  console.warn(
-    JSON.stringify({
-      event: 'misrouted_healthcheck',
-      path: req.nextUrl.pathname,
-      method: req.method,
-      ua,
-      xff,
-      rid,
-      recommendation: 'Configure health checks to use /api/health or /api/ready',
-    }),
-  );
+  edgeLog('warn', 'misrouted_healthcheck', {
+    path: req.nextUrl.pathname,
+    method: req.method,
+    ua,
+    xff,
+    rid,
+    recommendation: 'Configure health checks to use /api/health or /api/ready',
+  });
 
   return new NextResponse('OK', {
     status: 200,
@@ -161,16 +157,12 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
       if (fallbackEnabled) {
         site = routing.defaultSite;
       } else {
-        // eslint-disable-next-line no-console -- Edge middleware: Pino logger unavailable
-        console.warn(
-          JSON.stringify({
-            event: 'invalid_site_rejected',
-            site,
-            path: req.nextUrl.pathname,
-            availableSites: routing.availableSites,
-            recommendation: 'Check NEXT_PUBLIC_AVAILABLE_SITES configuration',
-          }),
-        );
+        edgeLog('warn', 'invalid_site_rejected', {
+          site,
+          path: req.nextUrl.pathname,
+          availableSites: routing.availableSites,
+          recommendation: 'Check NEXT_PUBLIC_AVAILABLE_SITES configuration',
+        });
         siteInvalid = true;
         site = routing.availableSites[0];
       }
