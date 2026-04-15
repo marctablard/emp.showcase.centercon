@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import { getPublicDefaultLanguage, getPublicDefaultSite } from '@/lib/common/public-default-env';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCountryApi } from '@/platform/integrations/emporix/country/EmporixCountryApi';
 import type { EmporixCurrencyApi } from '@/platform/integrations/emporix/currency/EmporixCurrencyApi';
@@ -198,7 +199,7 @@ class EmporixSiteService implements SiteService {
   async getAvailableSites(): Promise<Site[]> {
     try {
       const configuredCodes = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
-      const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || undefined;
+      const defaultSite = getPublicDefaultSite();
       if (defaultSite && (configuredCodes.length === 0 || !configuredCodes.includes(defaultSite))) {
         configuredCodes.push(defaultSite);
       }
@@ -256,7 +257,7 @@ class EmporixSiteService implements SiteService {
       // TODO Emporix should supply a separate field for the commercial default country,
       // currently it is in the address
       defaultCountry: address.country,
-      defaultLanguage: emporixSite.defaultLanguage || 'en',
+      defaultLanguage: emporixSite.defaultLanguage || getPublicDefaultLanguage(),
       defaultCurrency: currencies.find((c) => c.id === emporixSite.currency) || currencies[0],
       countries: countries,
       shipToCountries:

@@ -143,9 +143,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                   <div className="flex justify-between mb-2">
                     <span className="text-text-on-disabled">{tOrder('subtotal')}</span>
                     <span className="font-medium">
-                      {order.price?.subtotal?.gross
-                        ? formatCurrency(order.price.subtotal.gross, order.currency || 'EUR')
-                        : ''}
+                      {order.price?.subtotal?.gross ? formatCurrency(order.price.subtotal.gross, order.currency) : ''}
                     </span>
                   </div>
 
@@ -154,10 +152,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                       <span className="text-text-on-disabled">{tOrder('shipping')}</span>
                       <span className="font-medium">
                         {order.shipping.total?.value
-                          ? formatCurrency(
-                              order.shipping.total.value,
-                              order.shipping.total.currency || order.currency || 'EUR',
-                            )
+                          ? formatCurrency(order.shipping.total.value, order.shipping.total.currency || order.currency)
                           : tOrder('free')}
                       </span>
                     </div>
@@ -175,9 +170,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                   <div className="flex justify-between pt-2 border-t border-border-primary">
                     <span className="font-medium">{tOrder('total')}</span>
                     <span className="font-bold">
-                      {order.price?.total?.gross
-                        ? formatCurrency(order.price.total.gross, order.currency || 'EUR')
-                        : ''}
+                      {order.price?.total?.gross ? formatCurrency(order.price.total.gross, order.currency) : ''}
                     </span>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { getPublicDefaultCurrency } from '@/lib/common/public-default-env';
 import { useCheckout } from '../checkout/useCheckout';
 import { useSession } from '../session/useSession';
 import { useSite } from '../site/useSite';
@@ -28,7 +29,7 @@ export const useCartTotal = (): UseCartTotal => {
     sessionCurrency && (supportedSiteCurrencies.size === 0 || supportedSiteCurrencies.has(sessionCurrency))
       ? sessionCurrency
       : undefined;
-  const fallbackCurrency = sessionBackedCurrency ?? site?.defaultCurrency?.id ?? 'EUR';
+  const fallbackCurrency = sessionBackedCurrency ?? site?.defaultCurrency?.id ?? getPublicDefaultCurrency();
   const cartCurrency = cart?.totalPrice?.currency;
   const currency =
     sessionBackedCurrency && cartCurrency && cartCurrency !== sessionBackedCurrency

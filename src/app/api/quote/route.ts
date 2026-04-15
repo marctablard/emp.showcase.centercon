@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getPublicDefaultUnitCode } from '@/lib/common/public-default-env';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { QuoteUpdateRequest } from '@/platform/services/model/quote';
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     const items = Array.isArray(body?.items) ? body.items : undefined;
 
     if (items && items.length > 0) {
-      const defaultUnitCode = process.env.NEXT_PUBLIC_EMPORIX_DEFAULT_UNIT_CODE || 'piece';
+      const defaultUnitCode = getPublicDefaultUnitCode();
       const session = await sessionService.getCurrent();
 
       body.items = await Promise.all(

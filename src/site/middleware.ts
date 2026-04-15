@@ -2,6 +2,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { routing } from '@/i18n/routing';
+import { getPublicDefaultLanguage } from '@/lib/common/public-default-env';
 import { edgeLog } from '@/lib/server/edge-stderr-log';
 import {
   INTERNAL_APP_PATH_HEADER,
@@ -197,7 +198,7 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
     }
     // We can continue, but now we need to set the headers for Locale and Site
     const locale = intlResponse.headers.get(INTL_MIDDLEWARE_HEADER);
-    const resolvedLocale = locale || 'en';
+    const resolvedLocale = locale || getPublicDefaultLanguage();
     const headers = new Headers(req.headers);
     headers.set(INTERNAL_APP_PATH_HEADER, appPath);
     if (locale) {

@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { extendTailwindMerge } from 'tailwind-merge';
+import { getPublicDefaultCurrency, getPublicDefaultLanguage } from '@/lib/common/public-default-env';
 import type { LocalizedString, SearchParams } from '@/platform/services/model/common';
 import type { Session } from '@/platform/services/model/session/session';
 
@@ -12,8 +13,6 @@ function buildBaseUrl() {
 }
 
 export const baseUrl = buildBaseUrl();
-
-const defaultEmptyLocale = 'en';
 
 const customTwMerge = extendTailwindMerge({
   extend: {
@@ -64,12 +63,12 @@ export function buildSearchQuery<T>(params: SearchParams<T>): { body: string; qu
  * @param currencyCode The ISO currency code (e.g., 'USD', 'EUR')
  * @returns Formatted currency string
  */
-const DEFAULT_CURRENCY_LOCALE = 'de';
-
-export function formatCurrency(amount: number, currencyCode: string = 'USD', locale?: Session['language']): string {
-  return new Intl.NumberFormat(locale || DEFAULT_CURRENCY_LOCALE, {
+export function formatCurrency(amount: number, currencyCode?: string, locale?: Session['language']): string {
+  const code = currencyCode ?? getPublicDefaultCurrency();
+  const loc = locale ?? getPublicDefaultLanguage();
+  return new Intl.NumberFormat(loc, {
     style: 'currency',
-    currency: currencyCode,
+    currency: code,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
@@ -77,12 +76,14 @@ export function formatCurrency(amount: number, currencyCode: string = 'USD', loc
 
 export function formatCurrencyToParts(
   amount: number,
-  currencyCode: string = 'USD',
+  currencyCode?: string,
   locale?: Session['language'],
 ): Intl.NumberFormatPart[] {
-  return new Intl.NumberFormat(locale || DEFAULT_CURRENCY_LOCALE, {
+  const code = currencyCode ?? getPublicDefaultCurrency();
+  const loc = locale ?? getPublicDefaultLanguage();
+  return new Intl.NumberFormat(loc, {
     style: 'currency',
-    currency: currencyCode,
+    currency: code,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).formatToParts(amount);
@@ -98,7 +99,7 @@ export function buildCanonicalUrl(locale: string, path: string): string {
   if (!path.startsWith('/')) {
     path = `/${path}`;
   }
-  return `${baseUrl}${locale === defaultEmptyLocale ? '' : `/${locale}`}${path}`;
+  return `${baseUrl}${locale === getPublicDefaultLanguage() ? '' : `/${locale}`}${path}`;
 }
 /**
  * Extract the localized value from a LocalizedString, array format, or return the string directly

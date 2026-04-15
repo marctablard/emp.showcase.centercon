@@ -733,10 +733,12 @@ The application uses `globalThis`-backed in-memory caches to share data across N
 | `__emporix_site_cache` | `EmporixSiteService` | 30s (per-site and ref data) | TTL expiry + **`SiteService.invalidateSiteCache`** after successful session site switch | Site config, currencies, countries, regions, payment modes |
 | `__emporix_session_ctx_cache` | `EmporixSessionContextApi` | 5s per `sessionId` entry (max 128 keys) | Own-context PATCH/POST/DELETE clear all in-process entries; service-token context writes clear the **target** `sessionId` key after success | Own `/me/context` keyed by Emporix `sessionId` from `EmporixTokenManager` |
 
-Public token caching relies on Next.js `fetch` cache with `next: { revalidate: 3200 }` in production. Both SSR and Server containers share the Next.js fetch cache natively, so no `globalThis` wrapper is needed.
+| `__emporix_public_token_cache` | `EmporixTokenManagerAbstract` | Derived from token `expires_in` (minus safety margin) | `clearPublicTokenCache`; entry replaced on fetch | Public access token per `tenant:clientId`; inflight dedupe across SSR and Server scopes |
+
+`EmporixOAuthApiServer.getPublicToken` still passes `next: { revalidate: 3200 }` on the underlying `fetch`, which can help in production when Next’s fetch cache applies; the **`globalThis`** cache above is what guarantees deduplication across separate DI containers and in dev where that cache is often inactive.
 
 **When caches are NOT shared:**
-- Anonymous session tokens (`EmporixTokenManagerAbstract`) use per-instance inflight deduplication with a 2s grace period — not shared via `globalThis` because session tokens are user-specific.
+- Anonymous **shopper** session tokens use per–token-manager-instance inflight maps with a 2s post-resolve grace period (not `globalThis`), because storage and cookie wiring are subclass-specific.
 
 ### Adding Metrics to New API Integrations
 

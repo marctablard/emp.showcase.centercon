@@ -1,3 +1,4 @@
+import { getPublicDefaultLanguage } from '@/lib/common/public-default-env';
 import { LocalizedString } from '@/platform/services/model/common';
 import { formatCurrency, formatCurrencyToParts, l10n } from './utils';
 
@@ -221,9 +222,9 @@ describe('currency formatting utilities', () => {
     expect(formatCurrency(amount, 'EUR', 'en-US')).toBe(expected);
   });
 
-  it('uses de fallback when locale is omitted', () => {
+  it('uses default language from env when locale is omitted', () => {
     const amount = 1234.5;
-    const expected = new Intl.NumberFormat('de', {
+    const expected = new Intl.NumberFormat(getPublicDefaultLanguage(), {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2,

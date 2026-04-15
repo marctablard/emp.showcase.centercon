@@ -103,8 +103,12 @@ describe('EmporixSiteService', () => {
   });
 
   afterEach(() => {
-    // Reset environment variable
-    delete process.env.NEXT_PUBLIC_DEFAULT_SITE;
+    process.env.NEXT_PUBLIC_DEFAULT_SITE = 'main';
+    process.env.NEXT_PUBLIC_DEFAULT_CURRENCY = 'EUR';
+    process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE = 'en';
+    process.env.NEXT_PUBLIC_DEFAULT_COUNTRY = 'DE';
+    process.env.NEXT_PUBLIC_DEFAULT_REGION = 'Europe';
+    process.env.NEXT_PUBLIC_EMPORIX_DEFAULT_UNIT_CODE = 'piece';
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
   });
