@@ -136,6 +136,26 @@ class EmporixSessionService implements SessionService {
         throw error;
       }
 
+      if (latestSession.siteCode === site) {
+        this.logger.info({ site }, 'Site already set to target — skipping retry');
+        return;
+      }
+
+      // Guard: if the siteCode changed between our initial read and the retry,
+      // a concurrent setSite() call already completed (e.g. site switcher vs.
+      // reconciliation race). Retrying would overwrite the newer intent.
+      if (latestSession.siteCode !== initialSession.siteCode) {
+        this.logger.info(
+          {
+            targetSite: site,
+            initialSiteCode: initialSession.siteCode,
+            currentSiteCode: latestSession.siteCode,
+          },
+          'Aborting setSite retry — siteCode was concurrently changed by another mutation',
+        );
+        return;
+      }
+
       const retryPayload = buildUpdatePayload(latestSession);
       this.logger.warn(
         {
@@ -146,6 +166,14 @@ class EmporixSessionService implements SessionService {
         'Retrying session site update after version conflict',
       );
       await this.sessionContextApi.updateOwnSessionContext(retryPayload);
+    }
+
+    if (siteChanged) {
+      const previousSiteCode = initialSession.siteCode;
+      if (previousSiteCode) {
+        this.siteService.invalidateSiteCache(previousSiteCode);
+      }
+      this.siteService.invalidateSiteCache(site);
     }
   }
 
@@ -221,6 +249,18 @@ class EmporixSessionService implements SessionService {
       result.siteCode = resolvedDefaultSite;
     }
 
+    this.logger.debug(
+      {
+        siteCode: result.siteCode,
+        currency: result.currency,
+        country: result.country,
+        language: result.language,
+        region: result.region,
+        needsAdjustment: Object.keys(updateDefaults).length > 0,
+      },
+      'adjustSessionsSettings entry',
+    );
+
     // Fast path: skip the expensive getSite() call when the session is already
     // fully populated (returning visitor). getSite() is only needed to validate
     // currency against site.currencies and fill missing defaults.
@@ -231,6 +271,7 @@ class EmporixSessionService implements SessionService {
       result.language &&
       result.region
     ) {
+      this.logger.debug('Session fully populated, skipping adjustment');
       return;
     }
 
@@ -263,6 +304,7 @@ class EmporixSessionService implements SessionService {
       result.region = this.defaultRegion;
     }
     if (Object.keys(updateDefaults).length > 0) {
+      this.logger.info({ updateDefaults }, 'Patching session defaults');
       updateDefaults.metadata = {
         version: sessionContext?.metadata?.version || 1,
       };

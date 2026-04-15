@@ -12,10 +12,21 @@ async function getSiteFromHeaderImpl(): Promise<string> {
     site = (await headers()).get(INTERNAL_SITE_HEADER) || undefined;
     server.get<LoggerService>('LoggerService').debug({ site }, 'Request site resolved');
   } catch (error) {
-    const isOutsideRequestScope = error instanceof Error && error.message.includes('outside a request scope');
     const logger = server.get<LoggerService>('LoggerService');
-    if (isOutsideRequestScope) {
-      logger.debug('headers() called outside request scope — falling back to default site');
+    const digest =
+      typeof error === 'object' && error !== null && 'digest' in error
+        ? String((error as { digest?: unknown }).digest)
+        : '';
+    const message = error instanceof Error ? error.message : String(error);
+    const isBenignDynamicContext =
+      digest.includes('DYNAMIC') ||
+      /dynamic server usage|outside a request scope|static generation|headers\(\)/i.test(message);
+
+    if (isBenignDynamicContext) {
+      logger.debug(
+        { event: 'request_headers_unavailable', digest: digest || undefined },
+        'headers() unavailable in this context — falling back to default site',
+      );
     } else {
       logger.error({ err: error }, 'Error getting headers');
     }

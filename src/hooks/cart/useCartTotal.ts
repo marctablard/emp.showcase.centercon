@@ -24,14 +24,20 @@ export const useCartTotal = (): UseCartTotal => {
     site?.currencies?.flatMap((currency) => [currency.id, currency.code].filter(Boolean) as string[]) ?? [],
   );
   const sessionCurrency = session?.currency;
-  const fallbackCurrency =
+  const sessionBackedCurrency =
     sessionCurrency && (supportedSiteCurrencies.size === 0 || supportedSiteCurrencies.has(sessionCurrency))
       ? sessionCurrency
-      : site?.defaultCurrency?.id || 'EUR';
+      : undefined;
+  const fallbackCurrency = sessionBackedCurrency ?? site?.defaultCurrency?.id ?? 'EUR';
+  const cartCurrency = cart?.totalPrice?.currency;
+  const currency =
+    sessionBackedCurrency && cartCurrency && cartCurrency !== sessionBackedCurrency
+      ? sessionBackedCurrency
+      : (cartCurrency ?? fallbackCurrency);
 
   return {
     cartTotal,
     shippingCosts: shippingMethod?.amount,
-    currency: cart?.totalPrice?.currency ?? fallbackCurrency,
+    currency,
   };
 };

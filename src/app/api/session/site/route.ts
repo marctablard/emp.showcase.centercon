@@ -13,16 +13,21 @@ export async function PUT(request: NextRequest) {
   try {
     const sessionService = server.get<SessionService>('SessionService');
     const siteService = server.get<SiteService>('SiteService');
+    const logger = server.get<LoggerService>('LoggerService');
     const data = await request.json();
 
     if (!data.site) {
       return NextResponse.json({ error: 'Site is required' }, { status: 400 });
     }
+
+    logger.info({ targetSite: data.site }, 'PUT /api/session/site — updating session site');
+
     const newSite = await siteService.getSite(data.site);
     if (!newSite) {
       return NextResponse.json({ error: 'Unknown Site' }, { status: 400 });
     }
     await sessionService.setSite(newSite.code, newSite.defaultCurrency.id);
+    logger.info({ site: newSite.code, currency: newSite.defaultCurrency.id }, 'Session site updated successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');

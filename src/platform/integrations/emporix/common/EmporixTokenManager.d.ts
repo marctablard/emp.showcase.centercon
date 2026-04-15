@@ -82,6 +82,12 @@ export interface EmporixTokenManager {
   ): Promise<{ accessToken: string; saasToken?: string; sessionId: string } | null>;
 
   /**
+   * Clear the in-process public token cache for the given tenant+clientId.
+   * Used by invokers to force a fresh token on 401 retry.
+   */
+  clearPublicTokenCache(tenant: string, clientId: string): void;
+
+  /**
    * Clear all stored tokens
    */
   clearTokens(tenant: string): void;

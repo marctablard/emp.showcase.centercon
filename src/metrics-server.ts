@@ -2,6 +2,8 @@ import { createServer } from 'http';
 import type { MetricsService } from '@/platform/services/metrics/MetricsService';
 
 const DEFAULT_METRICS_PORT = 3001;
+/** Bind metrics scrape to loopback only — remote scrape needs a same-host proxy or platform forwarding. */
+export const METRICS_BIND_HOST = '127.0.0.1' as const;
 
 export function getMetricsPort(): number {
   const envPort = process.env.NEXT_MONITORING_PORT;
@@ -14,11 +16,15 @@ export function getMetricsPort(): number {
   return DEFAULT_METRICS_PORT;
 }
 
-export function startMetricsServer(metricsService: MetricsService): { started: boolean; port: number } {
+export function startMetricsServer(metricsService: MetricsService): {
+  started: boolean;
+  port: number;
+  host: typeof METRICS_BIND_HOST;
+} {
   const port = getMetricsPort();
 
   if (!metricsService.isEnabled()) {
-    return { started: false, port };
+    return { started: false, port, host: METRICS_BIND_HOST };
   }
 
   const registry = metricsService.getRegistry();
@@ -46,6 +52,6 @@ export function startMetricsServer(metricsService: MetricsService): { started: b
     }
   });
 
-  server.listen(port);
-  return { started: true, port };
+  server.listen(port, METRICS_BIND_HOST);
+  return { started: true, port, host: METRICS_BIND_HOST };
 }

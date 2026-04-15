@@ -110,9 +110,8 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
       },
       validateSite: async (newSiteCode: string) => {
-        const { lastSiteCode } = get();
+        const { lastSiteCode, currentCart } = get();
         if (lastSiteCode !== null && lastSiteCode !== newSiteCode) {
-          // Site changed - set new site first to prevent race conditions, then clear cart state and fetch new one
           set({
             lastSiteCode: newSiteCode,
             currentCart: null,
@@ -123,8 +122,20 @@ export const createCartStore = (initState: CartState = defaultState) => {
           });
           await get().fetchCart(false);
         } else if (lastSiteCode === null) {
-          // First time setting site
           set({ lastSiteCode: newSiteCode });
+          // Cart may already be loaded from SSR/page-load before the session's site
+          // was reconciled (e.g., direct URL navigation to a different site). If the
+          // existing cart belongs to a different site, clear and refetch.
+          if (currentCart && currentCart.site && currentCart.site !== newSiteCode) {
+            set({
+              currentCart: null,
+              loading: true,
+              error: null,
+              lastShippingUpdate: null,
+              pendingCurrencySync: null,
+            });
+            await get().fetchCart(false);
+          }
         }
       },
       validateLegalEntity: async (newLegalEntityId: string | undefined) => {
@@ -182,7 +193,22 @@ export const createCartStore = (initState: CartState = defaultState) => {
             set({ loading: true, error: null });
 
             try {
-              const cartData = await apiFetchCurrentCart(createCurrent);
+              let cartData = await apiFetchCurrentCart(createCurrent);
+
+              // Site guard: discard cart from a different site.
+              // getCartByCriteria passes siteCode to the API but the upstream may
+              // still return a cart from a previous site (race condition / stale
+              // customer lookup).  Accepting it would leave the cart icon stuck on
+              // the wrong currency until the next full page reload.
+              const expectedSite = get().lastSiteCode;
+              if (cartData && expectedSite && cartData.site && cartData.site !== expectedSite) {
+                getLogger().warn(
+                  { cartSite: cartData.site, expectedSite },
+                  'fetchCart received cart from wrong site — discarding',
+                );
+                cartData = null;
+              }
+
               set({ currentCart: cartData, loading: false });
               await get().flushPendingCurrencySync();
               return cartData;

@@ -5,6 +5,7 @@ import { omit } from 'lodash';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import type { StoredToken } from '@/platform/integrations/types/auth';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { RequestContextService } from '@/platform/services/request-context/RequestContextService';
 import type { AnonymousTokenSessionParams, EmporixAccessTokenResponse } from '../../model/oauth';
 import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
@@ -15,13 +16,16 @@ import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
 class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
   protected serviceToken: StoredToken<EmporixAccessTokenResponse> | undefined;
   private requestContext: RequestContextService;
+  private logger: LoggerService;
 
   constructor(
     @inject('EmporixOAuthApi') oauthApi: EmporixOAuthApi,
     @inject('RequestContextService') requestContext: RequestContextService,
+    @inject('LoggerService') logger: LoggerService,
   ) {
     super(oauthApi);
     this.requestContext = requestContext;
+    this.logger = logger;
   }
 
   async getAnonymousToken(
@@ -42,12 +46,15 @@ class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
     } catch {
       siteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE;
     }
-    return {
+    const params: AnonymousTokenSessionParams = {
       siteCode: siteCode || process.env.NEXT_PUBLIC_DEFAULT_SITE,
       currency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY,
       language: process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE,
       targetLocation: process.env.NEXT_PUBLIC_DEFAULT_COUNTRY,
+      region: process.env.NEXT_PUBLIC_DEFAULT_REGION,
     };
+    this.logger.debug({ ...params }, 'resolveSessionParams');
+    return params;
   }
 
   public clearTokens(tenant: string): void {

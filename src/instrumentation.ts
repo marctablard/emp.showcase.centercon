@@ -23,9 +23,9 @@ export async function register() {
 
     const metricsService = server.default.get<MetricsService>('MetricsService');
     const { startMetricsServer } = await import('./metrics-server');
-    const { started, port } = startMetricsServer(metricsService);
+    const { started, port, host } = startMetricsServer(metricsService);
     if (started) {
-      logger.info({ port }, 'Metrics server started');
+      logger.info({ port, host }, 'Metrics server started');
     } else {
       logger.info('Metrics disabled (NEXT_METRICS_ENABLED is not "true")');
     }

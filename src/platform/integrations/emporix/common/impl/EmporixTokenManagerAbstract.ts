@@ -22,6 +22,22 @@ export interface TokenStore {
   serviceToken?: StoredToken<EmporixAccessTokenResponse>;
 }
 
+interface PublicTokenCache {
+  entries: Map<string, { accessToken: string; expiresAt: number }>;
+  inflight: Map<string, Promise<{ accessToken: string }>>;
+}
+
+const PUBLIC_TOKEN_CACHE_KEY = '__emporix_public_token_cache' as const;
+const PUBLIC_TOKEN_SAFETY_MARGIN_MS = 60_000;
+
+function getPublicTokenCache(): PublicTokenCache {
+  const g = globalThis as unknown as Record<string, PublicTokenCache>;
+  if (!g[PUBLIC_TOKEN_CACHE_KEY]) {
+    g[PUBLIC_TOKEN_CACHE_KEY] = { entries: new Map(), inflight: new Map() };
+  }
+  return g[PUBLIC_TOKEN_CACHE_KEY];
+}
+
 export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManager {
   private static readonly ANON_TOKEN_DEDUP_GRACE_MS = 2_000;
   private _anonymousTokenInflight = new Map<string, Promise<StoredToken<EmporixAnonymousTokenResponse>>>();
@@ -30,9 +46,39 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
   abstract clearTokens(tenant: string): void;
 
   async getPublicToken(tenant: string, clientId: string): Promise<{ accessToken: string }> {
-    // this token should already be a cached one.
-    const publicToken = await this.oauthApi.getPublicToken(tenant, clientId);
-    return { accessToken: publicToken.access_token };
+    const cacheKey = `${tenant}:${clientId}`;
+    const cache = getPublicTokenCache();
+
+    const cached = cache.entries.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return { accessToken: cached.accessToken };
+    }
+
+    const inflight = cache.inflight.get(cacheKey);
+    if (inflight) {
+      return inflight;
+    }
+
+    const promise = (async () => {
+      const response = await this.oauthApi.getPublicToken(tenant, clientId);
+      const expiresAt = Date.now() + response.expires_in * 1000 - PUBLIC_TOKEN_SAFETY_MARGIN_MS;
+      cache.entries.set(cacheKey, { accessToken: response.access_token, expiresAt });
+      return { accessToken: response.access_token };
+    })();
+
+    cache.inflight.set(cacheKey, promise);
+    try {
+      return await promise;
+    } finally {
+      cache.inflight.delete(cacheKey);
+    }
+  }
+
+  clearPublicTokenCache(tenant: string, clientId: string): void {
+    const cacheKey = `${tenant}:${clientId}`;
+    const cache = getPublicTokenCache();
+    cache.entries.delete(cacheKey);
+    cache.inflight.delete(cacheKey);
   }
 
   async getAnonymousToken(

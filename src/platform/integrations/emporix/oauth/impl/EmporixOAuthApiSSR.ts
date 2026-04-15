@@ -110,7 +110,7 @@ class EmporixOAuthApiSSR implements IEmporixOAuthApi {
         headers: { Accept: 'application/json' },
         next: { revalidate: 3200 },
       },
-      '/customerlogin/auth/public/login',
+      '/customerlogin/auth/anonymous/login',
     );
 
     if (!response.ok) {
@@ -132,6 +132,7 @@ class EmporixOAuthApiSSR implements IEmporixOAuthApi {
       if (sessionParams.currency) url += `&currency=${encodeURIComponent(sessionParams.currency)}`;
       if (sessionParams.language) url += `&language=${encodeURIComponent(sessionParams.language)}`;
       if (sessionParams.targetLocation) url += `&targetLocation=${encodeURIComponent(sessionParams.targetLocation)}`;
+      if (sessionParams.region) url += `&region=${encodeURIComponent(sessionParams.region)}`;
     }
 
     const response = await this.fetchWithMetrics(
@@ -223,7 +224,7 @@ class EmporixOAuthApiSSR implements IEmporixOAuthApi {
           Authorization: `Bearer ${accessToken}`,
         },
       },
-      '/customer/{tenant}/refreshauthtoken/refresh',
+      '/customer/{tenant}/refreshauthtoken',
     );
 
     if (!response.ok) {

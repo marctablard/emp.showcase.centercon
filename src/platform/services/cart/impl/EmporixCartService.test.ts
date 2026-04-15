@@ -33,7 +33,7 @@ describe('EmporixCartService', () => {
   >;
   let mockLogger: jest.Mocked<LoggerService>;
   let mockSessionService: jest.Mocked<Pick<SessionService, 'getCurrent' | 'setCart' | 'clearCart'>>;
-  let mockSiteService: jest.Mocked<Pick<SiteService, 'getSite'>>;
+  let mockSiteService: jest.Mocked<Pick<SiteService, 'getSite' | 'invalidateSiteCache'>>;
   let mockPriceService: jest.Mocked<Pick<PriceService, 'getProductPrice'>>;
   let mockProductService: jest.Mocked<Pick<ProductService, 'getProductById'>>;
   let mockStockService: jest.Mocked<Pick<StockService, 'getStockAvailability'>>;
@@ -82,6 +82,7 @@ describe('EmporixCartService', () => {
 
     mockSiteService = {
       getSite: jest.fn().mockResolvedValue(mainSite),
+      invalidateSiteCache: jest.fn(),
     };
 
     mockPriceService = {
@@ -549,8 +550,11 @@ describe('EmporixCartService', () => {
 
       const result = await cartService.addItemToCart('cart-us', 'prod-1', 1);
 
-      // When cart site matches session site, use session-based pricing (no explicit siteCode)
-      expect(mockPriceService.getProductPrice).toHaveBeenCalledWith('prod-1', 1);
+      expect(mockPriceService.getProductPrice).toHaveBeenCalledWith('prod-1', 1, undefined, {
+        siteCode: 'us-branch',
+        currency: 'USD',
+        country: undefined,
+      });
 
       // Verify the addItemRequest uses cart's siteCode
       expect(mockCartApi.addItemToCart).toHaveBeenCalledWith(
@@ -626,8 +630,11 @@ describe('EmporixCartService', () => {
         'Cart belongs to different site — auto-recovering correct cart',
       );
 
-      // Price should be fetched with session-based pricing (no explicit params)
-      expect(mockPriceService.getProductPrice).toHaveBeenCalledWith('prod-1', 1);
+      expect(mockPriceService.getProductPrice).toHaveBeenCalledWith('prod-1', 1, undefined, {
+        siteCode: 'us-branch',
+        currency: 'USD',
+        country: undefined,
+      });
 
       // Should have added item to the recovered cart, not the original
       expect(mockCartApi.addItemToCart).toHaveBeenCalledWith(
@@ -754,8 +761,11 @@ describe('EmporixCartService', () => {
 
       const result = await cartService.updateCartItemQuantity('cart-us', 'item-1', 3);
 
-      // When session site matches cart site, use session-based matching (no explicit params)
-      expect(mockPriceService.getProductPrice).toHaveBeenCalledWith('prod-1', 3);
+      expect(mockPriceService.getProductPrice).toHaveBeenCalledWith('prod-1', 3, undefined, {
+        siteCode: 'us-branch',
+        currency: 'USD',
+        country: undefined,
+      });
 
       expect(result.cartItem.quantity).toBe(3);
       expect(result.status).toBe('OK');

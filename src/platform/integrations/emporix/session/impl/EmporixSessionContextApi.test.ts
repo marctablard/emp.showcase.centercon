@@ -1,4 +1,5 @@
 import { Container } from 'inversify';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import { EmporixTokenManager as TokenManager } from '../../common/EmporixTokenManager';
 import EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { EmporixTestTokenManager } from '../../common/impl/EmporixTokenManager.test';
@@ -64,6 +65,14 @@ describe('EmporixSessionContextApi', () => {
           new EmporixApiInvoker(ctx.get<EmporixConfig>('EmporixConfig'), ctx.get<TokenManager>('EmporixTokenManager')),
       )
       .inSingletonScope();
+    container.bind<LoggerService>('LoggerService').toConstantValue({
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    } as unknown as LoggerService);
     container.bind<EmporixSessionContextApi>('EmporixSessionContextApi').to(EmporixSessionContextApi);
     // enable for debug output as curl
     // container.bind<boolean>('debugCurl').toConstantValue(true);

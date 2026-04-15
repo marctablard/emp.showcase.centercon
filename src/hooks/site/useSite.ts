@@ -15,10 +15,13 @@ export function useSite(id?: string) {
   const { setLoading, getLoading, setSite, getSite, setAvailableSites, availableSites, reset, loading, site } =
     useSiteStore();
   const urlSiteCode = useContext(SiteContext);
-  if (id && site && site.code != id) {
-    // id mismatch, that's a client-side site-switch
-    reset();
-  }
+  const effectiveSiteCode = id || urlSiteCode;
+
+  useEffect(() => {
+    if (effectiveSiteCode && site && site.code !== effectiveSiteCode) {
+      reset();
+    }
+  }, [effectiveSiteCode, site, reset]);
   const [countries, setCountries] = useState<Country[] | undefined>(getSite()?.countries);
   const [regions, setRegions] = useState<Region[] | undefined>(getSite()?.regions);
   const [currencies, setCurrencies] = useState<Currency[] | undefined>(getSite()?.currencies);

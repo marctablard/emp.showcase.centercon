@@ -16,7 +16,8 @@ import {
 } from '@/platform/services/cart/errors';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Cart } from '@/platform/services/model/cart/cart';
-import type { PriceService } from '@/platform/services/price/PriceService';
+import type { Session } from '@/platform/services/model/session/session';
+import type { PriceFetchOptions, PriceService } from '@/platform/services/price/PriceService';
 import type { ProductService } from '@/platform/services/product/ProductService';
 import type { StockService } from '@/platform/services/stock/StockService';
 import type { CartMapper } from '../../model/cart/CartMapper';
@@ -44,6 +45,19 @@ class EmporixCartService implements CartService {
 
   private normalizeLegalEntityId(value: string | undefined): string {
     return typeof value === 'string' ? value.trim() : '';
+  }
+
+  /**
+   * Use explicit match-prices (site + session currency + country) for cart mutations.
+   * `match-prices-by-context` can diverge from the shop session cookie when propagation lags,
+   * which produced priceIds incompatible with the cart currency.
+   */
+  private explicitPriceParamsForCartOperation(session: Session, cartSiteCode: string): PriceFetchOptions {
+    return {
+      siteCode: cartSiteCode,
+      currency: session.currency,
+      country: session.country,
+    };
   }
 
   private isCartOptimisticLockConflict(error: unknown): boolean {
@@ -258,9 +272,12 @@ class EmporixCartService implements CartService {
       return this.addItemToCart(correctCart.id, productId, quantity);
     }
 
-    // Session and cart are aligned → matchPricesByContext handles currency conversion,
-    // cross-site price fallback, and tax recalculation internally via the session context.
-    const price = await this.priceService.getProductPrice(productId, quantity);
+    const price = await this.priceService.getProductPrice(
+      productId,
+      quantity,
+      undefined,
+      this.explicitPriceParamsForCartOperation(session, cartSiteCode),
+    );
 
     // TODO find existing cartItem and merge if desired
     if (!price) {
@@ -342,8 +359,16 @@ class EmporixCartService implements CartService {
       throw new Error('Cart belongs to a different site. Please refresh the page.');
     }
 
-    // Session-based pricing — matchPricesByContext handles currency/tax internally
-    const price = await this.priceService.getProductPrice(cartItem.product.id, quantity);
+    if (!session) {
+      throw new Error('Failed to get session context');
+    }
+
+    const price = await this.priceService.getProductPrice(
+      cartItem.product.id,
+      quantity,
+      undefined,
+      this.explicitPriceParamsForCartOperation(session, cartSiteCode),
+    );
 
     if (!price) {
       throw new Error('Price missing');

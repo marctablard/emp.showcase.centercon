@@ -32,6 +32,12 @@ jest.mock('@/lib/client/carts', () => ({
   updateCartShippingInfo: jest.fn(),
 }));
 
+const mockUpdateSessionSite = jest.fn().mockResolvedValue(true);
+jest.mock('@/lib/client/session', () => ({
+  updateSessionSite: (...args: unknown[]) => mockUpdateSessionSite(...args),
+  fetchCurrentSession: jest.fn().mockResolvedValue(null),
+}));
+
 // Helper to create minimal mock data
 const createMockSession = (overrides: Partial<Session> = {}): Session => ({
   id: 'session-1',
@@ -114,12 +120,10 @@ describe('Store Synchronizer', () => {
       });
 
       expect(Array.isArray(unsubscribers)).toBe(true);
-      expect(unsubscribers.length).toBe(5); // shipping cache + currency + site + siteStore + legalEntity
-      expect(typeof unsubscribers[0]).toBe('function');
-      expect(typeof unsubscribers[1]).toBe('function');
-      expect(typeof unsubscribers[2]).toBe('function');
-      expect(typeof unsubscribers[3]).toBe('function');
-      expect(typeof unsubscribers[4]).toBe('function');
+      expect(unsubscribers.length).toBe(8); // shipping cache + currency + site + siteStore + legalEntity + session site change tracker + site reconciliation + cart currency check
+      for (const unsub of unsubscribers) {
+        expect(typeof unsub).toBe('function');
+      }
     });
 
     it('should call syncCurrencyWithSession when session currency changes', async () => {
@@ -460,6 +464,199 @@ describe('Store Synchronizer', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(resetSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reconcile session when site store code differs from session siteCode on init (debounced)', async () => {
+      jest.useFakeTimers();
+      // Site store has 'main' but session has 'fw-site' (URL/session mismatch)
+      sessionStore = createSessionStore({
+        session: createMockSession({ siteCode: 'fw-site', currency: 'CHF' }),
+        loading: false,
+      });
+
+      await act(async () => {
+        unsubscribers = setupStoreSynchronization({
+          sessionStore,
+          cartStore,
+          siteStore,
+          customerStore,
+        });
+      });
+
+      // Reconciliation is debounced — fast-forward past the debounce delay
+      await act(async () => {
+        jest.advanceTimersByTime(2500);
+      });
+
+      expect(mockUpdateSessionSite).toHaveBeenCalledWith('main');
+      jest.useRealTimers();
+    });
+
+    it('should NOT reconcile when site store and session match', async () => {
+      jest.useFakeTimers();
+      mockUpdateSessionSite.mockClear();
+
+      await act(async () => {
+        unsubscribers = setupStoreSynchronization({
+          sessionStore,
+          cartStore,
+          siteStore,
+          customerStore,
+        });
+      });
+
+      await act(async () => {
+        jest.advanceTimersByTime(2500);
+      });
+
+      expect(mockUpdateSessionSite).not.toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('should trigger currency sync when cart loads with mismatched currency', async () => {
+      const syncSpy = jest.spyOn(cartStore.getState(), 'syncCurrencyWithSession');
+
+      // Session has EUR, no cart yet
+      sessionStore = createSessionStore({
+        session: createMockSession({ currency: 'EUR', siteCode: 'main' }),
+        loading: false,
+      });
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+        customerStore,
+      });
+
+      // Cart loads with CHF (stale currency from previous session)
+      await act(async () => {
+        cartStore.setState({
+          currentCart: createMockCart({ site: 'main', currency: 'CHF' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(syncSpy).toHaveBeenCalledWith('EUR', 'main');
+    });
+
+    it('should NOT trigger currency sync when cart currency matches session', async () => {
+      const syncSpy = jest.spyOn(cartStore.getState(), 'syncCurrencyWithSession');
+
+      sessionStore = createSessionStore({
+        session: createMockSession({ currency: 'EUR', siteCode: 'main' }),
+        loading: false,
+      });
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+        customerStore,
+      });
+
+      // Cart loads with EUR (matches session)
+      await act(async () => {
+        cartStore.setState({
+          currentCart: createMockCart({ site: 'main', currency: 'EUR' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(syncSpy).not.toHaveBeenCalled();
+    });
+
+    it('should clear wrong-site cart and refetch when cart loads from a different site than session', async () => {
+      const setCurrentCartSpy = jest.spyOn(cartStore.getState(), 'setCurrentCart');
+      const fetchCartSpy = jest.spyOn(cartStore.getState(), 'fetchCart');
+
+      sessionStore = createSessionStore({
+        session: createMockSession({ currency: 'EUR', siteCode: 'main' }),
+        loading: false,
+      });
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+        customerStore,
+      });
+
+      // Cart from a different site loads (e.g., after site switch + page reload)
+      await act(async () => {
+        cartStore.setState({
+          currentCart: createMockCart({ site: 'us-branch', currency: 'USD' }),
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(setCurrentCartSpy).toHaveBeenCalledWith(null);
+      expect(fetchCartSpy).toHaveBeenCalledWith(false);
+    });
+
+    it('should skip reconciliation when session site was recently mutated (site switcher flow)', async () => {
+      jest.useFakeTimers();
+      mockUpdateSessionSite.mockClear();
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+        customerStore,
+      });
+
+      // Simulate site switcher: session is updated to 'us-branch' first
+      await act(async () => {
+        sessionStore.setState({
+          session: createMockSession({ siteCode: 'us-branch', currency: 'USD' }),
+        });
+      });
+
+      // Site store briefly reverts to 'main' (useSite re-fetches from stale URL)
+      await act(async () => {
+        siteStore.setState({ site: createMockSite({ code: 'main' }) });
+      });
+
+      // Advance past the debounce — reconciliation should be SKIPPED
+      // because the session was just mutated
+      await act(async () => {
+        jest.advanceTimersByTime(2500);
+      });
+
+      expect(mockUpdateSessionSite).not.toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('should skip reconciliation when session store is loading (mutation in progress)', async () => {
+      jest.useFakeTimers();
+      mockUpdateSessionSite.mockClear();
+
+      // Session has 'fw-site' but site store has 'main' — normally triggers reconciliation
+      sessionStore = createSessionStore({
+        session: createMockSession({ siteCode: 'fw-site', currency: 'CHF' }),
+        loading: true, // mutation in progress (site switcher is calling setSite)
+      });
+
+      await act(async () => {
+        unsubscribers = setupStoreSynchronization({
+          sessionStore,
+          cartStore,
+          siteStore,
+          customerStore,
+        });
+      });
+
+      // Advance past the debounce — reconciliation should be SKIPPED
+      // because session.loading is true
+      await act(async () => {
+        jest.advanceTimersByTime(2500);
+      });
+
+      expect(mockUpdateSessionSite).not.toHaveBeenCalled();
+      jest.useRealTimers();
     });
 
     it('should not reset site store when session site matches site store', async () => {

@@ -268,6 +268,6 @@ export function createSiteMiddleware(routingConfig: SiteRoutingConfig) {
       rewrite.pathname = `/${site}${rewrite.pathname == '/' ? '' : rewrite.pathname}`;
       siteResponse = NextResponse.rewrite(rewrite, { request: { headers } });
     }
-    return withCookies(intlResponse, siteResponse, req, routingConfig, site, resolvedLocale);
+    return withCookies(intlResponse, siteResponse, req, routing, site, resolvedLocale);
   };
 }

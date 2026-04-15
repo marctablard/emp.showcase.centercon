@@ -6,6 +6,7 @@ import type { QuoteUpdateRequest } from '@/platform/services/model/quote';
 import type { PriceService } from '@/platform/services/price/PriceService';
 import type { QuoteService } from '@/platform/services/quote/QuoteService';
 import type { SchemaService } from '@/platform/services/schema/SchemaService';
+import type { SessionService } from '@/platform/services/session/SessionService';
 
 /**
  * POST /api/quote
@@ -18,11 +19,13 @@ export async function POST(request: NextRequest) {
     const priceService = server.get<PriceService>('PriceService');
     const quoteService = server.get<QuoteService>('QuoteService');
     const schemaService = server.get<SchemaService>('SchemaService');
+    const sessionService = server.get<SessionService>('SessionService');
 
     const items = Array.isArray(body?.items) ? body.items : undefined;
 
     if (items && items.length > 0) {
       const defaultUnitCode = process.env.NEXT_PUBLIC_EMPORIX_DEFAULT_UNIT_CODE || 'piece';
+      const session = await sessionService.getCurrent();
 
       body.items = await Promise.all(
         items.map(async (item: any) => {
@@ -32,7 +35,13 @@ export async function POST(request: NextRequest) {
           if (!productId || !quantity) return item;
 
           // Fetch matched price for the product to satisfy required fields
-          const matched = await priceService.getProductPrice(productId, quantity);
+          const matched = session
+            ? await priceService.getProductPrice(productId, quantity, unitCode, {
+                siteCode: session.siteCode,
+                currency: session.currency,
+                country: session.country,
+              })
+            : await priceService.getProductPrice(productId, quantity, unitCode);
           if (!matched) return { ...item, quantity: { quantity, unitCode } };
 
           const unitPrice = matched.amount;

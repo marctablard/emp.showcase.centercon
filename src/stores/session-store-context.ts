@@ -18,6 +18,7 @@ export interface SessionActions {
   fetchSession: () => Promise<Session | null>;
   tryAcquireMutationLock: () => boolean;
   releaseMutationLock: () => void;
+  isMutationInFlight: () => boolean;
   reset: () => void;
 }
 
@@ -67,6 +68,7 @@ export const createSessionStore = (initState: SessionState = defaultState) => {
       releaseMutationLock: () => {
         mutationInFlight = false;
       },
+      isMutationInFlight: () => mutationInFlight,
       reset: () => set(defaultState),
     })),
   );

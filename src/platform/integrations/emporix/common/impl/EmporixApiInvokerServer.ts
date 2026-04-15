@@ -234,6 +234,49 @@ class EmporixApiInvokerServer {
         .observe(labels, duration);
     }
 
+    if (response.status === 401 && tokenType === 'public') {
+      this.tokenManager.clearPublicTokenCache(this.config.tenant, this.config.clientId);
+      const freshToken = await this.tokenManager.getPublicToken(this.config.tenant, this.config.clientId);
+      const retryHeaders = {
+        ...options.headers,
+        ...this.addPublicHeaders(freshToken),
+        Authorization: `Bearer ${freshToken.accessToken}`,
+      };
+      const retryStartTime = metricsEnabled && metrics ? performance.now() : undefined;
+      response = await this.fetch(url, { ...options, headers: retryHeaders });
+
+      if (metricsEnabled && metrics && retryStartTime !== undefined) {
+        const method = (options.method || 'GET').toUpperCase();
+        const source = metrics.source || getFirstUrlSegment(url, 'unknown');
+        const route = metrics.routePattern || url;
+        const retryLabels = {
+          site: site || METRICS_DEFAULT_SITE,
+          method,
+          status_code: String(response.status),
+          source,
+          token_type: tokenType,
+          route,
+        };
+        this.metricsService
+          .getOrCreateCounter(METRIC_FETCH_TOTAL, 'Total upstream API fetch calls', METRIC_LABEL_NAMES)
+          .inc(retryLabels);
+        if (!response.ok) {
+          this.metricsService
+            .getOrCreateCounter(METRIC_FETCH_ERRORS_TOTAL, 'Total upstream API fetch errors', METRIC_LABEL_NAMES)
+            .inc(retryLabels);
+        }
+        const duration = (performance.now() - retryStartTime) / 1000;
+        this.metricsService
+          .getOrCreateHistogram(
+            METRIC_FETCH_DURATION,
+            'Upstream API fetch duration in seconds',
+            METRIC_LABEL_NAMES,
+            HISTOGRAM_BUCKETS,
+          )
+          .observe(retryLabels, duration);
+      }
+    }
+
     return response;
   }
 

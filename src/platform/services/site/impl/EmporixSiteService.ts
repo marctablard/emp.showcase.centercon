@@ -78,6 +78,18 @@ class EmporixSiteService implements SiteService {
     @inject('LoggerService') private logger: LoggerService,
   ) {}
 
+  invalidateSiteCache(code?: string): void {
+    if (code !== undefined && code !== '') {
+      this._siteCache.delete(code);
+      this._siteInflight.delete(code);
+      return;
+    }
+    this._siteCache.clear();
+    this._siteInflight.clear();
+    this._refDataCache = null;
+    this._refDataInflight = null;
+  }
+
   private async getTenantReferenceData(): Promise<TenantReferenceData> {
     const now = Date.now();
     if (this._refDataCache && now < this._refDataCache.expiresAt) {
@@ -185,14 +197,36 @@ class EmporixSiteService implements SiteService {
 
   async getAvailableSites(): Promise<Site[]> {
     try {
-      const config = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
+      const configuredCodes = process.env.NEXT_PUBLIC_AVAILABLE_SITES?.split(',') || [];
       const defaultSite = process.env.NEXT_PUBLIC_DEFAULT_SITE || undefined;
-      if (defaultSite && (config.length === 0 || !config.includes(defaultSite))) {
-        config.push(defaultSite);
+      if (defaultSite && (configuredCodes.length === 0 || !configuredCodes.includes(defaultSite))) {
+        configuredCodes.push(defaultSite);
       }
-      const refData = await this.getTenantReferenceData();
-      const sites = await Promise.all(config.map(async (code) => this.getSite(code, false, refData)));
-      return sites.filter((site) => site !== null) as Site[];
+      const codeSet = new Set(configuredCodes);
+
+      const [bulkResponse, currencies] = await Promise.all([
+        this.siteSettingsApi.getSites({}, false),
+        this.getCurrencies(),
+      ]);
+
+      const matchedEmporixSites = bulkResponse.items.filter((s: EmporixSite) => codeSet.has(s.code));
+
+      // Stable sort: default site first, then preserve configuredCodes order
+      const codeOrder = new Map(configuredCodes.map((code, idx) => [code, idx]));
+      matchedEmporixSites.sort((a: EmporixSite, b: EmporixSite) => {
+        if (a.code === defaultSite) return -1;
+        if (b.code === defaultSite) return 1;
+        return (codeOrder.get(a.code) ?? Infinity) - (codeOrder.get(b.code) ?? Infinity);
+      });
+
+      const now = Date.now();
+      const sites: Site[] = matchedEmporixSites.map((emporixSite: EmporixSite) => {
+        const site = this.mapSite(emporixSite, currencies, [], [], []);
+        this._siteCache.set(emporixSite.code, { data: site, expiresAt: now + EmporixSiteService.SITE_TTL_MS });
+        return site;
+      });
+
+      return sites;
     } catch (error) {
       this.logger.error({ err: error instanceof Error ? error : String(error) }, 'Error getting available sites');
       return [];

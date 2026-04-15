@@ -33,4 +33,5 @@ export interface AnonymousTokenSessionParams {
   currency?: string;
   language?: string;
   targetLocation?: string;
+  region?: string;
 }

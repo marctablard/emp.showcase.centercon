@@ -657,18 +657,19 @@ Counts every outbound OAuth/token fetch. Labels:
 | `method` | HTTP method | `GET`, `POST` |
 | `status_code` | HTTP status | `200`, `401` |
 | `source` | Always `oauth` | `oauth` |
-| `route` | Route pattern (see below) | `/customerlogin/auth/public/login` |
+| `route` | Route pattern (see below) | `/customerlogin/auth/anonymous/login` |
 
 **Route patterns:**
 
 | Pattern | Token type | Description |
 |---|---|---|
-| `/customerlogin/auth/public/login` | Public (shared) | Read-only token for SSR and server; cached via `next: { revalidate: 3200 }` in production |
-| `/customerlogin/auth/anonymous/login` | Anonymous (per-session) | Session-bound token with site/currency/language; creates a new Emporix session |
+| `/customerlogin/auth/anonymous/login` | Public + anonymous (metrics) | `getPublicToken` and `getAnonymousToken` use this label so it matches the upstream `…/anonymous/login` path; shared read-only token uses `next: { revalidate: 3200 }` where applicable |
+| `/customerlogin/auth/anonymous/refresh` | Anonymous | Anonymous refresh |
 | `/oauth/token` | Service | Client-credentials token for admin operations (cart ownership, IAM) |
 | `/customer/{tenant}/login` | Customer | User login (email + password) |
+| `/customer/{tenant}/refreshauthtoken` | Customer | Customer token refresh |
 
-> **Note:** Public and anonymous tokens hit the **same** upstream Emporix endpoint but serve different purposes and are tracked under separate route labels for accurate visibility.
+> **Note:** `getPublicToken` and `getAnonymousToken` hit the **same** upstream anonymous-login path family; metrics use the **anonymous** route pattern for both so dashboards match the URL.
 
 #### `emx_bff_api_fetch_total`
 
@@ -695,11 +696,14 @@ Histograms measuring round-trip time in seconds. Buckets: `0.01, 0.05, 0.1, 0.25
 
 | Metric pattern | Healthy range (full session) | Investigation trigger |
 |---|---|---|
-| `route="/customerlogin/auth/public/login"` | 1–2 | >5 indicates cache miss or container isolation |
-| `route="/customerlogin/auth/anonymous/login"` | 1–3 | >10 indicates deduplication failure |
+| `route="/customerlogin/auth/anonymous/login"` (includes `getPublicToken` + `getAnonymousToken`) | 1–4 | >10 indicates cache miss or deduplication failure |
 | `source="site-settings"` | 10–25 (depends on site count) | >50 indicates cache expiration storm |
 | `source="session"` GET | 5–15 | >30 indicates missing cache or excessive callers |
 | `source="currency"` / `"country"` / `"payment"` | 3–6 each | >10 indicates reference data cache miss |
+
+### Prometheus metrics HTTP listener
+
+When `NEXT_METRICS_ENABLED` is `true`, `src/instrumentation.ts` starts `src/metrics-server.ts`, which listens on **`127.0.0.1`** and the port from `NEXT_MONITORING_PORT` (default **3001**). Endpoints: `/metrics/prometheus`, `/health`. Scraping from another host requires a same-host agent, SSH tunnel, or platform forwarding — the listener is **not** exposed on all interfaces.
 
 ### Server-Side Caching Architecture
 
@@ -726,8 +730,8 @@ The application uses `globalThis`-backed in-memory caches to share data across N
 
 | `globalThis` key | Owner class | TTL | Invalidation | What it caches |
 |---|---|---|---|---|
-| `__emporix_site_cache` | `EmporixSiteService` | 30s (per-site and ref data) | TTL expiry only | Site config, currencies, countries, regions, payment modes |
-| `__emporix_session_ctx_cache` | `EmporixSessionContextApi` | 5s | On any session mutation (PATCH, POST attribute, DELETE attribute) | Own session context (site, currency, country, language, region, cartId) |
+| `__emporix_site_cache` | `EmporixSiteService` | 30s (per-site and ref data) | TTL expiry + **`SiteService.invalidateSiteCache`** after successful session site switch | Site config, currencies, countries, regions, payment modes |
+| `__emporix_session_ctx_cache` | `EmporixSessionContextApi` | 5s per `sessionId` entry (max 128 keys) | Own-context PATCH/POST/DELETE clear all in-process entries; service-token context writes clear the **target** `sessionId` key after success | Own `/me/context` keyed by Emporix `sessionId` from `EmporixTokenManager` |
 
 Public token caching relies on Next.js `fetch` cache with `next: { revalidate: 3200 }` in production. Both SSR and Server containers share the Next.js fetch cache natively, so no `globalThis` wrapper is needed.
 
