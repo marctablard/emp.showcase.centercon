@@ -19,18 +19,21 @@ function CurrencySwitcherContent() {
   const { currencies, loading: siteLoading, site } = useSite();
   const [isSwitching, setIsSwitching] = useState(false);
   const currentCurrency = useMemo(() => {
-    // First, try to find session currency in available currencies
-    if (currencies && currencies.length > 0) {
-      if (session?.currency) {
-        const matchedCurrency = currencies.find((currency) => currency.code === session.currency);
-        if (matchedCurrency) {
-          return matchedCurrency;
-        }
+    // Match session currency by id or code (Emporix list entries may omit `code`).
+    if (currencies && currencies.length > 0 && session?.currency) {
+      const matchedCurrency = currencies.find(
+        (currency) => currency.id === session.currency || currency.code === session.currency,
+      );
+      if (matchedCurrency) {
+        return matchedCurrency;
       }
+      return { id: session.currency, code: session.currency, name: session.currency };
+    }
+
+    if (currencies && currencies.length > 0) {
       return currencies[0];
     }
 
-    // Fallback to site's default currency when currencies array is empty
     if (site?.defaultCurrency) {
       return site.defaultCurrency;
     }
@@ -103,14 +106,16 @@ function CurrencySwitcherContent() {
   );
 
   return (
-    <TopBarSwitcher
-      options={options}
-      current={currentCurrency.id}
-      label={t('label')}
-      onSelected={switchCurrency}
-      icon={icon}
-      disabled={isSwitching || sessionLoading}
-    />
+    <div data-testid="header-currency-display" data-selected-currency={currentCurrency.id}>
+      <TopBarSwitcher
+        options={options}
+        current={currentCurrency.id}
+        label={t('label')}
+        onSelected={switchCurrency}
+        icon={icon}
+        disabled={isSwitching || sessionLoading}
+      />
+    </div>
   );
 }
 

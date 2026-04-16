@@ -57,7 +57,7 @@ export function ProductPriceComponent({ price, isAddToCartBar }: ProductPricePro
     ];
   }
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6" data-testid="product-price" data-product-currency={price.currency}>
       <div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{t('yourPrice')}</span>
@@ -141,7 +141,7 @@ export function ProductPriceComponent({ price, isAddToCartBar }: ProductPricePro
 
 export function ProductPriceSkeleton() {
   return (
-    <div className="space-y-2 mb-2">
+    <div className="space-y-2 mb-2" data-testid="product-price" aria-busy="true">
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-8 w-32" />
       <Skeleton className="h-4 w-40" />

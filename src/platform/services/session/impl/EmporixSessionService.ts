@@ -8,6 +8,7 @@ import type {
 } from '@/platform/integrations/emporix/model/session-context';
 import type { EmporixSessionContextApi } from '@/platform/integrations/emporix/session/EmporixSessionContextApi';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import type { Site } from '@/platform/services/model/common/site';
 import type { SessionMapper } from '@/platform/services/model/session/SessionMapper';
 import type { Session } from '@/platform/services/model/session/session';
 import type { SiteService } from '../../site/SiteService';
@@ -261,25 +262,12 @@ class EmporixSessionService implements SessionService {
       'adjustSessionsSettings entry',
     );
 
-    // Fast path: skip the expensive getSite() call when the session is already
-    // fully populated (returning visitor). getSite() is only needed to validate
-    // currency against site.currencies and fill missing defaults.
-    if (
-      Object.keys(updateDefaults).length === 0 &&
-      result.currency &&
-      result.country &&
-      result.language &&
-      result.region
-    ) {
-      this.logger.debug('Session fully populated, skipping adjustment');
-      return;
-    }
-
     const site = await this.siteService.getSite(result.siteCode);
     if (!site) {
       return;
     }
-    if (!sessionContext?.currency || !site.currencies.find((currency) => currency.id === result.currency)) {
+
+    if (site.defaultCurrency?.id && (!result.currency || !this.isCurrencySupportedOnSite(site, result.currency))) {
       updateDefaults.currency = site.defaultCurrency.id;
       result.currency = site.defaultCurrency.id;
     }
@@ -319,6 +307,25 @@ class EmporixSessionService implements SessionService {
         }
       });
     }
+  }
+
+  private isCurrencySupportedOnSite(site: Site, currency: string): boolean {
+    const supported = new Set<string>();
+    if (site.defaultCurrency?.id) {
+      supported.add(site.defaultCurrency.id);
+    }
+    if (site.defaultCurrency?.code) {
+      supported.add(site.defaultCurrency.code);
+    }
+    for (const entry of site.currencies ?? []) {
+      if (entry.id) {
+        supported.add(entry.id);
+      }
+      if (entry.code) {
+        supported.add(entry.code);
+      }
+    }
+    return supported.has(currency);
   }
 
   private isSessionContextVersionConflictError(error: unknown): boolean {

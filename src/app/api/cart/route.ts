@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
         status: 204,
       });
     }
+    const sessionSiteHeader = { 'x-session-site-code': session.siteCode ?? '' };
+
     // Check for cart ID in cookies
     let cart: Cart | null = await cartService.getCart();
 
@@ -41,9 +43,9 @@ export async function GET(request: NextRequest) {
     }
     // null found for cart
     if (cart === null) {
-      return new Response(null, { status: 204 });
+      return new Response(null, { status: 204, headers: sessionSiteHeader });
     }
-    return NextResponse.json(cart);
+    return NextResponse.json(cart, { headers: sessionSiteHeader });
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
     const mappedError = mapCartGetError(error);

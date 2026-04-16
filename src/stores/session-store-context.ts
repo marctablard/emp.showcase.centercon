@@ -4,6 +4,7 @@ import { createContext, useContext } from 'react';
 import type { StoreApi } from 'zustand';
 import { create, useStore } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { devSyncLog } from '@/lib/client/dev-sync-log';
 import { fetchCurrentSession } from '@/lib/client/session';
 import type { Session } from '@/platform/services/model/session/session';
 
@@ -36,7 +37,14 @@ export const createSessionStore = (initState: SessionState = defaultState) => {
   return create<SessionStore>()(
     subscribeWithSelector((set, get) => ({
       ...initState,
-      setSession: (session: Session | null | undefined) => set({ session }),
+      setSession: (session: Session | null | undefined) => {
+        devSyncLog('session-store: setSession', {
+          siteCode: session?.siteCode,
+          currency: session?.currency,
+          cartId: session?.cartId,
+        });
+        set({ session });
+      },
       setLoading: (loading: boolean) => set({ loading }),
       fetchSession: async (): Promise<Session | null> => {
         if (_fetchPromise) return _fetchPromise;
@@ -45,6 +53,11 @@ export const createSessionStore = (initState: SessionState = defaultState) => {
           try {
             const session = await fetchCurrentSession(true);
             set({ session, loading: false });
+            devSyncLog('session-store: fetchSession completed', {
+              siteCode: session?.siteCode,
+              currency: session?.currency,
+              cartId: session?.cartId,
+            });
             return session;
           } catch {
             if (get().session === undefined) set({ session: null });

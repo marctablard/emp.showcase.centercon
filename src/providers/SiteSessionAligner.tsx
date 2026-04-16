@@ -1,6 +1,7 @@
 'use client';
 
 import { useContext, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { fetchCurrentSession, updateSessionSite } from '@/lib/client/session';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { SiteContext } from '@/providers/SiteProvider';
@@ -26,6 +27,7 @@ import { useSessionStore } from '@/providers/StoreProvider';
  * when React Strict Mode cancels the first mount's effect.
  */
 export function SiteSessionAligner() {
+  const router = useRouter();
   const urlSiteCode = useContext(SiteContext);
   const { session, setSession, loading, tryAcquireMutationLock, releaseMutationLock } = useSessionStore();
 
@@ -56,6 +58,10 @@ export function SiteSessionAligner() {
 
         const updatedSession = await fetchCurrentSession(true);
         setSession(updatedSession);
+        // Defer like header site switcher so layout/segment has applied before RSC refresh (avoids stale PDP vs session).
+        window.setTimeout(() => {
+          router.refresh();
+        }, 150);
       } catch (error) {
         logger.error({ err: error, targetSite, sessionSiteCode: session.siteCode }, 'Site session alignment failed');
       } finally {
@@ -66,7 +72,16 @@ export function SiteSessionAligner() {
     // No cleanup — the async work must run to completion so the store is updated.
     // Aborting here (e.g. on Strict Mode remount) would skip setSession and leave
     // the session permanently misaligned.
-  }, [urlSiteCode, session?.siteCode, loading, session, setSession, tryAcquireMutationLock, releaseMutationLock]);
+  }, [
+    urlSiteCode,
+    session?.siteCode,
+    loading,
+    session,
+    setSession,
+    tryAcquireMutationLock,
+    releaseMutationLock,
+    router,
+  ]);
 
   return null;
 }

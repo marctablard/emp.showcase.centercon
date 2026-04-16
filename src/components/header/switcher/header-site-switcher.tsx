@@ -29,7 +29,7 @@ export function SiteSwitcher() {
 
     setIsSwitching(true);
     try {
-      await switchSiteAndRedirect({
+      const success = await switchSiteAndRedirect({
         site: targetSite,
         locale,
         getSiteByCode: getSite,
@@ -43,6 +43,13 @@ export function SiteSwitcher() {
             type: ToastType.Error,
           }),
       });
+      if (success) {
+        // Match currency switcher RSC reload, but defer so `router.push` from the site switch commits first;
+        // an immediate refresh can still run against the old segment and leave PDP/cart out of sync with the header.
+        window.setTimeout(() => {
+          router.refresh();
+        }, 150);
+      }
     } finally {
       setIsSwitching(false);
     }

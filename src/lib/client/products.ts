@@ -13,8 +13,13 @@ const _variantInflight = new Map<string, Promise<Product[]>>();
  * Fetch a product by ID.
  * Uses module-level in-flight map to deduplicate concurrent requests for the same product.
  */
-export async function fetchProductById(id: string, options?: ProductFetchOptions): Promise<Product | null> {
-  const cacheKey = `${id}:${options?.variants ?? false}:${options?.prices ?? false}`;
+export async function fetchProductById(
+  id: string,
+  options?: ProductFetchOptions,
+  /** Separates in-flight dedupe per shop session so a site switch does not reuse the previous site's response. */
+  clientDedupeScope = '',
+): Promise<Product | null> {
+  const cacheKey = `${id}:${clientDedupeScope}:${options?.variants ?? false}:${options?.prices ?? false}`;
   const existing = _productInflight.get(cacheKey);
   if (existing) return existing;
 

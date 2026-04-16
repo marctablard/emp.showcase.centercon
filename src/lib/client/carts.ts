@@ -2,18 +2,24 @@ import type { CartShippingAddress, ModifyCartItemResult } from '@/platform/servi
 import type { Cart } from '@/platform/services/model/cart/cart';
 import { CartErrorCode } from '@/platform/services/model/cart/error-codes';
 
+/** Same-request Emporix session `siteCode` echoed by GET /api/cart (`x-session-site-code`). */
+export interface FetchCurrentCartResult {
+  cart: Cart | null | undefined;
+  sessionSiteCode: string | null;
+}
+
 /**
  * Fetch the current cart
  * If no cart ID is found in cookies, a new cart will be created
  * @param {boolean} [createIfNotExist=false] - Whether to create a new cart if one doesn't exist
- * @returns {Promise<Cart|null>} The cart or null if no cart exists and createIfNotExist is false
  */
-export async function fetchCurrentCart(createIfNotExist: boolean = false): Promise<Cart | null | undefined> {
+export async function fetchCurrentCart(createIfNotExist: boolean = false): Promise<FetchCurrentCartResult> {
   const response = await fetch(`/api/cart?create=${createIfNotExist}`);
+  const sessionSiteCode = response.headers.get('x-session-site-code')?.trim() || null;
 
   // If we get a 204, it means no cart exists yet
   if (response.status === 204) {
-    return null;
+    return { cart: null, sessionSiteCode };
   }
 
   // For other error codes, throw an error
@@ -21,7 +27,8 @@ export async function fetchCurrentCart(createIfNotExist: boolean = false): Promi
     throw new Error(`Failed to fetch cart: ${response.statusText}`);
   }
 
-  return await response.json();
+  const cart = (await response.json()) as Cart;
+  return { cart, sessionSiteCode };
 }
 
 /**

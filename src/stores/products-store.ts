@@ -20,6 +20,8 @@ export type ProductActions = {
   setCurrentProduct: (product: Product | null) => void;
   addProduct: (product: Product | string) => void;
   addProducts: (products: Product[]) => void;
+  /** Clears cached products/variants — required after session site or currency changes (prices are site-scoped). */
+  clearProductCache: () => void;
   getVariants: (parentId: string) => Product[] | undefined;
   setVariants: (parentId: string, variants: Product[]) => void;
 };
@@ -93,5 +95,11 @@ export const createProductStore = (initState: ProductState = defaultState) => {
       set((state) => ({
         variantsByParentId: { ...state.variantsByParentId, [parentId]: variants },
       })),
+    clearProductCache: () =>
+      set({
+        products: {},
+        variantsByParentId: {},
+        currentProductId: null,
+      }),
   }));
 };

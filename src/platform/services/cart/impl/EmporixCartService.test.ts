@@ -568,6 +568,56 @@ describe('EmporixCartService', () => {
       expect(result.status).toBe('OK');
     });
 
+    it('should align cart currency with session before add when they differ on the same site', async () => {
+      const eurCart: EmporixCart = {
+        id: 'cart-us',
+        currency: 'EUR',
+        siteCode: 'us-branch',
+        metadata: { version: 1 },
+      };
+      const usdCartAfterChange: EmporixCart = {
+        ...eurCart,
+        currency: 'USD',
+      };
+      const sessionUsd: typeof mockSession = {
+        ...mockSession,
+        currency: 'USD',
+      };
+
+      mockCartApi.getCart
+        .mockResolvedValueOnce(eurCart)
+        .mockResolvedValueOnce(eurCart)
+        .mockResolvedValueOnce(usdCartAfterChange)
+        .mockResolvedValueOnce(usdCartAfterChange)
+        .mockResolvedValueOnce(usdCartAfterChange);
+      mockProductService.getProductById.mockResolvedValue(mockProduct);
+      mockSessionService.getCurrent.mockResolvedValue(sessionUsd);
+      mockPriceService.getProductPrice.mockResolvedValue(mockPrice);
+
+      const mappedCart: Cart = {
+        id: 'cart-us',
+        currency: 'USD',
+        site: 'us-branch',
+        items: [
+          {
+            id: 'new-item-id',
+            quantity: 1,
+            price: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
+            product: { id: 'prod-1' },
+          },
+        ],
+        totalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
+        subTotalPrice: { amount: 29.99, originalAmount: 29.99, currency: 'USD' },
+        tax: { amount: 0, currency: 'USD', grossValue: 29.99, netValue: 29.99 },
+      };
+      mockMapper.mapToService.mockReturnValue(mappedCart);
+
+      await cartService.addItemToCart('cart-us', 'prod-1', 1);
+
+      expect(mockCartApi.changeCurrency).toHaveBeenCalledWith('cart-us', 'USD');
+      expect(mockCartApi.addItemToCart).toHaveBeenCalled();
+    });
+
     it('should auto-recover when cart site differs from session site', async () => {
       // Cart is on 'main' but session says 'us-branch' (race condition scenario)
       const mainCart: EmporixCart = {

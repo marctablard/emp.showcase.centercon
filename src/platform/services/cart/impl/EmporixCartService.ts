@@ -60,6 +60,37 @@ class EmporixCartService implements CartService {
     };
   }
 
+  private normalizeCurrencyCode(value: string | undefined): string {
+    return typeof value === 'string' ? value.trim().toUpperCase() : '';
+  }
+
+  /**
+   * Emporix validates new line prices against the cart's pricing currency. If the cart still
+   * carries a stale currency (e.g. site default while the session already switched), match-prices
+   * for the session can yield a priceId that the cart API rejects ("PriceIds … from cart are invalid").
+   */
+  private async ensureCartCurrencyMatchesSessionBeforeLineMutation(
+    rawCart: EmporixCart,
+    session: Session,
+  ): Promise<EmporixCart> {
+    const cartCur = this.normalizeCurrencyCode(rawCart.currency);
+    const sessionCur = this.normalizeCurrencyCode(session.currency);
+    if (!cartCur || !sessionCur || cartCur === sessionCur) {
+      return rawCart;
+    }
+
+    this.logger.info(
+      { cartId: rawCart.id, cartCurrency: rawCart.currency, sessionCurrency: session.currency },
+      'Aligning cart currency with session before cart line mutation',
+    );
+    await this.updateCurrency(rawCart.id, session.currency);
+    const refreshed = await this.cartApi.getCart(rawCart.id);
+    if (!refreshed) {
+      throw new Error('Cart not found after currency alignment');
+    }
+    return refreshed;
+  }
+
   private isCartOptimisticLockConflict(error: unknown): boolean {
     if (!(error instanceof Error)) {
       return false;
@@ -113,6 +144,10 @@ class EmporixCartService implements CartService {
     };
     try {
       const cartId = await this.cartApi.createCart(createCartRequest);
+      // Emporix POST /carts does not always persist `currentCart` on the session context immediately
+      // for anonymous flows. Without this, GET /api/cart?create=true can return null (getCartById
+      // / follow-up getCart) and the client shows "No cart available" until a full page reload.
+      await this.sessionService.setCart(cartId);
       return cartId;
     } catch (error) {
       // only business error can be that it's a duplicate
@@ -234,11 +269,12 @@ class EmporixCartService implements CartService {
   }
 
   async addItemToCart(cartId: string, productId: string, quantity: number): Promise<ModifyCartItemResult> {
-    const [rawCart, product, session] = await Promise.all([
+    const [initialRawCart, product, session] = await Promise.all([
       this.cartApi.getCart(cartId),
       this.productService.getProductById(productId),
       this.sessionService.getCurrent(),
     ]);
+    let rawCart = initialRawCart;
     if (!rawCart) {
       throw new Error('Cart not found');
     }
@@ -250,7 +286,7 @@ class EmporixCartService implements CartService {
     }
 
     // Determine the cart's effective site code
-    const cartSiteCode = rawCart.siteCode || session.siteCode;
+    let cartSiteCode = rawCart.siteCode || session.siteCode;
 
     // GUARD: If cart belongs to a different site, auto-recover by fetching/creating the correct cart.
     // This handles race conditions where the session site changed but the cart ID wasn't updated yet.
@@ -271,6 +307,9 @@ class EmporixCartService implements CartService {
       }
       return this.addItemToCart(correctCart.id, productId, quantity);
     }
+
+    rawCart = await this.ensureCartCurrencyMatchesSessionBeforeLineMutation(rawCart, session);
+    cartSiteCode = rawCart.siteCode || session.siteCode;
 
     const price = await this.priceService.getProductPrice(
       productId,
@@ -308,9 +347,10 @@ class EmporixCartService implements CartService {
     };
     // Add item to cart regardless of stock availability
     // (we determine availability for information and handle the surplus asynchronously)
-    const itemId = await this.cartApi.addItemToCart(cartId, addItemRequest);
+    const postAlignCartId = rawCart.id;
+    const itemId = await this.cartApi.addItemToCart(postAlignCartId, addItemRequest);
 
-    const cart = await this.getCartById(cartId);
+    const cart = await this.getCartById(postAlignCartId);
     const cartItem = cart?.items.find((item) => item.id === itemId);
     if (!cartItem) {
       throw new Error('Cart item not found');
@@ -336,11 +376,11 @@ class EmporixCartService implements CartService {
   }
 
   async updateCartItemQuantity(cartId: string, itemId: string, quantity: number): Promise<ModifyCartItemResult> {
-    const cart = await this.getCartById(cartId);
+    let cart = await this.getCartById(cartId);
     if (!cart) {
       throw new Error('Cart not found');
     }
-    const cartItem = cart.items.find((item) => item.id === itemId);
+    let cartItem = cart.items.find((item) => item.id === itemId);
     if (!cartItem || !cartItem.product?.id) {
       throw new Error('Cart item not found');
     }
@@ -361,6 +401,21 @@ class EmporixCartService implements CartService {
 
     if (!session) {
       throw new Error('Failed to get session context');
+    }
+
+    const rawCartForCurrency = await this.cartApi.getCart(cartId);
+    if (rawCartForCurrency) {
+      const aligned = await this.ensureCartCurrencyMatchesSessionBeforeLineMutation(rawCartForCurrency, session);
+      if (this.normalizeCurrencyCode(rawCartForCurrency.currency) !== this.normalizeCurrencyCode(aligned.currency)) {
+        cart = await this.getCartById(cartId);
+        if (!cart) {
+          throw new Error('Cart not found');
+        }
+        cartItem = cart.items.find((item) => item.id === itemId);
+        if (!cartItem || !cartItem.product?.id) {
+          throw new Error('Cart item not found');
+        }
+      }
     }
 
     const price = await this.priceService.getProductPrice(

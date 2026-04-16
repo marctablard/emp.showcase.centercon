@@ -520,7 +520,7 @@ describe('EmporixSessionService', () => {
     });
   });
 
-  describe('adjustSessionsSettings - fast path', () => {
+  describe('adjustSessionsSettings - site currency validation', () => {
     beforeEach(() => {
       process.env.NEXT_PUBLIC_DEFAULT_SITE = 'main';
       process.env.NEXT_PUBLIC_AVAILABLE_SITES = 'main';
@@ -537,7 +537,7 @@ describe('EmporixSessionService', () => {
       delete process.env.NEXT_PUBLIC_DEFAULT_REGION;
     });
 
-    it('should take the fast path and NOT call getSite when all session fields are present', async () => {
+    it('should call getSite when all session fields are present to validate currency on site', async () => {
       const fullyPopulatedContext: EmporixSessionContext = {
         sessionId: 'test-session',
         currency: 'EUR',
@@ -559,13 +559,77 @@ describe('EmporixSessionService', () => {
 
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue(fullyPopulatedContext);
       mockSessionMapper.mapToService.mockReturnValue(mappedSession);
+      mockSiteService.getSite.mockResolvedValue({
+        code: 'main',
+        name: 'Main',
+        defaultCountry: 'DE',
+        defaultCurrency: { id: 'EUR', code: 'EUR', name: 'Euro', active: true },
+        currencies: [{ id: 'EUR', code: 'EUR', name: 'Euro', active: true }],
+        countries: [],
+        shipToCountries: [],
+        regions: [],
+        paymentModes: [],
+        languages: ['en'],
+        defaultLanguage: 'en',
+        address: { contactName: '', street: '', zipCode: '', city: '', country: 'DE' },
+        includesTax: false,
+        decimals: 2,
+      });
 
       const result = await sessionService.getCurrent();
 
       expect(result).toBeDefined();
       expect(result?.currency).toBe('EUR');
-      expect(mockSiteService.getSite).not.toHaveBeenCalled();
+      expect(mockSiteService.getSite).toHaveBeenCalledWith('main');
       expect(mockSessionContextApi.updateOwnSessionContext).not.toHaveBeenCalled();
+    });
+
+    it('should patch currency when session is fully populated but currency is not on site', async () => {
+      const fullyPopulatedContext: EmporixSessionContext = {
+        sessionId: 'test-session',
+        currency: 'EUR',
+        siteCode: 'ch-site',
+        targetLocation: 'DE',
+        context: {
+          language: { key: 'language', value: 'en' },
+          region: { key: 'region', value: 'Europe' },
+        },
+        metadata: { version: 2 },
+      };
+      const mappedSession: Session = {
+        id: 'test-session',
+        currency: 'EUR',
+        siteCode: 'ch-site',
+        country: 'DE',
+        language: 'en',
+        region: 'Europe',
+      };
+
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue(fullyPopulatedContext);
+      mockSessionMapper.mapToService.mockReturnValue(mappedSession);
+      mockSiteService.getSite.mockResolvedValue({
+        code: 'ch-site',
+        name: 'CH',
+        defaultCountry: 'CH',
+        defaultCurrency: { id: 'CHF', code: 'CHF', name: 'Franc', active: true },
+        currencies: [{ id: 'CHF', code: 'CHF', name: 'Franc', active: true }],
+        countries: [],
+        shipToCountries: [],
+        regions: [],
+        paymentModes: [],
+        languages: ['en'],
+        defaultLanguage: 'en',
+        address: { contactName: '', street: '', zipCode: '', city: '', country: 'CH' },
+        includesTax: false,
+        decimals: 2,
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+
+      const result = await sessionService.getCurrent();
+
+      expect(result).toBeDefined();
+      expect(result?.currency).toBe('CHF');
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalled();
     });
 
     it('should call getSite when region is missing from session', async () => {

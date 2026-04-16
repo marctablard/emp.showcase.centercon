@@ -1,5 +1,11 @@
 import { act } from '@testing-library/react';
+import type { Cart } from '@/platform/services/model/cart/cart';
 import { createCartStore } from '@/stores/cart-store';
+
+function fcResult(cart: Cart | null): { cart: Cart | null; sessionSiteCode: string | null } {
+  if (!cart) return { cart: null, sessionSiteCode: null };
+  return { cart, sessionSiteCode: cart.site ?? null };
+}
 
 // Mock the API calls
 jest.mock('@/lib/client/carts', () => ({
@@ -85,7 +91,7 @@ describe('CartStore - Site Validation', () => {
         tax: { amount: 0, currency: 'USD', netValue: 0, grossValue: 0 },
       };
 
-      mockFetchCurrentCart.mockResolvedValueOnce(newSiteCart);
+      mockFetchCurrentCart.mockResolvedValueOnce(fcResult(newSiteCart as Cart));
 
       // Set initial cart and site
       act(() => {
@@ -172,7 +178,7 @@ describe('CartStore - Site Validation', () => {
       expect(store.getState().currentCart).toBeNull();
     });
 
-    it('should set lastSiteCode before clearing cart to prevent race conditions', async () => {
+    it('keeps lastSiteCode on previous site until fetchCart resolves after a site change', async () => {
       // Arrange
       const initialCart = {
         id: 'cart-1',
@@ -203,21 +209,28 @@ describe('CartStore - Site Validation', () => {
       // Act - start site change but don't await
       const validatePromise = store.getState().validateSite('site-b');
 
-      // Assert - lastSiteCode should be updated immediately (before fetch completes)
-      expect(store.getState().lastSiteCode).toBe('site-b');
+      // validateSite chains via `.then(run)` — allow the microtask to run before asserting
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // lastSiteCode must not jump to site-b before the response: a stale cart could match that snap.
+      expect(store.getState().lastSiteCode).toBe('site-a');
       expect(store.getState().currentCart).toBeNull();
       expect(store.getState().loading).toBe(true);
 
       // Complete the fetch
-      resolvePromise!({
-        id: 'cart-2',
-        currency: 'USD',
-        site: 'site-b',
-        items: [],
-        totalPrice: { amount: 0, currency: 'USD' },
-        subTotalPrice: { amount: 0, currency: 'USD' },
-        tax: { amount: 0, currency: 'USD', netValue: 0, grossValue: 0 },
-      });
+      resolvePromise!(
+        fcResult({
+          id: 'cart-2',
+          currency: 'USD',
+          site: 'site-b',
+          items: [],
+          totalPrice: { amount: 0, currency: 'USD' },
+          subTotalPrice: { amount: 0, currency: 'USD' },
+          tax: { amount: 0, currency: 'USD', netValue: 0, grossValue: 0 },
+        } as Cart),
+      );
 
       await act(async () => {
         await validatePromise;
@@ -256,8 +269,8 @@ describe('CartStore - Site Validation', () => {
         await store.getState().validateSite('site-b');
       });
 
-      // Assert - lastSiteCode should still be updated, cart should be null
-      expect(store.getState().lastSiteCode).toBe('site-b');
+      // Fetch failed before any successful snapshot — lastSiteCode stays the prior bound value.
+      expect(store.getState().lastSiteCode).toBe('site-a');
       expect(store.getState().currentCart).toBeNull();
     });
   });
@@ -336,7 +349,7 @@ describe('CartStore - Site Validation', () => {
       expect(store.getState().currentCart).toBeNull();
       expect(store.getState().loading).toBe(true);
 
-      resolvePromise!(refreshedCart);
+      resolvePromise!(fcResult(refreshedCart as Cart));
 
       await act(async () => {
         await validatePromise;
@@ -362,7 +375,7 @@ describe('CartStore - Site Validation', () => {
         tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
       };
 
-      mockFetchCurrentCart.mockResolvedValueOnce(refreshedCart);
+      mockFetchCurrentCart.mockResolvedValueOnce(fcResult(refreshedCart as Cart));
 
       // Actual transition: 'unauthenticated' → 'authenticated'
       await act(async () => {
@@ -401,7 +414,7 @@ describe('CartStore - Fetch Deduplication', () => {
       tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
     };
 
-    mockFetchCurrentCart.mockResolvedValueOnce(cartData);
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(cartData as Cart));
 
     // Fire 5 concurrent fetchCart(false) calls
     const promises = Array.from({ length: 5 }, () => store.getState().fetchCart(false));
@@ -445,7 +458,7 @@ describe('CartStore - Fetch Deduplication', () => {
       resolveFirst = resolve;
     });
     mockFetchCurrentCart.mockReturnValueOnce(firstPromise);
-    mockFetchCurrentCart.mockResolvedValueOnce(createdCart);
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(createdCart as Cart));
 
     // Start fetchCart(false)
     const fetchFalsePromise = store.getState().fetchCart(false);
@@ -459,7 +472,7 @@ describe('CartStore - Fetch Deduplication', () => {
     expect(mockFetchCurrentCart).toHaveBeenNthCalledWith(2, true);
 
     // Resolve first call
-    resolveFirst!(existingCart);
+    resolveFirst!(fcResult(existingCart as Cart));
 
     await act(async () => {
       await Promise.all([fetchFalsePromise, fetchTruePromise]);
@@ -487,8 +500,8 @@ describe('CartStore - Fetch Deduplication', () => {
       tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
     };
 
-    mockFetchCurrentCart.mockResolvedValueOnce(cart1);
-    mockFetchCurrentCart.mockResolvedValueOnce(cart2);
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(cart1 as Cart));
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(cart2 as Cart));
 
     // First fetch
     await act(async () => {
@@ -518,7 +531,7 @@ describe('CartStore - Fetch Deduplication', () => {
       tax: { amount: 0, currency: 'EUR', netValue: 0, grossValue: 0 },
     };
 
-    mockFetchCurrentCart.mockResolvedValueOnce(cartData);
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(cartData as Cart));
 
     // Multiple concurrent fetchCart(true) calls
     const promises = Array.from({ length: 3 }, () => store.getState().fetchCart(true));
@@ -562,7 +575,7 @@ describe('CartStore - Fetch Deduplication', () => {
     // Only one API call
     expect(mockFetchCurrentCart).toHaveBeenCalledTimes(1);
 
-    resolvePromise!(cartData);
+    resolvePromise!(fcResult(cartData as Cart));
 
     const [resultTrue, resultFalse] = await Promise.all([fetchTruePromise, fetchFalsePromise]);
 
@@ -624,7 +637,7 @@ describe('CartStore - Fetch Deduplication', () => {
     };
 
     clearedStore.getState().clearCart({ clearSession: false });
-    mockFetchCurrentCart.mockResolvedValueOnce(createdCart);
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(createdCart as Cart));
     mockAddItemToCart.mockResolvedValueOnce({ cart: updatedCart });
 
     await act(async () => {

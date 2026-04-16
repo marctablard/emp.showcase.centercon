@@ -1,8 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from '@/hooks/history/useHistory';
+import { useSession } from '@/hooks/session/useSession';
+import { useSite } from '@/hooks/site/useSite';
 import { fetchProductById } from '@/lib/client/products';
+import {
+  isProductPriceDisplayableForPurchase,
+  stripProductPriceIfNotDisplayableForShopContext,
+} from '@/lib/common/product-price-site-context';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Product } from '@/platform/services/model/product';
 import type { ProductFetchOptions } from '@/platform/services/product/ProductService';
@@ -18,6 +24,8 @@ interface UseProductResult {
 }
 
 export const useProduct = (productOrId?: string | Product, options?: ProductFetchOptions): UseProductResult => {
+  const { session } = useSession();
+  const { site } = useSite();
   const { getProduct, setCurrentProduct, addProduct, currentProductId } = useProductStore();
 
   let id: string | undefined;
@@ -25,41 +33,61 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
     id = currentProductId || undefined;
   } else {
     if ((productOrId as Product).id) {
-      addProduct(productOrId as Product);
       id = (productOrId as Product).id;
     } else {
       id = productOrId as string;
     }
   }
-  const [loading, setLoading] = useState<boolean>(typeof productOrId === 'string' ? true : false);
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (!id) return false;
+    if (productOrId && typeof productOrId === 'object' && (productOrId as Product).id) {
+      return false;
+    }
+    return true;
+  });
   const [error, setError] = useState<Error | null>(null);
-  const [product, setProduct] = useState<Product | null>(id ? getProduct(id) : null);
+  const [product, setProduct] = useState<Product | null>(() => {
+    if (!id) return null;
+    if (productOrId && typeof productOrId === 'object' && (productOrId as Product).id) {
+      return productOrId as Product;
+    }
+    return getProduct(id);
+  });
 
   const fetchProduct = useCallback(
-    async (forceRefresh = false) => {
+    async (forceRefresh = false, clientDedupeScope = '') => {
       if (!id) return;
 
       try {
         setLoading(true);
         setError(null);
 
-        // Check if product exists in store first (unless forceRefresh is true)
         if (!forceRefresh) {
           const cachedProduct = getProduct(id);
-          if (cachedProduct) {
+          if (
+            cachedProduct?.price?.currency &&
+            isProductPriceDisplayableForPurchase(cachedProduct.price.currency, session, site)
+          ) {
             setProduct(cachedProduct);
             setLoading(false);
             return;
           }
         }
 
-        // Fetch from API if not in store using our shared API layer
-        const data = await fetchProductById(id, options);
-        if (data) {
-          // Add to store
-          addProduct(data);
+        if (forceRefresh) {
+          setProduct(null);
+        } else {
+          setProduct((p) => (p && p.id !== id ? null : p));
         }
-        setProduct(data);
+
+        const data = await fetchProductById(id, options, clientDedupeScope);
+        const next =
+          data && session?.currency ? stripProductPriceIfNotDisplayableForShopContext(data, session, site) : data;
+        if (next) {
+          addProduct(next);
+        }
+        setProduct(next);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('An unknown error occurred'));
         getLogger().error({ err }, 'Error fetching product');
@@ -67,22 +95,32 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
         setLoading(false);
       }
     },
-    [id, getProduct, addProduct, options],
+    [id, getProduct, addProduct, options, session?.currency, session?.siteCode, site],
   );
 
-  const refetch = () => fetchProduct(true);
+  const refetch = useCallback(async () => {
+    const scope = session?.siteCode && session?.currency ? `${session.siteCode}|${session.currency}` : '';
+    await fetchProduct(true, scope);
+  }, [session?.siteCode, session?.currency, fetchProduct]);
+
+  const productForUi = useMemo(() => {
+    if (!product) {
+      return product;
+    }
+    return stripProductPriceIfNotDisplayableForShopContext(product, session ?? null, site);
+  }, [product, session, site]);
 
   const { addLastSeenProduct } = useHistory();
 
   const setAsCurrent = useCallback(
     (isCurrent: boolean = true) => {
-      if (product && isCurrent) {
-        setCurrentProduct(product);
+      if (productForUi && isCurrent) {
+        setCurrentProduct(productForUi);
       } else {
         setCurrentProduct(null);
       }
     },
-    [product, setCurrentProduct],
+    [productForUi, setCurrentProduct],
   );
 
   useEffect(() => {
@@ -95,15 +133,45 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
     }
   }, [currentProductId, addLastSeenProduct, getProduct]);
 
+  const sessionPricingKey = session?.siteCode && session?.currency ? `${session.siteCode}|${session.currency}` : '';
+  const prevSessionPricingKeyRef = useRef<string | null>(null);
+  const prevProductIdRef = useRef<string | undefined>(undefined);
+
   useEffect(() => {
-    if (id) {
-      fetchProduct();
+    if (prevProductIdRef.current !== id) {
+      prevProductIdRef.current = id;
+      prevSessionPricingKeyRef.current = null;
     }
-  }, [id, fetchProduct]);
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+    if (!sessionPricingKey) {
+      return;
+    }
+
+    if (prevSessionPricingKeyRef.current === null) {
+      prevSessionPricingKeyRef.current = sessionPricingKey;
+      const cached = getProduct(id);
+      const reuseCache =
+        !!cached &&
+        !!cached.price?.currency &&
+        isProductPriceDisplayableForPurchase(cached.price.currency, session, site);
+      void fetchProduct(!reuseCache, sessionPricingKey);
+      return;
+    }
+
+    if (prevSessionPricingKeyRef.current !== sessionPricingKey) {
+      prevSessionPricingKeyRef.current = sessionPricingKey;
+      void fetchProduct(true, sessionPricingKey);
+    }
+  }, [id, sessionPricingKey, fetchProduct, getProduct, site, session?.currency]);
 
   return {
     currentProductId,
-    product,
+    product: productForUi,
     loading,
     error,
     refetch,

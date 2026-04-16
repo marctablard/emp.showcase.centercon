@@ -1,9 +1,17 @@
 // src/stores/sync/store-synchronizer.ts
 import { shallow } from 'zustand/shallow';
+import { devSyncLog } from '@/lib/client/dev-sync-log';
 import { updateSessionSite } from '@/lib/client/session';
 import { invalidateShippingMethodsResponseCache } from '@/lib/client/shipping-methods-response-cache';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import type { CartStoreApi, CustomerStoreApi, SessionStoreApi, SiteStoreApi } from '@/providers/StoreProvider';
+import type {
+  AvailabilityStoreApi,
+  CartStoreApi,
+  CustomerStoreApi,
+  ProductStoreApi,
+  SessionStoreApi,
+  SiteStoreApi,
+} from '@/providers/StoreProvider';
 
 type UnsubscribeFn = () => void;
 
@@ -12,9 +20,61 @@ interface StoreSynchronizerParams {
   cartStore: CartStoreApi;
   siteStore: SiteStoreApi;
   customerStore: CustomerStoreApi;
+  productStore: ProductStoreApi;
+  availabilityStore: AvailabilityStoreApi;
 }
 
 const CURRENCY_SYNC_RETRY_DELAYS_MS = [0, 250, 750];
+
+/** Max time to wait for site store + session to settle after site/currency mutations (avoids redundant cart GETs). */
+const SITE_SESSION_ALIGN_TIMEOUT_MS = 8000;
+const SITE_SESSION_ALIGN_POLL_MS = 48;
+
+/**
+ * Waits until the URL-derived site object matches `session.siteCode` and neither site nor session
+ * store is in a loading/mutation state, so cart fetches and currency sync hit a coherent context.
+ * Returns immediately when session has no site, or when the site store has no in-flight fetch and
+ * still no `site` (useSite not mounted — cannot align from here).
+ */
+async function waitForSiteAndSessionStable(sessionStore: SessionStoreApi, siteStore: SiteStoreApi): Promise<void> {
+  const deadline = Date.now() + SITE_SESSION_ALIGN_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const session = sessionStore.getState().session;
+    if (!session?.siteCode) {
+      return;
+    }
+
+    const site = siteStore.getState().site;
+    const siteLoading = siteStore.getState().loading;
+    const sessionLoading = sessionStore.getState().loading;
+    const sessionMutation = sessionStore.getState().isMutationInFlight?.() ?? false;
+
+    if (site === undefined && !siteLoading) {
+      return;
+    }
+
+    if (site?.code === session.siteCode && !siteLoading && !sessionLoading && !sessionMutation) {
+      devSyncLog('store-sync: site + session stable for cart work', {
+        siteCode: site.code,
+        sessionSite: session.siteCode,
+        currency: session.currency,
+      });
+      return;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, SITE_SESSION_ALIGN_POLL_MS));
+  }
+
+  getLogger().warn(
+    {
+      sessionSite: sessionStore.getState().session?.siteCode,
+      storeSite: siteStore.getState().site?.code,
+      siteLoading: siteStore.getState().loading,
+      sessionLoading: sessionStore.getState().loading,
+    },
+    'store-sync: site/session alignment wait timed out — proceeding with cart operation',
+  );
+}
 
 /**
  * Sets up cross-store subscriptions for state synchronization.
@@ -34,13 +94,23 @@ const CURRENCY_SYNC_RETRY_DELAYS_MS = [0, 250, 750];
  * 4. Session legalEntityId changes (B2B company switcher) → Cart re-fetch for current company
  * 5. Session site / legal entity changes → Invalidate cached legal-entity checkout addresses (single refetch per new key)
  * 6. Session site / currency / legal entity changes → Invalidate client shipping-methods response cache (GET /api/shipping)
- * 7. Cart loaded with stale currency → trigger currency sync (handles page refresh with mismatched cart)
+ * 7. Session site / currency changes → Clear client product store cache (product payloads are site/currency scoped)
+ * 8. Session site / currency changes → Clear client availability store (stock is site/session scoped)
+ *
+ * URL/session reconciliation (debounced) updates the session when the site store settles on a
+ * URL-derived site that still disagrees with the session — see `reconcileSiteWithSession`.
+ * There is intentionally no cart-store subscription that compares `currentCart.site` to the client
+ * session on every cart update (develop does not have one): during site switches the BFF can
+ * still echo the previous `x-session-site-code` for a request or two; fighting that with
+ * validateSite produced fetch loops and empty carts while Emporix was still consistent internally.
  */
 export function setupStoreSynchronization({
   sessionStore,
   cartStore,
   siteStore,
   customerStore,
+  productStore,
+  availabilityStore,
 }: StoreSynchronizerParams): UnsubscribeFn[] {
   const unsubscribers: UnsubscribeFn[] = [];
   let activeCurrencySyncToken = 0;
@@ -58,6 +128,43 @@ export function setupStoreSynchronization({
   );
   unsubscribers.push(unsubShippingMethodsCache);
 
+  // Product store is keyed only by product id; clear it when shop session context changes so PDP/search
+  // cannot show another site's currency until a fresh fetch completes.
+  const unsubProductClientCache = sessionStore.subscribe(
+    (state) => ({
+      siteCode: state.session?.siteCode ?? '',
+      currency: state.session?.currency ?? '',
+    }),
+    (curr, prev) => {
+      if (!curr.siteCode || !curr.currency) {
+        return;
+      }
+      if (prev === undefined) {
+        return;
+      }
+      const prevSite =
+        typeof prev === 'object' && prev && 'siteCode' in prev ? (prev as { siteCode: string }).siteCode : '';
+      const prevCur =
+        typeof prev === 'object' && prev && 'currency' in prev ? (prev as { currency: string }).currency : '';
+      if (!prevSite || !prevCur) {
+        return;
+      }
+      if (prevSite === curr.siteCode && prevCur === curr.currency) {
+        return;
+      }
+      devSyncLog('store-sync: clear client product cache (session site/currency changed)', {
+        prevSite,
+        prevCurrency: prevCur,
+        siteCode: curr.siteCode,
+        currency: curr.currency,
+      });
+      productStore.getState().clearProductCache();
+      availabilityStore.getState().clearAllAvailabilities();
+    },
+    { equalityFn: shallow },
+  );
+  unsubscribers.push(unsubProductClientCache);
+
   const runCurrencySync = async (currency: string, siteCode: string) => {
     const syncToken = ++activeCurrencySyncToken;
     for (let i = 0; i < CURRENCY_SYNC_RETRY_DELAYS_MS.length; i++) {
@@ -73,10 +180,17 @@ export function setupStoreSynchronization({
 
       const latestSession = sessionStore.getState().session;
       if (!latestSession || latestSession.currency !== currency || latestSession.siteCode !== siteCode) {
+        devSyncLog('store-sync: currency sync skipped (stale session)', {
+          currency,
+          siteCode,
+          latestCurrency: latestSession?.currency,
+          latestSite: latestSession?.siteCode,
+        });
         return;
       }
 
       try {
+        devSyncLog('store-sync: syncing cart currency with session', { currency, siteCode });
         await cartStore.getState().syncCurrencyWithSession(currency, siteCode);
       } catch (error) {
         getLogger().error({ error, currency, siteCode, attempt: i + 1 }, 'Failed to sync cart currency with session');
@@ -99,6 +213,7 @@ export function setupStoreSynchronization({
     }),
     async ({ currency, siteCode }) => {
       if (!currency || !siteCode) return;
+      await waitForSiteAndSessionStable(sessionStore, siteStore);
       await runCurrencySync(currency, siteCode);
     },
     { equalityFn: shallow },
@@ -112,7 +227,9 @@ export function setupStoreSynchronization({
     async (siteCode, prevSiteCode) => {
       if (!siteCode || siteCode === prevSiteCode) return;
 
+      devSyncLog('store-sync: session site changed — validate cart site', { siteCode, prevSiteCode });
       try {
+        await waitForSiteAndSessionStable(sessionStore, siteStore);
         await cartStore.getState().validateSite(siteCode);
       } catch (error) {
         getLogger().error({ error }, 'Failed to validate cart site');
@@ -133,6 +250,10 @@ export function setupStoreSynchronization({
 
       const currentSite = siteStore.getState().getSite();
       if (currentSite && currentSite.code !== siteCode) {
+        devSyncLog('store-sync: resetting site store after session site change', {
+          siteCode,
+          previousStoreSite: currentSite.code,
+        });
         customerStore.getState().invalidateLegalEntityCheckoutAddresses();
         siteStore.getState().reset();
       }
@@ -151,6 +272,7 @@ export function setupStoreSynchronization({
       }
       customerStore.getState().invalidateLegalEntityCheckoutAddresses();
       try {
+        await waitForSiteAndSessionStable(sessionStore, siteStore);
         await cartStore.getState().validateLegalEntity(legalEntityId === '' ? undefined : legalEntityId);
       } catch (error) {
         getLogger().error({ error }, 'Failed to validate cart legal entity');
@@ -228,6 +350,7 @@ export function setupStoreSynchronization({
 
     reconciliationInFlight = true;
     try {
+      devSyncLog('store-sync: reconciling session to URL site', { urlSite: siteCode, sessionSite: sessionSiteCode });
       getLogger().info(
         { urlSite: siteCode, sessionSite: sessionSiteCode },
         'Site/session mismatch — reconciling session to URL site',
@@ -303,48 +426,6 @@ export function setupStoreSynchronization({
       void reconcileSiteWithSession(initialSiteCode);
     }, RECONCILIATION_DEBOUNCE_MS);
   }
-
-  // Subscription 7: Cart site & currency validation on load
-  // When a cart is loaded/fetched with a site or currency that doesn't match the
-  // session, trigger validation. Handles page refreshes where the session already has
-  // the correct values but the cart was persisted from a previous site/currency.
-  // Subscription 1 (session changes) and Subscription 2 (session site changes) only
-  // fire on CHANGES, so they miss the initial-load case.
-  const unsubCartCheck = cartStore.subscribe(
-    (state) => ({
-      cartCurrency: state.currentCart?.currency,
-      cartSite: state.currentCart?.site,
-    }),
-    async ({ cartCurrency, cartSite }) => {
-      if (!cartSite) return;
-
-      const session = sessionStore.getState().session;
-      if (!session?.currency || !session?.siteCode) return;
-
-      if (cartSite !== session.siteCode) {
-        getLogger().info(
-          { cartSite, sessionSite: session.siteCode },
-          'Cart belongs to different site — clearing and refetching',
-        );
-        try {
-          // validateSite is a no-op when lastSiteCode already matches the new site
-          // (which happens after reconciliation). Directly clear the stale cart and refetch.
-          const state = cartStore.getState();
-          state.setCurrentCart(null);
-          await state.fetchCart(false);
-        } catch (error) {
-          getLogger().error({ error }, 'Failed to clear wrong-site cart');
-        }
-        return;
-      }
-
-      if (cartCurrency && cartCurrency !== session.currency) {
-        await runCurrencySync(session.currency, session.siteCode);
-      }
-    },
-    { equalityFn: shallow },
-  );
-  unsubscribers.push(unsubCartCheck);
 
   return unsubscribers;
 }
