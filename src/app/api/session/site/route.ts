@@ -28,7 +28,21 @@ export async function PUT(request: NextRequest) {
     }
     await sessionService.setSite(newSite.code, newSite.defaultCurrency.id);
     logger.info({ site: newSite.code, currency: newSite.defaultCurrency.id }, 'Session site updated successfully');
-    return NextResponse.json({ success: true });
+
+    const response = NextResponse.json({ success: true });
+    // Keep the site cookie in sync with the user's selected site so the edge middleware
+    // (which honours cookieOverridesDefault) does not redirect back to the previously
+    // selected non-default site on the next navigation to `/`.
+    const siteCookieName = process.env.NEXT_PUBLIC_SITE_COOKIE || 'NEXT_SITE';
+    response.cookies.set({
+      name: siteCookieName,
+      value: newSite.code,
+      maxAge: 365 * 24 * 60 * 60,
+      httpOnly: false,
+      sameSite: 'lax',
+      path: '/',
+    });
+    return response;
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
     const errorMessage = error instanceof Error ? error.message : String(error);
