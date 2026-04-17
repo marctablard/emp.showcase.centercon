@@ -11,6 +11,7 @@ import type {
   EmporixPaginatedResponse,
   EmporixSearchParams,
 } from '@/platform/integrations/emporix/model';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import type EmporixCommonUtil from '../../common/util/EmporixCommonUtil';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
@@ -59,6 +60,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
       'public',
       undefined,
       createCategoryMetrics('/category/{tenant}/categories'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     return buildPaginatedResponse(params, response);
@@ -81,6 +83,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
       'public',
       undefined,
       createCategoryMetrics('/category/{tenant}/categories/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -111,6 +114,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
       'public',
       undefined,
       createCategoryMetrics('/category/{tenant}/categories/{id}/parents'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -156,6 +160,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         'public',
         undefined,
         createCategoryMetrics('/category/{tenant}/categories/{id}/subcategories'),
+        DEFAULT_CACHE_REVALIDATE,
       );
       return buildPaginatedResponse(params, response);
     } catch (error: any) {
@@ -206,6 +211,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         'public',
         undefined,
         createCategoryMetrics('/category/{tenant}/assignments/references/{id}'),
+        DEFAULT_CACHE_REVALIDATE,
       );
       return buildPaginatedResponse(params, response);
     } catch (error: any) {
@@ -248,6 +254,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         tokenType,
         authOptions,
         createCategoryMetrics('/category/{tenant}/category-trees/{id}'),
+        DEFAULT_CACHE_REVALIDATE,
       );
 
       if (!response.ok) {
@@ -298,6 +305,7 @@ class EmporixCategoryApi implements IEmporixCategoryApi {
         'public',
         undefined,
         createCategoryMetrics('/category/{tenant}/categories/{id}/assignments'),
+        DEFAULT_CACHE_REVALIDATE,
       );
       return buildPaginatedResponse(params, response);
     } catch (error: any) {

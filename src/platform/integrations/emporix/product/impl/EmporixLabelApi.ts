@@ -7,6 +7,7 @@ import type {
   EmporixPaginatedResponse,
   EmporixSearchParams,
 } from '@/platform/integrations/emporix/model';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixLabelApi as IEmporixLabelApi } from '../EmporixLabelApi';
@@ -52,6 +53,7 @@ class EmporixLabelApi implements IEmporixLabelApi {
       'public',
       undefined,
       createLabelMetrics('/label/labels'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     return buildPaginatedResponse(params, response);
@@ -69,6 +71,7 @@ class EmporixLabelApi implements IEmporixLabelApi {
       'public',
       undefined,
       createLabelMetrics('/label/labels/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {

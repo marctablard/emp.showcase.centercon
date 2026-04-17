@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import type { EmporixFindSiteRequest, EmporixShippingSite } from '../../model';
@@ -27,6 +28,7 @@ class EmporixShippingApi implements IEmporixShippingApi {
       'public',
       undefined,
       createShippingMetrics('/shipping/{tenant}/{id}/zones/{id}/methods/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
     if (!response.ok) {
       if (response.status === 404) {
@@ -45,6 +47,7 @@ class EmporixShippingApi implements IEmporixShippingApi {
       'public',
       undefined,
       createShippingMetrics('/shipping/{tenant}/{id}/zones/{id}/methods'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {

@@ -746,6 +746,7 @@ Use `createFetchMetricsParams()` to generate standard metric labels:
 
 ```typescript
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+import { DEFAULT_CACHE_REVALIDATE } from '@/platform/integrations/emporix/common/cache-defaults';
 
 const metrics = createFetchMetricsParams('my-service', '/my-service/{tenant}/endpoint');
 
@@ -755,8 +756,16 @@ const response = await this.apiClient.authenticatedFetch(
   'public',
   undefined,
   metrics,
+  // Optional: opt in to Next fetch caching for this endpoint.
+  // Only applied on GET/HEAD when `options.cache` / `options.next` are not set.
+  // Omit for volatile data (orders, approvals, cart-ownership-sensitive reads, custom entities).
+  DEFAULT_CACHE_REVALIDATE,
 );
 ```
+
+**Caching is opt-in per call.** The trailing `cacheSeconds` argument is the only way to enable Next `fetch` caching — no `tokenType` (including `public` or `service`) implies caching anymore. Write methods always bypass the cache regardless of `cacheSeconds`.
+
+For reference/catalog reads where a shared TTL is appropriate, prefer the `DEFAULT_CACHE_REVALIDATE` constant over hard-coded literals. It reads the same `NEXT_CACHE_DEFAULT_REVALIDATE` environment variable as the HTTP cache middleware (`src/caching/cache-config.ts`), so a single setting controls the default revalidation window across both layers. The default is `3600` seconds; non-positive or non-numeric values fall back to `3600`. Endpoint-specific TTLs can still pass a different literal. See `docs/cache-middleware.md` for the full semantics of the env var.
 
 For OAuth-level metrics in `EmporixOAuthApi*` subclasses, use `fetchWithMetrics()` directly with a route pattern string.
 

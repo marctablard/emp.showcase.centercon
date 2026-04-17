@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
@@ -36,6 +37,7 @@ class EmporixAvailabilityApi implements IEmporixAvailabilityApi {
       'public',
       undefined,
       createAvailabilityMetrics('/availability/{tenant}/availability/site/{site}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -89,6 +91,7 @@ class EmporixAvailabilityApi implements IEmporixAvailabilityApi {
       'public',
       undefined,
       createAvailabilityMetrics('/availability/{tenant}/availability/{id}/{site}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {

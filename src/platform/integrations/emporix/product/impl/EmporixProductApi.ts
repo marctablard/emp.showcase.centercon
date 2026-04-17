@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
@@ -29,6 +30,7 @@ class EmporixProductApi implements IEmporixProductApi {
       'public',
       undefined,
       createProductMetrics('/product/{tenant}/products'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     return buildPaginatedResponse(params, response);
@@ -60,6 +62,7 @@ class EmporixProductApi implements IEmporixProductApi {
       'public',
       undefined,
       createProductMetrics('/product/{tenant}/products/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
     if (!response.ok) {
       if (response.status == 404) {

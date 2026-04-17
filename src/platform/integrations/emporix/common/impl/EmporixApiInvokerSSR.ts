@@ -59,6 +59,13 @@ class EmporixApiInvokerSSR {
     );
   }
 
+  /**
+   * Create an authenticated fetch request.
+   *
+   * Caching is opt-in: callers enable it for an endpoint by passing `cacheSeconds`
+   * (applies to GET/HEAD only, and only when the caller has not set `cache`/`next`
+   * on `options`). Write methods are always forced to `cache: 'no-store'`.
+   */
   async authenticatedFetch(
     url: string,
     options: RequestInit = {},
@@ -68,6 +75,7 @@ class EmporixApiInvokerSSR {
       scopes?: string[];
     },
     metrics?: FetchMetrics,
+    cacheSeconds?: number,
   ): Promise<Response> {
     let token: string;
 
@@ -133,16 +141,16 @@ class EmporixApiInvokerSSR {
         throw new Error(`Unknown token type: ${tokenType}`);
     }
 
-    if (tokenType === 'public' || tokenType === 'service') {
+    {
       const method = (options.method || 'GET').toUpperCase();
       const isWriteMethod = method !== 'GET' && method !== 'HEAD';
 
       if (isWriteMethod) {
         options['cache'] = 'no-store';
         delete (options as Record<string, unknown>)['next'];
-      } else if (!options['cache'] && !options['next']) {
+      } else if (!options['cache'] && !options['next'] && cacheSeconds !== undefined) {
         options['cache'] = 'force-cache';
-        options['next'] = { revalidate: 3600 };
+        options['next'] = { revalidate: cacheSeconds };
       }
     }
 

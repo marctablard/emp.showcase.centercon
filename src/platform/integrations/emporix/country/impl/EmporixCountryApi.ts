@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCountry, EmporixRegion } from '../../model/country';
@@ -31,6 +32,7 @@ class EmporixCountryApi implements IEmporixCountryApi {
       'public',
       undefined,
       createCountryMetrics('/country/{tenant}/countries'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -52,6 +54,7 @@ class EmporixCountryApi implements IEmporixCountryApi {
       'public',
       undefined,
       createCountryMetrics('/country/{tenant}/countries/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -77,6 +80,7 @@ class EmporixCountryApi implements IEmporixCountryApi {
       'public',
       undefined,
       createCountryMetrics('/country/{tenant}/regions'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -98,6 +102,7 @@ class EmporixCountryApi implements IEmporixCountryApi {
       'public',
       undefined,
       createCountryMetrics('/country/{tenant}/regions/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {

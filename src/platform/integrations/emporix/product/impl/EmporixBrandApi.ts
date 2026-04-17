@@ -7,6 +7,7 @@ import type {
   EmporixPaginatedResponse,
   EmporixSearchParams,
 } from '@/platform/integrations/emporix/model';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiInvoker from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixBrandApi as IEmporixBrandApi } from '../EmporixBrandApi';
@@ -39,6 +40,7 @@ class EmporixBrandApi implements IEmporixBrandApi {
       'public',
       undefined,
       createBrandMetrics('/brand/brands'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     return buildPaginatedResponse(params, response);
@@ -56,6 +58,7 @@ class EmporixBrandApi implements IEmporixBrandApi {
       'public',
       undefined,
       createBrandMetrics('/brand/brands/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {

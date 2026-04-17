@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+import { DEFAULT_CACHE_REVALIDATE } from '../../common/cache-defaults';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../../config';
 import type { EmporixCurrency, EmporixExchangeRate } from '../../model/currency';
@@ -26,6 +27,7 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       'public',
       undefined,
       createCurrencyMetrics('/currency/{tenant}/currencies'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -42,6 +44,7 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       'public',
       undefined,
       createCurrencyMetrics('/currency/{tenant}/currencies/{id}'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -62,6 +65,7 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       'public',
       undefined,
       createCurrencyMetrics('/currency/{tenant}/exchanges'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
@@ -78,6 +82,7 @@ class EmporixCurrencyApi implements IEmporixCurrencyApi {
       'public',
       undefined,
       createCurrencyMetrics('/currency/{tenant}/exchanges'),
+      DEFAULT_CACHE_REVALIDATE,
     );
 
     if (!response.ok) {
