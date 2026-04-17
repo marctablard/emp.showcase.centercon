@@ -35,6 +35,8 @@ async function fetchJsonSession(page: Page): Promise<{ currency: string; siteCod
 
 /** Waits for the BFF mutation the header switcher triggers before asserting cookies/session. */
 async function switchToUsBranchFromHeaderAndWaitPut(page: Page): Promise<void> {
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
   await page.locator('button[aria-label="Site"]').click();
   const put = page.waitForResponse(
     (r) =>
@@ -47,6 +49,8 @@ async function switchToUsBranchFromHeaderAndWaitPut(page: Page): Promise<void> {
 }
 
 async function switchToDifferentSite(page: Page): Promise<void> {
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
   await page.locator('button[aria-label="Site"]').click();
   const selected = page.getByRole('menuitem').and(page.locator('.bg-surface-action-hover-2'));
   const alternative = page.getByRole('menuitem').filter({ hasNot: selected });

@@ -24,9 +24,15 @@ interface UseProductResult {
 }
 
 export const useProduct = (productOrId?: string | Product, options?: ProductFetchOptions): UseProductResult => {
-  const { session } = useSession();
+  const { session, loading: sessionLoading } = useSession();
   const { site } = useSite();
   const { getProduct, setCurrentProduct, addProduct, currentProductId } = useProductStore();
+
+  const sessionPricingContext = useMemo(
+    () => (session != null ? { currency: session.currency, siteCode: session.siteCode } : session),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional narrow slice: pricing helpers only use currency + siteCode
+    [session?.currency, session?.siteCode],
+  );
 
   let id: string | undefined;
   if (!productOrId) {
@@ -67,7 +73,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
           const cachedProduct = getProduct(id);
           if (
             cachedProduct?.price?.currency &&
-            isProductPriceDisplayableForPurchase(cachedProduct.price.currency, session, site)
+            isProductPriceDisplayableForPurchase(cachedProduct.price.currency, sessionPricingContext, site)
           ) {
             setProduct(cachedProduct);
             setLoading(false);
@@ -83,7 +89,9 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
 
         const data = await fetchProductById(id, options, clientDedupeScope);
         const next =
-          data && session?.currency ? stripProductPriceIfNotDisplayableForShopContext(data, session, site) : data;
+          data && sessionPricingContext?.currency
+            ? stripProductPriceIfNotDisplayableForShopContext(data, sessionPricingContext, site)
+            : data;
         if (next) {
           addProduct(next);
         }
@@ -95,7 +103,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
         setLoading(false);
       }
     },
-    [id, getProduct, addProduct, options, session?.currency, session?.siteCode, site],
+    [id, getProduct, addProduct, options, sessionPricingContext, site],
   );
 
   const refetch = useCallback(async () => {
@@ -133,6 +141,18 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
     }
   }, [currentProductId, addLastSeenProduct, getProduct]);
 
+  // Fail-safe: when session recovery fails (null + not loading), unblock the spinner
+  // so ProductDetail can show an error/retry state instead of infinite loading.
+  useEffect(() => {
+    if (!id) return;
+    if (session?.siteCode && session?.currency) return;
+    if (session === undefined) return;
+    if (loading && session === null && !sessionLoading) {
+      setLoading(false);
+      setError(new Error('Session unavailable — unable to load product pricing'));
+    }
+  }, [id, session, loading, sessionLoading]);
+
   const sessionPricingKey = session?.siteCode && session?.currency ? `${session.siteCode}|${session.currency}` : '';
   const prevSessionPricingKeyRef = useRef<string | null>(null);
   const prevProductIdRef = useRef<string | undefined>(undefined);
@@ -158,7 +178,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
       const reuseCache =
         !!cached &&
         !!cached.price?.currency &&
-        isProductPriceDisplayableForPurchase(cached.price.currency, session, site);
+        isProductPriceDisplayableForPurchase(cached.price.currency, sessionPricingContext, site);
       void fetchProduct(!reuseCache, sessionPricingKey);
       return;
     }
@@ -167,7 +187,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
       prevSessionPricingKeyRef.current = sessionPricingKey;
       void fetchProduct(true, sessionPricingKey);
     }
-  }, [id, sessionPricingKey, fetchProduct, getProduct, site, session?.currency]);
+  }, [id, sessionPricingKey, fetchProduct, getProduct, site, sessionPricingContext]);
 
   return {
     currentProductId,

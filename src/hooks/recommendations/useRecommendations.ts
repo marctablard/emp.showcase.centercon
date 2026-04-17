@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useSession } from '@/hooks/session/useSession';
 import { fetchRecommendations } from '@/lib/client/recommendations';
 import type { ProductRecommendations } from '@/platform/services/model/product';
 
 export function useRecommendations(productId?: string) {
+  const { session } = useSession();
   const [recommendations, setRecommendations] = useState<ProductRecommendations | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function useRecommendations(productId?: string) {
     return () => {
       isCancelled = true;
     };
-  }, [productId]);
+  }, [productId, session?.currency, session?.siteCode]);
 
   const hasProduct = Boolean(productId);
 

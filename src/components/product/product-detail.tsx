@@ -9,6 +9,7 @@ import { ProductCarousel } from '@/components/product/product-carousel';
 import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
 import { Card, CardContent } from '@/components/ui/card';
+import { useShopContextReady } from '@/hooks/common/useShopContextReady';
 import { useProduct } from '@/hooks/product/useProduct';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
@@ -46,6 +47,7 @@ export interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product: initialProduct, options, className }: ProductDetailProps) {
+  const { ready: shopContextReady } = useShopContextReady();
   const { product, loading, setAsCurrent } = useProduct(initialProduct, options);
   const { session } = useSession();
   const { site } = useSite();
@@ -195,7 +197,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
     }
   });
 
-  if (loading) {
+  if (!shopContextReady || loading) {
     return (
       <div className={cn('flex justify-center items-center min-h-[400px] mb-6', className)}>
         <Spinner variant="lg" />

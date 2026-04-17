@@ -86,7 +86,13 @@ export async function waitHeaderCurrencyMatchesSession(page: Page, timeoutMs = 3
     .toBe(true);
 }
 
+export async function ensureSiteSwitcherVisible(page: Page): Promise<void> {
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
+}
+
 export async function switchToSiteFromHeader(page: Page, menuLabel: string): Promise<void> {
+  await ensureSiteSwitcherVisible(page);
   await page.locator('button[aria-label="Site"]').click();
   const put = page.waitForResponse(
     (r) =>

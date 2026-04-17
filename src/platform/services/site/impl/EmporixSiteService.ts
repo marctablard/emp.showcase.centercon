@@ -220,11 +220,8 @@ class EmporixSiteService implements SiteService {
         return (codeOrder.get(a.code) ?? Infinity) - (codeOrder.get(b.code) ?? Infinity);
       });
 
-      const now = Date.now();
       const sites: Site[] = matchedEmporixSites.map((emporixSite: EmporixSite) => {
-        const site = this.mapSite(emporixSite, currencies, [], [], []);
-        this._siteCache.set(emporixSite.code, { data: site, expiresAt: now + EmporixSiteService.SITE_TTL_MS });
-        return site;
+        return this.mapSite(emporixSite, currencies, [], [], []);
       });
 
       return sites;

@@ -230,6 +230,32 @@ describe('useProduct hook', () => {
     expect(hookResult.current.loading).toBe(false);
   });
 
+  test('should set error when session is irrecoverably null', async () => {
+    const sharedStore = createProductStore();
+    const historyStore = createHistoryStore();
+    const sessionStore = createSessionStore({
+      session: null,
+      loading: false,
+    });
+    const customWrapper = ({ children }: { children: ReactNode }) => (
+      <SessionStoreContext.Provider value={sessionStore}>
+        <HistoryStoreContext.Provider value={historyStore}>
+          <ProductStoreContext.Provider value={sharedStore}>{children}</ProductStoreContext.Provider>
+        </HistoryStoreContext.Provider>
+      </SessionStoreContext.Provider>
+    );
+
+    const { result } = renderHook(() => useProduct('test-product-123'), { wrapper: customWrapper });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).not.toBeNull();
+    expect(result.current.error?.message).toContain('Session unavailable');
+    expect(fetchProductById).not.toHaveBeenCalled();
+  });
+
   test('refetch should work correctly', async () => {
     // Create a shared store
     const sharedStore = createProductStore();

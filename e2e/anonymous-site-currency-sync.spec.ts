@@ -65,6 +65,8 @@ async function cartLineQuantitySum(page: Page): Promise<number> {
 
 /** Switch site via header: pick a menu item that is not the highlighted current site row. */
 async function switchToDifferentSite(page: Page): Promise<void> {
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
   await page.locator('button[aria-label="Site"]').click();
   const selected = page.getByRole('menuitem').and(page.locator('.bg-surface-action-hover-2'));
   const alternative = page.getByRole('menuitem').filter({ hasNot: selected });
@@ -76,6 +78,8 @@ async function switchToDifferentSite(page: Page): Promise<void> {
 const US_SITE_MENU_LABEL = (process.env.E2E_US_SITE_MENU_LABEL || 'US').trim();
 
 async function switchToUsBranchFromHeader(page: Page): Promise<void> {
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
   await page.locator('button[aria-label="Site"]').click();
   await page.getByRole('menuitem', { name: US_SITE_MENU_LABEL }).click();
 }
@@ -151,6 +155,8 @@ test.describe('Anonymous: site, header, price, cart', () => {
     test.setTimeout(120_000);
 
     await page.goto('/');
+    await page.evaluate(() => window.scrollTo({ top: 0 }));
+    await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
     await page.locator('button[aria-label="Site"]').click();
     await page.getByRole('menuitem', { name: US_SITE_MENU_LABEL }).click();
     await expect(page).toHaveURL(/us-branch/, { timeout: 30_000 });

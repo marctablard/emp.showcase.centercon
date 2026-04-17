@@ -116,6 +116,79 @@ describe('useSession mutation lock', () => {
   });
 });
 
+describe('useSession null-session recovery', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should trigger fetchSession when session is null (SSR failure recovery)', () => {
+    const store = createMockStore({ session: null, loading: false });
+    mockUseSessionStore.mockReturnValue(store);
+
+    renderHook(() => useSession());
+
+    expect(store.fetchSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('should trigger fetchSession when session lacks siteCode', () => {
+    const store = createMockStore({
+      session: { id: 's1', currency: 'EUR', siteCode: '' },
+      loading: false,
+    });
+    mockUseSessionStore.mockReturnValue(store);
+
+    renderHook(() => useSession());
+
+    expect(store.fetchSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('should trigger fetchSession when session lacks currency', () => {
+    const store = createMockStore({
+      session: { id: 's1', currency: '', siteCode: 'main' },
+      loading: false,
+    });
+    mockUseSessionStore.mockReturnValue(store);
+
+    renderHook(() => useSession());
+
+    expect(store.fetchSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not retry recovery more than once for the same null session', () => {
+    const store = createMockStore({ session: null, loading: false });
+    mockUseSessionStore.mockReturnValue(store);
+
+    const { rerender } = renderHook(() => useSession());
+
+    expect(store.fetchSession).toHaveBeenCalledTimes(1);
+
+    rerender();
+
+    expect(store.fetchSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not attempt recovery while session store is loading', () => {
+    const store = createMockStore({ session: null, loading: true });
+    mockUseSessionStore.mockReturnValue(store);
+
+    renderHook(() => useSession());
+
+    expect(store.fetchSession).not.toHaveBeenCalled();
+  });
+
+  it('should not trigger recovery for a valid session', () => {
+    const store = createMockStore({
+      session: { id: 's1', currency: 'EUR', siteCode: 'main' },
+      loading: false,
+    });
+    mockUseSessionStore.mockReturnValue(store);
+
+    renderHook(() => useSession());
+
+    expect(store.fetchSession).not.toHaveBeenCalled();
+  });
+});
+
 describe('useSession fetch resilience', () => {
   beforeEach(() => {
     jest.clearAllMocks();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   fetchCurrentSession,
   updateSessionCompany,
@@ -21,6 +21,7 @@ export function useSession() {
   const sessionStore = useSessionStore();
   const session = sessionStore.session;
   const loading = sessionStore.loading;
+  const hasAttemptedRecovery = useRef(false);
 
   const fetchSessionWithStatus = useCallback(async (): Promise<{ session: Session | null; hasError: boolean }> => {
     try {
@@ -56,9 +57,23 @@ export function useSession() {
   );
 
   useEffect(() => {
-    if (session !== undefined) return;
-    sessionStore.fetchSession();
-  }, [session, sessionStore]);
+    if (session === undefined) {
+      hasAttemptedRecovery.current = false;
+      sessionStore.fetchSession();
+      return;
+    }
+
+    const needsRecovery = session === null || !session.siteCode || !session.currency;
+    if (needsRecovery && !hasAttemptedRecovery.current && !loading) {
+      hasAttemptedRecovery.current = true;
+      sessionStore.fetchSession();
+      return;
+    }
+
+    if (!needsRecovery) {
+      hasAttemptedRecovery.current = false;
+    }
+  }, [session, sessionStore, loading]);
 
   const setLanguage = async (language: string): Promise<boolean> => {
     return runSessionMutation(() => updateSessionLanguage(language));

@@ -242,6 +242,11 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
 
         _fetchPromiseCreate = createCurrent;
+        // Track "this" promise so we can clear the dedup slot before flushing.
+        // `let` is needed because the IIFE's closure captures the binding before the
+        // assignment on the next line; TS rejects `const` as "used before assigned".
+        let thisPromise: Promise<Cart | null | undefined> | null = null;
+
         const currentFetchPromise = (async () => {
           const epochAtFetchStart = _cartFetchEpoch;
           try {
@@ -315,14 +320,21 @@ export const createCartStore = (initState: CartState = defaultState) => {
               } catch {
                 /* logging must never clear cart state */
               }
+              // Clear the dedup slot before flushing so that updateCurrency → fetchCart
+              // inside the flush chain can start a fresh fetch instead of re-entering this promise.
+              if (_fetchPromise === thisPromise) {
+                _fetchPromise = null;
+              }
               await get().flushPendingCurrencySync();
               return cartData;
             } catch (_err) {
               if (epochAtFetchStart !== _cartFetchEpoch) {
                 return get().currentCart;
               }
-              // Silent error when cart is gone
               set({ currentCart: null, loading: false });
+              if (_fetchPromise === thisPromise) {
+                _fetchPromise = null;
+              }
               await get().flushPendingCurrencySync();
               return null;
             }
@@ -333,10 +345,14 @@ export const createCartStore = (initState: CartState = defaultState) => {
             const error = err instanceof Error ? err : new Error('Failed to fetch cart');
             set({ error, loading: false });
             getLogger().error({ err }, 'Error fetching cart');
+            if (_fetchPromise === thisPromise) {
+              _fetchPromise = null;
+            }
             await get().flushPendingCurrencySync();
             return undefined;
           }
         })();
+        thisPromise = currentFetchPromise;
         _fetchPromise = currentFetchPromise;
 
         // Clean up after completion — only clear if this is still the current in-flight promise
@@ -651,7 +667,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
 
       flushPendingCurrencySync: async () => {
         const pendingCurrencySync = get().pendingCurrencySync;
-        if (!pendingCurrencySync || get().loading) {
+        if (!pendingCurrencySync) {
           return;
         }
 

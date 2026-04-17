@@ -94,12 +94,14 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
       // Deduplicate concurrent token creation requests (thundering herd prevention).
       // When multiple API route handlers fire simultaneously without a stored token,
       // they all share a single upstream call instead of each creating a new token.
-      const inflight = this._anonymousTokenInflight.get(tenant);
+      // Key includes siteCode so requests for different sites get separate tokens.
+      const dedupeKey = `${tenant}:${sessionParams?.siteCode ?? ''}`;
+      const inflight = this._anonymousTokenInflight.get(dedupeKey);
       if (inflight) {
         anonymousToken = await inflight;
       } else {
         const promise = this.fetchAnonymousToken(anonymousToken, tenant, clientId, sessionParams);
-        this._anonymousTokenInflight.set(tenant, promise);
+        this._anonymousTokenInflight.set(dedupeKey, promise);
         try {
           anonymousToken = await promise;
         } finally {
@@ -108,8 +110,8 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
           // readable) still coalesce instead of creating a new token.
           const ref = promise;
           setTimeout(() => {
-            if (this._anonymousTokenInflight.get(tenant) === ref) {
-              this._anonymousTokenInflight.delete(tenant);
+            if (this._anonymousTokenInflight.get(dedupeKey) === ref) {
+              this._anonymousTokenInflight.delete(dedupeKey);
             }
           }, EmporixTokenManagerAbstract.ANON_TOKEN_DEDUP_GRACE_MS);
         }

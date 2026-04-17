@@ -274,16 +274,18 @@ describe('EmporixSiteService', () => {
       expect(sites.map((s) => s.code)).toEqual(['main', 'us-branch']);
     });
 
-    it('should cache results so subsequent getSite returns cached data', async () => {
+    it('should not poison getSite cache with incomplete Site objects', async () => {
       mockSiteSettingsApi.getSites.mockResolvedValue({ items: [mockSite], total: 1 });
+      mockSiteSettingsApi.getSite.mockResolvedValue(mockSite);
       process.env.NEXT_PUBLIC_AVAILABLE_SITES = 'main';
 
       await siteService.getAvailableSites();
-      const cached = await siteService.getSite('main');
+      const site = await siteService.getSite('main');
 
-      expect(cached).not.toBeNull();
-      expect(cached?.code).toBe('main');
-      expect(mockSiteSettingsApi.getSite).not.toHaveBeenCalled();
+      expect(site).not.toBeNull();
+      expect(site?.code).toBe('main');
+      expect(site?.countries).toHaveLength(2);
+      expect(mockSiteSettingsApi.getSite).toHaveBeenCalledWith('main');
     });
 
     it('should return lightweight sites with empty countries/regions/paymentModes', async () => {

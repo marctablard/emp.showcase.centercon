@@ -66,6 +66,8 @@ async function waitHeaderCurrencyMatchesSession(page: Page): Promise<void> {
 }
 
 async function openSiteMenu(page: Page): Promise<void> {
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
   await page.locator('button[aria-label="Site"]').click();
 }
 

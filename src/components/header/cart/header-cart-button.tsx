@@ -13,6 +13,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
+import { useShopContextReady } from '@/hooks/common/useShopContextReady';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { getLogger } from '@/lib/logger/use-logger-client';
@@ -29,6 +30,8 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
   const { cartTotal, currency } = useCartTotal();
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
+  const { ready: shopContextReady } = useShopContextReady({ requireCart: true });
+  const showSpinner = loading || !shopContextReady;
   const [scrollHeight, setScrollHeight] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const scrollContainer = useRef<HTMLDivElement>(null);
@@ -106,7 +109,7 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
               rounded="full"
               className="h-5 min-w-5 px-1 tabular-nums tracking-normal absolute top-0 right-0"
             >
-              {loading ? (
+              {showSpinner ? (
                 <Spinner color="primary" variant="xs" />
               ) : (
                 cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0

@@ -29,6 +29,8 @@ test.describe('Auth + Site synchronization', () => {
     await page.goto('/');
 
     // Pre-login: switch to US to reproduce canonicalization handoff path.
+    await page.evaluate(() => window.scrollTo({ top: 0 }));
+    await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
     await page.locator('button[aria-label="Site"]').click();
     await page.getByRole('menuitem', { name: 'US' }).click();
     await expect(page).toHaveURL(/\/us-branch/);
@@ -64,6 +66,8 @@ test.describe('Auth + Site synchronization', () => {
     expect(urlSiteCode).toBe(session.siteCode);
 
     // Post-login: switch site and assert header/site/currency consistency.
+    await page.evaluate(() => window.scrollTo({ top: 0 }));
+    await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
     await page.locator('button[aria-label="Site"]').click();
     await page.getByRole('menuitem', { name: 'US' }).click();
 

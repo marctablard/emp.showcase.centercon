@@ -2,9 +2,18 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import server from '@/platform/server';
 import type { CartService } from '@/platform/services/cart';
-import { isCartCurrencyUpdateError } from '@/platform/services/cart/errors';
+import {
+  CART_CURRENCY_UPDATE_ERROR_CODE,
+  type CartCurrencyUpdateErrorCode,
+  isCartCurrencyUpdateError,
+} from '@/platform/services/cart/errors';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SessionService } from '@/platform/services/session/SessionService';
+
+const RECOVERABLE_CART_ERROR_CODES = new Set<CartCurrencyUpdateErrorCode>([
+  CART_CURRENCY_UPDATE_ERROR_CODE.CART_NOT_FOUND,
+  CART_CURRENCY_UPDATE_ERROR_CODE.STALE_CART_ID,
+]);
 
 /**
  * PUT /api/session/currency
@@ -36,11 +45,19 @@ export async function PUT(request: NextRequest) {
         updatedCart = (await cartService.getCartById(cartId)) ?? (await cartService.getCart());
       } catch (cartError) {
         if (isCartCurrencyUpdateError(cartError)) {
-          logger.warn(
-            { code: cartError.code, cartId, currency, cartSite },
-            'Cart currency update skipped — updating session only',
-          );
-          updatedCart = null;
+          if (RECOVERABLE_CART_ERROR_CODES.has(cartError.code)) {
+            logger.warn(
+              { code: cartError.code, cartId, currency, cartSite },
+              'Cart currency update skipped — updating session only',
+            );
+            updatedCart = null;
+          } else {
+            logger.error(
+              { code: cartError.code, cartId, currency, cartSite },
+              'Cart currency update failed — non-recoverable error',
+            );
+            return NextResponse.json({ error: 'Cart currency update failed', code: cartError.code }, { status: 409 });
+          }
         } else {
           throw cartError;
         }

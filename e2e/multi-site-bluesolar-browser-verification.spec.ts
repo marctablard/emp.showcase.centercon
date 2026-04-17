@@ -129,6 +129,8 @@ async function gotoSiteHome(page: Page, siteCode: string): Promise<void> {
 }
 
 async function switchToSiteFromHeader(page: Page, menuLabel: string): Promise<void> {
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await expect(page.locator('button[aria-label="Site"]')).toBeVisible({ timeout: 10_000 });
   await page.locator('button[aria-label="Site"]').click();
   const put = page.waitForResponse(
     (r) =>

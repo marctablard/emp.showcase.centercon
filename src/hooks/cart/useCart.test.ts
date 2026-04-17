@@ -13,6 +13,7 @@ jest.mock('@/lib/client/carts', () => ({
   addItemToCart: jest.fn(),
   removeCartItem: jest.fn(),
   updateCartItemQuantity: jest.fn(),
+  updateCartCurrency: jest.fn(),
   updateShippingInfo: jest.fn(),
   loadSavedCart: jest.fn(),
   clearCartSession: jest.fn(),
@@ -30,6 +31,7 @@ jest.mock('@/lib/logger/use-logger-client', () => ({
 const mockFetchCurrentCart = require('@/lib/client/carts').fetchCurrentCart;
 const mockAddItemToCart = require('@/lib/client/carts').addItemToCart;
 const mockClearCartSession = require('@/lib/client/carts').clearCartSession;
+const mockUpdateCartCurrency = require('@/lib/client/carts').updateCartCurrency;
 
 describe('CartStore - Site Validation', () => {
   let store: ReturnType<typeof createCartStore>;
@@ -647,5 +649,69 @@ describe('CartStore - Fetch Deduplication', () => {
     expect(mockFetchCurrentCart).toHaveBeenCalledWith(true);
     expect(mockAddItemToCart).toHaveBeenCalledWith('cart-usd', 'product-1', 1);
     expect(clearedStore.getState().currentCart?.currency).toBe('USD');
+  });
+});
+
+describe('CartStore - fetchCart loading gap with pendingCurrencySync', () => {
+  let store: ReturnType<typeof createCartStore>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockClearCartSession.mockResolvedValue(undefined);
+    store = createCartStore();
+  });
+
+  it('should set loading=false after fetchCart even with pendingCurrencySync and flush the pending sync', async () => {
+    const cart = {
+      id: 'cart-1',
+      currency: 'EUR',
+      site: 'main',
+      items: [],
+    } as unknown as Cart;
+
+    const cartAfterCurrencySync = {
+      ...cart,
+      currency: 'USD',
+    } as unknown as Cart;
+
+    store.setState({
+      lastSiteCode: 'main',
+      pendingCurrencySync: { currency: 'USD', siteCode: 'main', attempts: 1 },
+    });
+
+    // First fetchCart: returns the original EUR cart
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(cart));
+    // updateCartCurrency succeeds
+    mockUpdateCartCurrency.mockResolvedValueOnce(undefined);
+    // Second fetchCart (called by updateCurrency after API call): returns the USD cart
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(cartAfterCurrencySync));
+
+    await act(async () => {
+      await store.getState().fetchCart(false);
+    });
+
+    expect(store.getState().loading).toBe(false);
+    expect(store.getState().currentCart?.currency).toBe('USD');
+    expect(store.getState().pendingCurrencySync).toBeNull();
+  });
+
+  it('should set loading=false after fetchCart when no pendingCurrencySync', async () => {
+    const cart = {
+      id: 'cart-1',
+      currency: 'EUR',
+      site: 'main',
+      items: [],
+    } as unknown as Cart;
+
+    store.setState({ lastSiteCode: 'main', pendingCurrencySync: null });
+
+    mockFetchCurrentCart.mockResolvedValueOnce(fcResult(cart));
+
+    await act(async () => {
+      await store.getState().fetchCart(false);
+    });
+
+    expect(store.getState().loading).toBe(false);
+    expect(store.getState().currentCart).toEqual(cart);
   });
 });
