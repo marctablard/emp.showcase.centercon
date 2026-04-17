@@ -247,10 +247,15 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
     }
     if (response) {
       const now = Date.now();
+      const previous = customerToken!.token;
+      const saasTokenFromRefresh = response.saas_token;
+      const saasToken =
+        saasTokenFromRefresh != null && saasTokenFromRefresh !== '' ? saasTokenFromRefresh : previous.saas_token;
       customerToken = {
         token: {
           ...response,
-          session_id: customerToken!.token.session_id,
+          session_id: previous.session_id,
+          saas_token: saasToken,
         },
         expiryAt: now + response.expires_in * 1000,
         refreshExpiryAt: response.refresh_token_expires_in ? now + response.refresh_token_expires_in * 1000 : undefined,
