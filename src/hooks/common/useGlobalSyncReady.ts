@@ -27,7 +27,7 @@ const READY: GlobalSyncReady = Object.freeze({ ready: true });
 /**
  * Derives a single readiness state from the session, site, and cart stores. Use this to gate UI
  * surfaces that display or mutate cart / currency / site-dependent data so users do not see
- * stale values during a site switch or authentication transition (plan Phase 5.1).
+ * stale values during a site switch or authentication transition.
  *
  * Subscribes through selectors so the hook only re-renders when the fields it reads change.
  * `availableSites` is intentionally excluded — we only care about whether the active site, the

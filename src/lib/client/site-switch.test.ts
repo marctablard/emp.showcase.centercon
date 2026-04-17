@@ -33,6 +33,7 @@ type SessionStoreState = {
 
 type SiteStoreState = {
   resetSite: jest.Mock<void, []>;
+  getSite: jest.Mock<{ code: string } | null | undefined, []>;
 };
 
 type CartStoreState = {
@@ -55,6 +56,8 @@ interface BuildStoresOptions {
   session?: Partial<Session> | null | undefined;
   lockAvailable?: boolean;
   cartValidateSiteImpl?: () => Promise<void>;
+  /** Seed the siteStore's `getSite()` return value — defaults to undefined (no site). */
+  siteInStore?: { code: string } | null | undefined;
 }
 
 function buildStores(options: BuildStoresOptions = {}): {
@@ -72,6 +75,7 @@ function buildStores(options: BuildStoresOptions = {}): {
   };
   const siteState: SiteStoreState = {
     resetSite: jest.fn(),
+    getSite: jest.fn(() => options.siteInStore),
   };
   const cartState: CartStoreState = {
     validateSite: jest.fn<Promise<void>, [string]>(options.cartValidateSiteImpl ?? (() => Promise.resolve())),
@@ -267,6 +271,26 @@ describe('performSiteSwitch', () => {
     expect(mockedUpdateSessionSite).not.toHaveBeenCalled();
     expect(siteState.resetSite).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'unknown-site' }), expect.any(String));
+  });
+
+  it('skips resetSite when siteStore already holds the target site (SSR-aligned deep-link)', async () => {
+    // Deep-link scenario after SSR alignment: sessionStore has stale 'a' (pre-alignment snapshot
+    // captured by SiteSessionAligner before setSession fires) but siteStore was already seeded
+    // with 'b' from the URL. Clearing it would force useSite into a transient undefined window
+    // and make useShopContextReady.siteAligned flip false long enough to trip the deadlock guard.
+    const { stores, siteState, cartState } = buildStores({
+      session: { siteCode: 'a', currency: 'EUR', language: 'en' },
+      siteInStore: { code: 'b' },
+    });
+    mockedUpdateSessionSite.mockResolvedValue(true);
+    mockedFetchCurrentSession.mockResolvedValue({ siteCode: 'b', currency: 'EUR', language: 'en' });
+
+    const result = await performSiteSwitch('b', stores, { source: 'deep-link' });
+
+    expect(result.success).toBe(true);
+    expect(siteState.resetSite).not.toHaveBeenCalled();
+    // Cart still validates against the new site even when we skip the reset.
+    expect(cartState.validateSite).toHaveBeenCalledWith('b');
   });
 
   it('resetSite and validateSite are awaited in parallel (not sequential)', async () => {

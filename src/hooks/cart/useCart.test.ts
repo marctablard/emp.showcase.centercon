@@ -75,7 +75,7 @@ describe('CartStore - Site Validation', () => {
         await store.getState().validateSite('site-a');
       });
 
-      // With the simplified validateSite (plan Phase 4.1), any null→siteCode transition is
+      // With the simplified validateSite, any null→siteCode transition is
       // treated as a site change: snap lastSiteCode, clear, refetch.
       expect(store.getState().lastSiteCode).toBe('site-a');
       expect(mockFetchCurrentCart).toHaveBeenCalledTimes(1);
@@ -205,8 +205,8 @@ describe('CartStore - Site Validation', () => {
 
       const validatePromise = store.getState().validateSite('site-b');
 
-      // validateSite now snaps lastSiteCode synchronously (plan Phase 4.1 — orchestrator awaits
-      // the session update, so there's no stale window for a prior-site response to masquerade).
+      // validateSite snaps lastSiteCode synchronously — the orchestrator awaits the session
+      // update, so there's no stale window for a prior-site response to masquerade.
       expect(store.getState().lastSiteCode).toBe('site-b');
       expect(store.getState().currentCart).toBeNull();
       expect(store.getState().loading).toBe(true);

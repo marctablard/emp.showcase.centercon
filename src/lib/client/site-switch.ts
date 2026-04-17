@@ -11,7 +11,7 @@ import type { SiteStore } from '@/stores/site-store';
  * Single awaited client-side pipeline for every site change — whether user-initiated
  * (`SiteSwitcher`) or URL-driven (`SiteSessionAligner`).
  *
- * Ordering guarantees (see `site-session-cart-sync-improvements.plan.md` §Target Architecture):
+ * Ordering guarantees:
  *  1. Acquire the session mutation lock (single writer guarantee).
  *  2. `PUT /api/session/site` (server clears `currentCart` and PATCHes `{ siteCode, currency }`).
  *  3. `GET /api/session` to refetch the authoritative session.
@@ -175,8 +175,15 @@ export async function performSiteSwitch(
     // Run site-store reset (drops active site; `useSite` effect refetches) in parallel with the
     // cart validation (clears + GET /api/cart). resetSite is synchronous but exposed here so
     // tests can assert it was called before the parallel await resolves.
+    //
+    // Skip `resetSite()` when `siteStore.site` already matches the target (typical for
+    // SSR-aligned deep-links where the layout seeded the correct site). Clearing it would
+    // force `useSite` into a transient `site: undefined` window and flip
+    // `useShopContextReady.siteAligned` to false long enough to trip the deadlock guard.
+    const currentSiteInStore = siteStore.getState().getSite()?.code;
+    const shouldResetSite = currentSiteInStore !== updatedSession.siteCode;
     await Promise.all([
-      Promise.resolve(siteStore.getState().resetSite()),
+      shouldResetSite ? Promise.resolve(siteStore.getState().resetSite()) : Promise.resolve(),
       cartStore.getState().validateSite(updatedSession.siteCode),
     ]);
 

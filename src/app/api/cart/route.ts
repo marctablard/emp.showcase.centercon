@@ -11,8 +11,7 @@ import type { SessionService } from '@/platform/services/session';
  * GET /api/cart
  *
  * Fetches the current cart. **Never creates a cart on GET** — callers must POST /api/cart
- * explicitly when they want a fresh cart. Legacy `?create=true` is ignored and logged as deprecated
- * (see site-session-cart-sync-improvements plan, Phase 4.4).
+ * explicitly when they want a fresh cart. Legacy `?create=true` is ignored and logged as deprecated.
  */
 export async function GET(request: NextRequest) {
   try {

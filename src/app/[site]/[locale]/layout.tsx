@@ -13,7 +13,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { redirect } from '@/i18n/edge/navigation';
 import { routing } from '@/i18n/routing';
 import { isBrowserDebugOutputEnabled, isDebugApiEnabled } from '@/lib/common/debug-env';
-import { getSession, setSessionLanguage } from '@/lib/ssr/session';
+import { getSessionForSite, setSessionLanguage } from '@/lib/ssr/session';
 import { getAvailableSites, getSite } from '@/lib/ssr/site';
 import SiteProvider from '@/providers/SiteProvider';
 import { SiteSessionAligner } from '@/providers/SiteSessionAligner';
@@ -70,7 +70,16 @@ export default async function LocaleLayout({ children, dialog, params }: Props) 
     notFound();
   }
 
-  const [site, availableSites, shopSession] = await Promise.all([getSite(siteCode), getAvailableSites(), getSession()]);
+  // Align the Emporix session's siteCode with the URL-derived site BEFORE hydration.
+  // Prevents the "stale siteCode" deep-link race where the server session still points
+  // at the previous site (e.g. `main`) while the URL and `siteStore` already reflect
+  // the target site (e.g. `us-branch`), causing `SiteSessionAligner` to tear down the
+  // correct `siteStore` state on mount. See `_alignSessionSite` for the full rationale.
+  const [site, availableSites, shopSession] = await Promise.all([
+    getSite(siteCode),
+    getAvailableSites(),
+    getSessionForSite(siteCode),
+  ]);
 
   // Handle invalid site: redirect to valid site (fallback ON) or show 404 (fallback OFF)
   if (!site) {

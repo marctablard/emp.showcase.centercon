@@ -89,6 +89,9 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# Local-only e2e specs and helpers: kept for developer reproduction/exploration,
+# not shipped to CI or deployment.
+/e2e/local/
 
 # Generated translation files
 /src/i18n/translations/*.json

@@ -15,7 +15,7 @@ let _loggedDeprecatedFetchCurrentCartCreate = false;
  * Fetch the current cart without creating a new one when absent.
  *
  * The optional `createIfNotExist` argument is retained for one release for backwards compatibility
- * with external callers but is **no-op**: `GET /api/cart` never creates a cart (plan Phase 4.4).
+ * with external callers but is **no-op**: `GET /api/cart` never creates a cart.
  * Clients that need a new cart must use `createCart()` (POST /api/cart) instead.
  */
 export async function fetchCurrentCart(createIfNotExist: boolean = false): Promise<FetchCurrentCartResult> {
@@ -62,7 +62,7 @@ export async function fetchCartById(cartId: string): Promise<Cart> {
  * Optional `siteCode` / `currency` override the server-side session defaults (see
  * `POST /api/cart`). Call this when the client discovers that no cart exists yet and it
  * needs one — e.g. on the first add-to-cart of a new site. Never auto-called by
- * `fetchCurrentCart` (plan Phase 4.4).
+ * `fetchCurrentCart`.
  */
 export async function createCart(options: { siteCode?: string; currency?: string } = {}): Promise<Cart> {
   const body = JSON.stringify({

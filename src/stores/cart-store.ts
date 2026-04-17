@@ -85,9 +85,8 @@ const defaultState: CartState = {
 export const createCartStore = (initState: CartState = defaultState) => {
   /**
    * In-flight promise deduplication for `fetchCart`. Stored outside Zustand state to avoid
-   * triggering re-renders. With `GET /api/cart` no longer creating carts (plan Phase 4.4), the
-   * previous `_fetchPromiseCreate` distinction is gone — every in-flight `fetchCart` is the same
-   * read and is safely reused by concurrent callers.
+   * triggering re-renders. `GET /api/cart` never creates carts, so every in-flight `fetchCart`
+   * is the same read and is safely reused by concurrent callers.
    */
   let _fetchPromise: Promise<Cart | null | undefined> | null = null;
   /** Serializes PATCH /shipping so parallel callers cannot race Emporix optimistic locking. */
@@ -120,7 +119,6 @@ export const createCartStore = (initState: CartState = defaultState) => {
        * The orchestrator (`performSiteSwitch`) has already settled the session before calling
        * this, so there is no window during which a stale GET /api/cart response can masquerade as
        * the new site's cart — the discard-only guards in `fetchCart` catch any residual races.
-       * See site-session-cart-sync-improvements plan, Phase 4.1.
        */
       validateSite: async (newSiteCode: string) => {
         const { lastSiteCode, currentCart } = get();
@@ -191,9 +189,9 @@ export const createCartStore = (initState: CartState = defaultState) => {
       setError: (error: Error | null) => set({ error }),
 
       /**
-       * Read the current cart. Never creates (see plan Phase 4.4). Discards the response when
-       * the cart's site disagrees with either the same-request `x-session-site-code` header or
-       * the locally-tracked `lastSiteCode` — `lastSiteCode` itself is authored only by
+       * Read the current cart. Never creates. Discards the response when the cart's site
+       * disagrees with either the same-request `x-session-site-code` header or the
+       * locally-tracked `lastSiteCode` — `lastSiteCode` itself is authored only by
        * `validateSite` / `validateLegalEntity`, never from response headers.
        *
        * The `createCurrent` argument is kept for backwards compatibility with existing callers
@@ -326,7 +324,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
        * Adds an item to the current cart. If no cart exists yet, issues a single explicit
        * `POST /api/cart` (via `createCart()`) before adding — never relies on `fetchCart` to
        * create one. If the existing cart belongs to the wrong site (rare defensive path), drops it
-       * and re-resolves via a plain `fetchCart()` before adding. See plan Phase 4.3.
+       * and re-resolves via a plain `fetchCart()` before adding.
        */
       addToCart: async (productId: string, quantity: number, _retryCount = 0) => {
         const { lastSiteCode } = get();
