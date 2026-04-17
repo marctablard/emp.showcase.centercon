@@ -101,7 +101,12 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
       className="pl-[11px] sm:pl-4 pr-1 pb-2 pt-1 sm:py-1"
     >
       {showSum && isAboveSmallScreen && (
-        <span className="text-text-on-action text-lg">{formatCurrency(cartTotal || 0.0, currency)}</span>
+        <span
+          className="text-text-on-action text-lg tabular-nums min-w-[3ch] inline-block"
+          aria-busy={showSpinner || undefined}
+        >
+          {showSpinner ? '\u00A0' : formatCurrency(cartTotal || 0.0, currency)}
+        </span>
       )}
       <div className={cn('flex items-center w-[43px] h-[35px] relative', isClient ? '' : 'justify-center')}>
         {isClient ? (
@@ -148,7 +153,7 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
               className="[@media(pointer:coarse)]:hidden backdrop-blur-default bg-surface-page/90 shadow-xl pl-4 pb-4 pt-0 pr-0 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit origin-(--radix-tooltip-content-transform-origin) border-width-notification rounded-notification"
             >
               <HeaderMiniCartContent
-                loading={loading}
+                loading={showSpinner}
                 cart={cart}
                 scrollHeight={scrollHeight}
                 scrollContainer={scrollContainer}
