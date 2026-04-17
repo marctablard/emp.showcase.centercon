@@ -1,4 +1,4 @@
-import { fetchCurrentSession, updateSessionSite } from '@/lib/client/session';
+import { fetchCurrentSession, updateSessionLanguage, updateSessionSite } from '@/lib/client/session';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Session } from '@/platform/services/model/session/session';
 import type { SiteSwitchStores } from './site-switch';
@@ -6,6 +6,7 @@ import { NAVIGATION_REFRESH_DELAY_MS, performSiteSwitch } from './site-switch';
 
 jest.mock('@/lib/client/session', () => ({
   updateSessionSite: jest.fn(),
+  updateSessionLanguage: jest.fn(),
   fetchCurrentSession: jest.fn(),
 }));
 
@@ -21,6 +22,7 @@ jest.mock('@/lib/logger/use-logger-client', () => ({
 }));
 
 const mockedUpdateSessionSite = updateSessionSite as jest.Mock;
+const mockedUpdateSessionLanguage = updateSessionLanguage as jest.Mock;
 const mockedFetchCurrentSession = fetchCurrentSession as jest.Mock;
 
 type SessionStoreState = {
@@ -291,6 +293,97 @@ describe('performSiteSwitch', () => {
     expect(siteState.resetSite).not.toHaveBeenCalled();
     // Cart still validates against the new site even when we skip the reset.
     expect(cartState.validateSite).toHaveBeenCalledWith('b');
+  });
+
+  describe('locale alignment on site switch (user source)', () => {
+    it('calls updateSessionLanguage with the target-site fallback locale when the current locale is unsupported', async () => {
+      // Regression: before this fix, performSiteSwitch never touched the session language, so the
+      // next navigation on the new site re-introduced the stale (unsupported) locale into URLs
+      // produced by <Link> (e.g. /us/de/product/X), which in turn triggered the layout's
+      // unsupported-locale redirect loop. The target-site fallback locale must be pushed to the
+      // server session (and, on the real browser, the locale cookie) before router.push fires.
+      const { stores } = buildStores({
+        session: { siteCode: 'fw', currency: 'CHF', language: 'de' },
+      });
+      mockedUpdateSessionSite.mockResolvedValue(true);
+      mockedFetchCurrentSession.mockResolvedValue({ siteCode: 'us', currency: 'USD', language: 'en' });
+      mockedUpdateSessionLanguage.mockResolvedValue(true);
+
+      const navigateTo = jest.fn();
+      const getRedirectPath = jest.fn(() => '/us');
+      const refresh = jest.fn();
+      const getSiteByCode = jest.fn(() => Promise.resolve({ languages: ['en'] }));
+
+      const result = await performSiteSwitch('us', stores, {
+        source: 'user',
+        locale: 'de',
+        navigateTo,
+        getRedirectPath,
+        getSiteByCode,
+        router: { refresh },
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockedUpdateSessionLanguage).toHaveBeenCalledTimes(1);
+      expect(mockedUpdateSessionLanguage).toHaveBeenCalledWith('en');
+      expect(getRedirectPath).toHaveBeenCalledWith(
+        expect.objectContaining({ locale: 'en', site: 'us', forcePrefix: true }),
+      );
+      expect(navigateTo).toHaveBeenCalledWith('/us');
+    });
+
+    it('does not touch session language when current locale is supported by the target site', async () => {
+      const { stores } = buildStores({
+        session: { siteCode: 'fw', currency: 'EUR', language: 'en' },
+      });
+      mockedUpdateSessionSite.mockResolvedValue(true);
+      mockedFetchCurrentSession.mockResolvedValue({ siteCode: 'us', currency: 'USD', language: 'en' });
+
+      const getSiteByCode = jest.fn(() => Promise.resolve({ languages: ['en'] }));
+
+      const result = await performSiteSwitch('us', stores, {
+        source: 'user',
+        locale: 'en',
+        navigateTo: jest.fn(),
+        getRedirectPath: jest.fn(() => '/us'),
+        getSiteByCode,
+        router: { refresh: jest.fn() },
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockedUpdateSessionLanguage).not.toHaveBeenCalled();
+    });
+
+    it('does not block the switch when updateSessionLanguage rejects — navigation still fires', async () => {
+      const { stores } = buildStores({
+        session: { siteCode: 'fw', currency: 'CHF', language: 'de' },
+      });
+      mockedUpdateSessionSite.mockResolvedValue(true);
+      mockedFetchCurrentSession.mockResolvedValue({ siteCode: 'us', currency: 'USD', language: 'en' });
+      mockedUpdateSessionLanguage.mockRejectedValue(new Error('500'));
+
+      const navigateTo = jest.fn();
+      const getRedirectPath = jest.fn(() => '/us');
+      const logger = createLogger();
+
+      const result = await performSiteSwitch('us', stores, {
+        source: 'user',
+        locale: 'de',
+        navigateTo,
+        getRedirectPath,
+        getSiteByCode: () => Promise.resolve({ languages: ['en'] }),
+        router: { refresh: jest.fn() },
+        logger,
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockedUpdateSessionLanguage).toHaveBeenCalledWith('en');
+      expect(navigateTo).toHaveBeenCalledWith('/us');
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({ locale: 'en', site: 'us' }),
+        expect.stringContaining('updateSessionLanguage'),
+      );
+    });
   });
 
   it('resetSite and validateSite are awaited in parallel (not sequential)', async () => {

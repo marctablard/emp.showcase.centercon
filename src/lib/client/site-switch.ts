@@ -1,11 +1,30 @@
 'use client';
 
 import type { StoreApi } from 'zustand';
-import { fetchCurrentSession, updateSessionSite } from '@/lib/client/session';
+import { fetchCurrentSession, updateSessionLanguage, updateSessionSite } from '@/lib/client/session';
 import { type LoggerService, getLogger } from '@/lib/logger/use-logger-client';
 import type { CartStore } from '@/stores/cart-store';
 import type { SessionStore } from '@/stores/session-store-context';
 import type { SiteStore } from '@/stores/site-store';
+
+/**
+ * Write the locale cookie from the browser before `router.push` fires, so the next RSC/middleware
+ * round-trip sees the aligned locale. Without this, `next-intl`'s cookie-driven locale detection
+ * keeps the pre-switch locale (e.g. `de`) and redirects `/us` → `/us/de` even after the switch to
+ * a site that does not advertise that locale — which in turn makes the layout redirect away from
+ * any deep link the user was navigating to.
+ */
+function writeLocaleCookie(locale: string): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
+  const cookieName = process.env.NEXT_PUBLIC_LOCALE_COOKIE;
+  if (!cookieName) {
+    return;
+  }
+  const maxAge = 365 * 24 * 60 * 60;
+  document.cookie = `${cookieName}=${encodeURIComponent(locale)}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+}
 
 /**
  * Single awaited client-side pipeline for every site change — whether user-initiated
@@ -209,6 +228,24 @@ export async function performSiteSwitch(
             ? fallbackLocale
             : targetLanguages[0]
           : fallbackLocale;
+
+      // When the target site does not advertise the current UI locale (e.g. FW/CHF/de → US which
+      // only supports en), we must realign both the server-side session language AND the
+      // client-cookie that next-intl reads. Otherwise the next navigation (header search, product
+      // tile click, etc.) re-introduces `/de` into URLs on the new site and the layout bounces the
+      // user back to `/` to correct the locale, discarding deep links.
+      const localeChanged = Boolean(targetLocale) && targetLocale !== opts.locale;
+      if (localeChanged) {
+        writeLocaleCookie(targetLocale);
+        try {
+          await updateSessionLanguage(targetLocale);
+        } catch (err) {
+          logger.error(
+            { err, locale: targetLocale, site: targetSite, correlationId },
+            'updateSessionLanguage failed during site switch (locale realignment)',
+          );
+        }
+      }
 
       const targetPath = opts.getRedirectPath({
         href: '/',
