@@ -7,6 +7,7 @@ import type { IconName } from 'lucide-react/dynamic';
 import { DynamicIcon } from 'lucide-react/dynamic';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { Spinner } from '@/components/ui/spinner';
+import { useGlobalSyncReady } from '@/hooks/common/useGlobalSyncReady';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
 import { l10n } from '@/lib/utils';
@@ -17,6 +18,7 @@ function CurrencySwitcherContent() {
   const router = useRouter();
   const t = useTranslations('common.Currencies');
   const { currencies, loading: siteLoading, site } = useSite();
+  const { ready: syncReady } = useGlobalSyncReady();
   const [isSwitching, setIsSwitching] = useState(false);
   const currentCurrency = useMemo(() => {
     // Match session currency by id or code (Emporix list entries may omit `code`).
@@ -113,7 +115,7 @@ function CurrencySwitcherContent() {
         label={t('label')}
         onSelected={switchCurrency}
         icon={icon}
-        disabled={isSwitching || sessionLoading}
+        disabled={isSwitching || sessionLoading || !syncReady}
       />
     </div>
   );

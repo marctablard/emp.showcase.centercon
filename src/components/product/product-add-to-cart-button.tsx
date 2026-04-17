@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/cart/useCart';
+import { useGlobalSyncReady } from '@/hooks/common/useGlobalSyncReady';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
 import { isProductPriceDisplayableForPurchase } from '@/lib/common/product-price-site-context';
@@ -37,9 +38,15 @@ export default function ProductAddToCartButton({
   const { addItem, cart } = useCart();
   const { session } = useSession();
   const { site } = useSite();
+  const { ready: syncReady, reason: syncReason } = useGlobalSyncReady();
   const [adding, setAdding] = useState(false);
 
   const priceOkForCart = price != null && isProductPriceDisplayableForPurchase(price.currency, session, site);
+
+  const isMidSwitch =
+    !syncReady &&
+    (syncReason === 'session-mutation' || syncReason === 'site-mismatch' || syncReason === 'cart-mismatch');
+  const syncTitle = isMidSwitch ? t('updatingSite') : undefined;
 
   // State for the add-to-cart modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,8 +101,10 @@ export default function ProductAddToCartButton({
           adding ||
           !priceOkForCart ||
           availabilityLoading ||
-          (availability != null && !availability.isAvailable)
+          (availability != null && !availability.isAvailable) ||
+          !syncReady
         }
+        title={syncTitle}
         data-testid="product-addToCartButton"
       >
         {t('addToCart')}

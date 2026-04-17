@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import {
   addItemToCart as apiAddItemToCart,
+  createCart as apiCreateCart,
   fetchCurrentCart as apiFetchCurrentCart,
   removeCartItem as apiRemoveCartItem,
   updateCartCurrency as apiUpdateCartCurrency,
@@ -64,8 +65,6 @@ interface CartActions {
   // Cross-store synchronization
   syncCurrencyWithSession: (currency: string, siteCode: string) => Promise<void>;
   flushPendingCurrencySync: () => Promise<void>;
-  /** Drop in-flight fetchCart dedup so the next fetch cannot resolve a stale site transition. */
-  invalidateInFlightCartFetch: () => void;
 }
 export type CartStore = CartState & CartActions;
 
@@ -84,28 +83,19 @@ const defaultState: CartState = {
 };
 
 export const createCartStore = (initState: CartState = defaultState) => {
-  // In-flight promise deduplication for fetchCart
-  // Stored outside Zustand state to avoid triggering re-renders
-  let _fetchPromise: Promise<Cart | null | undefined> | null = null;
-  let _fetchPromiseCreate: boolean = false;
   /**
-   * Bumped by {@link invalidateInFlightCartFetch}. In-flight fetchCart work must not call `set`
-   * after await if a newer generation superseded it — otherwise a stale GET /api/cart response
-   * reapplies the previous site's cart and store-sync re-enters validateSite in a tight loop.
+   * In-flight promise deduplication for `fetchCart`. Stored outside Zustand state to avoid
+   * triggering re-renders. With `GET /api/cart` no longer creating carts (plan Phase 4.4), the
+   * previous `_fetchPromiseCreate` distinction is gone — every in-flight `fetchCart` is the same
+   * read and is safely reused by concurrent callers.
    */
-  let _cartFetchEpoch = 0;
+  let _fetchPromise: Promise<Cart | null | undefined> | null = null;
   /** Serializes PATCH /shipping so parallel callers cannot race Emporix optimistic locking. */
   let _shippingUpdateGate: Promise<void> = Promise.resolve();
-  /** Serializes validateSite so session-driven and cart-driven site recovery never overlap fetchCart. */
-  let _validateSiteChain: Promise<void> = Promise.resolve();
 
   return create<CartStore>()(
     subscribeWithSelector((set, get) => ({
       ...initState,
-      invalidateInFlightCartFetch: () => {
-        _fetchPromise = null;
-        _cartFetchEpoch += 1;
-      },
       validateCart: async (newSessionStatus: string) => {
         const { sessionStatus } = get();
         if (sessionStatus !== newSessionStatus) {
@@ -113,7 +103,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
           // Only clear cart on actual auth transitions (not initial mount)
           // On first mount, sessionStatus is null — this is initialization, not an auth change
           if (sessionStatus !== null) {
-            get().invalidateInFlightCartFetch();
+            _fetchPromise = null;
             set({
               currentCart: null,
               loading: true,
@@ -121,80 +111,47 @@ export const createCartStore = (initState: CartState = defaultState) => {
               lastShippingUpdate: null,
               pendingCurrencySync: null,
             });
-            await get().fetchCart(false);
+            await get().fetchCart();
           }
         }
       },
+      /**
+       * Snap `lastSiteCode := newSiteCode` early, clear the cart, and issue a single refetch.
+       * The orchestrator (`performSiteSwitch`) has already settled the session before calling
+       * this, so there is no window during which a stale GET /api/cart response can masquerade as
+       * the new site's cart — the discard-only guards in `fetchCart` catch any residual races.
+       * See site-session-cart-sync-improvements plan, Phase 4.1.
+       */
       validateSite: async (newSiteCode: string) => {
-        const run = async (): Promise<void> => {
-          const { lastSiteCode, currentCart } = get();
-          devSyncLog('cart-store: validateSite', {
-            newSiteCode,
-            lastSiteCode,
-            cartSite: currentCart?.site,
-            cartId: currentCart?.id,
-          });
-          if (lastSiteCode !== null && lastSiteCode !== newSiteCode) {
-            get().invalidateInFlightCartFetch();
-            // Do not set lastSiteCode to newSiteCode here: GET /api/cart can still echo the previous
-            // session for one request — snapping lastSiteCode early makes cart.site vs session look
-            // aligned and skips discard. lastSiteCode is updated from x-session-site-code in fetchCart.
-            set({
-              currentCart: null,
-              loading: true,
-              error: null,
-              lastShippingUpdate: null,
-              pendingCurrencySync: null,
-            });
-            await get().fetchCart(false);
-          } else if (lastSiteCode === null) {
-            // First session-site bind: record target site. (On lastSiteCode!==null transitions we avoid
-            // setting lastSiteCode to the new URL before fetchCart — that snap hid stale cart/session pairs.)
-            set({ lastSiteCode: newSiteCode });
-            // Cart may already be loaded from SSR/page-load before the session's site
-            // was reconciled (e.g., direct URL navigation to a different site). If the
-            // existing cart belongs to a different site, clear and refetch.
-            if (currentCart && currentCart.site && currentCart.site !== newSiteCode) {
-              get().invalidateInFlightCartFetch();
-              set({
-                currentCart: null,
-                loading: true,
-                error: null,
-                lastShippingUpdate: null,
-                pendingCurrencySync: null,
-              });
-              await get().fetchCart(false);
-            }
-          } else if (
-            lastSiteCode === newSiteCode &&
-            currentCart &&
-            currentCart.site &&
-            currentCart.site !== newSiteCode
-          ) {
-            // lastSiteCode already matches session site but cart payload is from another tenant
-            // (e.g. race with store-synchronizer or upstream returning a stale cart). Single refetch path.
-            get().invalidateInFlightCartFetch();
-            set({
-              currentCart: null,
-              loading: true,
-              error: null,
-              lastShippingUpdate: null,
-              pendingCurrencySync: null,
-            });
-            await get().fetchCart(false);
-          }
-        };
-
-        _validateSiteChain = _validateSiteChain.then(run).catch((err) => {
-          getLogger().error({ err, newSiteCode }, 'validateSite failed');
+        const { lastSiteCode, currentCart } = get();
+        devSyncLog('cart-store: validateSite', {
+          newSiteCode,
+          lastSiteCode,
+          cartSite: currentCart?.site,
+          cartId: currentCart?.id,
         });
-        await _validateSiteChain;
+        if (!newSiteCode || newSiteCode === lastSiteCode) {
+          if (lastSiteCode === null && newSiteCode) {
+            set({ lastSiteCode: newSiteCode });
+          }
+          return;
+        }
+        _fetchPromise = null;
+        set({
+          lastSiteCode: newSiteCode,
+          currentCart: null,
+          loading: true,
+          error: null,
+          lastShippingUpdate: null,
+          pendingCurrencySync: null,
+        });
+        await get().fetchCart();
       },
       validateLegalEntity: async (newLegalEntityId: string | undefined) => {
         const normalized = newLegalEntityId?.trim() ?? '';
         const { lastLegalEntityId } = get();
         if (lastLegalEntityId !== null && lastLegalEntityId !== normalized) {
-          get().invalidateInFlightCartFetch();
+          _fetchPromise = null;
           set({
             lastLegalEntityId: normalized,
             currentCart: null,
@@ -203,13 +160,13 @@ export const createCartStore = (initState: CartState = defaultState) => {
             lastShippingUpdate: null,
             pendingCurrencySync: null,
           });
-          await get().fetchCart(false);
+          await get().fetchCart();
         } else if (lastLegalEntityId === null) {
           set({ lastLegalEntityId: normalized });
           // First bound session legal entity (e.g. B2B company selection): re-resolve cart server-side
           // so we never keep a cart from another company or from before LE context existed.
           if (normalized !== '') {
-            get().invalidateInFlightCartFetch();
+            _fetchPromise = null;
             set({
               currentCart: null,
               loading: true,
@@ -217,7 +174,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
               lastShippingUpdate: null,
               pendingCurrencySync: null,
             });
-            await get().fetchCart(false);
+            await get().fetchCart();
           }
         }
       },
@@ -233,35 +190,32 @@ export const createCartStore = (initState: CartState = defaultState) => {
       getLoading: () => get().loading,
       setError: (error: Error | null) => set({ error }),
 
-      // Cart API operations
-      fetchCart: async (createCurrent: boolean = false) => {
-        // Dedup: if a fetch is already in-flight, reuse it
-        // A create=true call must NOT reuse a create=false in-flight request
-        if (_fetchPromise && (createCurrent === _fetchPromiseCreate || !createCurrent)) {
+      /**
+       * Read the current cart. Never creates (see plan Phase 4.4). Discards the response when
+       * the cart's site disagrees with either the same-request `x-session-site-code` header or
+       * the locally-tracked `lastSiteCode` — `lastSiteCode` itself is authored only by
+       * `validateSite` / `validateLegalEntity`, never from response headers.
+       *
+       * The `createCurrent` argument is kept for backwards compatibility with existing callers
+       * but is ignored; it will be removed in a follow-up.
+       */
+      fetchCart: async (_createCurrent: boolean = false) => {
+        if (_fetchPromise) {
           return _fetchPromise;
         }
 
-        _fetchPromiseCreate = createCurrent;
-        // Track "this" promise so we can clear the dedup slot before flushing.
-        // `let` is needed because the IIFE's closure captures the binding before the
-        // assignment on the next line; TS rejects `const` as "used before assigned".
         let thisPromise: Promise<Cart | null | undefined> | null = null;
 
         const currentFetchPromise = (async () => {
-          const epochAtFetchStart = _cartFetchEpoch;
           try {
             set({ loading: true, error: null });
 
             try {
-              const { cart: fetchedCart, sessionSiteCode } = await apiFetchCurrentCart(createCurrent);
-              if (epochAtFetchStart !== _cartFetchEpoch) {
-                return get().currentCart;
-              }
+              const { cart: fetchedCart, sessionSiteCode } = await apiFetchCurrentCart();
               let cartData = fetchedCart;
               const expectedSite = get().lastSiteCode;
 
-              // 1) Server inconsistency: cart tenant ≠ Emporix session.siteCode from the same GET /api/cart
-              //    (`x-session-site-code`).
+              // Server inconsistency guard: cart tenant ≠ Emporix session.siteCode from the same GET.
               if (cartData && sessionSiteCode && cartData.site && cartData.site !== sessionSiteCode) {
                 devSyncLog('cart-store: fetchCart discarding cart/session site mismatch', {
                   cartSite: cartData.site,
@@ -293,16 +247,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
                 cartData = null;
               }
 
-              if (epochAtFetchStart !== _cartFetchEpoch) {
-                return get().currentCart;
-              }
-              const nextLastSite =
-                (sessionSiteCode && sessionSiteCode.trim()) || (cartData?.site && String(cartData.site).trim()) || '';
-              set({
-                currentCart: cartData,
-                loading: false,
-                ...(nextLastSite ? { lastSiteCode: nextLastSite } : {}),
-              });
+              set({ currentCart: cartData, loading: false });
               try {
                 getLogger().info(
                   {
@@ -313,24 +258,18 @@ export const createCartStore = (initState: CartState = defaultState) => {
                     sessionId: cartData?.sessionId ?? null,
                     sessionSiteCode,
                     lastSiteCode: get().lastSiteCode,
-                    createCurrent,
                   },
                   'fetchCart: cart id, site, currency, session id, and session header (single snapshot)',
                 );
               } catch {
                 /* logging must never clear cart state */
               }
-              // Clear the dedup slot before flushing so that updateCurrency → fetchCart
-              // inside the flush chain can start a fresh fetch instead of re-entering this promise.
               if (_fetchPromise === thisPromise) {
                 _fetchPromise = null;
               }
               await get().flushPendingCurrencySync();
               return cartData;
             } catch (_err) {
-              if (epochAtFetchStart !== _cartFetchEpoch) {
-                return get().currentCart;
-              }
               set({ currentCart: null, loading: false });
               if (_fetchPromise === thisPromise) {
                 _fetchPromise = null;
@@ -339,9 +278,6 @@ export const createCartStore = (initState: CartState = defaultState) => {
               return null;
             }
           } catch (err) {
-            if (epochAtFetchStart !== _cartFetchEpoch) {
-              return get().currentCart;
-            }
             const error = err instanceof Error ? err : new Error('Failed to fetch cart');
             set({ error, loading: false });
             getLogger().error({ err }, 'Error fetching cart');
@@ -355,8 +291,6 @@ export const createCartStore = (initState: CartState = defaultState) => {
         thisPromise = currentFetchPromise;
         _fetchPromise = currentFetchPromise;
 
-        // Clean up after completion — only clear if this is still the current in-flight promise
-        // (prevents a later fetchCart(true) from being cleared by an earlier fetchCart(false) completing)
         void currentFetchPromise.finally(() => {
           if (_fetchPromise === currentFetchPromise) {
             _fetchPromise = null;
@@ -388,44 +322,45 @@ export const createCartStore = (initState: CartState = defaultState) => {
         }
       },
 
+      /**
+       * Adds an item to the current cart. If no cart exists yet, issues a single explicit
+       * `POST /api/cart` (via `createCart()`) before adding — never relies on `fetchCart` to
+       * create one. If the existing cart belongs to the wrong site (rare defensive path), drops it
+       * and re-resolves via a plain `fetchCart()` before adding. See plan Phase 4.3.
+       */
       addToCart: async (productId: string, quantity: number, _retryCount = 0) => {
-        const { loading, lastSiteCode } = get();
+        const { lastSiteCode } = get();
 
-        // Guard 1: Block while a site transition is in progress
-        // (validateSite sets loading=true before async fetchCart)
-        if (loading) {
-          if (_retryCount >= 1) {
-            throw new Error('Site transition in progress. Please try again.');
-          }
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          const { loading: stillLoading } = get();
-          if (stillLoading) {
-            throw new Error('Site transition in progress. Please try again.');
-          }
-          // Retry with fresh state after transition completes (max 1 retry)
-          return get().addToCart(productId, quantity, _retryCount + 1);
-        }
-
-        // first get a cart (before we block with the loading state)
         let { currentCart } = get();
         if (!currentCart) {
-          currentCart = await get().fetchCart(true);
-          if (!currentCart) throw new Error('No cart available');
+          try {
+            const newCart = await apiCreateCart({
+              ...(lastSiteCode ? { siteCode: lastSiteCode } : {}),
+            });
+            set({ currentCart: newCart, loading: false });
+            currentCart = newCart;
+          } catch (err) {
+            const error = err instanceof Error ? err : new Error('Failed to create cart');
+            set({ error, loading: false });
+            getLogger().error({ err }, 'Error creating cart before add-to-cart');
+            throw err;
+          }
         }
 
-        // Guard 2: Verify cart-site alignment using lastSiteCode from validateSite()
+        // Defensive alignment: cart belongs to a different site than the one validateSite last snapped.
+        // Re-resolve via GET (never create here).
         if (lastSiteCode && currentCart.site && currentCart.site !== lastSiteCode) {
           getLogger().warn(
             { cartSite: currentCart.site, sessionSite: lastSiteCode },
-            'Cart-site mismatch detected on client — clearing stale cart',
+            'Cart-site mismatch detected on client — clearing stale cart and re-resolving',
           );
+          _fetchPromise = null;
           set({ currentCart: null, loading: true, error: null });
-          await get().fetchCart(true);
+          await get().fetchCart();
           const { currentCart: correctCart } = get();
           if (!correctCart) {
             throw new Error('Failed to get correct site cart');
           }
-          // Use the correct cart directly instead of recursing (max 1 retry)
           currentCart = correctCart;
         }
 
@@ -434,14 +369,11 @@ export const createCartStore = (initState: CartState = defaultState) => {
         try {
           const cartId = currentCart.id;
 
-          // Call API to add item
           const result = await apiAddItemToCart(cartId, productId, quantity);
 
-          // Update cart state with the result
           if (result.cart) {
             set({ currentCart: result.cart, loading: false });
           } else {
-            // Refetch cart to get updated state if result doesn't include cart
             await get().fetchCart();
           }
 
@@ -586,7 +518,7 @@ export const createCartStore = (initState: CartState = defaultState) => {
 
       clearCart: (options?: { deleteCart?: boolean; clearSession?: boolean }) => {
         const { deleteCart = false, clearSession = true } = options ?? {};
-        get().invalidateInFlightCartFetch();
+        _fetchPromise = null;
         // 1. Optimistically reset all cart-related state immediately
         set({
           currentCart: null,

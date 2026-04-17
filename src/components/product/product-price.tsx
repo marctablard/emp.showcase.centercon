@@ -4,6 +4,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useGlobalSyncReady } from '@/hooks/common/useGlobalSyncReady';
 import { cn, formatCurrency, formatCurrencyToParts } from '@/lib/utils';
 import type { ProductPrice } from '@/platform/services/model/price';
 
@@ -14,6 +15,7 @@ interface ProductPriceProps {
 
 export function ProductPriceComponent({ price, isAddToCartBar }: ProductPriceProps) {
   const t = useTranslations('product.price');
+  const { ready: syncReady } = useGlobalSyncReady();
 
   if (price === null) {
     return null;
@@ -57,7 +59,12 @@ export function ProductPriceComponent({ price, isAddToCartBar }: ProductPricePro
     ];
   }
   return (
-    <div className="flex gap-6" data-testid="product-price" data-product-currency={price.currency}>
+    <div
+      className={cn('flex gap-6 transition-opacity', !syncReady && 'opacity-60')}
+      data-testid="product-price"
+      data-product-currency={price.currency}
+      aria-busy={!syncReady || undefined}
+    >
       <div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{t('yourPrice')}</span>

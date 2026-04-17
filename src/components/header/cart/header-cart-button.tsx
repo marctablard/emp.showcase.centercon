@@ -13,6 +13,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
+import { useGlobalSyncReady } from '@/hooks/common/useGlobalSyncReady';
 import { useShopContextReady } from '@/hooks/common/useShopContextReady';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -31,7 +32,8 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
   // Pass initialCart directly to useCart to skip loading
   const { cart, loading } = useCart(initialCart);
   const { ready: shopContextReady } = useShopContextReady({ requireCart: true });
-  const showSpinner = loading || !shopContextReady;
+  const { ready: globalSyncReady } = useGlobalSyncReady();
+  const showSpinner = loading || !shopContextReady || !globalSyncReady;
   const [scrollHeight, setScrollHeight] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const scrollContainer = useRef<HTMLDivElement>(null);
