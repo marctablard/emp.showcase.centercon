@@ -1,7 +1,7 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { routing } from '@/i18n/routing';
+import { routing as intlRouting } from '@/i18n/routing';
 import { getPublicDefaultLanguage } from '@/lib/common/public-default-env';
 import { edgeLog } from '@/lib/server/edge-stderr-log';
 import {
@@ -15,6 +15,30 @@ import {
 import { isLikelyProbe } from './probe-detection';
 import { setCachedRequestSite } from './server/RequestSiteCache';
 import { resolveApplicableRouting, shouldPrefix } from './utils';
+
+const intlMiddleware = createIntlMiddleware(intlRouting);
+
+/**
+ * True when the pathname is the default-site URL shape for `prefix: 'as-needed'`: no explicit
+ * `/{site}/` segment for a non-default site (locale-first like `/en/...`, default-locale-hidden
+ * like `/browse`, or `/`). Those URLs must not be reinterpreted from the site cookie, or a stale
+ * cookie overrides the visible URL (broken site switcher / session alignment).
+ */
+function isUnprefixedDefaultSiteCanonicalPath(
+  pathname: string,
+  siteRouting: SiteConfig,
+  localeCodes: readonly string[],
+): boolean {
+  const trimmed = pathname.replace(/^\//, '');
+  if (!trimmed) {
+    return true;
+  }
+  const first = trimmed.split('/')[0];
+  if (localeCodes.includes(first)) {
+    return true;
+  }
+  return !siteRouting.availableSites.includes(first);
+}
 
 function syncSiteCookie(
   req: NextRequest,
@@ -73,15 +97,22 @@ export function resolveSite(
   if (routing.availableSites.includes(segments[0])) {
     site = segments.shift();
   }
-  // second, try to look for an existing site-cookie
+  // second, for as-needed + default site: unprefixed canonical paths are authoritative for site identity
+  // (cookie/header must not pull another tenant onto `/en/...`, `/browse`, `/`, etc.).
+  if (!site && routing.defaultSite && routing.prefix === 'as-needed') {
+    if (isUnprefixedDefaultSiteCanonicalPath(pathname, routing, intlRouting.locales ?? [])) {
+      site = routing.defaultSite;
+    }
+  }
+  // third, try to look for an existing site-cookie
   if (!site && routing.cookie && routing.cookieOverridesDefault) {
     site = cookies.get(routing.cookie.name)?.value;
   }
-  // third, try to look for an existing site-header
+  // fourth, try to look for an existing site-header
   if (!site && routing.header) {
     site = headers.get(routing.header) ?? undefined;
   }
-  // fourth, use the default site
+  // fifth, use the default site
   if (!site) {
     site = routing.defaultSite;
   }
@@ -90,8 +121,6 @@ export function resolveSite(
 const NEXT_MIDDLEWARE_PREFIX = 'x-middleware-request-';
 const INTL_LOCALE_HEADER = 'x-next-intl-locale';
 const INTL_MIDDLEWARE_HEADER = NEXT_MIDDLEWARE_PREFIX + INTL_LOCALE_HEADER;
-
-const intlMiddleware = createIntlMiddleware(routing);
 
 function handleMisroutedHealthCheck(req: NextRequest): NextResponse {
   const ua = req.headers.get('user-agent') ?? '';
