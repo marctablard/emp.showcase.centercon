@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { type ProductAttributeKey, dk } from '@/i18n/dynamic-key';
 import { Link } from '@/i18n/navigation';
 import { formatCurrency, l10n } from '@/lib/utils';
-import { Product } from '@/platform/services/model/product';
+import type { Product } from '@/platform/services/model/product';
 
 interface ProductTileProps {
   product: Product;

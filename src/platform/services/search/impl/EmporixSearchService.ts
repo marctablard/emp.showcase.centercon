@@ -1,18 +1,19 @@
 import { inject } from 'inversify';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCategoryApi } from '@/platform/integrations/emporix/category/EmporixCategoryApi';
-import { EmporixPaginatedResponse, EmporixProduct } from '@/platform/integrations/emporix/model';
+import type { EmporixPaginatedResponse, EmporixProduct } from '@/platform/integrations/emporix/model';
 import type { EmporixProductApi } from '@/platform/integrations/emporix/product/EmporixProductApi';
 import { buildProductCategoryIdsCriteriaValue } from '@/platform/integrations/emporix/product/buildProductCatalogScopeQ';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Product } from '@/platform/services/model/product';
+import type { PriceFetchOptions } from '@/platform/services/price/PriceService';
 import type { ProductFetchOptions, ProductService } from '@/platform/services/product/ProductService';
 import type { SearchService } from '@/platform/services/search/SearchService';
 import type { SessionService } from '@/platform/services/session/SessionService';
 import type { ProductMapper } from '../../model/product/ProductMapper';
 import type { SearchSuggestions } from '../../model/search';
-import { CatalogPublishedRootCategoryService } from './CatalogPublishedRootCategoryService';
+import type { CatalogPublishedRootCategoryService } from './CatalogPublishedRootCategoryService';
 import type SegmentFilterService from './SegmentFilterService';
 
 function isOmitCatalogCategoryFilterEnv(): boolean {
@@ -62,6 +63,13 @@ class EmporixSearchService implements SearchService {
       total: 0,
       availableFilters: [],
     };
+  }
+
+  private buildPriceOption(siteCode?: string, currency?: string): boolean | PriceFetchOptions {
+    if (siteCode) {
+      return { siteCode, ...(currency && { currency }) };
+    }
+    return true;
   }
 
   private async mapAndEnrichSearchResults(
@@ -146,7 +154,7 @@ class EmporixSearchService implements SearchService {
     });
 
     const enrichedProducts = await this.mapAndEnrichSearchResults(searchResult.items, {
-      prices: true,
+      prices: this.buildPriceOption(effectiveSite, params.currency),
       variants: false,
       categories: false,
     });
@@ -179,7 +187,7 @@ class EmporixSearchService implements SearchService {
     });
 
     const enrichedProducts = await this.mapAndEnrichSearchResults(searchResult.items, {
-      prices: true,
+      prices: this.buildPriceOption(params.site, params.currency),
       variants: false,
       categories: false,
     });
