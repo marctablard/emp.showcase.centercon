@@ -20,6 +20,12 @@ import type { EmporixCartApi as IEmporixCartApi } from '../EmporixCartApi';
 
 const createCartMetrics = (route: string) => createFetchMetricsParams('cart', route);
 
+// Ask Emporix to return all locales for localized fields (e.g. product.localizedName
+// on cart lines) so the mapper can expose the full map and the UI can resolve
+// the current UI locale per render. Without this, Emporix defaults to the
+// session language and flattens localized values into a single string.
+const ACCEPT_LANGUAGE_ALL: Record<string, string> = { 'Accept-Language': '*' };
+
 @injectable('EmporixCartApi', 'Singleton')
 class EmporixCartApi implements IEmporixCartApi {
   protected apiClient: EmporixApiClient;
@@ -63,7 +69,7 @@ class EmporixCartApi implements IEmporixCartApi {
   async getCart(cartId: string, checkSession = true): Promise<EmporixCart | null> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}`,
-      { method: 'GET' },
+      { method: 'GET', headers: { ...ACCEPT_LANGUAGE_ALL } },
       checkSession ? 'session' : 'service',
       undefined,
       createCartMetrics('/cart/{tenant}/carts/{cartId}'),
@@ -108,7 +114,7 @@ class EmporixCartApi implements IEmporixCartApi {
 
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts?${queryParams.toString()}`,
-      { method: 'GET' },
+      { method: 'GET', headers: { ...ACCEPT_LANGUAGE_ALL } },
       'session',
       undefined,
       createCartMetrics('/cart/{tenant}/carts'),
@@ -133,6 +139,7 @@ class EmporixCartApi implements IEmporixCartApi {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          ...ACCEPT_LANGUAGE_ALL,
         },
         body: JSON.stringify(body),
       },
@@ -176,7 +183,7 @@ class EmporixCartApi implements IEmporixCartApi {
   async getCartItems(cartId: string): Promise<EmporixCartItem[]> {
     const response = await this.apiClient.authenticatedFetch(
       `/cart/${this.config.tenant}/carts/${cartId}/items`,
-      { method: 'GET' },
+      { method: 'GET', headers: { ...ACCEPT_LANGUAGE_ALL } },
       'session',
       undefined,
       createCartMetrics('/cart/{tenant}/carts/{cartId}/items'),

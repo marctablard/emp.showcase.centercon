@@ -556,13 +556,24 @@ describe('EmporixCartService', () => {
         country: undefined,
       });
 
-      // Verify the addItemRequest uses cart's siteCode
+      // Verify the addItemRequest uses cart's siteCode and sends the full localized
+      // name map (not a single-language string) so the cart line can be re-rendered
+      // in any supported locale without another add-to-cart round trip.
       expect(mockCartApi.addItemToCart).toHaveBeenCalledWith(
         'cart-us',
         expect.objectContaining({
           siteCode: 'us-branch',
+          product: expect.objectContaining({
+            id: 'prod-1',
+            localizedName: { en: 'Widget' },
+            sku: 'WID-001',
+          }),
         }),
       );
+
+      const addItemCallArg = mockCartApi.addItemToCart.mock.calls[0][1];
+      expect(addItemCallArg.product).not.toHaveProperty('name');
+      expect(addItemCallArg.product).not.toHaveProperty('description');
 
       expect(result.cartItem.id).toBe('new-item-id');
       expect(result.status).toBe('OK');

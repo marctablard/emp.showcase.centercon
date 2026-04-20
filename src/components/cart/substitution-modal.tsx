@@ -232,7 +232,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
                     width={100}
                     height={65}
                     src={String(cartItem.product.images[0].url)}
-                    alt={String(cartItem.product.name || 'Product')}
+                    alt={l10n(cartItem.product.name || 'Product')}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -312,7 +312,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
                             width={60}
                             height={60}
                             src={String(productMap[sub.productId]?.images?.[0]?.url || '')}
-                            alt={String(productMap[sub.productId]?.name || 'Product')}
+                            alt={l10n(productMap[sub.productId]?.name || 'Product')}
                             className="w-full h-full object-cover"
                           />
                         ) : (

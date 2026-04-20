@@ -1,6 +1,5 @@
 import { inject } from 'inversify';
 import { isAuthenticatedSessionCustomerId } from '@/lib/common/customer-identity';
-import { l10n } from '@/lib/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
@@ -324,14 +323,22 @@ class EmporixCartService implements CartService {
     }
     const { hasSufficientStock, availableQuantity } = await this.checkStock(cartSiteCode, productId, quantity);
 
+    const productNamePayload: { name?: string; localizedName?: { [language: string]: string } } = {};
+    if (typeof product.name === 'string') {
+      productNamePayload.name = product.name;
+    } else if (product.name && typeof product.name === 'object') {
+      // Persist the full localized map on the cart line so the UI can resolve it per render.
+      // This avoids stamping the language active at add time onto every subsequent view of the cart.
+      productNamePayload.localizedName = { ...(product.name as { [language: string]: string }) };
+    }
+
     const addItemRequest: EmporixAddCartItemRequest = {
       siteCode: cartSiteCode,
       itemYrn: this.commonUtil.generateProductYrn(productId),
       quantity,
       product: {
         id: productId,
-        name: l10n(product.name, session.language),
-        description: l10n(product.description, session.language),
+        ...productNamePayload,
         sku: product.sku,
         images: product.images?.map((img: Media) => ({
           id: img.url,
