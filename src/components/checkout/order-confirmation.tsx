@@ -1,15 +1,16 @@
 'use client';
 
 import React from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Check, ClockAlert, Package, ReceiptText } from 'lucide-react';
 import UiLink from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
 import useCustomer from '@/hooks/customer/useCustomer';
 import { useOrder } from '@/hooks/order/useOrder';
+import { useL10n } from '@/hooks/useL10n';
 import { type OrderStatusKey, type PaymentModeKey, dk } from '@/i18n/dynamic-key';
-import { formatCurrency, l10n } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import type { Order } from '@/platform/services/model/order/order';
 import { AddressDisplay } from '../common/address-display';
 import { Card, CardContent, CardHeader } from '../ui/card';
@@ -31,7 +32,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
   const tOrder = useTranslations('orders');
   const tOrderStatus = useTranslations('orders.OrderStatus');
   const tPayment = useTranslations('checkout.PaymentModes');
-  const locale = useLocale();
+  const { l10n } = useL10n();
   const { customer } = useCustomer();
   const { order, loading, error } = useOrder({ orderId, initialOrder });
   const isApprovalPendingConfirmation = orderId === PENDING_APPROVAL_CONFIRMATION_SEGMENT;
@@ -204,7 +205,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
                           {(() => {
                             const method = order.shipping?.methods?.[0];
                             if (!method) return tOrder('shippingMethodUnknown');
-                            const localized = method.localizedName ? l10n(method.localizedName, locale) : '';
+                            const localized = method.localizedName ? l10n(method.localizedName) : '';
                             return localized || method.name || tOrder('shippingMethodUnknown');
                           })()}
                         </p>

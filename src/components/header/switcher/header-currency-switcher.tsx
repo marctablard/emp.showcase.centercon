@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useMemo, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { IconName } from 'lucide-react/dynamic';
 import { DynamicIcon } from 'lucide-react/dynamic';
@@ -10,11 +10,11 @@ import { Spinner } from '@/components/ui/spinner';
 import { useGlobalSyncReady } from '@/hooks/common/useGlobalSyncReady';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
-import { l10n } from '@/lib/utils';
+import { useL10n } from '@/hooks/useL10n';
 
 function CurrencySwitcherContent() {
   const { session, loading: sessionLoading, setCurrency } = useSession();
-  const locale = useLocale();
+  const { l10n } = useL10n();
   const router = useRouter();
   const t = useTranslations('common.Currencies');
   const { currencies, loading: siteLoading, site } = useSite();
@@ -76,12 +76,12 @@ function CurrencySwitcherContent() {
     currencies && currencies.length > 0
       ? currencies.map((currency) => ({
           code: currency.id,
-          name: l10n(currency.name || currency.id, locale),
+          name: l10n(currency.name || currency.id),
         }))
       : [
           {
             code: currentCurrency.id,
-            name: l10n(currentCurrency.name || currentCurrency.id, locale),
+            name: l10n(currentCurrency.name || currentCurrency.id),
           },
         ];
 
