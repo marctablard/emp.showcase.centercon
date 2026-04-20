@@ -270,10 +270,13 @@ class EmporixSiteService implements SiteService {
   }
 
   // Map EmporixCountry to Country
+  // Pass the raw name through so callers receive either a plain string or a
+  // LocalizedString map, allowing UI rendering to honor the active locale
+  // via `l10n(country.name, locale)` instead of flattening to the first value.
   private mapCountry(emporixCountry: EmporixCountry): Country {
     return {
       code: emporixCountry.code,
-      name: typeof emporixCountry.name === 'string' ? emporixCountry.name : Object.values(emporixCountry.name)[0] || '',
+      name: emporixCountry.name,
       regions: emporixCountry.regions,
     };
   }
@@ -282,7 +285,7 @@ class EmporixSiteService implements SiteService {
   private mapRegion(emporixRegion: EmporixRegion): Region {
     return {
       code: emporixRegion.code,
-      name: typeof emporixRegion.name === 'string' ? emporixRegion.name : Object.values(emporixRegion.name)[0] || '',
+      name: emporixRegion.name,
     };
   }
 

@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useSite } from '@/hooks/site/useSite';
 import { useValidator } from '@/hooks/validation/useValidator';
+import { l10n } from '@/lib/utils';
 import type { Address } from '@/platform/services/model/common';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
@@ -43,6 +44,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
 }) => {
   const tid = (field: string) => `${testIdPrefix}-${field}`;
   const t = useTranslations('account.AddressForm');
+  const locale = useLocale();
 
   const addressContentKey =
     initialData == null
@@ -281,9 +283,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
                       <SelectContent>
                         {countries.map((country) => (
                           <SelectItem key={country.code} value={country.code} className="px-2">
-                            {typeof country.name === 'string'
-                              ? country.name
-                              : country.name.en || Object.values(country.name)[0]}
+                            {l10n(country.name, locale) || country.code}
                           </SelectItem>
                         ))}
                       </SelectContent>
