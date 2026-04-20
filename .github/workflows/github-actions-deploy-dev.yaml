@@ -30,6 +30,8 @@ jobs:
           node-version: 22
           cache: 'npm'
           cache-dependency-path: package-lock.json
+      - name: Align npm with package.json engines
+        run: npm install -g npm@11.10.0
       - name: Setup safe-chain
         run: |
           npm i -g @aikidosec/safe-chain
