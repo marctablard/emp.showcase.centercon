@@ -38,6 +38,31 @@ function getPublicTokenCache(): PublicTokenCache {
   return g[PUBLIC_TOKEN_CACHE_KEY];
 }
 
+interface ServiceTokenCache {
+  entries: Map<string, { accessToken: string; expiresAt: number }>;
+  inflight: Map<string, Promise<string>>;
+}
+
+export const SERVICE_TOKEN_CACHE_KEY = '__emporix_service_token_cache' as const;
+const SERVICE_TOKEN_SAFETY_MARGIN_MS = 60_000;
+
+function getServiceTokenCache(): ServiceTokenCache {
+  const g = globalThis as unknown as Record<string, ServiceTokenCache>;
+  if (!g[SERVICE_TOKEN_CACHE_KEY]) {
+    g[SERVICE_TOKEN_CACHE_KEY] = { entries: new Map(), inflight: new Map() };
+  }
+  return g[SERVICE_TOKEN_CACHE_KEY];
+}
+
+function buildServiceTokenCacheKey(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): string {
+  // Include clientSecret in the key so rotation of NEXT_EMPORIX_CLIENT_SECRET
+  // invalidates the cache automatically without needing an explicit flush.
+  // scopes are normalized (sorted, space-joined) so callers passing the same
+  // scopes in different order still share an entry.
+  const normalizedScopes = scopes && scopes.length > 0 ? [...scopes].sort().join(' ') : '';
+  return `${tenant}:${clientId}:${clientSecret}:${normalizedScopes}`;
+}
+
 export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManager {
   private static readonly ANON_TOKEN_DEDUP_GRACE_MS = 2_000;
   private _anonymousTokenInflight = new Map<string, Promise<StoredToken<EmporixAnonymousTokenResponse>>>();
@@ -308,8 +333,46 @@ export abstract class EmporixTokenManagerAbstract implements IEmporixTokenManage
     clientSecret: string,
     scopes?: string[],
   ): Promise<string> {
-    const response = await this.oauthApi.getServiceAccessToken(tenant, clientId, clientSecret, scopes);
-    return response.access_token;
+    const cacheKey = buildServiceTokenCacheKey(tenant, clientId, clientSecret, scopes);
+    const cache = getServiceTokenCache();
+
+    const cached = cache.entries.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.accessToken;
+    }
+
+    const inflight = cache.inflight.get(cacheKey);
+    if (inflight) {
+      return inflight;
+    }
+
+    const promise = (async () => {
+      const response = await this.oauthApi.getServiceAccessToken(tenant, clientId, clientSecret, scopes);
+      // Only cache entries that are meaningfully useful — tokens that expire in
+      // less than the safety margin would cause immediate re-fetch storms.
+      const effectiveTtlMs = response.expires_in * 1000 - SERVICE_TOKEN_SAFETY_MARGIN_MS;
+      if (effectiveTtlMs > 0) {
+        cache.entries.set(cacheKey, {
+          accessToken: response.access_token,
+          expiresAt: Date.now() + effectiveTtlMs,
+        });
+      }
+      return response.access_token;
+    })();
+
+    cache.inflight.set(cacheKey, promise);
+    try {
+      return await promise;
+    } finally {
+      cache.inflight.delete(cacheKey);
+    }
+  }
+
+  public clearServiceTokenCache(tenant: string, clientId: string, clientSecret: string, scopes?: string[]): void {
+    const cacheKey = buildServiceTokenCacheKey(tenant, clientId, clientSecret, scopes);
+    const cache = getServiceTokenCache();
+    cache.entries.delete(cacheKey);
+    cache.inflight.delete(cacheKey);
   }
 
   protected async readToken<T extends StoredToken<K>, K>(

@@ -108,7 +108,11 @@ class EmporixOAuthApiSSR implements IEmporixOAuthApi {
       {
         method: 'GET',
         headers: { Accept: 'application/json' },
-        next: { revalidate: 3200 },
+        // OAuth token responses must never be persisted in Next.js Data Cache —
+        // that cache survives across Vercel deploys and would serve revoked
+        // tokens after credential rotation. In-memory dedup/cache lives in
+        // EmporixTokenManagerAbstract.
+        cache: 'no-store',
       },
       '/customerlogin/auth/anonymous/login',
     );
@@ -257,7 +261,11 @@ class EmporixOAuthApiSSR implements IEmporixOAuthApi {
           Accept: 'application/json',
         },
         body: formData,
-        next: { revalidate: 3200 },
+        // OAuth token responses must never be persisted in Next.js Data Cache —
+        // that cache survives across Vercel deploys and would serve revoked
+        // tokens after credential rotation. In-memory dedup/cache lives in
+        // EmporixTokenManagerAbstract.
+        cache: 'no-store',
       },
       '/oauth/token',
     );
