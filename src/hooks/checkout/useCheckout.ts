@@ -297,7 +297,7 @@ export const useCheckout = (): UseCheckout => {
 
     // Drop stale rates and any previously selected method synchronously so the
     // auto-selection effect cannot re-pick from the previous list while the new
-    // fetch is in flight (closes Bug 2 "Matching quote could not be found").
+    // fetch is in flight.
     clearShippingMethods();
     if (shippingMethod) {
       submitShippingMethod(null);
