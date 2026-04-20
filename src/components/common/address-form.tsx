@@ -275,7 +275,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
                         field.onChange(e);
                         field.onBlur();
                       }}
-                      defaultValue={field.value}
+                      value={field.value ?? ''}
                     >
                       <SelectTrigger data-testid={tid('country')}>
                         <SelectValue placeholder={t('country')} />
