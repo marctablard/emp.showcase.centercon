@@ -102,7 +102,8 @@ export default function ProductDetail({ product: initialProduct, options, classN
     ) {
       setPrice(embedded);
     } else {
-      fetchProductPrice(product.id).then((nextPrice) => {
+      const syncPrice = async () => {
+        const nextPrice = await fetchProductPrice(product.id);
         if (cancelled || syncGeneration !== priceSyncGenerationRef.current) {
           return;
         }
@@ -120,7 +121,8 @@ export default function ProductDetail({ product: initialProduct, options, classN
           return;
         }
         setPrice(nextPrice);
-      });
+      };
+      void syncPrice();
     }
 
     return () => {
@@ -154,19 +156,21 @@ export default function ProductDetail({ product: initialProduct, options, classN
     availabilityShopContextRef.current = shopSyncKey;
 
     setAvailability(undefined);
-    fetchProductAvailability(product.id)
-      .then((nextAvailability) => {
+    const syncAvailability = async () => {
+      try {
+        const nextAvailability = await fetchProductAvailability(product.id);
         if (cancelled || syncGeneration !== availabilitySyncGenerationRef.current) {
           return;
         }
         setAvailability(nextAvailability);
-      })
-      .catch(() => {
+      } catch {
         if (cancelled || syncGeneration !== availabilitySyncGenerationRef.current) {
           return;
         }
         setAvailability(undefined);
-      });
+      }
+    };
+    void syncAvailability();
 
     return () => {
       cancelled = true;

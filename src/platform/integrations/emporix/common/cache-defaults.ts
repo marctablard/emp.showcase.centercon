@@ -3,11 +3,18 @@
  * caching on Emporix integration calls. Passed as the trailing `cacheSeconds`
  * argument to `authenticatedFetch` from cacheable GET/HEAD callers.
  *
- * Reuses the same env var as the HTTP cache middleware
- * (`src/caching/cache-config.ts` → `DEFAULT_CACHE_REVALIDATE`) so a single
- * setting controls the default revalidation window across both layers:
+ * Env knob:
  *
- *   NEXT_CACHE_DEFAULT_REVALIDATE=<seconds>
+ *   NEXT_PUBLIC_CACHE_DEFAULT_REVALIDATE=<seconds>
+ *
+ * The `NEXT_PUBLIC_` prefix is required because this module can be evaluated
+ * from the client DI container graph. Next.js only inlines `NEXT_PUBLIC_*`
+ * env vars into the browser bundle; non-public vars resolve to `undefined` in
+ * the client and the override would be silently lost.
+ *
+ * The HTTP cache middleware (`src/caching/cache-config.ts` →
+ * `DEFAULT_CACHE_REVALIDATE`) reads the same env so a single setting controls
+ * the default revalidation window across both layers.
  *
  * Non-positive or non-numeric values fall back to the built-in default.
  *
@@ -18,7 +25,7 @@
 const FALLBACK_DEFAULT_CACHE_REVALIDATE = 3600;
 
 function resolveDefaultCacheRevalidate(): number {
-  const raw = process.env.NEXT_CACHE_DEFAULT_REVALIDATE;
+  const raw = process.env.NEXT_PUBLIC_CACHE_DEFAULT_REVALIDATE;
   if (raw === undefined || raw === null || raw.trim() === '') {
     return FALLBACK_DEFAULT_CACHE_REVALIDATE;
   }
