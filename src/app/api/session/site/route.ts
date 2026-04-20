@@ -26,8 +26,35 @@ export async function PUT(request: NextRequest) {
     if (!newSite) {
       return NextResponse.json({ error: 'Unknown Site' }, { status: 400 });
     }
-    await sessionService.setSite(newSite.code, newSite.defaultCurrency.id);
-    logger.info({ site: newSite.code, currency: newSite.defaultCurrency.id }, 'Session site updated successfully');
+
+    // Preserve the user's current currency if the target site supports it; only
+    // fall back to the target site's default when the current currency is not
+    // available on the new site. Passing `undefined` keeps the currency as-is
+    // in the session context.
+    const currentSession = await sessionService.getCurrent();
+    const currentCurrency = currentSession?.currency;
+    const supportedCurrencyIds = new Set<string>();
+    if (newSite.defaultCurrency?.id) {
+      supportedCurrencyIds.add(newSite.defaultCurrency.id);
+    }
+    for (const currency of newSite.currencies ?? []) {
+      if (currency.id) {
+        supportedCurrencyIds.add(currency.id);
+      }
+    }
+    const shouldPreserveCurrency = Boolean(currentCurrency && supportedCurrencyIds.has(currentCurrency));
+    const targetCurrency = shouldPreserveCurrency ? undefined : newSite.defaultCurrency.id;
+
+    await sessionService.setSite(newSite.code, targetCurrency);
+    logger.info(
+      {
+        site: newSite.code,
+        previousCurrency: currentCurrency,
+        currency: shouldPreserveCurrency ? currentCurrency : newSite.defaultCurrency.id,
+        currencyPreserved: shouldPreserveCurrency,
+      },
+      'Session site updated successfully',
+    );
 
     const response = NextResponse.json({ success: true });
     // Keep the site cookie in sync with the user's selected site so the edge middleware
