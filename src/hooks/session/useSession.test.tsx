@@ -7,8 +7,10 @@ const mockUpdateSessionCurrency = jest.fn();
 const mockUpdateSessionCountry = jest.fn();
 const mockUpdateSessionSite = jest.fn();
 const mockUpdateSessionRegion = jest.fn();
+const mockUpdateSessionCompany = jest.fn();
 const mockUseSessionStore = jest.fn();
 const mockUseCartStore = jest.fn();
+const mockLoggerError = jest.fn();
 
 jest.mock('@/lib/client/session', () => ({
   fetchCurrentSession: (...args: unknown[]) => mockFetchCurrentSession(...args),
@@ -17,6 +19,18 @@ jest.mock('@/lib/client/session', () => ({
   updateSessionCountry: (...args: unknown[]) => mockUpdateSessionCountry(...args),
   updateSessionSite: (...args: unknown[]) => mockUpdateSessionSite(...args),
   updateSessionRegion: (...args: unknown[]) => mockUpdateSessionRegion(...args),
+  updateSessionCompany: (...args: unknown[]) => mockUpdateSessionCompany(...args),
+}));
+
+jest.mock('@/lib/logger/use-logger-client', () => ({
+  getLogger: () => ({
+    error: (...args: unknown[]) => mockLoggerError(...args),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+  }),
 }));
 
 jest.mock('@/providers/StoreProvider', () => ({
@@ -26,6 +40,7 @@ jest.mock('@/providers/StoreProvider', () => ({
 
 const createMockCartStore = () => ({
   setCurrentCart: jest.fn(),
+  validateLegalEntity: jest.fn().mockResolvedValue(undefined),
 });
 
 type Deferred<T> = {
@@ -85,6 +100,7 @@ describe('useSession mutation lock', () => {
     mockUpdateSessionCountry.mockResolvedValue(true);
     mockUpdateSessionSite.mockResolvedValue(true);
     mockUpdateSessionRegion.mockResolvedValue(true);
+    mockUpdateSessionCompany.mockResolvedValue(true);
   });
 
   it('blocks concurrent mutations across hook instances and allows next mutation after release', async () => {
@@ -365,5 +381,154 @@ describe('useSession setCurrency cart reconciliation', () => {
 
     expect(success!).toBe(false);
     expect(cartStore.setCurrentCart).not.toHaveBeenCalled();
+  });
+});
+
+describe('useSession setCompany cart reconciliation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUpdateSessionCompany.mockResolvedValue(true);
+  });
+
+  it('runs validateLegalEntity with the session-refetched legalEntityId under the mutation lock', async () => {
+    const store = createMockStore({
+      session: { id: 's1', siteCode: 'main', currency: 'USD', legalEntityId: 'old-entity' },
+    });
+    const cartStore = createMockCartStore();
+
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+    // Server-returned session carries padded whitespace to exercise the trim normalization path.
+    mockFetchCurrentSession.mockResolvedValue({
+      id: 's1',
+      siteCode: 'main',
+      currency: 'USD',
+      legalEntityId: '  6995aedcb216a9070488dc71  ',
+    });
+
+    const { result } = renderHook(() => useSession());
+    let success: boolean;
+    await act(async () => {
+      success = await result.current.setCompany('6995aedcb216a9070488dc71');
+    });
+
+    expect(success!).toBe(true);
+    expect(mockUpdateSessionCompany).toHaveBeenCalledWith('6995aedcb216a9070488dc71');
+    expect(cartStore.validateLegalEntity).toHaveBeenCalledTimes(1);
+    expect(cartStore.validateLegalEntity).toHaveBeenCalledWith('6995aedcb216a9070488dc71');
+
+    // afterCommit must run after setSession and before releaseMutationLock so that the cart
+    // write stays within the orchestrator's mutation-lock window (mirrors performSiteSwitch).
+    const setSessionOrder = (store.setSession as jest.Mock).mock.invocationCallOrder[0];
+    const validateOrder = cartStore.validateLegalEntity.mock.invocationCallOrder[0];
+    const releaseOrder = (store.releaseMutationLock as jest.Mock).mock.invocationCallOrder[0];
+    expect(setSessionOrder).toBeLessThan(validateOrder);
+    expect(validateOrder).toBeLessThan(releaseOrder);
+  });
+
+  it('returns false and skips validateLegalEntity when the mutation lock is already held', async () => {
+    // Pre-hold the lock so tryAcquireMutationLock returns false.
+    const deferred = createDeferred<{ success: boolean }>();
+    mockUpdateSessionCurrency.mockReturnValueOnce(deferred.promise);
+
+    const store = createMockStore({
+      session: { id: 's1', siteCode: 'main', currency: 'USD' },
+    });
+    const cartStore = createMockCartStore();
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+
+    const { result } = renderHook(() => useSession());
+
+    let first: Promise<boolean> | undefined;
+    act(() => {
+      first = result.current.setCurrency('USD');
+    });
+
+    let blocked: boolean;
+    await act(async () => {
+      blocked = await result.current.setCompany('new-entity');
+    });
+
+    expect(blocked!).toBe(false);
+    expect(mockUpdateSessionCompany).not.toHaveBeenCalled();
+    expect(cartStore.validateLegalEntity).not.toHaveBeenCalled();
+
+    await act(async () => {
+      deferred.resolve({ success: true });
+      await first!;
+    });
+  });
+
+  it('does not refetch the cart when updateSessionCompany fails', async () => {
+    mockUpdateSessionCompany.mockResolvedValueOnce(false);
+    const store = createMockStore({
+      session: { id: 's1', siteCode: 'main', currency: 'USD' },
+    });
+    const cartStore = createMockCartStore();
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+
+    const { result } = renderHook(() => useSession());
+    let success: boolean;
+    await act(async () => {
+      success = await result.current.setCompany('new-entity');
+    });
+
+    expect(success!).toBe(false);
+    expect(mockFetchCurrentSession).not.toHaveBeenCalled();
+    expect(cartStore.validateLegalEntity).not.toHaveBeenCalled();
+    expect(store.releaseMutationLock).toHaveBeenCalledTimes(1);
+  });
+
+  it('swallows validateLegalEntity errors so the session mutation still succeeds and releases the lock', async () => {
+    const store = createMockStore({
+      session: { id: 's1', siteCode: 'main', currency: 'USD', legalEntityId: 'old' },
+    });
+    const cartStore = createMockCartStore();
+    cartStore.validateLegalEntity.mockRejectedValueOnce(new Error('boom'));
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+    mockFetchCurrentSession.mockResolvedValue({
+      id: 's1',
+      siteCode: 'main',
+      currency: 'USD',
+      legalEntityId: 'new',
+    });
+
+    const { result } = renderHook(() => useSession());
+    let success: boolean;
+    await act(async () => {
+      success = await result.current.setCompany('new');
+    });
+
+    expect(success!).toBe(true);
+    expect(cartStore.validateLegalEntity).toHaveBeenCalledWith('new');
+    expect(mockLoggerError).toHaveBeenCalledTimes(1);
+    expect(mockLoggerError.mock.calls[0][1]).toBe('Session mutation afterCommit failed');
+    expect(store.releaseMutationLock).toHaveBeenCalledTimes(1);
+  });
+
+  it('normalizes an empty/whitespace legalEntityId to undefined when passing to validateLegalEntity', async () => {
+    const store = createMockStore({
+      session: { id: 's1', siteCode: 'main', currency: 'USD' },
+    });
+    const cartStore = createMockCartStore();
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+    mockFetchCurrentSession.mockResolvedValue({
+      id: 's1',
+      siteCode: 'main',
+      currency: 'USD',
+      legalEntityId: '   ',
+    });
+
+    const { result } = renderHook(() => useSession());
+    await act(async () => {
+      await result.current.setCompany('whatever');
+    });
+
+    expect(cartStore.validateLegalEntity).toHaveBeenCalledTimes(1);
+    expect(cartStore.validateLegalEntity).toHaveBeenCalledWith(undefined);
   });
 });

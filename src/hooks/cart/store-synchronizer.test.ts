@@ -568,6 +568,38 @@ describe('Store Synchronizer', () => {
       expect(validateSiteSpy).not.toHaveBeenCalled();
     });
 
+    it('should suppress validateLegalEntity while the session mutation lock is held (afterCommit is sole caller)', async () => {
+      const validateLeSpy = jest.spyOn(cartStore.getState(), 'validateLegalEntity');
+
+      unsubscribers = setupStoreSynchronization({
+        sessionStore,
+        cartStore,
+        siteStore,
+        customerStore,
+        productStore,
+        availabilityStore,
+      });
+
+      // Simulate the useSession.runSessionMutation window: lock is held while legalEntityId flips
+      // (store-synchronizer must NOT refetch the cart here; runSessionMutation.afterCommit owns it).
+      const acquired = sessionStore.getState().tryAcquireMutationLock();
+      expect(acquired).toBe(true);
+
+      try {
+        await act(async () => {
+          sessionStore.setState({
+            session: createMockSession({ legalEntityId: 'le-new' }),
+          });
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        expect(validateLeSpy).not.toHaveBeenCalled();
+      } finally {
+        sessionStore.getState().releaseMutationLock();
+      }
+    });
+
     it('should not call resetSite when session site matches site store', async () => {
       const resetSiteSpy = jest.spyOn(siteStore.getState(), 'resetSite');
 
