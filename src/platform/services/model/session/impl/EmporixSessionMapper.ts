@@ -37,7 +37,7 @@ export class EmporixSessionMapper implements SessionMapper<EmporixSessionContext
       currency: source.currency || getPublicDefaultCurrency(),
       siteCode: source.siteCode || getPublicDefaultSite(),
       customerId: source.customerId,
-      language: source.context?.['language'],
+      language: source.language ?? source.context?.['language'],
       country: source.targetLocation,
       region: source.context?.['region'],
       cartId: source.context?.['currentCart'],

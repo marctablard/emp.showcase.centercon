@@ -75,12 +75,25 @@ export class EmporixAuthService implements AuthService {
 
   async login(credentials: Credentials): Promise<Session> {
     const oldSession = await this.sessionService.getCurrent();
+    // Capture the shopper's pre-login preferences so we can realign the
+    // Emporix-migrated session context after login instead of silently
+    // accepting the customer-preferred defaults Emporix returns (which would
+    // yank the UI to the customer's home site/currency/language/country/region
+    // on every login).
+    const preferredSiteCode = oldSession?.siteCode || undefined;
+    const preferredLanguage = oldSession?.language || undefined;
+    const preferredCountry = oldSession?.country || undefined;
+    const preferredRegion = oldSession?.region || undefined;
     const password = credentials.password || this.generateSsoPassword(credentials.username);
     const session = await this.emporixCustomerApi.login(credentials.username, password);
     if (!session) {
       throw new Error('Failed to get session context');
     }
-    const targetSiteCode = session.siteCode || oldSession?.siteCode || getPublicDefaultSite();
+    // Shopper's site choice wins when available; Emporix's migrated `session.siteCode`
+    // is only used as a fallback. The subsequent combined-PATCH (see below) pushes
+    // this back to the server so `getCanonicalSiteCode()` on the client sees the
+    // aligned state and the post-login redirect becomes a no-op.
+    const targetSiteCode = preferredSiteCode || session.siteCode || getPublicDefaultSite();
     const targetSite = await this.safeGetSite(targetSiteCode);
     let finalCurrency = this.resolveFinalLoginCurrency(targetSite, oldSession?.currency, session.currency);
     const preferredLoginCurrency = finalCurrency;
@@ -358,22 +371,83 @@ export class EmporixAuthService implements AuthService {
       finalCurrency = verifiedCustomerCart.currency;
     }
 
-    if (verifiedCustomerCart && session.currency !== verifiedCustomerCart.currency) {
+    // Single combined `PATCH /session-context/{tenant}/me/context` to realign
+    // siteCode / currency / language / country / region with the shopper's
+    // pre-login preferences. This replaces the earlier per-field `setCurrency`
+    // sync and closes the gap where `session.siteCode`, `session.language`,
+    // etc. drifted to customer-preferred defaults after login.
+    //
+    // IMPORTANT: compare against the server-side values captured from the
+    // `emporixCustomerApi.login()` response (i.e. the in-memory `session` DTO
+    // before any local mirroring). The cart-driven currency change from the
+    // merge flow only updates the cart document; the session context on the
+    // server still carries the Emporix-migrated default until we PATCH it.
+    //
+    // Comparisons use the integration DTO fields:
+    //   - session.siteCode       (EmporixSessionContext)
+    //   - session.currency       (EmporixSessionContext)
+    //   - session.language       (top-level since 2026-04-21 BE change)
+    //   - session.targetLocation (compared against preferredCountry)
+    //   - session.context?.region (compared against preferredRegion — region
+    //     remains a custom-attribute field; no top-level session field yet)
+    const serverSiteCode = session.siteCode;
+    const serverCurrency = session.currency;
+    const serverLanguage = session.language;
+    const serverCountry = session.targetLocation;
+    const serverRegion = session.context?.['region'] as string | undefined;
+    const finalLanguage = preferredLanguage ?? serverLanguage;
+    const finalCountry = preferredCountry ?? serverCountry;
+    const finalRegion = preferredRegion ?? serverRegion;
+    const needsPatch =
+      (preferredSiteCode !== undefined && preferredSiteCode !== serverSiteCode) ||
+      finalCurrency !== serverCurrency ||
+      (finalLanguage !== undefined && finalLanguage !== serverLanguage) ||
+      (finalCountry !== undefined && finalCountry !== serverCountry) ||
+      (finalRegion !== undefined && finalRegion !== serverRegion);
+    if (needsPatch) {
       try {
-        await this.sessionService.setCurrency(verifiedCustomerCart.currency);
-        session.currency = verifiedCustomerCart.currency;
+        const patched = await this.sessionService.updateContext(
+          {
+            siteCode:
+              preferredSiteCode !== undefined && preferredSiteCode !== serverSiteCode ? preferredSiteCode : undefined,
+            currency: finalCurrency !== serverCurrency ? finalCurrency : undefined,
+            language: finalLanguage !== undefined && finalLanguage !== serverLanguage ? finalLanguage : undefined,
+            country: finalCountry !== undefined && finalCountry !== serverCountry ? finalCountry : undefined,
+            region: finalRegion !== undefined && finalRegion !== serverRegion ? finalRegion : undefined,
+          },
+          { expectedVersion: session.metadata?.version },
+        );
+        if (patched) {
+          // Surface the canonical post-PATCH values in the login result so
+          // NextAuth's JWT/session and `getCanonicalSiteCode()` see the
+          // aligned state on the very next read.
+          if (patched.siteCode) session.siteCode = patched.siteCode;
+          if (patched.currency) session.currency = patched.currency;
+        }
       } catch (error) {
         this.logger.error(
           {
             err: error instanceof Error ? error : String(error),
             customerId: session.customerId,
-            cartId: verifiedCustomerCart.id,
-            currentCurrency: session.currency,
-            targetCurrency: verifiedCustomerCart.currency,
+            preferredSiteCode,
+            preferredLanguage,
+            preferredCountry,
+            preferredRegion,
+            targetCurrency: finalCurrency,
           },
-          'Failed to sync session currency after login cart transition',
+          'Failed to realign session context with pre-login preferences',
         );
       }
+    }
+
+    // Mirror the verified customer cart currency into the session DTO used to
+    // build the login result. This runs *after* the combined PATCH so the
+    // PATCH's currency comparison sees the real server-side delta; when the
+    // PATCH succeeded `session.currency` already matches (no-op), and when it
+    // failed the result still carries the cart-aligned currency that was
+    // actually applied to the shopper's cart.
+    if (verifiedCustomerCart && session.currency !== verifiedCustomerCart.currency) {
+      session.currency = verifiedCustomerCart.currency;
     }
 
     return this.buildLoginResult(session, customerCartId, cartMergeStatus, cartMergeReason);

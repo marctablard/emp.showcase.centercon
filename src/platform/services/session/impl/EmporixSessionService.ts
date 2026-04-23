@@ -46,10 +46,11 @@ class EmporixSessionService implements SessionService {
 
   async setLanguage(language: string): Promise<void> {
     // TODO propagate Language Switch via Event-System
-    this.sessionContextApi.addOwnSessionContextAttribute({
-      key: 'language',
-      value: language,
-    });
+    // Language is a top-level session-context field since the 2026-04-21 Emporix
+    // Session Context changelog; go through the combined PATCH helper so the
+    // write hits `PATCH /me/context` with the optimistic-lock + retry semantics
+    // shared by the other scalar setters.
+    await this.updateContext({ language });
   }
 
   async setCurrency(currency: string): Promise<void> {
@@ -181,8 +182,12 @@ class EmporixSessionService implements SessionService {
     if (fields.siteCode !== undefined) payload.siteCode = fields.siteCode;
     if (fields.currency !== undefined) payload.currency = fields.currency;
     if (fields.country !== undefined) payload.targetLocation = fields.country;
+    // `language` is a first-class field on `EmporixSessionContext` since the
+    // 2026-04-21 BE changelog, so it goes in the top-level PATCH payload (no
+    // pre-fetch needed). Custom attributes like `region` still need to be
+    // merged into the full `context` object because PATCH replaces it.
+    if (fields.language !== undefined) payload.language = fields.language;
     const contextPatch: Record<string, string> = {};
-    if (fields.language !== undefined) contextPatch.language = fields.language;
     if (fields.region !== undefined) contextPatch.region = fields.region;
     const hasContextPatch = Object.keys(contextPatch).length > 0;
 
@@ -315,6 +320,7 @@ class EmporixSessionService implements SessionService {
       ...(patch.siteCode !== undefined ? { siteCode: patch.siteCode } : {}),
       ...(patch.currency !== undefined ? { currency: patch.currency } : {}),
       ...(patch.targetLocation !== undefined ? { targetLocation: patch.targetLocation } : {}),
+      ...(patch.language !== undefined ? { language: patch.language } : {}),
       ...(patch.context ? { context: { ...(base.context ?? {}), ...patch.context } } : {}),
       metadata: { version: nextVersion },
     };
@@ -382,11 +388,10 @@ class EmporixSessionService implements SessionService {
       result.country = this.defaultCountry;
     }
     if (!result.language) {
-      if (updateDefaults.context) {
-        updateDefaults.context.language = this.defaultLanguage;
-      } else {
-        updateDefaults.context = { language: this.defaultLanguage };
-      }
+      // Top-level field since the 2026-04-21 BE changelog — write it at the
+      // root of the PATCH payload so we don't have to round-trip the full
+      // `context` object just to seed a default language.
+      updateDefaults.language = this.defaultLanguage;
       result.language = this.defaultLanguage;
     }
     if (!result.region) {

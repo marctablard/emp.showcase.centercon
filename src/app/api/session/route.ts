@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { CURRENCY_COOKIE_NAME } from '@/lib/common/cookie-names';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { Session } from '@/platform/services/model/session/session';
@@ -115,6 +116,22 @@ export async function PATCH(request: NextRequest) {
       response.cookies.set({
         name: siteCookieName,
         value: fields.siteCode,
+        maxAge: 365 * 24 * 60 * 60,
+        httpOnly: false,
+        sameSite: 'lax',
+        path: '/',
+      });
+    }
+
+    if (fields.currency !== undefined) {
+      // Persist the currency preference so `EmporixTokenManagerServer.resolveSessionParams`
+      // can seed the next anonymous session context (e.g. after logout / token expiry)
+      // with the shopper's choice. Prefer the canonical post-PATCH value from the
+      // combined path; fall back to the requested value for the legacy per-field path.
+      const canonicalCurrency = updatedSession?.currency || fields.currency;
+      response.cookies.set({
+        name: CURRENCY_COOKIE_NAME,
+        value: canonicalCurrency,
         maxAge: 365 * 24 * 60 * 60,
         httpOnly: false,
         sameSite: 'lax',

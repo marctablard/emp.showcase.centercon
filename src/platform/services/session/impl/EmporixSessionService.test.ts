@@ -184,15 +184,30 @@ describe('EmporixSessionService', () => {
     });
   });
 
-  describe('addAttributeToCurrentSession', () => {
-    it('should map the attribute and call addOwnSessionContextAttribute on the SessionContextApi', async () => {
-      const mockSessionAttribute: EmporixContextAttribute = {
-        key: 'language',
-        value: 'en',
-      };
-      sessionService.setLanguage('en');
-      expect(mockSessionContextApi.addOwnSessionContextAttribute).toHaveBeenCalledTimes(1);
-      expect(mockSessionContextApi.addOwnSessionContextAttribute).toHaveBeenCalledWith(mockSessionAttribute);
+  describe('setLanguage', () => {
+    it('should PATCH language as a top-level session-context field (2026-04-21 BE change)', async () => {
+      // Since the 2026-04-21 Session Context changelog, `language` is a
+      // first-class field on the session context and `setLanguage` must
+      // write it via `PATCH /me/context` at the top level — not as a
+      // context attribute.
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        currency: 'EUR',
+        context: { currentCart: 'cart-123' },
+        metadata: { version: 4 },
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+      mockSessionMapper.mapToService.mockReturnValue(mockSession);
+
+      await sessionService.setLanguage('en');
+
+      expect(mockSessionContextApi.addOwnSessionContextAttribute).not.toHaveBeenCalled();
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledTimes(1);
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        language: 'en',
+        metadata: { version: 4 },
+      });
     });
   });
 
@@ -430,13 +445,13 @@ describe('EmporixSessionService', () => {
       expect(result).toBe(mockSession);
     });
 
-    it('should pre-PATCH GET and merge existing context attributes when the patch touches context (e.g. language)', async () => {
+    it('should pre-PATCH GET and merge existing context attributes when the patch touches context (e.g. region)', async () => {
       mockSessionContextApi.getOwnSessionContext
         .mockResolvedValueOnce({
           sessionId: 'test-session',
           siteCode: 'site-a',
           currency: 'EUR',
-          context: { currentCart: 'cart-123', region: 'Europe' },
+          context: { currentCart: 'cart-123', language: 'en' },
           metadata: { version: 8 },
         })
         .mockResolvedValueOnce({
@@ -449,22 +464,24 @@ describe('EmporixSessionService', () => {
       mockSessionMapper.mapToService.mockReturnValue(mockSession);
 
       await sessionService.updateContext(
-        { siteCode: 'site-b', currency: 'EUR', language: 'de' },
+        { siteCode: 'site-b', currency: 'EUR', region: 'DACH' },
         { expectedVersion: 7 },
       );
 
-      // Pre-PATCH GET is forced because the patch includes `language` (a context field).
-      // The existing `context` attributes (`currentCart`, `region`) must survive the merge
-      // because Emporix's `PATCH /me/context` replaces the whole `context` object.
+      // Pre-PATCH GET is forced because the patch includes `region`, which is
+      // still stored inside `context` (`language` moved to top-level in the
+      // 2026-04-21 BE change, but `region` remains a custom context field).
+      // Existing context attributes (`currentCart`, `language`) must survive
+      // the merge because `PATCH /me/context` replaces the whole `context`.
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
         siteCode: 'site-b',
         currency: 'EUR',
-        context: { currentCart: 'cart-123', region: 'Europe', language: 'de' },
+        context: { currentCart: 'cart-123', language: 'en', region: 'DACH' },
         metadata: { version: 8 },
       });
     });
 
-    it('should read once and PATCH once when expectedVersion is omitted', async () => {
+    it('should send top-level language (no context merge) in a single PATCH after one GET', async () => {
       mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
         sessionId: 'test-session',
         siteCode: 'site-a',
@@ -475,12 +492,49 @@ describe('EmporixSessionService', () => {
 
       await sessionService.updateContext({ language: 'fr' });
 
+      // One GET (because no `expectedVersion` was provided) and one PATCH.
+      // Language must be top-level — not nested under `context` — since the
+      // 2026-04-21 BE changelog promoted it to a first-class field.
       expect(mockSessionContextApi.getOwnSessionContext).toHaveBeenCalledTimes(1);
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
-        context: { language: 'fr' },
+        language: 'fr',
         metadata: { version: 3 },
       });
       expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
+    });
+
+    it('should skip the pre-PATCH GET when only top-level fields (e.g. language) change and expectedVersion is provided', async () => {
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+      // updateContext returns the canonical Session by issuing a single GET
+      // after the PATCH when no `initialSession` is available. That's a
+      // separate code path — assert the PATCH shape, not the call count.
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        language: 'de',
+        metadata: { version: 11 },
+      });
+      mockSessionMapper.mapToService.mockReturnValue(mockSession);
+
+      const invocationOrder: string[] = [];
+      mockSessionContextApi.getOwnSessionContext.mockImplementation(async () => {
+        invocationOrder.push('GET');
+        return { sessionId: 'test-session', siteCode: 'site-a', language: 'de', metadata: { version: 11 } };
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockImplementation(async () => {
+        invocationOrder.push('PATCH');
+      });
+
+      await sessionService.updateContext({ language: 'de' }, { expectedVersion: 10 });
+
+      // No `region`/context patch → the pre-fetch GET is skipped. The PATCH
+      // therefore uses the caller-supplied `expectedVersion` directly.
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        language: 'de',
+        metadata: { version: 10 },
+      });
+      // PATCH must come before any GET — proving we did NOT pre-fetch.
+      expect(invocationOrder[0]).toBe('PATCH');
     });
 
     it('should retry exactly once on version conflict and rethrow on second failure', async () => {
@@ -657,9 +711,7 @@ describe('EmporixSessionService', () => {
         currency: 'EUR',
         siteCode: 'main',
         targetLocation: 'DE',
-        context: {
-          language: { key: 'language', value: 'en' },
-        },
+        language: 'en',
       };
       const mappedSession: Session = {
         id: 'test-session',
@@ -693,6 +745,63 @@ describe('EmporixSessionService', () => {
 
       expect(result).toBeDefined();
       expect(mockSiteService.getSite).toHaveBeenCalledWith('main');
+    });
+
+    it('should seed the default language as a top-level field when language is missing', async () => {
+      // 2026-04-21 BE change: `language` is a first-class field, so the
+      // default-language seed must go to the top of the PATCH payload rather
+      // than under `context.language`.
+      const missingLanguageContext: EmporixSessionContext = {
+        sessionId: 'test-session',
+        currency: 'EUR',
+        siteCode: 'main',
+        targetLocation: 'DE',
+        context: { region: 'Europe' },
+        metadata: { version: 2 },
+      };
+      const mappedSession: Session = {
+        id: 'test-session',
+        currency: 'EUR',
+        siteCode: 'main',
+        country: 'DE',
+        region: 'Europe',
+      };
+
+      // The service captures `defaultLanguage` from env in its class-field
+      // initializer during the outer `beforeEach`, which ran before this
+      // describe's `beforeEach` overrode the env var. Pin the default
+      // directly on the instance so the default-seeding branch is exercised
+      // deterministically.
+      (sessionService as unknown as { defaultLanguage: string }).defaultLanguage = 'en';
+
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue(missingLanguageContext);
+      mockSessionMapper.mapToService.mockReturnValue(mappedSession);
+      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+      mockSiteService.getSite.mockResolvedValue({
+        code: 'main',
+        name: 'Main',
+        defaultCountry: 'DE',
+        defaultCurrency: { id: 'EUR', code: 'EUR', name: 'Euro', active: true },
+        currencies: [{ id: 'EUR', code: 'EUR', name: 'Euro', active: true }],
+        countries: [],
+        shipToCountries: [],
+        regions: [],
+        paymentModes: [],
+        languages: ['en'],
+        defaultLanguage: 'en',
+        address: { contactName: '', street: '', zipCode: '', city: '', country: 'DE' },
+        includesTax: false,
+        decimals: 2,
+      });
+
+      const result = await sessionService.getCurrent();
+
+      expect(result?.language).toBe('en');
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledTimes(1);
+      const [patchCall] = mockSessionContextApi.updateOwnSessionContext.mock.calls[0];
+      expect(patchCall).toMatchObject({ language: 'en' });
+      // Language must NOT be written under `context` (legacy placement).
+      expect((patchCall?.context as Record<string, unknown> | undefined)?.language).toBeUndefined();
     });
   });
 });

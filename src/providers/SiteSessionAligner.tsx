@@ -38,7 +38,7 @@ export function SiteSessionAligner() {
       return availableSites.find((s) => s.code === code);
     };
 
-    const runAlignmentIfNeeded = () => {
+    const runAlignmentIfNeeded = async () => {
       if (pipelineInFlightRef.current) {
         return;
       }
@@ -48,16 +48,18 @@ export function SiteSessionAligner() {
       }
 
       pipelineInFlightRef.current = true;
-      void performSiteSwitch(
-        urlSiteCode,
-        { sessionStore, siteStore, cartStore },
-        { source: 'deep-link', getSiteByCode, logger: getLogger() },
-      ).finally(() => {
+      try {
+        await performSiteSwitch(
+          urlSiteCode,
+          { sessionStore, siteStore, cartStore },
+          { source: 'deep-link', getSiteByCode, logger: getLogger() },
+        );
+      } finally {
         pipelineInFlightRef.current = false;
-      });
+      }
     };
 
-    runAlignmentIfNeeded();
+    void runAlignmentIfNeeded();
 
     // Re-evaluate on relevant session slice changes — picks up the client `/api/session`
     // resolution when SSR seeded a `null`/`undefined` session.
@@ -66,7 +68,9 @@ export function SiteSessionAligner() {
         siteCode: state.session?.siteCode ?? null,
         loading: state.loading,
       }),
-      runAlignmentIfNeeded,
+      () => {
+        void runAlignmentIfNeeded();
+      },
       { equalityFn: shallow },
     );
     return unsubscribe;

@@ -50,23 +50,58 @@ class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
   }
 
   private async resolveSessionParams(): Promise<AnonymousTokenSessionParams> {
+    // Per-field source tracking so the debug log makes it trivial to verify,
+    // in a production trace, that the cookies set by the auth/session routes
+    // are actually being picked up when a new anonymous token is issued
+    // (e.g. right after logout).
+    const fallback: Record<string, 'cookie' | 'request-context' | 'env-default'> = {
+      siteCode: 'env-default',
+      currency: 'env-default',
+      language: 'env-default',
+      targetLocation: 'env-default',
+      region: 'env-default',
+    };
+
     let siteCode: string | undefined;
-    let fallback: 'request-context' | 'env-default';
     try {
       siteCode = await this.requestContext.getSite();
     } catch {
       siteCode = undefined;
     }
     if (siteCode) {
-      fallback = 'request-context';
+      fallback.siteCode = 'request-context';
     } else {
       siteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE;
-      fallback = 'env-default';
     }
+
+    let currency: string | undefined;
+    try {
+      currency = await this.requestContext.getCurrency();
+    } catch {
+      currency = undefined;
+    }
+    if (currency) {
+      fallback.currency = 'cookie';
+    } else {
+      currency = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY;
+    }
+
+    let language: string | undefined;
+    try {
+      language = await this.requestContext.getLanguage();
+    } catch {
+      language = undefined;
+    }
+    if (language) {
+      fallback.language = 'cookie';
+    } else {
+      language = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE;
+    }
+
     const params: AnonymousTokenSessionParams = {
       siteCode,
-      currency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY,
-      language: process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE,
+      currency,
+      language,
       targetLocation: process.env.NEXT_PUBLIC_DEFAULT_COUNTRY,
       region: process.env.NEXT_PUBLIC_DEFAULT_REGION,
     };
