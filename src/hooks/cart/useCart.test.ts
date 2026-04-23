@@ -529,7 +529,6 @@ describe('CartStore - Fetch Deduplication', () => {
       lastSiteCode: 'main',
       lastLegalEntityId: null,
       pendingCurrencySync: null,
-      isSettling: false,
     });
 
     const createdCart = {
@@ -582,7 +581,6 @@ describe('CartStore - Fetch Deduplication', () => {
       lastSiteCode: 'main',
       lastLegalEntityId: null,
       pendingCurrencySync: null,
-      isSettling: false,
     });
     const updatedCart = {
       ...existingCart,

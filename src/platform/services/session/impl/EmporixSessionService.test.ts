@@ -197,33 +197,82 @@ describe('EmporixSessionService', () => {
   });
 
   describe('setSite', () => {
-    it('should issue a single combined PATCH (siteCode + currency) when site changes', async () => {
+    it('should clear currentCart BEFORE updating siteCode when site changes', async () => {
+      // Arrange
+      const callOrder: string[] = [];
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockImplementation(async () => {
+        callOrder.push('removeOwnSessionContextAttribute');
+      });
+      mockSessionContextApi.updateOwnSessionContext.mockImplementation(async () => {
+        callOrder.push('updateOwnSessionContext');
+      });
+
+      // Act
+      await sessionService.setSite('site-b', 'EUR');
+
+      // Assert — cartId cleared BEFORE siteCode update to prevent race condition
+      expect(callOrder).toEqual(['removeOwnSessionContextAttribute', 'updateOwnSessionContext']);
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
+      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
+        siteCode: 'site-b',
+        currency: 'EUR',
+        metadata: { version: 1 },
+      });
+      expect(mockSiteService.invalidateSiteCache).toHaveBeenCalledWith('site-a');
+      expect(mockSiteService.invalidateSiteCache).toHaveBeenCalledWith('site-b');
+    });
+
+    it('should clear currentCart and reset currency when site changes with defaultCurrency', async () => {
+      // Arrange
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a', // Current site
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
       mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
         sessionId: 'test-session',
         siteCode: 'site-a',
         metadata: { version: 1 },
       });
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
 
-      await sessionService.setSite('site-b', 'EUR');
+      // Act
+      await sessionService.setSite('site-b', 'EUR'); // New site with default currency
 
-      // No longer clears `currentCart` — the client-side `performSiteSwitch` orchestrator
-      // re-fetches the per-site cart via `CartService.getCart()` / `getCartByCriteria`.
-      expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
-      // Single combined PATCH using the initial version — no second GET.
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledTimes(1);
+      // Assert — single atomic PATCH includes both siteCode and currency
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
         siteCode: 'site-b',
         currency: 'EUR',
         metadata: { version: 1 },
       });
-      // Only the previous site's cache is invalidated — keep the target site
-      // cache warm (the API route that called us typically just hydrated it).
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
       expect(mockSiteService.invalidateSiteCache).toHaveBeenCalledWith('site-a');
-      expect(mockSiteService.invalidateSiteCache).not.toHaveBeenCalledWith('site-b');
+      expect(mockSiteService.invalidateSiteCache).toHaveBeenCalledWith('site-b');
     });
 
     it('should NOT include currency in PATCH when site is set to same value', async () => {
+      // Arrange
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
         sessionId: 'test-session',
         siteCode: 'site-a',
@@ -231,8 +280,10 @@ describe('EmporixSessionService', () => {
       });
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
 
-      await sessionService.setSite('site-a', 'EUR');
+      // Act
+      await sessionService.setSite('site-a', 'EUR'); // Same site
 
+      // Assert — currency should NOT be included since site didn't change
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
         siteCode: 'site-a',
         metadata: { version: 1 },
@@ -242,38 +293,53 @@ describe('EmporixSessionService', () => {
     });
 
     it('should NOT clear currentCart when session has no siteCode set initially', async () => {
+      // Arrange - session exists but no siteCode yet (first time setting site)
       mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
         sessionId: 'test-session',
         metadata: { version: 1 },
       });
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
 
+      // Act
       await sessionService.setSite('site-a', 'EUR');
 
-      // First-time site set: siteChanged is false → no currency reset, no cache invalidation.
+      // Assert — first-time site set: siteChanged is false, so no currency reset
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
         siteCode: 'site-a',
         metadata: { version: 1 },
       });
       expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
-      expect(mockSiteService.invalidateSiteCache).not.toHaveBeenCalled();
     });
 
     it('should not update currency when defaultCurrency is not provided (backward compatibility)', async () => {
+      // Arrange
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValue({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
+      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
+        sessionId: 'test-session',
+        siteCode: 'site-a',
+        metadata: { version: 1 },
+      });
       mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
         sessionId: 'test-session',
         siteCode: 'site-a',
         metadata: { version: 1 },
       });
       mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
 
+      // Act — no defaultCurrency argument
       await sessionService.setSite('site-b');
 
+      // Assert — PATCH only contains siteCode, no currency
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
         siteCode: 'site-b',
         metadata: { version: 1 },
       });
-      expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
+      expect(mockSessionContextApi.removeOwnSessionContextAttribute).toHaveBeenCalledWith('currentCart');
     });
 
     it('should retry once with refreshed version when first PATCH fails with version conflict', async () => {
@@ -283,16 +349,21 @@ describe('EmporixSessionService', () => {
           siteCode: 'site-a',
           metadata: { version: 3 },
         })
-        // After version conflict — service re-reads to get latest version.
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 4 },
+        })
         .mockResolvedValueOnce({
           sessionId: 'test-session',
           siteCode: 'site-a',
           metadata: { version: 5 },
         });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
       mockSessionContextApi.updateOwnSessionContext
         .mockRejectedValueOnce(
           new Error(
-            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 3 has not been found."}',
+            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 4 has not been found."}',
           ),
         )
         .mockResolvedValueOnce();
@@ -302,7 +373,7 @@ describe('EmporixSessionService', () => {
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenNthCalledWith(1, {
         siteCode: 'site-b',
         currency: 'EUR',
-        metadata: { version: 3 },
+        metadata: { version: 4 },
       });
       expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenNthCalledWith(2, {
         siteCode: 'site-b',
@@ -312,7 +383,7 @@ describe('EmporixSessionService', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         {
           site: 'site-b',
-          previousVersion: 3,
+          previousVersion: 4,
           retryVersion: 5,
         },
         'Retrying session site update after version conflict',
@@ -328,12 +399,19 @@ describe('EmporixSessionService', () => {
         })
         .mockResolvedValueOnce({
           sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 4 },
+        })
+        // After version conflict, another mutation changed siteCode to 'site-c'
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
           siteCode: 'site-c',
           metadata: { version: 6 },
         });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
       mockSessionContextApi.updateOwnSessionContext.mockRejectedValueOnce(
         new Error(
-          'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 3 has not been found."}',
+          'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 4 has not been found."}',
         ),
       );
 
@@ -359,12 +437,19 @@ describe('EmporixSessionService', () => {
         })
         .mockResolvedValueOnce({
           sessionId: 'test-session',
+          siteCode: 'site-a',
+          metadata: { version: 4 },
+        })
+        // After version conflict, another mutation already set siteCode to target
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
           siteCode: 'site-b',
           metadata: { version: 6 },
         });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
       mockSessionContextApi.updateOwnSessionContext.mockRejectedValueOnce(
         new Error(
-          'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 3 has not been found."}',
+          'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 4 has not been found."}',
         ),
       );
 
@@ -384,12 +469,18 @@ describe('EmporixSessionService', () => {
         .mockResolvedValueOnce({
           sessionId: 'test-session',
           siteCode: 'site-a',
+          metadata: { version: 3 },
+        })
+        .mockResolvedValueOnce({
+          sessionId: 'test-session',
+          siteCode: 'site-a',
           metadata: { version: 4 },
         });
+      mockSessionContextApi.removeOwnSessionContextAttribute.mockResolvedValue();
       mockSessionContextApi.updateOwnSessionContext
         .mockRejectedValueOnce(
           new Error(
-            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 2 has not been found."}',
+            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 3 has not been found."}',
           ),
         )
         .mockRejectedValueOnce(
@@ -399,116 +490,6 @@ describe('EmporixSessionService', () => {
         );
 
       await expect(sessionService.setSite('site-b', 'EUR')).rejects.toThrow('Failed to update own session context');
-    });
-  });
-
-  describe('updateContext', () => {
-    it('should skip pre-PATCH GET when expectedVersion is provided and the patch has no context fields', async () => {
-      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
-      // Without an initialSession baseline we issue one follow-up GET to return the canonical shape.
-      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
-        sessionId: 'test-session',
-        siteCode: 'site-b',
-        currency: 'EUR',
-        metadata: { version: 8 },
-      });
-      mockSessionMapper.mapToService.mockReturnValue(mockSession);
-
-      const result = await sessionService.updateContext(
-        { siteCode: 'site-b', currency: 'EUR' },
-        { expectedVersion: 7 },
-      );
-
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledTimes(1);
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
-        siteCode: 'site-b',
-        currency: 'EUR',
-        metadata: { version: 7 },
-      });
-      // No pre-PATCH read, only one post-PATCH read for the canonical shape.
-      expect(mockSessionContextApi.getOwnSessionContext).toHaveBeenCalledTimes(1);
-      expect(result).toBe(mockSession);
-    });
-
-    it('should pre-PATCH GET and merge existing context attributes when the patch touches context (e.g. language)', async () => {
-      mockSessionContextApi.getOwnSessionContext
-        .mockResolvedValueOnce({
-          sessionId: 'test-session',
-          siteCode: 'site-a',
-          currency: 'EUR',
-          context: { currentCart: 'cart-123', region: 'Europe' },
-          metadata: { version: 8 },
-        })
-        .mockResolvedValueOnce({
-          sessionId: 'test-session',
-          siteCode: 'site-b',
-          currency: 'EUR',
-          metadata: { version: 9 },
-        });
-      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
-      mockSessionMapper.mapToService.mockReturnValue(mockSession);
-
-      await sessionService.updateContext(
-        { siteCode: 'site-b', currency: 'EUR', language: 'de' },
-        { expectedVersion: 7 },
-      );
-
-      // Pre-PATCH GET is forced because the patch includes `language` (a context field).
-      // The existing `context` attributes (`currentCart`, `region`) must survive the merge
-      // because Emporix's `PATCH /me/context` replaces the whole `context` object.
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
-        siteCode: 'site-b',
-        currency: 'EUR',
-        context: { currentCart: 'cart-123', region: 'Europe', language: 'de' },
-        metadata: { version: 8 },
-      });
-    });
-
-    it('should read once and PATCH once when expectedVersion is omitted', async () => {
-      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
-        sessionId: 'test-session',
-        siteCode: 'site-a',
-        metadata: { version: 3 },
-      });
-      mockSessionContextApi.updateOwnSessionContext.mockResolvedValue();
-      mockSessionMapper.mapToService.mockReturnValue(mockSession);
-
-      await sessionService.updateContext({ language: 'fr' });
-
-      expect(mockSessionContextApi.getOwnSessionContext).toHaveBeenCalledTimes(1);
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledWith({
-        context: { language: 'fr' },
-        metadata: { version: 3 },
-      });
-      expect(mockSessionContextApi.removeOwnSessionContextAttribute).not.toHaveBeenCalled();
-    });
-
-    it('should retry exactly once on version conflict and rethrow on second failure', async () => {
-      mockSessionContextApi.getOwnSessionContext.mockResolvedValueOnce({
-        sessionId: 'test-session',
-        siteCode: 'site-a',
-        metadata: { version: 9 },
-      });
-      mockSessionContextApi.updateOwnSessionContext
-        .mockRejectedValueOnce(
-          new Error(
-            'Failed to update own session context: Not Found - {"message":"The context with sessionId test-session and version 5 has not been found."}',
-          ),
-        )
-        .mockResolvedValueOnce();
-      mockSessionMapper.mapToService.mockReturnValue(mockSession);
-
-      await sessionService.updateContext({ siteCode: 'site-b' }, { expectedVersion: 5 });
-
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenCalledTimes(2);
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenNthCalledWith(1, {
-        siteCode: 'site-b',
-        metadata: { version: 5 },
-      });
-      expect(mockSessionContextApi.updateOwnSessionContext).toHaveBeenNthCalledWith(2, {
-        siteCode: 'site-b',
-        metadata: { version: 9 },
-      });
     });
   });
 

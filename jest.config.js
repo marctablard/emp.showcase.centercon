@@ -114,7 +114,7 @@ const customJestConfig = {
       preset: 'ts-jest',
       displayName: 'React Tests',
       testEnvironment: 'jsdom',
-      testMatch: ['**/hooks/**/?(*.)+(spec|test).ts?(x)', '**/providers/**/?(*.)+(spec|test).ts?(x)'],
+      testMatch: ['**/hooks/**/?(*.)+(spec|test).ts?(x)'],
       setupFilesAfterEnv: ['<rootDir>/jest.react.setup.js'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',

@@ -10,14 +10,15 @@ import {
   updateSessionRegion,
   updateSessionSite,
 } from '@/lib/client/session';
-import type { Cart } from '@/platform/services/model/cart/cart';
 import type { Session } from '@/platform/services/model/session/session';
-import { useCartStore, useSessionStore } from '@/providers/StoreProvider';
+import { useSessionStore } from '@/providers/StoreProvider';
 
-/** Hook for reading and mutating session data. */
+/**
+ * Hook for managing session data
+ * Provides methods to get and update session information
+ */
 export function useSession() {
   const sessionStore = useSessionStore();
-  const cartStore = useCartStore();
   const session = sessionStore.session;
   const loading = sessionStore.loading;
   const hasAttemptedRecovery = useRef(false);
@@ -79,22 +80,7 @@ export function useSession() {
   };
 
   const setCurrency = async (currency: string): Promise<boolean> => {
-    // Server returns the reconciled cart; pipe it straight into the store since the
-    // synchronizer's currency subscriber is suppressed while the mutation lock is held.
-    let reconciledCart: Cart | null | undefined;
-    let cartIncludedInResponse = false;
-    const success = await runSessionMutation(async () => {
-      const result = await updateSessionCurrency(currency);
-      if (result.success && 'cart' in result) {
-        reconciledCart = result.cart ?? null;
-        cartIncludedInResponse = true;
-      }
-      return result.success;
-    });
-    if (success && cartIncludedInResponse) {
-      cartStore.setCurrentCart(reconciledCart ?? null);
-    }
-    return success;
+    return runSessionMutation(() => updateSessionCurrency(currency));
   };
 
   const setCountry = async (country: string): Promise<boolean> => {
