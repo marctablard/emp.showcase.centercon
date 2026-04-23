@@ -7,11 +7,7 @@ import { injectable } from '@/platform/core/di/injectable';
 import type { StoredToken } from '@/platform/integrations/types/auth';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { RequestContextService } from '@/platform/services/request-context/RequestContextService';
-import type {
-  AnonymousTokenSessionParams,
-  EmporixAccessTokenResponse,
-  EmporixAnonymousTokenResponse,
-} from '../../model/oauth';
+import type { AnonymousTokenSessionParams, EmporixAccessTokenResponse } from '../../model/oauth';
 import type { EmporixOAuthApi } from '../../oauth/EmporixOAuthApi';
 import type { TokenStore } from './EmporixTokenManagerAbstract';
 import { EmporixTokenManagerAbstract } from './EmporixTokenManagerAbstract';
@@ -32,45 +28,32 @@ class EmporixTokenManagerServer extends EmporixTokenManagerAbstract {
     this.logger = logger;
   }
 
-  /**
-   * Resolves session params lazily in the cache-miss/refresh path only. Overriding
-   * `fetchAnonymousToken` (instead of `getAnonymousToken`) keeps cached-token reads free of
-   * `resolveSessionParams` work.
-   */
-  protected async fetchAnonymousToken(
-    anonymousToken: StoredToken<EmporixAnonymousTokenResponse> | undefined,
+  async getAnonymousToken(
     tenant: string,
     clientId: string,
     sessionParams?: AnonymousTokenSessionParams,
-  ) {
+  ): Promise<{ accessToken: string; sessionId: string }> {
     if (!sessionParams) {
       sessionParams = await this.resolveSessionParams();
     }
-    return super.fetchAnonymousToken(anonymousToken, tenant, clientId, sessionParams);
+    return super.getAnonymousToken(tenant, clientId, sessionParams);
   }
 
   private async resolveSessionParams(): Promise<AnonymousTokenSessionParams> {
     let siteCode: string | undefined;
-    let fallback: 'request-context' | 'env-default';
     try {
       siteCode = await this.requestContext.getSite();
     } catch {
-      siteCode = undefined;
-    }
-    if (siteCode) {
-      fallback = 'request-context';
-    } else {
       siteCode = process.env.NEXT_PUBLIC_DEFAULT_SITE;
-      fallback = 'env-default';
     }
     const params: AnonymousTokenSessionParams = {
-      siteCode,
+      siteCode: siteCode || process.env.NEXT_PUBLIC_DEFAULT_SITE,
       currency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY,
       language: process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE,
       targetLocation: process.env.NEXT_PUBLIC_DEFAULT_COUNTRY,
       region: process.env.NEXT_PUBLIC_DEFAULT_REGION,
     };
-    this.logger.debug({ ...params, fallback }, 'resolveSessionParams');
+    this.logger.debug({ ...params }, 'resolveSessionParams');
     return params;
   }
 

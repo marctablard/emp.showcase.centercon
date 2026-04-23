@@ -626,6 +626,11 @@ class EmporixCartService implements CartService {
     }
   }
 
+  async updateSite(cartId: string, siteCode: string): Promise<void> {
+    await this.cartApi.changeSite(cartId, siteCode);
+    await this.refreshCartWithCleanup(cartId);
+  }
+
   async getSavedCarts(pagination: PaginationQuery): Promise<Paginated<Cart>> {
     const session = await this.sessionService.getCurrent();
     if (!session?.customerId) {

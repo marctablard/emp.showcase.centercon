@@ -13,7 +13,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCart } from '@/hooks/cart/useCart';
 import { useCartTotal } from '@/hooks/cart/useCartTotal';
-import { useIsCartSettling } from '@/hooks/cart/useIsCartSettling';
 import { useGlobalSyncReady } from '@/hooks/common/useGlobalSyncReady';
 import { useShopContextReady } from '@/hooks/common/useShopContextReady';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
@@ -34,9 +33,7 @@ function HeaderCartButtonContent({ initialCart, showSum = true }: HeaderCartButt
   const { cart, loading } = useCart(initialCart);
   const { ready: shopContextReady } = useShopContextReady({ requireCart: true });
   const { ready: globalSyncReady } = useGlobalSyncReady();
-  const isSettling = useIsCartSettling();
-  // `isSettling` spans the whole site-switch window to avoid empty→stale→new flicker.
-  const showSpinner = loading || !shopContextReady || !globalSyncReady || isSettling;
+  const showSpinner = loading || !shopContextReady || !globalSyncReady;
   const [scrollHeight, setScrollHeight] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const scrollContainer = useRef<HTMLDivElement>(null);

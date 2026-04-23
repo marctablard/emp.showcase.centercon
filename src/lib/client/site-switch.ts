@@ -1,16 +1,19 @@
 'use client';
 
 import type { StoreApi } from 'zustand';
-import { devSyncLog } from '@/lib/client/dev-sync-log';
-import { updateSessionContext } from '@/lib/client/session';
+import { fetchCurrentSession, updateSessionLanguage, updateSessionSite } from '@/lib/client/session';
 import { type LoggerService, getLogger } from '@/lib/logger/use-logger-client';
 import type { CartStore } from '@/stores/cart-store';
 import type { SessionStore } from '@/stores/session-store-context';
 import type { SiteStore } from '@/stores/site-store';
 
-const SETTLING_REASON_SITE_SWITCH = 'site-switch';
-
-/** Sync the locale cookie so next-intl picks up the aligned locale on the next request. */
+/**
+ * Write the locale cookie from the browser before `router.push` fires, so the next RSC/middleware
+ * round-trip sees the aligned locale. Without this, `next-intl`'s cookie-driven locale detection
+ * keeps the pre-switch locale (e.g. `de`) and redirects `/us` → `/us/de` even after the switch to
+ * a site that does not advertise that locale — which in turn makes the layout redirect away from
+ * any deep link the user was navigating to.
+ */
 function writeLocaleCookie(locale: string): void {
   if (typeof document === 'undefined') {
     return;
@@ -24,11 +27,24 @@ function writeLocaleCookie(locale: string): void {
 }
 
 /**
- * Single awaited pipeline for every site change (user / deep-link). Happy path:
- * one `PATCH /api/session` + one `GET /api/cart` (+ optional cart-currency reconcile when
- * a shared currency leaves a stale per-site cart). Runs under the session mutation lock
- * and a `beginSettling` window so consumers render one spinner across the whole flow.
- * Guards: same-site / unknown-site / locked.
+ * Single awaited client-side pipeline for every site change — whether user-initiated
+ * (`SiteSwitcher`) or URL-driven (`SiteSessionAligner`).
+ *
+ * Ordering guarantees:
+ *  1. Acquire the session mutation lock (single writer guarantee).
+ *  2. `PUT /api/session/site` (server clears `currentCart` and PATCHes `{ siteCode, currency }`).
+ *  3. `GET /api/session` to refetch the authoritative session.
+ *  4. `sessionStore.setSession(updated)` — fires downstream subscriptions (caches, LE check).
+ *  5. `await` in parallel: `siteStore.resetSite()` (prompts `useSite` to refetch active site)
+ *     and `cartStore.validateSite(session.siteCode)` (clears cart + `GET /api/cart`).
+ *  6. If currency changed, `await cartStore.syncCurrencyWithSession(...)`.
+ *  7. If `source === 'user'`, navigate + schedule `router.refresh()` after a 150 ms
+ *     micro-delay so RSC trees have settled.
+ *  8. Release the mutation lock (always, via `finally`).
+ *
+ * The mutation lock is the only concurrency primitive required: it guarantees that a second
+ * invocation (double-click, Strict Mode re-mount, deep-link race) cannot observe an
+ * intermediate state.
  */
 export interface SiteSwitchStores {
   sessionStore: StoreApi<SessionStore>;
@@ -43,26 +59,27 @@ export interface SiteSwitchRedirectPathArgs {
   forcePrefix?: boolean;
 }
 
-/** Target site metadata. Accepts strings or `{ id | code }` objects; lists are normalized to ids. */
-interface TargetSiteMetadata {
-  languages?: Array<string | { id?: string; code?: string }> | undefined;
-  currencies?: Array<string | { id?: string; code?: string }> | undefined;
-  defaultCurrency?: string | { id?: string } | undefined;
-  defaultLanguage?: string | undefined;
-}
-
 export interface SiteSwitchOptions {
-  /** `'user'` = switcher click (navigates + refreshes). `'deep-link'` = URL-driven alignment (no nav). */
+  /**
+   * `'user'` = header site switcher click. Orchestrator navigates to the target site URL and
+   *            triggers `router.refresh()` so server components reload with the new session.
+   * `'deep-link'` = URL-driven divergence detected by `SiteSessionAligner`. The browser is already
+   *                 on the target URL so we skip navigation and refresh; the aligner's parent tree
+   *                 re-renders naturally once `sessionStore.setSession` fires.
+   */
   source: 'user' | 'deep-link';
-  /** Current UI locale — used for user source to pick a compatible target-site locale. */
+  /** Current UI locale — only relevant when `source === 'user'` to pick a target-site-compatible locale. */
   locale?: string;
-  /** Navigator for user-initiated switches (typically `router.push`). */
+  /** Navigator for user-initiated switches (typically `router.push`). Ignored for deep-link source. */
   navigateTo?: (path: string) => void;
-  /** Computes the target-site path (typically `@/i18n/navigation`'s `getPathname`). */
+  /** Computes the target-site path. Typically `@/i18n/navigation`'s `getPathname`. */
   getRedirectPath?: (args: SiteSwitchRedirectPathArgs) => string;
-  /** Resolves target-site metadata. Required for user source; optional for deep-link. */
-  getSiteByCode?: (site: string) => Promise<TargetSiteMetadata | null | undefined>;
-  /** Next router used only for user-initiated switches. */
+  /**
+   * Optional lookup used to resolve the target site's allowed locales (used to pick a
+   * compatible target locale). Can be omitted for deep-link source.
+   */
+  getSiteByCode?: (site: string) => Promise<{ languages?: string[] } | null | undefined>;
+  /** Next router object with `refresh()`. Only invoked for user-initiated switches. */
   router?: { refresh: () => void };
   logger?: LoggerService;
 }
@@ -71,10 +88,9 @@ export interface SiteSwitchResult {
   success: boolean;
   reason?: 'locked' | 'unknown-site' | 'error' | 'same-site';
   correlationId?: string;
-  /** Count of BFF responses the orchestrator is responsible for (telemetry). */
-  upstreamCalls?: number;
 }
 
+/** Matches the 150 ms delay previously used inline inside `header-site-switcher.tsx`. */
 export const NAVIGATION_REFRESH_DELAY_MS = 150;
 
 function generateCorrelationId(): string {
@@ -84,36 +100,12 @@ function generateCorrelationId(): string {
   return `sw-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function normalizeList(items: Array<string | { id?: string; code?: string }> | undefined): string[] {
-  if (!items) {
-    return [];
-  }
-  const out: string[] = [];
-  for (const item of items) {
-    if (typeof item === 'string') {
-      if (item.length > 0) out.push(item);
-    } else if (item && typeof item === 'object') {
-      const value = item.id ?? item.code;
-      if (typeof value === 'string' && value.length > 0) {
-        out.push(value);
-      }
-    }
-  }
-  return out;
-}
-
-function resolveDefaultCurrency(meta: TargetSiteMetadata | null | undefined): string | undefined {
-  const defaultCurrency = meta?.defaultCurrency;
-  if (typeof defaultCurrency === 'string') {
-    return defaultCurrency || undefined;
-  }
-  if (defaultCurrency && typeof defaultCurrency === 'object') {
-    return defaultCurrency.id;
-  }
-  return undefined;
-}
-
-/** Runs the site-switch pipeline and emits a single telemetry event. Never throws. */
+/**
+ * Runs the site-switch pipeline and emits a single structured telemetry event on completion.
+ *
+ * @returns `{ success: true }` on success (including same-site no-op),
+ *          `{ success: false, reason }` on failure. Never throws.
+ */
 export async function performSiteSwitch(
   targetSite: string,
   stores: SiteSwitchStores,
@@ -127,8 +119,6 @@ export async function performSiteSwitch(
   const prevSession = sessionStore.getState().session;
   const prevSiteCode = prevSession?.siteCode;
   const prevCurrency = prevSession?.currency;
-  const prevLanguage = prevSession?.language;
-  const prevVersion = prevSession?.metadata?.version;
 
   if (!targetSite || targetSite === prevSiteCode) {
     logger.info(
@@ -139,12 +129,11 @@ export async function performSiteSwitch(
         from: prevSiteCode,
         to: targetSite,
         outcome: 'same-site',
-        upstreamCalls: 0,
         durationMs: 0,
       },
       'site switch skipped — same site',
     );
-    return { success: true, reason: 'same-site', correlationId, upstreamCalls: 0 };
+    return { success: true, reason: 'same-site', correlationId };
   }
 
   if (!sessionStore.getState().tryAcquireMutationLock()) {
@@ -156,177 +145,111 @@ export async function performSiteSwitch(
         from: prevSiteCode,
         to: targetSite,
         outcome: 'locked',
-        upstreamCalls: 0,
         durationMs: 0,
       },
       'site switch skipped — session mutation lock held',
     );
-    return { success: false, reason: 'locked', correlationId, upstreamCalls: 0 };
+    return { success: false, reason: 'locked', correlationId };
   }
 
-  cartStore.getState().beginSettling(SETTLING_REASON_SITE_SWITCH);
+  let targetSiteInfo: { languages?: string[] } | null | undefined;
+  if (opts.getSiteByCode) {
+    try {
+      targetSiteInfo = await opts.getSiteByCode(targetSite);
+    } catch (err) {
+      logger.error({ err, site: targetSite, correlationId }, 'Failed to resolve target site metadata');
+    }
+    if (!targetSiteInfo) {
+      sessionStore.getState().releaseMutationLock();
+      logger.info(
+        {
+          event: 'site_switch',
+          correlationId,
+          source: opts.source,
+          from: prevSiteCode,
+          to: targetSite,
+          outcome: 'unknown-site',
+          durationMs: Date.now() - startedAt,
+        },
+        'site switch failed — unknown target site',
+      );
+      return { success: false, reason: 'unknown-site', correlationId };
+    }
+  }
 
-  let upstreamCalls = 0;
+  sessionStore.getState().setLoading(true);
 
   try {
-    let targetSiteInfo: TargetSiteMetadata | null | undefined;
-    if (opts.getSiteByCode) {
-      try {
-        // Cache-first lookup; not counted toward the upstream budget.
-        targetSiteInfo = await opts.getSiteByCode(targetSite);
-      } catch (err) {
-        logger.error({ err, site: targetSite, correlationId }, 'Failed to resolve target site metadata');
-      }
-      // User source requires known metadata; deep-link tolerates a cold cache.
-      if (!targetSiteInfo && opts.source === 'user') {
-        logger.info(
-          {
-            event: 'site_switch',
-            correlationId,
-            source: opts.source,
-            from: prevSiteCode,
-            to: targetSite,
-            outcome: 'unknown-site',
-            upstreamCalls,
-            durationMs: Date.now() - startedAt,
-          },
-          'site switch failed — unknown target site',
-        );
-        return { success: false, reason: 'unknown-site', correlationId, upstreamCalls };
-      }
+    const siteUpdateSuccess = await updateSessionSite(targetSite);
+    if (!siteUpdateSuccess) {
+      throw new Error('updateSessionSite returned false');
     }
 
-    sessionStore.getState().setLoading(true);
-    // Preserve current currency/language when supported; fall back to site defaults otherwise.
-    const targetLanguages = normalizeList(targetSiteInfo?.languages);
-    const targetCurrencies = normalizeList(targetSiteInfo?.currencies);
-    const targetDefaultCurrency = resolveDefaultCurrency(targetSiteInfo);
-    if (targetDefaultCurrency && !targetCurrencies.includes(targetDefaultCurrency)) {
-      targetCurrencies.push(targetDefaultCurrency);
-    }
-
-    const nextCurrency =
-      prevCurrency && targetCurrencies.length > 0
-        ? targetCurrencies.includes(prevCurrency)
-          ? prevCurrency
-          : targetDefaultCurrency
-        : prevCurrency;
-
-    const nextLanguage =
-      prevLanguage && targetLanguages.length > 0
-        ? targetLanguages.includes(prevLanguage)
-          ? prevLanguage
-          : targetSiteInfo?.defaultLanguage && targetLanguages.includes(targetSiteInfo.defaultLanguage)
-            ? targetSiteInfo.defaultLanguage
-            : targetLanguages[0]
-        : prevLanguage;
-
-    const sessionFields: { siteCode?: string; currency?: string; language?: string } = {
-      siteCode: targetSite,
-    };
-    if (nextCurrency && nextCurrency !== prevCurrency) {
-      sessionFields.currency = nextCurrency;
-    }
-    if (nextLanguage && nextLanguage !== prevLanguage) {
-      sessionFields.language = nextLanguage;
-    }
-
-    const updatedSession = await updateSessionContext(sessionFields, prevVersion);
+    const updatedSession = await fetchCurrentSession(true);
     if (!updatedSession) {
-      throw new Error('updateSessionContext returned null');
+      throw new Error('fetchCurrentSession returned null');
     }
-    upstreamCalls += 1;
     sessionStore.getState().setSession(updatedSession);
 
-    // Reset the site store if it still holds the previous site (SSR-seeded deep links).
+    // Run site-store reset (drops active site; `useSite` effect refetches) in parallel with the
+    // cart validation (clears + GET /api/cart). resetSite is synchronous but exposed here so
+    // tests can assert it was called before the parallel await resolves.
+    //
+    // Skip `resetSite()` when `siteStore.site` already matches the target (typical for
+    // SSR-aligned deep-links where the layout seeded the correct site). Clearing it would
+    // force `useSite` into a transient `site: undefined` window and flip
+    // `useShopContextReady.siteAligned` to false long enough to trip the deadlock guard.
     const currentSiteInStore = siteStore.getState().getSite()?.code;
-    if (currentSiteInStore !== updatedSession.siteCode) {
-      siteStore.getState().resetSite();
-    }
+    const shouldResetSite = currentSiteInStore !== updatedSession.siteCode;
+    await Promise.all([
+      shouldResetSite ? Promise.resolve(siteStore.getState().resetSite()) : Promise.resolve(),
+      cartStore.getState().validateSite(updatedSession.siteCode),
+    ]);
 
-    // Snap `lastSiteCode` + drop the local cart so the next `fetchCart` returns the target
-    // site's own cart (each site keeps its own cart server-side).
-    cartStore.setState({
-      currentCart: null,
-      lastSiteCode: updatedSession.siteCode,
-      lastShippingUpdate: null,
-      pendingCurrencySync: null,
-      error: null,
-    });
-    try {
-      await cartStore.getState().fetchCart();
-      upstreamCalls += 1;
-    } catch (err) {
-      logger.error(
-        { err, siteCode: updatedSession.siteCode, correlationId },
-        'fetchCart failed during site switch — leaving cart unresolved',
-      );
-    }
-
-    // Reconcile cart currency inside the settling window — the synchronizer subscriber is
-    // suppressed under the mutation lock and cannot fire here. No-op when already aligned.
-    const resolvedCart = cartStore.getState().currentCart;
-    const resolvedCartCurrency = resolvedCart?.currency ?? resolvedCart?.totalPrice?.currency;
-    const sessionCurrency = updatedSession.currency;
-    if (
-      resolvedCart &&
-      resolvedCart.site === updatedSession.siteCode &&
-      sessionCurrency &&
-      resolvedCartCurrency &&
-      resolvedCartCurrency !== sessionCurrency
-    ) {
+    const newCurrency = updatedSession.currency;
+    const currencyChanged = Boolean(newCurrency && newCurrency !== prevCurrency);
+    if (currencyChanged && newCurrency) {
       try {
-        await cartStore.getState().syncCurrencyWithSession(sessionCurrency, updatedSession.siteCode);
-        upstreamCalls += 2;
+        await cartStore.getState().syncCurrencyWithSession(newCurrency, updatedSession.siteCode);
       } catch (err) {
         logger.error(
-          {
-            err,
-            siteCode: updatedSession.siteCode,
-            fromCurrency: resolvedCartCurrency,
-            toCurrency: sessionCurrency,
-            correlationId,
-          },
-          'syncCurrencyWithSession failed during site switch — cart currency may remain stale',
+          { err, currency: newCurrency, siteCode: updatedSession.siteCode, correlationId },
+          'syncCurrencyWithSession failed during site switch',
         );
       }
     }
 
-    const currencyChanged = Boolean(updatedSession.currency && updatedSession.currency !== prevCurrency);
-    const languageChanged = Boolean(updatedSession.language && updatedSession.language !== prevLanguage);
-
-    devSyncLog('site-switch: post-switch snapshot', {
-      correlationId,
-      siteCode: updatedSession.siteCode,
-      sessionCurrency: updatedSession.currency,
-      prevCurrency,
-      cartId: cartStore.getState().currentCart?.id ?? null,
-      cartSite: cartStore.getState().currentCart?.site ?? null,
-      cartCurrency:
-        cartStore.getState().currentCart?.currency ?? cartStore.getState().currentCart?.totalPrice?.currency ?? null,
-      currencyChanged,
-      languageChanged,
-      upstreamCalls,
-    });
-
-    // Navigation + locale cookie sync (user source only).
     if (opts.source === 'user' && opts.navigateTo && opts.getRedirectPath) {
       const fallbackLocale = opts.locale ?? updatedSession.language ?? '';
-      const resolvedTargetLocale =
-        targetLanguages.length > 0
+      const targetLanguages = targetSiteInfo?.languages;
+      const targetLocale =
+        targetLanguages && targetLanguages.length > 0
           ? targetLanguages.includes(fallbackLocale)
             ? fallbackLocale
             : targetLanguages[0]
           : fallbackLocale;
 
-      const localeChanged = Boolean(resolvedTargetLocale) && resolvedTargetLocale !== opts.locale;
+      // When the target site does not advertise the current UI locale (e.g. FW/CHF/de → US which
+      // only supports en), we must realign both the server-side session language AND the
+      // client-cookie that next-intl reads. Otherwise the next navigation (header search, product
+      // tile click, etc.) re-introduces `/de` into URLs on the new site and the layout bounces the
+      // user back to `/` to correct the locale, discarding deep links.
+      const localeChanged = Boolean(targetLocale) && targetLocale !== opts.locale;
       if (localeChanged) {
-        writeLocaleCookie(resolvedTargetLocale);
+        writeLocaleCookie(targetLocale);
+        try {
+          await updateSessionLanguage(targetLocale);
+        } catch (err) {
+          logger.error(
+            { err, locale: targetLocale, site: targetSite, correlationId },
+            'updateSessionLanguage failed during site switch (locale realignment)',
+          );
+        }
       }
 
       const targetPath = opts.getRedirectPath({
         href: '/',
-        locale: resolvedTargetLocale,
+        locale: targetLocale,
         site: targetSite,
         forcePrefix: true,
       });
@@ -347,14 +270,12 @@ export async function performSiteSwitch(
         from: prevSiteCode,
         to: targetSite,
         currencyChanged,
-        languageChanged,
         outcome: 'success',
-        upstreamCalls,
         durationMs: Date.now() - startedAt,
       },
       'site switch pipeline complete',
     );
-    return { success: true, correlationId, upstreamCalls };
+    return { success: true, correlationId };
   } catch (err) {
     logger.error(
       {
@@ -364,16 +285,14 @@ export async function performSiteSwitch(
         from: prevSiteCode,
         to: targetSite,
         outcome: 'error',
-        upstreamCalls,
         durationMs: Date.now() - startedAt,
         err: err instanceof Error ? err.message : String(err),
       },
       'site switch pipeline failed',
     );
-    return { success: false, reason: 'error', correlationId, upstreamCalls };
+    return { success: false, reason: 'error', correlationId };
   } finally {
     sessionStore.getState().setLoading(false);
     sessionStore.getState().releaseMutationLock();
-    cartStore.getState().endSettling(SETTLING_REASON_SITE_SWITCH);
   }
 }
