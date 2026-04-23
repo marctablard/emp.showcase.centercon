@@ -8,6 +8,7 @@ const mockUpdateSessionCountry = jest.fn();
 const mockUpdateSessionSite = jest.fn();
 const mockUpdateSessionRegion = jest.fn();
 const mockUseSessionStore = jest.fn();
+const mockUseCartStore = jest.fn();
 
 jest.mock('@/lib/client/session', () => ({
   fetchCurrentSession: (...args: unknown[]) => mockFetchCurrentSession(...args),
@@ -20,7 +21,12 @@ jest.mock('@/lib/client/session', () => ({
 
 jest.mock('@/providers/StoreProvider', () => ({
   useSessionStore: () => mockUseSessionStore(),
+  useCartStore: () => mockUseCartStore(),
 }));
+
+const createMockCartStore = () => ({
+  setCurrentCart: jest.fn(),
+});
 
 type Deferred<T> = {
   promise: Promise<T>;
@@ -72,16 +78,17 @@ describe('useSession mutation lock', () => {
     const store = createMockStore();
 
     mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(createMockCartStore());
     mockFetchCurrentSession.mockResolvedValue({ id: 'session-1', siteCode: 'main' });
     mockUpdateSessionLanguage.mockResolvedValue(true);
-    mockUpdateSessionCurrency.mockResolvedValue(true);
+    mockUpdateSessionCurrency.mockResolvedValue({ success: true });
     mockUpdateSessionCountry.mockResolvedValue(true);
     mockUpdateSessionSite.mockResolvedValue(true);
     mockUpdateSessionRegion.mockResolvedValue(true);
   });
 
   it('blocks concurrent mutations across hook instances and allows next mutation after release', async () => {
-    const currencyDeferred = createDeferred<boolean>();
+    const currencyDeferred = createDeferred<{ success: boolean }>();
     mockUpdateSessionCurrency.mockReturnValueOnce(currencyDeferred.promise);
 
     const hookA = renderHook(() => useSession());
@@ -101,7 +108,7 @@ describe('useSession mutation lock', () => {
     expect(mockUpdateSessionLanguage).not.toHaveBeenCalled();
 
     await act(async () => {
-      currencyDeferred.resolve(true);
+      currencyDeferred.resolve({ success: true });
       await firstMutationPromise!;
     });
 
@@ -119,6 +126,7 @@ describe('useSession mutation lock', () => {
 describe('useSession null-session recovery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCartStore.mockReturnValue(createMockCartStore());
   });
 
   it('should trigger fetchSession when session is null (SSR failure recovery)', () => {
@@ -192,6 +200,7 @@ describe('useSession null-session recovery', () => {
 describe('useSession fetch resilience', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCartStore.mockReturnValue(createMockCartStore());
   });
 
   it('keeps last known session when mutation refetch returns null', async () => {
@@ -200,7 +209,7 @@ describe('useSession fetch resilience', () => {
     });
 
     mockUseSessionStore.mockReturnValue(store);
-    mockUpdateSessionCurrency.mockResolvedValue(true);
+    mockUpdateSessionCurrency.mockResolvedValue({ success: true });
     mockFetchCurrentSession.mockRejectedValue(new Error('Temporary fetch failure'));
 
     const { result } = renderHook(() => useSession());
@@ -266,5 +275,95 @@ describe('useSession fetch resilience', () => {
     expect(refreshed).toBeNull();
     expect(store.setSession).toHaveBeenCalledWith(null);
     expect(store.session).toBeNull();
+  });
+});
+
+describe('useSession setCurrency cart reconciliation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFetchCurrentSession.mockResolvedValue({ id: 'session-1', currency: 'USD', siteCode: 'us-branch' });
+  });
+
+  it('pushes the server-reconciled cart into the cart store after a successful currency change', async () => {
+    const store = createMockStore({
+      session: { id: 's1', currency: 'CHF', siteCode: 'us-branch' },
+    });
+    const cartStore = createMockCartStore();
+    const reconciledCart = {
+      id: 'cart-1',
+      site: 'us-branch',
+      currency: 'USD',
+      totalPrice: { amount: 105.7, currency: 'USD' },
+    };
+
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+    mockUpdateSessionCurrency.mockResolvedValue({ success: true, cart: reconciledCart });
+
+    const { result } = renderHook(() => useSession());
+    let success: boolean;
+    await act(async () => {
+      success = await result.current.setCurrency('USD');
+    });
+
+    expect(success!).toBe(true);
+    expect(cartStore.setCurrentCart).toHaveBeenCalledTimes(1);
+    expect(cartStore.setCurrentCart).toHaveBeenCalledWith(reconciledCart);
+  });
+
+  it('clears the cart store when the response payload carries `cart: null`', async () => {
+    const store = createMockStore({
+      session: { id: 's1', currency: 'CHF', siteCode: 'us-branch' },
+    });
+    const cartStore = createMockCartStore();
+
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+    mockUpdateSessionCurrency.mockResolvedValue({ success: true, cart: null });
+
+    const { result } = renderHook(() => useSession());
+    await act(async () => {
+      await result.current.setCurrency('USD');
+    });
+
+    expect(cartStore.setCurrentCart).toHaveBeenCalledWith(null);
+  });
+
+  it('does not touch the cart store when the response omits `cart`', async () => {
+    const store = createMockStore({
+      session: { id: 's1', currency: 'CHF', siteCode: 'us-branch' },
+    });
+    const cartStore = createMockCartStore();
+
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+    mockUpdateSessionCurrency.mockResolvedValue({ success: true });
+
+    const { result } = renderHook(() => useSession());
+    await act(async () => {
+      await result.current.setCurrency('USD');
+    });
+
+    expect(cartStore.setCurrentCart).not.toHaveBeenCalled();
+  });
+
+  it('does not touch the cart store when the mutation fails', async () => {
+    const store = createMockStore({
+      session: { id: 's1', currency: 'CHF', siteCode: 'us-branch' },
+    });
+    const cartStore = createMockCartStore();
+
+    mockUseSessionStore.mockReturnValue(store);
+    mockUseCartStore.mockReturnValue(cartStore);
+    mockUpdateSessionCurrency.mockResolvedValue({ success: false });
+
+    const { result } = renderHook(() => useSession());
+    let success: boolean;
+    await act(async () => {
+      success = await result.current.setCurrency('USD');
+    });
+
+    expect(success!).toBe(false);
+    expect(cartStore.setCurrentCart).not.toHaveBeenCalled();
   });
 });

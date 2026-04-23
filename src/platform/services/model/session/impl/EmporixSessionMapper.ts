@@ -43,6 +43,7 @@ export class EmporixSessionMapper implements SessionMapper<EmporixSessionContext
       cartId: source.context?.['currentCart'],
       legalEntityId: source.context?.['legalEntityId'],
       attributes,
+      ...(typeof source.metadata?.version === 'number' ? { metadata: { version: source.metadata.version } } : {}),
     };
   }
 
@@ -99,6 +100,10 @@ export class EmporixSessionMapper implements SessionMapper<EmporixSessionContext
       });
 
       result.context = context;
+    }
+
+    if (typeof partialSession.metadata?.version === 'number') {
+      result.metadata = { version: partialSession.metadata.version };
     }
 
     return result;
