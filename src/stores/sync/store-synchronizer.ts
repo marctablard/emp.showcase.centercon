@@ -5,6 +5,7 @@ import { getLogger } from '@/lib/logger/use-logger-client';
 import type {
   AvailabilityStoreApi,
   CartStoreApi,
+  CheckoutStoreApi,
   CustomerStoreApi,
   ProductStoreApi,
   SessionStoreApi,
@@ -20,6 +21,7 @@ interface StoreSynchronizerParams {
   customerStore: CustomerStoreApi;
   productStore: ProductStoreApi;
   availabilityStore: AvailabilityStoreApi;
+  checkoutStore: CheckoutStoreApi;
 }
 
 const CURRENCY_SYNC_RETRY_DELAYS_MS = [0, 250, 750];
@@ -37,6 +39,7 @@ export function setupStoreSynchronization({
   customerStore,
   productStore,
   availabilityStore,
+  checkoutStore,
 }: StoreSynchronizerParams): UnsubscribeFn[] {
   const unsubscribers: UnsubscribeFn[] = [];
   let activeCurrencySyncToken = 0;
@@ -53,6 +56,40 @@ export function setupStoreSynchronization({
     { equalityFn: shallow },
   );
   unsubscribers.push(unsubShippingMethodsCache);
+
+  // Reset the persisted checkout store (`emp-checkout`, sessionStorage) when the session
+  // site or currency changes. Shipping/billing addresses, payment and shipping method
+  // selections are scoped to a single site+currency context — keeping them across a site
+  // or currency switch can POST legal-entity addresses or shipping methods from the
+  // previous context to Emporix and make the cart calc reject the order.
+  const unsubCheckoutReset = sessionStore.subscribe(
+    (state) => ({
+      siteCode: state.session?.siteCode ?? '',
+      currency: state.session?.currency ?? '',
+    }),
+    (curr, prev) => {
+      if (!curr.siteCode || !curr.currency) {
+        return;
+      }
+      const prevSite = typeof prev === 'object' && prev && 'siteCode' in prev ? prev.siteCode : '';
+      const prevCurrency = typeof prev === 'object' && prev && 'currency' in prev ? prev.currency : '';
+      if (!prevSite || !prevCurrency) {
+        return;
+      }
+      if (prevSite === curr.siteCode && prevCurrency === curr.currency) {
+        return;
+      }
+      devSyncLog('store-sync: reset checkout store (session site/currency changed)', {
+        prevSite,
+        prevCurrency,
+        siteCode: curr.siteCode,
+        currency: curr.currency,
+      });
+      checkoutStore.getState().reset();
+    },
+    { equalityFn: shallow },
+  );
+  unsubscribers.push(unsubCheckoutReset);
 
   // Product cache is keyed only by id; clear on site/currency change so PDP/search never
   // display another site's currency before the fresh fetch completes.

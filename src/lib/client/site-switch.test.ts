@@ -57,6 +57,7 @@ type CartStoreState = {
   validateSite: jest.Mock<Promise<void>, [string]>;
   fetchCart: jest.Mock<Promise<Cart | null | undefined>, []>;
   syncCurrencyWithSession: jest.Mock<Promise<void>, [string, string]>;
+  setError: jest.Mock<void, [Error | null]>;
   currentCart?: Cart | null | undefined;
   loading?: boolean;
 };
@@ -125,6 +126,7 @@ function buildStores(options: BuildStoresOptions = {}): {
         }),
     fetchCart: jest.fn<Promise<Cart | null | undefined>, []>(() => Promise.resolve(null)),
     syncCurrencyWithSession: jest.fn<Promise<void>, [string, string]>(() => Promise.resolve()),
+    setError: jest.fn<void, [Error | null]>(),
     currentCart: options.currentCart,
     loading: false,
   };
@@ -643,6 +645,250 @@ describe('performSiteSwitch', () => {
       });
 
       expect(cartState.syncCurrencyWithSession).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * Emporix's `POST /cart/{cartId}/changeCurrency` is transactional: if any line item has
+   * no price list for the target currency it rejects with 400 and leaves the cart in the
+   * prior currency. The cart store's `updateCurrency` swallows that error (stores it in
+   * state, does not rethrow), so `syncCurrencyWithSession` resolves normally. The
+   * orchestrator must therefore also detect non-convergence of the post-call cart currency
+   * and fall back to the target site's `defaultCurrency` to keep session/cart aligned.
+   */
+  describe('cart currency reprice fallback', () => {
+    it('rolls session currency back to target default when syncCurrencyWithSession resolves but cart currency stays stale', async () => {
+      const staleUsBranchCart = { id: 'us-cart', site: 'us-branch', currency: 'USD' } as Cart;
+      const { stores, sessionState, cartState } = buildStores({
+        session: {
+          siteCode: 'fw-site',
+          currency: 'CHF',
+          language: 'de',
+          cartId: 'fw-cart',
+          metadata: { version: 20 },
+        },
+        currentCart: staleUsBranchCart,
+      });
+      // First PATCH: site switch preserves CHF (listed as supported by us-branch).
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'CHF',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 21 },
+      });
+      // Second PATCH: rollback to target default USD after reprice fails silently.
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'USD',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 22 },
+      });
+      // syncCurrencyWithSession resolves (default behaviour) but cartState.currentCart stays USD.
+
+      const result = await performSiteSwitch('us-branch', stores, {
+        source: 'deep-link',
+        getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['USD', 'CHF'], defaultCurrency: 'USD' }),
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.currencyFallback).toEqual({ from: 'CHF', to: 'USD' });
+
+      expect(cartState.syncCurrencyWithSession).toHaveBeenCalledTimes(1);
+      // First call aligned session → CHF, second call rolled it back → USD.
+      expect(mockedUpdateSessionContext).toHaveBeenCalledTimes(2);
+      expect(mockedUpdateSessionContext).toHaveBeenNthCalledWith(2, { currency: 'USD' }, 21);
+      // Session store re-updated with rolled-back session.
+      expect(sessionState.setSession).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ currency: 'USD', metadata: { version: 22 } }),
+      );
+      // Residual cart error cleared so UI doesn't surface the reprice 400.
+      expect(cartState.setError).toHaveBeenCalledWith(null);
+      // Cart is NOT cleared — contents preserved.
+      expect(cartState.clearCart).not.toHaveBeenCalled();
+    });
+
+    it('rolls back when syncCurrencyWithSession rejects outright', async () => {
+      const staleUsBranchCart = { id: 'us-cart', site: 'us-branch', currency: 'USD' } as Cart;
+      const { stores, sessionState, cartState } = buildStores({
+        session: {
+          siteCode: 'fw-site',
+          currency: 'CHF',
+          language: 'de',
+          cartId: 'fw-cart',
+          metadata: { version: 20 },
+        },
+        currentCart: staleUsBranchCart,
+      });
+      cartState.syncCurrencyWithSession.mockRejectedValueOnce(new Error('reprice failed'));
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'CHF',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 21 },
+      });
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'USD',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 22 },
+      });
+
+      const result = await performSiteSwitch('us-branch', stores, {
+        source: 'deep-link',
+        getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['USD', 'CHF'], defaultCurrency: 'USD' }),
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.currencyFallback).toEqual({ from: 'CHF', to: 'USD' });
+      expect(mockedUpdateSessionContext).toHaveBeenCalledTimes(2);
+      expect(sessionState.setSession).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not roll back when reprice converges (cart currency updated to session currency)', async () => {
+      const staleUsBranchCart = { id: 'us-cart', site: 'us-branch', currency: 'USD' } as Cart;
+      const { stores, cartState } = buildStores({
+        session: {
+          siteCode: 'fw-site',
+          currency: 'CHF',
+          language: 'de',
+          cartId: 'fw-cart',
+          metadata: { version: 20 },
+        },
+        currentCart: staleUsBranchCart,
+      });
+      // Simulate successful reprice by mutating the cart currency during the call.
+      cartState.syncCurrencyWithSession.mockImplementationOnce(() => {
+        cartState.currentCart = { ...staleUsBranchCart, currency: 'CHF' } as Cart;
+        return Promise.resolve();
+      });
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'CHF',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 21 },
+      });
+
+      const result = await performSiteSwitch('us-branch', stores, {
+        source: 'deep-link',
+        getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['USD', 'CHF'], defaultCurrency: 'USD' }),
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.currencyFallback).toBeUndefined();
+      expect(mockedUpdateSessionContext).toHaveBeenCalledTimes(1);
+      expect(cartState.setError).not.toHaveBeenCalled();
+    });
+
+    it('skips rollback when the target site has no usable defaultCurrency', async () => {
+      const staleUsBranchCart = { id: 'us-cart', site: 'us-branch', currency: 'USD' } as Cart;
+      const { stores, cartState } = buildStores({
+        session: {
+          siteCode: 'fw-site',
+          currency: 'CHF',
+          language: 'de',
+          cartId: 'fw-cart',
+          metadata: { version: 20 },
+        },
+        currentCart: staleUsBranchCart,
+      });
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'CHF',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 21 },
+      });
+
+      const result = await performSiteSwitch('us-branch', stores, {
+        source: 'deep-link',
+        // No defaultCurrency → nothing to roll back to.
+        getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['USD', 'CHF'] }),
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.currencyFallback).toBeUndefined();
+      expect(mockedUpdateSessionContext).toHaveBeenCalledTimes(1);
+      expect(cartState.setError).not.toHaveBeenCalled();
+    });
+
+    it('skips rollback when target defaultCurrency equals the attempted currency (already aligned to default)', async () => {
+      // Session carried CHF; target site lists CHF as default. Reprice still failed silently
+      // (the cart simply cannot be repriced to CHF) — but there's no other currency to fall
+      // back to, so the orchestrator must not issue a no-op PATCH.
+      const staleCart = { id: 'cart-1', site: 'us-branch', currency: 'USD' } as Cart;
+      const { stores, cartState } = buildStores({
+        session: {
+          siteCode: 'fw-site',
+          currency: 'CHF',
+          language: 'de',
+          cartId: 'cart-1',
+          metadata: { version: 20 },
+        },
+        currentCart: staleCart,
+      });
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'CHF',
+        language: 'en',
+        cartId: 'cart-1',
+        metadata: { version: 21 },
+      });
+
+      const result = await performSiteSwitch('us-branch', stores, {
+        source: 'deep-link',
+        getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['CHF'], defaultCurrency: 'CHF' }),
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.currencyFallback).toBeUndefined();
+      expect(mockedUpdateSessionContext).toHaveBeenCalledTimes(1);
+      expect(cartState.setError).not.toHaveBeenCalled();
+    });
+
+    it('applies fallback on user source too (so the switcher can toast)', async () => {
+      const staleUsBranchCart = { id: 'us-cart', site: 'us-branch', currency: 'USD' } as Cart;
+      const { stores } = buildStores({
+        session: {
+          siteCode: 'fw-site',
+          currency: 'CHF',
+          language: 'de',
+          cartId: 'us-cart',
+          metadata: { version: 20 },
+        },
+        currentCart: staleUsBranchCart,
+      });
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'CHF',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 21 },
+      });
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'us-branch',
+        currency: 'USD',
+        language: 'en',
+        cartId: 'us-cart',
+        metadata: { version: 22 },
+      });
+
+      const result = await performSiteSwitch('us-branch', stores, {
+        source: 'user',
+        locale: 'de',
+        navigateTo: jest.fn(),
+        getRedirectPath: jest.fn(() => '/us-branch'),
+        router: { refresh: jest.fn() },
+        getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['USD', 'CHF'], defaultCurrency: 'USD' }),
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.currencyFallback).toEqual({ from: 'CHF', to: 'USD' });
     });
   });
 

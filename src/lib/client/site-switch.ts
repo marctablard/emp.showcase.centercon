@@ -73,6 +73,16 @@ export interface SiteSwitchResult {
   correlationId?: string;
   /** Count of BFF responses the orchestrator is responsible for (telemetry). */
   upstreamCalls?: number;
+  /**
+   * Set when the orchestrator rolled the session currency back to the target site's default
+   * because the preferred currency could not be applied to the per-site cart (Emporix's
+   * `/changeCurrency` is transactional and will fail the whole cart if any item lacks a
+   * price list in the target currency). Callers can surface this to the user (toast).
+   */
+  currencyFallback?: {
+    from: string;
+    to: string;
+  };
 }
 
 export const NAVIGATION_REFRESH_DELAY_MS = 150;
@@ -264,6 +274,8 @@ export async function performSiteSwitch(
     const resolvedCart = cartStore.getState().currentCart;
     const resolvedCartCurrency = resolvedCart?.currency ?? resolvedCart?.totalPrice?.currency;
     const sessionCurrency = updatedSession.currency;
+    let activeSession = updatedSession;
+    let currencyFallback: { from: string; to: string } | undefined;
     if (
       resolvedCart &&
       resolvedCart.site === updatedSession.siteCode &&
@@ -271,10 +283,12 @@ export async function performSiteSwitch(
       resolvedCartCurrency &&
       resolvedCartCurrency !== sessionCurrency
     ) {
+      let repriceFailed = false;
       try {
         await cartStore.getState().syncCurrencyWithSession(sessionCurrency, updatedSession.siteCode);
         upstreamCalls += 2;
       } catch (err) {
+        repriceFailed = true;
         logger.error(
           {
             err,
@@ -286,15 +300,94 @@ export async function performSiteSwitch(
           'syncCurrencyWithSession failed during site switch — cart currency may remain stale',
         );
       }
+
+      // Emporix's /changeCurrency is transactional: on failure the cart store's updateCurrency
+      // swallows the error (stores state.error, no rethrow), so the promise resolves even
+      // though the cart was not repriced. Detect that by re-reading the post-call cart
+      // currency and treat a non-convergence the same as a thrown failure.
+      if (!repriceFailed) {
+        const postCart = cartStore.getState().currentCart;
+        const postCartCurrency = postCart?.currency ?? postCart?.totalPrice?.currency;
+        if (postCart && postCart.site === updatedSession.siteCode && postCartCurrency !== sessionCurrency) {
+          repriceFailed = true;
+          logger.warn(
+            {
+              siteCode: updatedSession.siteCode,
+              fromCurrency: postCartCurrency,
+              toCurrency: sessionCurrency,
+              correlationId,
+            },
+            'syncCurrencyWithSession resolved but cart currency did not converge — reprice rejected upstream',
+          );
+        }
+      }
+
+      if (repriceFailed) {
+        // Fallback: the preferred currency was carried over from the previous site but the
+        // per-site cart cannot honour it (at least one line item has no price list in that
+        // currency). Roll the session currency back to the target site's defaultCurrency so
+        // header/cart totals and line items realign, without clearing the cart.
+        if (targetDefaultCurrency && targetDefaultCurrency !== sessionCurrency) {
+          try {
+            const rolledBack = await updateSessionContext(
+              { currency: targetDefaultCurrency },
+              updatedSession.metadata?.version,
+            );
+            if (rolledBack) {
+              upstreamCalls += 1;
+              sessionStore.getState().setSession(rolledBack);
+              activeSession = rolledBack;
+              // Clear the residual cart-store error set by updateCurrency's internal catch —
+              // the failure is now recovered from the orchestrator's POV.
+              cartStore.getState().setError(null);
+              currencyFallback = { from: sessionCurrency, to: targetDefaultCurrency };
+              logger.info(
+                {
+                  siteCode: updatedSession.siteCode,
+                  fromCurrency: sessionCurrency,
+                  toCurrency: targetDefaultCurrency,
+                  correlationId,
+                },
+                'Rolled back session currency to target site default after reprice failure',
+              );
+            } else {
+              logger.error(
+                { siteCode: updatedSession.siteCode, toCurrency: targetDefaultCurrency, correlationId },
+                'Session currency rollback returned null — session/cart currency may remain mismatched',
+              );
+            }
+          } catch (rollbackErr) {
+            logger.error(
+              {
+                err: rollbackErr,
+                siteCode: updatedSession.siteCode,
+                toCurrency: targetDefaultCurrency,
+                correlationId,
+              },
+              'Session currency rollback failed — session/cart currency may remain mismatched',
+            );
+          }
+        } else {
+          logger.warn(
+            {
+              siteCode: updatedSession.siteCode,
+              attemptedCurrency: sessionCurrency,
+              targetDefaultCurrency,
+              correlationId,
+            },
+            'Cannot roll back session currency — no usable defaultCurrency for target site',
+          );
+        }
+      }
     }
 
-    const currencyChanged = Boolean(updatedSession.currency && updatedSession.currency !== prevCurrency);
-    const languageChanged = Boolean(updatedSession.language && updatedSession.language !== prevLanguage);
+    const currencyChanged = Boolean(activeSession.currency && activeSession.currency !== prevCurrency);
+    const languageChanged = Boolean(activeSession.language && activeSession.language !== prevLanguage);
 
     devSyncLog('site-switch: post-switch snapshot', {
       correlationId,
-      siteCode: updatedSession.siteCode,
-      sessionCurrency: updatedSession.currency,
+      siteCode: activeSession.siteCode,
+      sessionCurrency: activeSession.currency,
       prevCurrency,
       cartId: cartStore.getState().currentCart?.id ?? null,
       cartSite: cartStore.getState().currentCart?.site ?? null,
@@ -302,12 +395,13 @@ export async function performSiteSwitch(
         cartStore.getState().currentCart?.currency ?? cartStore.getState().currentCart?.totalPrice?.currency ?? null,
       currencyChanged,
       languageChanged,
+      currencyFallback,
       upstreamCalls,
     });
 
     // Navigation + locale cookie sync (user source only).
     if (opts.source === 'user' && opts.navigateTo && opts.getRedirectPath) {
-      const fallbackLocale = opts.locale ?? updatedSession.language ?? '';
+      const fallbackLocale = opts.locale ?? activeSession.language ?? '';
       const resolvedTargetLocale =
         targetLanguages.length > 0
           ? targetLanguages.includes(fallbackLocale)
@@ -344,13 +438,14 @@ export async function performSiteSwitch(
         to: targetSite,
         currencyChanged,
         languageChanged,
+        currencyFallback,
         outcome: 'success',
         upstreamCalls,
         durationMs: Date.now() - startedAt,
       },
       'site switch pipeline complete',
     );
-    return { success: true, correlationId, upstreamCalls };
+    return { success: true, correlationId, upstreamCalls, currencyFallback };
   } catch (err) {
     logger.error(
       {

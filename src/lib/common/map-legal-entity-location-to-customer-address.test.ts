@@ -1,11 +1,9 @@
 import { ADDRESS_TYPE } from '@/lib/common/address-type-constants';
 import { EMPORIX_LOCATION_TYPE } from '@/lib/common/emporix-location-type';
 import type { EmporixLocation } from '@/platform/integrations/emporix/model';
-import type { CustomerAddress } from '@/platform/services/model/customer/customer';
 import {
   inferLocationAddressTags,
   mapLegalEntityLocationToCustomerAddress,
-  pickDefaultLegalEntityAddress,
 } from './map-legal-entity-location-to-customer-address';
 
 function baseLocation(overrides: Partial<EmporixLocation> = {}): EmporixLocation {
@@ -33,16 +31,14 @@ describe('mapLegalEntityLocationToCustomerAddress', () => {
     expect(mapped.zipCode).toBe('10115');
     expect(mapped.city).toBe('Berlin');
     expect(mapped.country).toBe('DE');
-    expect(mapped.id).toBe('le-loc:loc-1');
+    expect(mapped.id).toBe('loc-1');
+    expect(mapped.source).toBe('legalEntity');
     expect(mapped.contactName).toContain('Main WH');
   });
 
-  it('marks headquarter as default', () => {
-    const hq = mapLegalEntityLocationToCustomerAddress(
-      baseLocation({ type: EMPORIX_LOCATION_TYPE.HEADQUARTER, id: 'hq' }),
-      'ACME',
-    );
-    expect(hq.isDefault).toBe(true);
+  it('preserves the raw Emporix location id (no prefix)', () => {
+    const mapped = mapLegalEntityLocationToCustomerAddress(baseLocation({ id: '699ec5f3b438a032a7fde0a5' }), 'ACME');
+    expect(mapped.id).toBe('699ec5f3b438a032a7fde0a5');
   });
 
   it('maps explicit street, streetNumber, and streetAppendix when provided', () => {
@@ -81,35 +77,5 @@ describe('inferLocationAddressTags', () => {
     expect(inferLocationAddressTags(baseLocation({ type: EMPORIX_LOCATION_TYPE.WAREHOUSE }))).toEqual([
       ADDRESS_TYPE.SHIPPING,
     ]);
-  });
-});
-
-describe('pickDefaultLegalEntityAddress', () => {
-  const list: CustomerAddress[] = [
-    {
-      ...mapLegalEntityLocationToCustomerAddress(
-        baseLocation({ id: 'a', type: EMPORIX_LOCATION_TYPE.WAREHOUSE }),
-        'Co',
-      ),
-      tags: [ADDRESS_TYPE.SHIPPING],
-      isDefault: false,
-    },
-    {
-      ...mapLegalEntityLocationToCustomerAddress(
-        baseLocation({ id: 'b', type: EMPORIX_LOCATION_TYPE.HEADQUARTER, name: 'HQ' }),
-        'Co',
-      ),
-      tags: [ADDRESS_TYPE.BILLING, ADDRESS_TYPE.SHIPPING],
-      isDefault: true,
-    },
-  ];
-
-  it('prefers default for tag when available', () => {
-    const picked = pickDefaultLegalEntityAddress(list, ADDRESS_TYPE.BILLING);
-    expect(picked?.id).toBe('le-loc:b');
-  });
-
-  it('returns null when no address matches tag', () => {
-    expect(pickDefaultLegalEntityAddress([], ADDRESS_TYPE.SHIPPING)).toBeNull();
   });
 });

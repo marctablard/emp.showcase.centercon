@@ -87,6 +87,11 @@ export interface UpdateSessionCurrencyResult {
    * server skipped the update, missing = unexpected response / network error.
    */
   cart?: Cart | null;
+  /**
+   * True when the server rejected the change because the cart could not be repriced in the
+   * requested currency (HTTP 409 from `/api/session/currency`).
+   */
+  cartCurrencyBlocked?: boolean;
 }
 
 /** Update session currency and return the server-reconciled cart alongside the success flag. */
@@ -98,15 +103,18 @@ export async function updateSessionCurrency(currency: string): Promise<UpdateSes
       body: JSON.stringify({ currency }),
     });
 
+    const payload: unknown = await response.json().catch(() => ({}));
+    const obj = typeof payload === 'object' && payload !== null ? (payload as Record<string, unknown>) : {};
+
     if (!response.ok) {
-      throw new Error(`Failed to update currency: ${response.statusText}`);
+      const cartCurrencyBlocked = response.status === 409;
+      return { success: false, ...(cartCurrencyBlocked ? { cartCurrencyBlocked: true } : {}) };
     }
 
-    const payload = (await response.json()) as { success?: boolean; cart?: Cart | null };
-    const hasCart = Object.prototype.hasOwnProperty.call(payload, 'cart');
+    const hasCart = Object.prototype.hasOwnProperty.call(obj, 'cart');
     return {
-      success: payload.success !== false,
-      ...(hasCart ? { cart: payload.cart ?? null } : {}),
+      success: obj.success !== false,
+      ...(hasCart ? { cart: (obj.cart as Cart | null) ?? null } : {}),
     };
   } catch (error) {
     getLogger().error({ err: error, currency }, 'Error updating currency');

@@ -75,7 +75,7 @@ export function CheckoutPayment({ initialEdit }: { initialEdit: boolean }) {
           <>
             {/* Addresses */}
             <AddressSelector
-              addressBook="companyAndCustomer"
+              addressBook="auto"
               addressType="BILLING"
               selectedAddressId={billingAddress?.id}
               onSelect={handleBillingAddressChange}

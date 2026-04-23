@@ -91,7 +91,7 @@ export function CheckoutShipping({ initialEdit }: { initialEdit: boolean }) {
             <div className="col-span-2 flex flex-col gap-4">
               {/* Addresses */}
               <AddressSelector
-                addressBook="companyAndCustomer"
+                addressBook="auto"
                 addressType="SHIPPING"
                 selectedAddressId={shippingAddress?.id}
                 onSelect={handleShippingAddressChange}

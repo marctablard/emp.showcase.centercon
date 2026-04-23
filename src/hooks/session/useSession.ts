@@ -15,6 +15,11 @@ import type { Cart } from '@/platform/services/model/cart/cart';
 import type { Session } from '@/platform/services/model/session/session';
 import { useCartStore, useSessionStore } from '@/providers/StoreProvider';
 
+export interface SetCurrencyResult {
+  success: boolean;
+  cartCurrencyBlocked?: boolean;
+}
+
 /** Hook for reading and mutating session data. */
 export function useSession() {
   const sessionStore = useSessionStore();
@@ -94,23 +99,27 @@ export function useSession() {
     return runSessionMutation(() => updateSessionLanguage(language));
   };
 
-  const setCurrency = async (currency: string): Promise<boolean> => {
+  const setCurrency = async (currency: string): Promise<SetCurrencyResult> => {
     // Server returns the reconciled cart; pipe it straight into the store since the
     // synchronizer's currency subscriber is suppressed while the mutation lock is held.
     let reconciledCart: Cart | null | undefined;
     let cartIncludedInResponse = false;
+    let cartCurrencyBlocked = false;
     const success = await runSessionMutation(async () => {
       const result = await updateSessionCurrency(currency);
       if (result.success && 'cart' in result) {
         reconciledCart = result.cart ?? null;
         cartIncludedInResponse = true;
       }
+      if (!result.success && result.cartCurrencyBlocked) {
+        cartCurrencyBlocked = true;
+      }
       return result.success;
     });
     if (success && cartIncludedInResponse) {
       cartStore.setCurrentCart(reconciledCart ?? null);
     }
-    return success;
+    return { success, ...(cartCurrencyBlocked ? { cartCurrencyBlocked: true } : {}) };
   };
 
   const setCountry = async (country: string): Promise<boolean> => {

@@ -7,6 +7,7 @@ import type { IconName } from 'lucide-react/dynamic';
 import { DynamicIcon } from 'lucide-react/dynamic';
 import TopBarSwitcher from '@/components/ui/molecules/ui-topbar-switcher';
 import { Spinner } from '@/components/ui/spinner';
+import { ToastType, notify } from '@/components/ui/toast-notification';
 import { useGlobalSyncReady } from '@/hooks/common/useGlobalSyncReady';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
@@ -17,6 +18,7 @@ function CurrencySwitcherContent() {
   const { l10n } = useL10n();
   const router = useRouter();
   const t = useTranslations('common.Currencies');
+  const tRegions = useTranslations('common.Regions');
   const { currencies, loading: siteLoading, site } = useSite();
   const { ready: syncReady } = useGlobalSyncReady();
   const [isSwitching, setIsSwitching] = useState(false);
@@ -51,12 +53,22 @@ function CurrencySwitcherContent() {
       return;
     }
 
+    const fromCurrency = currentCurrency.id;
     setIsSwitching(true);
     try {
-      const success = await setCurrency(currency);
-      if (success) {
+      const result = await setCurrency(currency);
+      if (result.success) {
         // Refresh page after session update completes to reload prices with new currency
         router.refresh();
+      } else if (result.cartCurrencyBlocked) {
+        notify({
+          title: tRegions('currencySwitchCartBlocked', {
+            fromCurrency,
+            toCurrency: currency,
+          }),
+          type: ToastType.Info,
+          duration: 8000,
+        });
       }
     } finally {
       setIsSwitching(false);

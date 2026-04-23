@@ -1,4 +1,5 @@
 import { inject } from 'inversify';
+import { getPublicPriceMatchUseFallback } from '@/lib/common/public-default-env';
 import { injectable } from '@/platform/core/di/injectable';
 import type {
   EmporixMatchPricesRequest,
@@ -55,7 +56,7 @@ class EmporixPriceService implements PriceService {
           countryCode: params.country!,
         },
         items: [this.mapToMatchPriceItem(productId, quantity, unitCode)],
-        useFallback: true, //TODO: confirm if it should be true by default, or if it should be configurable via account settings, endpoint or ENVs
+        useFallback: getPublicPriceMatchUseFallback(),
       };
       matchedPrices = await this.priceApi.matchPrices(matchRequest);
     }
@@ -105,7 +106,7 @@ class EmporixPriceService implements PriceService {
           siteCode: params.siteCode,
           targetLocation: { countryCode: params.country! },
           items,
-          useFallback: true,
+          useFallback: getPublicPriceMatchUseFallback(),
         });
       }
       allMatched.push(...matchedPrices);

@@ -72,9 +72,13 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
         },
         body: JSON.stringify(createQuoteRequest),
       },
-      //TODO: Changed to service now as the customer cannot create quotes with cartId and without company addresses.
-      // Should be reverted to session later.
-      'service',
+      // From-cart quote creation requires the customer's `session` token
+      // (carries `legalEntityId` for B2B + `quote.quote_manage_own` scope per
+      // resources/emporix/quote.yml). Manual-payload creation from a CUSTOMER
+      // token is rejected by Emporix with 403, so this endpoint is
+      // intentionally scoped to `session` — the showcase only issues
+      // QuoteCreateFromCartRequest bodies here.
+      'session',
       undefined,
       createQuoteMetrics('/quote/{tenant}/quotes'),
     );
