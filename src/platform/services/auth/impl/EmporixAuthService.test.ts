@@ -193,6 +193,8 @@ describe('EmporixAuthService', () => {
       setCart: jest.fn(),
       clearCart: jest.fn(),
       setLegalEntity: jest.fn(),
+      clearLegalEntity: jest.fn(),
+      updateContext: jest.fn(),
     };
 
     mockCartService = {
@@ -205,7 +207,6 @@ describe('EmporixAuthService', () => {
       deleteCart: jest.fn(),
       updateShippingInfo: jest.fn(),
       updateCurrency: jest.fn(),
-      updateSite: jest.fn(),
       getSavedCarts: jest.fn(),
       saveCart: jest.fn(),
       loadCart: jest.fn(),

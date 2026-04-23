@@ -128,13 +128,6 @@ export interface CartService {
   updateCurrency(cartId: string, currency: string): Promise<void>;
 
   /**
-   * Updates the site for a cart
-   * @param cartId The ID of the cart
-   * @param siteCode The new site code
-   */
-  updateSite(cartId: string, siteCode: string): Promise<void>;
-
-  /**
    * Retrieves the saved carts for the current customer
    * @param pagination The pagination query
    * @returns The saved carts
