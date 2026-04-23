@@ -9,6 +9,21 @@ jest.mock('@/lib/client/session', () => ({
   updateSessionContext: jest.fn(),
 }));
 
+// Mocked so the regression suite below (which uses the real `createCartStore`) can
+// intercept `apiFetchCurrentCart` without hitting the network. The earlier suites build
+// a fully-faked cart state and never call through, so this mock is a no-op for them.
+jest.mock('@/lib/client/carts', () => ({
+  fetchCurrentCart: jest.fn(),
+  createCart: jest.fn(),
+  addItemToCart: jest.fn(),
+  removeCartItem: jest.fn(),
+  updateCartItemQuantity: jest.fn(),
+  updateCartCurrency: jest.fn(),
+  updateShippingInfo: jest.fn(),
+  loadSavedCart: jest.fn(),
+  clearCartSession: jest.fn(),
+}));
+
 jest.mock('@/lib/logger/use-logger-client', () => ({
   getLogger: () => ({
     trace: jest.fn(),
@@ -39,6 +54,7 @@ type CartStoreState = {
   beginSettling: jest.Mock<void, [string?]>;
   endSettling: jest.Mock<void, [string?]>;
   clearCart: jest.Mock<void, [unknown?]>;
+  validateSite: jest.Mock<Promise<void>, [string]>;
   fetchCart: jest.Mock<Promise<Cart | null | undefined>, []>;
   syncCurrencyWithSession: jest.Mock<Promise<void>, [string, string]>;
   currentCart?: Cart | null | undefined;
@@ -61,8 +77,10 @@ interface BuildStoresOptions {
   lockAvailable?: boolean;
   siteInStore?: { code: string } | null | undefined;
   currentCart?: Cart | null | undefined;
-  fetchCartResult?: Cart | null | undefined;
-  fetchCartRejectsWith?: Error;
+  /** Cart the mocked `validateSite` should make visible on the cart state after resolving. */
+  validateSiteResult?: Cart | null | undefined;
+  /** When provided, the mocked `validateSite` rejects with this error. */
+  validateSiteRejectsWith?: Error;
 }
 
 function buildStores(options: BuildStoresOptions = {}): {
@@ -88,14 +106,24 @@ function buildStores(options: BuildStoresOptions = {}): {
     resetSite: jest.fn(),
     getSite: jest.fn(() => options.siteInStore),
   };
-  const fetchCartMock: jest.Mock<Promise<Cart | null | undefined>, []> = options.fetchCartRejectsWith
-    ? jest.fn(() => Promise.reject(options.fetchCartRejectsWith as Error))
-    : jest.fn(() => Promise.resolve(options.fetchCartResult ?? null));
   const cartState: CartStoreState = {
     beginSettling: jest.fn(),
     endSettling: jest.fn(),
     clearCart: jest.fn(),
-    fetchCart: fetchCartMock,
+    // `validateSite` is the orchestrator's canonical per-site cart reset + refetch path;
+    // its production implementation nulls `_fetchPromise` and runs `fetchCart` internally.
+    // The mock reflects the resolved cart the orchestrator should observe afterwards when
+    // `validateSiteResult` is provided (via property mutation, matching how the real store
+    // would have updated `currentCart` for the subsequent currency-reconcile check).
+    validateSite: options.validateSiteRejectsWith
+      ? jest.fn<Promise<void>, [string]>(() => Promise.reject(options.validateSiteRejectsWith as Error))
+      : jest.fn<Promise<void>, [string]>(() => {
+          if (Object.prototype.hasOwnProperty.call(options, 'validateSiteResult')) {
+            cartState.currentCart = options.validateSiteResult;
+          }
+          return Promise.resolve();
+        }),
+    fetchCart: jest.fn<Promise<Cart | null | undefined>, []>(() => Promise.resolve(null)),
     syncCurrencyWithSession: jest.fn<Promise<void>, [string, string]>(() => Promise.resolve()),
     currentCart: options.currentCart,
     loading: false,
@@ -122,7 +150,7 @@ describe('performSiteSwitch', () => {
   describe('happy path', () => {
     it('user source: combined PATCH /api/session + GET /api/cart (per-site resolution) + navigate + scheduled refresh', async () => {
       const targetSiteCart = { id: 'cart-b', site: 'b', currency: 'EUR' } as Cart;
-      const { stores, sessionState, siteState, cartState, cartSetState } = buildStores({
+      const { stores, sessionState, siteState, cartState } = buildStores({
         session: {
           siteCode: 'a',
           currency: 'EUR',
@@ -131,7 +159,7 @@ describe('performSiteSwitch', () => {
           metadata: { version: 3 },
         },
         currentCart: { id: 'cart-1', site: 'a', currency: 'EUR' } as Cart,
-        fetchCartResult: targetSiteCart,
+        validateSiteResult: targetSiteCart,
       });
       mockedUpdateSessionContext.mockResolvedValue({
         siteCode: 'b',
@@ -170,15 +198,11 @@ describe('performSiteSwitch', () => {
         expect.objectContaining({ siteCode: 'b', metadata: { version: 4 } }),
       );
 
-      // Cart-per-site resolution: drop local cart, snap lastSiteCode, let fetchCart run
-      expect(cartSetState).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentCart: null,
-          lastSiteCode: 'b',
-          pendingCurrencySync: null,
-        }),
-      );
-      expect(cartState.fetchCart).toHaveBeenCalledTimes(1);
+      // Cart-per-site resolution: delegated to validateSite (which nulls the shared
+      // _fetchPromise, clears currentCart/lastSiteCode, and kicks off a fresh fetchCart
+      // for the target site).
+      expect(cartState.validateSite).toHaveBeenCalledTimes(1);
+      expect(cartState.validateSite).toHaveBeenCalledWith('b');
 
       expect(siteState.resetSite).toHaveBeenCalledTimes(1);
 
@@ -194,10 +218,10 @@ describe('performSiteSwitch', () => {
     });
 
     it('anonymous (no cart): still issues a single GET /api/cart that resolves to null for new sites', async () => {
-      const { stores, cartSetState, cartState } = buildStores({
+      const { stores, cartState } = buildStores({
         session: { siteCode: 'a', currency: 'EUR', language: 'en', metadata: { version: 1 } },
         currentCart: null,
-        fetchCartResult: null,
+        validateSiteResult: null,
       });
       mockedUpdateSessionContext.mockResolvedValue({
         siteCode: 'b',
@@ -212,8 +236,8 @@ describe('performSiteSwitch', () => {
       });
 
       expect(result).toEqual(expect.objectContaining({ success: true, upstreamCalls: 2 }));
-      expect(cartState.fetchCart).toHaveBeenCalledTimes(1);
-      expect(cartSetState).toHaveBeenCalledWith(expect.objectContaining({ lastSiteCode: 'b' }));
+      expect(cartState.validateSite).toHaveBeenCalledTimes(1);
+      expect(cartState.validateSite).toHaveBeenCalledWith('b');
     });
   });
 
@@ -230,7 +254,7 @@ describe('performSiteSwitch', () => {
       expect(sessionState.tryAcquireMutationLock).not.toHaveBeenCalled();
       expect(cartState.beginSettling).not.toHaveBeenCalled();
       expect(mockedUpdateSessionContext).not.toHaveBeenCalled();
-      expect(cartState.fetchCart).not.toHaveBeenCalled();
+      expect(cartState.validateSite).not.toHaveBeenCalled();
     });
 
     it('returns locked when the session mutation lock is held (no PATCH, no settling)', async () => {
@@ -282,7 +306,7 @@ describe('performSiteSwitch', () => {
       expect(result).toEqual(expect.objectContaining({ success: false, reason: 'error' }));
       expect(sessionState.releaseMutationLock).toHaveBeenCalledTimes(1);
       expect(cartState.endSettling).toHaveBeenCalledWith('site-switch');
-      expect(cartState.fetchCart).not.toHaveBeenCalled();
+      expect(cartState.validateSite).not.toHaveBeenCalled();
       expect(navigateTo).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(expect.objectContaining({ outcome: 'error' }), expect.any(String));
     });
@@ -469,7 +493,7 @@ describe('performSiteSwitch', () => {
           metadata: { version: 1 },
         },
         currentCart: { id: 'cart-1', site: 'a', currency: 'EUR' } as Cart,
-        fetchCartRejectsWith: new Error('upstream 500'),
+        validateSiteRejectsWith: new Error('upstream 500'),
       });
       mockedUpdateSessionContext.mockResolvedValue({
         siteCode: 'b',
@@ -487,17 +511,18 @@ describe('performSiteSwitch', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(cartState.fetchCart).toHaveBeenCalledTimes(1);
+      expect(cartState.validateSite).toHaveBeenCalledTimes(1);
+      expect(cartState.validateSite).toHaveBeenCalledWith('b');
       expect(logger.error).toHaveBeenCalledWith(
         expect.objectContaining({ siteCode: 'b' }),
         expect.stringContaining('fetchCart failed'),
       );
     });
 
-    it('resolves per-site cart via fetchCart even when previous site had a cart (cart-per-site, not carried)', async () => {
+    it('resolves per-site cart via validateSite even when previous site had a cart (cart-per-site, not carried)', async () => {
       const previousCart = { id: 'cart-a', site: 'a', currency: 'EUR' } as Cart;
       const perSiteCart = { id: 'cart-b', site: 'b', currency: 'EUR' } as Cart;
-      const { stores, cartState, cartSetState } = buildStores({
+      const { stores, cartState } = buildStores({
         session: {
           siteCode: 'a',
           currency: 'EUR',
@@ -506,7 +531,7 @@ describe('performSiteSwitch', () => {
           metadata: { version: 1 },
         },
         currentCart: previousCart,
-        fetchCartResult: perSiteCart,
+        validateSiteResult: perSiteCart,
       });
       mockedUpdateSessionContext.mockResolvedValue({
         siteCode: 'b',
@@ -521,9 +546,10 @@ describe('performSiteSwitch', () => {
         getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['EUR'] }),
       });
 
-      // Previous cart was cleared from local state before fetchCart
-      expect(cartSetState).toHaveBeenCalledWith(expect.objectContaining({ currentCart: null, lastSiteCode: 'b' }));
-      expect(cartState.fetchCart).toHaveBeenCalledTimes(1);
+      // The orchestrator delegates cart reset + refetch to validateSite, which in production
+      // invalidates the in-flight _fetchPromise (closure) before issuing a fresh GET.
+      expect(cartState.validateSite).toHaveBeenCalledTimes(1);
+      expect(cartState.validateSite).toHaveBeenCalledWith('b');
     });
 
     it('reconciles cart currency to session currency when the resolved per-site cart is stale (e.g. us-branch cached USD cart, session CHF)', async () => {
@@ -617,6 +643,118 @@ describe('performSiteSwitch', () => {
       });
 
       expect(cartState.syncCurrencyWithSession).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * Regression test for the `_fetchPromise` race (Copilot review
+   * https://github.com/emporix/emporix-showcase/pull/283#discussion_r3128797246).
+   *
+   * Uses the REAL `createCartStore` so the closure-level `_fetchPromise` dedupe is exercised.
+   * Before the fix, `performSiteSwitch` would call `setState + fetchCart`, which short-circuited
+   * on the in-flight `_fetchPromise` and reused the previous site's GET — no second HTTP request
+   * was issued. After the fix, `validateSite` nulls `_fetchPromise` first, so the orchestrator
+   * always drives a fresh per-site `GET /api/cart`.
+   */
+  describe('regression: in-flight fetchCart dedupe is invalidated across site switch', () => {
+    // Alias the top-of-file mocked `fetchCurrentCart` so the real cart store's
+    // `apiFetchCurrentCart` import resolves here.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mockedFetchCurrentCart = require('@/lib/client/carts').fetchCurrentCart as jest.Mock;
+
+    beforeEach(() => {
+      mockedFetchCurrentCart.mockReset();
+    });
+
+    it('fires a second GET /api/cart for the target site even when a previous-site fetchCart is in-flight', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { createCartStore: createRealCartStore } =
+        require('@/stores/cart-store') as typeof import('@/stores/cart-store');
+
+      const realCartStore = createRealCartStore();
+
+      // Seed the store as if a previous `validateSite('a')` had already run.
+      realCartStore.setState({ lastSiteCode: 'a' });
+
+      // Two deferreds: one for the in-flight previous-site GET, one for the new post-switch GET.
+      type Deferred<T> = { promise: Promise<T>; resolve: (value: T) => void };
+      const defer = <T>(): Deferred<T> => {
+        let resolve!: (value: T) => void;
+        const promise = new Promise<T>((r) => {
+          resolve = r;
+        });
+        return { promise, resolve };
+      };
+
+      const firstFetch = defer<{ cart: Cart | null; sessionSiteCode: string | null }>();
+      const secondFetch = defer<{ cart: Cart | null; sessionSiteCode: string | null }>();
+
+      mockedFetchCurrentCart
+        .mockImplementationOnce(() => firstFetch.promise)
+        .mockImplementationOnce(() => secondFetch.promise);
+
+      // 1) Kick off the in-flight cart read for site 'a' and leave it unresolved —
+      //    this installs `_fetchPromise` inside the real cart store.
+      const inFlight = realCartStore.getState().fetchCart();
+      expect(mockedFetchCurrentCart).toHaveBeenCalledTimes(1);
+
+      // 2) Drive `performSiteSwitch('b')` while the first fetchCart is still pending.
+      mockedUpdateSessionContext.mockResolvedValueOnce({
+        siteCode: 'b',
+        currency: 'EUR',
+        language: 'en',
+        cartId: 'cart-b',
+        metadata: { version: 2 },
+      });
+
+      const sessionState: SessionStoreState = {
+        session: { siteCode: 'a', currency: 'EUR', language: 'en', metadata: { version: 1 } },
+        tryAcquireMutationLock: jest.fn(() => true),
+        releaseMutationLock: jest.fn(),
+        setSession: jest.fn(),
+        setLoading: jest.fn(),
+      };
+      const siteState: SiteStoreState = {
+        resetSite: jest.fn(),
+        getSite: jest.fn(() => undefined),
+      };
+      const stores = {
+        sessionStore: { getState: () => sessionState },
+        siteStore: { getState: () => siteState },
+        cartStore: realCartStore,
+      } as unknown as SiteSwitchStores;
+
+      const switchDone = performSiteSwitch('b', stores, {
+        source: 'deep-link',
+        getSiteByCode: () => Promise.resolve({ languages: ['en'], currencies: ['EUR'] }),
+      });
+
+      // 3) Let the microtask queue flush so `validateSite` has time to null `_fetchPromise`
+      //    and issue the NEW `apiFetchCurrentCart`. Several ticks cover each await in the
+      //    orchestrator body (getSiteByCode → updateSessionContext → validateSite).
+      for (let i = 0; i < 10; i += 1) {
+        await Promise.resolve();
+      }
+
+      // Contract: a second HTTP call fires for the target site. This is the behaviour that
+      // was broken under the old `setState + fetchCart` approach — it would have stayed at 1.
+      expect(mockedFetchCurrentCart).toHaveBeenCalledTimes(2);
+
+      // 4) Resolve both GETs: old → a cart, new → b cart.
+      firstFetch.resolve({
+        cart: { id: 'cart-a', site: 'a', currency: 'EUR' } as Cart,
+        sessionSiteCode: 'a',
+      });
+      secondFetch.resolve({
+        cart: { id: 'cart-b', site: 'b', currency: 'EUR' } as Cart,
+        sessionSiteCode: 'b',
+      });
+
+      await inFlight;
+      await switchDone;
+
+      // The store snapped to site 'b' and the orchestrator drove a per-site fetch.
+      expect(realCartStore.getState().lastSiteCode).toBe('b');
     });
   });
 });

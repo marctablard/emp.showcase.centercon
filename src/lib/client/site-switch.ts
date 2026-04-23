@@ -244,17 +244,13 @@ export async function performSiteSwitch(
       siteStore.getState().resetSite();
     }
 
-    // Snap `lastSiteCode` + drop the local cart so the next `fetchCart` returns the target
-    // site's own cart (each site keeps its own cart server-side).
-    cartStore.setState({
-      currentCart: null,
-      lastSiteCode: updatedSession.siteCode,
-      lastShippingUpdate: null,
-      pendingCurrencySync: null,
-      error: null,
-    });
+    // Delegate per-site cart reset + refetch to `validateSite` so any in-flight `fetchCart`
+    // from the previous site (closure-level `_fetchPromise` dedupe) is invalidated before
+    // the target site's cart is loaded. Matches the pattern used by every other caller that
+    // must discard an in-flight cart read (validateCart, validateLegalEntity, addToCart
+    // mismatch branch, clearCart).
     try {
-      await cartStore.getState().fetchCart();
+      await cartStore.getState().validateSite(updatedSession.siteCode);
       upstreamCalls += 1;
     } catch (err) {
       logger.error(
