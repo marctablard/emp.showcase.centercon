@@ -25,20 +25,30 @@ function baseLocation(overrides: Partial<EmporixLocation> = {}): EmporixLocation
 describe('mapLegalEntityLocationToCustomerAddress', () => {
   it('maps contact details and company display name', () => {
     const mapped = mapLegalEntityLocationToCustomerAddress(baseLocation(), 'ACME GmbH');
-    expect(mapped.companyName).toBe('ACME GmbH');
-    expect(mapped.street).toBe('Industriestr.');
-    expect(mapped.streetNumber).toBe('1');
-    expect(mapped.zipCode).toBe('10115');
-    expect(mapped.city).toBe('Berlin');
-    expect(mapped.country).toBe('DE');
-    expect(mapped.id).toBe('loc-1');
-    expect(mapped.source).toBe('legalEntity');
-    expect(mapped.contactName).toContain('Main WH');
+    expect(mapped).not.toBeNull();
+    expect(mapped!.companyName).toBe('ACME GmbH');
+    expect(mapped!.street).toBe('Industriestr.');
+    expect(mapped!.streetNumber).toBe('1');
+    expect(mapped!.zipCode).toBe('10115');
+    expect(mapped!.city).toBe('Berlin');
+    expect(mapped!.country).toBe('DE');
+    expect(mapped!.id).toBe('loc-1');
+    expect(mapped!.source).toBe('legalEntity');
+    expect(mapped!.contactName).toContain('Main WH');
   });
 
   it('preserves the raw Emporix location id (no prefix)', () => {
     const mapped = mapLegalEntityLocationToCustomerAddress(baseLocation({ id: '699ec5f3b438a032a7fde0a5' }), 'ACME');
-    expect(mapped.id).toBe('699ec5f3b438a032a7fde0a5');
+    expect(mapped).not.toBeNull();
+    expect(mapped!.id).toBe('699ec5f3b438a032a7fde0a5');
+  });
+
+  it('returns null when location id is missing', () => {
+    expect(mapLegalEntityLocationToCustomerAddress(baseLocation({ id: undefined }), 'ACME')).toBeNull();
+  });
+
+  it('returns null when location id is blank', () => {
+    expect(mapLegalEntityLocationToCustomerAddress(baseLocation({ id: '   ' }), 'ACME')).toBeNull();
   });
 
   it('maps explicit street, streetNumber, and streetAppendix when provided', () => {
@@ -56,9 +66,10 @@ describe('mapLegalEntityLocationToCustomerAddress', () => {
       }),
       'ACME GmbH',
     );
-    expect(mapped.street).toBe('Hauptstraße');
-    expect(mapped.streetNumber).toBe('9');
-    expect(mapped.streetAppendix).toBe('Hinterhof');
+    expect(mapped).not.toBeNull();
+    expect(mapped!.street).toBe('Hauptstraße');
+    expect(mapped!.streetNumber).toBe('9');
+    expect(mapped!.streetAppendix).toBe('Hinterhof');
   });
 });
 

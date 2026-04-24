@@ -38,11 +38,19 @@ export function inferLocationAddressTags(location: EmporixLocation): AddressType
  * that is the identifier Emporix quote/checkout APIs expect for B2B
  * billing/shipping address references. Disambiguation from customer profile
  * addresses is carried on the `source` field (`'legalEntity'`), not on the id.
+ *
+ * Returns `null` when `location.id` is missing or blank so callers never surface
+ * a legal-entity address that cannot be submitted to quote/checkout APIs.
  */
 export function mapLegalEntityLocationToCustomerAddress(
   location: EmporixLocation,
   companyDisplayName: string,
-): CustomerAddress {
+): CustomerAddress | null {
+  const rawId = location.id;
+  if (typeof rawId !== 'string' || rawId.trim() === '') {
+    return null;
+  }
+
   const cd = location.contactDetails;
 
   const street = cd?.street ?? cd?.addressLine1 ?? '';
@@ -68,7 +76,7 @@ export function mapLegalEntityLocationToCustomerAddress(
   }
 
   return {
-    id: location.id,
+    id: rawId,
     contactName: [location.name, location.type].filter(Boolean).join(' — '),
     companyName: companyDisplayName,
     street,

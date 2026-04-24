@@ -112,10 +112,8 @@ class EmporixPriceService implements PriceService {
       allMatched.push(...matchedPrices);
     }
 
-    // Initialize all requested IDs to null
     productIds.forEach((id) => result.set(id, null));
 
-    // Map matched prices by product ID (first match wins)
     allMatched.forEach((matched) => {
       const productId = matched.itemId.id;
       if (result.has(productId) && result.get(productId) === null) {

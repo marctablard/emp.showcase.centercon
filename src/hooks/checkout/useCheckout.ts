@@ -16,6 +16,7 @@ import type {
   ContactData,
   OrderShipping,
 } from '@/platform/services/model/checkout';
+import type { AddressType } from '@/platform/services/model/common';
 import type { CustomerAddress } from '@/platform/services/model/customer/customer';
 import type { ShippingMethod } from '@/platform/services/model/shipping';
 import { useCheckoutStore } from '@/providers/StoreProvider';
@@ -368,24 +369,29 @@ export const useCheckout = (): UseCheckout => {
     if (!customerAddresses || customerAddresses.length === 0) {
       return;
     }
-    const defaultAddress = customerAddresses.find((addr) => addr.isDefault) ?? customerAddresses[0];
-    if (!defaultAddress) {
-      return;
-    }
+    const pickForTag = (tag: AddressType): CustomerAddress | undefined => {
+      const tagged = customerAddresses.filter((addr) => addr.tags.includes(tag));
+      if (tagged.length === 0) {
+        return undefined;
+      }
+      return tagged.find((addr) => addr.isDefault) ?? tagged[0];
+    };
+    const shippingSource = pickForTag(ADDRESS_TYPE.SHIPPING);
+    const billingSource = pickForTag(ADDRESS_TYPE.BILLING);
     const applyIfEmpty = (
       current: CheckoutAddress | null,
-      source: CustomerAddress,
+      source: CustomerAddress | undefined,
       type: 'SHIPPING' | 'BILLING',
       submit: (addr: CheckoutAddress) => void,
-    ) => {
-      if (current) {
-        return;
+    ): boolean => {
+      if (!source || current) {
+        return false;
       }
       if (type === ADDRESS_TYPE.SHIPPING && !source.tags.includes(ADDRESS_TYPE.SHIPPING)) {
-        return;
+        return false;
       }
       if (type === ADDRESS_TYPE.BILLING && !source.tags.includes(ADDRESS_TYPE.BILLING)) {
-        return;
+        return false;
       }
       submit({
         id: source.id,
@@ -401,10 +407,13 @@ export const useCheckout = (): UseCheckout => {
         contactPhone: source.contactPhone,
         type,
       });
+      return true;
     };
-    applyIfEmpty(shippingAddress, defaultAddress, ADDRESS_TYPE.SHIPPING, submitShippingAddress);
-    applyIfEmpty(billingAddress, defaultAddress, ADDRESS_TYPE.BILLING, submitBillingAddress);
-    prefilledRef.current = true;
+    const appliedShipping = applyIfEmpty(shippingAddress, shippingSource, ADDRESS_TYPE.SHIPPING, submitShippingAddress);
+    const appliedBilling = applyIfEmpty(billingAddress, billingSource, ADDRESS_TYPE.BILLING, submitBillingAddress);
+    if (appliedShipping || appliedBilling) {
+      prefilledRef.current = true;
+    }
   }, [
     customer,
     customerAddresses,

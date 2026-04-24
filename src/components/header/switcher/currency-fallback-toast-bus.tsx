@@ -49,6 +49,11 @@ function readPendingFallback(): PendingCurrencyFallback | null {
     window.sessionStorage.removeItem(PENDING_CURRENCY_FALLBACK_KEY);
     return null;
   } catch {
+    try {
+      window.sessionStorage.removeItem(PENDING_CURRENCY_FALLBACK_KEY);
+    } catch {
+      // sessionStorage may be unavailable (private mode / quota) — ignore.
+    }
     return null;
   }
 }

@@ -100,8 +100,6 @@ export function useSession() {
   };
 
   const setCurrency = async (currency: string): Promise<SetCurrencyResult> => {
-    // Server returns the reconciled cart; pipe it straight into the store since the
-    // synchronizer's currency subscriber is suppressed while the mutation lock is held.
     let reconciledCart: Cart | null | undefined;
     let cartIncludedInResponse = false;
     let cartCurrencyBlocked = false;

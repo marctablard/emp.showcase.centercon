@@ -23,7 +23,6 @@ function CurrencySwitcherContent() {
   const { ready: syncReady } = useGlobalSyncReady();
   const [isSwitching, setIsSwitching] = useState(false);
   const currentCurrency = useMemo(() => {
-    // Match session currency by id or code (Emporix list entries may omit `code`).
     if (currencies && currencies.length > 0 && session?.currency) {
       const matchedCurrency = currencies.find(
         (currency) => currency.id === session.currency || currency.code === session.currency,
@@ -58,7 +57,6 @@ function CurrencySwitcherContent() {
     try {
       const result = await setCurrency(currency);
       if (result.success) {
-        // Refresh page after session update completes to reload prices with new currency
         router.refresh();
       } else if (result.cartCurrencyBlocked) {
         notify({
@@ -83,7 +81,6 @@ function CurrencySwitcherContent() {
     return <></>;
   }
 
-  // Build options array - use currencies if available, otherwise use currentCurrency
   const options =
     currencies && currencies.length > 0
       ? currencies.map((currency) => ({

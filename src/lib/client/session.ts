@@ -82,19 +82,11 @@ export async function updateSessionLanguage(language: string): Promise<boolean> 
 
 export interface UpdateSessionCurrencyResult {
   success: boolean;
-  /**
-   * Server-reconciled cart. `Cart` = recalculated in the new currency, `null` = no cart or
-   * server skipped the update, missing = unexpected response / network error.
-   */
   cart?: Cart | null;
-  /**
-   * True when the server rejected the change because the cart could not be repriced in the
-   * requested currency (HTTP 409 from `/api/session/currency`).
-   */
+  /** Set when `/api/session/currency` returns 409 (cart cannot be repriced in the target currency). */
   cartCurrencyBlocked?: boolean;
 }
 
-/** Update session currency and return the server-reconciled cart alongside the success flag. */
 export async function updateSessionCurrency(currency: string): Promise<UpdateSessionCurrencyResult> {
   try {
     const response = await fetch('/api/session/currency', {
