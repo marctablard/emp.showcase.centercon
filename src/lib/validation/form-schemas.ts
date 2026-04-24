@@ -63,7 +63,7 @@ export const ProfileEditSchema = z.object({
 
 export const PaymentFormSchema = z
   .object({
-    id: z.string().min(1, 'payment.id.required'),
+    id: z.string().min(1, 'payment.method.required'),
     cardNumber: z.string().optional(),
     cardHolder: z.string().optional(),
     expiryDate: z.string().optional(),
@@ -73,7 +73,7 @@ export const PaymentFormSchema = z
   .passthrough();
 
 export const ShippingFormSchema = z.object({
-  methodId: z.string().min(1, 'shipping.methodId.required'),
+  methodId: z.string().min(1, 'shipping.method.required'),
 });
 
 export const SummaryFormSchema = z.object({
