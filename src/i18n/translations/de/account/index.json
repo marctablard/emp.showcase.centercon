@@ -306,8 +306,7 @@
   "quotesPageDescription": "Angebote anzeigen und verwalten",
   "quotesPagePlaceholder": "Angebote werden hier angezeigt",
   "quoteStatus": {
-    "requested": "Angefordert",
-    "available": "Verfügbar",
+    "awaiting": "Wartet auf Freigabe",
     "in_progress": "In Bearbeitung",
     "declined": "Abgelehnt",
     "accepted": "Akzeptiert",

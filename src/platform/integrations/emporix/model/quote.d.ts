@@ -261,6 +261,7 @@ export type EmporixQuoteUpdatePath =
 
 export type EmporixQuoteStatus =
   | 'CREATING'
+  | 'AWAITING'
   | 'OPEN'
   | 'IN_PROGRESS'
   | 'DECLINED'

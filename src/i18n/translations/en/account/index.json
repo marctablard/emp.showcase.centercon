@@ -350,8 +350,7 @@
   "quotesPageDescription": "View and manage your quotes",
   "quotesPagePlaceholder": "Quotes will be displayed here",
   "quoteStatus": {
-    "requested": "Requested",
-    "available": "Available",
+    "awaiting": "Awaiting approval",
     "in_progress": "In progress",
     "declined": "Declined",
     "accepted": "Accepted",
