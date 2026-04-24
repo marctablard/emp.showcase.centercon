@@ -23,7 +23,7 @@ import type { CustomerAddress } from '@/platform/services/model/customer/custome
  * - `auto` — pick one book based on the signed-in customer:
  *     • B2B (businessModel='B2B' with a legalEntityId in session or customer)
  *       → legal-entity locations only, no prefill.
- *     • Everyone else (B2C / anonymous) → customer profile addresses only.
+ *     • Everyone else signed in (for example, B2C customers) → customer profile addresses only.
  *   This is the default for checkout/quote flows.
  */
 export type AddressBookMode = 'customer' | 'legalEntity' | 'auto';
