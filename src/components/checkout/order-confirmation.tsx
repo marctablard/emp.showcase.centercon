@@ -34,7 +34,11 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
   const tPayment = useTranslations('checkout.PaymentModes');
   const { l10n } = useL10n();
   const { customer } = useCustomer();
-  const { order, loading, error } = useOrder({ orderId, initialOrder });
+  const { order, loading, error } = useOrder({
+    orderId,
+    initialOrder,
+    autoFetchStatusTransitions: customer !== undefined && customer !== null,
+  });
   const isApprovalPendingConfirmation = orderId === PENDING_APPROVAL_CONFIRMATION_SEGMENT;
 
   return (

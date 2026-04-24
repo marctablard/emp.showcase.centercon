@@ -13,6 +13,7 @@ import type { Order } from '@/platform/services/model/order/order';
 interface UseOrderOptions {
   orderId?: string;
   initialOrder?: Order | null;
+  autoFetchStatusTransitions?: boolean;
 }
 
 interface UseOrderResult {
@@ -40,7 +41,7 @@ interface UseOrderResult {
  * @returns Order data and operations
  */
 export const useOrder = (options: UseOrderOptions = {}): UseOrderResult => {
-  const { orderId, initialOrder } = options;
+  const { orderId, initialOrder, autoFetchStatusTransitions = true } = options;
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [order, setOrder] = useState<Order | null | undefined>(initialOrder);
@@ -137,8 +138,10 @@ export const useOrder = (options: UseOrderOptions = {}): UseOrderResult => {
     if (order === undefined) {
       void fetchOrder();
     }
-    void fetchStatusTransitions();
-  }, [orderId, order, fetchOrder, fetchStatusTransitions]);
+    if (autoFetchStatusTransitions) {
+      void fetchStatusTransitions();
+    }
+  }, [orderId, order, autoFetchStatusTransitions, fetchOrder, fetchStatusTransitions]);
 
   return {
     order,

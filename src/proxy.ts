@@ -1,7 +1,5 @@
-import type { NextAuthRequest } from 'next-auth';
-import NextAuth from 'next-auth';
-import type { NextFetchEvent, NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import NextAuth, { NextAuthRequest } from 'next-auth';
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 import { config as authConfig } from './auth/auth.config';
 import { applyCacheDirectives } from './caching/cache-middleware';
 import { createSiteMiddleware } from './site/middleware';
