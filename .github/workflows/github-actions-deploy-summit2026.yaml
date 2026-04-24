@@ -23,8 +23,8 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: Align npm with package.json engines
-        run: npm install -g npm@11.10.0
+      - name: Align npm with packageManager
+        run: npm install -g "$(node -p 'const packageManager = require("./package.json").packageManager; if (!packageManager?.startsWith("npm@")) throw new Error("Expected packageManager to start with npm@"); packageManager')"
 
       - name: Install dependencies
         run: |

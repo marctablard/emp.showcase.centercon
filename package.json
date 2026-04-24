@@ -2,14 +2,11 @@
   "name": "emporix-showcase",
   "version": "1.3.0",
   "private": true,
+  "packageManager": "npm@11.10.0",
   "engines": {
     "node": "^20.17.0 || >=22.9.0",
     "npm": ">=11.10.0"
   },
-  "overrides": {
-    "baseline-browser-mapping": "2.9.3"
-  },
-  "//TODO": "Remove overrides.baseline-browser-mapping (introduced 2026-04-20T00:00:00Z). Retry on or after 2026-04-27T00:00:00Z (7d min-release-age) or once npm ci passes without this pin; then npm install and commit package-lock.json.",
   "scripts": {
     "dev": "npm-run-all --parallel generate:watch dev:next dev:open-browser",
     "dev:next": "next dev",
@@ -125,7 +122,6 @@
     "@types/react-dom": "19.2.2",
     "@types/react-grid-layout": "1.3.5",
     "@types/web-push": "3.6.4",
-    "baseline-browser-mapping": "2.9.3",
     "chokidar": "4.0.3",
     "dotenv": "17.2.3",
     "eslint": "9.31.0",
