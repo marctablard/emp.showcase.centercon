@@ -332,6 +332,15 @@ If any of these variables is missing or whitespace-only after trim, the correspo
 | `NEXT_PUBLIC_DEFAULT_REGION` | `getPublicDefaultRegion()` | Default region name; validated at startup and used alongside country in session / OAuth configuration. |
 | `NEXT_PUBLIC_EMPORIX_DEFAULT_UNIT_CODE` | `getPublicDefaultUnitCode()` | Default Emporix unit code for line items when the API needs a unit (for example quote creation in [`src/app/api/quote/route.ts`](../src/app/api/quote/route.ts)). |
 
+#### `NEXT_PUBLIC_FALLBACK_PRICES` (optional)
+
+Controls Emporix **price match** fallback for explicit `POST …/match-prices` calls (site + currency + country criteria) from [`EmporixPriceService`](../src/platform/services/price/impl/EmporixPriceService.ts).
+
+- **Unset, empty, or any value other than** `true` / `1` / `yes` (case-insensitive): sends `useFallback: false` — if no price exists for the requested `siteCode`, the API does not retry against the `main` site.
+- **`true` / `1` / `yes`:** sends `useFallback: true` — when no price matches the requested site, Emporix runs matching again for `main` (see [Price matching](https://developer.emporix.io/api-references/api-guides/prices-and-taxes/price-service/api-reference/price-matching)).
+
+Read via `getPublicPriceMatchUseFallback()` in [`src/lib/common/public-default-env.ts`](../src/lib/common/public-default-env.ts). Does **not** affect `match-prices-by-context` (session-driven matching has no `useFallback` in the request body).
+
 Some platform modules still read `process.env.NEXT_PUBLIC_DEFAULT_COUNTRY` or `NEXT_PUBLIC_DEFAULT_REGION` directly for historical reasons; new code should prefer the getters when on code paths that already use `public-default-env`, so values stay trim-validated and bundle-inlining stays correct.
 
 ### Multi-Site Support

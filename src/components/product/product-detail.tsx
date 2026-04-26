@@ -36,7 +36,7 @@ import { RatingStarRow } from '../ui/rating';
 import { Spinner } from '../ui/spinner';
 import ProductAddToCart from './product-add-to-cart';
 import ProductAddToCartBar from './product-add-to-cart-bar';
-import { ProductPriceComponent, ProductPriceSkeleton } from './product-price';
+import { ProductPriceComponent, ProductPriceSkeleton, ProductPriceUnavailable } from './product-price';
 import { ProductShippingInfo } from './product-shipping-info';
 import ProductVariantSelector from './product-variant-selector';
 
@@ -359,7 +359,13 @@ export default function ProductDetail({ product: initialProduct, options, classN
             ref={addToCartButton}
           >
             <div className="col-start-1 sm:row-start-1 md:col-end-4 xl-col-end-5">
-              {price == null ? <ProductPriceSkeleton /> : <ProductPriceComponent price={price} />}
+              {price === undefined ? (
+                <ProductPriceSkeleton />
+              ) : price === null ? (
+                <ProductPriceUnavailable />
+              ) : (
+                <ProductPriceComponent price={price} />
+              )}
             </div>
           </div>
           <ProductAddToCart

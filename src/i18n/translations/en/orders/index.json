@@ -37,6 +37,9 @@
   "ordersTotal": "Total orders",
   "orderActions": "Order Actions",
   "cancelOrder": "Cancel Order",
+  "cancelOrderFailed": "Could not cancel order",
+  "cancelOrderNotAllowed": "This order cannot be declined in its current state.",
+  "cancelOrderFailedUnknown": "Something went wrong. Please try again.",
   "search": {
     "placeholder": "Search orders..."
   },
