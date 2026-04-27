@@ -15,7 +15,7 @@ import type { Order } from '@/platform/services/model/order/order';
 import { AddressDisplay } from '../common/address-display';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { H1, H2, H3 } from '../ui/h';
-import { PENDING_APPROVAL_CONFIRMATION_SEGMENT } from './confirmation-constants';
+import { isPendingApprovalConfirmationSegment } from './confirmation-constants';
 
 interface OrderConfirmationProps {
   orderId: string;
@@ -34,12 +34,12 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ orderId, initialO
   const tPayment = useTranslations('checkout.PaymentModes');
   const { l10n } = useL10n();
   const { customer } = useCustomer();
+  const isApprovalPendingConfirmation = isPendingApprovalConfirmationSegment(orderId);
   const { order, loading, error } = useOrder({
-    orderId,
+    orderId: isApprovalPendingConfirmation ? undefined : orderId,
     initialOrder,
-    autoFetchStatusTransitions: customer !== undefined && customer !== null,
+    autoFetchStatusTransitions: !isApprovalPendingConfirmation && customer !== undefined && customer !== null,
   });
-  const isApprovalPendingConfirmation = orderId === PENDING_APPROVAL_CONFIRMATION_SEGMENT;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
