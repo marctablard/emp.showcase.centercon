@@ -1,0 +1,74 @@
+{
+  "title": "Quick Order",
+  "description": "Quickly add products to your cart by searching, pasting SKUs, or uploading a file.",
+  "breadcrumb": "Quick Order",
+  "tabs": {
+    "productsSearch": "Products Search",
+    "addManually": "Add Products Manually",
+    "bulkUpload": "Bulk Upload"
+  },
+  "search": {
+    "label": "Search for Product",
+    "hint": "Type product name or item number",
+    "placeholder": "Search by product name or item number",
+    "noResults": "No products found",
+    "addToList": "Add to list",
+    "addProducts": "Add Products"
+  },
+  "textPaste": {
+    "label": "Item number with quantity",
+    "hint": "Enter product codes with optional quantity (default: 1)",
+    "placeholder": "Paste SKU and quantity pairs, e.g.:\nSKU001, 2\nSKU002, 5",
+    "description": "Enter product codes separated by comma or new line. Optionally add quantity after each code (default: 1)."
+  },
+  "quickLinks": {
+    "saveOrderList": "Save order List",
+    "loadOrderList": "Load order List",
+    "share": "Share"
+  },
+  "fileUpload": {
+    "title": "Select a file",
+    "description": "Upload a valid CSV/XLSX file to view all products with just one click. You can download a template using the link below.",
+    "uploadButton": "Upload",
+    "downloadTemplate": "Download CSV/XLSX template",
+    "supportedFormats": "Supported formats: .csv, .xlsx",
+    "removeFile": "Remove file",
+    "selectFile": "Select a CSV or XLSX file to upload"
+  },
+  "productList": {
+    "product": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "remove": "Remove",
+    "empty": "No products added yet. Use the search, paste, or upload to add products."
+  },
+  "overview": {
+    "title": "Order Overview",
+    "valueOfGoods": "Value of Goods",
+    "netValue": "Net Value",
+    "vat": "VAT",
+    "shippingCosts": "Shipping Costs",
+    "freightCosts": "Freight Costs",
+    "total": "Total",
+    "addToCart": "Add to Cart",
+    "goToCheckout": "Go to Checkout",
+    "secureTransmission": "Your data is transmitted securely and encrypted.",
+    "calculatedAtCheckout": "Calculated at checkout"
+  },
+  "notifications": {
+    "productsAdded": "{count, plural, one {# product} other {# products}} added to list",
+    "productsNotFound": "{count, plural, one {# product code} other {# product codes}} not found",
+    "uploadSuccess": "All {count, plural, one {# product} other {# products}} added to list.",
+    "uploadPartial": "{found} of {total} products added. {notFound, plural, one {# code} other {# codes}} not found.",
+    "uploadError": "Failed to parse file. Please check the format.",
+    "addedToCart": "Products added to cart successfully",
+    "addToCartPartialFailure": "{failed, plural, one {# item} other {# items}} could not be added to cart. Please try again.",
+    "addingProgress": "Adding item {current} of {total}..."
+  },
+  "validation": {
+    "invalidFormat": "Invalid format. Please check your input.",
+    "emptyFile": "The uploaded file is empty.",
+    "fileTooLarge": "File is too large. Maximum size is 5MB.",
+    "unsupportedFormat": "Unsupported file format. Please use CSV or XLSX."
+  }
+}

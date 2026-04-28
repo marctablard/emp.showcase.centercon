@@ -1,0 +1,138 @@
+'use client';
+
+import { forwardRef, useCallback } from 'react';
+import Image from 'next/image';
+import { Spinner } from '@/components/ui/spinner';
+import { useL10n } from '@/hooks/useL10n';
+import { formatCurrency } from '@/lib/utils';
+import type { Product } from '@/platform/services/model/product';
+
+function HighlightedText({ text }: { text: string }) {
+  if (!text.includes('<mark>')) {
+    return <>{text}</>;
+  }
+  const parts = text.split(/<mark>|<\/mark>/);
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 0 ? (
+          part
+        ) : (
+          <span key={i} className="font-bold text-text-action">
+            {part}
+          </span>
+        ),
+      )}
+    </>
+  );
+}
+
+interface QuickOrderSearchDropdownProps {
+  products: Product[];
+  loading: boolean;
+  hasSearched: boolean;
+  highlightedIndex: number;
+  onSelect: (product: Product) => void;
+}
+
+export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSearchDropdownProps>(
+  function QuickOrderSearchDropdown({ products, loading, hasSearched, highlightedIndex, onSelect }, ref) {
+    const { l10n } = useL10n();
+
+    const handleSelect = useCallback(
+      (product: Product) => {
+        onSelect(product);
+      },
+      [onSelect],
+    );
+
+    return (
+      <div
+        ref={ref}
+        role="listbox"
+        aria-label="Search results"
+        className="absolute z-50 top-full left-0 w-full mt-1 bg-surface-page border border-border-primary rounded-sm shadow-lg max-h-80 overflow-y-auto"
+      >
+        {loading && (
+          <div className="flex items-center justify-center py-6">
+            <Spinner variant="sm" />
+          </div>
+        )}
+
+        {!loading && hasSearched && products.length === 0 && (
+          <div className="px-4 py-6 text-sm text-text-placeholders text-center" role="status">
+            No products found
+          </div>
+        )}
+
+        {!loading &&
+          products.map((product, index) => {
+            const image = product.images?.[0];
+            const brandName = l10n(product.brand?.name || '');
+            const productName = l10n(product.name);
+            const itemNumber = product.sku || product.id;
+            const isHighlighted = index === highlightedIndex;
+
+            return (
+              <button
+                key={product.id}
+                type="button"
+                role="option"
+                aria-selected={isHighlighted}
+                className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b border-border-primary last:border-b-0 cursor-pointer ${
+                  isHighlighted ? 'bg-surface-action-hover-2' : 'hover:bg-surface-action-hover-2'
+                }`}
+                onClick={() => handleSelect(product)}
+                data-testid={`search-result-${product.id}`}
+              >
+                <div className="flex-shrink-0 w-[60px] h-[39px] rounded-sm overflow-hidden bg-surface-image-background flex items-center justify-center">
+                  {image?.url ? (
+                    <Image
+                      src={image.url}
+                      alt={l10n(image.altText || '') || productName || ''}
+                      width={60}
+                      height={39}
+                      className="object-contain w-[60px] h-[39px]"
+                    />
+                  ) : (
+                    <Image
+                      src="/images/no_image_alt.png"
+                      alt={productName || ''}
+                      width={60}
+                      height={39}
+                      className="object-contain"
+                    />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  {brandName && (
+                    <p className="text-xs text-text-placeholders truncate">
+                      <HighlightedText text={brandName} />
+                    </p>
+                  )}
+                  <p className="text-sm font-headlines text-text-body truncate">
+                    <HighlightedText text={productName || ''} />
+                  </p>
+                  <p className="text-xs text-text-placeholders">{itemNumber}</p>
+                </div>
+                <div className="flex-shrink-0 text-right">
+                  {product.price && (
+                    <>
+                      {product.price.originalAmount && product.price.originalAmount > product.price.amount && (
+                        <p className="text-xs text-text-placeholders line-through">
+                          {formatCurrency(product.price.originalAmount, product.price.currency)}
+                        </p>
+                      )}
+                      <p className="text-sm font-bold font-headlines">
+                        {formatCurrency(product.price.amount, product.price.currency)}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+      </div>
+    );
+  },
+);

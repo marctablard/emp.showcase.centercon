@@ -54,3 +54,29 @@ export async function fetchProductPrice(
     throw error;
   }
 }
+
+/**
+ * Fetch prices for multiple products in a single batch call.
+ *
+ * @param productIds Array of product IDs
+ * @returns Map of product ID → ProductPrice (or null when unavailable)
+ */
+export async function fetchProductPrices(productIds: string[]): Promise<Record<string, ProductPrice | null>> {
+  try {
+    const response = await fetch('/api/products/prices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productIds }),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch batch product prices: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    getLogger().error({ err: error, productIds }, 'Error fetching batch product prices');
+    throw error;
+  }
+}
