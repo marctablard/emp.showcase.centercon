@@ -118,14 +118,17 @@ export function useProject(projectId: string) {
   );
 
   const removeItemFromList = useCallback(
-    async (listId: string, itemId: string): Promise<void> => {
+    async (listId: string, productId: string): Promise<void> => {
       const currentList = shoppingLists.find((l) => l.id === listId);
-      const response = await fetch(`/api/projects/${projectId}/shopping-lists/${listId}/items/${itemId}`, {
+      // Use a fixed placeholder in the URL; the actual productId to remove is passed in the body
+      // to avoid URL-encoding issues with product IDs containing slashes, colons, etc.
+      const response = await fetch(`/api/projects/${projectId}/shopping-lists/${listId}/items/_`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           listName: currentList?.name ?? '',
           currentItems: currentList?.items ?? [],
+          productIdToRemove: productId,
         }),
       });
       if (!response.ok) {
@@ -133,7 +136,7 @@ export function useProject(projectId: string) {
         throw new Error(err.error ?? `Failed to remove item: ${response.statusText}`);
       }
       setShoppingLists((prev) =>
-        prev.map((l) => (l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== itemId) } : l)),
+        prev.map((l) => (l.id === listId ? { ...l, items: l.items.filter((i) => i.productId !== productId) } : l)),
       );
     },
     [projectId, shoppingLists],

@@ -2,19 +2,30 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ChevronDown, ChevronRight, List, Package, Plus, ShoppingCart, Trash2, X } from 'lucide-react';
+import Link from 'next/link';
+import {
+  ChevronDown,
+  ChevronRight,
+  List,
+  Package,
+  Plus,
+  ShoppingCart,
+  SlidersHorizontal,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCart } from '@/hooks/cart/useCart';
 import { useSiteCode } from '@/hooks/site/useSiteCode';
 import { fetchProductPrice } from '@/lib/client/prices';
 import { fetchProductById } from '@/lib/client/products';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { ShoppingList, ShoppingListItem } from '@/platform/services/model/shopping-list/shopping-list';
-import { useCartStore } from '@/providers/StoreProvider';
 
 /* ─── Enriched item type ─────────────────────────────────── */
 
@@ -24,6 +35,7 @@ interface EnrichedItem extends ShoppingListItem {
   price?: number;
   currency?: string;
   loadingDetails?: boolean;
+  hasVariants?: boolean;
 }
 
 /* ─── Tab props ──────────────────────────────────────────── */
@@ -245,16 +257,13 @@ function ListItemsPanel({
   items,
   list,
   onRemoveItem,
-  onAddToCart,
-  cartId,
 }: {
   items: ShoppingListItem[];
   list: ShoppingList;
   onRemoveItem: (listId: string, itemId: string) => Promise<void>;
-  onAddToCart: (listId: string, cartId: string, itemId?: string) => Promise<{ added: number; failed: number }>;
-  cartId: string | null;
 }) {
   const t = useTranslations('account.projects.shoppingLists');
+  const { addItem } = useCart();
   const [enriched, setEnriched] = useState<EnrichedItem[]>([]);
   const [cartState, setCartState] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
 
@@ -268,7 +277,7 @@ function ListItemsPanel({
       source.map(async (item, idx) => {
         try {
           const [product, priceData] = await Promise.all([
-            fetchProductById(item.productId),
+            fetchProductById(item.productId, { variants: true }),
             fetchProductPrice(item.productId),
           ]);
           setEnriched((prev) =>
@@ -280,13 +289,14 @@ function ListItemsPanel({
                     loadingDetails: false,
                     productName: product
                       ? typeof product.name === 'object'
-                        ? ((product.name as any).en ?? Object.values(product.name as any)[0])
+                        ? resolveLocalized(product.name, 'en')
                         : String(product.name)
                       : item.productId,
-                    imageUrl: (product?.images?.[0] as any)?.url ?? (product?.media?.[0] as any)?.url,
+                    imageUrl: (product?.primaryImage as any)?.url ?? (product?.images?.[0] as any)?.url,
                     sku: item.sku ?? (product as any)?.sku,
                     price: priceData?.amount ?? priceData?.originalAmount,
                     currency: priceData?.currency ?? 'EUR',
+                    hasVariants: Array.isArray(product?.variants) && product.variants.length > 0,
                   },
             ),
           );
@@ -301,15 +311,16 @@ function ListItemsPanel({
     loadDetails(items);
   }, [items, loadDetails]);
 
-  const handleAddToCart = async (itemId?: string) => {
-    const key = itemId ?? '__all__';
+  const handleAddOneToCart = async (item: EnrichedItem, key: string) => {
+    if (!item.productId || item.hasVariants) return;
     setCartState((s) => ({ ...s, [key]: 'loading' }));
     try {
-      if (!cartId) throw new Error('No active cart');
-      await onAddToCart(list.id, cartId, itemId);
+      await addItem(item.productId, item.quantity ?? 1);
       setCartState((s) => ({ ...s, [key]: 'success' }));
       setTimeout(() => setCartState((s) => ({ ...s, [key]: 'idle' })), 2000);
-    } catch {
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[ShoppingList] addToCart failed', err);
       setCartState((s) => ({ ...s, [key]: 'error' }));
       setTimeout(() => setCartState((s) => ({ ...s, [key]: 'idle' })), 3000);
     }
@@ -318,16 +329,32 @@ function ListItemsPanel({
   const allCartState = cartState['__all__'] ?? 'idle';
 
   const handleAddAllToCart = async () => {
-    setCartState((s) => ({ ...s, ['__all__']: 'loading' }));
-    try {
-      if (!cartId) throw new Error('No active cart');
-      await onAddToCart(list.id, cartId);
-      setCartState((s) => ({ ...s, ['__all__']: 'success' }));
-      setTimeout(() => setCartState((s) => ({ ...s, ['__all__']: 'idle' })), 2000);
-    } catch {
-      setCartState((s) => ({ ...s, ['__all__']: 'error' }));
-      setTimeout(() => setCartState((s) => ({ ...s, ['__all__']: 'idle' })), 3000);
+    setCartState((s) => ({ ...s, __all__: 'loading' }));
+    const validItems = enriched.filter((i) => !!i.productId && !i.hasVariants);
+    if (validItems.length === 0) {
+      setCartState((s) => ({ ...s, __all__: 'error' }));
+      setTimeout(() => setCartState((s) => ({ ...s, __all__: 'idle' })), 3000);
+      return;
     }
+    // Add items sequentially: the cart store sets loading=true during each addToCart call,
+    // so concurrent calls would collide on the loading guard and fail.
+    let anySucceeded = false;
+    let anyFailed = false;
+    for (const item of validItems) {
+      try {
+        await addItem(item.productId, item.quantity ?? 1);
+        anySucceeded = true;
+      } catch (err) {
+        anyFailed = true;
+        // eslint-disable-next-line no-console
+        console.error('[ShoppingList] addAllToCart item failed', { productId: item.productId, err });
+      }
+    }
+    setCartState((s) => ({
+      ...s,
+      __all__: anyFailed && !anySucceeded ? 'error' : 'success',
+    }));
+    setTimeout(() => setCartState((s) => ({ ...s, __all__: 'idle' })), 2000);
   };
 
   if (items.length === 0) {
@@ -388,20 +415,45 @@ function ListItemsPanel({
                 {/* Actions */}
                 <TableCell className="px-2 py-4 pr-4 text-right">
                   <div className="flex justify-end gap-2 items-center">
-                    <Button
-                      size="icon"
-                      variant="neutral"
-                      className="text-text-secondary"
-                      disabled={cs === 'loading'}
-                      onClick={() => handleAddToCart(itemKey)}
-                    >
-                      {cs === 'loading' ? <Spinner /> : cs === 'success' ? '✓' : <ShoppingCart className="h-4 w-4" />}
-                    </Button>
+                    {item.hasVariants ? (
+                      <>
+                        <Button
+                          size="icon"
+                          variant="neutral"
+                          className="text-text-secondary"
+                          title={t('requiresVariant')}
+                          asChild
+                        >
+                          <Link href={`/product/${item.productId}`}>
+                            <SlidersHorizontal className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="neutral"
+                          className="text-text-disabled cursor-not-allowed"
+                          disabled
+                          title={t('requiresVariant')}
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="icon"
+                        variant="neutral"
+                        className="text-text-secondary"
+                        disabled={cs === 'loading'}
+                        onClick={() => handleAddOneToCart(item, itemKey)}
+                      >
+                        {cs === 'loading' ? <Spinner /> : cs === 'success' ? '✓' : <ShoppingCart className="h-4 w-4" />}
+                      </Button>
+                    )}
                     <Button
                       size="icon"
                       variant="neutral"
                       className="text-text-secondary hover:text-text-error"
-                      onClick={() => onRemoveItem(list.id, item.id)}
+                      onClick={() => onRemoveItem(list.id, item.productId)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -438,8 +490,6 @@ export function ProjectShoppingListsTab({
   onAddToCart,
 }: ProjectShoppingListsTabProps) {
   const t = useTranslations('account.projects.shoppingLists');
-  const cartStore = useCartStore();
-  const cartId = cartStore.currentCart?.id ?? null;
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addProductListId, setAddProductListId] = useState<string | null>(null);
@@ -582,13 +632,7 @@ export function ProjectShoppingListsTab({
                   {isExpanded && (
                     <TableRow key={`${list.id}-items`} className="hover:bg-transparent">
                       <TableCell colSpan={3} className="p-0 pb-4 border-t border-border-primary">
-                        <ListItemsPanel
-                          items={list.items}
-                          list={list}
-                          onRemoveItem={onRemoveItem}
-                          onAddToCart={onAddToCart}
-                          cartId={cartId}
-                        />
+                        <ListItemsPanel items={list.items} list={list} onRemoveItem={onRemoveItem} />
                       </TableCell>
                     </TableRow>
                   )}

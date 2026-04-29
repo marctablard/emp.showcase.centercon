@@ -254,7 +254,8 @@
       "add": "Add",
       "close": "Close",
       "price": "Price",
-      "actions": "Actions"
+      "actions": "Actions",
+      "requiresVariant": "Requires variant selection"
     },
     "orders": {
       "title": "Associated Orders",

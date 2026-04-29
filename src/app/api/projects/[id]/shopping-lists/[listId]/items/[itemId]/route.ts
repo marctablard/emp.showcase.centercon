@@ -14,9 +14,10 @@ export async function DELETE(
 ) {
   const logger = server.get<LoggerService>('LoggerService');
   try {
-    const { id: projectId, itemId } = await params;
+    const { id: projectId } = await params;
     const body = await request.json().catch(() => ({}));
-    const { listName = '', currentItems = [] } = body;
+    // productIdToRemove is sent in the body to avoid URL-encoding issues with special chars in product IDs
+    const { listName = '', currentItems = [], productIdToRemove = '' } = body;
 
     const api = server.get<EmporixApiInvoker>('EmporixApiInvoker');
     const config = server.get('EmporixConfig') as { tenant: string };
@@ -27,9 +28,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Remove the item by ID; strip to API-required fields only
+    if (!productIdToRemove) {
+      return NextResponse.json({ error: 'productIdToRemove is required' }, { status: 400 });
+    }
+
+    // Filter out the target item by productId; strip to API-required fields only
     const updatedItems = currentItems
-      .filter((i: any) => String(i.id) !== String(itemId))
+      .filter((i: any) => String(i.productId) !== String(productIdToRemove))
       .map((i: any) => ({ productId: i.productId, quantity: i.quantity }));
 
     // Always preserve the project mixin so the list stays linked to its project
@@ -53,7 +58,7 @@ export async function DELETE(
     if (!putRes.ok) {
       const errorBody = await putRes.text();
       logger.error(
-        { itemId, customerId: customer.id, status: putRes.status, body: errorBody },
+        { productIdToRemove, customerId: customer.id, status: putRes.status, body: errorBody },
         'DELETE shopping list item failed',
       );
       return NextResponse.json(

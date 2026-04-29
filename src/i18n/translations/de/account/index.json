@@ -169,7 +169,8 @@
       "add": "Hinzufügen",
       "close": "Schließen",
       "price": "Preis",
-      "actions": "Aktionen"
+      "actions": "Aktionen",
+      "requiresVariant": "Variantenauswahl erforderlich"
     },
     "orders": {
       "title": "Zugehörige Aufträge",
