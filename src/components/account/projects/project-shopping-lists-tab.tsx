@@ -322,6 +322,7 @@ function ListItemsPanel({
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDetails(items);
   }, [items, loadDetails]);
 
@@ -503,7 +504,7 @@ export function ProjectShoppingListsTab({
   onDeleteList,
   onAddItem,
   onRemoveItem,
-  onAddToCart,
+  onAddToCart: _onAddToCart,
 }: ProjectShoppingListsTabProps) {
   const t = useTranslations('account.projects.shoppingLists');
 
