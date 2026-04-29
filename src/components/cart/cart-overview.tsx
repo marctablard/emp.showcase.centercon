@@ -11,6 +11,7 @@ import { CartAction } from './cart-action';
 import { CartDelivery } from './cart-delivery';
 import { CartEmpty } from './cart-empty';
 import { CartItemList } from './cart-itemlist';
+import { CartProjectSelector } from './cart-project-selector';
 import { CartSummary } from './cart-summary';
 
 interface CartOverviewProps {
@@ -58,6 +59,11 @@ export function CartOverview({ initialCart }: CartOverviewProps) {
           </div>
         </div>
         <CartAction />
+        {currentCart.id && customer && (
+          <div className="mb-4">
+            <CartProjectSelector cartId={currentCart.id} />
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-11">
           <div className="col-span-1 lg:col-span-2" ref={leftContent}>
             {false && customer && <CartDelivery />}
