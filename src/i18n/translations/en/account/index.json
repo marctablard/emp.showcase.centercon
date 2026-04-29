@@ -282,7 +282,8 @@
       "deleteError": "Failed to delete document",
       "fileName": "File Name",
       "type": "Type",
-      "uploaded": "Uploaded"
+      "uploaded": "Uploaded",
+      "preview": "Preview"
     },
     "projectSelector": {
       "label": "Assign to Project",

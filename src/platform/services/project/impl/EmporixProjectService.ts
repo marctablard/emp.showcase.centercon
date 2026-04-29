@@ -138,6 +138,7 @@ export class EmporixProjectService implements IProjectService {
         url: a!.url,
         fileName: a!.fileName ?? a!.id,
         contentType: a!.contentType ?? 'application/octet-stream',
+        bytes: a!.bytes,
         createdAt: a!.createdAt,
       }));
     } catch (error) {

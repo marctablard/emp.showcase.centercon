@@ -3,6 +3,7 @@ export interface EmporixMediaAsset {
   url: string;
   fileName?: string;
   contentType?: string;
+  bytes?: number;
   createdAt?: string;
 }
 

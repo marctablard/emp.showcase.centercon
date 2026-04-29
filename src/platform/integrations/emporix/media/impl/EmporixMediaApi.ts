@@ -69,8 +69,10 @@ class EmporixMediaApi implements IEmporixMediaApi {
     return {
       id,
       url: data.url ?? data.link ?? data.downloadUrl ?? '',
-      fileName: data.fileName ?? data.name ?? fileName ?? id,
-      contentType: data.contentType ?? data.mimeType ?? contentType ?? 'application/octet-stream',
+      fileName: data.details?.filename ?? data.fileName ?? data.name ?? fileName ?? id,
+      contentType:
+        data.details?.mimeType ?? data.contentType ?? data.mimeType ?? contentType ?? 'application/octet-stream',
+      bytes: data.details?.bytes,
       createdAt: data.createdAt ?? data.metadata?.createdAt,
     };
   }

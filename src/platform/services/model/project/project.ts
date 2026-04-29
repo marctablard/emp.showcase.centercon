@@ -37,5 +37,6 @@ export interface ProjectMediaAsset {
   url: string;
   fileName: string;
   contentType: string;
+  bytes?: number;
   createdAt?: string;
 }

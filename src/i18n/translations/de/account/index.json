@@ -197,7 +197,8 @@
       "deleteError": "Fehler beim Löschen des Dokuments",
       "fileName": "Dateiname",
       "type": "Typ",
-      "uploaded": "Hochgeladen"
+      "uploaded": "Hochgeladen",
+      "preview": "Vorschau"
     },
     "projectSelector": {
       "label": "Projekt zuweisen",

@@ -114,7 +114,7 @@ export function ProjectsList() {
                           href={`/account/projects/${project.id}`}
                           variant="primary"
                           size="m"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={() => {}}
                         >
                           {name}
                         </UiLink>
