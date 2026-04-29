@@ -6,6 +6,8 @@ import { FileDown, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/ui/useToast';
+import { fetchProductAvailability } from '@/lib/client/availability';
+import { fetchProductPrices } from '@/lib/client/prices';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Product } from '@/platform/services/model/product';
 import { EmptyFileError, FileTooLargeError, UnsupportedFormatError, parseUploadedFile } from './utils/parse-file';
@@ -39,9 +41,7 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
         return (
           products.find(
             (p) => p.sku?.toLowerCase() === code.toLowerCase() || p.id?.toLowerCase() === code.toLowerCase(),
-          ) ??
-          products[0] ??
-          null
+          ) ?? null
         );
       } catch (err) {
         logger.error({ err, code }, 'Failed to resolve product code');
@@ -64,42 +64,105 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
       try {
         const entries = await parseUploadedFile(file);
 
-        const resolved: Array<{ product: Product; quantity: number }> = [];
+        const resolved: Array<{ product: Product; quantity: number; code: string }> = [];
         const notFoundCodes: string[] = [];
 
         for (const entry of entries) {
           const product = await resolveProductByCode(entry.code);
           if (product) {
-            resolved.push({ product, quantity: entry.quantity });
+            resolved.push({ product, quantity: entry.quantity, code: entry.code });
           } else {
             notFoundCodes.push(entry.code);
           }
         }
 
+        // Check prices for resolved products
+        const withPrice: Array<{ product: Product; quantity: number; code: string }> = [];
+        const noPriceCodes: string[] = [];
+
         if (resolved.length > 0) {
-          onAddProducts(resolved);
+          const ids = resolved.map((r) => r.product.id);
+          try {
+            const priceMap = await fetchProductPrices(ids);
+            for (const r of resolved) {
+              const price = priceMap[r.product.id];
+              if (price) {
+                withPrice.push({ product: { ...r.product, price }, quantity: r.quantity, code: r.code });
+              } else {
+                noPriceCodes.push(r.code);
+              }
+            }
+          } catch {
+            for (const r of resolved) {
+              noPriceCodes.push(r.code);
+            }
+          }
         }
 
-        if (notFoundCodes.length === 0 && resolved.length > 0) {
+        // Check availability for products with prices
+        const availableProducts: Array<{ product: Product; quantity: number }> = [];
+        const insufficientStockEntries: Array<{ code: string; requestedQty: number; availableQty: number }> = [];
+
+        if (withPrice.length > 0) {
+          const availabilityResults = await Promise.all(
+            withPrice.map(async (entry) => {
+              try {
+                const availability = await fetchProductAvailability(entry.product.id);
+                return { entry, availability };
+              } catch {
+                return { entry, availability: null };
+              }
+            }),
+          );
+
+          for (const { entry, availability } of availabilityResults) {
+            if (!availability || !availability.isAvailable || availability.availableQuantity <= 0) {
+              insufficientStockEntries.push({ code: entry.code, requestedQty: entry.quantity, availableQty: 0 });
+            } else if (availability.availableQuantity < entry.quantity) {
+              availableProducts.push({ product: entry.product, quantity: availability.availableQuantity });
+              insufficientStockEntries.push({
+                code: entry.code,
+                requestedQty: entry.quantity,
+                availableQty: availability.availableQuantity,
+              });
+            } else {
+              availableProducts.push({ product: entry.product, quantity: entry.quantity });
+            }
+          }
+        }
+
+        if (availableProducts.length > 0) {
+          onAddProducts(availableProducts);
           toast({
-            title: t('notifications.uploadSuccess', { count: resolved.length }),
+            title: t('notifications.productsAdded', { count: availableProducts.length }),
             variant: 'success',
           });
-        } else if (resolved.length > 0 && notFoundCodes.length > 0) {
+        }
+
+        const allFailedCodes = [...notFoundCodes, ...noPriceCodes];
+
+        if (insufficientStockEntries.length > 0) {
+          for (const stock of insufficientStockEntries) {
+            toast({
+              title: t('notifications.insufficientStock', {
+                code: stock.code,
+                requested: stock.requestedQty,
+                available: stock.availableQty,
+              }),
+              variant: 'warning',
+            });
+          }
+          // Zero-stock entries count as failed
+          const zeroStockCodes = insufficientStockEntries.filter((s) => s.availableQty <= 0).map((s) => s.code);
+          allFailedCodes.push(...zeroStockCodes);
+        }
+
+        if (allFailedCodes.length > 0) {
           toast({
-            title: t('notifications.uploadPartial', {
-              found: resolved.length,
-              total: entries.length,
-              notFound: notFoundCodes.length,
-            }),
-            description: notFoundCodes.join(', '),
+            title: t('notifications.productsCouldNotBeAdded', { count: allFailedCodes.length }),
+            description: allFailedCodes.join(', '),
             variant: 'destructive',
-          });
-        } else if (resolved.length === 0) {
-          toast({
-            title: t('notifications.productsNotFound', { count: notFoundCodes.length }),
-            description: notFoundCodes.join(', '),
-            variant: 'destructive',
+            persistent: true,
           });
         }
       } catch (err) {
@@ -107,22 +170,26 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
           toast({
             title: t('validation.fileTooLarge'),
             variant: 'destructive',
+            persistent: true,
           });
         } else if (err instanceof EmptyFileError) {
           toast({
             title: t('validation.emptyFile'),
             variant: 'destructive',
+            persistent: true,
           });
         } else if (err instanceof UnsupportedFormatError) {
           toast({
             title: t('validation.unsupportedFormat'),
             variant: 'destructive',
+            persistent: true,
           });
         } else {
           logger.error({ err }, 'Failed to parse uploaded file');
           toast({
             title: t('notifications.uploadError'),
             variant: 'destructive',
+            persistent: true,
           });
         }
         setSelectedFile(null);

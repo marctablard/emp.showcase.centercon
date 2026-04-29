@@ -57,16 +57,18 @@
   },
   "notifications": {
     "productsAdded": "{count, plural, one {# Produkt} other {# Produkte}} zur Liste hinzugefügt",
-    "productsNotFound": "{count, plural, one {# Produktcode} other {# Produktcodes}} nicht gefunden",
+    "productsCouldNotBeAdded": "Die folgenden ({count}) {count, plural, one {Produkt} other {Produkte}} konnten nicht hinzugefügt werden:",
     "uploadSuccess": "Alle {count, plural, one {# Produkt} other {# Produkte}} zur Liste hinzugefügt.",
     "uploadPartial": "{found} von {total} Produkten hinzugefügt. {notFound, plural, one {# Code} other {# Codes}} nicht gefunden.",
     "uploadError": "Datei konnte nicht verarbeitet werden. Bitte überprüfen Sie das Format.",
     "addedToCart": "Produkte erfolgreich zum Warenkorb hinzugefügt",
     "addToCartPartialFailure": "{failed, plural, one {# Artikel} other {# Artikel}} konnten nicht zum Warenkorb hinzugefügt werden. Bitte versuchen Sie es erneut.",
-    "addingProgress": "Artikel {current} von {total} wird hinzugefügt..."
+    "addingProgress": "Artikel {current} von {total} wird hinzugefügt...",
+    "insufficientStock": "Die erforderliche Anzahl von Produkten ({code} - {requested}) ist nicht auf Lager. ({code} - {available}) Produkte hinzugefügt."
   },
   "validation": {
     "invalidFormat": "Ungültiges Format. Bitte überprüfen Sie Ihre Eingabe.",
+    "invalidQuantity": "\"{line}\" ist kein gültiges Format. Wir akzeptieren nur positive Zahlen oder keine Angabe.",
     "emptyFile": "Die hochgeladene Datei ist leer.",
     "fileTooLarge": "Datei ist zu groß. Maximale Größe beträgt 5 MB.",
     "unsupportedFormat": "Nicht unterstütztes Dateiformat. Bitte verwenden Sie CSV oder XLSX."

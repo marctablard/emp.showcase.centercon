@@ -8,6 +8,10 @@ import { H5 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { useSearch } from '@/hooks/search/useSearch';
+import { useToast } from '@/hooks/ui/useToast';
+import { fetchProductAvailability } from '@/lib/client/availability';
+import { fetchProductPrice } from '@/lib/client/prices';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
 import { QuickOrderSearchDropdown } from './quick-order-search-dropdown';
@@ -25,6 +29,8 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
   const t = useTranslations('quick-order');
   const locale = useLocale();
   const { suggestions, loading, getSuggestions } = useSearch<Product>();
+  const { toast } = useToast();
+  const logger = getLogger();
 
   const [query, setQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -32,6 +38,7 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [textPasteResolving, setTextPasteResolving] = useState(false);
   const [textPasteHasText, setTextPasteHasText] = useState(false);
+  const [textPasteHasErrors, setTextPasteHasErrors] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -66,15 +73,59 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
   );
 
   const handleSelect = useCallback(
-    (product: Product) => {
-      onAddProducts([{ product, quantity: 1 }]);
+    async (product: Product) => {
       setQuery('');
       setShowDropdown(false);
       setHasSearched(false);
       setHighlightedIndex(-1);
+
+      try {
+        const price = await fetchProductPrice(product.id);
+        if (!price) {
+          toast({
+            title: t('notifications.productsCouldNotBeAdded', { count: 1 }),
+            description: product.sku ?? product.id,
+            variant: 'destructive',
+            persistent: true,
+          });
+          inputRef.current?.focus();
+          return;
+        }
+
+        // Check availability
+        const code = product.sku ?? product.id;
+        try {
+          const availability = await fetchProductAvailability(product.id);
+          if (!availability.isAvailable || availability.availableQuantity <= 0) {
+            toast({
+              title: t('notifications.insufficientStock', {
+                code,
+                requested: 1,
+                available: 0,
+              }),
+              variant: 'warning',
+            });
+            inputRef.current?.focus();
+            return;
+          }
+        } catch {
+          // If availability check fails, allow the product through
+        }
+
+        onAddProducts([{ product: { ...product, price }, quantity: 1 }]);
+      } catch (err) {
+        logger.error({ err, productId: product.id }, 'Failed to fetch price for selected product');
+        toast({
+          title: t('notifications.productsCouldNotBeAdded', { count: 1 }),
+          description: product.sku ?? product.id,
+          variant: 'destructive',
+          persistent: true,
+        });
+      }
+
       inputRef.current?.focus();
     },
-    [onAddProducts],
+    [onAddProducts, toast, t, logger],
   );
 
   const handleKeyDown = useCallback(
@@ -176,12 +227,13 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
           onAddProducts={onAddProducts}
           onResolvingChange={setTextPasteResolving}
           onTextChange={setTextPasteHasText}
+          onValidationChange={setTextPasteHasErrors}
         />
       </div>
 
       <Button
         onClick={() => textPasteRef.current?.addToList()}
-        disabled={textPasteResolving || !textPasteHasText}
+        disabled={textPasteResolving || !textPasteHasText || textPasteHasErrors}
         className="w-full sm:w-auto sm:min-w-[216px] h-12 font-headlines tracking-[2px]"
         data-testid="quick-order-add-to-list-button"
       >

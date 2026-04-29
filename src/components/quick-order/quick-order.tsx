@@ -70,6 +70,7 @@ export function QuickOrder() {
         toast({
           title: t('notifications.addToCartPartialFailure', { failed: failed.length }),
           variant: 'destructive',
+          persistent: true,
         });
       }
     } finally {
@@ -89,6 +90,7 @@ export function QuickOrder() {
         toast({
           title: t('notifications.addToCartPartialFailure', { failed: failed.length }),
           variant: 'destructive',
+          persistent: true,
         });
       }
     } finally {

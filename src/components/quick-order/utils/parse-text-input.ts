@@ -3,20 +3,29 @@ export interface ParsedEntry {
   quantity: number;
 }
 
+export interface ParseResult {
+  entries: ParsedEntry[];
+  errors: string[];
+}
+
 /**
  * Parses multi-line text input into an array of product code + quantity entries.
  *
  * Each line is split by comma, semicolon, or whitespace.
  * First token = product code, second token (optional) = quantity (defaults to 1).
  * Empty lines and whitespace-only lines are ignored.
+ *
+ * If the second token is present but is not a positive integer, the line is
+ * reported in `errors` and excluded from `entries`.
  */
-export function parseTextInput(text: string): ParsedEntry[] {
+export function parseTextInput(text: string): ParseResult {
   if (!text || !text.trim()) {
-    return [];
+    return { entries: [], errors: [] };
   }
 
   const lines = text.split(/\r?\n/);
   const entries: ParsedEntry[] = [];
+  const errors: string[] = [];
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -37,12 +46,17 @@ export function parseTextInput(text: string): ParsedEntry[] {
 
     let quantity = 1;
     if (tokens.length >= 2) {
-      const parsed = parseInt(tokens[1], 10);
-      quantity = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+      const raw = tokens[1];
+      const parsed = Number(raw);
+      if (!Number.isInteger(parsed) || parsed < 1) {
+        errors.push(trimmed);
+        continue;
+      }
+      quantity = parsed;
     }
 
     entries.push({ code, quantity });
   }
 
-  return entries;
+  return { entries, errors };
 }

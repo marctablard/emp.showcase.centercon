@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QuantityStepper } from '@/components/ui/molecules/quantity-stepper';
+import { useAvailability } from '@/hooks/product/useAvailability';
 import { useL10n } from '@/hooks/useL10n';
 import { Link } from '@/i18n/navigation';
 import { formatCurrency } from '@/lib/utils';
@@ -20,6 +21,7 @@ interface QuickOrderProductCardProps {
 export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQuantity }: QuickOrderProductCardProps) {
   const { l10n } = useL10n();
   const tCart = useTranslations('cart');
+  const { availability } = useAvailability(product.id);
   const image = product.images?.[0];
   const brandName = l10n(product.brand?.name || '');
   const productName = l10n(product.name) || '';
@@ -91,7 +93,7 @@ export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQua
       </div>
 
       <div className="mt-3 flex justify-start">
-        <QuantityStepper value={quantity} onChange={onUpdateQuantity} size="sm" />
+        <QuantityStepper value={quantity} onChange={onUpdateQuantity} size="sm" max={availability?.availableQuantity} />
       </div>
     </div>
   );

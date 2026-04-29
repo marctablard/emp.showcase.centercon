@@ -113,7 +113,12 @@ export function QuickOrderProductRow({ product, quantity, onRemove, onUpdateQuan
 
       <td className="py-4 px-4">
         <div className="w-fit">
-          <QuantityStepper value={quantity} onChange={onUpdateQuantity} size="md" />
+          <QuantityStepper
+            value={quantity}
+            onChange={onUpdateQuantity}
+            size="md"
+            max={availability?.availableQuantity}
+          />
         </div>
       </td>
 

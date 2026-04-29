@@ -12,6 +12,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps['theme']}
       className="toaster group mx-Auto"
       data-x-position="right"
+      expand
+      visibleToasts={9}
       style={
         {
           '--width': '90%',
