@@ -733,14 +733,14 @@ describe('EmporixAuthService', () => {
       expect(mockCartService.updateCurrency).toHaveBeenCalledWith('customer-cart-id', 'USD');
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.objectContaining({ cartMergeReason: 'TRANSITION_FAILED', err: expect.any(Error) }),
-        'Cart transition failed during login, continuing without merge',
+        expect.objectContaining({ err: expect.any(Error) }),
+        'Failed to ensure customer cart binding',
       );
       expect(result.sessionId).toBe('customer-session-id');
       expect(result.customerId).toBe('customer-123');
       expect(result.cartId).toBeUndefined();
       expect(result.cartMergeStatus).toBe('FALLBACK');
-      expect(result.cartMergeReason).toBe('TRANSITION_FAILED');
+      expect(result.cartMergeReason).toBe('TARGET_CART_UNAVAILABLE');
     });
 
     it('should continue with merge when updateCurrency fails with legalEntityId refresh error', async () => {
@@ -987,7 +987,7 @@ describe('EmporixAuthService', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.objectContaining({ err: expect.any(Error) }),
-        'Cart transition failed during login, continuing without merge',
+        'Failed to ensure customer cart binding',
       );
       expect(mockCartMigrationService.mergeCarts).not.toHaveBeenCalled();
       expect(result.sessionId).toBe('customer-session-id');
