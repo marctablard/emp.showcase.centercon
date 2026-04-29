@@ -12,6 +12,7 @@ type LoginDialogProps = {
   open?: boolean;
   onCloseAction?: () => void;
   guestCheckout?: boolean;
+  onGuestAction?: () => void;
 };
 
 export default function LoginDialog({
@@ -21,6 +22,7 @@ export default function LoginDialog({
   open = false,
   onCloseAction,
   guestCheckout = false,
+  onGuestAction,
 }: LoginDialogProps) {
   const handleOpenChange = (open: boolean) => {
     if (!open) onCloseAction?.();
@@ -40,6 +42,7 @@ export default function LoginDialog({
           email={email}
           onSuccess={onCloseAction}
           guestCheckout={guestCheckout}
+          onGuestAction={onGuestAction}
           isDialog
         />
       </DialogContent>

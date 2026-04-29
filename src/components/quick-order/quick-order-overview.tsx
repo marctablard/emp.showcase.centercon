@@ -129,7 +129,12 @@ export function QuickOrderOverview({
         </CardFooter>
       </Card>
 
-      <LoginDialog open={loginDialogOpen} onCloseAction={handleLoginDialogClose} guestCheckout />
+      <LoginDialog
+        open={loginDialogOpen}
+        onCloseAction={handleLoginDialogClose}
+        onGuestAction={handleLoginDialogClose}
+        guestCheckout
+      />
     </>
   );
 }

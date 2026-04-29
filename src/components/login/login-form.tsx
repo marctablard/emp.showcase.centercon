@@ -26,10 +26,18 @@ type LoginFormProps = {
   email?: string;
   onSuccess?: () => void;
   guestCheckout?: boolean;
+  onGuestAction?: () => void;
   isDialog?: boolean;
 };
 
-export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false, isDialog = false }: LoginFormProps) {
+export function LoginForm({
+  callbackUrl,
+  email,
+  onSuccess,
+  guestCheckout = false,
+  onGuestAction,
+  isDialog = false,
+}: LoginFormProps) {
   const t = useTranslations('auth.login');
   const locale = useLocale();
   const { site } = useSite();
@@ -223,13 +231,18 @@ export function LoginForm({ callbackUrl, email, onSuccess, guestCheckout = false
       ))}
 
       <div className="flex flex-col gap-6 w-full">
-        {guestCheckout && (
-          <Link href="/checkout">
-            <Button variant="secondary" className="w-full" data-testid="login-guestCheckout">
+        {guestCheckout &&
+          (onGuestAction ? (
+            <Button variant="secondary" className="w-full" data-testid="login-guestCheckout" onClick={onGuestAction}>
               {t('guestCheckout')}
             </Button>
-          </Link>
-        )}
+          ) : (
+            <Link href="/checkout">
+              <Button variant="secondary" className="w-full" data-testid="login-guestCheckout">
+                {t('guestCheckout')}
+              </Button>
+            </Link>
+          ))}
 
         <div className="flex flex-col gap-2 mx-auto items-center">
           <p>{t('noAccountYet')}</p>
