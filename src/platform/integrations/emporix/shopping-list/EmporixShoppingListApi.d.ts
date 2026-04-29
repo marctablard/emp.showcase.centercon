@@ -1,9 +1,11 @@
 export interface EmporixShoppingListItem {
-  id?: string;
+  id?: string | number;
+  productId?: string;
   itemYrn?: string;
   product?: {
     id: string;
     yrn?: string;
+    sku?: string;
   };
   quantity?: number;
   price?: {
@@ -23,7 +25,11 @@ export interface EmporixShoppingList {
 }
 
 export interface EmporixShoppingListApi {
-  getLists(pageSize?: number, pageNumber?: number): Promise<{ items: EmporixShoppingList[]; total: number }>;
+  getLists(
+    pageSize?: number,
+    pageNumber?: number,
+    projectId?: string,
+  ): Promise<{ items: EmporixShoppingList[]; total: number }>;
   getList(listId: string): Promise<EmporixShoppingList | null>;
   createList(name: string, projectId?: string): Promise<EmporixShoppingList>;
   deleteList(listId: string): Promise<void>;

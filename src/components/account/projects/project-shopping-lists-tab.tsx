@@ -1,23 +1,32 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { ChevronDown, ChevronRight, List, Plus, Search, ShoppingCart, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { ChevronDown, ChevronRight, List, Package, Plus, ShoppingCart, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { ShoppingList } from '@/platform/services/model/shopping-list/shopping-list';
+import { useSiteCode } from '@/hooks/site/useSiteCode';
+import { fetchProductPrice } from '@/lib/client/prices';
+import { fetchProductById } from '@/lib/client/products';
+import { cn, formatCurrency } from '@/lib/utils';
+import type { ShoppingList, ShoppingListItem } from '@/platform/services/model/shopping-list/shopping-list';
 import { useCartStore } from '@/providers/StoreProvider';
 
-interface ProductSearchResult {
-  id: string;
-  name: string;
-  sku?: string;
+/* ─── Enriched item type ─────────────────────────────────── */
+
+interface EnrichedItem extends ShoppingListItem {
+  productName?: string;
   imageUrl?: string;
+  price?: number;
+  currency?: string;
+  loadingDetails?: boolean;
 }
+
+/* ─── Tab props ──────────────────────────────────────────── */
 
 interface ProjectShoppingListsTabProps {
   projectId: string;
@@ -29,136 +38,395 @@ interface ProjectShoppingListsTabProps {
   onAddToCart: (listId: string, cartId: string, itemId?: string) => Promise<{ added: number; failed: number }>;
 }
 
-async function searchProducts(query: string): Promise<ProductSearchResult[]> {
+/* ─── Product search ─────────────────────────────────────── */
+
+interface ProductSearchResult {
+  id: string;
+  name: string;
+  sku?: string;
+  imageUrl?: string;
+  brand?: string;
+}
+
+function resolveLocalized(val: unknown, locale: string): string {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object') {
+    const obj = val as Record<string, string>;
+    return obj[locale] ?? obj['en'] ?? Object.values(obj)[0] ?? '';
+  }
+  return '';
+}
+
+async function searchProducts(query: string, locale: string, site: string): Promise<ProductSearchResult[]> {
   if (!query.trim()) return [];
-  const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&size=8`);
-  if (!response.ok) return [];
-  const data = await response.json();
+  const res = await fetch(`/api/search?query=${encodeURIComponent(query)}&size=10&locale=${locale}&site=${site}`);
+  if (!res.ok) throw new Error(`Search failed: ${res.status} ${res.statusText}`);
+  const data = await res.json();
   return (data.items ?? []).map((p: any) => ({
     id: p.id,
-    name: typeof p.name === 'object' ? (p.name.en ?? Object.values(p.name)[0]) : (p.name ?? p.id),
-    sku: p.sku ?? p.productId,
-    imageUrl: p.images?.[0]?.url ?? p.media?.[0]?.url,
+    name: resolveLocalized(p.name, locale) || p.id,
+    sku: p.sku ?? p.code,
+    imageUrl: p.primaryImage?.url ?? p.images?.[0]?.url,
+    brand: resolveLocalized(p.brand?.name, locale) || undefined,
   }));
 }
 
-interface AddProductDialogProps {
+/* ─── Add Product Dialog ─────────────────────────────────── */
+
+function AddProductDialog({
+  listId,
+  onAdd,
+  onClose,
+}: {
   listId: string;
   onAdd: (listId: string, productId: string, quantity: number) => Promise<any>;
   onClose: () => void;
-}
-
-function AddProductDialog({ listId, onAdd, onClose }: AddProductDialogProps) {
+}) {
   const t = useTranslations('account.projects.shoppingLists');
+  const locale = useLocale();
+  const siteCode = useSiteCode();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ProductSearchResult[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [priceMap, setPriceMap] = useState<Record<string, { amount: number; currency: string }>>({});
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [adding, setAdding] = useState<string | null>(null);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
-    setSearchLoading(true);
-    try {
-      const r = await searchProducts(query);
-      setResults(r);
-    } finally {
-      setSearchLoading(false);
-    }
-  }, [query]);
+  const runSearch = useCallback(
+    async (q: string) => {
+      if (!q.trim()) {
+        setResults([]);
+        return;
+      }
+      setSearching(true);
+      setSearchError(null);
+      try {
+        const r = await searchProducts(q, locale, siteCode);
+        setResults(r);
+        r.forEach(async (p) => {
+          try {
+            const price = await fetchProductPrice(p.id);
+            if (price)
+              setPriceMap((prev) => ({
+                ...prev,
+                [p.id]: { amount: price.amount ?? price.originalAmount ?? 0, currency: price.currency ?? 'EUR' },
+              }));
+          } catch {
+            /* ignore */
+          }
+        });
+      } catch (err) {
+        setSearchError(err instanceof Error ? err.message : 'Search failed');
+        setResults([]);
+      } finally {
+        setSearching(false);
+      }
+    },
+    [locale, siteCode],
+  );
 
-  const handleAdd = async (product: ProductSearchResult) => {
-    const qty = quantities[product.id] ?? 1;
-    setAdding(product.id);
+  const handleChange = (v: string) => {
+    setQuery(v);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => runSearch(v), 350);
+  };
+
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  const handleAdd = async (p: ProductSearchResult) => {
+    const qty = quantities[p.id] ?? 1;
+    setAdding(p.id);
     try {
-      await onAdd(listId, product.id, qty);
-      setAddedIds((prev) => new Set([...prev, product.id]));
+      await onAdd(listId, p.id, qty);
+      setAddedIds((prev) => new Set([...prev, p.id]));
     } finally {
       setAdding(null);
     }
   };
 
+  const statusSlot = searching ? (
+    <div className="flex justify-center py-3">
+      <Spinner color="primary" variant="md" />
+    </div>
+  ) : searchError ? (
+    <p className="text-sm text-text-error text-center">{searchError}</p>
+  ) : !query.trim() ? (
+    <p className="text-sm text-text-secondary text-center">{t('searchProducts')}</p>
+  ) : results.length === 0 ? (
+    <p className="text-sm text-text-secondary text-center">{t('noResults')}</p>
+  ) : null;
+
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-[560px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{t('addProduct')}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder={t('searchProducts')}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <Button onClick={handleSearch} disabled={searchLoading} variant="secondary" className="gap-2">
-              {searchLoading ? <Spinner /> : <Search className="h-4 w-4" />}
-              Search
-            </Button>
-          </div>
-
-          {results.length > 0 && (
-            <div className="border border-border-primary rounded-md divide-y divide-border-primary max-h-72 overflow-y-auto">
-              {results.map((product) => (
-                <div key={product.id} className="flex items-center gap-3 p-3">
-                  {product.imageUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="h-10 w-10 rounded object-cover shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{product.name}</p>
-                    {product.sku && <p className="text-xs text-text-secondary">SKU: {product.sku}</p>}
-                  </div>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={quantities[product.id] ?? 1}
-                    onChange={(e) =>
-                      setQuantities((prev) => ({
-                        ...prev,
-                        [product.id]: Math.max(1, parseInt(e.target.value) || 1),
-                      }))
-                    }
-                    className="w-16 text-center"
-                  />
-                  <Button
-                    size="small"
-                    variant={addedIds.has(product.id) ? 'secondary' : 'primary'}
-                    disabled={adding === product.id}
-                    onClick={() => handleAdd(product)}
-                  >
-                    {adding === product.id ? (
-                      <Spinner />
-                    ) : addedIds.has(product.id) ? (
-                      '✓'
+        <Input
+          placeholder={t('searchProducts')}
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          autoFocus
+        />
+        {statusSlot}
+        {results.length > 0 && (
+          <div className="border border-border-primary rounded-md divide-y divide-border-primary max-h-[360px] overflow-y-auto">
+            {results.map((p) => {
+              const price = priceMap[p.id];
+              const added = addedIds.has(p.id);
+              return (
+                <div key={p.id} className="flex items-center gap-3 p-3">
+                  <div className="w-12 h-12 shrink-0 rounded overflow-hidden bg-surface-image-background flex items-center justify-center">
+                    {p.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                     ) : (
-                      t('addProduct').split(' ')[0]
+                      <Package className="h-5 w-5 text-text-on-disabled" />
                     )}
-                  </Button>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {p.brand && <p className="text-xs text-text-secondary truncate">{p.brand}</p>}
+                    <p className="text-sm font-medium truncate">{p.name}</p>
+                    {p.sku && <p className="text-xs text-text-secondary">SKU: {p.sku}</p>}
+                    {price ? (
+                      <p className="text-sm font-semibold text-text-action">
+                        {formatCurrency(price.amount, price.currency)}
+                      </p>
+                    ) : (
+                      <div className="h-3.5 w-16 mt-0.5 bg-surface-disabled rounded animate-pulse" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Input
+                      type="number"
+                      min={1}
+                      value={quantities[p.id] ?? 1}
+                      onChange={(e) =>
+                        setQuantities((prev) => ({ ...prev, [p.id]: Math.max(1, parseInt(e.target.value) || 1) }))
+                      }
+                      className="w-16 text-center h-9"
+                      disabled={added}
+                    />
+                    <Button
+                      size="small"
+                      variant={added ? 'secondary' : 'primary'}
+                      disabled={adding === p.id}
+                      onClick={() => !added && handleAdd(p)}
+                      className="h-9 w-16"
+                    >
+                      {adding === p.id ? <Spinner /> : added ? '✓' : t('add')}
+                    </Button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {results.length === 0 && query && !searchLoading && (
-            <p className="text-sm text-text-secondary text-center py-4">{t('noResults')}</p>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-        </DialogFooter>
+              );
+            })}
+          </div>
+        )}
+        <Button variant="secondary" onClick={onClose} className="w-full">
+          {t('close')}
+        </Button>
       </DialogContent>
     </Dialog>
   );
 }
+
+/* ─── Expanded items panel ───────────────────────────────── */
+
+function ListItemsPanel({
+  items,
+  list,
+  onRemoveItem,
+  onAddToCart,
+  cartId,
+}: {
+  items: ShoppingListItem[];
+  list: ShoppingList;
+  onRemoveItem: (listId: string, itemId: string) => Promise<void>;
+  onAddToCart: (listId: string, cartId: string, itemId?: string) => Promise<{ added: number; failed: number }>;
+  cartId: string | null;
+}) {
+  const t = useTranslations('account.projects.shoppingLists');
+  const [enriched, setEnriched] = useState<EnrichedItem[]>([]);
+  const [cartState, setCartState] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
+
+  const loadDetails = useCallback(async (source: ShoppingListItem[]) => {
+    if (source.length === 0) {
+      setEnriched([]);
+      return;
+    }
+    setEnriched(source.map((i) => ({ ...i, loadingDetails: true })));
+    await Promise.all(
+      source.map(async (item, idx) => {
+        try {
+          const [product, priceData] = await Promise.all([
+            fetchProductById(item.productId),
+            fetchProductPrice(item.productId),
+          ]);
+          setEnriched((prev) =>
+            prev.map((e, i) =>
+              i !== idx
+                ? e
+                : {
+                    ...e,
+                    loadingDetails: false,
+                    productName: product
+                      ? typeof product.name === 'object'
+                        ? ((product.name as any).en ?? Object.values(product.name as any)[0])
+                        : String(product.name)
+                      : item.productId,
+                    imageUrl: (product?.images?.[0] as any)?.url ?? (product?.media?.[0] as any)?.url,
+                    sku: item.sku ?? (product as any)?.sku,
+                    price: priceData?.amount ?? priceData?.originalAmount,
+                    currency: priceData?.currency ?? 'EUR',
+                  },
+            ),
+          );
+        } catch {
+          setEnriched((prev) => prev.map((e, i) => (i !== idx ? e : { ...e, loadingDetails: false })));
+        }
+      }),
+    );
+  }, []);
+
+  useEffect(() => {
+    loadDetails(items);
+  }, [items, loadDetails]);
+
+  const handleAddToCart = async (itemId?: string) => {
+    const key = itemId ?? '__all__';
+    setCartState((s) => ({ ...s, [key]: 'loading' }));
+    try {
+      if (!cartId) throw new Error('No active cart');
+      await onAddToCart(list.id, cartId, itemId);
+      setCartState((s) => ({ ...s, [key]: 'success' }));
+      setTimeout(() => setCartState((s) => ({ ...s, [key]: 'idle' })), 2000);
+    } catch {
+      setCartState((s) => ({ ...s, [key]: 'error' }));
+      setTimeout(() => setCartState((s) => ({ ...s, [key]: 'idle' })), 3000);
+    }
+  };
+
+  const allCartState = cartState['__all__'] ?? 'idle';
+
+  const handleAddAllToCart = async () => {
+    setCartState((s) => ({ ...s, ['__all__']: 'loading' }));
+    try {
+      if (!cartId) throw new Error('No active cart');
+      await onAddToCart(list.id, cartId);
+      setCartState((s) => ({ ...s, ['__all__']: 'success' }));
+      setTimeout(() => setCartState((s) => ({ ...s, ['__all__']: 'idle' })), 2000);
+    } catch {
+      setCartState((s) => ({ ...s, ['__all__']: 'error' }));
+      setTimeout(() => setCartState((s) => ({ ...s, ['__all__']: 'idle' })), 3000);
+    }
+  };
+
+  if (items.length === 0) {
+    return <p className="text-base text-text-secondary text-center py-6">{t('emptyList')}</p>;
+  }
+
+  return (
+    <div>
+      <Table>
+        <TableBody>
+          {enriched.map((item, idx) => {
+            const itemKey = item.id || String(idx);
+            const cs = cartState[itemKey] ?? 'idle';
+            return (
+              <TableRow
+                key={itemKey}
+                className={cn('text-base', idx % 2 === 0 ? 'bg-surface-page' : 'bg-surface-image-background')}
+              >
+                {/* Thumbnail */}
+                <TableCell className="pl-4 py-3">
+                  <div className="w-12 h-12 rounded overflow-hidden bg-surface-image-background flex items-center justify-center shrink-0">
+                    {item.loadingDetails ? (
+                      <div className="w-full h-full animate-pulse bg-surface-disabled" />
+                    ) : item.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Package className="h-5 w-5 text-text-on-disabled" />
+                    )}
+                  </div>
+                </TableCell>
+                {/* Name + SKU */}
+                <TableCell className="px-2 py-4">
+                  {item.loadingDetails ? (
+                    <>
+                      <div className="h-4 w-40 bg-surface-disabled rounded animate-pulse mb-1" />
+                      <div className="h-3 w-24 bg-surface-disabled rounded animate-pulse" />
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-medium">{item.productName ?? item.productId}</div>
+                      {item.sku && <div className="text-sm text-text-placeholders">SKU: {item.sku}</div>}
+                    </>
+                  )}
+                </TableCell>
+                {/* Qty */}
+                <TableCell className="px-2 py-4 text-center">{item.quantity}</TableCell>
+                {/* Price */}
+                <TableCell className="px-2 py-4 text-right font-medium">
+                  {item.loadingDetails ? (
+                    <div className="h-4 w-16 bg-surface-disabled rounded animate-pulse ml-auto" />
+                  ) : item.price != null ? (
+                    formatCurrency(item.price, item.currency ?? 'EUR')
+                  ) : (
+                    '–'
+                  )}
+                </TableCell>
+                {/* Actions */}
+                <TableCell className="px-2 py-4 pr-4 text-right">
+                  <div className="flex justify-end gap-2 items-center">
+                    <Button
+                      size="icon"
+                      variant="neutral"
+                      className="text-text-secondary"
+                      disabled={cs === 'loading'}
+                      onClick={() => handleAddToCart(itemKey)}
+                    >
+                      {cs === 'loading' ? <Spinner /> : cs === 'success' ? '✓' : <ShoppingCart className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="neutral"
+                      className="text-text-secondary hover:text-text-error"
+                      onClick={() => onRemoveItem(list.id, item.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      <div className="flex justify-end px-4 py-3 border-t border-border-primary">
+        <Button disabled={allCartState === 'loading'} onClick={handleAddAllToCart}>
+          {allCartState === 'success'
+            ? t('addedToCart')
+            : allCartState === 'error'
+              ? t('addToCartError')
+              : t('addToCart')}
+          {allCartState === 'loading' ? <Spinner /> : <ShoppingCart />}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main tab ───────────────────────────────────────────── */
 
 export function ProjectShoppingListsTab({
   projectId: _projectId,
@@ -172,15 +440,16 @@ export function ProjectShoppingListsTab({
   const t = useTranslations('account.projects.shoppingLists');
   const cartStore = useCartStore();
   const cartId = cartStore.currentCart?.id ?? null;
+
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [addProductListId, setAddProductListId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [creating, setCreating] = useState(false);
-  const [expandedList, setExpandedList] = useState<string | null>(null);
-  const [addProductListId, setAddProductListId] = useState<string | null>(null);
-  const [cartActionState, setCartActionState] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const handleCreateList = async () => {
+  const handleCreate = async () => {
     if (!newListName.trim()) return;
     setCreating(true);
     try {
@@ -192,43 +461,31 @@ export function ProjectShoppingListsTab({
     }
   };
 
-  const handleAddToCart = async (listId: string, itemId?: string) => {
-    const key = itemId ? `${listId}_${itemId}` : listId;
-    setCartActionState((s) => ({ ...s, [key]: 'loading' }));
-    try {
-      if (!cartId) {
-        throw new Error('No active cart found. Please add an item to your cart first.');
-      }
-      await onAddToCart(listId, cartId, itemId);
-      setCartActionState((s) => ({ ...s, [key]: 'success' }));
-      setTimeout(() => setCartActionState((s) => ({ ...s, [key]: 'idle' })), 2000);
-    } catch {
-      setCartActionState((s) => ({ ...s, [key]: 'error' }));
-      setTimeout(() => setCartActionState((s) => ({ ...s, [key]: 'idle' })), 3000);
-    }
-  };
-
-  const handleDeleteList = async (listId: string) => {
-    if (deleteConfirm !== listId) {
-      setDeleteConfirm(listId);
+  const handleDelete = async (listId: string) => {
+    if (deleteConfirmId !== listId) {
+      setDeleteConfirmId(listId);
       return;
     }
-    await onDeleteList(listId);
-    setDeleteConfirm(null);
+    setDeleting(listId);
+    try {
+      await onDeleteList(listId);
+    } finally {
+      setDeleting(null);
+      setDeleteConfirmId(null);
+    }
   };
 
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div />
-        <Button onClick={() => setShowCreate(true)} size="small" className="gap-2">
+      <div className="flex justify-end">
+        <Button size="small" className="gap-2" onClick={() => setShowCreate(true)}>
           <Plus className="h-4 w-4" />
           {t('newList')}
         </Button>
       </div>
 
-      {/* Create new list inline */}
+      {/* Inline create form */}
       {showCreate && (
         <div className="border border-border-primary rounded-md p-4 bg-surface-image-background flex gap-3 items-end">
           <div className="flex-1 grid gap-1.5">
@@ -237,11 +494,11 @@ export function ProjectShoppingListsTab({
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
               placeholder={t('listNamePlaceholder')}
-              onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               autoFocus
             />
           </div>
-          <Button onClick={handleCreateList} disabled={creating || !newListName.trim()}>
+          <Button onClick={handleCreate} disabled={creating || !newListName.trim()}>
             {creating ? t('creating') : t('createList')}
           </Button>
           <Button variant="neutral" size="icon" onClick={() => setShowCreate(false)}>
@@ -250,146 +507,98 @@ export function ProjectShoppingListsTab({
         </div>
       )}
 
-      {/* Lists */}
       {lists.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border-primary rounded-md gap-3">
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border-primary rounded-md gap-3">
           <List className="h-10 w-10 text-text-on-disabled" />
-          <div>
-            <p className="font-medium">{t('noLists')}</p>
-            <p className="text-sm text-text-secondary">{t('noListsDescription')}</p>
-          </div>
+          <p className="font-medium">{t('noLists')}</p>
+          <p className="text-sm text-text-secondary">{t('noListsDescription')}</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {lists.map((list) => {
-            const isExpanded = expandedList === list.id;
-            const cartKey = list.id;
-            const cartState = cartActionState[cartKey] ?? 'idle';
+        <Table>
+          <TableHeader>
+            <TableRow className="text-base">
+              <TableHead className="!h-14 font-bold">{t('listName')}</TableHead>
+              <TableHead className="!h-14 font-bold w-32">{t('quantity')}</TableHead>
+              <TableHead className="!h-14 font-bold w-56 text-right">{t('actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {lists.map((list, index) => {
+              const isExpanded = expandedId === list.id;
+              const isDeletingThis = deleting === list.id;
 
-            return (
-              <div key={list.id} className="border border-border-primary rounded-md overflow-hidden">
-                {/* List header */}
-                <div className="flex items-center gap-3 px-4 py-3 bg-surface-image-background">
-                  <button
-                    className="flex items-center gap-2 flex-1 text-left"
-                    onClick={() => setExpandedList(isExpanded ? null : list.id)}
+              return (
+                <>
+                  {/* List header row — same style as order rows */}
+                  <TableRow
+                    key={list.id}
+                    className={cn(
+                      'cursor-pointer hover:bg-surface-image-background text-base',
+                      index % 2 === 0 ? 'bg-surface-page' : 'bg-surface-image-background',
+                    )}
+                    onClick={() => setExpandedId(isExpanded ? null : list.id)}
                   >
-                    {isExpanded ? (
-                      <ChevronDown className="h-4 w-4 shrink-0" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 shrink-0" />
-                    )}
-                    <span className="font-medium">{list.name}</span>
-                    <span className="text-xs text-text-secondary">{t('items', { count: list.items.length })}</span>
-                  </button>
+                    <TableCell className="px-2 py-4 font-medium">
+                      <span className="inline-flex items-center gap-2">
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4 shrink-0 text-text-secondary" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 shrink-0 text-text-secondary" />
+                        )}
+                        {list.name || list.id}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-2 py-4 text-text-secondary">
+                      {t('items', { count: list.items.length })}
+                    </TableCell>
+                    <TableCell className="px-2 py-4 text-right">
+                      <div className="flex justify-end gap-2 items-center" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          size="small"
+                          variant="secondary"
+                          className="gap-1.5"
+                          onClick={() => setAddProductListId(list.id)}
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          {t('addProduct')}
+                        </Button>
+                        {deleteConfirmId === list.id && (
+                          <span className="text-xs text-text-error whitespace-nowrap">{t('confirmDeleteList')}</span>
+                        )}
+                        <Button
+                          size="icon"
+                          variant="neutral"
+                          className="h-8 w-8 text-text-secondary hover:text-text-error"
+                          disabled={isDeletingThis}
+                          onClick={() => handleDelete(list.id)}
+                        >
+                          {isDeletingThis ? <Spinner /> : <Trash2 className="h-3.5 w-3.5" />}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
 
-                  <div className="flex gap-2 items-center">
-                    <Button
-                      size="small"
-                      variant="secondary"
-                      className="gap-1.5"
-                      disabled={list.items.length === 0 || cartState === 'loading'}
-                      onClick={() => handleAddToCart(list.id)}
-                    >
-                      {cartState === 'loading' ? <Spinner /> : <ShoppingCart className="h-3.5 w-3.5" />}
-                      {cartState === 'success'
-                        ? t('addedToCart')
-                        : cartState === 'error'
-                          ? t('addToCartError')
-                          : t('addToCart')}
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="secondary"
-                      className="gap-1.5"
-                      onClick={() => setAddProductListId(list.id)}
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      {t('addProduct')}
-                    </Button>
-                    {deleteConfirm === list.id && (
-                      <span className="text-xs text-text-error">{t('confirmDeleteList')}</span>
-                    )}
-                    <Button
-                      size="icon"
-                      variant="neutral"
-                      className="text-text-secondary hover:text-text-error h-8 w-8"
-                      onClick={() => handleDeleteList(list.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Items table */}
-                {isExpanded && (
-                  <div className="border-t border-border-primary">
-                    {list.items.length === 0 ? (
-                      <div className="py-6 text-center text-sm text-text-secondary">{t('emptyList')}</div>
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>{t('product')}</TableHead>
-                            <TableHead className="w-20 text-center">{t('quantity')}</TableHead>
-                            <TableHead className="w-36 text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {list.items.map((item) => {
-                            const itemCartKey = `${list.id}_${item.id}`;
-                            const itemCartState = cartActionState[itemCartKey] ?? 'idle';
-                            const name =
-                              typeof item.name === 'object'
-                                ? ((item.name as Record<string, string>)?.en ?? item.productId)
-                                : (item.name ?? item.productId);
-
-                            return (
-                              <TableRow key={item.id}>
-                                <TableCell>
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-medium">{name}</span>
-                                    {item.sku && <span className="text-xs text-text-secondary">SKU: {item.sku}</span>}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-center">{item.quantity}</TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-1">
-                                    <Button
-                                      size="small"
-                                      variant="secondary"
-                                      className="h-7 gap-1 text-xs"
-                                      disabled={itemCartState === 'loading'}
-                                      onClick={() => handleAddToCart(list.id, item.id)}
-                                    >
-                                      {itemCartState === 'loading' ? <Spinner /> : <ShoppingCart className="h-3 w-3" />}
-                                      {itemCartState === 'success' ? '✓' : t('addOneToCart')}
-                                    </Button>
-                                    <Button
-                                      size="icon"
-                                      variant="neutral"
-                                      className="h-7 w-7 text-text-secondary hover:text-text-error"
-                                      onClick={() => onRemoveItem(list.id, item.id)}
-                                    >
-                                      <X className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  {/* Expanded items — inline, no extra border/card */}
+                  {isExpanded && (
+                    <TableRow key={`${list.id}-items`} className="hover:bg-transparent">
+                      <TableCell colSpan={3} className="p-0 pb-4 border-t border-border-primary">
+                        <ListItemsPanel
+                          items={list.items}
+                          list={list}
+                          onRemoveItem={onRemoveItem}
+                          onAddToCart={onAddToCart}
+                          cartId={cartId}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
+              );
+            })}
+          </TableBody>
+        </Table>
       )}
 
-      {/* Add product dialog */}
       {addProductListId && (
         <AddProductDialog listId={addProductListId} onAdd={onAddItem} onClose={() => setAddProductListId(null)} />
       )}

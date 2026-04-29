@@ -165,7 +165,11 @@
       "addedToCart": "In den Warenkorb gelegt",
       "addToCartError": "Fehler beim Hinzufügen zum Warenkorb",
       "emptyList": "Diese Liste ist leer",
-      "noResults": "Keine Produkte gefunden"
+      "noResults": "Keine Produkte gefunden",
+      "add": "Hinzufügen",
+      "close": "Schließen",
+      "price": "Preis",
+      "actions": "Aktionen"
     },
     "orders": {
       "title": "Zugehörige Aufträge",

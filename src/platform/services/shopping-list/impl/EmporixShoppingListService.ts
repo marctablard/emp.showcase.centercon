@@ -16,9 +16,9 @@ export class EmporixShoppingListService implements IShoppingListService {
 
   async getShoppingLists(projectId?: string): Promise<ShoppingList[]> {
     try {
-      const { items } = await this.shoppingListApi.getLists(100, 1);
+      // q-filter is a best-effort hint to Emporix; client-side filter is the reliable guard
+      const { items } = await this.shoppingListApi.getLists(100, 1, projectId);
       const lists = items.map((e) => this.mapToShoppingList(e));
-
       if (projectId) {
         return lists.filter((l) => l.projectId === projectId);
       }
@@ -85,12 +85,12 @@ export class EmporixShoppingListService implements IShoppingListService {
   private mapToShoppingList(entity: any): ShoppingList {
     return {
       id: entity.id ?? '',
-      name: entity.name ?? '',
+      name: entity.name ?? entity.id ?? '',
       items: (entity.items ?? []).map((item: any) => ({
-        id: item.id ?? '',
-        productId: item.product?.id ?? item.itemYrn ?? '',
+        id: String(item.id ?? ''),
+        productId: item.productId ?? item.product?.id ?? item.itemYrn ?? '',
         quantity: item.quantity ?? 1,
-        sku: item.product?.sku,
+        sku: item.productId ?? item.product?.sku,
         unitPrice: item.price?.value,
         currency: item.price?.currency,
       })),

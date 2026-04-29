@@ -84,7 +84,6 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
             <H2 variant="h4">{name}</H2>
             <ProjectStatusBadge status={project.status} />
           </div>
-          {project.comment && <p className="text-text-secondary mt-1">{project.comment}</p>}
         </div>
       </div>
 

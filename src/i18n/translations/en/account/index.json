@@ -250,7 +250,11 @@
       "addedToCart": "Added to cart",
       "addToCartError": "Failed to add to cart",
       "emptyList": "This list is empty",
-      "noResults": "No products found"
+      "noResults": "No products found",
+      "add": "Add",
+      "close": "Close",
+      "price": "Price",
+      "actions": "Actions"
     },
     "orders": {
       "title": "Associated Orders",

@@ -75,41 +75,68 @@ export function useProject(projectId: string) {
 
   const deleteShoppingList = useCallback(
     async (listId: string): Promise<void> => {
+      const list = shoppingLists.find((l) => l.id === listId);
       const response = await fetch(`/api/projects/${projectId}/shopping-lists/${listId}`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listName: list?.name ?? '' }),
       });
-      if (!response.ok) throw new Error(`Failed to delete shopping list: ${response.statusText}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error ?? `Failed to delete shopping list: ${response.statusText}`);
+      }
       setShoppingLists((prev) => prev.filter((l) => l.id !== listId));
     },
-    [projectId],
+    [projectId, shoppingLists],
   );
 
   const addItemToList = useCallback(
     async (listId: string, productId: string, quantity: number): Promise<ShoppingListItem> => {
+      // Include current list state so the server can do a single PUT without a GET roundtrip
+      const currentList = shoppingLists.find((l) => l.id === listId);
       const response = await fetch(`/api/projects/${projectId}/shopping-lists/${listId}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity }),
+        body: JSON.stringify({
+          productId,
+          quantity,
+          listName: currentList?.name ?? '',
+          currentItems: (currentList?.items ?? []).map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        }),
       });
-      if (!response.ok) throw new Error(`Failed to add item: ${response.statusText}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error ?? `Failed to add item: ${response.statusText}`);
+      }
       const item = await response.json();
-      setShoppingLists((prev) => prev.map((l) => (l.id === listId ? { ...l, items: [...l.items, item] } : l)));
+      setShoppingLists((prev) =>
+        prev.map((l) => (l.id === listId ? { ...l, items: [...l.items, { ...item, productId }] } : l)),
+      );
       return item;
     },
-    [projectId],
+    [projectId, shoppingLists],
   );
 
   const removeItemFromList = useCallback(
     async (listId: string, itemId: string): Promise<void> => {
+      const currentList = shoppingLists.find((l) => l.id === listId);
       const response = await fetch(`/api/projects/${projectId}/shopping-lists/${listId}/items/${itemId}`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listName: currentList?.name ?? '',
+          currentItems: currentList?.items ?? [],
+        }),
       });
-      if (!response.ok) throw new Error(`Failed to remove item: ${response.statusText}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error ?? `Failed to remove item: ${response.statusText}`);
+      }
       setShoppingLists((prev) =>
         prev.map((l) => (l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== itemId) } : l)),
       );
     },
-    [projectId],
+    [projectId, shoppingLists],
   );
 
   const addListToCart = useCallback(

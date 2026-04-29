@@ -1,31 +1,46 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
 import server from '@/platform/server';
+import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
-import type { ShoppingListService } from '@/platform/services/shopping-list/ShoppingListService';
 
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string; listId: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string; listId: string }> }) {
+  const logger = server.get<LoggerService>('LoggerService');
   try {
     const { listId } = await params;
-    const shoppingListService = server.get<ShoppingListService>('ShoppingListService');
-    const list = await shoppingListService.getShoppingList(listId);
-    if (!list) return NextResponse.json({ error: 'Shopping list not found' }, { status: 404 });
-    return NextResponse.json(list);
-  } catch (error) {
-    const logger = server.get<LoggerService>('LoggerService');
-    logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error fetching shopping list');
-    return NextResponse.json({ error: 'Failed to fetch shopping list' }, { status: 500 });
-  }
-}
+    const body = await request.json().catch(() => ({}));
+    const listName: string = body.listName ?? '';
 
-export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string; listId: string }> }) {
-  try {
-    const { listId } = await params;
-    const shoppingListService = server.get<ShoppingListService>('ShoppingListService');
-    await shoppingListService.deleteShoppingList(listId);
+    const api = server.get<EmporixApiInvoker>('EmporixApiInvoker');
+    const config = server.get('EmporixConfig') as { tenant: string };
+    const customerService = server.get<CustomerService>('CustomerService');
+    const customer = await customerService.getCustomer();
+
+    if (!customer?.id) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // DELETE uses customer ID in path; list is identified by name query param
+    let url = `shoppinglist/${config.tenant}/shopping-lists/${customer.id}`;
+    if (listName) url += `?name=${encodeURIComponent(listName)}`;
+
+    const res = await api.authenticatedFetch(url, { method: 'DELETE' }, 'session');
+
+    if (!res.ok) {
+      const errorBody = await res.text();
+      logger.error(
+        { listId, customerId: customer.id, status: res.status, body: errorBody },
+        'DELETE shopping list failed',
+      );
+      return NextResponse.json(
+        { error: `Failed to delete shopping list: ${res.status} ${errorBody}` },
+        { status: res.status },
+      );
+    }
+
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    const logger = server.get<LoggerService>('LoggerService');
     logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error deleting shopping list');
     return NextResponse.json({ error: 'Failed to delete shopping list' }, { status: 500 });
   }

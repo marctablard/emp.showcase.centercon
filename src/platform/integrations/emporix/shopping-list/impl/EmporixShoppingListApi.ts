@@ -23,12 +23,18 @@ class EmporixShoppingListApi implements IEmporixShoppingListApi {
     return `shoppinglist/${this.config.tenant}/shopping-lists`;
   }
 
-  async getLists(pageSize = 20, pageNumber = 1): Promise<{ items: EmporixShoppingList[]; total: number }> {
-    const response = await this.apiClient.authenticatedFetch(
-      `${this.baseUrl()}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
-      { method: 'GET' },
-      'customer-saas',
-    );
+  async getLists(
+    pageSize = 100,
+    pageNumber = 1,
+    projectId?: string,
+  ): Promise<{ items: EmporixShoppingList[]; total: number }> {
+    let url = `${this.baseUrl()}?pageSize=${pageSize}&pageNumber=${pageNumber}`;
+    if (projectId) {
+      url += `&q=${encodeURIComponent(`mixins.project.projectid:${projectId}`)}`;
+    }
+    const response = await this.apiClient.authenticatedFetch(url, { method: 'GET', cache: 'no-store' }, 'session', {
+      scopes: ['shoppinglist.shoppinglist_manage'],
+    });
 
     if (!response.ok) {
       if (response.status === 404) return { items: [], total: 0 };
@@ -37,16 +43,45 @@ class EmporixShoppingListApi implements IEmporixShoppingListApi {
     }
 
     const data = await response.json();
-    const items: EmporixShoppingList[] = Array.isArray(data) ? data : (data.items ?? []);
-    const total = data.totalCount ?? data.total ?? items.length;
-    return { items, total };
+    const raw: any[] = Array.isArray(data) ? data : (data.items ?? []);
+
+    // The Emporix Shopping List API returns one customer object where each shopping
+    // list is stored as a named key:
+    //   [{ customerId: "C-xxx", "List A": { items, mixins, ... }, "List B": { ... } }]
+    // We need to unpack all list keys from each customer object.
+    const RESERVED = new Set(['customerId', 'metadata', 'id']);
+    const items: EmporixShoppingList[] = [];
+
+    for (const entry of raw) {
+      const listKeys = Object.keys(entry).filter(
+        (k) => !RESERVED.has(k) && typeof entry[k] === 'object' && entry[k] !== null,
+      );
+      if (listKeys.length === 0) {
+        // Already a flat list object (future-proof)
+        items.push(entry);
+      } else {
+        for (const key of listKeys) {
+          const listData = entry[key] as Record<string, any>;
+          items.push({
+            id: key, // list name is the stable identifier
+            name: key,
+            items: listData.items ?? [],
+            mixins: listData.mixins ?? {},
+            metadata: listData.metadata ?? {},
+          });
+        }
+      }
+    }
+
+    return { items, total: items.length };
   }
 
   async getList(listId: string): Promise<EmporixShoppingList | null> {
     const response = await this.apiClient.authenticatedFetch(
       `${this.baseUrl()}/${listId}`,
-      { method: 'GET' },
-      'customer-saas',
+      { method: 'GET', cache: 'no-store' },
+      'session',
+      { scopes: ['shoppinglist.shoppinglist_manage'] },
     );
 
     if (!response.ok) {
@@ -77,7 +112,8 @@ class EmporixShoppingListApi implements IEmporixShoppingListApi {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       },
-      'customer-saas',
+      'session',
+      { scopes: ['shoppinglist.shoppinglist_manage'] },
     );
 
     if (!response.ok) {
@@ -85,17 +121,23 @@ class EmporixShoppingListApi implements IEmporixShoppingListApi {
       throw new Error(`Failed to create shopping list: ${response.statusText} ${errorDetails}`);
     }
 
-    // API returns { id } — fetch full object
+    // API returns { id } — return a minimal object; full data loads on next getLists call
     const created = await response.json();
-    const full = await this.getList(created.id ?? created);
-    return full ?? ({ id: created.id, name, items: [] } as any);
+    return {
+      id: created.id ?? created,
+      name,
+      items: [],
+      mixins: body.mixins,
+      metadata: body.metadata,
+    } as EmporixShoppingList;
   }
 
   async deleteList(listId: string): Promise<void> {
     const response = await this.apiClient.authenticatedFetch(
       `${this.baseUrl()}/${listId}`,
       { method: 'DELETE' },
-      'customer-saas',
+      'session',
+      { scopes: ['shoppinglist.shoppinglist_manage'] },
     );
 
     if (!response.ok) {
@@ -105,39 +147,57 @@ class EmporixShoppingListApi implements IEmporixShoppingListApi {
   }
 
   async addItem(listId: string, productId: string, quantity: number): Promise<EmporixShoppingListItem> {
-    const body = {
-      product: { id: productId },
-      quantity,
-    };
+    const existing = await this.findListById(listId);
+    if (!existing) throw new Error(`Shopping list ${listId} not found`);
 
-    const response = await this.apiClient.authenticatedFetch(
-      `${this.baseUrl()}/${listId}/items`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      },
-      'customer-saas',
-    );
+    const newItem: EmporixShoppingListItem = { productId, quantity };
+    const updatedItems = [...(existing.items ?? []), newItem];
 
-    if (!response.ok) {
-      const errorDetails = await response.text();
-      throw new Error(`Failed to add item to shopping list: ${response.statusText} ${errorDetails}`);
-    }
-
-    return response.json();
+    await this.putList(listId, existing, updatedItems);
+    return newItem;
   }
 
   async removeItem(listId: string, itemId: string): Promise<void> {
+    const existing = await this.findListById(listId);
+    if (!existing) throw new Error(`Shopping list ${listId} not found`);
+
+    const updatedItems = (existing.items ?? []).filter((item) => String(item.id) !== String(itemId));
+
+    await this.putList(listId, existing, updatedItems);
+  }
+
+  private async findListById(listId: string): Promise<EmporixShoppingList | null> {
+    // No individual-list GET endpoint — fetch all and find by ID
+    const { items } = await this.getLists(100, 1);
+    return items.find((l) => String(l.id) === String(listId)) ?? null;
+  }
+
+  private async putList(
+    listId: string,
+    existing: EmporixShoppingList,
+    items: EmporixShoppingListItem[],
+  ): Promise<void> {
+    const body: Record<string, any> = {
+      name: existing.name ?? '',
+      items,
+    };
+    if (existing.mixins) body.mixins = existing.mixins;
+    if (existing.metadata) body.metadata = existing.metadata;
+
     const response = await this.apiClient.authenticatedFetch(
-      `${this.baseUrl()}/${listId}/items/${itemId}`,
-      { method: 'DELETE' },
-      'customer-saas',
+      `${this.baseUrl()}/${listId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      },
+      'session',
+      { scopes: ['shoppinglist.shoppinglist_manage'] },
     );
 
     if (!response.ok) {
       const errorDetails = await response.text();
-      throw new Error(`Failed to remove item from shopping list: ${response.statusText} ${errorDetails}`);
+      throw new Error(`Failed to update shopping list: ${response.statusText} ${errorDetails}`);
     }
   }
 
@@ -167,7 +227,8 @@ class EmporixShoppingListApi implements IEmporixShoppingListApi {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated),
       },
-      'customer-saas',
+      'session',
+      { scopes: ['shoppinglist.shoppinglist_manage'] },
     );
 
     if (!response.ok) {
