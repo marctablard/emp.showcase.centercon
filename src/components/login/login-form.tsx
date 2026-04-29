@@ -78,16 +78,20 @@ export function LoginForm({
     setSubmitting(true);
 
     try {
-      const success = await login(values.username, values.password, callbackUrl);
+      // In dialog mode with onSuccess, skip callbackUrl so login() doesn't redirect away —
+      // the caller (e.g. quick-order) handles post-login action via the onSuccess callback.
+      const loginCallbackUrl = isDialog && onSuccess ? undefined : callbackUrl;
+      const success = await login(values.username, values.password, loginCallbackUrl);
 
       if (!success) {
         setError(t('invalidCredentials'));
         form.resetField('password', { defaultValue: '' });
+      } else if (isDialog && onSuccess) {
+        onSuccess();
       } else if (!callbackUrl) {
-        // No callbackUrl - just call onSuccess callback
         onSuccess?.();
       }
-      // On success with callbackUrl, the login() function handles the redirect via window.location.href
+      // On success with callbackUrl (non-dialog), the login() function handles the redirect via window.location.href
     } finally {
       setSubmitting(false);
     }

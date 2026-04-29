@@ -8,6 +8,7 @@ import LoginDialog from '@/components/login/login-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { H5 } from '@/components/ui/h';
+import { useCart } from '@/hooks/cart/useCart';
 import type { QuickOrderItem } from '@/hooks/quick-order/useQuickOrderList';
 import { formatCurrency } from '@/lib/utils';
 
@@ -34,6 +35,7 @@ export function QuickOrderOverview({
 }: QuickOrderOverviewProps) {
   const t = useTranslations('quick-order.overview');
   const { status: sessionStatus } = useSession();
+  const { refetch: fetchCart } = useCart();
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const pendingActionRef = useRef<(() => Promise<void>) | null>(null);
@@ -58,9 +60,13 @@ export function QuickOrderOverview({
     const pending = pendingActionRef.current;
     if (pending) {
       pendingActionRef.current = null;
-      void pending();
+      const run = async (): Promise<void> => {
+        await fetchCart();
+        await pending();
+      };
+      void run();
     }
-  }, []);
+  }, [fetchCart]);
 
   return (
     <>
