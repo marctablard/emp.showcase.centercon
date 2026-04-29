@@ -1,10 +1,12 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { resolveLegalEntityIdFromSessionAndCustomer } from '@/lib/common/legal-entity-context';
 import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
 import server from '@/platform/server';
 import type { CustomerService } from '@/platform/services/customer/CustomerService';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { ProjectCreateDto } from '@/platform/services/model/project/project';
+import type { SessionService } from '@/platform/services/session/SessionService';
 
 const ENTITY_TYPE = 'PROJECTS';
 const MIXIN_KEY = 'projectinfo';
@@ -21,10 +23,11 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    logger.info(
-      { customerId: customer.id, legalEntityId: customer.legalEntityId },
-      'GET /api/projects: fetching all project instances',
-    );
+    const sessionService = server.get<SessionService>('SessionService');
+    const session = await sessionService.getCurrent();
+    const legalEntityId = resolveLegalEntityIdFromSessionAndCustomer(session, customer);
+
+    logger.info({ customerId: customer.id, legalEntityId }, 'GET /api/projects: fetching all project instances');
 
     const api = server.get<EmporixApiInvoker>('EmporixApiInvoker');
     const config = server.get('EmporixConfig') as { tenant: string };
@@ -60,18 +63,18 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    // Filter client-side to show only projects belonging to this customer's company
+    // Filter to show only projects belonging to this customer's company (session-aware)
     const filtered = instances.filter((it: any) => {
       const info = it?.mixins?.[MIXIN_KEY];
       if (!info) return false;
-      if (customer.legalEntityId) {
-        return info.company?.id === customer.legalEntityId;
+      if (legalEntityId) {
+        return info.company?.id === legalEntityId;
       }
       return info.customer?.id === customer.id;
     });
 
     logger.info(
-      { total: instances.length, filtered: filtered.length, legalEntityId: customer.legalEntityId },
+      { total: instances.length, filtered: filtered.length, legalEntityId },
       'GET /api/projects: filtered results',
     );
 

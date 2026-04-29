@@ -6,11 +6,12 @@ import { FolderKanban, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
 import type { Project } from '@/platform/services/model/project/project';
 
 interface CartProjectSelectorProps {
   cartId: string;
-  /** Pre-selected project ID (e.g. from shopping list context) */
+  /** Pre-selected project ID (e.g. from shopping list context or existing cart mixin) */
   initialProjectId?: string;
   onProjectSelected?: (projectId: string | null) => void;
 }
@@ -22,7 +23,9 @@ export function CartProjectSelector({ cartId, initialProjectId, onProjectSelecte
   const locale = useLocale();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(() => {
+    // Prefer initialProjectId (from cart mixin or shopping list context) over localStorage
     if (initialProjectId) return initialProjectId;
     if (typeof window !== 'undefined') {
       return localStorage.getItem(PROJECT_CART_STORAGE_KEY + cartId) ?? null;
@@ -30,16 +33,42 @@ export function CartProjectSelector({ cartId, initialProjectId, onProjectSelecte
     return null;
   });
 
+  // Sync initialProjectId changes (e.g. cart data loads asynchronously after mount)
+  useEffect(() => {
+    if (initialProjectId && !selectedId) {
+      setSelectedId(initialProjectId);
+    }
+  }, [initialProjectId, selectedId]);
+
   useEffect(() => {
     fetch('/api/projects')
       .then((r) => r.json())
       .then((data) => {
-        const open = (data as Project[]).filter((p) => p.status === 'open');
-        setProjects(open);
+        // Show all non-closed projects so customers can assign any active project
+        const active = (data as Project[]).filter((p) => p.status !== 'closed');
+        setProjects(active);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const persistProjectToCart = useCallback(
+    async (projectId: string | null) => {
+      setSaving(true);
+      try {
+        await fetch(`/api/cart/${cartId}/project`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId }),
+        });
+      } catch {
+        // Non-fatal: mixin update is best-effort; localStorage is the fallback
+      } finally {
+        setSaving(false);
+      }
+    },
+    [cartId],
+  );
 
   const handleSelect = useCallback(
     (value: string) => {
@@ -53,53 +82,46 @@ export function CartProjectSelector({ cartId, initialProjectId, onProjectSelecte
         }
       }
       onProjectSelected?.(newId);
+      void persistProjectToCart(newId);
     },
-    [cartId, onProjectSelected],
+    [cartId, onProjectSelected, persistProjectToCart],
   );
 
   const handleClear = () => handleSelect('__none__');
 
   if (loading || projects.length === 0) return null;
 
-  const selectedProject = projects.find((p) => p.id === selectedId);
-  const selectedName = selectedProject
-    ? ((selectedProject.name as Record<string, string>)?.[locale] ??
-      (selectedProject.name as Record<string, string>)?.en ??
-      selectedProject.id)
-    : undefined;
-
   return (
-    <div className="flex items-center gap-3 py-3 px-4 bg-surface-secondary rounded-md border border-border-primary">
-      <FolderKanban className="h-4 w-4 text-text-secondary shrink-0" />
-      <div className="flex-1 min-w-0">
-        <Label className="text-xs text-text-secondary mb-1 block">{t('label')}</Label>
-        <Select value={selectedId ?? '__none__'} onValueChange={handleSelect}>
-          <SelectTrigger className="h-8 text-sm bg-surface-page">
-            <SelectValue placeholder={t('placeholder')}>{selectedName ?? t('placeholder')}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__none__">{t('placeholder')}</SelectItem>
-            {projects.map((p) => {
-              const name =
-                (p.name as Record<string, string>)?.[locale] ?? (p.name as Record<string, string>)?.en ?? p.id;
-              return (
-                <SelectItem key={p.id} value={p.id}>
-                  {name}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-      </div>
-      {selectedId && (
+    <div className="flex items-center gap-3 py-4 border-b border-border-primary">
+      <FolderKanban className="h-5 w-5 text-text-secondary shrink-0" />
+      <Label className="text-base font-medium text-text-headings whitespace-nowrap cursor-default">{t('label')}</Label>
+      <Select value={selectedId ?? '__none__'} onValueChange={handleSelect} disabled={saving || loading}>
+        <SelectTrigger className="flex-1">
+          <SelectValue placeholder={t('placeholder')} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__none__">{t('placeholder')}</SelectItem>
+          {projects.map((p) => {
+            const name = (p.name as Record<string, string>)?.[locale] ?? (p.name as Record<string, string>)?.en ?? p.id;
+            return (
+              <SelectItem key={p.id} value={p.id}>
+                {name}
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+      {saving && <Spinner variant="xs" className="shrink-0" />}
+      {selectedId && !saving && (
         <Button
           variant="neutral"
           size="icon"
-          className="h-8 w-8 shrink-0"
+          className="shrink-0"
           onClick={handleClear}
+          disabled={saving}
           title={t('clearSelection')}
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" />
         </Button>
       )}
     </div>

@@ -63,7 +63,7 @@ export class EmporixShoppingListService implements IShoppingListService {
     try {
       const item = await this.shoppingListApi.addItem(listId, productId, quantity);
       return {
-        id: item.id ?? '',
+        id: String(item.id ?? ''),
         productId: item.product?.id ?? productId,
         quantity: item.quantity ?? quantity,
       };

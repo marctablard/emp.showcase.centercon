@@ -263,9 +263,23 @@ function ListItemsPanel({
   onRemoveItem: (listId: string, itemId: string) => Promise<void>;
 }) {
   const t = useTranslations('account.projects.shoppingLists');
-  const { addItem } = useCart();
+  const { addItem, cartId } = useCart();
   const [enriched, setEnriched] = useState<EnrichedItem[]>([]);
   const [cartState, setCartState] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
+
+  // Silently assign the shopping list's project to the cart after adding items
+  const assignProjectToCart = useCallback(async () => {
+    if (!cartId || !list.projectId) return;
+    try {
+      await fetch(`/api/cart/${cartId}/project`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId: list.projectId }),
+      });
+    } catch {
+      // best-effort — does not affect add-to-cart outcome
+    }
+  }, [cartId, list.projectId]);
 
   const loadDetails = useCallback(async (source: ShoppingListItem[]) => {
     if (source.length === 0) {
@@ -316,6 +330,7 @@ function ListItemsPanel({
     setCartState((s) => ({ ...s, [key]: 'loading' }));
     try {
       await addItem(item.productId, item.quantity ?? 1);
+      void assignProjectToCart();
       setCartState((s) => ({ ...s, [key]: 'success' }));
       setTimeout(() => setCartState((s) => ({ ...s, [key]: 'idle' })), 2000);
     } catch (err) {
@@ -350,6 +365,7 @@ function ListItemsPanel({
         console.error('[ShoppingList] addAllToCart item failed', { productId: item.productId, err });
       }
     }
+    if (anySucceeded) void assignProjectToCart();
     setCartState((s) => ({
       ...s,
       __all__: anyFailed && !anySucceeded ? 'error' : 'success',
