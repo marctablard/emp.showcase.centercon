@@ -25,7 +25,7 @@ export function QuickOrderProductList({ items, onRemoveProduct, onUpdateQuantity
   return (
     <div data-testid="quick-order-product-list">
       {/* Desktop/Tablet table layout */}
-      <div className="hidden md:block">
+      <div className="hidden sm:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border-primary text-left">
@@ -49,7 +49,7 @@ export function QuickOrderProductList({ items, onRemoveProduct, onUpdateQuantity
       </div>
 
       {/* Mobile card layout */}
-      <div className="md:hidden">
+      <div className="sm:hidden">
         {items.map((item) => (
           <QuickOrderProductCard
             key={item.product.id}

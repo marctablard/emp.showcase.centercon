@@ -81,17 +81,17 @@ export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQua
               )}
             </div>
           )}
-        </div>
-      </div>
 
-      <div className="mt-3 flex justify-start">
-        <QuantityStepper
-          value={quantity}
-          onChange={onUpdateQuantity}
-          size="sm"
-          max={availability?.availableQuantity}
-          onDelete={onRemove}
-        />
+          <div className="mt-2 w-fit">
+            <QuantityStepper
+              value={quantity}
+              onChange={onUpdateQuantity}
+              size="sm"
+              max={availability?.availableQuantity}
+              onDelete={onRemove}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

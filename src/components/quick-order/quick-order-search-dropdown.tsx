@@ -1,7 +1,6 @@
 'use client';
 
 import { forwardRef, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Spinner } from '@/components/ui/spinner';
 import { useL10n } from '@/hooks/useL10n';
