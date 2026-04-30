@@ -88,20 +88,20 @@ export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSea
                 </div>
                 <div className="flex-1 min-w-0">
                   {brandName && (
-                    <p className="text-xs text-text-placeholders truncate">
+                    <p className="text-sm text-text-placeholders truncate">
                       <HighlightedText text={brandName} />
                     </p>
                   )}
                   <p className="text-sm font-headlines text-text-body truncate">
                     <HighlightedText text={productName || ''} />
                   </p>
-                  <p className="text-xs text-text-placeholders">{itemNumber}</p>
+                  <p className="text-sm text-text-placeholders">{itemNumber}</p>
                 </div>
-                <div className="flex-shrink-0 text-right">
+                <div className="flex-shrink-0 text-right self-end">
                   {product.price && (
                     <>
                       {product.price.originalAmount && product.price.originalAmount > product.price.amount && (
-                        <p className="text-xs text-text-placeholders line-through">
+                        <p className="text-sm text-text-placeholders line-through">
                           {formatCurrency(product.price.originalAmount, product.price.currency)}
                         </p>
                       )}

@@ -184,10 +184,10 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
   }, []);
 
   return (
-    <div className="bg-surface-page rounded-md p-6 shadow-sm flex flex-col gap-4 items-end">
+    <div className="bg-surface-page rounded-md p-6 shadow-sm flex flex-col gap-4 items-end overflow-hidden">
       <H5 className="mb-0 self-start w-full">{t('tabs.addManually')}</H5>
       <div className="flex flex-col md:flex-row gap-6 self-stretch">
-        <div ref={containerRef} className={cn('relative flex-1 border-r border-border-primary pr-6')}>
+        <div ref={containerRef} className={cn('relative flex-1 min-w-0 md:border-r md:border-border-primary md:pr-6')}>
           <label className="font-bold text-base mb-1 block">{t('search.label')}</label>
           <p className="text-[12px] leading-5 text-text-placeholders mb-2">{t('search.hint')}</p>
           <div className="relative">

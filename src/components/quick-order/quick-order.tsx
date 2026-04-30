@@ -99,20 +99,20 @@ export function QuickOrder() {
   }, [items, addItemsToCart, clearAll, router, toast, t]);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 min-w-0 overflow-hidden">
       <H1 className="mb-0">{t('title')}</H1>
 
       <Tabs defaultValue="manual" className="gap-0">
         <TabsList className="inline-flex h-auto w-full items-center justify-start gap-0 rounded-none border-b border-border-primary bg-transparent p-0">
           <TabsTrigger
             value="manual"
-            className="flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-[28px] leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
+            className="flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-lg md:text-[28px] md:leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
           >
             {t('tabs.productsSearch')}
           </TabsTrigger>
           <TabsTrigger
             value="bulk"
-            className="flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-[28px] leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
+            className="flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-lg md:text-[28px] md:leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
           >
             {t('tabs.bulkUpload')}
           </TabsTrigger>
@@ -132,7 +132,7 @@ export function QuickOrder() {
       </Tabs>
 
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="flex-1 flex flex-col gap-6 min-w-0">
           <div className="flex flex-wrap gap-6">
             <Button
               variant="link"

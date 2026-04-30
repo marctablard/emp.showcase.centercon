@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ interface QuantityStepperProps {
   decrementLabel?: string;
   incrementLabel?: string;
   inputLabel?: string;
+  onDelete?: () => void;
 }
 
 export function QuantityStepper({
@@ -27,9 +28,12 @@ export function QuantityStepper({
   disabled = false,
   className,
   size = 'md',
+  onDelete,
 }: QuantityStepperProps) {
   const height = size === 'sm' ? 'h-9' : 'h-12';
   const iconSize = size === 'sm' ? 'size-3.5' : 'size-4';
+  const isAtMin = value <= min;
+  const showDelete = isAtMin && !!onDelete;
 
   const handleDecrement = useCallback(() => {
     if (value > min) {
@@ -62,12 +66,12 @@ export function QuantityStepper({
           'border-e-0 border-border-primary rounded-none rounded-ss-sm rounded-es-sm disabled:border-border-primary',
           height,
         )}
-        onClick={handleDecrement}
-        disabled={disabled || value <= min}
-        aria-label="Decrease quantity"
+        onClick={showDelete ? onDelete : handleDecrement}
+        disabled={disabled || (isAtMin && !onDelete)}
+        aria-label={showDelete ? 'Remove item' : 'Decrease quantity'}
         data-testid="quantity-stepper-decrement"
       >
-        <Minus className={iconSize} />
+        {showDelete ? <Trash2 className={iconSize} /> : <Minus className={iconSize} />}
       </Button>
       <Input
         type="number"

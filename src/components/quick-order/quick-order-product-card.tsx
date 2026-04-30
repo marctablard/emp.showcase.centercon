@@ -2,14 +2,13 @@
 
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { QuantityStepper } from '@/components/ui/molecules/quantity-stepper';
 import { useAvailability } from '@/hooks/product/useAvailability';
 import { useL10n } from '@/hooks/useL10n';
 import { Link } from '@/i18n/navigation';
 import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
+import { HighlightedText } from './highlighted-text';
 
 interface QuickOrderProductCardProps {
   product: Product;
@@ -51,27 +50,31 @@ export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQua
         </div>
 
         <div className="flex-1 min-w-0">
-          {brandName && <p className="text-xs text-text-placeholders">{brandName}</p>}
+          {brandName && (
+            <p className="text-sm text-text-placeholders">
+              <HighlightedText text={brandName} />
+            </p>
+          )}
           <Link
             href={`/product/${product.id}`}
             className="text-sm font-headlines font-bold text-text-body hover:underline line-clamp-2"
           >
-            {productName}
+            <HighlightedText text={productName} />
           </Link>
-          <p className="text-xs text-text-placeholders">{itemNumber}</p>
+          <p className="text-sm text-text-placeholders">{itemNumber}</p>
 
           {product.price && (
             <div className="mt-1">
               {product.price.originalAmount && product.price.originalAmount > product.price.amount && (
-                <p className="text-xs text-text-placeholders line-through">
+                <p className="text-sm text-text-placeholders line-through">
                   {formatCurrency(product.price.originalAmount, product.price.currency)}
                 </p>
               )}
-              <p className="text-sm font-bold font-headlines">
+              <p className="text-base font-bold font-headlines">
                 {formatCurrency(product.price.tax?.netValue || product.price.amount, product.price.currency)}
               </p>
               {product.price.tax?.netValue && (
-                <span className="text-xs text-text-on-disabled">
+                <span className="text-sm text-text-on-disabled">
                   {tCart('gross')}
                   {formatCurrency(product.price.tax.grossValue, product.price.currency)}
                 </span>
@@ -79,21 +82,16 @@ export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQua
             </div>
           )}
         </div>
-
-        <Button
-          variant="link"
-          size="icon"
-          onClick={onRemove}
-          aria-label="Remove product"
-          className="flex-shrink-0"
-          data-testid={`remove-product-${product.id}`}
-        >
-          <Trash2 className="h-4 w-4 text-icon-secondary" />
-        </Button>
       </div>
 
       <div className="mt-3 flex justify-start">
-        <QuantityStepper value={quantity} onChange={onUpdateQuantity} size="sm" max={availability?.availableQuantity} />
+        <QuantityStepper
+          value={quantity}
+          onChange={onUpdateQuantity}
+          size="sm"
+          max={availability?.availableQuantity}
+          onDelete={onRemove}
+        />
       </div>
     </div>
   );

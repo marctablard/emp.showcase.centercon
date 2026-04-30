@@ -32,9 +32,6 @@ export function QuickOrderProductList({ items, onRemoveProduct, onUpdateQuantity
               <th className="py-3 pr-4 text-sm font-bold text-text-body">{t('productList.product')}</th>
               <th className="py-3 px-4 text-sm font-bold text-text-body">{t('productList.quantity')}</th>
               <th className="py-3 px-4 text-sm font-bold text-text-body text-right">{t('productList.unitPrice')}</th>
-              <th className="py-3 pl-4 w-12">
-                <span className="sr-only">{t('productList.remove')}</span>
-              </th>
             </tr>
           </thead>
           <tbody>

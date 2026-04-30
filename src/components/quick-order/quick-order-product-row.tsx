@@ -2,8 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Package, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Package } from 'lucide-react';
 import { QuantityStepper } from '@/components/ui/molecules/quantity-stepper';
 import { useAvailability } from '@/hooks/product/useAvailability';
 import { useL10n } from '@/hooks/useL10n';
@@ -99,6 +98,7 @@ export function QuickOrderProductRow({ product, quantity, onRemove, onUpdateQuan
             onChange={onUpdateQuantity}
             size="md"
             max={availability?.availableQuantity}
+            onDelete={onRemove}
           />
         </div>
       </td>
@@ -122,18 +122,6 @@ export function QuickOrderProductRow({ product, quantity, onRemove, onUpdateQuan
             )}
           </div>
         )}
-      </td>
-
-      <td className="py-4 pl-4">
-        <Button
-          variant="link"
-          size="icon"
-          onClick={onRemove}
-          aria-label="Remove product"
-          data-testid={`remove-product-${product.id}`}
-        >
-          <Trash2 className="h-6 w-6 text-icon-secondary" />
-        </Button>
       </td>
     </tr>
   );
