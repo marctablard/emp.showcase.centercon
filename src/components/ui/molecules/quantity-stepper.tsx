@@ -24,7 +24,7 @@ export function QuantityStepper({
   value,
   onChange,
   min = 1,
-  max = 999,
+  max: maxProp = 999,
   disabled = false,
   className,
   size = 'md',
@@ -33,6 +33,7 @@ export function QuantityStepper({
   inputLabel,
   onDelete,
 }: QuantityStepperProps) {
+  const max = Math.max(min, maxProp);
   const height = size === 'sm' ? 'h-9' : 'h-12';
   const iconSize = size === 'sm' ? 'size-3.5' : 'size-4';
   const isAtMin = value <= min;

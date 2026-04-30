@@ -33,29 +33,27 @@ export function useQuickOrderList(): UseQuickOrderList {
   const inflightRef = useRef(0);
 
   const enrichProductPrices = useCallback(async (productIds: string[]) => {
-    for (const id of productIds) {
-      enrichedIdsRef.current.add(id);
-    }
-
     inflightRef.current += 1;
     setPricesLoading(true);
     try {
       const priceMap = await fetchProductPrices(productIds);
+      const enrichedIds: string[] = [];
       setItems((prev) =>
         prev.map((item) => {
           const fetchedPrice = priceMap[item.product.id];
           if (!fetchedPrice) return item;
+          enrichedIds.push(item.product.id);
           return {
             ...item,
             product: { ...item.product, price: fetchedPrice },
           };
         }),
       );
+      for (const id of enrichedIds) {
+        enrichedIdsRef.current.add(id);
+      }
     } catch (error) {
       getLogger().error({ error, productIds }, 'Failed to enrich quick order prices');
-      for (const id of productIds) {
-        enrichedIdsRef.current.delete(id);
-      }
     } finally {
       inflightRef.current -= 1;
       if (inflightRef.current === 0) {

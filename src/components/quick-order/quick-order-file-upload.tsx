@@ -6,12 +6,11 @@ import { FileDown, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/ui/useToast';
-import { fetchProductAvailability } from '@/lib/client/availability';
 import { fetchProductPrices } from '@/lib/client/prices';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Product } from '@/platform/services/model/product';
 import { EmptyFileError, FileTooLargeError, UnsupportedFormatError, parseUploadedFile } from './utils/parse-file';
-import { resolveProductsBatch } from './utils/resolve-product';
+import { fetchAvailabilityBatch, resolveProductsBatch } from './utils/resolve-product';
 
 interface QuickOrderFileUploadProps {
   onAddProducts: (entries: Array<{ product: Product; quantity: number }>) => void;
@@ -71,16 +70,7 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
         const insufficientStockEntries: Array<{ code: string; requestedQty: number; availableQty: number }> = [];
 
         if (withPrice.length > 0) {
-          const availabilityResults = await Promise.all(
-            withPrice.map(async (entry) => {
-              try {
-                const availability = await fetchProductAvailability(entry.product.id);
-                return { entry, availability };
-              } catch {
-                return { entry, availability: null };
-              }
-            }),
-          );
+          const availabilityResults = await fetchAvailabilityBatch(withPrice);
 
           for (const { entry, availability } of availabilityResults) {
             if (!availability || !availability.isAvailable || availability.availableQuantity <= 0) {

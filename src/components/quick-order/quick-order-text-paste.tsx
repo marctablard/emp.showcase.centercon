@@ -3,12 +3,11 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/ui/useToast';
-import { fetchProductAvailability } from '@/lib/client/availability';
 import { fetchProductPrices } from '@/lib/client/prices';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Product } from '@/platform/services/model/product';
 import { parseTextInput } from './utils/parse-text-input';
-import { resolveProductsBatch } from './utils/resolve-product';
+import { fetchAvailabilityBatch, resolveProductsBatch } from './utils/resolve-product';
 
 export interface QuickOrderTextPasteHandle {
   addToList: () => Promise<void>;
@@ -83,17 +82,7 @@ export const QuickOrderTextPaste = forwardRef<QuickOrderTextPasteHandle, QuickOr
             availableQty: number;
           }> = [];
 
-          const availabilityResults = await Promise.all(
-            withPrice.map(async (entry) => {
-              try {
-                const availability = await fetchProductAvailability(entry.product.id);
-                return { entry, availability };
-              } catch {
-                // If availability check fails, allow the product through
-                return { entry, availability: null };
-              }
-            }),
-          );
+          const availabilityResults = await fetchAvailabilityBatch(withPrice);
 
           for (const { entry, availability } of availabilityResults) {
             const code =

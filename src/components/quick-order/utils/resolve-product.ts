@@ -1,3 +1,4 @@
+import { fetchProductAvailability } from '@/lib/client/availability';
 import type { Product } from '@/platform/services/model/product';
 
 interface ResolveLogger {
@@ -60,4 +61,35 @@ export async function resolveProductsBatch(
   }
 
   return { resolved, notFound };
+}
+
+export interface AvailabilityResult<T> {
+  entry: T;
+  availability: Awaited<ReturnType<typeof fetchProductAvailability>> | null;
+}
+
+/**
+ * Fetch availability in batches to avoid unbounded concurrent requests.
+ */
+export async function fetchAvailabilityBatch<T extends { product: { id: string } }>(
+  entries: T[],
+): Promise<AvailabilityResult<T>[]> {
+  const results: AvailabilityResult<T>[] = [];
+
+  for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+    const batch = entries.slice(i, i + BATCH_SIZE);
+    const batchResults = await Promise.all(
+      batch.map(async (entry) => {
+        try {
+          const availability = await fetchProductAvailability(entry.product.id);
+          return { entry, availability };
+        } catch {
+          return { entry, availability: null };
+        }
+      }),
+    );
+    results.push(...batchResults);
+  }
+
+  return results;
 }

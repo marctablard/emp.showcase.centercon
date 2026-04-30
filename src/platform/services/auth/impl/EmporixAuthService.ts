@@ -145,6 +145,11 @@ export class EmporixAuthService implements AuthService {
         if (patched) {
           if (patched.siteCode) session.siteCode = patched.siteCode;
           if (patched.currency) session.currency = patched.currency;
+          if (patched.country) session.targetLocation = patched.country;
+          if (patched.language) session.language = patched.language;
+          if (patched.region) {
+            session.context = { ...session.context, region: patched.region };
+          }
         }
       } catch (error) {
         this.logger.error(
@@ -260,11 +265,13 @@ export class EmporixAuthService implements AuthService {
 
               if (!mergeRecovered) {
                 const retryCurrency = this.resolveMergeRetryCurrency(targetSite, finalCurrency);
+                const canRetryWithAnonymousCurrency = oldCart.currency === retryCurrency;
                 const shouldRetryMerge =
                   customerCartBinding?.created &&
                   this.isPriceMissingMergeError(mergeError) &&
                   retryCurrency !== undefined &&
-                  retryCurrency !== finalCurrency;
+                  retryCurrency !== finalCurrency &&
+                  canRetryWithAnonymousCurrency;
 
                 if (shouldRetryMerge) {
                   const retriedCustomerCartAlignment = await this.alignCartCurrency(
@@ -272,9 +279,8 @@ export class EmporixAuthService implements AuthService {
                     retryCurrency,
                     { expectedCustomerId: session.customerId },
                   );
-                  const canRetryWithAnonymousCurrency = oldCart.currency === retryCurrency;
 
-                  if (!retriedCustomerCartAlignment.cart || !canRetryWithAnonymousCurrency) {
+                  if (!retriedCustomerCartAlignment.cart) {
                     cartMergeStatus = this.CART_MERGE_STATUS.FALLBACK;
                     cartMergeReason =
                       retriedCustomerCartAlignment.reason || this.CART_MERGE_REASON.CURRENCY_ALIGNMENT_FAILED;
