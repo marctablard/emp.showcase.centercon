@@ -18,6 +18,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'productIds must be a non-empty array of strings' }, { status: 400 });
   }
 
+  if (productIds.length > 100) {
+    return NextResponse.json({ error: 'Too many productIds (max 100)' }, { status: 400 });
+  }
+
   try {
     const sessionService = server.get<SessionService>('SessionService');
     const session = await sessionService.getCurrent();

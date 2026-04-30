@@ -72,5 +72,12 @@
     "emptyFile": "Die hochgeladene Datei ist leer.",
     "fileTooLarge": "Datei ist zu groß. Maximale Größe beträgt 5 MB.",
     "unsupportedFormat": "Nicht unterstütztes Dateiformat. Bitte verwenden Sie CSV oder XLSX."
+  },
+  "accessibility": {
+    "searchResults": "Suchergebnisse",
+    "removeProduct": "Produkt entfernen",
+    "decreaseQuantity": "Menge verringern",
+    "increaseQuantity": "Menge erhöhen",
+    "quantity": "Menge"
   }
 }

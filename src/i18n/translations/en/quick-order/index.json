@@ -3,7 +3,7 @@
   "description": "Quickly add products to your cart by searching, pasting SKUs, or uploading a file.",
   "breadcrumb": "Quick Order",
   "tabs": {
-    "productsSearch": "Products Search",
+    "productsSearch": "Product Search",
     "addManually": "Add Products Manually",
     "bulkUpload": "Bulk Upload"
   },
@@ -22,18 +22,18 @@
     "description": "Enter product codes separated by comma or new line. Optionally add quantity after each code (default: 1)."
   },
   "quickLinks": {
-    "saveOrderList": "Save order List",
-    "loadOrderList": "Load order List",
+    "saveOrderList": "Save List",
+    "loadOrderList": "Load List",
     "share": "Share"
   },
   "fileUpload": {
     "title": "Select a file",
-    "description": "Upload a valid CSV/XLSX file to view all products with just one click. You can download a template using the link below.",
+    "description": "Upload a valid CSV file to view all products with just one click. You can download a template using the link below.",
     "uploadButton": "Upload",
-    "downloadTemplate": "Download CSV/XLSX template",
-    "supportedFormats": "Supported formats: .csv, .xlsx",
+    "downloadTemplate": "Download CSV template",
+    "supportedFormats": "Supported formats: .csv",
     "removeFile": "Remove file",
-    "selectFile": "Select a CSV or XLSX file to upload"
+    "selectFile": "Select a CSV file to upload"
   },
   "productList": {
     "product": "Product",
@@ -72,5 +72,12 @@
     "emptyFile": "The uploaded file is empty.",
     "fileTooLarge": "File is too large. Maximum size is 5MB.",
     "unsupportedFormat": "Unsupported file format. Please use CSV or XLSX."
+  },
+  "accessibility": {
+    "searchResults": "Search results",
+    "removeProduct": "Remove product",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "quantity": "Quantity"
   }
 }

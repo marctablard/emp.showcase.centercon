@@ -14,6 +14,9 @@ interface QuantityStepperProps {
   disabled?: boolean;
   className?: string;
   size?: 'sm' | 'md';
+  decrementLabel?: string;
+  incrementLabel?: string;
+  inputLabel?: string;
 }
 
 export function QuantityStepper({
