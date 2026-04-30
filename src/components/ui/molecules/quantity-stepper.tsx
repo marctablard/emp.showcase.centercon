@@ -28,6 +28,9 @@ export function QuantityStepper({
   disabled = false,
   className,
   size = 'md',
+  decrementLabel,
+  incrementLabel,
+  inputLabel,
   onDelete,
 }: QuantityStepperProps) {
   const height = size === 'sm' ? 'h-9' : 'h-12';
@@ -68,7 +71,7 @@ export function QuantityStepper({
         )}
         onClick={showDelete ? onDelete : handleDecrement}
         disabled={disabled || (isAtMin && !onDelete)}
-        aria-label={showDelete ? 'Remove item' : 'Decrease quantity'}
+        aria-label={showDelete ? 'Remove item' : (decrementLabel ?? 'Decrease quantity')}
         data-testid="quantity-stepper-decrement"
       >
         {showDelete ? <Trash2 className={iconSize} /> : <Minus className={iconSize} />}
@@ -80,7 +83,7 @@ export function QuantityStepper({
         value={value}
         onChange={handleInputChange}
         disabled={disabled}
-        aria-label="Quantity"
+        aria-label={inputLabel ?? 'Quantity'}
         data-testid="quantity-stepper-input"
         className={cn(
           'text-center min-w-[3rem] w-16 border border-border-primary rounded-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
@@ -96,7 +99,7 @@ export function QuantityStepper({
         )}
         onClick={handleIncrement}
         disabled={disabled || value >= max}
-        aria-label="Increase quantity"
+        aria-label={incrementLabel ?? 'Increase quantity'}
         data-testid="quantity-stepper-increment"
       >
         <Plus className={iconSize} />

@@ -30,12 +30,14 @@ export function useQuickOrderList(): UseQuickOrderList {
   const [pricesLoading, setPricesLoading] = useState(false);
   const { session } = useSessionStore();
   const enrichedIdsRef = useRef<Set<string>>(new Set());
+  const inflightRef = useRef(0);
 
   const enrichProductPrices = useCallback(async (productIds: string[]) => {
     for (const id of productIds) {
       enrichedIdsRef.current.add(id);
     }
 
+    inflightRef.current += 1;
     setPricesLoading(true);
     try {
       const priceMap = await fetchProductPrices(productIds);
@@ -55,7 +57,10 @@ export function useQuickOrderList(): UseQuickOrderList {
         enrichedIdsRef.current.delete(id);
       }
     } finally {
-      setPricesLoading(false);
+      inflightRef.current -= 1;
+      if (inflightRef.current === 0) {
+        setPricesLoading(false);
+      }
     }
   }, []);
 
@@ -80,9 +85,13 @@ export function useQuickOrderList(): UseQuickOrderList {
         return next;
       });
 
-      const idsNeedingPrices = entries
-        .filter((e) => !e.product.price?.tax?.netValue && !enrichedIdsRef.current.has(e.product.id))
-        .map((e) => e.product.id);
+      const idsNeedingPrices = [
+        ...new Set(
+          entries
+            .filter((e) => e.product.price?.tax?.netValue == null && !enrichedIdsRef.current.has(e.product.id))
+            .map((e) => e.product.id),
+        ),
+      ];
 
       if (idsNeedingPrices.length > 0) {
         void enrichProductPrices(idsNeedingPrices);

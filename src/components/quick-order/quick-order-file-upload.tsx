@@ -11,6 +11,7 @@ import { fetchProductPrices } from '@/lib/client/prices';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Product } from '@/platform/services/model/product';
 import { EmptyFileError, FileTooLargeError, UnsupportedFormatError, parseUploadedFile } from './utils/parse-file';
+import { resolveProductsBatch } from './utils/resolve-product';
 
 interface QuickOrderFileUploadProps {
   onAddProducts: (entries: Array<{ product: Product; quantity: number }>) => void;
@@ -26,31 +27,6 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const resolveProductByCode = useCallback(
-    async (code: string): Promise<Product | null> => {
-      try {
-        const url = new URL('/api/search/suggestions', window.location.origin);
-        url.searchParams.append('query', code);
-        url.searchParams.append('locale', locale);
-        const response = await fetch(url.toString());
-        if (!response.ok) {
-          return null;
-        }
-        const data = await response.json();
-        const products: Product[] = data.products ?? [];
-        return (
-          products.find(
-            (p) => p.sku?.toLowerCase() === code.toLowerCase() || p.id?.toLowerCase() === code.toLowerCase(),
-          ) ?? null
-        );
-      } catch (err) {
-        logger.error({ err, code }, 'Failed to resolve product code');
-        return null;
-      }
-    },
-    [locale, logger],
-  );
-
   const handleFileChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -64,17 +40,8 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
       try {
         const entries = await parseUploadedFile(file);
 
-        const resolved: Array<{ product: Product; quantity: number; code: string }> = [];
-        const notFoundCodes: string[] = [];
-
-        for (const entry of entries) {
-          const product = await resolveProductByCode(entry.code);
-          if (product) {
-            resolved.push({ product, quantity: entry.quantity, code: entry.code });
-          } else {
-            notFoundCodes.push(entry.code);
-          }
-        }
+        const { resolved, notFound } = await resolveProductsBatch(entries, locale, logger);
+        const notFoundCodes = notFound.map((e) => e.code);
 
         // Check prices for resolved products
         const withPrice: Array<{ product: Product; quantity: number; code: string }> = [];
@@ -201,7 +168,7 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
         }
       }
     },
-    [resolveProductByCode, onAddProducts, toast, t, logger],
+    [locale, onAddProducts, toast, t, logger],
   );
 
   const handleUploadClick = useCallback(() => {

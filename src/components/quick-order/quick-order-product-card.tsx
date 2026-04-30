@@ -71,9 +71,9 @@ export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQua
                 </p>
               )}
               <p className="text-base font-bold font-headlines">
-                {formatCurrency(product.price.tax?.netValue || product.price.amount, product.price.currency)}
+                {formatCurrency(product.price.tax?.netValue ?? product.price.amount, product.price.currency)}
               </p>
-              {product.price.tax?.netValue && (
+              {product.price.tax?.netValue != null && (
                 <span className="text-sm text-text-on-disabled">
                   {tCart('gross')}
                   {formatCurrency(product.price.tax.grossValue, product.price.currency)}

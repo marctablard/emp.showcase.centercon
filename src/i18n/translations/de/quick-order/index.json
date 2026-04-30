@@ -30,7 +30,7 @@
     "title": "Datei auswählen",
     "description": "Laden Sie eine gültige CSV/XLSX-Datei hoch, um alle Produkte mit nur einem Klick anzuzeigen. Sie können eine Vorlage über den untenstehenden Link herunterladen.",
     "uploadButton": "Hochladen",
-    "downloadTemplate": "CSV/XLSX-Vorlage herunterladen",
+    "downloadTemplate": "CSV-Vorlage herunterladen",
     "supportedFormats": "Unterstützte Formate: .csv, .xlsx",
     "removeFile": "Datei entfernen",
     "selectFile": "Wählen Sie eine CSV- oder XLSX-Datei zum Hochladen aus"

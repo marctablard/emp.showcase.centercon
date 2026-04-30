@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Loader2, LockKeyhole } from 'lucide-react';
@@ -39,14 +39,30 @@ export function QuickOrderOverview({
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const pendingActionRef = useRef<(() => Promise<void>) | null>(null);
+  const awaitingAuthRef = useRef(false);
 
   const isDisabled = items.length === 0 || isProcessing;
   const isAuthenticated = sessionStatus === 'authenticated';
+
+  // Execute pending action when user successfully authenticates via the login dialog
+  useEffect(() => {
+    if (isAuthenticated && awaitingAuthRef.current && pendingActionRef.current) {
+      awaitingAuthRef.current = false;
+      const pending = pendingActionRef.current;
+      pendingActionRef.current = null;
+      const run = async (): Promise<void> => {
+        await fetchCart();
+        await pending();
+      };
+      void run();
+    }
+  }, [isAuthenticated, fetchCart]);
 
   const handleAction = useCallback(
     (action: () => Promise<void>) => {
       if (!isAuthenticated) {
         pendingActionRef.current = action;
+        awaitingAuthRef.current = true;
         setLoginDialogOpen(true);
         return;
       }
@@ -57,9 +73,16 @@ export function QuickOrderOverview({
 
   const handleLoginDialogClose = useCallback(() => {
     setLoginDialogOpen(false);
+    pendingActionRef.current = null;
+    awaitingAuthRef.current = false;
+  }, []);
+
+  const handleLoginSuccess = useCallback(() => {
+    setLoginDialogOpen(false);
     const pending = pendingActionRef.current;
     if (pending) {
       pendingActionRef.current = null;
+      awaitingAuthRef.current = false;
       const run = async (): Promise<void> => {
         await fetchCart();
         await pending();
@@ -138,7 +161,7 @@ export function QuickOrderOverview({
       <LoginDialog
         open={loginDialogOpen}
         onCloseAction={handleLoginDialogClose}
-        onGuestAction={handleLoginDialogClose}
+        onGuestAction={handleLoginSuccess}
         guestCheckout
       />
     </>

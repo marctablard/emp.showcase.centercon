@@ -264,8 +264,7 @@ export class EmporixAuthService implements AuthService {
                   customerCartBinding?.created &&
                   this.isPriceMissingMergeError(mergeError) &&
                   retryCurrency !== undefined &&
-                  retryCurrency !== finalCurrency &&
-                  oldCart.currency === retryCurrency;
+                  retryCurrency !== finalCurrency;
 
                 if (shouldRetryMerge) {
                   const retriedCustomerCartAlignment = await this.alignCartCurrency(

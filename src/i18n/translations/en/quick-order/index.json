@@ -22,18 +22,18 @@
     "description": "Enter product codes separated by comma or new line. Optionally add quantity after each code (default: 1)."
   },
   "quickLinks": {
-    "saveOrderList": "Save List",
-    "loadOrderList": "Load List",
+    "saveOrderList": "Save order list",
+    "loadOrderList": "Load order list",
     "share": "Share"
   },
   "fileUpload": {
     "title": "Select a file",
-    "description": "Upload a valid CSV file to view all products with just one click. You can download a template using the link below.",
+    "description": "Upload a valid CSV or XLSX file to view all products with just one click. You can download a template using the link below.",
     "uploadButton": "Upload",
     "downloadTemplate": "Download CSV template",
-    "supportedFormats": "Supported formats: .csv",
+    "supportedFormats": "Supported formats: .csv, .xlsx",
     "removeFile": "Remove file",
-    "selectFile": "Select a CSV file to upload"
+    "selectFile": "Select a CSV or XLSX file to upload"
   },
   "productList": {
     "product": "Product",

@@ -137,6 +137,7 @@ export function QuickOrder() {
             <Button
               variant="link"
               size="default"
+              disabled
               className="normal-case text-base tracking-normal p-0 gap-1 underline justify-start"
             >
               {t('quickLinks.saveOrderList')}
@@ -145,6 +146,7 @@ export function QuickOrder() {
             <Button
               variant="link"
               size="default"
+              disabled
               className="normal-case text-base tracking-normal p-0 gap-1 underline justify-start"
             >
               {t('quickLinks.loadOrderList')}
@@ -153,6 +155,7 @@ export function QuickOrder() {
             <Button
               variant="link"
               size="default"
+              disabled
               className="normal-case text-base tracking-normal p-0 gap-1 underline justify-start"
             >
               {t('quickLinks.share')}
