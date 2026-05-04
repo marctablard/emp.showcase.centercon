@@ -43,6 +43,7 @@ export function QuickOrder() {
       const succeeded: QuickOrderItem[] = [];
       const failed: QuickOrderItem[] = [];
 
+      // Sequential to avoid cart API race conditions on concurrent mutations
       for (const item of currentItems) {
         try {
           await addItem(item.product.id, item.quantity);

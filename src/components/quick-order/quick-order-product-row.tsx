@@ -21,6 +21,7 @@ interface QuickOrderProductRowProps {
 export function QuickOrderProductRow({ product, quantity, onRemove, onUpdateQuantity }: QuickOrderProductRowProps) {
   const { l10n } = useL10n();
   const tCart = useTranslations('cart');
+  const tA11y = useTranslations('quick-order.accessibility');
   const { availability } = useAvailability(product.id);
   const image = product.images?.[0];
   const brandName = l10n(product.brand?.name || '');
@@ -81,10 +82,7 @@ export function QuickOrderProductRow({ product, quantity, onRemove, onUpdateQuan
                   </>
                 )
               ) : (
-                <>
-                  <Package className="h-4 w-4 text-icon-success" />
-                  <span className="text-sm text-text-success">{tCart('available')}</span>
-                </>
+                <span className="inline-block h-4 w-20 animate-pulse rounded bg-surface-secondary" />
               )}
             </div>
           </div>
@@ -99,6 +97,10 @@ export function QuickOrderProductRow({ product, quantity, onRemove, onUpdateQuan
             size="md"
             max={availability?.availableQuantity}
             onDelete={onRemove}
+            decrementLabel={tA11y('decreaseQuantity')}
+            incrementLabel={tA11y('increaseQuantity')}
+            inputLabel={tA11y('quantity')}
+            deleteLabel={tA11y('removeProduct')}
           />
         </div>
       </td>
