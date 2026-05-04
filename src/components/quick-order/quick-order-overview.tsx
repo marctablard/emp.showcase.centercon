@@ -139,7 +139,7 @@ export function QuickOrderOverview({
             variant="secondary"
             className="w-full font-headlines tracking-[2px]"
             disabled={isDisabled}
-            onClick={() => handleAction(onAddToCart)}
+            onClick={() => void onAddToCart()}
             data-testid="quick-order-add-to-cart"
           >
             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
