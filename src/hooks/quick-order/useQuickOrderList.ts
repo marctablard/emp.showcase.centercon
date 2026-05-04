@@ -37,12 +37,11 @@ export function useQuickOrderList(): UseQuickOrderList {
     setPricesLoading(true);
     try {
       const priceMap = await fetchProductPrices(productIds);
-      const enrichedIds: string[] = [];
+      const enrichedIds = productIds.filter((id) => priceMap[id] != null);
       setItems((prev) =>
         prev.map((item) => {
           const fetchedPrice = priceMap[item.product.id];
           if (!fetchedPrice) return item;
-          enrichedIds.push(item.product.id);
           return {
             ...item,
             product: { ...item.product, price: fetchedPrice },

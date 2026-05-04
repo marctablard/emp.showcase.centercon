@@ -20,6 +20,7 @@ interface QuickOrderProductCardProps {
 export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQuantity }: QuickOrderProductCardProps) {
   const { l10n } = useL10n();
   const tCart = useTranslations('cart');
+  const tA11y = useTranslations('quick-order.accessibility');
   const { availability } = useAvailability(product.id);
   const image = product.images?.[0];
   const brandName = l10n(product.brand?.name || '');
@@ -89,6 +90,10 @@ export function QuickOrderProductCard({ product, quantity, onRemove, onUpdateQua
               size="sm"
               max={availability?.availableQuantity}
               onDelete={onRemove}
+              decrementLabel={tA11y('decreaseQuantity')}
+              incrementLabel={tA11y('increaseQuantity')}
+              inputLabel={tA11y('quantity')}
+              deleteLabel={tA11y('removeProduct')}
             />
           </div>
         </div>

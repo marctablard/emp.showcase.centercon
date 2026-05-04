@@ -17,6 +17,7 @@ interface QuantityStepperProps {
   decrementLabel?: string;
   incrementLabel?: string;
   inputLabel?: string;
+  deleteLabel?: string;
   onDelete?: () => void;
 }
 
@@ -31,6 +32,7 @@ export function QuantityStepper({
   decrementLabel,
   incrementLabel,
   inputLabel,
+  deleteLabel,
   onDelete,
 }: QuantityStepperProps) {
   const max = Math.max(min, maxProp);
@@ -72,7 +74,7 @@ export function QuantityStepper({
         )}
         onClick={showDelete ? onDelete : handleDecrement}
         disabled={disabled || (isAtMin && !onDelete)}
-        aria-label={showDelete ? 'Remove item' : (decrementLabel ?? 'Decrease quantity')}
+        aria-label={showDelete ? (deleteLabel ?? 'Remove item') : (decrementLabel ?? 'Decrease quantity')}
         data-testid="quantity-stepper-decrement"
       >
         {showDelete ? <Trash2 className={iconSize} /> : <Minus className={iconSize} />}
