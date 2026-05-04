@@ -215,7 +215,7 @@ export default function ProfileEditForm({ customer }: ProfileEditFormProps) {
                 data-testid="profile-phone"
               />
               {form.formState.errors.phone && (
-                <p className="text-sm text-text-error mt-1">
+                <p className="text-sm text-text-error mt-1 whitespace-nowrap">
                   {t('profile.form.phone.invalid') || 'Bitte geben Sie eine gültige Telefonnummer ein.'}
                 </p>
               )}
