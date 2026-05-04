@@ -23,7 +23,7 @@ export function HeaderTopBanner() {
       )}
     >
       <div className="flex justify-between items-center self-stretch w-full">
-        <div className="flex grow basis-auto shrink-1 gap-4 items-center">
+        <div className="flex grow basis-auto shrink gap-4 items-center">
           <SiteSwitcher />
           <hr className="w-px h-6 bg-surface-page" />
           <LanguageSwitcher />
