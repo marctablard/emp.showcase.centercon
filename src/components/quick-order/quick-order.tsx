@@ -107,13 +107,13 @@ export function QuickOrder() {
         <TabsList className="inline-flex h-auto w-full items-center justify-start gap-0 rounded-none border-b border-border-primary bg-transparent p-0">
           <TabsTrigger
             value="manual"
-            className="flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-lg md:text-[28px] md:leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
+            className="cursor-pointer flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-lg md:text-[28px] md:leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
           >
             {t('tabs.productsSearch')}
           </TabsTrigger>
           <TabsTrigger
             value="bulk"
-            className="flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-lg md:text-[28px] md:leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
+            className="cursor-pointer flex-none rounded-none border-0 border-b border-border-primary bg-transparent px-3 pb-3 pt-0 text-lg md:text-[28px] md:leading-[36px] font-headlines font-bold text-text-placeholders shadow-none data-[state=active]:border-b-2 data-[state=active]:border-border-action data-[state=active]:text-text-action data-[state=active]:shadow-none"
           >
             {t('tabs.bulkUpload')}
           </TabsTrigger>

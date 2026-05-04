@@ -26,7 +26,7 @@ export default async function QuickOrderPage() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mx-4 lg:mx-9">
-        <UiBreadcrumb items={[{ href: '/quick-order', label: t('title') }]} className="pb-4 pt-0" />
+        <UiBreadcrumb items={[{ href: '/quick-order', label: t('title') }]} className="pb-4 pt-4 sm:pt-0" />
         <QuickOrder />
       </div>
     </div>
