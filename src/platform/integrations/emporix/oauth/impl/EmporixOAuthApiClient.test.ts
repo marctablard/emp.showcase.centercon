@@ -104,7 +104,7 @@ describe('EmporixOAuthApiClient', () => {
       });
 
       const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
-      expect(calledUrl).toContain('siteCode=site%20with%20spaces');
+      expect(calledUrl).toContain('siteCode=site+with+spaces');
     });
   });
 

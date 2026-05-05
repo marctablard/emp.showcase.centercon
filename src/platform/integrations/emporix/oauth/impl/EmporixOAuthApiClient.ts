@@ -17,7 +17,8 @@ class EmporixOAuthApiClient implements IEmporixOAuthApi {
   private readonly baseUrl: string = process.env.NEXT_PUBLIC_EMPORIX_BASE_URL || 'https://api.emporix.io';
 
   async getPublicToken(tenant: string, clientId: string): Promise<EmporixAnonymousTokenResponse> {
-    const url = `${this.baseUrl}/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+    const params = new URLSearchParams({ tenant, client_id: clientId });
+    const url = `${this.baseUrl}/customerlogin/auth/anonymous/login?${params.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -37,13 +38,14 @@ class EmporixOAuthApiClient implements IEmporixOAuthApi {
     clientId: string,
     sessionParams?: AnonymousTokenSessionParams,
   ): Promise<EmporixAnonymousTokenResponse> {
-    let url = `${this.baseUrl}/customerlogin/auth/anonymous/login?tenant=${tenant}&client_id=${clientId}`;
+    const params = new URLSearchParams({ tenant, client_id: clientId });
     if (sessionParams) {
-      if (sessionParams.siteCode) url += `&siteCode=${encodeURIComponent(sessionParams.siteCode)}`;
-      if (sessionParams.currency) url += `&currency=${encodeURIComponent(sessionParams.currency)}`;
-      if (sessionParams.language) url += `&language=${encodeURIComponent(sessionParams.language)}`;
-      if (sessionParams.targetLocation) url += `&targetLocation=${encodeURIComponent(sessionParams.targetLocation)}`;
+      if (sessionParams.siteCode) params.set('siteCode', sessionParams.siteCode);
+      if (sessionParams.currency) params.set('currency', sessionParams.currency);
+      if (sessionParams.language) params.set('language', sessionParams.language);
+      if (sessionParams.targetLocation) params.set('targetLocation', sessionParams.targetLocation);
     }
+    const url = `${this.baseUrl}/customerlogin/auth/anonymous/login?${params.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -63,7 +65,8 @@ class EmporixOAuthApiClient implements IEmporixOAuthApi {
     refreshToken: string,
     clientId: string,
   ): Promise<EmporixAnonymousTokenResponse> {
-    const url = `${this.baseUrl}/customerlogin/auth/anonymous/refresh?tenant=${tenant}&refresh_token=${refreshToken}&client_id=${clientId}`;
+    const params = new URLSearchParams({ tenant, refresh_token: refreshToken, client_id: clientId });
+    const url = `${this.baseUrl}/customerlogin/auth/anonymous/refresh?${params.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -84,7 +87,7 @@ class EmporixOAuthApiClient implements IEmporixOAuthApi {
     username: string,
     password: string,
   ): Promise<EmporixCustomerTokenResponse> {
-    const url = `${this.baseUrl}/customer/${tenant}/login`;
+    const url = `${this.baseUrl}/customer/${encodeURIComponent(tenant)}/login`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -109,10 +112,11 @@ class EmporixOAuthApiClient implements IEmporixOAuthApi {
     refreshToken: string,
     legalEntityId?: string,
   ): Promise<EmporixCustomerTokenResponse> {
-    let url = `${this.baseUrl}/customer/${tenant}/refreshauthtoken?refreshToken=${refreshToken}`;
+    const params = new URLSearchParams({ refreshToken });
     if (legalEntityId) {
-      url += `&legalEntityId=${encodeURIComponent(legalEntityId)}`;
+      params.set('legalEntityId', legalEntityId);
     }
+    const url = `${this.baseUrl}/customer/${encodeURIComponent(tenant)}/refreshauthtoken?${params.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',
