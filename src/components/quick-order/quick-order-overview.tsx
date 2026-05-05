@@ -73,13 +73,9 @@ export function QuickOrderOverview({
 
   const handleLoginDialogClose = useCallback(() => {
     setLoginDialogOpen(false);
-    // Only clear pending action if user is not authenticated (i.e., they cancelled).
-    // If authenticated, the useEffect will handle executing the pending action.
-    if (sessionStatus !== 'authenticated') {
-      pendingActionRef.current = null;
-      awaitingAuthRef.current = false;
-    }
-  }, [sessionStatus]);
+    pendingActionRef.current = null;
+    awaitingAuthRef.current = false;
+  }, []);
 
   const handleLoginSuccess = useCallback(() => {
     setLoginDialogOpen(false);
@@ -165,6 +161,7 @@ export function QuickOrderOverview({
       <LoginDialog
         open={loginDialogOpen}
         onCloseAction={handleLoginDialogClose}
+        onLoginSuccess={handleLoginSuccess}
         onGuestAction={handleLoginSuccess}
         guestCheckout
       />

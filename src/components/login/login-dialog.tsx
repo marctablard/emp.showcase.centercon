@@ -11,6 +11,7 @@ type LoginDialogProps = {
   email?: string;
   open?: boolean;
   onCloseAction?: () => void;
+  onLoginSuccess?: () => void;
   guestCheckout?: boolean;
   onGuestAction?: () => void;
 };
@@ -21,6 +22,7 @@ export default function LoginDialog({
   email,
   open = false,
   onCloseAction,
+  onLoginSuccess,
   guestCheckout = false,
   onGuestAction,
 }: LoginDialogProps) {
@@ -40,7 +42,7 @@ export default function LoginDialog({
         <LoginForm
           callbackUrl={callbackUrl}
           email={email}
-          onSuccess={onCloseAction}
+          onSuccess={onLoginSuccess ?? onCloseAction}
           guestCheckout={guestCheckout}
           onGuestAction={onGuestAction}
           isDialog
