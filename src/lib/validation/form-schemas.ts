@@ -56,6 +56,13 @@ export const ProfileEditSchema = z.object({
     .refine((val) => {
       if (!val) return true;
       if (!/^[+0-9()\s.\-]+$/.test(val)) return false;
+      // Structural checks: reject malformed punctuation patterns
+      if (/\+.*\+/.test(val)) return false; // multiple + signs
+      if (val.includes('+') && !val.startsWith('+')) return false; // + not at start
+      const openParens = (val.match(/\(/g) || []).length;
+      const closeParens = (val.match(/\)/g) || []).length;
+      if (openParens !== closeParens) return false; // unbalanced parentheses
+      if (/\)[^)\s.\-]*\(/.test(val)) return false; // closing before opening in wrong order
       let digits = val.replace(/[^0-9]/g, '');
       if (digits.startsWith('00')) {
         digits = digits.slice(2);

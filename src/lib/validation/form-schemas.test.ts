@@ -85,6 +85,10 @@ describe('ProfileEditSchema - phone validation', () => {
     ['+1234567890123456 (16 real digits)', '+1234567890123456'],
     ['+49-abc-1234 (contains letters)', '+49-abc-1234'],
     ['!@#$% (special characters)', '!@#$%'],
+    ['++49 1234567 (multiple plus signs)', '++49 1234567'],
+    ['12)34(5678 (misplaced parentheses)', '12)34(56789'],
+    ['1234(567 (unbalanced open paren)', '1234(567890'],
+    ['+49+ 1234567 (plus not only at start)', '+49+ 1234567'],
   ])('rejects %s', (_label, phone) => {
     const result = ProfileEditSchema.safeParse({ ...baseProfile, phone });
     expect(result.success).toBe(false);
