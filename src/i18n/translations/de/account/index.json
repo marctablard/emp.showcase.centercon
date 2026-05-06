@@ -103,7 +103,7 @@
     "groups": {
       "selfService": "Self Service",
       "orderManagement": "Bestellverwaltung",
-      "myOrganisation": "Meine Organisation",
+      "myOrganisation": "Mein Unternehmen",
       "myAccount": "Mein Konto"
     },
     "items": {
