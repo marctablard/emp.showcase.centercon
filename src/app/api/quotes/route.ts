@@ -10,7 +10,7 @@ import type { QuoteService } from '@/platform/services/quote/QuoteService';
 export async function GET(req: NextRequest): Promise<NextResponse> {
   // Parse query parameters (outside try for logging context)
   const searchParams = req.nextUrl.searchParams;
-  const query = searchParams.get('query') || undefined;
+  const query = searchParams.get('q') || searchParams.get('query') || undefined;
   const sort = searchParams.get('sort') || undefined;
 
   try {

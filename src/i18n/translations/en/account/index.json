@@ -434,6 +434,8 @@
     "numberOfProducts": "Number of Products",
     "products": "Products",
     "noQuotes": "You don't have any quotes yet",
+    "searchPlaceholder": "Search by quote ID...",
+    "noMatches": "No quotes match your search",
     "viewQuote": "View quote",
     "next": "Next",
     "previous": "Previous",

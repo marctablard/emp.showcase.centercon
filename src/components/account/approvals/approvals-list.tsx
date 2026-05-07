@@ -1,18 +1,22 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Search } from 'lucide-react';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { useApprovals } from '@/hooks/approval/useApprovals';
+import { Link } from '@/i18n/navigation';
 import type { Approval, ApprovalStatus } from '@/platform/services/model/approval';
 import { ApprovalStatusBadge } from './approval-status-badge';
+
+const SEARCH_DEBOUNCE_MS = 500;
 
 interface ApprovalsListProps {
   initialApprovals?: Approval[];
@@ -24,7 +28,28 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
   const tAction = useTranslations('orders.ApprovalAction');
   const [filterStatus, setFilterStatus] = useState<ApprovalStatus | '_ALL_'>('_ALL_');
   const [currentPage, setCurrentPage] = useState(1);
-  const { approvals, loading, error, filterApprovals, refreshApprovals } = useApprovals(initialApprovals);
+
+  const [quickSearch, setQuickSearch] = useState('');
+  const [debouncedQuickSearch, setDebouncedQuickSearch] = useState('');
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedQuickSearch(quickSearch);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [quickSearch]);
+
+  const normalizedSearch = debouncedQuickSearch.trim();
+  const apiQuery = normalizedSearch.length > 0 ? `id:~(${normalizedSearch})` : undefined;
+
+  const { approvals, loading, error, filterApprovals, refreshApprovals } = useApprovals(
+    initialApprovals,
+    undefined,
+    apiQuery,
+  );
 
   const totalPages = Math.max(1, Math.ceil(approvals.length / APPROVALS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -54,7 +79,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
     }).format(date);
   };
 
-  if (loading) {
+  if (loading && !quickSearch && filterStatus === '_ALL_') {
     return (
       <Card>
         <CardHeader>
@@ -90,7 +115,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
     );
   }
 
-  if (approvals.length === 0) {
+  if (approvals.length === 0 && !quickSearch && filterStatus === '_ALL_') {
     return (
       <Card>
         <CardHeader>
@@ -104,6 +129,8 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
     );
   }
 
+  const isSearchLoading = loading && quickSearch.length > 0;
+
   return (
     <Card>
       <CardHeader>
@@ -112,6 +139,27 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex flex-wrap gap-4">
+          <div className="relative w-full max-w-[380px]">
+            <Input
+              value={quickSearch}
+              onChange={(event) => {
+                setCurrentPage(1);
+                setQuickSearch(event.target.value);
+              }}
+              placeholder={t('searchPlaceholder')}
+              className="pr-10"
+              endIcon={isSearchLoading ? undefined : Search}
+              aria-label={t('searchPlaceholder')}
+            />
+            {isSearchLoading && (
+              <Spinner
+                variant="sm"
+                color="primary"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                loadingText={t('loading')}
+              />
+            )}
+          </div>
           <div className="flex-1 min-w-[200px]">
             <Select value={filterStatus} onValueChange={(value) => handleFilter(value as ApprovalStatus)}>
               <SelectTrigger>
@@ -128,6 +176,12 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
             </Select>
           </div>
         </div>
+
+        {!loading && approvals.length === 0 && quickSearch && (
+          <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
+            {t('noMatches')}
+          </div>
+        )}
 
         <div className="rounded-md border">
           <Table>

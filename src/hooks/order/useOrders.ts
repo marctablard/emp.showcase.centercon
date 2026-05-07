@@ -11,6 +11,8 @@ interface UseOrdersOptions {
   pageSize?: number;
   pageNumber?: number;
   filters?: Record<string, any>;
+  query?: string;
+  forceRefresh?: boolean;
 }
 
 interface UseOrdersResult {
@@ -48,6 +50,8 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
     pageSize: initialPageSize = 50,
     pageNumber: initialPageNumber = 1,
     filters: initialFilters = {},
+    query: searchQuery,
+    forceRefresh = false,
   } = options;
 
   const {
@@ -69,7 +73,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
     size: pageSize,
     criteria: filters,
   });
-  const queryKey = query.query + query.body;
+  const queryKey = query.query + query.body + (searchQuery ?? '');
 
   useEffect(() => {
     // Initialize with initialOrders if provided and not already in store
@@ -87,19 +91,19 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
   // Fetch orders when parameters change (force-refresh to always get fresh data from API)
   const refetchOrders = useCallback(async () => {
     try {
-      await storeFetchOrders(pageSize, pageNumber, filters, true);
+      await storeFetchOrders(pageSize, pageNumber, filters, forceRefresh, searchQuery);
     } catch (err) {
       // Error is already handled in the store
       getLogger().error({ err, pageSize, pageNumber }, 'Error in refetchOrders');
     }
-  }, [pageSize, pageNumber, filters, storeFetchOrders]);
+  }, [pageSize, pageNumber, filters, forceRefresh, searchQuery, storeFetchOrders]);
 
   // Auto-fetch when parameters change and we don't have data
   useEffect(() => {
     if (!orders && !loading) {
       refetchOrders();
     }
-  }, [pageSize, pageNumber, filters, orders, loading, refetchOrders]);
+  }, [pageSize, pageNumber, filters, searchQuery, orders, loading, refetchOrders]);
 
   return {
     orders,

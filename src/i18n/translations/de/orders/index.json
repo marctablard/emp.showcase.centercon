@@ -28,6 +28,7 @@
   "email": "E-Mail",
   "loading": "Bestellungen werden geladen...",
   "noOrders": "Keine Bestellungen gefunden",
+  "noMatches": "Keine Bestellungen entsprechen Ihrer Suche",
   "ordersTotal": "Bestellungen insgesamt",
   "billingAddress": "Rechnungsadresse",
   "shippingAddress": "Lieferadresse",
@@ -193,7 +194,9 @@
     "orderSuccessfullySubmitted": "Bestellung erfolgreich aufgegeben",
     "previous": "Zurück",
     "next": "Weiter",
-    "pageIndicator": "Seite {current} / {total}"
+    "pageIndicator": "Seite {current} / {total}",
+    "searchPlaceholder": "Nach Freigabe-ID suchen...",
+    "noMatches": "Keine Freigaben entsprechen Ihrer Suche"
   },
   "ApprovalAction": {
     "CHECKOUT": "Bestellung"

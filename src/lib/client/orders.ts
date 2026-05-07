@@ -4,12 +4,14 @@ import type { Order } from '@/platform/services/model/order/order';
  * Fetch all orders for the current customer with optional pagination
  * @param {number} [pageSize] - Optional page size for pagination
  * @param {number} [pageNumber] - Optional page number for pagination
+ * @param {string} [query] - Optional query filter (e.g. 'id:~(partial)')
  * @returns {Promise<Order[]>} Array of orders
  */
-export async function fetchOrders(pageSize?: number, pageNumber?: number): Promise<Order[]> {
+export async function fetchOrders(pageSize?: number, pageNumber?: number, query?: string): Promise<Order[]> {
   const queryParams = new URLSearchParams();
   if (pageSize) queryParams.append('pageSize', pageSize.toString());
   if (pageNumber) queryParams.append('pageNumber', pageNumber.toString());
+  if (query) queryParams.append('query', query);
 
   const queryString = queryParams.toString();
   const url = `/api/orders${queryString ? `?${queryString}` : ''}`;

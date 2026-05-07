@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Quote } from '@/platform/services/model/quote';
@@ -88,17 +88,22 @@ export function useQuotes(initialQuotes?: Quote[], params?: SearchParams<Quote>)
     } finally {
       setLoading(false);
     }
-  }, [params]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params?.query, params?.page, params?.size, params?.sort]);
 
   const refetchQuotes = useCallback(async () => {
     await fetchQuotes();
   }, [fetchQuotes]);
 
+  // Skip only the very first fetch when SSR data is available and no custom query is active
+  const isFirstRender = useRef(!!initialQuotes && !params?.query);
   useEffect(() => {
-    if (!initialQuotes) {
-      fetchQuotes();
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  }, [initialQuotes, fetchQuotes]);
+    fetchQuotes();
+  }, [fetchQuotes]);
 
   return {
     loading,

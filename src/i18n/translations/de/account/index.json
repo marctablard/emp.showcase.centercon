@@ -390,6 +390,8 @@
     "numberOfProducts": "Anzahl der Produkte",
     "products": "Produkte",
     "noQuotes": "Sie haben noch keine Angebote",
+    "searchPlaceholder": "Nach Angebots-ID suchen...",
+    "noMatches": "Keine Angebote entsprechen Ihrer Suche",
     "viewQuote": "Angebotsansicht",
     "next": "Weiter",
     "previous": "Zurück",
