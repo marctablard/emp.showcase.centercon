@@ -12,14 +12,27 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const searchParams = req.nextUrl.searchParams;
   const query = searchParams.get('q') || searchParams.get('query') || undefined;
   const sort = searchParams.get('sort') || undefined;
+  const page = searchParams.get('page') ? Number(searchParams.get('page')) : undefined;
+  const size = searchParams.get('size') ? Number(searchParams.get('size')) : undefined;
+
+  // Collect filter params (everything except known control params)
+  const reservedKeys = new Set(['q', 'query', 'sort', 'page', 'size']);
+  const filters: Record<string, string> = {};
+  searchParams.forEach((value, key) => {
+    if (!reservedKeys.has(key)) {
+      filters[key] = value;
+    }
+  });
 
   try {
     const quoteService = server.get<QuoteService>('QuoteService');
 
-    // Get quotes with filters
     const response = await quoteService.getQuotes({
       sort,
       query,
+      page,
+      size,
+      ...(Object.keys(filters).length > 0 ? { filters } : {}),
     });
 
     return NextResponse.json(response);

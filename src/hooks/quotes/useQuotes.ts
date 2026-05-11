@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
 import type { Quote } from '@/platform/services/model/quote';
@@ -32,6 +32,11 @@ export function useQuotes(initialQuotes?: Quote[], params?: SearchParams<Quote>)
       }>;
     }>
   >([]);
+
+  const stableFilters = useMemo(
+    () => (params?.filters ? JSON.stringify(params.filters) : undefined),
+    [params?.filters],
+  );
 
   const fetchQuotes = useCallback(async () => {
     try {
@@ -88,8 +93,7 @@ export function useQuotes(initialQuotes?: Quote[], params?: SearchParams<Quote>)
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params?.query, params?.page, params?.size, params?.sort]);
+  }, [params?.query, params?.page, params?.size, params?.sort, stableFilters]);
 
   const refetchQuotes = useCallback(async () => {
     await fetchQuotes();
