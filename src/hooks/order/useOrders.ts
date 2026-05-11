@@ -88,7 +88,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
   const loading = getStoreLoading(queryKey);
   const error = getStoreError(queryKey);
 
-  // Fetch orders when parameters change (force-refresh to always get fresh data from API)
+  // Re-fetch orders; honours the configurable `forceRefresh` flag (default: false)
   const refetchOrders = useCallback(async () => {
     try {
       await storeFetchOrders(pageSize, pageNumber, filters, forceRefresh, searchQuery);

@@ -38,9 +38,9 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
   const normalizedSearch = debouncedQuickSearch.trim();
   const apiQuery = normalizedSearch.length > 0 ? `id:~(${normalizedSearch})` : undefined;
 
-  const { quotes, loading, error } = useQuotes(initialQuotes, {
+  const { quotes, loading, error, pagination } = useQuotes(initialQuotes, {
     query: apiQuery,
-    page: currentPage,
+    page: currentPage - 1,
     size: quotesPerPage,
   });
 
@@ -49,10 +49,8 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
   };
 
   const handleNextPage = () => {
-    if (quotes) {
-      const maxPage = Math.ceil(quotes.length / quotesPerPage);
-      setCurrentPage((prev) => Math.min(prev + 1, maxPage));
-    }
+    const totalPages = pagination?.totalPages ?? 1;
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
   const isSearchLoading = loading && quickSearch.length > 0;
