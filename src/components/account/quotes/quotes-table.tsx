@@ -116,7 +116,7 @@ export function QuotesTable({
                       variant="text"
                       className="no-underline hover:underline"
                     >
-                      {quote.reference || '#' + quote.id}
+                      {quote.id}
                     </UiLink>
                   </TableCell>
                   <TableCell className="px-2 py-4">

@@ -12,8 +12,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const searchParams = req.nextUrl.searchParams;
   const query = searchParams.get('q') || searchParams.get('query') || undefined;
   const sort = searchParams.get('sort') || undefined;
-  const page = searchParams.get('page') ? Number(searchParams.get('page')) : undefined;
-  const size = searchParams.get('size') ? Number(searchParams.get('size')) : undefined;
+  const rawPage = searchParams.get('page') ? Number(searchParams.get('page')) : undefined;
+  const rawSize = searchParams.get('size') ? Number(searchParams.get('size')) : undefined;
+  const page = Number.isFinite(rawPage) && rawPage! >= 0 ? rawPage : undefined;
+  const size = Number.isFinite(rawSize) && rawSize! > 0 ? rawSize : undefined;
 
   // Collect filter params (everything except known control params)
   const reservedKeys = new Set(['q', 'query', 'sort', 'page', 'size']);

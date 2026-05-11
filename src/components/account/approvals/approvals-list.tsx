@@ -43,13 +43,19 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
   }, [quickSearch]);
 
   const normalizedSearch = debouncedQuickSearch.trim();
-  const apiQuery = normalizedSearch.length > 0 ? `id:~(${normalizedSearch})` : undefined;
 
-  const { approvals, loading, error, filterApprovals, refreshApprovals } = useApprovals(
-    initialApprovals,
-    undefined,
-    apiQuery,
-  );
+  const apiQuery = useMemo(() => {
+    const parts: string[] = [];
+    if (filterStatus !== '_ALL_') {
+      parts.push(`status:${filterStatus}`);
+    }
+    if (normalizedSearch.length > 0) {
+      parts.push(`id:~(${normalizedSearch})`);
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }, [filterStatus, normalizedSearch]);
+
+  const { approvals, loading, error, refreshApprovals } = useApprovals(initialApprovals, undefined, apiQuery);
 
   const totalPages = Math.max(1, Math.ceil(approvals.length / APPROVALS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -59,13 +65,8 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
   );
 
   const handleFilter = (status: ApprovalStatus | '_ALL_') => {
-    const filter: Partial<Approval> = {};
     setFilterStatus(status);
     setCurrentPage(1);
-    if (status !== '_ALL_') {
-      filter.status = status;
-    }
-    filterApprovals(filter);
   };
 
   const formatDate = (dateString: string) => {
@@ -161,7 +162,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
             )}
           </div>
           <div className="flex-1 min-w-[200px]">
-            <Select value={filterStatus} onValueChange={(value) => handleFilter(value as ApprovalStatus)}>
+            <Select value={filterStatus} onValueChange={(value) => handleFilter(value as ApprovalStatus | '_ALL_')}>
               <SelectTrigger>
                 <SelectValue placeholder={t('filterByStatus')} />
               </SelectTrigger>
@@ -177,7 +178,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
           </div>
         </div>
 
-        {!loading && approvals.length === 0 && quickSearch && (
+        {!loading && approvals.length === 0 && (quickSearch || filterStatus !== '_ALL_') && (
           <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
             {t('noMatches')}
           </div>
