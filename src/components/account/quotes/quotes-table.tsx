@@ -14,7 +14,7 @@ interface QuotesTableProps {
   quotes: Quote[];
   loading?: boolean;
   currentPage?: number;
-  quotesPerPage?: number;
+  totalPages?: number;
   onPreviousPage?: () => void;
   onNextPage?: () => void;
 }
@@ -23,14 +23,11 @@ export function QuotesTable({
   quotes,
   loading = false,
   currentPage = 1,
-  quotesPerPage = 5,
+  totalPages = 1,
   onPreviousPage,
   onNextPage,
 }: QuotesTableProps) {
   const t = useTranslations('account.quotesList');
-
-  const visibleQuotes = quotes.slice((currentPage - 1) * quotesPerPage, currentPage * quotesPerPage);
-  const totalPages = Math.max(1, Math.ceil(quotes.length / quotesPerPage));
 
   const formatPrice = (price: number, currency: string) => {
     try {
@@ -76,7 +73,7 @@ export function QuotesTable({
                 </TableCell>
               </TableRow>
             ) : (
-              visibleQuotes.map((quote, index) => (
+              quotes.map((quote, index) => (
                 <TableRow
                   key={quote.id}
                   className={cn(
@@ -114,7 +111,7 @@ export function QuotesTable({
         </Table>
       </div>
 
-      {quotes && quotes.length > quotesPerPage ? (
+      {totalPages > 1 ? (
         <TablePagination
           className="px-3"
           currentPage={currentPage}

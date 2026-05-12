@@ -100,6 +100,7 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
         method: 'GET',
         headers: {
           Accept: 'application/json',
+          'X-Total-Count': 'true',
         },
         cache: 'no-store',
       },

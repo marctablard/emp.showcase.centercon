@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import AccountLayout from '@/components/account/account-layout';
@@ -8,6 +8,7 @@ import { QuotesTable } from '@/components/account/quotes/quotes-table';
 import { H1 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
 import { useQuotes } from '@/hooks/quotes/useQuotes';
 import type { Quote } from '@/platform/services/model/quote';
 
@@ -23,19 +24,7 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
   const quotesPerPage = 5;
 
   const [quickSearch, setQuickSearch] = useState('');
-  const [debouncedQuickSearch, setDebouncedQuickSearch] = useState('');
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedQuickSearch(quickSearch);
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [quickSearch]);
-
-  const normalizedSearch = debouncedQuickSearch.trim();
+  const normalizedSearch = useDebouncedValue(quickSearch, SEARCH_DEBOUNCE_MS).trim();
   const apiQuery =
     normalizedSearch.length > 0
       ? `compoundLogicalQuery:((status.value:~(${normalizedSearch.toUpperCase()})) OR (id:~${normalizedSearch}) OR (customer.firstName:~(${normalizedSearch})) OR (customer.lastName:~(${normalizedSearch})) OR (employee.firstName:~(${normalizedSearch})) OR (employee.lastName:~(${normalizedSearch})))`
@@ -46,6 +35,8 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
     page: currentPage - 1,
     size: quotesPerPage,
   });
+
+  console.log('QuotesPageContent render', quotes.length, { apiQuery, quotes, loading, error, pagination });
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -102,7 +93,7 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
             quotes={quotes}
             loading={loading}
             currentPage={currentPage}
-            quotesPerPage={quotesPerPage}
+            totalPages={pagination?.totalPages ?? 1}
             onPreviousPage={handlePreviousPage}
             onNextPage={handleNextPage}
           />

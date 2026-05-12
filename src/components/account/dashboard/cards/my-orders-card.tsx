@@ -9,6 +9,7 @@ import { H4 } from '@/components/ui/h';
 import { Input } from '@/components/ui/input';
 import UiLink from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
+import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
 import { useOrders } from '@/hooks/order/useOrders';
 import { cn } from '@/lib/utils';
 import type { DashboardCardProps } from './dashboard-card';
@@ -25,19 +26,7 @@ export function MyOrdersCard({ className, title, forceRefreshOnMount = false, ..
   const t = useTranslations('orders');
 
   const [quickSearch, setQuickSearch] = useState('');
-  const [debouncedQuickSearch, setDebouncedQuickSearch] = useState('');
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedQuickSearch(quickSearch);
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [quickSearch]);
-
-  const normalizedSearch = debouncedQuickSearch.trim();
+  const normalizedSearch = useDebouncedValue(quickSearch, SEARCH_DEBOUNCE_MS).trim();
   const apiQuery = normalizedSearch.length > 0 ? `id:~(${normalizedSearch})` : undefined;
 
   // Fetch orders from the hook

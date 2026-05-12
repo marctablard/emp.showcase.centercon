@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
@@ -12,6 +12,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { useApprovals } from '@/hooks/approval/useApprovals';
+import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
 import { Link } from '@/i18n/navigation';
 import type { Approval, ApprovalStatus } from '@/platform/services/model/approval';
 import { ApprovalStatusBadge } from './approval-status-badge';
@@ -30,19 +31,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [quickSearch, setQuickSearch] = useState('');
-  const [debouncedQuickSearch, setDebouncedQuickSearch] = useState('');
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedQuickSearch(quickSearch);
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [quickSearch]);
-
-  const normalizedSearch = debouncedQuickSearch.trim();
+  const normalizedSearch = useDebouncedValue(quickSearch, SEARCH_DEBOUNCE_MS).trim();
 
   const apiQuery = useMemo(() => {
     const parts: string[] = [];

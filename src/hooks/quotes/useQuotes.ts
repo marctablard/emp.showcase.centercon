@@ -81,11 +81,13 @@ export function useQuotes(initialQuotes?: Quote[], params?: SearchParams<Quote>)
       const response: SearchResult<Quote> = await res.json();
 
       setQuotes(response.items || []);
+      const totalItems = response.total >= 0 ? response.total : (response.items?.length ?? 0);
+      const pageSize = response.pageSize || size || 10;
       setPagination({
         pageNumber: response.page,
-        pageSize: response.pageSize,
-        totalPages: Math.ceil(response.total / response.pageSize),
-        totalItems: response.total,
+        pageSize,
+        totalPages: Math.ceil(totalItems / pageSize),
+        totalItems,
       });
       setAvailableFilters(response.availableFilters || []);
     } catch (err) {
