@@ -36,8 +36,6 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
     size: quotesPerPage,
   });
 
-  console.log('QuotesPageContent render', quotes.length, { apiQuery, quotes, loading, error, pagination });
-
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
