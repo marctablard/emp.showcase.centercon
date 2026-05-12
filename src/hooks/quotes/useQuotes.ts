@@ -102,8 +102,9 @@ export function useQuotes(initialQuotes?: Quote[], params?: SearchParams<Quote>)
     await fetchQuotes();
   }, [fetchQuotes]);
 
-  // Skip only the very first fetch when SSR data is available and no custom query is active
-  const isFirstRender = useRef(!!initialQuotes && !params?.query);
+  // Skip only the very first fetch when SSR data is available and no custom params override the defaults
+  const hasCustomParams = !!(params?.query || params?.page || params?.size || params?.sort || params?.filters);
+  const isFirstRender = useRef(!!initialQuotes && !hasCustomParams);
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
