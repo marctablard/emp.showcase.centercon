@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import UiLink from '@/components/ui/link';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
@@ -30,18 +28,9 @@ export function QuotesTable({
   onNextPage,
 }: QuotesTableProps) {
   const t = useTranslations('account.quotesList');
-  const [sortOrder, setSortOrder] = useState<string>('latest');
 
-  // Sort quotes based on the selected order
-  const sortedQuotes = [...quotes].sort((a, b) => {
-    const dateA = new Date(a.submittedDate);
-    const dateB = new Date(b.submittedDate);
-
-    return sortOrder === 'latest' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
-  });
-
-  const visibleQuotes = sortedQuotes.slice((currentPage - 1) * quotesPerPage, currentPage * quotesPerPage);
-  const totalPages = Math.max(1, Math.ceil(sortedQuotes.length / quotesPerPage));
+  const visibleQuotes = quotes.slice((currentPage - 1) * quotesPerPage, currentPage * quotesPerPage);
+  const totalPages = Math.max(1, Math.ceil(quotes.length / quotesPerPage));
 
   const formatPrice = (price: number, currency: string) => {
     try {
@@ -58,20 +47,6 @@ export function QuotesTable({
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <Select value={sortOrder} onValueChange={setSortOrder}>
-            <SelectTrigger className="w-[340px]">
-              <SelectValue placeholder={t('latest')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="latest">{t('latest')}</SelectItem>
-              <SelectItem value="oldest">{t('oldest')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -94,7 +69,7 @@ export function QuotesTable({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : sortedQuotes.length === 0 ? (
+            ) : quotes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="h-24 text-center">
                   {t('noQuotes')}

@@ -33,41 +33,42 @@ export function useQuotes(initialQuotes?: Quote[], params?: SearchParams<Quote>)
     }>
   >([]);
 
+  const page = params?.page;
+  const size = params?.size;
+  const sort = params?.sort;
+  const searchQuery = params?.query;
   const stableFilters = useMemo(
     () => (params?.filters ? JSON.stringify(params.filters) : undefined),
     [params?.filters],
   );
+  const filters = params?.filters;
 
   const fetchQuotes = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Build query string from params
       const queryParams = new URLSearchParams();
-      if (params) {
-        if (params.page !== undefined) {
-          queryParams.append('page', params.page.toString());
-        }
-        if (params.size !== undefined) {
-          queryParams.append('size', params.size.toString());
-        }
-        if (params.sort !== undefined) {
-          queryParams.append('sort', params.sort);
-        }
-        if (params.query !== undefined) {
-          queryParams.append('q', params.query);
-        }
-        // Add criteria filters if present
-        if (params.filters) {
-          Object.entries(params.filters).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-              queryParams.append(key, value.join(','));
-            } else {
-              queryParams.append(key, value);
-            }
-          });
-        }
+      if (page !== undefined) {
+        queryParams.append('page', page.toString());
+      }
+      if (size !== undefined) {
+        queryParams.append('size', size.toString());
+      }
+      if (sort !== undefined) {
+        queryParams.append('sort', sort);
+      }
+      if (searchQuery !== undefined) {
+        queryParams.append('q', searchQuery);
+      }
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            queryParams.append(key, value.join(','));
+          } else {
+            queryParams.append(key, value);
+          }
+        });
       }
 
       const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
@@ -93,7 +94,7 @@ export function useQuotes(initialQuotes?: Quote[], params?: SearchParams<Quote>)
     } finally {
       setLoading(false);
     }
-  }, [params?.query, params?.page, params?.size, params?.sort, stableFilters]);
+  }, [page, size, sort, searchQuery, filters, stableFilters]);
 
   const refetchQuotes = useCallback(async () => {
     await fetchQuotes();

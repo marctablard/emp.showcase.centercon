@@ -42,42 +42,26 @@ export function useApprovals(
       try {
         setLoading(true);
 
-        // Build URL with filter parameters if provided
         let url = '/api/approval';
-        const params = new URLSearchParams();
+        const urlParams = new URLSearchParams();
 
-        if (filterParams) {
-          if (filterParams.status) {
-            params.append('status', filterParams.status);
-          }
+        // Build q= DSL query from filter params and/or explicit query
+        const queryParts: string[] = [];
 
-          if (filterParams.resourceType) {
-            params.append('resourceType', filterParams.resourceType);
-          }
-
-          if (filterParams.resource?.id) {
-            params.append('resourceId', filterParams.resource.id);
-          }
-
-          if (filterParams.action) {
-            params.append('action', filterParams.action);
-          }
-
-          if (filterParams.requestor?.userId) {
-            params.append('requestorId', filterParams.requestor.userId);
-          }
-
-          if (filterParams.approver?.userId) {
-            params.append('approverId', filterParams.approver.userId);
-          }
+        if (filterParams?.status) {
+          queryParts.push(`status:${filterParams.status}`);
         }
 
         if (query) {
-          params.append('query', query);
+          queryParts.push(query);
         }
 
-        if (params.toString()) {
-          url += `?${params.toString()}`;
+        if (queryParts.length > 0) {
+          urlParams.append('query', queryParts.join(' '));
+        }
+
+        if (urlParams.toString()) {
+          url += `?${urlParams.toString()}`;
         }
 
         const response = await fetch(url);
