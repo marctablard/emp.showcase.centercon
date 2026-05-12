@@ -36,7 +36,10 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
   }, [quickSearch]);
 
   const normalizedSearch = debouncedQuickSearch.trim();
-  const apiQuery = normalizedSearch.length > 0 ? `id:~(${normalizedSearch})` : undefined;
+  const apiQuery =
+    normalizedSearch.length > 0
+      ? `compoundLogicalQuery:((status:~(${normalizedSearch})) OR (id:~${normalizedSearch}) OR (customer.firstName:~(${normalizedSearch})) OR (customer.lastName:~(${normalizedSearch})) OR (employee.firstName:~(${normalizedSearch})) OR (employee.lastName:~(${normalizedSearch})))`
+      : undefined;
 
   const { quotes, loading, error, pagination } = useQuotes(initialQuotes, {
     query: apiQuery,
