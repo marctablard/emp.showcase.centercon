@@ -62,12 +62,15 @@ export function QuickOrder() {
   const handleAddToCart = useCallback(async () => {
     setIsProcessing(true);
     try {
-      const { failed } = await addItemsToCart(items);
+      const { succeeded, failed } = await addItemsToCart(items);
 
       if (failed.length === 0) {
         toast({ title: t('notifications.addedToCart'), variant: 'success' });
         clearAll();
       } else {
+        for (const item of succeeded) {
+          removeProduct(item.product.id);
+        }
         toast({
           title: t('notifications.addToCartPartialFailure', { failed: failed.length }),
           variant: 'destructive',
@@ -77,17 +80,20 @@ export function QuickOrder() {
     } finally {
       setIsProcessing(false);
     }
-  }, [items, addItemsToCart, toast, t, clearAll]);
+  }, [items, addItemsToCart, toast, t, clearAll, removeProduct]);
 
   const handleGoToCheckout = useCallback(async () => {
     setIsProcessing(true);
     try {
-      const { failed } = await addItemsToCart(items);
+      const { succeeded, failed } = await addItemsToCart(items);
 
       if (failed.length === 0) {
         clearAll();
         router.push('/checkout');
       } else {
+        for (const item of succeeded) {
+          removeProduct(item.product.id);
+        }
         toast({
           title: t('notifications.addToCartPartialFailure', { failed: failed.length }),
           variant: 'destructive',
@@ -97,10 +103,10 @@ export function QuickOrder() {
     } finally {
       setIsProcessing(false);
     }
-  }, [items, addItemsToCart, clearAll, router, toast, t]);
+  }, [items, addItemsToCart, clearAll, router, toast, t, removeProduct]);
 
   return (
-    <div className="flex flex-col gap-8 min-w-0 overflow-hidden">
+    <div className="flex flex-col gap-8 min-w-0 ">
       <H1 className="mb-0">{t('title')}</H1>
 
       <Tabs defaultValue="manual" className="gap-0">

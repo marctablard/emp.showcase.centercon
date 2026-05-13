@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Spinner } from '@/components/ui/spinner';
 import { useL10n } from '@/hooks/useL10n';
@@ -18,6 +19,7 @@ interface QuickOrderSearchDropdownProps {
 
 export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSearchDropdownProps>(
   function QuickOrderSearchDropdown({ products, loading, hasSearched, highlightedIndex, onSelect }, ref) {
+    const t = useTranslations('quick-order');
     const { l10n } = useL10n();
 
     const handleSelect = useCallback(
@@ -32,7 +34,7 @@ export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSea
         ref={ref}
         id="quick-order-search-results"
         role="listbox"
-        aria-label={l10n('quick-order.accessibility.searchResults')}
+        aria-label={t('accessibility.searchResults')}
         className="absolute z-50 top-full left-0 w-full mt-1 bg-surface-page border border-border-primary rounded-sm shadow-lg max-h-80 overflow-y-auto"
       >
         {loading && (
@@ -43,7 +45,7 @@ export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSea
 
         {!loading && hasSearched && products.length === 0 && (
           <div className="px-4 py-6 text-sm text-text-placeholders text-center" role="status">
-            {l10n('quick-order.search.noResults')}
+            {t('search.noResults')}
           </div>
         )}
 
