@@ -241,11 +241,9 @@ export function LoginForm({
               {t('guestCheckout')}
             </Button>
           ) : (
-            <Link href="/checkout">
-              <Button variant="secondary" className="w-full" data-testid="login-guestCheckout">
-                {t('guestCheckout')}
-              </Button>
-            </Link>
+            <Button asChild variant="secondary" className="w-full" data-testid="login-guestCheckout">
+              <Link href="/checkout">{t('guestCheckout')}</Link>
+            </Button>
           ))}
 
         <div className="flex flex-col gap-2 mx-auto items-center">
