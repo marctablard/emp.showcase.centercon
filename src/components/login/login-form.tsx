@@ -237,7 +237,13 @@ export function LoginForm({
       <div className="flex flex-col gap-6 w-full">
         {guestCheckout &&
           (onGuestAction ? (
-            <Button variant="secondary" className="w-full" data-testid="login-guestCheckout" onClick={onGuestAction}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full"
+              data-testid="login-guestCheckout"
+              onClick={onGuestAction}
+            >
               {t('guestCheckout')}
             </Button>
           ) : (
