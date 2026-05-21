@@ -140,8 +140,15 @@ class EmporixSearchService implements SearchService {
       }
     }
 
+    let nameIdCriteria: Record<string, string> = {};
+    if (params.query) {
+      const q = params.query;
+      const regexValue = q.includes(' ') ? `(~${q})` : `~${q}`;
+      nameIdCriteria = { compoundLogicalQuery: `((name:${regexValue}) OR (id:${regexValue}))` };
+    }
+
     const criteriaRecord: Record<string, string> = {
-      ...(params.query ? { name: '~' + params.query } : {}),
+      ...nameIdCriteria,
       ...(scoped && categoryValue ? { categoryIds: categoryValue } : {}),
     };
 

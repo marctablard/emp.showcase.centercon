@@ -35,7 +35,8 @@ export function buildSearchQuery<T>(
         if (query.length > 0) {
           query += ' ';
         }
-        const safeValue = String(value).includes(' ') ? `(${value})` : String(value);
+        const strValue = String(value);
+        const safeValue = strValue.includes(' ') && !strValue.startsWith('(') ? `(${strValue})` : strValue;
         query += `${key}:${safeValue}`;
       }
     });
