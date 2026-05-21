@@ -103,7 +103,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
       setPrice(embedded);
     } else {
       const syncPrice = async () => {
-        const nextPrice = await fetchProductPrice(product.id);
+        const nextPrice = await fetchProductPrice(product.id, undefined, undefined, session.currency);
         if (cancelled || syncGeneration !== priceSyncGenerationRef.current) {
           return;
         }

@@ -14,6 +14,7 @@ import { fetchProductPrice } from '@/lib/client/prices';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
+import { useSessionStore } from '@/providers/StoreProvider';
 import { QuickOrderSearchDropdown } from './quick-order-search-dropdown';
 import { QuickOrderTextPaste } from './quick-order-text-paste';
 import type { QuickOrderTextPasteHandle } from './quick-order-text-paste';
@@ -31,6 +32,7 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
   const { suggestions, loading, getSuggestions } = useSearch<Product>();
   const { toast } = useToast();
   const logger = getLogger();
+  const sessionCurrency = useSessionStore().session?.currency;
 
   const [query, setQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -80,7 +82,7 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
       setHighlightedIndex(-1);
 
       try {
-        const price = await fetchProductPrice(product.id);
+        const price = await fetchProductPrice(product.id, undefined, undefined, sessionCurrency);
         if (!price) {
           toast({
             title: t('notifications.productsCouldNotBeAdded', { count: 1 }),
@@ -125,7 +127,7 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
 
       inputRef.current?.focus();
     },
-    [onAddProducts, toast, t, logger],
+    [onAddProducts, toast, t, logger, sessionCurrency],
   );
 
   const handleKeyDown = useCallback(

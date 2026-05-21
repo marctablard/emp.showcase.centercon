@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { productIds } = body as { productIds?: unknown };
+  const { productIds, currency: currencyOverride } = body as { productIds?: unknown; currency?: unknown };
 
   if (!Array.isArray(productIds) || productIds.length === 0 || !productIds.every((id) => typeof id === 'string')) {
     return NextResponse.json({ error: 'productIds must be a non-empty array of strings' }, { status: 400 });
@@ -29,10 +29,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
+    // Use client-provided currency if available to avoid race condition
+    // between client-side session store and server-side session context propagation
+    const currency = (typeof currencyOverride === 'string' && currencyOverride) || session.currency;
+
     const priceService = server.get<PriceService>('PriceService');
     const priceMap = await priceService.getProductPrices(productIds as string[], undefined, undefined, {
       siteCode: session.siteCode,
-      currency: session.currency,
+      currency,
       country: session.country,
     });
 

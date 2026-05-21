@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/ui/useToast';
 import { fetchProductPrices } from '@/lib/client/prices';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Product } from '@/platform/services/model/product';
+import { useSessionStore } from '@/providers/StoreProvider';
 import { EmptyFileError, FileTooLargeError, UnsupportedFormatError, parseUploadedFile } from './utils/parse-file';
 import { fetchAvailabilityBatch, resolveProductsBatch } from './utils/resolve-product';
 
@@ -21,6 +22,7 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
   const locale = useLocale();
   const { toast } = useToast();
   const logger = getLogger();
+  const sessionCurrency = useSessionStore().session?.currency;
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -49,7 +51,7 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
         if (resolved.length > 0) {
           const ids = resolved.map((r) => r.product.id);
           try {
-            const priceMap = await fetchProductPrices(ids);
+            const priceMap = await fetchProductPrices(ids, sessionCurrency);
             for (const r of resolved) {
               const price = priceMap[r.product.id];
               if (price) {

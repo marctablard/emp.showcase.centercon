@@ -32,11 +32,11 @@ export function useQuickOrderList(): UseQuickOrderList {
   const enrichedIdsRef = useRef<Set<string>>(new Set());
   const inflightRef = useRef(0);
 
-  const enrichProductPrices = useCallback(async (productIds: string[]) => {
+  const enrichProductPrices = useCallback(async (productIds: string[], currency?: string) => {
     inflightRef.current += 1;
     setPricesLoading(true);
     try {
-      const priceMap = await fetchProductPrices(productIds);
+      const priceMap = await fetchProductPrices(productIds, currency);
       const enrichedIds = productIds.filter((id) => priceMap[id] != null);
       setItems((prev) =>
         prev.map((item) => {
@@ -91,10 +91,10 @@ export function useQuickOrderList(): UseQuickOrderList {
       ];
 
       if (idsNeedingPrices.length > 0) {
-        void enrichProductPrices(idsNeedingPrices);
+        void enrichProductPrices(idsNeedingPrices, session?.currency);
       }
     },
-    [enrichProductPrices],
+    [enrichProductPrices, session?.currency],
   );
 
   const removeProduct = useCallback((productId: string) => {

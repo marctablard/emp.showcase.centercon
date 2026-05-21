@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/ui/useToast';
 import { fetchProductPrices } from '@/lib/client/prices';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Product } from '@/platform/services/model/product';
+import { useSessionStore } from '@/providers/StoreProvider';
 import { parseTextInput } from './utils/parse-text-input';
 import { fetchAvailabilityBatch, resolveProductsBatch } from './utils/resolve-product';
 
@@ -29,6 +30,7 @@ export const QuickOrderTextPaste = forwardRef<QuickOrderTextPasteHandle, QuickOr
     const locale = useLocale();
     const { toast } = useToast();
     const logger = getLogger();
+    const sessionCurrency = useSessionStore().session?.currency;
 
     const [text, setText] = useState('');
     const [isResolving, setIsResolving] = useState(false);
@@ -56,7 +58,7 @@ export const QuickOrderTextPaste = forwardRef<QuickOrderTextPasteHandle, QuickOr
         if (resolved.length > 0) {
           const ids = resolved.map((r) => r.product.id);
           try {
-            const priceMap = await fetchProductPrices(ids);
+            const priceMap = await fetchProductPrices(ids, sessionCurrency);
             for (const r of resolved) {
               const price = priceMap[r.product.id];
               if (price) {
