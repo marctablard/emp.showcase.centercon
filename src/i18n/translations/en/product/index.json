@@ -99,5 +99,11 @@
     "headline": "You might also be interested in"
   },
   "loadingVariants": "Loading variants...",
-  "variantSelectPlaceholder": "Select variant"
+  "variantSelectPlaceholder": "Select variant",
+  "addedToComparison": "{name} added to comparison list",
+  "removedFromComparison": "{name} removed from comparison list",
+  "comparisonFull": "Comparison list is full (max {max} products)",
+  "compareTooltipAdd": "Add to comparison",
+  "compareTooltipRemove": "Remove from comparison",
+  "inComparisonList": "In comparison list"
 }

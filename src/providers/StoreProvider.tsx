@@ -7,6 +7,7 @@ import type { Session } from '@/platform/services/model/session';
 import { createAvailabilityStore } from '@/stores/availability-store';
 import { createCartStore } from '@/stores/cart-store';
 import { createCheckoutStore } from '@/stores/checkout-store';
+import { createComparisonStore } from '@/stores/comparison-store';
 import { createCustomerStore } from '@/stores/customer-store';
 import { createDashboardStore } from '@/stores/dashboard-store';
 import { createHistoryStore } from '@/stores/history-store';
@@ -42,6 +43,8 @@ export type NotificationStoreApi = ReturnType<typeof createNotificationStore>;
 export const NotificationStoreContext = createContext<NotificationStoreApi | null>(null);
 export type AvailabilityStoreApi = ReturnType<typeof createAvailabilityStore>;
 export const AvailabilityStoreContext = createContext<AvailabilityStoreApi | null>(null);
+export type ComparisonStoreApi = ReturnType<typeof createComparisonStore>;
+export const ComparisonStoreContext = createContext<ComparisonStoreApi | null>(null);
 
 export interface StoreProviderProps {
   children: ReactNode;
@@ -60,6 +63,7 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
   const [shippingMethodsStore] = useState<ShippingMethodsStoreApi>(() => createShippingMethodsStore());
   const [customerStore] = useState<CustomerStoreApi>(() => createCustomerStore());
   const [historyStore] = useState<HistoryStoreApi>(() => createHistoryStore());
+  const [comparisonStore] = useState<ComparisonStoreApi>(() => createComparisonStore());
   const [dashboardStore] = useState<DashboardStoreApi>(() => createDashboardStore());
   const [orderStore] = useState<OrderStoreApi>(() => createOrderStore());
   const [sessionStore] = useState<SessionStoreApi>(() => createSessionStore({ session: shopSession, loading: false }));
@@ -109,15 +113,17 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
               <CartStoreContext.Provider value={cartStore}>
                 <CheckoutStoreContext.Provider value={checkoutStore}>
                   <HistoryStoreContext.Provider value={historyStore}>
-                    <DashboardStoreContext.Provider value={dashboardStore}>
-                      <SessionStoreContext.Provider value={sessionStore}>
-                        <NotificationStoreContext.Provider value={notificationStore}>
-                          <AvailabilityStoreContext.Provider value={availabilityStore}>
-                            {children}
-                          </AvailabilityStoreContext.Provider>
-                        </NotificationStoreContext.Provider>
-                      </SessionStoreContext.Provider>
-                    </DashboardStoreContext.Provider>
+                    <ComparisonStoreContext.Provider value={comparisonStore}>
+                      <DashboardStoreContext.Provider value={dashboardStore}>
+                        <SessionStoreContext.Provider value={sessionStore}>
+                          <NotificationStoreContext.Provider value={notificationStore}>
+                            <AvailabilityStoreContext.Provider value={availabilityStore}>
+                              {children}
+                            </AvailabilityStoreContext.Provider>
+                          </NotificationStoreContext.Provider>
+                        </SessionStoreContext.Provider>
+                      </DashboardStoreContext.Provider>
+                    </ComparisonStoreContext.Provider>
                   </HistoryStoreContext.Provider>
                 </CheckoutStoreContext.Provider>
               </CartStoreContext.Provider>
@@ -221,6 +227,14 @@ export const useAvailabilityStore = () => {
   const storeContext = useContext(AvailabilityStoreContext);
   if (!storeContext) {
     throw new Error('useAvailabilityStore must be used within StoreProvider');
+  }
+  return useStore(storeContext);
+};
+
+export const useComparisonStore = () => {
+  const storeContext = useContext(ComparisonStoreContext);
+  if (!storeContext) {
+    throw new Error('useComparisonStore must be used within StoreProvider');
   }
   return useStore(storeContext);
 };

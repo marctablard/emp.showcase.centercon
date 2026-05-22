@@ -40,7 +40,9 @@
     "clearHistory": "Suchverlauf löschen",
     "navigation": {
       "meta": "Meta"
-    }
+    },
+    "compare": "Vergleichen",
+    "compareCount": "Vergleichen ({count})"
   },
   "footer": {
     "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",

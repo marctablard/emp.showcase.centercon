@@ -40,7 +40,9 @@
     "clearHistory": "delete search history",
     "navigation": {
       "meta": "Meta"
-    }
+    },
+    "compare": "Compare",
+    "compareCount": "Compare ({count})"
   },
   "footer": {
     "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",

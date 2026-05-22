@@ -99,5 +99,11 @@
     "headline": "Diese Produkte könnten auch interessant sein"
   },
   "loadingVariants": "Varianten werden geladen...",
-  "variantSelectPlaceholder": "Variante auswählen"
+  "variantSelectPlaceholder": "Variante auswählen",
+  "addedToComparison": "{name} wurde zur Vergleichsliste hinzugefügt",
+  "removedFromComparison": "{name} wurde aus der Vergleichsliste entfernt",
+  "comparisonFull": "Vergleichsliste ist voll (max. {max} Produkte)",
+  "compareTooltipAdd": "Zum Vergleich hinzufügen",
+  "compareTooltipRemove": "Aus Vergleich entfernen",
+  "inComparisonList": "In der Vergleichsliste"
 }

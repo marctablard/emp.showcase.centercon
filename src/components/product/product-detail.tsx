@@ -9,7 +9,9 @@ import { ProductCarousel } from '@/components/product/product-carousel';
 import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
 import { Card, CardContent } from '@/components/ui/card';
+import { ToastType, notify } from '@/components/ui/toast-notification';
 import { useShopContextReady } from '@/hooks/common/useShopContextReady';
+import { useComparison } from '@/hooks/comparison/useComparison';
 import { useProduct } from '@/hooks/product/useProduct';
 import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
@@ -28,6 +30,7 @@ import type { StockAvailability } from '@/platform/services/model/common';
 import type { ProductPrice } from '@/platform/services/model/price';
 import type { GroupedSpecification, Product, ProductVariantAttribute } from '@/platform/services/model/product';
 import type { ProductFetchOptions } from '@/platform/services/product';
+import { MAX_COMPARISON_PRODUCTS } from '@/stores/comparison-store';
 import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
 import { H1, H2, Overline } from '../ui/h';
@@ -57,6 +60,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
   const { l10n } = useL10n(locale);
   const t = useTranslations('product');
   const isAboveMediumScreen = useBreakpoint('md');
+  const { isInComparison, toggleProduct, isFull } = useComparison();
   const addToCartButton = useRef<HTMLDivElement>(null);
   const addToCartBar = useRef<HTMLDivElement>(null);
   const priceSyncGenerationRef = useRef(0);
@@ -201,6 +205,19 @@ export default function ProductDetail({ product: initialProduct, options, classN
     }
   });
 
+  const handleCompareClick = () => {
+    if (!product) return;
+    if (isInComparison(product.id)) {
+      toggleProduct(product);
+      notify({ title: t('removedFromComparison', { name: l10n(product.name) }), type: ToastType.Info });
+    } else if (isFull) {
+      notify({ title: t('comparisonFull', { max: MAX_COMPARISON_PRODUCTS }), type: ToastType.Warning });
+    } else {
+      toggleProduct(product);
+      notify({ title: t('addedToComparison', { name: l10n(product.name) }), type: ToastType.Success });
+    }
+  };
+
   if (!shopContextReady || loading) {
     return (
       <div className={cn('flex justify-center items-center min-h-[400px] mb-6', className)}>
@@ -319,7 +336,14 @@ export default function ProductDetail({ product: initialProduct, options, classN
                 ))}
               </div>
               <div className="hidden md:flex gap-2">
-                <Button size="icon" variant="secondary" aria-label={t('compare')}>
+                <Button
+                  size="icon"
+                  variant={isInComparison(product.id) ? 'primary' : 'secondary'}
+                  aria-label={t('compare')}
+                  aria-pressed={isInComparison(product.id)}
+                  title={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
+                  onClick={handleCompareClick}
+                >
                   <FlipHorizontal2 />
                 </Button>
                 <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
@@ -376,7 +400,14 @@ export default function ProductDetail({ product: initialProduct, options, classN
             className="mt-6"
           />
           <div className="flex md:hidden justify-center gap-2 mt-6">
-            <Button size="icon" variant="secondary" aria-label={t('compare')}>
+            <Button
+              size="icon"
+              variant={isInComparison(product.id) ? 'primary' : 'secondary'}
+              aria-label={t('compare')}
+              aria-pressed={isInComparison(product.id)}
+              title={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
+              onClick={handleCompareClick}
+            >
               <FlipHorizontal2 />
             </Button>
             <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>

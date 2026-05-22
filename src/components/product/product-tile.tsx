@@ -2,7 +2,18 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import type { LucideIcon } from 'lucide-react';
-import { Circle, DropletOff, Globe, MapPin, Pin, Shield, ShoppingCart, Trees, Truck } from 'lucide-react';
+import {
+  Circle,
+  DropletOff,
+  FlipHorizontal2,
+  Globe,
+  MapPin,
+  Pin,
+  Shield,
+  ShoppingCart,
+  Trees,
+  Truck,
+} from 'lucide-react';
 import { ProductCharacteristic } from '@/components/product/product-characteristic';
 import { ProductColorTile } from '@/components/product/product-color-tile';
 import { ProductTag } from '@/components/product/product-tag';
@@ -11,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heading } from '@/components/ui/h';
 import { useCart } from '@/hooks/cart/useCart';
+import { useComparison } from '@/hooks/comparison/useComparison';
 import { useAvailableVariantValues } from '@/hooks/useAvailableVariantValues';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
@@ -18,8 +30,9 @@ import { type ProductTemplateAttributeKey, dk } from '@/i18n/dynamic-key';
 import { Link } from '@/i18n/navigation';
 import { getPublicDefaultLanguage } from '@/lib/common/public-default-env';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { formatCurrency, imageSizes } from '@/lib/utils';
+import { cn, formatCurrency, imageSizes } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
+import { MAX_COMPARISON_PRODUCTS } from '@/stores/comparison-store';
 import { ToastType, notify } from '../ui/toast-notification';
 
 interface ProductTileProps {
@@ -33,6 +46,7 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
   const effectiveLocale = locale ?? getPublicDefaultLanguage();
   const { l10n } = useL10n(effectiveLocale);
   const { addItem, loading: cartLoading } = useCart();
+  const { isInComparison, toggleProduct, isFull } = useComparison();
   const horizontalScrollRef = useHorizontalScroll();
 
   const firstAttribute = product.variantAttributes?.[0];
@@ -80,6 +94,21 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
     return Circle;
   }
 
+  const handleCompareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (isInComparison(product.id)) {
+      toggleProduct(product);
+      notify({ title: t('removedFromComparison', { name: l10n(product.name) }), type: ToastType.Info });
+    } else if (isFull) {
+      notify({ title: t('comparisonFull', { max: MAX_COMPARISON_PRODUCTS }), type: ToastType.Warning });
+    } else {
+      toggleProduct(product);
+      notify({ title: t('addedToComparison', { name: l10n(product.name) }), type: ToastType.Success });
+    }
+  };
+
   return (
     <Link href={`/product/${product.id}`} className="block h-full">
       <Card shadow="default" rounded="md" className="flex h-full flex-col gap-4 border-0 transition hover:shadow-xl">
@@ -96,14 +125,22 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
             <Heading variant="h6" as="div" className="hidden md:block">
               <p className="line-clamp-2">{l10n(product.name)}</p>
             </Heading>
-            <Button
-              variant="secondary"
-              size="icon"
-              title={t('addToWishlist')}
-              className="h-[50px] w-[50px] flex-shrink-0"
-            >
-              <Pin width="24" height="24" />
-            </Button>
+            <div className="flex flex-shrink-0 gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
+                aria-pressed={isInComparison(product.id)}
+                title={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
+                className={cn('h-[50px] w-[50px]', isInComparison(product.id) && 'border-action ring-2 ring-focus')}
+                onClick={handleCompareClick}
+              >
+                <FlipHorizontal2 width="24" height="24" />
+              </Button>
+              <Button variant="secondary" size="icon" title={t('addToWishlist')} className="h-[50px] w-[50px]">
+                <Pin width="24" height="24" />
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
 
