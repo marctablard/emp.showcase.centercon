@@ -40,7 +40,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
     }
     if (normalizedSearch.length > 0) {
       parts.push(
-        `compoundLogicalQuery:((id:~(${normalizedSearch})) OR (status:~(${normalizedSearch.toUpperCase()})) OR (requestor.fullName:~(${normalizedSearch})) OR (approver.fullName:~(${normalizedSearch})))`,
+        `compoundLogicalQuery:((id:~(${normalizedSearch})) OR (status:~(${normalizedSearch.toUpperCase()})) OR (requestor.firstName:~(${normalizedSearch})) OR (requestor.lastName:~(${normalizedSearch})) OR (approver.firstName:~(${normalizedSearch})) OR (approver.lastName:~(${normalizedSearch})))`,
       );
     }
     return parts.length > 0 ? parts.join(' ') : undefined;
