@@ -71,7 +71,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
     }).format(date);
   };
 
-  if (loading && !quickSearch && filterStatus === '_ALL_') {
+  if (loading && normalizedSearch.length === 0 && filterStatus === '_ALL_') {
     return (
       <Card>
         <CardHeader>
@@ -107,7 +107,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
     );
   }
 
-  if (approvals.length === 0 && !quickSearch && filterStatus === '_ALL_') {
+  if (approvals.length === 0 && normalizedSearch.length === 0 && filterStatus === '_ALL_') {
     return (
       <Card>
         <CardHeader>
@@ -121,7 +121,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
     );
   }
 
-  const isSearchLoading = loading && quickSearch.length > 0;
+  const isSearchLoading = loading && normalizedSearch.length > 0;
 
   return (
     <Card>
@@ -169,7 +169,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
           </div>
         </div>
 
-        {!loading && approvals.length === 0 && (quickSearch || filterStatus !== '_ALL_') && (
+        {!loading && approvals.length === 0 && (normalizedSearch.length > 0 || filterStatus !== '_ALL_') && (
           <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
             {t('noMatches')}
           </div>

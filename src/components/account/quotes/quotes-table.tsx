@@ -48,6 +48,7 @@ export function QuotesTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="whitespace-nowrap">{t('quoteId')}</TableHead>
               <TableHead className="whitespace-nowrap">{t('quoteReference')}</TableHead>
               <TableHead className="whitespace-nowrap">{t('status')}</TableHead>
               <TableHead className="whitespace-nowrap">{t('quotationDate')}</TableHead>
@@ -60,7 +61,7 @@ export function QuotesTable({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   <div className="flex items-center justify-center">
                     <Spinner color="primary" variant="md" />
                   </div>
@@ -68,7 +69,7 @@ export function QuotesTable({
               </TableRow>
             ) : quotes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   {t('noQuotes')}
                 </TableCell>
               </TableRow>
@@ -91,6 +92,7 @@ export function QuotesTable({
                       {quote.id}
                     </UiLink>
                   </TableCell>
+                  <TableCell className="px-2 py-4">{quote.reference || '-'}</TableCell>
                   <TableCell className="px-2 py-4">
                     <QuoteStatusBadge status={quote.status} />
                   </TableCell>

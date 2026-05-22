@@ -58,7 +58,7 @@ export function MyOrdersCard({ className, title, forceRefreshOnMount = false, ..
     }
   };
 
-  const isSearchLoading = loading && quickSearch.length > 0;
+  const isSearchLoading = loading && normalizedSearch.length > 0;
 
   return (
     <DashboardCard variant="default" className={cn('py-4 pb-0', className)} {...props}>
@@ -94,7 +94,7 @@ export function MyOrdersCard({ className, title, forceRefreshOnMount = false, ..
           )}
         </div>
       </div>
-      {!loading && orders?.length === 0 && quickSearch && (
+      {!loading && orders?.length === 0 && normalizedSearch.length > 0 && (
         <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
           {t('noMatches')}
         </div>

@@ -27,7 +27,7 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
   const normalizedSearch = useDebouncedValue(quickSearch, SEARCH_DEBOUNCE_MS).trim();
   const apiQuery =
     normalizedSearch.length > 0
-      ? `compoundLogicalQuery:((status.value:~(${normalizedSearch.toUpperCase()})) OR (id:~(${normalizedSearch})) OR (customer.firstName:~(${normalizedSearch})) OR (customer.lastName:~(${normalizedSearch})) OR (employee.firstName:~(${normalizedSearch})) OR (employee.lastName:~(${normalizedSearch})))`
+      ? `compoundLogicalQuery:((status.value:~(${normalizedSearch.toUpperCase()})) OR (id:~(${normalizedSearch})) OR (reference:~(${normalizedSearch})) OR (customer.firstName:~(${normalizedSearch})) OR (customer.lastName:~(${normalizedSearch})) OR (employee.firstName:~(${normalizedSearch})) OR (employee.lastName:~(${normalizedSearch})))`
       : undefined;
 
   const { quotes, loading, error, pagination } = useQuotes(initialQuotes, {
@@ -45,7 +45,7 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const isSearchLoading = loading && quickSearch.length > 0;
+  const isSearchLoading = loading && normalizedSearch.length > 0;
 
   return (
     <AccountLayout>
@@ -76,7 +76,7 @@ export default function QuotesPageContent({ initialQuotes }: QuotesPageContentPr
           </div>
         </div>
 
-        {!loading && quotes.length === 0 && quickSearch && (
+        {!loading && quotes.length === 0 && normalizedSearch.length > 0 && (
           <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
             {t('noMatches')}
           </div>
