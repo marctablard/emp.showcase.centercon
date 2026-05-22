@@ -39,7 +39,9 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
       parts.push(`status:${filterStatus}`);
     }
     if (normalizedSearch.length > 0) {
-      parts.push(`id:~(${normalizedSearch})`);
+      parts.push(
+        `compoundLogicalQuery:((id:~(${normalizedSearch})) OR (status:~(${normalizedSearch.toUpperCase()})) OR (requestor.fullName:~(${normalizedSearch})) OR (approver.fullName:~(${normalizedSearch})))`,
+      );
     }
     return parts.length > 0 ? parts.join(' ') : undefined;
   }, [filterStatus, normalizedSearch]);
@@ -194,8 +196,12 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
                   <TableCell>
                     <ApprovalStatusBadge status={approval.status} />
                   </TableCell>
-                  <TableCell>{approval.requestor.userId}</TableCell>
-                  <TableCell>{approval.approver.userId}</TableCell>
+                  <TableCell>
+                    {approval.requestor.fullName || `${approval.requestor.firstName} ${approval.requestor.lastName}`}
+                  </TableCell>
+                  <TableCell>
+                    {approval.approver.fullName || `${approval.approver.firstName} ${approval.approver.lastName}`}
+                  </TableCell>
                   <TableCell>{formatDate(approval.createdAt)}</TableCell>
                   <TableCell>
                     <Link href={`/account/approvals/${approval.id}`} passHref>
