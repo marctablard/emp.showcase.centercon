@@ -42,7 +42,8 @@
       "meta": "Meta"
     },
     "compare": "Vergleichen",
-    "compareCount": "Vergleichen ({count})"
+    "compareCount": "Vergleichen ({count})",
+    "compareTooltip": "Klicken, um {count} Artikel zu vergleichen"
   },
   "footer": {
     "newsletterTitle": "Abonnieren Sie unseren Newsletter für exklusive Updates und mehr!",

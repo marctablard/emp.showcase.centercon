@@ -6,12 +6,15 @@ import { ComparisonProductCard } from '@/components/comparison/comparison-produc
 import { ComparisonTable } from '@/components/comparison/comparison-table';
 import { Button } from '@/components/ui/button';
 import { H4, H5 } from '@/components/ui/h';
+import { Spinner } from '@/components/ui/spinner';
 import { useComparison } from '@/hooks/comparison/useComparison';
+import { useProducts } from '@/hooks/product/useProducts';
 import { Link } from '@/i18n/navigation';
 
 export function CompareView() {
   const t = useTranslations('comparison');
-  const { products, count, removeProduct, clearComparison } = useComparison();
+  const { productIds, count, removeProduct, clearComparison } = useComparison();
+  const { products, loading } = useProducts(productIds, { prices: true });
 
   if (count === 0) {
     return (
@@ -24,6 +27,14 @@ export function CompareView() {
         >
           {t('emptyStateAction')}
         </Link>
+      </div>
+    );
+  }
+
+  if (loading && products.length === 0) {
+    return (
+      <div className="w-full max-w-[1848px] mx-auto px-9 py-12 flex justify-center">
+        <Spinner variant="lg" />
       </div>
     );
   }
@@ -50,7 +61,7 @@ export function CompareView() {
       </div>
 
       {/* Single product state */}
-      {count === 1 && <p className="mt-6 text-text-on-disabled">{t('addMoreProducts')}</p>}
+      {products.length === 1 && <p className="mt-6 text-text-on-disabled">{t('addMoreProducts')}</p>}
 
       {/* Products section */}
       <div className="border-t border-border-primary mt-6">
@@ -70,7 +81,7 @@ export function CompareView() {
       </div>
 
       {/* Comparison table */}
-      {count >= 2 && <ComparisonTable products={products} />}
+      {products.length >= 2 && <ComparisonTable products={products} />}
     </div>
   );
 }

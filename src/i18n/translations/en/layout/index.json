@@ -42,7 +42,8 @@
       "meta": "Meta"
     },
     "compare": "Compare",
-    "compareCount": "Compare ({count})"
+    "compareCount": "Compare ({count})",
+    "compareTooltip": "Click to compare {count} item(s)"
   },
   "footer": {
     "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",

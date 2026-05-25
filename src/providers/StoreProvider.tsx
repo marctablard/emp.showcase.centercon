@@ -63,7 +63,10 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
   const [shippingMethodsStore] = useState<ShippingMethodsStoreApi>(() => createShippingMethodsStore());
   const [customerStore] = useState<CustomerStoreApi>(() => createCustomerStore());
   const [historyStore] = useState<HistoryStoreApi>(() => createHistoryStore());
-  const [comparisonStore] = useState<ComparisonStoreApi>(() => createComparisonStore());
+  const [comparisonStore] = useState<ComparisonStoreApi>(() => {
+    const storageKey = `comparison:${site?.code ?? 'default'}:${shopSession?.customerId ?? 'anonymous'}`;
+    return createComparisonStore(undefined, storageKey);
+  });
   const [dashboardStore] = useState<DashboardStoreApi>(() => createDashboardStore());
   const [orderStore] = useState<OrderStoreApi>(() => createOrderStore());
   const [sessionStore] = useState<SessionStoreApi>(() => createSessionStore({ session: shopSession, loading: false }));

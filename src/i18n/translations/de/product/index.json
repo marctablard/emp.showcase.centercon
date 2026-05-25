@@ -105,5 +105,9 @@
   "comparisonFull": "Vergleichsliste ist voll (max. {max} Produkte)",
   "compareTooltipAdd": "Zum Vergleich hinzufügen",
   "compareTooltipRemove": "Aus Vergleich entfernen",
+  "compareTooltipInList": "Dieser Artikel ist auf der Vergleichsliste",
+  "compareTooltipMasterProduct": "Hauptprodukt kann nicht verglichen werden. Bitte wählen Sie eine bestimmte Variante.",
+  "cartTooltipMasterProduct": "Hauptprodukt kann nicht in den Warenkorb gelegt werden. Bitte wählen Sie eine bestimmte Variante.",
+  "cartTooltipNoPrice": "Dieses Produkt hat keinen {currency}-Preis und kann nicht in den Warenkorb gelegt werden.",
   "inComparisonList": "In der Vergleichsliste"
 }

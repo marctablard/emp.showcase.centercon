@@ -5,7 +5,9 @@ import Image from 'next/image';
 import { MapPin, Pin, ShoppingCart, Trash2, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ToastType, notify } from '@/components/ui/toast-notification';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCart } from '@/hooks/cart/useCart';
+import { useValidateAddToCart } from '@/hooks/cart/useValidateAddToCart';
 import { useL10n } from '@/hooks/useL10n';
 import { Link } from '@/i18n/navigation';
 import { getLogger } from '@/lib/logger/use-logger-client';
@@ -23,6 +25,7 @@ export function ComparisonProductCard({ product, onRemove }: ComparisonProductCa
   const t = useTranslations('comparison');
   const tProduct = useTranslations('product');
   const { addItem, loading: cartLoading } = useCart();
+  const { disabled: cartDisabled, tooltip: cartTooltip } = useValidateAddToCart(product);
 
   const brand = l10n(
     product.brand?.name || product.specifications?.find((spec) => spec.key === 'manufacturer')?.value || '',
@@ -147,15 +150,20 @@ export function ComparisonProductCard({ product, onRemove }: ComparisonProductCa
           >
             <Pin className="h-6 w-6" />
           </Button>
-          <Button
-            size="icon"
-            className="h-[50px] w-[50px]"
-            onClick={handleAddToCart}
-            disabled={cartLoading}
-            title={tProduct('addToCart')}
-          >
-            <ShoppingCart className="h-6 w-6" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                className="h-[50px] w-[50px]"
+                onClick={handleAddToCart}
+                disabled={cartLoading || cartDisabled}
+                title={tProduct('addToCart')}
+              >
+                <ShoppingCart className="h-6 w-6" />
+              </Button>
+            </TooltipTrigger>
+            {cartTooltip && <TooltipContent>{cartTooltip}</TooltipContent>}
+          </Tooltip>
         </div>
       </div>
     </div>

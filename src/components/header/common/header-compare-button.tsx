@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { FlipHorizontal2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useComparison } from '@/hooks/comparison/useComparison';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -26,7 +27,6 @@ export function HeaderCompareButton() {
           : 'text-text-on-disabled cursor-default',
       )}
       aria-disabled={!isActive}
-      title={isActive ? t('compare') : t('compareCount', { count })}
     >
       <div className="relative w-8 h-8">
         <FlipHorizontal2 className="w-8 h-8" />
@@ -44,11 +44,23 @@ export function HeaderCompareButton() {
 
   if (isActive) {
     return (
-      <Link href="/compare" aria-label={t('compareCount', { count })}>
-        {content}
-      </Link>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link href="/compare" aria-label={t('compareCount', { count })}>
+            {content}
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent>{t('compareTooltip', { count })}</TooltipContent>
+      </Tooltip>
     );
   }
 
-  return content;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span>{content}</span>
+      </TooltipTrigger>
+      <TooltipContent>{t('compareTooltip', { count })}</TooltipContent>
+    </Tooltip>
+  );
 }

@@ -21,8 +21,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heading } from '@/components/ui/h';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCart } from '@/hooks/cart/useCart';
+import { useValidateAddToCart } from '@/hooks/cart/useValidateAddToCart';
 import { useComparison } from '@/hooks/comparison/useComparison';
+import { useValidateAddToComparison } from '@/hooks/comparison/useValidateAddToComparison';
 import { useAvailableVariantValues } from '@/hooks/useAvailableVariantValues';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
@@ -47,6 +50,8 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
   const { l10n } = useL10n(effectiveLocale);
   const { addItem, loading: cartLoading } = useCart();
   const { isInComparison, toggleProduct, isFull } = useComparison();
+  const { disabled: cartDisabled, tooltip: cartTooltip } = useValidateAddToCart(product);
+  const { disabled: compareDisabled, tooltip: compareTooltip } = useValidateAddToComparison(product);
   const horizontalScrollRef = useHorizontalScroll();
 
   const firstAttribute = product.variantAttributes?.[0];
@@ -99,12 +104,12 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
     e.preventDefault();
 
     if (isInComparison(product.id)) {
-      toggleProduct(product);
+      toggleProduct(product.id);
       notify({ title: t('removedFromComparison', { name: l10n(product.name) }), type: ToastType.Info });
     } else if (isFull) {
       notify({ title: t('comparisonFull', { max: MAX_COMPARISON_PRODUCTS }), type: ToastType.Warning });
     } else {
-      toggleProduct(product);
+      toggleProduct(product.id);
       notify({ title: t('addedToComparison', { name: l10n(product.name) }), type: ToastType.Success });
     }
   };
@@ -126,17 +131,24 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
               <p className="line-clamp-2">{l10n(product.name)}</p>
             </Heading>
             <div className="flex flex-shrink-0 gap-2">
-              <Button
-                variant="secondary"
-                size="icon"
-                aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
-                aria-pressed={isInComparison(product.id)}
-                title={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
-                className={cn('h-[50px] w-[50px]', isInComparison(product.id) && 'border-action ring-2 ring-focus')}
-                onClick={handleCompareClick}
-              >
-                <FlipHorizontal2 width="24" height="24" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
+                    aria-pressed={isInComparison(product.id)}
+                    className={cn('h-[50px] w-[50px]', isInComparison(product.id) && 'border-action ring-2 ring-focus')}
+                    onClick={handleCompareClick}
+                    disabled={compareDisabled}
+                  >
+                    <FlipHorizontal2 width="24" height="24" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipInList') : t('compareTooltipAdd'))}
+                </TooltipContent>
+              </Tooltip>
               <Button variant="secondary" size="icon" title={t('addToWishlist')} className="h-[50px] w-[50px]">
                 <Pin width="24" height="24" />
               </Button>
@@ -264,15 +276,20 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
                   <p className="text-lg font-bold">{t('price.priceNotAvailable')}</p>
                 )}
               </div>
-              <Button
-                size="icon"
-                className="h-[50px] w-[50px] self-end"
-                onClick={(e) => handleAddToCart(e)}
-                title={t('addToCart')}
-                disabled={cartLoading}
-              >
-                <ShoppingCart width="24" height="24" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    className="h-[50px] w-[50px] self-end"
+                    onClick={(e) => handleAddToCart(e)}
+                    aria-label={t('addToCart')}
+                    disabled={cartLoading || cartDisabled}
+                  >
+                    <ShoppingCart width="24" height="24" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{cartTooltip ?? t('addToCart')}</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </CardFooter>

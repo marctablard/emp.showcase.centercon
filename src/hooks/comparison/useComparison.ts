@@ -1,15 +1,14 @@
 'use client';
 
-import type { Product } from '@/platform/services/model/product';
 import { useComparisonStore } from '@/providers/StoreProvider';
 import { MAX_COMPARISON_PRODUCTS } from '@/stores/comparison-store';
 
 interface UseComparisonResult {
-  products: Product[];
+  productIds: string[];
   count: number;
-  addProduct: (product: Product) => boolean;
+  addProduct: (productId: string) => boolean;
   removeProduct: (productId: string) => void;
-  toggleProduct: (product: Product) => void;
+  toggleProduct: (productId: string) => void;
   isInComparison: (productId: string) => boolean;
   clearComparison: () => void;
   isFull: boolean;
@@ -18,23 +17,23 @@ interface UseComparisonResult {
 export const useComparison = (): UseComparisonResult => {
   const store = useComparisonStore();
 
-  const toggleProduct = (product: Product): void => {
-    if (store.isInComparison(product.id)) {
-      store.removeProduct(product.id);
+  const toggleProduct = (productId: string): void => {
+    if (store.isInComparison(productId)) {
+      store.removeProduct(productId);
     } else {
-      store.addProduct(product);
+      store.addProductId(productId);
     }
   };
 
   return {
-    products: store.products,
+    productIds: store.productIds,
     count: store.getCount(),
-    addProduct: store.addProduct,
+    addProduct: store.addProductId,
     removeProduct: store.removeProduct,
     toggleProduct,
     isInComparison: store.isInComparison,
     clearComparison: store.clearComparison,
-    isFull: store.products.length >= MAX_COMPARISON_PRODUCTS,
+    isFull: store.productIds.length >= MAX_COMPARISON_PRODUCTS,
   };
 };
 
