@@ -98,16 +98,18 @@ export default function ProductAddToCartButton({
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            className={cn('flex-1 w-full', className)}
-            onClick={handleAddToCart}
-            disabled={isDisabled}
-            title={syncTitle}
-            data-testid="product-addToCartButton"
-          >
-            {t('addToCart')}
-            <ShoppingCart className="hidden sm:inline" />
-          </Button>
+          <span className="inline-flex flex-1 w-full">
+            <Button
+              className={cn('flex-1 w-full', className)}
+              onClick={handleAddToCart}
+              disabled={isDisabled}
+              title={syncTitle}
+              data-testid="product-addToCartButton"
+            >
+              {t('addToCart')}
+              <ShoppingCart className="hidden sm:inline" />
+            </Button>
+          </span>
         </TooltipTrigger>
         {cartTooltip && <TooltipContent>{cartTooltip}</TooltipContent>}
       </Tooltip>

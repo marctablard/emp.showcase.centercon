@@ -36,6 +36,10 @@ export function useValidateAddToCart(product: Product | undefined, price?: Produ
     return { disabled: true, tooltip: t('cartTooltipMasterProduct') };
   }
 
+  if (!product.purchasable) {
+    return { disabled: true, tooltip: t('cartTooltipNotPurchasable') };
+  }
+
   // Use the explicit price prop if provided, otherwise fall back to product.price
   const effectivePrice = price !== undefined ? price : product.price;
   const priceOk =

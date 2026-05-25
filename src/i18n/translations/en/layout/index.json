@@ -43,7 +43,8 @@
     },
     "compare": "Compare",
     "compareCount": "Compare ({count})",
-    "compareTooltip": "Click to compare {count} item(s)"
+    "compareTooltip": "Click to compare {count} item(s)",
+    "compareTooltipMinimum": "Add at least 2 products to compare"
   },
   "footer": {
     "newsletterTitle": "Join Our Newsletter for Exclusive Updates and More!",

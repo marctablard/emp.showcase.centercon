@@ -25,13 +25,13 @@ const defaultState: ComparisonState = {
   productIds: [],
 };
 
-export const createComparisonStore = (initState: ComparisonState = defaultState, storageKey?: string) => {
+export const createComparisonStore = (initState?: ComparisonState, storageKey?: string) => {
   const name = storageKey || process.env.NEXT_PUBLIC_COMPARISON_STORAGE_NAME || 'comparison-storage';
 
   return create<ComparisonStore>()(
     persist(
       immer((set, get) => ({
-        ...initState,
+        ...(initState ?? defaultState),
         addProductId: (productId: string): boolean => {
           const state = get();
           if (state.productIds.includes(productId)) {

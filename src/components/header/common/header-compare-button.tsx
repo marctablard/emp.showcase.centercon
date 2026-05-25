@@ -60,7 +60,7 @@ export function HeaderCompareButton() {
       <TooltipTrigger asChild>
         <span>{content}</span>
       </TooltipTrigger>
-      <TooltipContent>{t('compareTooltip', { count })}</TooltipContent>
+      <TooltipContent>{t('compareTooltipMinimum')}</TooltipContent>
     </Tooltip>
   );
 }

@@ -152,15 +152,17 @@ export function ComparisonProductCard({ product, onRemove }: ComparisonProductCa
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                className="h-[50px] w-[50px]"
-                onClick={handleAddToCart}
-                disabled={cartLoading || cartDisabled}
-                title={tProduct('addToCart')}
-              >
-                <ShoppingCart className="h-6 w-6" />
-              </Button>
+              <span className="inline-flex">
+                <Button
+                  size="icon"
+                  className="h-[50px] w-[50px]"
+                  onClick={handleAddToCart}
+                  disabled={cartLoading || cartDisabled}
+                  title={tProduct('addToCart')}
+                >
+                  <ShoppingCart className="h-6 w-6" />
+                </Button>
+              </span>
             </TooltipTrigger>
             {cartTooltip && <TooltipContent>{cartTooltip}</TooltipContent>}
           </Tooltip>

@@ -65,20 +65,23 @@ export function ComparisonTable({ products }: ComparisonTableProps) {
     return new Set(actual).size > 1;
   };
 
-  type Row = { label: string; values: string[]; differ: boolean };
+  type Row = { key: string; label: string; values: string[]; differ: boolean };
 
   const rows: Row[] = [
     {
+      key: 'category',
       label: t('category'),
       values: products.map((p) => (p.primaryCategory?.name ? l10n(p.primaryCategory.name) : '—')),
       differ: listValuesDiffer(products.map((p) => (p.primaryCategory?.name ? l10n(p.primaryCategory.name) : '—'))),
     },
     {
+      key: 'price',
       label: t('price'),
       values: products.map((p) => (p.price ? formatCurrency(p.price.amount, p.price.currency) : '—')),
       differ: listValuesDiffer(products.map((p) => (p.price ? formatCurrency(p.price.amount, p.price.currency) : '—'))),
     },
     ...sharedKeys.map((key) => ({
+      key,
       label: getSpecLabel(key),
       values: products.map((p) => getSpecValue(p, key)),
       differ: valuesDiffer(key),
@@ -116,7 +119,7 @@ export function ComparisonTable({ products }: ComparisonTableProps) {
         {/* Data rows */}
         {rows.map((row) => (
           <div
-            key={row.label}
+            key={row.key}
             className="flex w-full rounded-sm transition-colors duration-200 hover:bg-surface-image-background"
             role="row"
           >

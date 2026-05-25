@@ -341,16 +341,18 @@ export default function ProductDetail({ product: initialProduct, options, classN
               <div className="hidden md:flex gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant={isInComparison(product.id) ? 'primary' : 'secondary'}
-                      aria-label={t('compare')}
-                      aria-pressed={isInComparison(product.id)}
-                      onClick={handleCompareClick}
-                      disabled={compareDisabled}
-                    >
-                      <FlipHorizontal2 />
-                    </Button>
+                    <span className="inline-flex">
+                      <Button
+                        size="icon"
+                        variant={isInComparison(product.id) ? 'primary' : 'secondary'}
+                        aria-label={t('compare')}
+                        aria-pressed={isInComparison(product.id)}
+                        onClick={handleCompareClick}
+                        disabled={compareDisabled}
+                      >
+                        <FlipHorizontal2 />
+                      </Button>
+                    </span>
                   </TooltipTrigger>
                   <TooltipContent>
                     {compareTooltip ??
@@ -413,16 +415,18 @@ export default function ProductDetail({ product: initialProduct, options, classN
           <div className="flex md:hidden justify-center gap-2 mt-6">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant={isInComparison(product.id) ? 'primary' : 'secondary'}
-                  aria-label={t('compare')}
-                  aria-pressed={isInComparison(product.id)}
-                  onClick={handleCompareClick}
-                  disabled={compareDisabled}
-                >
-                  <FlipHorizontal2 />
-                </Button>
+                <span className="inline-flex">
+                  <Button
+                    size="icon"
+                    variant={isInComparison(product.id) ? 'primary' : 'secondary'}
+                    aria-label={t('compare')}
+                    aria-pressed={isInComparison(product.id)}
+                    onClick={handleCompareClick}
+                    disabled={compareDisabled}
+                  >
+                    <FlipHorizontal2 />
+                  </Button>
+                </span>
               </TooltipTrigger>
               <TooltipContent>
                 {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}

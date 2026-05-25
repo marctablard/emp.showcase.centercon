@@ -133,17 +133,22 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
             <div className="flex flex-shrink-0 gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
-                    aria-pressed={isInComparison(product.id)}
-                    className={cn('h-[50px] w-[50px]', isInComparison(product.id) && 'border-action ring-2 ring-focus')}
-                    onClick={handleCompareClick}
-                    disabled={compareDisabled}
-                  >
-                    <FlipHorizontal2 width="24" height="24" />
-                  </Button>
+                  <span className="inline-flex">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
+                      aria-pressed={isInComparison(product.id)}
+                      className={cn(
+                        'h-[50px] w-[50px]',
+                        isInComparison(product.id) && 'border-action ring-2 ring-focus',
+                      )}
+                      onClick={handleCompareClick}
+                      disabled={compareDisabled}
+                    >
+                      <FlipHorizontal2 width="24" height="24" />
+                    </Button>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipInList') : t('compareTooltipAdd'))}
@@ -278,15 +283,17 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
               </div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    className="h-[50px] w-[50px] self-end"
-                    onClick={(e) => handleAddToCart(e)}
-                    aria-label={t('addToCart')}
-                    disabled={cartLoading || cartDisabled}
-                  >
-                    <ShoppingCart width="24" height="24" />
-                  </Button>
+                  <span className="inline-flex self-end">
+                    <Button
+                      size="icon"
+                      className="h-[50px] w-[50px]"
+                      onClick={(e) => handleAddToCart(e)}
+                      aria-label={t('addToCart')}
+                      disabled={cartLoading || cartDisabled}
+                    >
+                      <ShoppingCart width="24" height="24" />
+                    </Button>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>{cartTooltip ?? t('addToCart')}</TooltipContent>
               </Tooltip>
