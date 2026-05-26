@@ -90,7 +90,7 @@ async function main(): Promise<void> {
   // Resolve configuration from env
   const tenant = process.env.NEXT_PUBLIC_EMPORIX_TENANT;
   const apiEndpoint = process.env.NEXT_PUBLIC_EMPORIX_BASE_URL;
-  let accessToken = process.env.EMPORIX_SCHEMA_ACCESS_TOKEN;
+  let accessToken = process.env.EMPORIX_ACCESS_TOKEN;
 
   if (!tenant || !apiEndpoint) {
     console.error(
@@ -107,8 +107,8 @@ async function main(): Promise<void> {
 
     if (!schemaClientId || !schemaClientSecret) {
       console.error(
-        'Missing EMPORIX_SCHEMA_ACCESS_TOKEN.\n' +
-        'Either provide EMPORIX_SCHEMA_ACCESS_TOKEN or set NEXT_EMPORIX_SCHEMA_CLIENT_ID and NEXT_EMPORIX_SCHEMA_CLIENT_SECRET to auto-generate it.',
+        'Missing EMPORIX_ACCESS_TOKEN.\n' +
+        'Either provide EMPORIX_ACCESS_TOKEN or set NEXT_EMPORIX_SCHEMA_CLIENT_ID and NEXT_EMPORIX_SCHEMA_CLIENT_SECRET to auto-generate it.',
       );
       process.exit(1);
     }

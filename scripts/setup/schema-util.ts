@@ -16,6 +16,8 @@ export interface SchemaAttribute {
   type: string;
   metadata?: Record<string, any>;
   values?: any[];
+  attributes?: SchemaAttribute[];
+  arrayType?: Record<string, any>;
 }
 
 export interface SchemaDefinition {
@@ -23,6 +25,7 @@ export interface SchemaDefinition {
   name: Record<string, string>;
   attributes: SchemaAttribute[];
   types: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface EntitySyncResult {
@@ -114,14 +117,58 @@ function attributesMatch(
   for (const expected of expectedAttrs) {
     const remote = remoteMap.get(expected.key);
     if (!remote) return false;
-    // Deep-compare type, metadata, values
-    if (remote.type !== expected.type) return false;
-    if (JSON.stringify(remote.metadata ?? {}) !== JSON.stringify(expected.metadata ?? {})) return false;
-    if (JSON.stringify(remote.values ?? []) !== JSON.stringify(expected.values ?? [])) return false;
-    if (JSON.stringify(remote.name ?? {}) !== JSON.stringify(expected.name ?? {})) return false;
-    if (JSON.stringify(remote.description ?? {}) !== JSON.stringify(expected.description ?? {})) return false;
+    if (
+      stableStringify(normalizeAttribute(remote)) !==
+      stableStringify(normalizeAttribute(expected))
+    ) {
+      return false;
+    }
   }
   return true;
+}
+
+function stableStringify(value: unknown): string {
+  return JSON.stringify(sortKeysRecursively(value));
+}
+
+function sortKeysRecursively(value: any): any {
+  if (Array.isArray(value)) {
+    return value.map(sortKeysRecursively);
+  }
+  if (value && typeof value === 'object') {
+    return Object.keys(value)
+      .sort()
+      .reduce<Record<string, any>>((acc, key) => {
+        acc[key] = sortKeysRecursively(value[key]);
+        return acc;
+      }, {});
+  }
+  return value;
+}
+
+function normalizeAttribute(attribute: SchemaAttribute): Record<string, any> {
+  return {
+    key: attribute.key,
+    name: attribute.name ?? {},
+    description: attribute.description ?? {},
+    type: attribute.type,
+    metadata: attribute.metadata ?? {},
+    values: attribute.values ?? [],
+    attributes: (attribute.attributes ?? []).map(normalizeAttribute),
+    arrayType: normalizeArrayType(attribute.arrayType),
+  };
+}
+
+function normalizeArrayType(arrayType?: Record<string, any>): Record<string, any> | undefined {
+  if (!arrayType) return undefined;
+
+  return {
+    ...arrayType,
+    attributes: Array.isArray(arrayType.attributes)
+      ? arrayType.attributes.map((attr: SchemaAttribute) => normalizeAttribute(attr))
+      : [],
+    values: Array.isArray(arrayType.values) ? arrayType.values : [],
+  };
 }
 
 export async function syncSchema(
@@ -179,8 +226,57 @@ export async function syncSchema(
     };
   }
 
-  // Needs update → PUT the full schema
-  const updateResp = await client.updateSchema(schema.id, schema);
+  const buildUpdatePayload = (version: any): SchemaDefinition => ({
+    ...schema,
+    metadata: {
+      ...(schema.metadata ?? {}),
+      version,
+    },
+  });
+
+  const remoteVersion = remote?.metadata?.version;
+  if (remoteVersion === undefined || remoteVersion === null) {
+    return {
+      schemaId: schema.id,
+      action: 'error',
+      missingAttributes: missing,
+      extraAttributes: extra,
+      message: 'Update skipped: remote metadata.version is missing',
+    };
+  }
+
+  // Needs update → PUT with version from remote schema
+  let updateResp = await client.updateSchema(schema.id, buildUpdatePayload(remoteVersion));
+
+  // Retry once on version conflict with latest remote version
+  if (updateResp.status === 409) {
+    const latestResp = await client.getSchema(schema.id);
+    if (!latestResp.ok) {
+      const errText = await latestResp.text();
+      return {
+        schemaId: schema.id,
+        action: 'error',
+        missingAttributes: missing,
+        extraAttributes: extra,
+        message: `Retry fetch failed (${latestResp.status}): ${errText}`,
+      };
+    }
+
+    const latestRemote = await latestResp.json();
+    const latestVersion = latestRemote?.metadata?.version;
+    if (latestVersion === undefined || latestVersion === null) {
+      return {
+        schemaId: schema.id,
+        action: 'error',
+        missingAttributes: missing,
+        extraAttributes: extra,
+        message: 'Retry update skipped: latest remote metadata.version is missing',
+      };
+    }
+
+    updateResp = await client.updateSchema(schema.id, buildUpdatePayload(latestVersion));
+  }
+
   if (updateResp.ok || updateResp.status === 204) {
     const parts: string[] = [];
     if (missing.length) parts.push(`added: ${missing.join(', ')}`);
