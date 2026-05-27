@@ -1,6 +1,6 @@
 import { webcrypto } from 'crypto';
-import { isEncryptedFormat } from '../util/token-encryption-client';
-import EmporixTokenManagerClient from './EmporixTokenManagerClient';
+import EmporixTokenManagerClient from './impl/EmporixTokenManagerClient';
+import { isEncryptedFormat } from './util/token-encryption-client';
 
 // Polyfill Web Crypto API and browser globals for Node.js test environment
 beforeAll(() => {
