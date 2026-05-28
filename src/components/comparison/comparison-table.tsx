@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { H5 } from '@/components/ui/h';
 import { useL10n } from '@/hooks/useL10n';
-import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
 
 interface ComparisonTableProps {
@@ -56,13 +55,6 @@ export function ComparisonTable({ products }: ComparisonTableProps) {
     const values = products.map((p) => getSpecValue(p, key)).filter((v) => v !== '—');
     if (values.length <= 1) return false;
     return new Set(values).size > 1;
-  };
-
-  // Check if actual (non-empty) values in a list differ
-  const listValuesDiffer = (values: string[]): boolean => {
-    const actual = values.filter((v) => v !== '—');
-    if (actual.length <= 1) return false;
-    return new Set(actual).size > 1;
   };
 
   type Row = { key: string; label: string; values: string[]; differ: boolean };
