@@ -1,5 +1,4 @@
 import Papa from 'papaparse';
-import { read, utils } from 'xlsx';
 import type { ParsedEntry } from './parse-text-input';
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -138,6 +137,7 @@ export function parseCSV(file: File): Promise<ParsedEntry[]> {
  * Parses an XLSX file into an array of ParsedEntry using SheetJS.
  */
 export async function parseXLSX(file: File): Promise<ParsedEntry[]> {
+  const { read, utils } = await import('xlsx');
   const buffer = await file.arrayBuffer();
   const workbook = read(buffer, { type: 'array' });
   const firstSheetName = workbook.SheetNames[0];

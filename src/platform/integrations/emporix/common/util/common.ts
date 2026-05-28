@@ -1,5 +1,7 @@
 import type { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 
+const RAW_SEARCH_CRITERIA_KEY = 'compoundLogicalQuery';
+
 /**
  * Translate Search Parameters to Query and Body (for POST)
  * @param params
@@ -36,6 +38,11 @@ export function buildSearchQuery<T>(
           query += ' ';
         }
         const strValue = String(value);
+        if (key === RAW_SEARCH_CRITERIA_KEY) {
+          query += strValue;
+          return;
+        }
+
         const safeValue = strValue.includes(' ') && !strValue.startsWith('(') ? `(${strValue})` : strValue;
         query += `${key}:${safeValue}`;
       }

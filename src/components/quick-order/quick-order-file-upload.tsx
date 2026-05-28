@@ -160,7 +160,7 @@ export function QuickOrderFileUpload({ onAddProducts }: QuickOrderFileUploadProp
         }
       }
     },
-    [locale, onAddProducts, toast, t, logger],
+    [locale, onAddProducts, toast, t, logger, sessionCurrency],
   );
 
   const handleUploadClick = useCallback(() => {

@@ -25,6 +25,8 @@ interface QuickOrderSearchProps {
 
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
+const SEARCH_INPUT_ID = 'quick-order-search-input';
+const SEARCH_HINT_ID = 'quick-order-search-hint';
 
 export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
   const t = useTranslations('quick-order');
@@ -190,10 +192,15 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
       <H5 className="mb-0 self-start w-full">{t('tabs.addManually')}</H5>
       <div className="flex flex-col sm:flex-row gap-6 self-stretch">
         <div ref={containerRef} className={cn('relative flex-1 min-w-0 sm:border-r sm:border-border-primary sm:pr-6')}>
-          <label className="font-bold text-base mb-1 block">{t('search.label')}</label>
-          <p className="text-[12px] leading-5 text-text-placeholders mb-2">{t('search.hint')}</p>
+          <label htmlFor={SEARCH_INPUT_ID} className="font-bold text-base mb-1 block">
+            {t('search.label')}
+          </label>
+          <p id={SEARCH_HINT_ID} className="text-[12px] leading-5 text-text-placeholders mb-2">
+            {t('search.hint')}
+          </p>
           <div className="relative">
             <Input
+              id={SEARCH_INPUT_ID}
               ref={inputRef}
               type="text"
               value={query}
@@ -206,6 +213,7 @@ export function QuickOrderSearch({ onAddProducts }: QuickOrderSearchProps) {
               aria-haspopup="listbox"
               aria-autocomplete="list"
               aria-controls="quick-order-search-results"
+              aria-describedby={SEARCH_HINT_ID}
               autoComplete="off"
               data-testid="quick-order-search-input"
             />

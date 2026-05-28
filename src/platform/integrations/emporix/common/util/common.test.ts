@@ -58,6 +58,17 @@ describe('buildSearchQuery', () => {
     const result = buildSearchQuery({ criteria: { name: '~solar blue' } });
     expect(result.body).toBe('name:(~solar blue)');
   });
+
+  it('should emit raw compound logical criteria without a synthetic field prefix', () => {
+    const result = buildSearchQuery({
+      criteria: {
+        compoundLogicalQuery: '((name:~solar) OR (id:~solar))',
+        categoryIds: '(root-a root-b)',
+      },
+    });
+
+    expect(result.body).toBe('((name:~solar) OR (id:~solar)) categoryIds:(root-a root-b)');
+  });
 });
 
 describe('checkTokenValidity', () => {

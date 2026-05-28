@@ -10,6 +10,9 @@ import { useSessionStore } from '@/providers/StoreProvider';
 import { parseTextInput } from './utils/parse-text-input';
 import { fetchAvailabilityBatch, resolveProductsBatch } from './utils/resolve-product';
 
+const TEXT_PASTE_INPUT_ID = 'quick-order-text-paste-input';
+const TEXT_PASTE_HINT_ID = 'quick-order-text-paste-hint';
+
 export interface QuickOrderTextPasteHandle {
   addToList: () => Promise<void>;
   isResolving: boolean;
@@ -167,7 +170,7 @@ export const QuickOrderTextPaste = forwardRef<QuickOrderTextPasteHandle, QuickOr
         setIsResolving(false);
         onResolvingChange?.(false);
       }
-    }, [text, locale, onAddProducts, toast, t, logger, onResolvingChange, onTextChange]);
+    }, [text, locale, onAddProducts, toast, t, logger, onResolvingChange, onTextChange, sessionCurrency]);
 
     useImperativeHandle(
       ref,
@@ -183,9 +186,14 @@ export const QuickOrderTextPaste = forwardRef<QuickOrderTextPasteHandle, QuickOr
     return (
       <div className="flex-1 flex flex-col gap-4">
         <div>
-          <label className="font-bold text-base mb-1 block">{t('textPaste.label')}</label>
-          <p className="text-[12px] leading-5 text-text-disabled mb-2">{t('textPaste.hint')}</p>
+          <label htmlFor={TEXT_PASTE_INPUT_ID} className="font-bold text-base mb-1 block">
+            {t('textPaste.label')}
+          </label>
+          <p id={TEXT_PASTE_HINT_ID} className="text-[12px] leading-5 text-text-disabled mb-2">
+            {t('textPaste.hint')}
+          </p>
           <textarea
+            id={TEXT_PASTE_INPUT_ID}
             ref={textareaRef}
             value={text}
             onChange={(e) => {
@@ -202,6 +210,7 @@ export const QuickOrderTextPaste = forwardRef<QuickOrderTextPasteHandle, QuickOr
             style={{ minHeight: '140px' }}
             disabled={isResolving}
             aria-label={t('textPaste.description')}
+            aria-describedby={TEXT_PASTE_HINT_ID}
             aria-invalid={validationErrors.length > 0}
             data-testid="quick-order-text-paste-input"
           />
