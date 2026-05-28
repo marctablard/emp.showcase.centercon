@@ -9,7 +9,7 @@ function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
     <nav
       aria-label="breadcrumb"
       data-slot="breadcrumb"
-      className="relative [@media_screen]:after:content-[''] after:absolute after:top-0 after:right-0 after:w-8 after:h-full after:bg-gradient-to-r after:from-transparent after:to-white"
+      className="relative [@media_screen]:after:content-[''] after:absolute after:top-0 after:right-0 after:w-8 after:h-full after:bg-gradient-to-r after:from-transparent after:to-surface-page"
       {...props}
     />
   );
