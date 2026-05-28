@@ -105,7 +105,7 @@ export default function ProductVariantSelectorSimple({
     return () => {
       isCancelled = true;
     };
-  }, [product.id, product.parentVariantId, soloVariant, variants, variantPrices]);
+  }, [product.id, product.parentVariantId, soloVariant, variants, variantPrices, session?.currency]);
 
   // Handle variant selection via tiles
   const handleVariantTileClick = (variant: Product) => {

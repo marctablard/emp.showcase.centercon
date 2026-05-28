@@ -103,6 +103,8 @@
   "addedToComparison": "{name} wurde zur Vergleichsliste hinzugefügt",
   "removedFromComparison": "{name} wurde aus der Vergleichsliste entfernt",
   "comparisonFull": "Vergleichsliste ist voll (max. {max} Produkte)",
+  "wishlistTooltip": "Produkt merken",
+  "shareTooltip": "Teilen",
   "compareTooltipAdd": "Zum Vergleich hinzufügen",
   "compareTooltipRemove": "Aus Vergleich entfernen",
   "compareTooltipInList": "Dieser Artikel ist auf der Vergleichsliste",

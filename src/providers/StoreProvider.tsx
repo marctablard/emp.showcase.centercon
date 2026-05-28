@@ -86,6 +86,7 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
       productStore,
       availabilityStore,
       checkoutStore,
+      comparisonStore,
     });
 
     // Cleanup subscriptions on unmount
@@ -93,7 +94,16 @@ export const StoreProvider = ({ children, shopSession, site, availableSites }: S
       unsubscribersRef.current.forEach((unsubscribe) => unsubscribe());
       unsubscribersRef.current = [];
     };
-  }, [sessionStore, cartStore, siteStore, customerStore, productStore, availabilityStore, checkoutStore]);
+  }, [
+    sessionStore,
+    cartStore,
+    siteStore,
+    customerStore,
+    productStore,
+    availabilityStore,
+    checkoutStore,
+    comparisonStore,
+  ]);
 
   /**
    * The order is relevant, because store data can only depend on one another,

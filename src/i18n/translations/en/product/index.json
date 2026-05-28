@@ -103,6 +103,8 @@
   "addedToComparison": "{name} added to comparison list",
   "removedFromComparison": "{name} removed from comparison list",
   "comparisonFull": "Comparison list is full (max {max} products)",
+  "wishlistTooltip": "Add to Shopping List",
+  "shareTooltip": "Share",
   "compareTooltipAdd": "Click to compare",
   "compareTooltipRemove": "Click to remove from comparison",
   "compareTooltipInList": "This item is in comparison list",
