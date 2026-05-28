@@ -158,7 +158,7 @@ export function HeaderActionBar() {
               </>
             )}
             <div className="hidden sm:flex gap-5">
-              <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
+              <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/quick-order" />
               <HeaderIconLink icon={Pin} text={t('wishlists')} href="/account/wishlists" />
               <HeaderCompareButton />
             </div>

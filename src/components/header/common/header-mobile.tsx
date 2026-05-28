@@ -46,7 +46,7 @@ export function HeaderMobile() {
           )}
           {!showSearch && (
             <>
-              <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/#" />
+              <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/quick-order" />
               <HeaderIconButton
                 icon={Search}
                 text={t('shortSearch')}

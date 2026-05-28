@@ -1,5 +1,7 @@
 import type { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 
+const RAW_SEARCH_CRITERIA_KEY = 'compoundLogicalQuery';
+
 /**
  * Translate Search Parameters to Query and Body (for POST)
  * @param params
@@ -35,7 +37,13 @@ export function buildSearchQuery<T>(
         if (query.length > 0) {
           query += ' ';
         }
-        const safeValue = String(value).includes(' ') ? `(${value})` : String(value);
+        const strValue = String(value);
+        if (key === RAW_SEARCH_CRITERIA_KEY) {
+          query += strValue;
+          return;
+        }
+
+        const safeValue = strValue.includes(' ') && !strValue.startsWith('(') ? `(${strValue})` : strValue;
         query += `${key}:${safeValue}`;
       }
     });
@@ -55,12 +63,13 @@ export async function buildPaginatedResponse<T>(
   response: Response,
 ): Promise<EmporixPaginatedResponse<T>> {
   const total: number = Number(response.headers.get('x-total-count')) || -1;
-  const data: T[] = await response.json();
+  const raw = (await response.json()) as T[] | { items?: T[]; page?: number; size?: number; total?: number };
+  const data = Array.isArray(raw) ? raw : (raw.items ?? []);
   return {
     items: data,
-    page: params.page || 0,
-    size: params.size || 20,
-    total: total,
+    page: Array.isArray(raw) ? params.page || 0 : (raw.page ?? (params.page || 0)),
+    size: Array.isArray(raw) ? params.size || 20 : (raw.size ?? (params.size || 20)),
+    total: Array.isArray(raw) ? total : (raw.total ?? total),
   };
 }
 

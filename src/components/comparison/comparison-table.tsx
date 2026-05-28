@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { H5 } from '@/components/ui/h';
 import { useL10n } from '@/hooks/useL10n';
-import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
 
 interface ComparisonTableProps {
@@ -58,28 +57,16 @@ export function ComparisonTable({ products }: ComparisonTableProps) {
     return new Set(values).size > 1;
   };
 
-  // Check if actual (non-empty) values in a list differ
-  const listValuesDiffer = (values: string[]): boolean => {
-    const actual = values.filter((v) => v !== '—');
-    if (actual.length <= 1) return false;
-    return new Set(actual).size > 1;
-  };
-
   type Row = { key: string; label: string; values: string[]; differ: boolean };
 
   const rows: Row[] = [
-    {
-      key: 'category',
-      label: t('category'),
-      values: products.map((p) => (p.primaryCategory?.name ? l10n(p.primaryCategory.name) : '—')),
-      differ: listValuesDiffer(products.map((p) => (p.primaryCategory?.name ? l10n(p.primaryCategory.name) : '—'))),
-    },
-    {
-      key: 'price',
-      label: t('price'),
-      values: products.map((p) => (p.price ? formatCurrency(p.price.amount, p.price.currency) : '—')),
-      differ: listValuesDiffer(products.map((p) => (p.price ? formatCurrency(p.price.amount, p.price.currency) : '—'))),
-    },
+    // TODO: implement when categories will be availiable throu indexer (like BatteryIncluded)
+    // {
+    //   key: 'category',
+    //   label: t('category'),
+    //   values: products.map((p) => (p.primaryCategory?.name ? l10n(p.primaryCategory.name) : '—')),
+    //   differ: listValuesDiffer(products.map((p) => (p.primaryCategory?.name ? l10n(p.primaryCategory.name) : '—'))),
+    // },
     ...sharedKeys.map((key) => ({
       key,
       label: getSpecLabel(key),
@@ -95,52 +82,42 @@ export function ComparisonTable({ products }: ComparisonTableProps) {
         <H5>{t('theDifferences')}</H5>
       </div>
 
-      {/* Row-based table */}
-      <div role="table" aria-label={t('theDifferences')}>
-        {/* Header row */}
-        <div
-          className="flex w-full rounded-sm transition-colors duration-200 hover:bg-surface-image-background"
-          role="row"
-        >
-          <div className="w-[279px] shrink-0 px-4 py-4">
-            <span className="text-base font-bold text-text-headings" role="columnheader">
-              {t('theDifferences')}
-            </span>
-          </div>
-          {products.map((product) => (
-            <div key={product.id} className="flex flex-1 min-w-0 border-l border-border-primary px-4 py-4">
-              <span className="text-base font-bold text-text-headings" role="columnheader">
-                {l10n(product.name)}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Data rows */}
-        {rows.map((row) => (
-          <div
-            key={row.key}
-            className="flex w-full rounded-sm transition-colors duration-200 hover:bg-surface-image-background"
-            role="row"
-          >
-            <div className="w-[279px] shrink-0 px-4 py-4">
-              <span className="text-base font-bold text-text-body" role="rowheader">
-                {row.label}
-              </span>
-            </div>
-            {row.values.map((value, index) => (
-              <div key={products[index].id} className="flex flex-1 min-w-0 border-l border-border-primary px-4 py-4">
-                <span className={`text-base text-text-body ${row.differ ? 'font-bold' : 'font-normal'}`} role="cell">
-                  {value}
-                </span>
+      {sharedKeys.length > 0 ? (
+        <>
+          {/* Row-based table */}
+          <div role="table" aria-label={t('theDifferences')}>
+            {/* Data rows */}
+            {rows.map((row) => (
+              <div
+                key={row.key}
+                className="flex w-full rounded-sm transition-colors duration-200 hover:bg-surface-image-background"
+                role="row"
+              >
+                <div className="w-[279px] shrink-0 px-4 py-4">
+                  <span className="text-base font-bold text-text-body" role="rowheader">
+                    {row.label}
+                  </span>
+                </div>
+                {row.values.map((value, index) => (
+                  <div
+                    key={products[index].id}
+                    className="flex flex-1 min-w-0 border-l border-border-primary px-4 py-4"
+                  >
+                    <span
+                      className={`text-base text-text-body ${row.differ ? 'font-bold' : 'font-normal'}`}
+                      role="cell"
+                    >
+                      {value}
+                    </span>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
-        ))}
-      </div>
-
-      {/* No shared attributes message */}
-      {sharedKeys.length === 0 && <p className="p-6 text-center text-text-on-disabled">{t('noSharedAttributes')}</p>}
+        </>
+      ) : (
+        <p className="p-6 text-center text-text-on-disabled">{t('noSharedAttributes')}</p>
+      )}
     </div>
   );
 }

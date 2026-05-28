@@ -4,6 +4,7 @@
  *
  * Mocks next-intl and l10n to focus on algorithm correctness.
  */
+import { ComparisonTable } from '@/components/comparison/comparison-table';
 import type { Product } from '@/platform/services/model/product';
 
 // --- Mocks ---
@@ -229,5 +230,16 @@ describe('ComparisonTable algorithm', () => {
       expect(weightRow?.values[0]).toBe('10 kg');
       expect(weightRow?.values[1]).toBe('15 kg');
     });
+  });
+});
+
+describe('ComparisonTable rendering', () => {
+  it('renders a fallback message when there are no shared specification keys', () => {
+    const products = [
+      makeProduct('p1', { specifications: undefined }),
+      makeProduct('p2', { specifications: undefined }),
+    ];
+
+    expect(ComparisonTable({ products })).not.toBeNull();
   });
 });

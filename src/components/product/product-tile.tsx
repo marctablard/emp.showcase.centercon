@@ -33,7 +33,7 @@ import { type ProductTemplateAttributeKey, dk } from '@/i18n/dynamic-key';
 import { Link } from '@/i18n/navigation';
 import { getPublicDefaultLanguage } from '@/lib/common/public-default-env';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import { cn, formatCurrency, imageSizes } from '@/lib/utils';
+import { formatCurrency, imageSizes } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
 import { MAX_COMPARISON_PRODUCTS } from '@/stores/comparison-store';
 import { ToastType, notify } from '../ui/toast-notification';
@@ -135,14 +135,11 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
                 <TooltipTrigger asChild>
                   <span className="inline-flex">
                     <Button
-                      variant="secondary"
+                      variant={isInComparison(product.id) ? 'primary' : 'secondary'}
                       size="icon"
                       aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
                       aria-pressed={isInComparison(product.id)}
-                      className={cn(
-                        'h-[50px] w-[50px]',
-                        isInComparison(product.id) && 'border-action ring-2 ring-focus',
-                      )}
+                      className="h-[50px] w-[50px]"
                       onClick={handleCompareClick}
                       disabled={compareDisabled}
                     >
@@ -151,7 +148,7 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipInList') : t('compareTooltipAdd'))}
+                  {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
                 </TooltipContent>
               </Tooltip>
               <Button variant="secondary" size="icon" title={t('addToWishlist')} className="h-[50px] w-[50px]">

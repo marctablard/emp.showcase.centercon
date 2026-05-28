@@ -110,7 +110,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
       setPrice(embedded);
     } else {
       const syncPrice = async () => {
-        const nextPrice = await fetchProductPrice(product.id);
+        const nextPrice = await fetchProductPrice(product.id, undefined, undefined, session.currency);
         if (cancelled || syncGeneration !== priceSyncGenerationRef.current) {
           return;
         }
@@ -339,7 +339,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
                 ))}
               </div>
               <div className="hidden md:flex gap-2">
-                <Tooltip>
+                <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
                     <span className="inline-flex">
                       <Button
@@ -359,12 +359,26 @@ export default function ProductDetail({ product: initialProduct, options, classN
                       (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
                   </TooltipContent>
                 </Tooltip>
-                <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
-                  <Pin />
-                </Button>
-                <Button size="icon" variant="secondary" aria-label={t('share')}>
-                  <Share2 />
-                </Button>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
+                      <Pin />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('wishlistTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="secondary" aria-label={t('share')}>
+                      <Share2 />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('shareTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>
