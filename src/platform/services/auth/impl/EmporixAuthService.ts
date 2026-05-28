@@ -265,52 +265,60 @@ export class EmporixAuthService implements AuthService {
 
               if (!mergeRecovered) {
                 const retryCurrency = this.resolveMergeRetryCurrency(targetSite, finalCurrency);
-                const canRetryWithAnonymousCurrency = oldCart.currency === retryCurrency;
                 const shouldRetryMerge =
                   customerCartBinding?.created &&
                   this.isPriceMissingMergeError(mergeError) &&
                   retryCurrency !== undefined &&
-                  retryCurrency !== finalCurrency &&
-                  canRetryWithAnonymousCurrency;
+                  retryCurrency !== finalCurrency;
 
                 if (shouldRetryMerge) {
-                  const retriedCustomerCartAlignment = await this.alignCartCurrency(
-                    verifiedCustomerCart,
-                    retryCurrency,
-                    { expectedCustomerId: session.customerId },
-                  );
+                  const retriedAnonymousCartAlignment = await this.alignCartCurrency(oldCart, retryCurrency, {
+                    allowRefreshOnlyFailure: true,
+                  });
 
-                  if (!retriedCustomerCartAlignment.cart) {
+                  if (!retriedAnonymousCartAlignment.cart) {
                     cartMergeStatus = this.CART_MERGE_STATUS.FALLBACK;
                     cartMergeReason =
-                      retriedCustomerCartAlignment.reason || this.CART_MERGE_REASON.CURRENCY_ALIGNMENT_FAILED;
+                      retriedAnonymousCartAlignment.reason || this.CART_MERGE_REASON.CURRENCY_ALIGNMENT_FAILED;
                   } else {
-                    try {
-                      const mergedCart = await this.mergeAndVerifyCarts(
-                        oldCart,
-                        retriedCustomerCartAlignment.cart,
-                        session.customerId,
-                        customerCartQuantityBeforeMerge,
-                        anonymousCartQuantity,
-                      );
-                      await this.sessionService.setCart(mergedCart.id);
-                      customerCartId = mergedCart.id;
-                      verifiedCustomerCart = mergedCart;
-                      finalCurrency = mergedCart.currency;
-                      cartMergeStatus = this.CART_MERGE_STATUS.MERGED;
-                    } catch (retryError) {
+                    const retriedCustomerCartAlignment = await this.alignCartCurrency(
+                      verifiedCustomerCart,
+                      retryCurrency,
+                      { expectedCustomerId: session.customerId },
+                    );
+
+                    if (!retriedCustomerCartAlignment.cart) {
                       cartMergeStatus = this.CART_MERGE_STATUS.FALLBACK;
-                      cartMergeReason = this.CART_MERGE_REASON.MERGE_FAILED;
-                      this.logger.error(
-                        {
-                          err: retryError instanceof Error ? retryError : String(retryError),
-                          oldCartId: oldCart.id,
-                          customerCartId,
-                          retryCurrency,
-                          cartMergeReason,
-                        },
-                        'Failed to merge carts during login after retrying with fallback currency',
-                      );
+                      cartMergeReason =
+                        retriedCustomerCartAlignment.reason || this.CART_MERGE_REASON.CURRENCY_ALIGNMENT_FAILED;
+                    } else {
+                      try {
+                        const mergedCart = await this.mergeAndVerifyCarts(
+                          retriedAnonymousCartAlignment.cart,
+                          retriedCustomerCartAlignment.cart,
+                          session.customerId,
+                          customerCartQuantityBeforeMerge,
+                          anonymousCartQuantity,
+                        );
+                        await this.sessionService.setCart(mergedCart.id);
+                        customerCartId = mergedCart.id;
+                        verifiedCustomerCart = mergedCart;
+                        finalCurrency = mergedCart.currency;
+                        cartMergeStatus = this.CART_MERGE_STATUS.MERGED;
+                      } catch (retryError) {
+                        cartMergeStatus = this.CART_MERGE_STATUS.FALLBACK;
+                        cartMergeReason = this.CART_MERGE_REASON.MERGE_FAILED;
+                        this.logger.error(
+                          {
+                            err: retryError instanceof Error ? retryError : String(retryError),
+                            oldCartId: oldCart.id,
+                            customerCartId,
+                            retryCurrency,
+                            cartMergeReason,
+                          },
+                          'Failed to merge carts during login after retrying with fallback currency',
+                        );
+                      }
                     }
                   }
                 } else {

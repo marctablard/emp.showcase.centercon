@@ -659,12 +659,14 @@ describe('EmporixAuthService', () => {
       const result = await authService.login(credentials);
 
       expect(mockCartService.createCart).toHaveBeenCalledWith('USD', 'main');
-      expect(mockCartService.updateCurrency).not.toHaveBeenCalledWith('new-customer-cart-id', 'EUR');
-      expect(mockCartMigrationService.mergeCarts).toHaveBeenCalledTimes(1);
+      expect(mockCartService.updateCurrency).toHaveBeenCalledWith('anon-cart-id', 'EUR');
+      expect(mockCartService.updateCurrency).toHaveBeenCalledWith('new-customer-cart-id', 'EUR');
+      expect(mockCartService.updateCurrency).toHaveBeenCalledWith('new-customer-cart-id', 'USD');
+      expect(mockCartMigrationService.mergeCarts).toHaveBeenCalledTimes(2);
       expect(result.cartId).toBe('new-customer-cart-id');
       expect(result.currency).toBe('USD');
-      expect(result.cartMergeStatus).toBe('FALLBACK');
-      expect(result.cartMergeReason).toBe('MERGE_FAILED');
+      expect(result.cartMergeStatus).toBe('MERGED');
+      expect(result.cartMergeReason).toBeUndefined();
     });
 
     it('should return correct cartId in session after merge', async () => {

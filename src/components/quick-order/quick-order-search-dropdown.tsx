@@ -9,6 +9,10 @@ import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/platform/services/model/product';
 import { HighlightedText } from './highlighted-text';
 
+function stripHighlightMarkup(value: string | undefined): string {
+  return (value ?? '').replace(/<[^>]+>/g, '').trim();
+}
+
 interface QuickOrderSearchDropdownProps {
   products: Product[];
   loading: boolean;
@@ -54,6 +58,7 @@ export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSea
             const image = product.images?.[0];
             const brandName = l10n(product.brand?.name || '');
             const productName = l10n(product.name);
+            const plainProductName = stripHighlightMarkup(productName);
             const itemNumber = product.sku || product.id;
             const isHighlighted = index === highlightedIndex;
 
@@ -73,7 +78,7 @@ export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSea
                   {image?.url ? (
                     <Image
                       src={image.url}
-                      alt={l10n(image.altText || '') || productName || ''}
+                      alt={stripHighlightMarkup(l10n(image.altText || '')) || plainProductName}
                       width={60}
                       height={39}
                       className="object-contain w-[60px] h-[39px]"
@@ -81,7 +86,7 @@ export const QuickOrderSearchDropdown = forwardRef<HTMLDivElement, QuickOrderSea
                   ) : (
                     <Image
                       src="/images/no_image_alt.png"
-                      alt={productName || ''}
+                      alt={plainProductName}
                       width={60}
                       height={39}
                       className="object-contain"

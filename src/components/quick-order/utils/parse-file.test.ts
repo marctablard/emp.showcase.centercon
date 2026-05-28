@@ -183,6 +183,42 @@ describe('parseUploadedFile', () => {
       ]);
     });
 
+    it('skips rows with non-positive quantities instead of coercing them to 1', async () => {
+      const file = makeFile('test.csv', 'ABC,-5\nDEF,0\nGHI,2', 100);
+
+      mockPapaParse.mockImplementation((_file: File, options: { complete: (r: { data: string[][] }) => void }) => {
+        options.complete({
+          data: [
+            ['ABC', '-5'],
+            ['DEF', '0'],
+            ['GHI', '2'],
+          ],
+        });
+      });
+
+      const result = await parseCSV(file);
+      expect(result).toEqual<ParsedEntry[]>([{ code: 'GHI', quantity: 2 }]);
+    });
+
+    it('defaults blank quantity cells to 1', async () => {
+      const file = makeFile('test.csv', 'ABC,\nDEF,3', 100);
+
+      mockPapaParse.mockImplementation((_file: File, options: { complete: (r: { data: string[][] }) => void }) => {
+        options.complete({
+          data: [
+            ['ABC', ''],
+            ['DEF', '3'],
+          ],
+        });
+      });
+
+      const result = await parseCSV(file);
+      expect(result).toEqual<ParsedEntry[]>([
+        { code: 'ABC', quantity: 1 },
+        { code: 'DEF', quantity: 3 },
+      ]);
+    });
+
     it('handles PapaParse error callback', async () => {
       const file = makeFile('test.csv', 'bad', 100);
 

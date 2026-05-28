@@ -77,8 +77,16 @@ function rowToEntry(row: string[]): ParsedEntry | null {
   let quantity = 1;
   if (row.length >= 2) {
     const rawQty = (row[1] ?? '').trim();
+    if (!rawQty) {
+      return { code, quantity };
+    }
+
     const parsed = parseInt(rawQty, 10);
-    quantity = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+    if (isNaN(parsed) || parsed < 1) {
+      return null;
+    }
+
+    quantity = parsed;
   }
 
   return { code, quantity };
