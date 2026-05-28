@@ -34,7 +34,8 @@
     "format": "prettier --write \"**/*.{tsx,jsx,ts,css,scss,md}\"",
     "setup": "ts-node --project scripts/tsconfig.json scripts/setup-api.ts",
     "generate:sso-password": "ts-node --project scripts/tsconfig.json scripts/generate-sso-password.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "update-schemas": "ts-node --project scripts/tsconfig.json scripts/setup/schema-update.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,css,scss,json,yml,yaml}": "prettier --write"
@@ -64,6 +65,7 @@
     "@radix-ui/react-tabs": "1.1.13",
     "@radix-ui/react-tooltip": "1.2.8",
     "@storyblok/react": "5.4.18",
+    "axios": "^1.13.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",

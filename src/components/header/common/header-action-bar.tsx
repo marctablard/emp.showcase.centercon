@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Gauge, Menu, Pin, Search, User, UserCheck, X } from 'lucide-react';
 import { HeaderCartButton } from '@/components/header/cart/header-cart-button';
+import { HeaderCompareButton } from '@/components/header/common/header-compare-button';
 import { HeaderIconButton } from '@/components/header/common/header-icon-button';
 import { HeaderIconLink } from '@/components/header/common/header-icon-link';
 import { HeaderLogo } from '@/components/header/common/header-logo';
@@ -159,6 +160,7 @@ export function HeaderActionBar() {
             <div className="hidden sm:flex gap-5">
               <HeaderIconLink icon={Gauge} text={t('quickOrder')} href="/quick-order" />
               <HeaderIconLink icon={Pin} text={t('wishlists')} href="/account/wishlists" />
+              <HeaderCompareButton />
             </div>
           </div>
         </div>
