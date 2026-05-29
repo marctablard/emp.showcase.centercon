@@ -14,5 +14,7 @@
   "onlineAvailable": "Online available",
   "canBeReserved": "Can be reserved",
   "remove": "Remove",
-  "addToWishlist": "Add to wishlist"
+  "addToWishlist": "Add to wishlist",
+  "removeFromComparison": "Remove from comparison",
+  "productAttributes": "Product attributes"
 }

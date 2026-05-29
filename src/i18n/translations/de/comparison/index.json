@@ -14,5 +14,7 @@
   "onlineAvailable": "Online verfügbar",
   "canBeReserved": "Reservierbar",
   "remove": "Entfernen",
-  "addToWishlist": "Zur Merkliste hinzufügen"
+  "addToWishlist": "Zur Merkliste hinzufügen",
+  "removeFromComparison": "Aus Vergleich entfernen",
+  "productAttributes": "Produktattribute"
 }
