@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { MapPin, Pin, ShoppingCart, Trash2, Truck } from 'lucide-react';
+import { FlipHorizontal2, MapPin, Pin, ShoppingCart, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ToastType, notify } from '@/components/ui/toast-notification';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -51,15 +51,20 @@ export function ComparisonProductCard({ product, onRemove }: ComparisonProductCa
     <div className="flex flex-1 min-w-0 flex-col border-l border-border-primary px-4 py-4">
       {/* Remove button — fixed height */}
       <div className="flex h-8 items-center justify-end">
-        <Button
-          size="icon"
-          variant="link"
-          className="h-8 w-8 text-text-headings normal-case"
-          onClick={() => onRemove(product.id)}
-          aria-label={`${t('remove')} ${l10n(product.name)}`}
-        >
-          <Trash2 className="h-6 w-6" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="primary"
+              className="h-8 w-8"
+              onClick={() => onRemove(product.id)}
+              aria-label={`${t('removeFromComparison')} ${l10n(product.name)}`}
+            >
+              <FlipHorizontal2 className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('removeFromComparison')}</TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Image area — fixed height */}

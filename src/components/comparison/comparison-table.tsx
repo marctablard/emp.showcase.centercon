@@ -79,13 +79,17 @@ export function ComparisonTable({ products }: ComparisonTableProps) {
     <div className="border-t border-border-primary mt-6">
       {/* Section heading */}
       <div className="py-6">
-        <H5>{t('theDifferences')}</H5>
+        <H5>{t('productAttributes')}</H5>
       </div>
 
       {sharedKeys.length > 0 ? (
         <>
           {/* Row-based table */}
-          <div role="table" aria-label={t('theDifferences')}>
+          <div
+            role="table"
+            aria-label={t('productAttributes')}
+            className="w-full border border-border-primary rounded-sm"
+          >
             {/* Data rows */}
             {rows.map((row) => (
               <div
