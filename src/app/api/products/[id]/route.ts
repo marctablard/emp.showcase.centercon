@@ -16,12 +16,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const includeVariants = searchParams.get('variants') === 'true';
   const includePrices = searchParams.get('prices') === 'true';
   const includeCategories = searchParams.get('categories') === 'true';
+  const priceSiteCode = searchParams.get('priceSiteCode') || undefined;
+  const priceCurrency = searchParams.get('priceCurrency') || undefined;
+  const priceCountry = searchParams.get('priceCountry') || undefined;
 
   try {
     const productService = server.get<ProductService>('ProductService');
     const product = await productService.getProductById(productId, {
       variants: includeVariants,
-      prices: includePrices,
+      prices: includePrices
+        ? priceSiteCode || priceCurrency || priceCountry
+          ? {
+              siteCode: priceSiteCode,
+              currency: priceCurrency,
+              country: priceCountry,
+            }
+          : true
+        : false,
       categories: includeCategories,
     });
 

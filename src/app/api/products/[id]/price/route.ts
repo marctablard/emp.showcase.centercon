@@ -17,6 +17,7 @@ import type { SessionService } from '@/platform/services/session/SessionService'
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: productId } = await params;
   const { searchParams } = new URL(request.url);
+  const logger = server.get<LoggerService>('LoggerService');
 
   // Parse query parameters
   const quantity = searchParams.get('quantity') ? parseInt(searchParams.get('quantity') as string, 10) : undefined;
@@ -50,7 +51,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(price);
   } catch (error) {
-    const logger = server.get<LoggerService>('LoggerService');
     logger.error(
       {
         error: error instanceof Error ? error.message : String(error),
