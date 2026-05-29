@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import server from '@/platform/server';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import type { PriceFetchOptions } from '@/platform/services/price/PriceService';
 import type { ProductService } from '@/platform/services/product/ProductService';
 
 /**
@@ -19,20 +20,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const priceSiteCode = searchParams.get('priceSiteCode') || undefined;
   const priceCurrency = searchParams.get('priceCurrency') || undefined;
   const priceCountry = searchParams.get('priceCountry') || undefined;
+  let priceOptions: true | PriceFetchOptions = true;
+
+  if (priceSiteCode) {
+    priceOptions = {
+      siteCode: priceSiteCode,
+      currency: priceCurrency,
+      country: priceCountry,
+    };
+  }
 
   try {
     const productService = server.get<ProductService>('ProductService');
     const product = await productService.getProductById(productId, {
       variants: includeVariants,
-      prices: includePrices
-        ? priceSiteCode || priceCurrency || priceCountry
-          ? {
-              siteCode: priceSiteCode,
-              currency: priceCurrency,
-              country: priceCountry,
-            }
-          : true
-        : false,
+      prices: includePrices ? priceOptions : false,
       categories: includeCategories,
     });
 

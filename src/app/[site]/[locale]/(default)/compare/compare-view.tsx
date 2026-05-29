@@ -22,7 +22,16 @@ export function CompareView() {
   const { session } = useSession();
   const logger = useLogger();
   const { products, loading } = useProducts(productIds);
-  const [priceMap, setPriceMap] = useState<Record<string, ProductPrice | null>>({});
+  const productIdsKey = productIds.join(',');
+  const [priceState, setPriceState] = useState<{
+    currency: string | null;
+    productIdsKey: string;
+    prices: Record<string, ProductPrice | null>;
+  }>({
+    currency: null,
+    productIdsKey: '',
+    prices: {},
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +60,11 @@ export function CompareView() {
         const nextPriceMap = Object.fromEntries(nextPriceEntries);
 
         if (!cancelled) {
-          setPriceMap(nextPriceMap);
+          setPriceState({
+            currency: session.currency,
+            productIdsKey,
+            prices: nextPriceMap,
+          });
         }
       } catch (error) {
         logger.error(
@@ -63,7 +76,11 @@ export function CompareView() {
           'Failed to fetch comparison prices via PDP product price endpoint',
         );
         if (!cancelled) {
-          setPriceMap({});
+          setPriceState({
+            currency: session.currency,
+            productIdsKey,
+            prices: {},
+          });
         }
       }
     };
@@ -73,11 +90,16 @@ export function CompareView() {
     return () => {
       cancelled = true;
     };
-  }, [logger, productIds, session?.currency]);
+  }, [logger, productIds, productIdsKey, session?.currency]);
+
+  const activePriceMap =
+    priceState.currency === (session?.currency ?? null) && priceState.productIdsKey === productIdsKey
+      ? priceState.prices
+      : {};
 
   const productsWithPrices = products.map((product) => ({
     ...product,
-    price: priceMap[product.id] ?? undefined,
+    price: activePriceMap[product.id] ?? undefined,
   }));
 
   if (count === 0) {

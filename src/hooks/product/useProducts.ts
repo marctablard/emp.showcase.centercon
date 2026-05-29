@@ -49,6 +49,7 @@ export function useProducts(productIds: Product['id'][] = [], fetchOptions?: Pro
       setLoading(true);
       setError(null);
       try {
+        const pricesRequested = Boolean(fetchOptionsRef.current?.prices);
         const requestedPriceCurrency =
           typeof fetchOptionsRef.current?.prices === 'object' && fetchOptionsRef.current.prices !== null
             ? fetchOptionsRef.current.prices.currency
@@ -61,6 +62,10 @@ export function useProducts(productIds: Product['id'][] = [], fetchOptions?: Pro
               .map((id) => {
                 const cachedProduct = getProduct(id);
                 if (!cachedProduct) {
+                  return null;
+                }
+
+                if (pricesRequested && !cachedProduct.price) {
                   return null;
                 }
 
