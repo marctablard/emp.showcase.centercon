@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import { ComparisonProductCard } from '@/components/comparison/comparison-product-card';
@@ -7,14 +8,99 @@ import { ComparisonTable } from '@/components/comparison/comparison-table';
 import { Button } from '@/components/ui/button';
 import { H4, H5 } from '@/components/ui/h';
 import { Spinner } from '@/components/ui/spinner';
+import { useLogger } from '@/hooks/common/useLogger';
 import { useComparison } from '@/hooks/comparison/useComparison';
 import { useProducts } from '@/hooks/product/useProducts';
+import { useSession } from '@/hooks/session/useSession';
 import { Link } from '@/i18n/navigation';
+import { fetchProductPrice } from '@/lib/client/prices';
+import type { ProductPrice } from '@/platform/services/model/price/price';
 
 export function CompareView() {
   const t = useTranslations('comparison');
   const { productIds, count, removeProduct, clearComparison } = useComparison();
-  const { products, loading } = useProducts(productIds, { prices: true });
+  const { session } = useSession();
+  const logger = useLogger();
+  const { products, loading } = useProducts(productIds);
+  const productIdsKey = productIds.join(',');
+  const [priceState, setPriceState] = useState<{
+    currency: string | null;
+    productIdsKey: string;
+    prices: Record<string, ProductPrice | null>;
+  }>({
+    currency: null,
+    productIdsKey: '',
+    prices: {},
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (productIds.length === 0) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!session?.currency) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const loadPrices = async () => {
+      try {
+        const nextPriceEntries = await Promise.all(
+          productIds.map(async (productId) => {
+            const price = await fetchProductPrice(productId, undefined, undefined, session.currency);
+            return [productId, price] as const;
+          }),
+        );
+
+        const nextPriceMap = Object.fromEntries(nextPriceEntries);
+
+        if (!cancelled) {
+          setPriceState({
+            currency: session.currency,
+            productIdsKey,
+            prices: nextPriceMap,
+          });
+        }
+      } catch (error) {
+        logger.error(
+          {
+            err: error,
+            productIds,
+            currency: session.currency,
+          },
+          'Failed to fetch comparison prices via PDP product price endpoint',
+        );
+        if (!cancelled) {
+          setPriceState({
+            currency: session.currency,
+            productIdsKey,
+            prices: {},
+          });
+        }
+      }
+    };
+
+    void loadPrices();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [logger, productIds, productIdsKey, session?.currency]);
+
+  const activePriceMap =
+    priceState.currency === (session?.currency ?? null) && priceState.productIdsKey === productIdsKey
+      ? priceState.prices
+      : {};
+
+  const productsWithPrices = products.map((product) => ({
+    ...product,
+    price: activePriceMap[product.id] ?? undefined,
+  }));
 
   if (count === 0) {
     return (
@@ -61,7 +147,7 @@ export function CompareView() {
       </div>
 
       {/* Single product state */}
-      {products.length === 1 && <p className="mt-6 text-text-on-disabled">{t('addMoreProducts')}</p>}
+      {productsWithPrices.length === 1 && <p className="mt-6 text-text-on-disabled">{t('addMoreProducts')}</p>}
 
       {/* Products section */}
       <div className="border-t border-border-primary mt-6">
@@ -74,14 +160,14 @@ export function CompareView() {
             <span className="text-base font-bold text-text-body">{t('products')}</span>
           </div>
           {/* Product columns — flex-1 each, same as table */}
-          {products.map((product) => (
+          {productsWithPrices.map((product) => (
             <ComparisonProductCard key={product.id} product={product} onRemove={removeProduct} />
           ))}
         </div>
       </div>
 
       {/* Comparison table */}
-      {products.length >= 2 && <ComparisonTable products={products} />}
+      {productsWithPrices.length >= 2 && <ComparisonTable products={productsWithPrices} />}
     </div>
   );
 }

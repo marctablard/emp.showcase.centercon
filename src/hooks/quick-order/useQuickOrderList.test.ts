@@ -21,7 +21,7 @@ jest.mock('@/lib/logger/use-logger-client', () => ({
   }),
 }));
 
-function makeProduct(id: string, priceAmount: number, priceCurrency = 'EUR'): Product {
+function makeProduct(id: string, priceAmount: number, priceCurrency = 'EUR', includeTax = true): Product {
   return {
     id,
     name: `Product ${id}`,
@@ -30,6 +30,13 @@ function makeProduct(id: string, priceAmount: number, priceCurrency = 'EUR'): Pr
     price: {
       amount: priceAmount,
       currency: priceCurrency,
+      tax: includeTax
+        ? {
+            netValue: priceAmount,
+            grossValue: priceAmount,
+            taxRate: 0,
+          }
+        : undefined,
     },
   } as Product;
 }
@@ -176,7 +183,7 @@ describe('useQuickOrderList', () => {
     const { result } = renderHook(() => useQuickOrderList());
 
     act(() => {
-      result.current.addProducts([{ product: makeProduct('p1', 11.9), quantity: 2 }]);
+      result.current.addProducts([{ product: makeProduct('p1', 11.9, 'EUR', false), quantity: 2 }]);
     });
 
     await waitFor(() => {
