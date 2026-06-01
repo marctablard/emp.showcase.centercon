@@ -29,9 +29,10 @@ import { useQuoteHistory } from '@/hooks/quotes/useQuoteHistory';
 import { useQuote } from '@/hooks/quotes/useQuotes';
 import { useRouter } from '@/i18n/navigation';
 import { createQuoteApprovalRequest } from '@/lib/approval/contracts';
-import { ApprovalAlreadyExistsError, checkApprovalPermitted, createApproval } from '@/lib/client/approval';
+import { checkApprovalPermitted, createApproval } from '@/lib/client/approval';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
+import { ApprovalAlreadyExistsError } from '@/platform/services/approval/errors';
 import type { Quote } from '@/platform/services/model/quote';
 
 interface QuoteDetailsProps {
