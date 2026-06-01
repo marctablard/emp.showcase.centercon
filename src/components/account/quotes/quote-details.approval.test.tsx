@@ -6,10 +6,6 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QuoteDetails } from './quote-details';
 
-function notify() {
-  return undefined;
-}
-
 const notifyMock = jest.fn();
 
 jest.mock('next-intl', () => ({
@@ -54,7 +50,7 @@ jest.mock('@/components/ui/link', () => ({
   default: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
 }));
 
-jest.mock('@/lib/client/approval', () => ({
+jest.mock('@/platform/services/approval/errors', () => ({
   ApprovalAlreadyExistsError: class ApprovalAlreadyExistsError extends Error {
     approvalId: string;
 
@@ -64,6 +60,9 @@ jest.mock('@/lib/client/approval', () => ({
       this.approvalId = approvalId;
     }
   },
+}));
+
+jest.mock('@/lib/client/approval', () => ({
   checkApprovalPermitted: jest.fn(),
   createApproval: jest.fn(),
   searchApprovalUsers: jest.fn(),
@@ -90,10 +89,10 @@ jest.mock('@/lib/logger/use-logger-client', () => ({
 }));
 
 describe('QuoteDetails approval flow', () => {
-  const { ApprovalAlreadyExistsError, checkApprovalPermitted, createApproval, searchApprovalUsers } = jest.requireMock(
-    '@/lib/client/approval',
-  ) as {
+  const { ApprovalAlreadyExistsError } = jest.requireMock('@/platform/services/approval/errors') as {
     ApprovalAlreadyExistsError: new (approvalId: string, message?: string) => Error & { approvalId: string };
+  };
+  const { checkApprovalPermitted, createApproval, searchApprovalUsers } = jest.requireMock('@/lib/client/approval') as {
     checkApprovalPermitted: jest.Mock;
     createApproval: jest.Mock;
     searchApprovalUsers: jest.Mock;
