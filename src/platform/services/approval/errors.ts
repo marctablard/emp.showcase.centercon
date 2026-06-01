@@ -1,8 +1,8 @@
 export class ApprovalAlreadyExistsError extends Error {
   readonly approvalId: string;
 
-  constructor(approvalId: string) {
-    super('Approval already exists');
+  constructor(approvalId: string, message: string = 'Approval already exists') {
+    super(message);
     this.name = 'ApprovalAlreadyExistsError';
     this.approvalId = approvalId;
   }

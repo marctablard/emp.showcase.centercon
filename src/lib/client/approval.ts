@@ -1,3 +1,4 @@
+import { ApprovalAlreadyExistsError } from '@/platform/services/approval/errors';
 import type {
   ApprovalAction,
   ApprovalCreateRequest,
@@ -8,20 +9,14 @@ import type {
   ApprovalUser,
 } from '@/platform/services/model/approval';
 
-export class ApprovalAlreadyExistsError extends Error {
-  readonly approvalId: string;
-
-  constructor(approvalId: string, message: string = 'Approval already exists') {
-    super(message);
-    this.name = 'ApprovalAlreadyExistsError';
-    this.approvalId = approvalId;
-  }
-}
-
 export interface ApprovalRequirementRequest {
   resourceId: string;
   resourceType?: ApprovalResourceType;
   action?: ApprovalAction;
+}
+
+function getApprovalApiErrorMessage(errorData: { details?: string; error?: string }, fallback: string): string {
+  return errorData.details || errorData.error || fallback;
 }
 
 /**
@@ -53,7 +48,7 @@ export async function requiresApproval(input: string | ApprovalRequirementReques
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.details || 'Failed to check approval requirements');
+    throw new Error(getApprovalApiErrorMessage(errorData, 'Failed to check approval requirements'));
   }
 
   const result = await response.json();
@@ -76,7 +71,7 @@ export async function checkApprovalPermitted(request: ApprovalPermittedRequest):
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.details || 'Failed to check approval permission');
+    throw new Error(getApprovalApiErrorMessage(errorData, 'Failed to check approval permission'));
   }
 
   return response.json();
@@ -106,7 +101,7 @@ export async function searchApprovalUsers(
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.details || 'Failed to search approval users');
+    throw new Error(getApprovalApiErrorMessage(errorData, 'Failed to search approval users'));
   }
 
   return response.json();
@@ -133,7 +128,7 @@ export async function createApproval(approval: ApprovalCreateRequest): Promise<A
       throw new ApprovalAlreadyExistsError(errorData.approvalId, errorData.error);
     }
 
-    throw new Error(errorData.details || 'Failed to create approval request');
+    throw new Error(getApprovalApiErrorMessage(errorData, 'Failed to create approval request'));
   }
 
   return response.json();

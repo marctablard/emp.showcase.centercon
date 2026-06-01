@@ -55,12 +55,10 @@ export class EmporixApprovalService implements ApprovalService {
       // Call the API
       return await this.approvalApi.createApproval(emporixApproval);
     } catch (error) {
-      if (this.isApprovalConflictError(error)) {
-        const conflictApprovalId = await this.getExistingApprovalId(approval);
+      const conflictApprovalId = await this.tryGetExistingApprovalId(approval);
 
-        if (conflictApprovalId) {
-          throw new ApprovalAlreadyExistsError(conflictApprovalId);
-        }
+      if (conflictApprovalId) {
+        throw new ApprovalAlreadyExistsError(conflictApprovalId);
       }
 
       throw error;
@@ -246,13 +244,12 @@ export class EmporixApprovalService implements ApprovalService {
     }
   }
 
-  private isApprovalConflictError(error: unknown): error is Error {
-    return (
-      error instanceof Error &&
-      (error.message.includes('409') ||
-        error.message.includes('Conflict') ||
-        error.message.includes('Duplicate key found for a unique index.'))
-    );
+  private async tryGetExistingApprovalId(approval: ApprovalCreateRequest): Promise<string | undefined> {
+    try {
+      return await this.getExistingApprovalId(approval);
+    } catch {
+      return undefined;
+    }
   }
 }
 export default EmporixApprovalService;

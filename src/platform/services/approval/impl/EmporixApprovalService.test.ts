@@ -90,4 +90,27 @@ describe('EmporixApprovalService', () => {
     expect(mockApprovalMapper.mapCreateRequestToSource).not.toHaveBeenCalled();
     expect(mockApprovalApi.createApproval).not.toHaveBeenCalled();
   });
+
+  it('maps create failures to duplicate approvals when a re-check finds the new approval', async () => {
+    mockApprovalApi.createApproval.mockRejectedValueOnce(new Error('Failed to create approval'));
+    mockApprovalApi.checkApprovalPermitted
+      .mockResolvedValueOnce({ permitted: false })
+      .mockResolvedValueOnce({ permitted: false, approvalId: 'approval-existing-2' });
+
+    const createApprovalPromise = approvalService.createApproval(approvalRequest);
+
+    await expect(createApprovalPromise).rejects.toBeInstanceOf(ApprovalAlreadyExistsError);
+    await expect(createApprovalPromise).rejects.toMatchObject({ approvalId: 'approval-existing-2' });
+  });
+
+  it('preserves the original create error when the duplicate re-check also fails', async () => {
+    const createError = new Error('Failed to create approval');
+
+    mockApprovalApi.createApproval.mockRejectedValueOnce(createError);
+    mockApprovalApi.checkApprovalPermitted
+      .mockResolvedValueOnce({ permitted: false })
+      .mockRejectedValueOnce(new Error('Failed to re-check approval state'));
+
+    await expect(approvalService.createApproval(approvalRequest)).rejects.toBe(createError);
+  });
 });
