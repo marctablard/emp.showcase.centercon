@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,11 +10,20 @@ import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { useApprovals } from '@/hooks/approval/useApprovals';
+import { Link } from '@/i18n/navigation';
 import type { Approval, ApprovalStatus } from '@/platform/services/model/approval';
 import { ApprovalStatusBadge } from './approval-status-badge';
 
 interface ApprovalsListProps {
   initialApprovals?: Approval[];
+}
+
+function getApprovalHref(approval: Approval): string {
+  if (approval.resourceType === 'QUOTE') {
+    return `/account/quotes/${approval.resource.id}`;
+  }
+
+  return `/account/approvals/${approval.id}`;
 }
 
 export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
@@ -134,6 +142,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('id')}</TableHead>
+                <TableHead>{t('resourceType')}</TableHead>
                 <TableHead>{t('action')}</TableHead>
                 <TableHead>{t('status')}</TableHead>
                 <TableHead>{t('requestor')}</TableHead>
@@ -146,6 +155,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
               {visibleApprovals.map((approval) => (
                 <TableRow key={approval.id}>
                   <TableCell className="font-medium">{approval.id}</TableCell>
+                  <TableCell>{approval.resourceType}</TableCell>
                   <TableCell>{tAction(approval.action)}</TableCell>
                   <TableCell>
                     <ApprovalStatusBadge status={approval.status} />
@@ -154,7 +164,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
                   <TableCell>{approval.approver.userId}</TableCell>
                   <TableCell>{formatDate(approval.createdAt)}</TableCell>
                   <TableCell>
-                    <Link href={`/account/approvals/${approval.id}`} passHref>
+                    <Link href={getApprovalHref(approval)}>
                       <Button variant="link" size="default">
                         {t('view')}
                       </Button>

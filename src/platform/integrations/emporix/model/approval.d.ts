@@ -65,7 +65,7 @@ export interface EmporixApprovalDetails {
   addresses?: EmporixCheckoutAddress[];
 }
 
-export type EmporixApprovalResourceType = 'CART';
+export type EmporixApprovalResourceType = 'CART' | 'QUOTE';
 export type EmporixApprovalAction = 'CHECKOUT';
 export type EmporixApprovalStatus = 'PENDING' | 'APPROVED' | 'CLOSED' | 'EXPIRED' | 'DECLINED';
 

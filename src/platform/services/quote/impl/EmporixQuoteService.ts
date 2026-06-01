@@ -18,6 +18,8 @@ import type { QuoteService } from '@/platform/services/quote/QuoteService';
 import type { SchemaService } from '@/platform/services/schema/SchemaService';
 import type { SearchParams, SearchResult } from '../../model/common';
 
+const DEFAULT_QUOTE_SORT = 'createdAt:desc';
+
 @injectable('QuoteService', 'Singleton')
 class EmporixQuoteService implements QuoteService {
   constructor(
@@ -38,6 +40,8 @@ class EmporixQuoteService implements QuoteService {
     if (!customer) {
       throw new Error('Customer not found');
     }
+    const sort = params.sort ?? DEFAULT_QUOTE_SORT;
+
     const searchResult: EmporixPaginatedResponse<EmporixQuote> = await this.quoteApi.getQuotes({
       page: (params.page || 0) + 1,
       size: params.size,
@@ -45,7 +49,7 @@ class EmporixQuoteService implements QuoteService {
       criteria: {
         'customer.customerId': customer.id,
       },
-      sort: params.sort,
+      sort,
     });
 
     // TODO fetch for quotes of subordinates

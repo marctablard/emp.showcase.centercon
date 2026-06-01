@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import AccountLayout from '@/components/account/account-layout';
 import { ApprovalDetails } from '@/components/account/approvals/approval-details';
+import { redirect } from '@/i18n/navigation';
 import { getApprovalById } from '@/lib/ssr/approvals';
 import { getPageTitle } from '@/lib/ssr/seo';
 
@@ -21,9 +22,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function ApprovalDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
+export default async function ApprovalDetailPage({
+  params,
+}: {
+  params: Promise<{ site: string; locale: string; id: string }>;
+}) {
   // Get approval ID and locale from params
-  const { locale, id } = await params;
+  const { site, locale, id } = await params;
 
   // Get translations
   const [tAccount, tApproval, approval] = await Promise.all([
@@ -35,6 +40,15 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
   // If approval not found, return 404
   if (!approval) {
     notFound();
+  }
+
+  if (approval.resourceType === 'QUOTE') {
+    redirect({
+      href: `/account/quotes/${approval.resource.id}`,
+      locale,
+      site,
+      forcePrefix: true,
+    });
   }
 
   const breadcrumbs = [

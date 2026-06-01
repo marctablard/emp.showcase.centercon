@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { ApprovalStatusBadge } from '@/components/account/approvals/approval-status-badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useApproval } from '@/hooks/approval/useApproval';
+import { Link } from '@/i18n/navigation';
 import type { Approval } from '@/platform/services/model/approval';
 
 interface ApprovalDetailsProps {
@@ -21,10 +22,13 @@ interface ApprovalDetailsProps {
 export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetailsProps) {
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
+  const locale = useLocale();
   const [approverComment, setApproverComment] = useState<string>('');
   const [requestorComment, setRequestorComment] = useState<string>('');
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [quoteAcceptedPendingApprovalStatus, setQuoteAcceptedPendingApprovalStatus] = useState(false);
+  const [isApprovalActionPending, setIsApprovalActionPending] = useState(false);
 
   const {
     approval,
@@ -37,10 +41,57 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     refreshApproval,
   } = useApproval(approvalId, initialApproval);
 
+  const updateQuoteStatus = async (quoteId: string, status: string, comment?: string): Promise<void> => {
+    const response = await fetch('/api/quote/update-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quoteId,
+        status,
+        comment,
+        locale,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.error || `Failed to update quote status to ${status}`);
+    }
+  };
+
+  const acceptQuote = async (quoteId: string, comment?: string): Promise<void> => {
+    await updateQuoteStatus(quoteId, 'ACCEPTED', comment);
+  };
+
+  const reopenQuote = async (quoteId: string): Promise<void> => {
+    await updateQuoteStatus(quoteId, 'OPEN');
+  };
+
   const handleApprove = async () => {
+    let acceptedInThisAttempt = false;
+    let approvalStatusUpdated = false;
+
+    if (isApprovalActionPending) {
+      return;
+    }
+
     try {
+      setIsApprovalActionPending(true);
       setActionError(null);
+      let quoteAccepted = quoteAcceptedPendingApprovalStatus;
+
+      if (approval?.resourceType === 'QUOTE' && !quoteAccepted) {
+        await acceptQuote(approval.resource.id, approverComment || undefined);
+        quoteAccepted = true;
+        acceptedInThisAttempt = true;
+        setQuoteAcceptedPendingApprovalStatus(true);
+      }
+
       await updateApprovalStatus('APPROVED');
+      approvalStatusUpdated = true;
+      setQuoteAcceptedPendingApprovalStatus(false);
       setActionSuccess(t('approvalSuccessfullyApproved'));
 
       if (approverComment) {
@@ -48,12 +99,29 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
         setApproverComment('');
       }
     } catch (err) {
+      if (approval?.resourceType === 'QUOTE' && acceptedInThisAttempt && !approvalStatusUpdated) {
+        try {
+          await reopenQuote(approval.resource.id);
+          setQuoteAcceptedPendingApprovalStatus(false);
+        } catch (revertError) {
+          setActionError(revertError instanceof Error ? revertError.message : String(revertError));
+          return;
+        }
+      }
+
       setActionError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsApprovalActionPending(false);
     }
   };
 
   const handleDecline = async () => {
+    if (isApprovalActionPending) {
+      return;
+    }
+
     try {
+      setIsApprovalActionPending(true);
       setActionError(null);
       await updateApprovalStatus('DECLINED');
       setActionSuccess(t('approvalSuccessfullyDeclined'));
@@ -64,6 +132,8 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
       }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsApprovalActionPending(false);
     }
   };
 
@@ -113,11 +183,9 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     }).format(date);
   };
 
-  // This view intentionally only updates approval status without triggering checkout.
-  // The main approval view at /account/approvals/[id] handles the full checkout + order
-  // submission flow. See SHOW-298 for context on this distinction.
   const canApprove = approval?.status === 'PENDING';
   const canComment = approval?.status !== 'CLOSED' && approval?.status !== 'EXPIRED';
+  const quoteDetailsHref = approval?.resourceType === 'QUOTE' ? `/account/quotes/${approval.resource.id}` : null;
 
   if (loading) {
     return (
@@ -258,6 +326,14 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
           )}
         </div>
 
+        {quoteDetailsHref && (
+          <div>
+            <Button asChild variant="link" className="px-0">
+              <Link href={quoteDetailsHref}>{t('viewFullQuoteDetails')}</Link>
+            </Button>
+          </div>
+        )}
+
         {canApprove && (
           <>
             <Separator />
@@ -265,10 +341,14 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
             <div>
               <p className="text-sm font-medium mb-2">{t('approvalActions')}</p>
               <div className="flex gap-2">
-                <Button onClick={handleApprove} className="bg-surface-success hover:bg-surface-action-hover-2">
+                <Button
+                  onClick={handleApprove}
+                  className="bg-surface-success hover:bg-surface-action-hover-2"
+                  disabled={isApprovalActionPending}
+                >
                   {t('approve')}
                 </Button>
-                <Button onClick={handleDecline} variant="secondary">
+                <Button onClick={handleDecline} variant="secondary" disabled={isApprovalActionPending}>
                   {t('decline')}
                 </Button>
               </div>

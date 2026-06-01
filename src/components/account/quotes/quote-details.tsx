@@ -1,22 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { QuoteStatusBadge } from '@/components/account/quotes/quote-status-badge';
 import { QuoteSummary } from '@/components/account/quotes/quote-summary';
 import { ProductListResolver } from '@/components/product/product-list-resolver';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { H2, H3, H4 } from '@/components/ui/h';
+import { Label } from '@/components/ui/label';
 import UiLink from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { ToastType, notify } from '@/components/ui/toast-notification';
+import { useApproverSearch } from '@/hooks/approval/useApproverSearch';
 import { useQuoteHistory } from '@/hooks/quotes/useQuoteHistory';
 import { useQuote } from '@/hooks/quotes/useQuotes';
+import { useRouter } from '@/i18n/navigation';
+import { createQuoteApprovalRequest } from '@/lib/approval/contracts';
+import { ApprovalAlreadyExistsError, checkApprovalPermitted, createApproval } from '@/lib/client/approval';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import type { Quote } from '@/platform/services/model/quote';
@@ -26,8 +39,17 @@ interface QuoteDetailsProps {
   initialQuote?: Quote;
 }
 
+interface ApprovalPermissionState {
+  approvalId?: string;
+  permitted: boolean;
+}
+
+const QUOTE_APPROVAL_ACTION = 'CHECKOUT';
+const QUOTE_APPROVAL_RESOURCE_TYPE = 'QUOTE';
+
 export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   const t = useTranslations('account.quoteDetails');
+  const tApproval = useTranslations('checkout.approval');
   const router = useRouter();
 
   // State for confirmation dialogs
@@ -38,7 +60,23 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   const maxCommentLength = 500;
   const [isProcessing, setIsProcessing] = useState(false);
   const [processError, setProcessError] = useState<string | null>(null);
+  const [approvalPermission, setApprovalPermission] = useState<ApprovalPermissionState | null>(null);
+  const [isCheckingApprovalPermission, setIsCheckingApprovalPermission] = useState(false);
+  const [showApprovalInquiryDialog, setShowApprovalInquiryDialog] = useState(false);
+  const [selectedApproverId, setSelectedApproverId] = useState<string | null>(null);
+  const [approvalInquiryComment, setApprovalInquiryComment] = useState('');
   const locale = useLocale();
+
+  const {
+    approvers,
+    loading: approverSearchLoading,
+    error: approverSearchError,
+    refetch: refetchApprovers,
+  } = useApproverSearch({
+    resourceType: QUOTE_APPROVAL_RESOURCE_TYPE,
+    resourceId: quoteId,
+    action: QUOTE_APPROVAL_ACTION,
+  });
 
   const updateQuoteStatus = async (
     quoteId: string,
@@ -100,6 +138,155 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   // Use initialQuote if provided, otherwise use fetched quote
   const quote = initialQuote || fetchedQuote;
 
+  useEffect(() => {
+    if (!quote || quote.status !== 'OPEN') {
+      setApprovalPermission(null);
+      setIsCheckingApprovalPermission(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadApprovalPermission = async (): Promise<void> => {
+      try {
+        setIsCheckingApprovalPermission(true);
+
+        const permission = await checkApprovalPermitted({
+          resourceId: quoteId,
+          resourceType: QUOTE_APPROVAL_RESOURCE_TYPE,
+          action: QUOTE_APPROVAL_ACTION,
+        });
+
+        if (!isCancelled) {
+          setApprovalPermission({
+            approvalId: permission.approvalId,
+            permitted: permission.permitted,
+          });
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setApprovalPermission(null);
+          getLogger().error({ err: error, quoteId }, 'Failed to load quote approval permission');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsCheckingApprovalPermission(false);
+        }
+      }
+    };
+
+    void loadApprovalPermission();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [quote, quoteId]);
+
+  useEffect(() => {
+    if (!showApprovalInquiryDialog || approvers !== undefined || approverSearchLoading || approverSearchError) {
+      return;
+    }
+
+    void refetchApprovers();
+  }, [showApprovalInquiryDialog, approvers, approverSearchLoading, approverSearchError, refetchApprovers]);
+
+  const handleApprovalInquiryDialogChange = (open: boolean): void => {
+    setShowApprovalInquiryDialog(open);
+    setProcessError(null);
+
+    if (!open) {
+      setSelectedApproverId(null);
+      setApprovalInquiryComment('');
+    }
+  };
+
+  const handleApprovalInquirySubmit = async (): Promise<void> => {
+    if (!selectedApproverId) {
+      return;
+    }
+
+    try {
+      setProcessError(null);
+      setIsProcessing(true);
+
+      const approval = await createApproval(
+        createQuoteApprovalRequest(quoteId, {
+          approverId: selectedApproverId,
+          comment: approvalInquiryComment.trim() || undefined,
+        }),
+      );
+
+      setApprovalPermission({
+        approvalId: approval.id,
+        permitted: false,
+      });
+      handleApprovalInquiryDialogChange(false);
+      router.push(`/account/company/approval/${approval.id}`);
+    } catch (error) {
+      if (error instanceof ApprovalAlreadyExistsError) {
+        setApprovalPermission({
+          approvalId: error.approvalId,
+          permitted: false,
+        });
+        handleApprovalInquiryDialogChange(false);
+        router.push(`/account/company/approval/${error.approvalId}`);
+        return;
+      }
+
+      getLogger().error({ err: error, quoteId }, 'Failed to create quote approval inquiry');
+      const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
+      setProcessError(msg);
+      notify({
+        title: t('quoteActionFailedTitle'),
+        description: msg,
+        type: ToastType.Error,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleQuotePrimaryAction = async (): Promise<void> => {
+    try {
+      setProcessError(null);
+      setIsProcessing(true);
+
+      const permission = await checkApprovalPermitted({
+        resourceId: quoteId,
+        resourceType: QUOTE_APPROVAL_RESOURCE_TYPE,
+        action: QUOTE_APPROVAL_ACTION,
+      });
+
+      setApprovalPermission({
+        approvalId: permission.approvalId,
+        permitted: permission.permitted,
+      });
+
+      if (!permission.permitted) {
+        if (permission.approvalId) {
+          router.push(`/account/company/approval/${permission.approvalId}`);
+          return;
+        }
+
+        handleApprovalInquiryDialogChange(true);
+        return;
+      }
+
+      setShowAcceptConfirmation(true);
+    } catch (error) {
+      getLogger().error({ err: error, quoteId }, 'Failed to evaluate quote approval requirement');
+      const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
+      setProcessError(msg);
+      notify({
+        title: t('quoteActionFailedTitle'),
+        description: msg,
+        type: ToastType.Error,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('de-DE', {
@@ -133,6 +320,10 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
     }
     return historyItem.userFullName;
   };
+
+  const showInquiryCta = approvalPermission?.permitted === false;
+  const primaryActionLabel = showInquiryCta ? t('inquireApproval') : t('accept');
+  const isPrimaryActionDisabled = !(quote?.status === 'OPEN') || isProcessing || isCheckingApprovalPermission;
 
   // Loading state
   if (loading) {
@@ -172,6 +363,101 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
 
   return (
     <div>
+      <Dialog open={showApprovalInquiryDialog} onOpenChange={handleApprovalInquiryDialogChange}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{tApproval('selectApprover')}</DialogTitle>
+            <DialogDescription>{tApproval('selectApproverRequired')}</DialogDescription>
+          </DialogHeader>
+
+          {approvers && approvers.length > 0 && (
+            <div className="space-y-2 max-h-[200px] overflow-y-auto rounded-md border p-2">
+              {approvers.map((approver) => (
+                <button
+                  type="button"
+                  key={approver.userId}
+                  className={cn(
+                    'flex w-full items-center rounded-md p-2 text-left',
+                    selectedApproverId === approver.userId ? 'bg-surface-action-hover-2' : 'hover:bg-surface-disabled',
+                  )}
+                  onClick={() => setSelectedApproverId(approver.userId)}
+                  data-testid={`quote-approval-approver-${approver.userId}`}
+                >
+                  <Avatar className="mr-2 h-8 w-8">
+                    <div className="flex h-full w-full items-center justify-center rounded-full bg-surface-action text-text-on-action">
+                      {approver.firstName?.charAt(0) || approver.lastName?.charAt(0) || 'U'}
+                    </div>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">
+                      {approver.firstName} {approver.lastName}
+                    </p>
+                    <p className="text-sm text-text-placeholders">{approver.fullName}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {approverSearchLoading && (
+            <div className="py-2 text-center">
+              <Spinner className="mr-2 inline h-4 w-4" /> {tApproval('loadingApprovers')}
+            </div>
+          )}
+
+          {!approverSearchLoading && approvers?.length === 0 && !approverSearchError && (
+            <div className="py-2 text-center text-text-placeholders">{tApproval('noApproversFound')}</div>
+          )}
+
+          {!approverSearchLoading && approverSearchError && (
+            <div className="space-y-2 py-4 text-center">
+              <p className="text-sm text-text-error">{tApproval('errorFetchingApproversDescription')}</p>
+              <Button variant="secondary" size="small" onClick={() => void refetchApprovers()}>
+                {tApproval('retry')}
+              </Button>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="quote-approval-comment">{tApproval('comment')}</Label>
+            <Textarea
+              id="quote-approval-comment"
+              placeholder={tApproval('commentPlaceholder')}
+              value={approvalInquiryComment}
+              onChange={(e) => setApprovalInquiryComment(e.target.value)}
+              rows={3}
+              data-testid="quote-approval-comment"
+            />
+          </div>
+
+          {processError ? (
+            <Alert variant="destructive" role="alert">
+              <AlertDescription>{processError}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              disabled={isProcessing}
+              onClick={() => handleApprovalInquiryDialogChange(false)}
+              data-testid="quote-approval-cancelButton"
+            >
+              {tApproval('cancel')}
+            </Button>
+            <Button
+              disabled={!selectedApproverId || isProcessing}
+              onClick={() => {
+                void handleApprovalInquirySubmit();
+              }}
+              data-testid="quote-approval-submitButton"
+            >
+              {tApproval('submitApprovalRequest')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col px-4 gap-6">
@@ -216,14 +502,13 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                 <Button
                   variant="primary"
                   size="small"
-                  disabled={!(quote.status === 'OPEN')}
+                  disabled={isPrimaryActionDisabled}
                   onClick={() => {
-                    setProcessError(null);
-                    setShowAcceptConfirmation(true);
+                    void handleQuotePrimaryAction();
                   }}
                   className="bg-surface-success hover:bg-surface-action-hover-2"
                 >
-                  {t('accept')}
+                  {primaryActionLabel}
                 </Button>
               </div>
             )}

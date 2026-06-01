@@ -347,6 +347,7 @@
     "quoteReference": "Angebotsnummer",
     "approver": "Genehmiger",
     "accept": "ANNEHMEN",
+    "inquireApproval": "GENEHMIGUNG ANFRAGEN",
     "reject": "ABLEHNEN",
     "requestChange": "ÄNDERUNG ANFORDERN",
     "confirmationTitle": "Möchten Sie das Angebot annehmen und eine Bestellung erstellen?",

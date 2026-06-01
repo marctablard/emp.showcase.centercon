@@ -6,12 +6,15 @@ import type {
   EmporixApprovalSearchUsersRequest,
   EmporixApprovalUpdateRequest,
 } from '@/platform/integrations/emporix/model/approval';
+import { ApprovalAlreadyExistsError, ApprovalApproverNotPermittedError } from '@/platform/services/approval/errors';
 import type {
   Approval,
+  ApprovalAction,
   ApprovalCreateRequest,
   ApprovalId,
   ApprovalPermittedRequest,
   ApprovalPermittedResponse,
+  ApprovalResourceType,
   ApprovalStatus,
   ApprovalUser,
 } from '@/platform/services/model/approval';
@@ -37,11 +40,31 @@ export class EmporixApprovalService implements ApprovalService {
    * @returns Promise with the created approval ID
    */
   async createApproval(approval: ApprovalCreateRequest): Promise<ApprovalId> {
+    const existingApprovalId = await this.getExistingApprovalId(approval);
+
+    if (existingApprovalId) {
+      throw new ApprovalAlreadyExistsError(existingApprovalId);
+    }
+
+    await this.validateApproverIsPermitted(approval);
+
     // Map service model to integration model
     const emporixApproval = this.approvalMapper.mapCreateRequestToSource(approval);
 
-    // Call the API
-    return await this.approvalApi.createApproval(emporixApproval);
+    try {
+      // Call the API
+      return await this.approvalApi.createApproval(emporixApproval);
+    } catch (error) {
+      if (this.isApprovalConflictError(error)) {
+        const conflictApprovalId = await this.getExistingApprovalId(approval);
+
+        if (conflictApprovalId) {
+          throw new ApprovalAlreadyExistsError(conflictApprovalId);
+        }
+      }
+
+      throw error;
+    }
   }
 
   /**
@@ -156,11 +179,15 @@ export class EmporixApprovalService implements ApprovalService {
    * @param action The action to check
    * @returns Promise with array of users
    */
-  async searchApprovalUsers(resourceType: string, resourceId: string, action: string): Promise<ApprovalUser[]> {
+  async searchApprovalUsers(
+    resourceType: ApprovalResourceType,
+    resourceId: string,
+    action: ApprovalAction,
+  ): Promise<ApprovalUser[]> {
     const request: EmporixApprovalSearchUsersRequest = {
-      resourceType: resourceType as any,
+      resourceType,
       resourceId,
-      action: action as any,
+      action,
     };
 
     const emporixUsers = await this.approvalApi.searchApprovalUsers(request);
@@ -176,22 +203,56 @@ export class EmporixApprovalService implements ApprovalService {
 
   /**
    * Requires Approval
-   * @param cartId The ID of the cart
+   * @param request The resource currently evaluated for approval requirements
    * @returns Promise with the requires approval result
    */
-  async requiresApproval(cartId: string): Promise<boolean> {
+  async requiresApproval(request: ApprovalPermittedRequest): Promise<boolean> {
     const customer = await this.customerService.getCustomer();
     if (!customer || customer.businessModel == 'B2C') {
       // Guests and B2C Customers don't require Approval.
       return false;
     }
 
-    const permitted = await this.approvalApi.checkApprovalPermitted({
-      resourceType: 'CART',
-      resourceId: cartId,
-      action: 'CHECKOUT',
-    });
+    const permitted = await this.approvalApi.checkApprovalPermitted(request);
     return !permitted.permitted;
+  }
+
+  private async getExistingApprovalId(approval: ApprovalCreateRequest): Promise<string | undefined> {
+    const permission = await this.approvalApi.checkApprovalPermitted({
+      resourceId: approval.resourceId,
+      resourceType: approval.resourceType,
+      action: approval.action,
+    });
+
+    return permission.approvalId;
+  }
+
+  private async validateApproverIsPermitted(approval: ApprovalCreateRequest): Promise<void> {
+    const approverId = approval.approver.userId;
+
+    if (!approverId) {
+      throw new ApprovalApproverNotPermittedError('');
+    }
+
+    const availableApprovers = await this.searchApprovalUsers(
+      approval.resourceType,
+      approval.resourceId,
+      approval.action,
+    );
+    const approverExists = availableApprovers.some((approver) => approver.userId === approverId);
+
+    if (!approverExists) {
+      throw new ApprovalApproverNotPermittedError(approverId);
+    }
+  }
+
+  private isApprovalConflictError(error: unknown): error is Error {
+    return (
+      error instanceof Error &&
+      (error.message.includes('409') ||
+        error.message.includes('Conflict') ||
+        error.message.includes('Duplicate key found for a unique index.'))
+    );
   }
 }
 export default EmporixApprovalService;

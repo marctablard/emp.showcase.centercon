@@ -78,7 +78,7 @@ export interface ApprovalDetails {
   addresses?: CheckoutAddress[];
 }
 
-export type ApprovalResourceType = 'CART';
+export type ApprovalResourceType = 'CART' | 'QUOTE';
 export type ApprovalAction = 'CHECKOUT';
 export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'CLOSED' | 'EXPIRED' | 'DECLINED';
 
