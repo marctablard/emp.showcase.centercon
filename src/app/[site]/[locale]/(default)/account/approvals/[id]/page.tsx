@@ -1,10 +1,15 @@
+import { createNavigation as createIntlNavigation } from 'next-intl/navigation';
 import { getTranslations } from 'next-intl/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import AccountLayout from '@/components/account/account-layout';
 import { ApprovalDetails } from '@/components/account/approvals/approval-details';
-import { redirect } from '@/i18n/navigation';
+import { routing as intlRouting } from '@/i18n/routing';
 import { getApprovalById } from '@/lib/ssr/approvals';
 import { getPageTitle } from '@/lib/ssr/seo';
+import { routing as siteRouting } from '@/site/routing';
+import { addPrefixIfNeeded } from '@/site/utils';
+
+const { getPathname } = createIntlNavigation(intlRouting);
 
 // Force dynamic rendering for personalized content
 
@@ -43,12 +48,13 @@ export default async function ApprovalDetailPage({
   }
 
   if (approval.resourceType === 'QUOTE') {
-    redirect({
-      href: `/account/quotes/${approval.resource.id}`,
-      locale,
+    const quotePath = addPrefixIfNeeded(
+      getPathname({ href: `/account/quotes/${approval.resource.id}`, locale }),
       site,
-      forcePrefix: true,
-    });
+      siteRouting,
+      true,
+    );
+    redirect(quotePath);
   }
 
   const breadcrumbs = [

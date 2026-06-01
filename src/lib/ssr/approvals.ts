@@ -35,7 +35,7 @@ export const getApprovalById = cache(async (approvalId: string): Promise<Approva
  * Get all approvals for the current customer with optional pagination
  * This function is cached to prevent multiple approval fetches in a single request
  */
-export const getApprovals = cache(async (pageSize?: number, pageNumber?: number): Promise<Approval[] | undefined> => {
+export const getApprovals = cache(async (pageNumber?: number, pageSize?: number): Promise<Approval[] | undefined> => {
   try {
     const approvalService = getApprovalService();
     const approvals = await approvalService.getApprovals(pageNumber, pageSize, DEFAULT_APPROVAL_SORT);

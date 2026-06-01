@@ -59,7 +59,7 @@ export function CartRequest() {
           >
             {buttonText}
           </Button>
-          <QuoteRequestDialog open={isQuoteOpen} onOpenChange={setIsQuoteOpen} mode="request" />
+          <QuoteRequestDialog open={isQuoteOpen} onOpenChange={setIsQuoteOpen} />
         </CollapsibleContent>
       </Collapsible>
     </Card>

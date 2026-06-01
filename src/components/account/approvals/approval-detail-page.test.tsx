@@ -9,8 +9,8 @@ const mockGetTranslations = jest.fn(
     (key: string) =>
       `${namespace}.${key}`,
 );
-const redirect = jest.fn((options: { href: string; locale: string; site: string; forcePrefix?: boolean }) => {
-  throw new Error(`REDIRECT:${JSON.stringify(options)}`);
+const redirect = jest.fn((href: string) => {
+  throw new Error(`REDIRECT:${href}`);
 });
 const notFound = jest.fn(() => {
   throw new Error('NOT_FOUND');
@@ -22,10 +22,7 @@ jest.mock('next-intl/server', () => ({
 
 jest.mock('next/navigation', () => ({
   notFound: () => notFound(),
-}));
-
-jest.mock('@/i18n/navigation', () => ({
-  redirect: (options: { href: string; locale: string; site: string; forcePrefix?: boolean }) => redirect(options),
+  redirect: (href: string) => redirect(href),
 }));
 
 jest.mock('@/components/account/account-layout', () => ({
@@ -66,11 +63,6 @@ describe('Approval requester detail page', () => {
       ApprovalDetailPage({ params: Promise.resolve({ locale: 'en', site: 'main', id: 'approval-quote-1' }) }),
     ).rejects.toThrow('REDIRECT');
 
-    expect(redirect).toHaveBeenCalledWith({
-      href: '/account/quotes/quote-1',
-      locale: 'en',
-      site: 'main',
-      forcePrefix: true,
-    });
+    expect(redirect).toHaveBeenCalledWith('/main/account/quotes/quote-1');
   });
 });
