@@ -20,6 +20,24 @@ jest.mock('next-intl/server', () => ({
   getTranslations: (...args: unknown[]) => mockGetTranslations(...args),
 }));
 
+jest.mock('next-intl/navigation', () => ({
+  createNavigation: () => ({
+    getPathname: ({ href }: { href: string }) => href,
+  }),
+}));
+
+jest.mock('@/i18n/routing', () => ({
+  routing: {},
+}));
+
+jest.mock('@/site/routing', () => ({
+  routing: {},
+}));
+
+jest.mock('@/site/utils', () => ({
+  addPrefixIfNeeded: (path: string, site: string) => `/${site}${path}`,
+}));
+
 jest.mock('next/navigation', () => ({
   notFound: () => notFound(),
   redirect: (href: string) => redirect(href),
