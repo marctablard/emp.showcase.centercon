@@ -210,7 +210,8 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
   }
 
   private mapResourceItem(source: EmporixApprovalResourceItem): ApprovalResourceItem {
-    // Extract product ID from YRN if available
+    // Extract product ID from the YRN when present, otherwise fall back to itemId
+    // from approval payloads that already expose the underlying product identifier.
     let productId: string | undefined;
     if (source.itemYrn) {
       const parts = source.itemYrn.split(';');
@@ -219,10 +220,15 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
       }
     }
 
+    if (!productId && source.itemId) {
+      productId = source.itemId;
+    }
+
     return {
       quantity: source.quantity,
       itemPrice: this.mapPrice(source.itemPrice),
       itemYrn: source.itemYrn,
+      itemId: source.itemId,
       productId,
     };
   }
@@ -232,6 +238,7 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
       quantity: service.quantity,
       itemPrice: this.mapPriceToSource(service.itemPrice),
       itemYrn: service.itemYrn,
+      itemId: service.itemId,
     };
   }
 

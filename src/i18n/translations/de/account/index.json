@@ -322,6 +322,9 @@
   "quoteDetails": {
     "title": "Angebotsdetails",
     "status": "Status",
+    "product": "Produkt",
+    "quantity": "Menge",
+    "price": "Preis",
     "quotationDate": "Angebotsdatum",
     "totalAmount": "Gesamtbetrag",
     "editor": "Bearbeiter",

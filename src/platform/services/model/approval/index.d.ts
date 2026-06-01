@@ -41,7 +41,8 @@ export interface ApprovalDeliveryWindow {
 export interface ApprovalResourceItem {
   quantity: number;
   itemPrice: ApprovalPrice;
-  itemYrn: string;
+  itemYrn?: string;
+  itemId?: string;
   productId?: string;
   productName?: string | LocalizedString;
 }

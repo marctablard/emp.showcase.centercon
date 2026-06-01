@@ -2,33 +2,76 @@
 
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, List, ReceiptText } from 'lucide-react';
 import { ApprovalStatusBadge } from '@/components/account/approvals/approval-status-badge';
+import { ProductListResolver } from '@/components/product/product-list-resolver';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
+import { SummaryCard, SummaryRow } from '@/components/ui/summary-card';
 import { Textarea } from '@/components/ui/textarea';
 import { useApproval } from '@/hooks/approval/useApproval';
-import { Link } from '@/i18n/navigation';
+import { useSite } from '@/hooks/site/useSite';
+import { useRouter } from '@/i18n/navigation';
+import { checkoutFromQuote } from '@/lib/client/checkout';
+import { formatCurrency } from '@/lib/utils';
 import type { Approval } from '@/platform/services/model/approval';
+import type { CheckoutPaymentMethod, QuoteCheckoutRequest } from '@/platform/services/model/checkout';
 
 interface ApprovalDetailsProps {
   approvalId: string;
   initialApproval?: Approval;
+  currentUserId?: string;
 }
 
-export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetailsProps) {
+interface ApprovalResourcePrice {
+  currency: string;
+  amount?: number;
+  netValue?: number;
+  grossValue?: number;
+  taxValue?: number;
+  unitPrice?: number;
+  newUnitPrice?: number;
+  calculatedPrice?: {
+    price?: {
+      netValue?: number;
+      grossValue?: number;
+      taxValue?: number;
+    };
+  };
+}
+
+interface ApprovalResourceItem {
+  itemYrn?: string;
+  productId?: string;
+  quantity: number;
+  itemPrice: ApprovalResourcePrice;
+}
+
+type ApprovalQuoteResource = Approval['resource'] & {
+  items?: ApprovalResourceItem[];
+  totalPrice?: ApprovalResourcePrice;
+  subTotalPrice?: ApprovalResourcePrice;
+  subtotalAggregate?: ApprovalResourcePrice;
+};
+
+export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: ApprovalDetailsProps) {
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
+  const tQuote = useTranslations('account.quoteDetails');
   const locale = useLocale();
+  const router = useRouter();
+  const maxCommentLength = 250;
   const [approverComment, setApproverComment] = useState<string>('');
   const [requestorComment, setRequestorComment] = useState<string>('');
+  const [orderComment, setOrderComment] = useState<string>('');
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [quoteAcceptedPendingApprovalStatus, setQuoteAcceptedPendingApprovalStatus] = useState(false);
   const [isApprovalActionPending, setIsApprovalActionPending] = useState(false);
+  const [isOrderCreationPending, setIsOrderCreationPending] = useState(false);
+  const { paymentModes, loading: isSiteLoading } = useSite();
 
   const {
     approval,
@@ -41,7 +84,12 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     refreshApproval,
   } = useApproval(approvalId, initialApproval);
 
-  const updateQuoteStatus = async (quoteId: string, status: string, comment?: string): Promise<void> => {
+  const updateQuoteStatus = async (
+    quoteId: string,
+    status: string,
+    comment?: string,
+    linkedApprovalId?: string,
+  ): Promise<void> => {
     const response = await fetch('/api/quote/update-status', {
       method: 'POST',
       headers: {
@@ -51,6 +99,7 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
         quoteId,
         status,
         comment,
+        approvalId: linkedApprovalId,
         locale,
       }),
     });
@@ -62,17 +111,72 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
   };
 
   const acceptQuote = async (quoteId: string, comment?: string): Promise<void> => {
-    await updateQuoteStatus(quoteId, 'ACCEPTED', comment);
+    await updateQuoteStatus(quoteId, 'ACCEPTED', comment, approvalId);
   };
 
   const reopenQuote = async (quoteId: string): Promise<void> => {
-    await updateQuoteStatus(quoteId, 'OPEN');
+    await updateQuoteStatus(quoteId, 'OPEN', undefined, approvalId);
+  };
+
+  const resolveQuoteCheckoutPaymentMethod = async (): Promise<CheckoutPaymentMethod> => {
+    const approvalPaymentMethod = approval?.details?.paymentMethods?.[0];
+
+    if (approvalPaymentMethod) {
+      return approvalPaymentMethod;
+    }
+
+    const fallbackPaymentMode = paymentModes?.[0];
+
+    if (!fallbackPaymentMode) {
+      throw new Error('Missing payment method for quote checkout');
+    }
+
+    return {
+      ...fallbackPaymentMode,
+      // TODO: remove this synthetic provider fallback once the payment mode source includes provider for quote checkout.
+      provider: 'none',
+    };
+  };
+
+  const resolveQuoteCheckoutCurrency = (): string | undefined => {
+    return (
+      approval?.details?.currency ??
+      quoteResource?.totalPrice?.currency ??
+      quoteResource?.subTotalPrice?.currency ??
+      quoteResource?.subtotalAggregate?.currency
+    );
+  };
+
+  const checkoutApprovedQuote = async (): Promise<string> => {
+    if (!approval || !quoteResource) {
+      throw new Error('Quote approval data is missing');
+    }
+
+    const paymentMethod = await resolveQuoteCheckoutPaymentMethod();
+
+    const request: QuoteCheckoutRequest = {
+      quoteId: quoteResource.id,
+      paymentMethod,
+      customer: {
+        userId: approval.requestor.userId,
+        firstName: approval.requestor.firstName,
+        lastName: approval.requestor.lastName,
+        email: approval.requestor.email,
+        emailConfirmation: approval.requestor.email,
+      },
+      currency: resolveQuoteCheckoutCurrency(),
+    };
+
+    const response = await checkoutFromQuote(request);
+
+    if (!response.orderId) {
+      throw new Error('Order ID is missing in quote checkout response');
+    }
+
+    return response.orderId;
   };
 
   const handleApprove = async () => {
-    let acceptedInThisAttempt = false;
-    let approvalStatusUpdated = false;
-
     if (isApprovalActionPending) {
       return;
     }
@@ -80,18 +184,11 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     try {
       setIsApprovalActionPending(true);
       setActionError(null);
-      let quoteAccepted = quoteAcceptedPendingApprovalStatus;
-
-      if (approval?.resourceType === 'QUOTE' && !quoteAccepted) {
-        await acceptQuote(approval.resource.id, approverComment || undefined);
-        quoteAccepted = true;
-        acceptedInThisAttempt = true;
-        setQuoteAcceptedPendingApprovalStatus(true);
-      }
-
       await updateApprovalStatus('APPROVED');
-      approvalStatusUpdated = true;
-      setQuoteAcceptedPendingApprovalStatus(false);
+
+      if (approval?.resourceType === 'QUOTE') {
+        await acceptQuote(approval.resource.id, approverComment || undefined);
+      }
       setActionSuccess(t('approvalSuccessfullyApproved'));
 
       if (approverComment) {
@@ -99,10 +196,9 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
         setApproverComment('');
       }
     } catch (err) {
-      if (approval?.resourceType === 'QUOTE' && acceptedInThisAttempt && !approvalStatusUpdated) {
+      if (approval?.resourceType === 'QUOTE' && approval?.status === 'APPROVED') {
         try {
           await reopenQuote(approval.resource.id);
-          setQuoteAcceptedPendingApprovalStatus(false);
         } catch (revertError) {
           setActionError(revertError instanceof Error ? revertError.message : String(revertError));
           return;
@@ -159,6 +255,27 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     }
   };
 
+  const handleCreateOrder = async (): Promise<void> => {
+    if (!quoteResource || isOrderCreationPending) {
+      return;
+    }
+
+    try {
+      setIsOrderCreationPending(true);
+      setActionError(null);
+
+      const orderId = await checkoutApprovedQuote();
+
+      setActionSuccess(t('orderSuccessfullySubmitted'));
+      setOrderComment('');
+      router.push(`/confirmation/${orderId}`);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsOrderCreationPending(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (confirm(t('confirmDeleteApproval'))) {
       try {
@@ -183,9 +300,25 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     }).format(date);
   };
 
+  const formatPrice = (amount?: number, currency?: string) => {
+    if (amount === undefined || !currency) {
+      return '-';
+    }
+
+    return formatCurrency(amount, currency, locale);
+  };
+
   const canApprove = approval?.status === 'PENDING';
-  const canComment = approval?.status !== 'CLOSED' && approval?.status !== 'EXPIRED';
-  const quoteDetailsHref = approval?.resourceType === 'QUOTE' ? `/account/quotes/${approval.resource.id}` : null;
+  const quoteResource = approval?.resourceType === 'QUOTE' ? (approval.resource as ApprovalQuoteResource) : undefined;
+  const quoteItems = quoteResource?.items as ApprovalResourceItem[] | undefined;
+  const quoteItemCount = quoteResource?.items?.reduce((total, item) => total + item.quantity, 0) ?? 0;
+  const isRequestor = !!approval && currentUserId === approval.requestor.userId;
+  const isApprover = !!approval && currentUserId === approval.approver.userId;
+  const canComment = approval?.status !== 'CLOSED' && approval?.status !== 'EXPIRED' && (isRequestor || isApprover);
+  const canApprovalAction = canApprove && isApprover;
+  const canCreateOrder = approval?.status === 'APPROVED' && approval?.resourceType === 'QUOTE' && isApprover;
+  const hasApprovalPaymentMethod = !!approval?.details?.paymentMethods?.length;
+  const isCreateOrderWaitingForSitePayment = !hasApprovalPaymentMethod && isSiteLoading;
 
   if (loading) {
     return (
@@ -265,6 +398,49 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
           </Alert>
         )}
 
+        {canCreateOrder && quoteResource && (
+          <>
+            <Separator />
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="rounded-md bg-surface-action-hover-2 p-6 shadow-sm">
+                <div className="rounded-md bg-surface-page p-6">
+                  <p className="mb-2 text-sm font-medium">{t('createOrderAfterApprovalTitle')}</p>
+                  <p className="mb-4 text-sm text-text-placeholders">{t('createOrderAfterApprovalDescription')}</p>
+
+                  <div className="mb-4">
+                    <label htmlFor="approval-order-comment" className="mb-1 block text-sm font-medium">
+                      {tQuote('yourComment')}
+                    </label>
+                    <Textarea
+                      id="approval-order-comment"
+                      placeholder={tQuote('commentPlaceholder')}
+                      className="h-32 w-full resize-none"
+                      value={orderComment}
+                      onChange={(event) => setOrderComment(event.target.value.slice(0, maxCommentLength))}
+                      maxLength={maxCommentLength}
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button variant="secondary" disabled={isOrderCreationPending} onClick={() => setOrderComment('')}>
+                      {tQuote('cancel')}
+                    </Button>
+                    <Button
+                      disabled={isOrderCreationPending || isCreateOrderWaitingForSitePayment}
+                      onClick={() => {
+                        void handleCreateOrder();
+                      }}
+                    >
+                      {isOrderCreationPending ? tQuote('creating') : tQuote('createOrder')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium text-text-placeholders">{t('id')}</p>
@@ -326,15 +502,108 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
           )}
         </div>
 
-        {quoteDetailsHref && (
+        {quoteResource && (
           <div>
-            <Button asChild variant="link" className="px-0">
-              <Link href={quoteDetailsHref}>{t('viewFullQuoteDetails')}</Link>
-            </Button>
+            <p className="text-sm font-medium mb-4">{t('resource')}</p>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div className="rounded-md bg-surface-action-hover-2 p-6 shadow-sm">
+                  <SummaryCard
+                    heading={tQuote('details')}
+                    className="h-full gap-2 rounded-md py-4 shadow-none"
+                    icon={<ReceiptText className="h-8 w-8 text-text-action" />}
+                    hasHeadline
+                  >
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-lg font-bold">{tQuote('quoteReference')}</div>
+                        <div className="text-base">{quoteResource.id}</div>
+                      </div>
+
+                      <div>
+                        <div className="text-lg font-bold">{tQuote('numberOfProducts')}</div>
+                        <div className="text-base">{quoteItemCount}</div>
+                      </div>
+
+                      {quoteResource.siteCode && (
+                        <div>
+                          <div className="text-lg font-bold">{t('siteCode')}</div>
+                          <div className="text-base">{quoteResource.siteCode}</div>
+                        </div>
+                      )}
+                    </div>
+                  </SummaryCard>
+                </div>
+
+                <div className="rounded-md bg-surface-action-hover-2 p-6 shadow-sm">
+                  <SummaryCard
+                    heading={tQuote('basePrice')}
+                    className="h-full gap-2 rounded-md py-4 shadow-none"
+                    icon={<List className="h-8 w-8 text-text-action" />}
+                    hasHeadline
+                  >
+                    <div className="space-y-3">
+                      <SummaryRow label={tQuote('netValue')} className="text-base">
+                        {formatPrice(
+                          quoteResource.subtotalAggregate?.netValue,
+                          quoteResource.subtotalAggregate?.currency,
+                        )}
+                      </SummaryRow>
+                      <SummaryRow label={tQuote('vat')} className="text-base">
+                        {formatPrice(
+                          quoteResource.subtotalAggregate?.taxValue,
+                          quoteResource.subtotalAggregate?.currency,
+                        )}
+                      </SummaryRow>
+                      <SummaryRow label={tQuote('baseTotal')} strong className="text-base">
+                        {formatPrice(
+                          quoteResource.subtotalAggregate?.grossValue ?? quoteResource.subTotalPrice?.grossValue,
+                          quoteResource.subtotalAggregate?.currency ?? quoteResource.subTotalPrice?.currency,
+                        )}
+                      </SummaryRow>
+                    </div>
+                  </SummaryCard>
+                </div>
+
+                <div className="rounded-md bg-surface-action-hover-2 p-6 shadow-sm">
+                  <SummaryCard
+                    heading={tQuote('quotedPrice')}
+                    className="h-full gap-2 rounded-md py-4 shadow-none"
+                    icon={<ReceiptText className="h-8 w-8 text-text-action" />}
+                    hasHeadline
+                  >
+                    <div className="space-y-3">
+                      <SummaryRow label={tQuote('netValue')} className="text-base">
+                        {formatPrice(quoteResource.totalPrice?.netValue, quoteResource.totalPrice?.currency)}
+                      </SummaryRow>
+                      <SummaryRow label={tQuote('vat')} className="text-base">
+                        {formatPrice(quoteResource.totalPrice?.taxValue, quoteResource.totalPrice?.currency)}
+                      </SummaryRow>
+                      <SummaryRow label={tQuote('quotedTotal')} strong className="text-base">
+                        {formatPrice(quoteResource.totalPrice?.grossValue, quoteResource.totalPrice?.currency)}
+                      </SummaryRow>
+                    </div>
+                  </SummaryCard>
+                </div>
+              </div>
+
+              {quoteItems && quoteItems.length > 0 && (
+                <ProductListResolver
+                  items={quoteItems.map((item) => ({
+                    productId: item.productId,
+                    itemYrn: item.itemYrn,
+                    quantity: item.quantity,
+                    unitPrice: item.itemPrice.newUnitPrice ?? item.itemPrice.unitPrice ?? item.itemPrice.amount ?? 0,
+                    currency: item.itemPrice.currency,
+                  }))}
+                />
+              )}
+            </div>
           </div>
         )}
 
-        {canApprove && (
+        {canApprovalAction && (
           <>
             <Separator />
 
@@ -342,8 +611,9 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
               <p className="text-sm font-medium mb-2">{t('approvalActions')}</p>
               <div className="flex gap-2">
                 <Button
+                  variant="outlineSuccess"
                   onClick={handleApprove}
-                  className="bg-surface-success hover:bg-surface-action-hover-2"
+                  className="hover:bg-surface-action-hover-2"
                   disabled={isApprovalActionPending}
                 >
                   {t('approve')}
@@ -360,31 +630,37 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
           <>
             <Separator />
 
-            <div>
-              <p className="text-sm font-medium mb-2">{t('addApproverComment')}</p>
-              <Textarea
-                value={approverComment}
-                onChange={(e) => setApproverComment(e.target.value)}
-                placeholder={t('enterApproverComment')}
-                className="mb-2"
-              />
-              <Button onClick={handleUpdateApproverComment} disabled={!approverComment.trim()}>
-                {t('saveApproverComment')}
-              </Button>
-            </div>
+            {isApprover && (
+              <div>
+                <p className="text-sm font-medium mb-2">{t('addApproverComment')}</p>
+                <Textarea
+                  value={approverComment}
+                  onChange={(e) => setApproverComment(e.target.value.slice(0, maxCommentLength))}
+                  placeholder={t('enterApproverComment')}
+                  className="mb-2"
+                  maxLength={maxCommentLength}
+                />
+                <Button onClick={handleUpdateApproverComment} disabled={!approverComment.trim()}>
+                  {t('saveApproverComment')}
+                </Button>
+              </div>
+            )}
 
-            <div>
-              <p className="text-sm font-medium mb-2">{t('addRequestorComment')}</p>
-              <Textarea
-                value={requestorComment}
-                onChange={(e) => setRequestorComment(e.target.value)}
-                placeholder={t('enterRequestorComment')}
-                className="mb-2"
-              />
-              <Button onClick={handleUpdateRequestorComment} disabled={!requestorComment.trim()}>
-                {t('saveRequestorComment')}
-              </Button>
-            </div>
+            {isRequestor && (
+              <div>
+                <p className="text-sm font-medium mb-2">{t('addRequestorComment')}</p>
+                <Textarea
+                  value={requestorComment}
+                  onChange={(e) => setRequestorComment(e.target.value.slice(0, maxCommentLength))}
+                  placeholder={t('enterRequestorComment')}
+                  className="mb-2"
+                  maxLength={maxCommentLength}
+                />
+                <Button onClick={handleUpdateRequestorComment} disabled={!requestorComment.trim()}>
+                  {t('saveRequestorComment')}
+                </Button>
+              </div>
+            )}
           </>
         )}
       </CardContent>

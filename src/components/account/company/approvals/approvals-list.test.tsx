@@ -63,13 +63,16 @@ describe('company ApprovalsList', () => {
     expect(screen.getByText('resourceType')).toBeInTheDocument();
     expect(screen.getByText('QUOTE')).toBeInTheDocument();
     expect(screen.getByText('CART')).toBeInTheDocument();
+    expect(screen.getByText('requestor-1')).toBeInTheDocument();
+    expect(screen.getByText('Approver One')).toBeInTheDocument();
+    expect(screen.getByText('Approver Two')).toBeInTheDocument();
 
     const quoteRow = screen.getByText('approval-quote-1').closest('tr');
 
     expect(quoteRow).not.toBeNull();
     expect(within(quoteRow as HTMLTableRowElement).getByRole('link', { name: 'view' })).toHaveAttribute(
       'href',
-      '/account/company/approval/approval-quote-1',
+      '/account/approval/approval-quote-1',
     );
   });
 });

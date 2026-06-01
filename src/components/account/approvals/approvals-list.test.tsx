@@ -33,7 +33,7 @@ describe('ApprovalsList', () => {
         action: 'CHECKOUT',
         status: 'PENDING',
         resource: { id: 'quote-1' },
-        requestor: { userId: 'requestor-1' },
+        requestor: { userId: 'requestor-1', firstName: 'Requester', lastName: 'One', fullName: 'Requester One' },
         approver: { userId: 'approver-1', firstName: 'Approver', lastName: 'One', fullName: 'Approver One' },
         createdAt: '2026-06-01T10:00:00.000Z',
       },
@@ -54,6 +54,8 @@ describe('ApprovalsList', () => {
     expect(screen.getByText('resourceType')).toBeInTheDocument();
     expect(screen.getByText('QUOTE')).toBeInTheDocument();
     expect(screen.getByText('CART')).toBeInTheDocument();
+    expect(screen.getByText('Requester One')).toBeInTheDocument();
+    expect(screen.getByText('Approver One')).toBeInTheDocument();
     const quoteRow = screen.getByText('approval-quote-1').closest('tr');
 
     expect(quoteRow).not.toBeNull();
@@ -61,6 +63,44 @@ describe('ApprovalsList', () => {
       'href',
       '/account/quotes/quote-1',
     );
+  });
+
+  it('routes QUOTE approvals for designated approvers to the company approval page', () => {
+    const approvals: Approval[] = [
+      {
+        id: 'approval-quote-1',
+        resourceType: 'QUOTE',
+        action: 'CHECKOUT',
+        status: 'PENDING',
+        resource: { id: 'quote-1' },
+        requestor: { userId: 'requestor-1', firstName: 'Requester', lastName: 'One', fullName: 'Requester One' },
+        approver: { userId: 'approver-1', firstName: 'Approver', lastName: 'One', fullName: 'Approver One' },
+        createdAt: '2026-06-01T10:00:00.000Z',
+      },
+    ];
+
+    render(<ApprovalsList initialApprovals={approvals} currentUserId="approver-1" />);
+
+    expect(screen.getByRole('link', { name: 'view' })).toHaveAttribute('href', '/account/approval/approval-quote-1');
+  });
+
+  it('keeps QUOTE approvals on the quote page for requestors even when they are also the approver', () => {
+    const approvals: Approval[] = [
+      {
+        id: 'approval-quote-1',
+        resourceType: 'QUOTE',
+        action: 'CHECKOUT',
+        status: 'PENDING',
+        resource: { id: 'quote-1' },
+        requestor: { userId: 'shared-user', firstName: 'Shared', lastName: 'User', fullName: 'Shared User' },
+        approver: { userId: 'shared-user', firstName: 'Shared', lastName: 'User', fullName: 'Shared User' },
+        createdAt: '2026-06-01T10:00:00.000Z',
+      },
+    ];
+
+    render(<ApprovalsList initialApprovals={approvals} currentUserId="shared-user" />);
+
+    expect(screen.getByRole('link', { name: 'view' })).toHaveAttribute('href', '/account/quotes/quote-1');
   });
 
   it('keeps non-QUOTE approvals on the requester approval details route', () => {

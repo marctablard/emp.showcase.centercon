@@ -222,7 +222,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
         permitted: false,
       });
       handleApprovalInquiryDialogChange(false);
-      router.push(`/account/company/approval/${approval.id}`);
+      router.push(`/account/approval/${approval.id}`);
     } catch (error) {
       if (error instanceof ApprovalAlreadyExistsError) {
         setApprovalPermission({
@@ -230,7 +230,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
           permitted: false,
         });
         handleApprovalInquiryDialogChange(false);
-        router.push(`/account/company/approval/${error.approvalId}`);
+        router.push(`/account/approval/${error.approvalId}`);
         return;
       }
 
@@ -265,7 +265,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
 
       if (!permission.permitted) {
         if (permission.approvalId) {
-          router.push(`/account/company/approval/${permission.approvalId}`);
+          router.push(`/account/approval/${permission.approvalId}`);
           return;
         }
 
@@ -474,10 +474,11 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
             !showRequestChangeConfirmation &&
             quote.status !== 'ACCEPTED' &&
             quote.status !== 'DECLINED' && (
-              <div className="flex space-x-6">
+              <div className="flex gap-6">
                 <Button
-                  variant="red"
+                  variant="outlineError"
                   size="small"
+                  className={cn('disabled:border-none')}
                   disabled={!(quote.status === 'OPEN')}
                   onClick={() => {
                     setProcessError(null);
@@ -501,13 +502,13 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                 </Button>
 
                 <Button
-                  variant="primary"
+                  variant="outlineSuccess"
                   size="small"
+                  className={cn('disabled:border-none')}
                   disabled={isPrimaryActionDisabled}
                   onClick={() => {
                     void handleQuotePrimaryAction();
                   }}
-                  className="bg-surface-success hover:bg-surface-action-hover-2"
                 >
                   {primaryActionLabel}
                 </Button>

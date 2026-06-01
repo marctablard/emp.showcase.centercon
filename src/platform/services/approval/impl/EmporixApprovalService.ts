@@ -3,10 +3,12 @@ import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixApprovalApi } from '@/platform/integrations/emporix/approval/EmporixApprovalApi';
 import type { EmporixIamApi } from '@/platform/integrations/emporix/iam/EmporixIamApi';
 import type {
+  EmporixApprovalResponse,
   EmporixApprovalSearchUsersRequest,
   EmporixApprovalUpdateRequest,
 } from '@/platform/integrations/emporix/model/approval';
 import { ApprovalAlreadyExistsError, ApprovalApproverNotPermittedError } from '@/platform/services/approval/errors';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type {
   Approval,
   ApprovalAction,
@@ -32,6 +34,7 @@ export class EmporixApprovalService implements ApprovalService {
     @inject('EmporixApprovalApi') private approvalApi: EmporixApprovalApi,
     @inject('EmporixApprovalMapper') private approvalMapper: EmporixApprovalMapper,
     @inject('CustomerService') private customerService: CustomerService,
+    @inject('LoggerService') private logger: LoggerService,
   ) {}
 
   /**
@@ -81,6 +84,18 @@ export class EmporixApprovalService implements ApprovalService {
   ): Promise<Approval[]> {
     // Call the API
     const emporixApprovals = await this.approvalApi.getApprovals(pageNumber, pageSize, sort, query);
+
+    this.logger.info(
+      {
+        pageNumber,
+        pageSize,
+        sort: sort ?? null,
+        query: query ?? null,
+        approvalsCount: emporixApprovals.length,
+        approvals: emporixApprovals.map((approval) => this.createApprovalLogSummary(approval)),
+      },
+      'Emporix approvals list response summary',
+    );
 
     // Map each approval to service model
     return emporixApprovals.map((approval) => this.approvalMapper.mapToService(approval));
@@ -250,6 +265,32 @@ export class EmporixApprovalService implements ApprovalService {
     } catch {
       return undefined;
     }
+  }
+
+  private createApprovalLogSummary(approval: EmporixApprovalResponse): Record<string, unknown> {
+    return {
+      id: approval.id,
+      resourceType: approval.resourceType,
+      action: approval.action,
+      status: approval.status,
+      resourceId: approval.resource?.id,
+      requestor: {
+        userId: approval.requestor?.userId,
+        firstName: approval.requestor?.firstName,
+        lastName: approval.requestor?.lastName,
+      },
+      approver: {
+        userId: approval.approver?.userId,
+        firstName: approval.approver?.firstName,
+        lastName: approval.approver?.lastName,
+      },
+      comment: approval.comment,
+      approverComment: approval.approverComment,
+      expiryDate: approval.expiryDate,
+      createdAt: approval.metadata?.createdAt,
+      updatedAt: approval.metadata?.updatedAt,
+      version: approval.metadata?.version,
+    };
   }
 }
 export default EmporixApprovalService;

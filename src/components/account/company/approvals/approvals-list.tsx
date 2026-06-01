@@ -19,6 +19,24 @@ interface ApprovalsListProps {
   initialApprovals?: Approval[];
 }
 
+function formatApprovalUserName(user: {
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  userId?: string;
+}): string {
+  if (user.fullName && user.fullName.trim() !== '') {
+    return user.fullName;
+  }
+
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  if (fullName !== '') {
+    return fullName;
+  }
+
+  return user.userId ?? '-';
+}
+
 export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
@@ -181,11 +199,11 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
                   <TableCell>
                     <ApprovalStatusBadge status={approval.status} />
                   </TableCell>
-                  <TableCell>{approval.requestor.userId}</TableCell>
-                  <TableCell>{approval.approver.userId}</TableCell>
+                  <TableCell>{formatApprovalUserName(approval.requestor)}</TableCell>
+                  <TableCell>{formatApprovalUserName(approval.approver)}</TableCell>
                   <TableCell>{formatDate(approval.createdAt)}</TableCell>
                   <TableCell>
-                    <Link href={`/account/company/approval/${approval.id}`} passHref>
+                    <Link href={`/account/approval/${approval.id}`} passHref>
                       <Button variant="link" size="default">
                         {t('view')}
                       </Button>

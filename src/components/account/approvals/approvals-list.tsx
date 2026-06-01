@@ -16,9 +16,37 @@ import { ApprovalStatusBadge } from './approval-status-badge';
 
 interface ApprovalsListProps {
   initialApprovals?: Approval[];
+  currentUserId?: string;
 }
 
-function getApprovalHref(approval: Approval): string {
+function formatApprovalUserName(user: {
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  userId?: string;
+}): string {
+  if (user.fullName && user.fullName.trim() !== '') {
+    return user.fullName;
+  }
+
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  if (fullName !== '') {
+    return fullName;
+  }
+
+  return user.userId ?? '-';
+}
+
+function getApprovalHref(approval: Approval, currentUserId?: string): string {
+  if (
+    approval.resourceType === 'QUOTE' &&
+    currentUserId &&
+    approval.approver.userId === currentUserId &&
+    approval.requestor.userId !== currentUserId
+  ) {
+    return `/account/approval/${approval.id}`;
+  }
+
   if (approval.resourceType === 'QUOTE') {
     return `/account/quotes/${approval.resource.id}`;
   }
@@ -26,7 +54,7 @@ function getApprovalHref(approval: Approval): string {
   return `/account/approvals/${approval.id}`;
 }
 
-export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
+export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsListProps) {
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
   const tAction = useTranslations('orders.ApprovalAction');
@@ -160,11 +188,11 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
                   <TableCell>
                     <ApprovalStatusBadge status={approval.status} />
                   </TableCell>
-                  <TableCell>{approval.requestor.userId}</TableCell>
-                  <TableCell>{approval.approver.userId}</TableCell>
+                  <TableCell>{formatApprovalUserName(approval.requestor)}</TableCell>
+                  <TableCell>{formatApprovalUserName(approval.approver)}</TableCell>
                   <TableCell>{formatDate(approval.createdAt)}</TableCell>
                   <TableCell>
-                    <Link href={getApprovalHref(approval)}>
+                    <Link href={getApprovalHref(approval, currentUserId)}>
                       <Button variant="link" size="default">
                         {t('view')}
                       </Button>

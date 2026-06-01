@@ -38,7 +38,8 @@ export interface EmporixApprovalDeliveryWindow {
 export interface EmporixApprovalResourceItem {
   quantity: number;
   itemPrice: EmporixApprovalPrice;
-  itemYrn: string;
+  itemYrn?: string;
+  itemId?: string;
 }
 
 export interface EmporixApprovalResource {

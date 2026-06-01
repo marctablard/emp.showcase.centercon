@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import AccountLayout from '@/components/account/account-layout';
 import { ApprovalDetails } from '@/components/account/company/approvals/approval-details';
 import { getApprovalById } from '@/lib/ssr/approvals';
+import { getCurrentCustomer } from '@/lib/ssr/customer';
 import { getPageTitle } from '@/lib/ssr/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
@@ -20,17 +21,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function ApprovalDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
-  // Get approval ID and locale from params
   const { locale, id } = await params;
 
-  // Get translations
-  const [tAccount, tApproval, approval] = await Promise.all([
+  const [tAccount, tApproval, approval, customer] = await Promise.all([
     getTranslations({ locale, namespace: 'account' }),
     getTranslations({ locale, namespace: 'orders.Approval' }),
     getApprovalById(id),
+    getCurrentCustomer(),
   ]);
 
-  // If approval not found, return 404
   if (!approval) {
     notFound();
   }
@@ -41,22 +40,18 @@ export default async function ApprovalDetailPage({ params }: { params: Promise<{
       label: tAccount('title'),
     },
     {
-      href: '/account/company',
-      label: tAccount('company'),
-    },
-    {
-      href: '/account/company/approval',
+      href: '/account/approvals',
       label: tApproval('approvals'),
     },
     {
-      href: `/account/company/approval/${id}`,
+      href: `/account/approval/${id}`,
       label: `${tApproval('approval')} #${id}`,
     },
   ];
 
   return (
     <AccountLayout breadcrumbs={breadcrumbs}>
-      <ApprovalDetails approvalId={id} initialApproval={approval} />
+      <ApprovalDetails approvalId={id} initialApproval={approval} currentUserId={customer?.id} />
     </AccountLayout>
   );
 }

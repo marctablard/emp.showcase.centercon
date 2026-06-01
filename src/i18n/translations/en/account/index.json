@@ -366,6 +366,9 @@
   "quoteDetails": {
     "title": "Quote Details",
     "status": "Status",
+    "product": "Product",
+    "quantity": "Quantity",
+    "price": "Price",
     "quotationDate": "Quotation Date",
     "totalAmount": "Total Amount",
     "editor": "Editor",

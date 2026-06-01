@@ -150,7 +150,7 @@ describe('QuoteDetails approval flow', () => {
 
     expect(checkApprovalPermitted).toHaveBeenCalledTimes(2);
 
-    expect(pushMock).toHaveBeenCalledWith('/account/company/approval/approval-1');
+    expect(pushMock).toHaveBeenCalledWith('/account/approval/approval-1');
   });
 
   it('opens an approver inquiry dialog and loads quote-scoped approvers when approval is required', async () => {
@@ -248,7 +248,7 @@ describe('QuoteDetails approval flow', () => {
       });
     });
 
-    expect(pushMock).toHaveBeenCalledWith('/account/company/approval/approval-1');
+    expect(pushMock).toHaveBeenCalledWith('/account/approval/approval-1');
     expect(notifyMock).not.toHaveBeenCalled();
   });
 
@@ -276,7 +276,7 @@ describe('QuoteDetails approval flow', () => {
     fireEvent.click(screen.getByTestId('quote-approval-submitButton'));
 
     await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith('/account/company/approval/approval-2');
+      expect(pushMock).toHaveBeenCalledWith('/account/approval/approval-2');
     });
 
     expect(notifyMock).not.toHaveBeenCalled();
