@@ -49,6 +49,7 @@ export interface ApprovalResourceItem {
 
 export interface ApprovalResource {
   id: string;
+  orderId?: string;
   items?: ApprovalResourceItem[];
   totalPrice?: ApprovalPrice;
   subTotalPrice?: ApprovalPrice;
@@ -103,6 +104,7 @@ export interface Approval extends ApprovalBase {
   requestor: ApprovalRequestor;
   approver: ApprovalUser;
   createdAt: string;
+  modifiedAt?: string;
   updatedAt?: string;
   status: ApprovalStatus;
   expiryDate?: string;

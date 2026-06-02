@@ -47,4 +47,39 @@ describe('EmporixApprovalMapper', () => {
       }),
     ]);
   });
+
+  it('maps approval modifiedAt and optional resource orderId', () => {
+    const mapper = new EmporixApprovalMapper({} as never, {} as never, {} as never);
+
+    const approval = mapper.mapToService({
+      id: 'approval-2',
+      resourceType: 'QUOTE',
+      action: 'CHECKOUT',
+      status: 'APPROVED',
+      resource: {
+        id: 'Q-2000',
+        orderId: 'O-2000',
+      },
+      requestor: {
+        userId: 'requestor-2',
+        firstName: 'Req',
+        lastName: 'User',
+        email: 'req2@example.com',
+      },
+      approver: {
+        userId: 'approver-2',
+        firstName: 'App',
+        lastName: 'User',
+      },
+      metadata: {
+        version: 2,
+        createdAt: '2026-06-01T00:00:00.000Z',
+        modifiedAt: '2026-06-02T12:00:00.000Z',
+      },
+    } as never);
+
+    expect(approval.modifiedAt).toBe('2026-06-02T12:00:00.000Z');
+    expect(approval.updatedAt).toBe('2026-06-02T12:00:00.000Z');
+    expect(approval.resource.orderId).toBe('O-2000');
+  });
 });

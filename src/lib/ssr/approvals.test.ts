@@ -39,6 +39,6 @@ describe('getApprovals', () => {
     const approvals = await getApprovals(3, 25);
 
     expect(approvals).toEqual([{ id: 'approval-1' }]);
-    expect(approvalService.getApprovals).toHaveBeenCalledWith(3, 25, 'createdAt:desc');
+    expect(approvalService.getApprovals).toHaveBeenCalledWith(3, 25, 'metadata.modifiedAt:desc');
   });
 });

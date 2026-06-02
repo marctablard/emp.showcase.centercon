@@ -7,7 +7,7 @@ import { ApprovalAlreadyExistsError, ApprovalApproverNotPermittedError } from '@
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { ApprovalCreateRequest } from '@/platform/services/model/approval';
 
-const DEFAULT_APPROVAL_SORT = 'createdAt:desc';
+const DEFAULT_APPROVAL_SORT = 'metadata.modifiedAt:desc';
 
 /**
  * GET /api/approval

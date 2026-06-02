@@ -34,14 +34,14 @@ describe('/api/approval', () => {
     mockedServer.default.get.mockImplementation((id: string) => mockedServer.default.__services.get(id));
   });
 
-  it('defaults GET sorting to createdAt:desc for approvals listing', async () => {
+  it('defaults GET sorting to metadata.modifiedAt:desc for approvals listing', async () => {
     approvalService.getApprovals.mockResolvedValueOnce([{ id: 'approval-1' }]);
 
     const response = await GET({ url: 'https://example.test/api/approval' } as never);
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual([{ id: 'approval-1' }]);
-    expect(approvalService.getApprovals).toHaveBeenCalledWith(1, 60, 'createdAt:desc', undefined);
+    expect(approvalService.getApprovals).toHaveBeenCalledWith(1, 60, 'metadata.modifiedAt:desc', undefined);
   });
 
   it('creates a quote approval for a valid request', async () => {

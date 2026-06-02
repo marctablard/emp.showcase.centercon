@@ -19,6 +19,13 @@ interface ApprovalsListProps {
   currentUserId?: string;
 }
 
+function getApprovalModifiedAt(approval: Approval): number {
+  const candidate = approval.modifiedAt ?? approval.updatedAt ?? approval.createdAt;
+  const timestamp = candidate ? new Date(candidate).getTime() : 0;
+
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
 function formatApprovalUserName(user: {
   firstName?: string;
   lastName?: string;
@@ -62,11 +69,16 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
   const [currentPage, setCurrentPage] = useState(1);
   const { approvals, loading, error, filterApprovals, refreshApprovals } = useApprovals(initialApprovals);
 
-  const totalPages = Math.max(1, Math.ceil(approvals.length / APPROVALS_PER_PAGE));
+  const sortedApprovals = useMemo(
+    () => [...approvals].sort((left, right) => getApprovalModifiedAt(right) - getApprovalModifiedAt(left)),
+    [approvals],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(sortedApprovals.length / APPROVALS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const visibleApprovals = useMemo(
-    () => approvals.slice((safeCurrentPage - 1) * APPROVALS_PER_PAGE, safeCurrentPage * APPROVALS_PER_PAGE),
-    [approvals, safeCurrentPage],
+    () => sortedApprovals.slice((safeCurrentPage - 1) * APPROVALS_PER_PAGE, safeCurrentPage * APPROVALS_PER_PAGE),
+    [safeCurrentPage, sortedApprovals],
   );
 
   const handleFilter = (status: ApprovalStatus | '_ALL_') => {
@@ -126,7 +138,7 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
     );
   }
 
-  if (approvals.length === 0) {
+  if (sortedApprovals.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -171,6 +183,8 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
               <TableRow>
                 <TableHead>{t('id')}</TableHead>
                 <TableHead>{t('resourceType')}</TableHead>
+                <TableHead>{t('quoteId')}</TableHead>
+                <TableHead>{t('orderId')}</TableHead>
                 <TableHead>{t('action')}</TableHead>
                 <TableHead>{t('status')}</TableHead>
                 <TableHead>{t('requestor')}</TableHead>
@@ -184,6 +198,8 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
                 <TableRow key={approval.id}>
                   <TableCell className="font-medium">{approval.id}</TableCell>
                   <TableCell>{approval.resourceType}</TableCell>
+                  <TableCell>{approval.resourceType === 'QUOTE' ? approval.resource.id : '-'}</TableCell>
+                  <TableCell>{approval.resource.orderId ?? '-'}</TableCell>
                   <TableCell>{tAction(approval.action)}</TableCell>
                   <TableCell>
                     <ApprovalStatusBadge status={approval.status} />

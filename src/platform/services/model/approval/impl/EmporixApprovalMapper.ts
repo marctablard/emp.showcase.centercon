@@ -65,7 +65,8 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
       approverComment: source.approverComment,
       expiryDate: source.expiryDate,
       createdAt: source.metadata.createdAt!,
-      updatedAt: source.metadata.updatedAt,
+      modifiedAt: source.metadata.modifiedAt,
+      updatedAt: source.metadata.modifiedAt,
       details: source.details ? this.mapDetails(source.details) : undefined,
       version: source.metadata.version,
     };
@@ -245,6 +246,7 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
   private mapResource(source: EmporixApprovalResource): ApprovalResource {
     return {
       id: source.id,
+      orderId: source.orderId,
       items: source.items?.map((item) => this.mapResourceItem(item)),
       totalPrice: source.totalPrice ? this.mapPrice(source.totalPrice) : undefined,
       subTotalPrice: source.subTotalPrice ? this.mapPrice(source.subTotalPrice) : undefined,
@@ -258,6 +260,7 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
   private mapResourceToSource(service: ApprovalResource): EmporixApprovalResource {
     return {
       id: service.id,
+      orderId: service.orderId,
       items: service.items?.map((item) => this.mapResourceItemToSource(item)),
       totalPrice: service.totalPrice ? this.mapPriceToSource(service.totalPrice) : undefined,
       subTotalPrice: service.subTotalPrice ? this.mapPriceToSource(service.subTotalPrice) : undefined,

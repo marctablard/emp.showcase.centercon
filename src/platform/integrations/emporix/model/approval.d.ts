@@ -44,6 +44,7 @@ export interface EmporixApprovalResourceItem {
 
 export interface EmporixApprovalResource {
   id: string;
+  orderId?: string;
   items?: EmporixApprovalResourceItem[];
   totalPrice?: EmporixApprovalPrice;
   subTotalPrice?: EmporixApprovalPrice;

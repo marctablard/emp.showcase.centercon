@@ -142,6 +142,8 @@
     "id": "ID",
     "resourceType": "Resource Type",
     "resourceId": "Resource ID",
+    "quoteId": "Quote ID",
+    "orderId": "Order ID",
     "action": "Action",
     "status": "Status",
     "requestor": "Requestor",
