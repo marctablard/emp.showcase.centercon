@@ -365,6 +365,16 @@
     "creating": "WIRD ERSTELLT...",
     "rejectConfirmationTitle": "Möchten Sie das Angebot ablehnen?",
     "rejectConfirmationDescription": "Wenn Sie möchten, können Sie einen Kommentar hinterlassen, um uns mitzuteilen, warum Sie dieses Angebot ablehnen. Ihr Feedback hilft uns, unsere Angebote zu verbessern.",
+    "decisionReasonLabel": "Grund",
+    "decisionReasonPlaceholder": "Wählen Sie einen Grund aus",
+    "decisionReasons": {
+      "PRICE_TOO_HIGH": "Preis zu hoch",
+      "NO_LONGER_NEEDED": "Nicht mehr benötigt",
+      "DELIVERY_TIME_LATE": "Lieferzeit zu spät",
+      "OTHER": "Andere",
+      "WRONG_MATERIAL": "Falsches Material",
+      "PROVIDED_PRICE_TO_HIGH": "Angegebener Preis zu hoch"
+    },
     "rejectCommentPlaceholder": "Bitte geben Sie Gründe für die Ablehnung dieses Angebots an...",
     "rejectQuote": "ANGEBOT ABLEHNEN",
     "rejecting": "WIRD ABGELEHNT...",

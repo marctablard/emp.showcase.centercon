@@ -30,7 +30,7 @@ function createRequest(
 
 describe('POST /api/quote/update-status', () => {
   let quoteService: {
-    createQuoteReason: jest.Mock;
+    resolveQuoteReasonId: jest.Mock;
     updateQuote: jest.Mock;
   };
   let approvalService: {
@@ -46,7 +46,7 @@ describe('POST /api/quote/update-status', () => {
 
   beforeEach(() => {
     quoteService = {
-      createQuoteReason: jest.fn(),
+      resolveQuoteReasonId: jest.fn(),
       updateQuote: jest.fn().mockResolvedValue(undefined),
     };
     approvalService = {
@@ -134,19 +134,20 @@ describe('POST /api/quote/update-status', () => {
     expect(approvalService.updateApprovalStatus).toHaveBeenCalledWith('approval-1', 'APPROVED');
   });
 
-  it('includes quoteReasonId only when a quote reason is created', async () => {
-    quoteService.createQuoteReason.mockResolvedValueOnce('reason-1');
+  it('includes quoteReasonId when declining with a selected reason code', async () => {
+    quoteService.resolveQuoteReasonId.mockResolvedValueOnce('reason-1');
 
     const response = await POST(
       createRequest({
         quoteId: 'Q-1000',
         status: 'DECLINED',
         comment: 'Need changes',
-        locale: 'en',
+        reasonCode: 'PRICE_TOO_HIGH',
       }) as never,
     );
 
     expect(response.status).toBe(200);
+    expect(quoteService.resolveQuoteReasonId).toHaveBeenCalledWith('DECLINE', 'PRICE_TOO_HIGH');
     expect(quoteService.updateQuote).toHaveBeenCalledWith(
       'Q-1000',
       [
@@ -158,6 +159,53 @@ describe('POST /api/quote/update-status', () => {
       ],
       'session',
     );
+  });
+
+  it('includes quoteReasonId when requesting changes with a selected reason code', async () => {
+    quoteService.resolveQuoteReasonId.mockResolvedValueOnce('reason-2');
+
+    const response = await POST(
+      createRequest({
+        quoteId: 'Q-1000',
+        status: 'IN_PROGRESS',
+        comment: 'Please adjust the material',
+        reasonCode: 'WRONG_MATERIAL',
+      }) as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(quoteService.resolveQuoteReasonId).toHaveBeenCalledWith('CHANGE', 'WRONG_MATERIAL');
+    expect(quoteService.updateQuote).toHaveBeenCalledWith(
+      'Q-1000',
+      [
+        {
+          op: 'REPLACE',
+          path: '/status',
+          value: { value: 'IN_PROGRESS', comment: 'Please adjust the material', quoteReasonId: 'reason-2' },
+        },
+      ],
+      'session',
+    );
+  });
+
+  it('rejects requester-side decline and change transitions without a reason code', async () => {
+    const declineResponse = await POST(
+      createRequest({
+        quoteId: 'Q-1000',
+        status: 'DECLINED',
+      }) as never,
+    );
+
+    const changeResponse = await POST(
+      createRequest({
+        quoteId: 'Q-1000',
+        status: 'IN_PROGRESS',
+      }) as never,
+    );
+
+    expect(declineResponse.status).toBe(400);
+    expect(changeResponse.status).toBe(400);
+    expect(quoteService.updateQuote).not.toHaveBeenCalled();
   });
 
   it('rejects approver-scoped quote updates when the current customer is not the designated approver', async () => {

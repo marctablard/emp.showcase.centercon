@@ -43,7 +43,6 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
     updateApprovalStatus,
     updateApproverComment,
     updateRequestorComment,
-    deleteApproval,
     refreshApproval,
   } = useApproval(approvalId, initialApproval);
 
@@ -107,18 +106,6 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
       setComment('');
     } catch (err) {
       setActionError(err instanceof Error ? err.message : String(err));
-    }
-  };
-
-  const handleDelete = async () => {
-    if (confirm(t('confirmDeleteApproval'))) {
-      try {
-        setActionError(null);
-        await deleteApproval();
-        setActionSuccess(t('approvalSuccessfullyDeleted'));
-      } catch (err) {
-        setActionError(err instanceof Error ? err.message : String(err));
-      }
     }
   };
 
@@ -223,8 +210,6 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
   const isDesignatedApprover = approval.approver.userId === customer?.id;
   const canApprove = approval.status === 'PENDING' && isDesignatedApprover && !isRequestor;
   const canComment = approval.status === 'PENDING';
-  const canDelete = approval.status === 'PENDING' && isRequestor;
-
   return (
     <Card>
       <CardHeader>
@@ -350,21 +335,6 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
           </>
         )}
 
-        {/* {canSubmitOrder && (
-          <>
-            <Separator />
-
-            <div>
-              <p className="text-sm font-medium mb-2">{t('approvalActions')}</p>
-              <div className="flex gap-2">
-                <Button onClick={handleSubmitOrder} disabled={isSubmitting} className="bg-surface-success hover:bg-surface-action-hover-2">
-                  {t('submitOrder')}
-                </Button>
-              </div>
-            </div>
-          </>
-        )} */}
-
         {canComment && (
           <>
             <Separator />
@@ -388,11 +358,6 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
         <Button variant="neutral" onClick={() => window.history.back()}>
           {t('back')}
         </Button>
-        {canDelete && (
-          <Button variant="secondary" onClick={handleDelete}>
-            {t('delete')}
-          </Button>
-        )}
       </CardFooter>
     </Card>
   );

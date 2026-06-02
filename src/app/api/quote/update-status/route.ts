@@ -7,6 +7,35 @@ import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { QuoteScope, QuoteUpdateRequest } from '@/platform/services/model/quote';
 import type { QuoteService } from '@/platform/services/quote/QuoteService';
 
+type QuoteReasonType = 'CHANGE' | 'DECLINE';
+
+interface QuoteStatusValueInput {
+  value?: string;
+  comment?: string;
+  quoteReasonId?: string;
+  reasonCode?: string;
+}
+
+interface QuoteStatusBodyInput {
+  quoteId?: string;
+  status?: string;
+  approvalId?: string;
+  comment?: string;
+  reasonCode?: string;
+}
+
+function getQuoteReasonType(status: string): QuoteReasonType | undefined {
+  if (status === 'DECLINED') {
+    return 'DECLINE';
+  }
+
+  if (status === 'IN_PROGRESS') {
+    return 'CHANGE';
+  }
+
+  return undefined;
+}
+
 export async function POST(request: NextRequest) {
   let quoteId: string | undefined;
   let status: string | undefined;
@@ -17,20 +46,19 @@ export async function POST(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const isPatchOperationsRequest = Array.isArray(requestBody);
 
-    const body = isPatchOperationsRequest ? null : requestBody;
+    const body = isPatchOperationsRequest ? null : (requestBody as QuoteStatusBodyInput);
     const operations = isPatchOperationsRequest ? (requestBody as QuoteUpdateRequest[]) : undefined;
     const statusOperation = operations?.find((operation) => operation.path === '/status');
     const requestStatusValue =
       statusOperation && typeof statusOperation.value === 'object' && statusOperation.value !== null
-        ? (statusOperation.value as { value?: string; comment?: string; quoteReasonId?: string })
+        ? (statusOperation.value as QuoteStatusValueInput)
         : undefined;
 
-    quoteId = isPatchOperationsRequest ? (searchParams.get('quoteId') ?? undefined) : body.quoteId;
-    status = isPatchOperationsRequest ? requestStatusValue?.value : body.status;
-    const approvalId = isPatchOperationsRequest ? (searchParams.get('approvalId') ?? undefined) : body.approvalId;
-    const comment = isPatchOperationsRequest ? requestStatusValue?.comment : body.comment;
-    const locale = isPatchOperationsRequest ? (searchParams.get('locale') ?? undefined) : body.locale;
-    const oldStatus = isPatchOperationsRequest ? (searchParams.get('oldStatus') ?? undefined) : body.oldStatus;
+    quoteId = isPatchOperationsRequest ? (searchParams.get('quoteId') ?? undefined) : body?.quoteId;
+    status = isPatchOperationsRequest ? requestStatusValue?.value : body?.status;
+    const approvalId = isPatchOperationsRequest ? (searchParams.get('approvalId') ?? undefined) : body?.approvalId;
+    const comment = isPatchOperationsRequest ? requestStatusValue?.comment : body?.comment;
+    const reasonCode = isPatchOperationsRequest ? requestStatusValue?.reasonCode : body?.reasonCode;
     linkedApprovalId = approvalId;
 
     if (!quoteId) {
@@ -80,11 +108,17 @@ export async function POST(request: NextRequest) {
       quoteUpdateScope = 'session';
     }
 
-    let quoteReasonId: string | undefined;
-    if (status === 'DECLINED' || oldStatus === 'OPEN') {
-      const reasonType = status === 'DECLINED' ? 'DECLINE' : 'CHANGE';
-      quoteReasonId = await quoteService.createQuoteReason(quoteId, comment, locale, reasonType);
+    const requiredQuoteReasonType = getQuoteReasonType(status);
+    let quoteReasonId = requestStatusValue?.quoteReasonId;
+
+    if (requiredQuoteReasonType && !quoteReasonId) {
+      if (!reasonCode) {
+        return NextResponse.json({ error: 'Reason code is required' }, { status: 400 });
+      }
+
+      quoteReasonId = await quoteService.resolveQuoteReasonId(requiredQuoteReasonType, reasonCode);
     }
+
     const statusValue: {
       value: string;
       comment: string;

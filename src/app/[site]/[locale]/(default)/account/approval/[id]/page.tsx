@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import AccountLayout from '@/components/account/account-layout';
-import { ApprovalDetails } from '@/components/account/company/approvals/approval-details';
+import { ApprovalDetails } from '@/components/account/approvals/approval-details.quote';
 import { getApprovalById } from '@/lib/ssr/approvals';
 import { getCurrentCustomer } from '@/lib/ssr/customer';
 import { getPageTitle } from '@/lib/ssr/seo';

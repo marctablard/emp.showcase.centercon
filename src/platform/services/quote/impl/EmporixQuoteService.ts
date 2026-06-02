@@ -112,19 +112,19 @@ class EmporixQuoteService implements QuoteService {
     return emporixQuoteReason as QuoteReason;
   }
 
-  async createQuoteReason(quoteId: string, comment: string, locale: string, reasonType: string) {
-    const quoteId_current = `${quoteId}_${Date.now()}`;
-    const code = `${(comment || quoteId_current).toUpperCase().replace(/\s+/g, '_')}`;
+  async resolveQuoteReasonId(reasonType: string, reasonCode: string): Promise<string> {
+    const quoteReasons = await this.quoteApi.getQuoteReasons();
+    const normalizedReasonType = reasonType.toUpperCase();
+    const normalizedReasonCode = reasonCode.toUpperCase();
+    const quoteReason = quoteReasons.find(
+      ({ code, type }) => code === normalizedReasonCode && type === normalizedReasonType,
+    );
 
-    const message: Record<string, string> = {};
-    message[locale] = comment || 'Price too high';
+    if (!quoteReason) {
+      throw new Error(`Quote reason ${normalizedReasonType}:${normalizedReasonCode} not found`);
+    }
 
-    const response = await this.quoteApi.createQuoteReason({
-      code: code,
-      type: reasonType,
-      message: message,
-    });
-    return response.id;
+    return quoteReason.id;
   }
 
   async getQuoteHistory(quoteId: string): Promise<QuoteHistory> {

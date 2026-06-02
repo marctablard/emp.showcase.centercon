@@ -8,12 +8,10 @@ import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/comm
 import type { EmporixConfig } from '../../config';
 import type { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
 import type {
-  EmporixCreateQuoteReasonRequest,
   EmporixCreateQuoteRequest,
   EmporixQuoteCreationResponse,
   EmporixQuoteHistory,
   EmporixQuoteReason,
-  EmporixQuoteReasonCreationResponse,
 } from '../../model/quote';
 import type { EmporixQuote } from '../../model/quote';
 import type { EmporixQuoteApi as IEmporixQuoteApi } from '../EmporixQuoteApi';
@@ -158,6 +156,29 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
     return await response.json();
   }
 
+  async getQuoteReasons(): Promise<EmporixQuoteReason[]> {
+    const response = await this.apiClient.authenticatedFetch(
+      `/quote/${this.config.tenant}/quote-reasons`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+      },
+      'service',
+      undefined,
+      createQuoteMetrics('/quote/{tenant}/quote-reasons'),
+    );
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Failed to fetch quote reasons: ${response.statusText} ${errorDetails}`);
+    }
+
+    return await response.json();
+  }
+
   async getQuoteReason(quoteReasonId: string): Promise<EmporixQuoteReason> {
     const response = await this.apiClient.authenticatedFetch(
       `/quote/${this.config.tenant}/quote-reasons/${quoteReasonId}`,
@@ -176,32 +197,6 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
     if (!response.ok) {
       const errorDetails = await response.text();
       throw new Error(`Failed to fetch quote reason ${quoteReasonId}: ${response.statusText} ${errorDetails}`);
-    }
-
-    return await response.json();
-  }
-
-  async createQuoteReason(
-    createQuoteReasonRequest: EmporixCreateQuoteReasonRequest,
-  ): Promise<EmporixQuoteReasonCreationResponse> {
-    const response = await this.apiClient.authenticatedFetch(
-      `/quote/${this.config.tenant}/quote-reasons`,
-      {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(createQuoteReasonRequest),
-      },
-      'service',
-      undefined,
-      createQuoteMetrics('/quote/{tenant}/quote-reasons'),
-    );
-
-    if (!response.ok) {
-      const errorDetails = await response.text();
-      throw new Error(`Failed to create quote reason: ${response.statusText} ${errorDetails}`);
     }
 
     return await response.json();

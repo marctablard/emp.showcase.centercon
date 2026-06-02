@@ -409,6 +409,16 @@
     "creating": "CREATING...",
     "rejectConfirmationTitle": "Do you want to reject the quote?",
     "rejectConfirmationDescription": "If you wish, you can leave a comment to let us know why you are declining this quote. Your feedback helps us improve our offers.",
+    "decisionReasonLabel": "Reason",
+    "decisionReasonPlaceholder": "Select a reason",
+    "decisionReasons": {
+      "PRICE_TOO_HIGH": "Price too high",
+      "NO_LONGER_NEEDED": "No longer needed",
+      "DELIVERY_TIME_LATE": "Delivery time too late",
+      "OTHER": "Other",
+      "WRONG_MATERIAL": "Wrong material",
+      "PROVIDED_PRICE_TO_HIGH": "Provided price too high"
+    },
     "rejectCommentPlaceholder": "Please provide reasons for declining this quote...",
     "rejectQuote": "REJECT QUOTE",
     "rejecting": "REJECTING...",

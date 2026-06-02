@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 import { QuoteStatusBadge } from '@/components/account/quotes/quote-status-badge';
 import { QuoteSummary } from '@/components/account/quotes/quote-summary';
@@ -21,6 +21,7 @@ import {
 import { H2, H3, H4 } from '@/components/ui/h';
 import { Label } from '@/components/ui/label';
 import UiLink from '@/components/ui/link';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { ToastType, notify } from '@/components/ui/toast-notification';
@@ -47,6 +48,16 @@ interface ApprovalPermissionState {
 
 const QUOTE_APPROVAL_ACTION = 'CHECKOUT';
 const QUOTE_APPROVAL_RESOURCE_TYPE = 'QUOTE';
+const QUOTE_DECISION_STATUS = {
+  CHANGE: 'IN_PROGRESS',
+  DECLINE: 'DECLINED',
+} as const;
+const QUOTE_DECISION_REASON_OPTIONS = {
+  CHANGE: ['WRONG_MATERIAL', 'PROVIDED_PRICE_TO_HIGH', 'DELIVERY_TIME_LATE', 'OTHER'],
+  DECLINE: ['PRICE_TOO_HIGH', 'NO_LONGER_NEEDED', 'DELIVERY_TIME_LATE', 'OTHER'],
+} as const;
+
+type QuoteDecisionMode = keyof typeof QUOTE_DECISION_REASON_OPTIONS;
 
 export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   const t = useTranslations('account.quoteDetails');
@@ -55,9 +66,10 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
 
   // State for confirmation dialogs
   const [showAcceptConfirmation, setShowAcceptConfirmation] = useState(false);
-  const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
-  const [showRequestChangeConfirmation, setShowRequestChangeConfirmation] = useState(false);
-  const [comment, setComment] = useState('');
+  const [activeDecisionDialog, setActiveDecisionDialog] = useState<QuoteDecisionMode | null>(null);
+  const [acceptComment, setAcceptComment] = useState('');
+  const [decisionComment, setDecisionComment] = useState('');
+  const [decisionReasonCode, setDecisionReasonCode] = useState('');
   const maxCommentLength = 500;
   const [isProcessing, setIsProcessing] = useState(false);
   const [processError, setProcessError] = useState<string | null>(null);
@@ -66,7 +78,6 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   const [showApprovalInquiryDialog, setShowApprovalInquiryDialog] = useState(false);
   const [selectedApproverId, setSelectedApproverId] = useState<string | null>(null);
   const [approvalInquiryComment, setApprovalInquiryComment] = useState('');
-  const locale = useLocale();
 
   const {
     approvers,
@@ -83,7 +94,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
     quoteId: string,
     status: string,
     comment?: string,
-    oldStatus?: string,
+    reasonCode?: string,
   ): Promise<void> => {
     const statusResponse = await fetch('/api/quote/update-status', {
       method: 'POST',
@@ -94,8 +105,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
         quoteId,
         status,
         comment,
-        locale,
-        oldStatus: oldStatus,
+        reasonCode,
       }),
     });
 
@@ -105,28 +115,6 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
     }
 
     // After successfully updating status, refresh the page to show updated status
-    window.location.reload();
-  };
-
-  const addQuoteComment = async (quoteId: string, comment: string): Promise<void> => {
-    const commentResponse = await fetch('/api/quote/add-comment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        quoteId,
-        reference: quote?.reference,
-        comment,
-      }),
-    });
-
-    if (!commentResponse.ok) {
-      const errorData = await commentResponse.json();
-      throw new Error(errorData.error || 'Failed to add comment to quote');
-    }
-
-    // After successfully adding comment, refresh the page to show updated quote
     window.location.reload();
   };
 
@@ -276,6 +264,44 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
       setShowAcceptConfirmation(true);
     } catch (error) {
       getLogger().error({ err: error, quoteId }, 'Failed to evaluate quote approval requirement');
+      const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
+      setProcessError(msg);
+      notify({
+        title: t('quoteActionFailedTitle'),
+        description: msg,
+        type: ToastType.Error,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDecisionDialogChange = (nextMode: QuoteDecisionMode | null): void => {
+    setActiveDecisionDialog(nextMode);
+    setDecisionReasonCode('');
+    setDecisionComment('');
+    setProcessError(null);
+  };
+
+  const handleQuoteDecisionSubmit = async (): Promise<void> => {
+    if (!activeDecisionDialog || !decisionReasonCode) {
+      return;
+    }
+
+    try {
+      setProcessError(null);
+      setIsProcessing(true);
+
+      await updateQuoteStatus(
+        quoteId,
+        QUOTE_DECISION_STATUS[activeDecisionDialog],
+        decisionComment.trim() || undefined,
+        decisionReasonCode,
+      );
+
+      handleDecisionDialogChange(null);
+    } catch (error) {
+      getLogger().error({ err: error, quoteId, reasonCode: decisionReasonCode }, 'Failed to update quote decision');
       const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
       setProcessError(msg);
       notify({
@@ -459,6 +485,83 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={activeDecisionDialog !== null}
+        onOpenChange={(open) => handleDecisionDialogChange(open ? activeDecisionDialog : null)}
+      >
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {activeDecisionDialog === 'DECLINE' ? t('rejectConfirmationTitle') : t('requestChangeConfirmationTitle')}
+            </DialogTitle>
+            <DialogDescription>
+              {activeDecisionDialog === 'DECLINE'
+                ? t('rejectConfirmationDescription')
+                : t('requestChangeConfirmationDescription')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="quote-decision-reason">{t('decisionReasonLabel')}</Label>
+            <Select value={decisionReasonCode} onValueChange={setDecisionReasonCode}>
+              <SelectTrigger id="quote-decision-reason" aria-label={t('decisionReasonLabel')}>
+                <SelectValue placeholder={t('decisionReasonPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                {(activeDecisionDialog ? QUOTE_DECISION_REASON_OPTIONS[activeDecisionDialog] : []).map((reasonCode) => (
+                  <SelectItem key={reasonCode} value={reasonCode}>
+                    {t(`decisionReasons.${reasonCode}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="quote-decision-comment">{t('yourComment')}</Label>
+            <Textarea
+              id="quote-decision-comment"
+              placeholder={
+                activeDecisionDialog === 'DECLINE'
+                  ? t('rejectCommentPlaceholder')
+                  : t('requestChangeCommentPlaceholder')
+              }
+              className="min-h-32 resize-none"
+              value={decisionComment}
+              onChange={(e) => setDecisionComment(e.target.value)}
+              maxLength={maxCommentLength}
+            />
+          </div>
+
+          {processError ? (
+            <Alert variant="destructive" role="alert">
+              <AlertDescription>{processError}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          <DialogFooter>
+            <Button variant="secondary" disabled={isProcessing} onClick={() => handleDecisionDialogChange(null)}>
+              {t('cancel')}
+            </Button>
+            <Button
+              variant={activeDecisionDialog === 'DECLINE' ? 'red' : 'primary'}
+              disabled={!decisionReasonCode || isProcessing}
+              onClick={() => {
+                void handleQuoteDecisionSubmit();
+              }}
+            >
+              {activeDecisionDialog === 'DECLINE'
+                ? isProcessing
+                  ? t('rejecting')
+                  : t('rejectQuote')
+                : isProcessing
+                  ? t('requestingChange')
+                  : t('requestChange')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col px-4 gap-6">
@@ -470,8 +573,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
           </div>
           {/* Only show action buttons when confirmation dialogs are not visible and quote status is not ACCEPTED or DECLINED */}
           {!showAcceptConfirmation &&
-            !showRejectConfirmation &&
-            !showRequestChangeConfirmation &&
+            !activeDecisionDialog &&
             quote.status !== 'ACCEPTED' &&
             quote.status !== 'DECLINED' && (
               <div className="flex gap-6">
@@ -481,8 +583,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                   className={cn('disabled:border-none')}
                   disabled={!(quote.status === 'OPEN')}
                   onClick={() => {
-                    setProcessError(null);
-                    setShowRejectConfirmation(true);
+                    handleDecisionDialogChange('DECLINE');
                   }}
                 >
                   {t('reject')}
@@ -494,8 +595,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                   className={cn('disabled:border-none')}
                   disabled={!(quote.status === 'OPEN')}
                   onClick={() => {
-                    setProcessError(null);
-                    setShowRequestChangeConfirmation(true);
+                    handleDecisionDialogChange('CHANGE');
                   }}
                 >
                   {t('requestChange')}
@@ -536,8 +636,8 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                     id="accept-comment"
                     placeholder={t('commentPlaceholder')}
                     className="w-full h-32 resize-none"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
+                    value={acceptComment}
+                    onChange={(e) => setAcceptComment(e.target.value)}
                     maxLength={maxCommentLength}
                   />
                 </div>
@@ -565,7 +665,7 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                     onClick={() => {
                       setProcessError(null);
                       setShowAcceptConfirmation(false);
-                      setComment('');
+                      setAcceptComment('');
                     }}
                   >
                     {t('cancel')}
@@ -578,10 +678,10 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                         setProcessError(null);
                         setIsProcessing(true);
 
-                        await updateQuoteStatus(quoteId, 'ACCEPTED', comment);
+                        await updateQuoteStatus(quoteId, 'ACCEPTED', acceptComment);
 
                         setShowAcceptConfirmation(false);
-                        setComment('');
+                        setAcceptComment('');
                       } catch (error) {
                         getLogger().error({ err: error }, 'Failed to process quote');
                         const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
@@ -597,163 +697,6 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
                     }}
                   >
                     {isProcessing ? t('creating') : t('createOrder')}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Quote rejection confirmation dialog */}
-        {showRejectConfirmation && (
-          <div className="grid grid-cols-1 mb-6 gap-6">
-            <div className="p-6 rounded-lg bg-surface-action-hover-2 shadow-sm">
-              <div className="shadow-none rounded-md py-4 h-full gap-2 bg-surface-page p-6">
-                <H3 variant="h5" className="mb-2">
-                  {t('rejectConfirmationTitle') || 'Do you want to reject the quote?'}
-                </H3>
-                <p className="text-sm text-text-placeholders mb-4">
-                  {t('rejectConfirmationDescription') ||
-                    'If you wish, you can leave a comment to let us know why you are declining this quote. Your feedback helps us improve our offers.'}
-                </p>
-
-                <div className="mb-4">
-                  <label htmlFor="reject-comment" className="block text-sm font-medium mb-1">
-                    {t('yourComment')}
-                  </label>
-                  <Textarea
-                    id="reject-comment"
-                    placeholder={t('rejectCommentPlaceholder') || 'Placeholder'}
-                    className="w-full h-32 resize-none"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    maxLength={maxCommentLength}
-                  />
-                </div>
-
-                {processError ? (
-                  <Alert variant="destructive" className="mb-4" role="alert">
-                    <AlertDescription>{processError}</AlertDescription>
-                  </Alert>
-                ) : null}
-
-                <div className="flex space-x-3">
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setProcessError(null);
-                      setShowRejectConfirmation(false);
-                      setComment('');
-                    }}
-                  >
-                    {t('cancel')}
-                  </Button>
-                  <Button
-                    variant="red"
-                    disabled={isProcessing}
-                    onClick={async () => {
-                      try {
-                        setProcessError(null);
-                        setIsProcessing(true);
-
-                        await updateQuoteStatus(quoteId, 'DECLINED', comment);
-
-                        setShowRejectConfirmation(false);
-                        setComment('');
-                      } catch (error) {
-                        getLogger().error({ err: error }, 'Failed to reject quote');
-                        const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
-                        setProcessError(msg);
-                        notify({
-                          title: t('quoteActionFailedTitle'),
-                          description: msg,
-                          type: ToastType.Error,
-                        });
-                      } finally {
-                        setIsProcessing(false);
-                      }
-                    }}
-                  >
-                    {isProcessing ? t('rejecting') || 'REJECTING...' : t('rejectQuote') || 'REJECT QUOTE'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Quote request change confirmation dialog */}
-        {showRequestChangeConfirmation && (
-          <div className="grid grid-cols-1 mb-6 gap-6">
-            <div className="p-6 rounded-lg bg-surface-action-hover-2 shadow-sm">
-              <div className="shadow-none rounded-md py-4 h-full gap-2 bg-surface-page p-6">
-                <H3 variant="h5" className="mb-2">
-                  {t('requestChangeConfirmationTitle') || 'Do you want to request a change of the quote?'}
-                </H3>
-                <p className="text-sm text-text-placeholders mb-4">
-                  {t('requestChangeConfirmationDescription') || 'Please let us know how what we can do better.'}
-                </p>
-
-                <div className="mb-4">
-                  <label htmlFor="request-change-comment" className="block text-sm font-medium mb-1">
-                    {t('yourComment')}
-                  </label>
-                  <Textarea
-                    id="request-change-comment"
-                    placeholder={t('requestChangeCommentPlaceholder') || 'Placeholder'}
-                    className="w-full h-32 resize-none"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    maxLength={maxCommentLength}
-                  />
-                </div>
-
-                {processError ? (
-                  <Alert variant="destructive" className="mb-4" role="alert">
-                    <AlertDescription>{processError}</AlertDescription>
-                  </Alert>
-                ) : null}
-
-                <div className="flex space-x-3">
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setProcessError(null);
-                      setShowRequestChangeConfirmation(false);
-                      setComment('');
-                    }}
-                  >
-                    {t('cancel')}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    disabled={isProcessing || !comment.trim()}
-                    onClick={async () => {
-                      try {
-                        setProcessError(null);
-                        setIsProcessing(true);
-
-                        await addQuoteComment(quoteId, comment);
-
-                        setShowRequestChangeConfirmation(false);
-                        setComment('');
-                      } catch (error) {
-                        getLogger().error({ err: error }, 'Failed to add comment to quote');
-                        const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
-                        setProcessError(msg);
-                        notify({
-                          title: t('quoteActionFailedTitle'),
-                          description: msg,
-                          type: ToastType.Error,
-                        });
-                      } finally {
-                        setIsProcessing(false);
-                      }
-                    }}
-                  >
-                    {isProcessing
-                      ? t('requestingChange') || 'REQUESTING CHANGE...'
-                      : t('requestChange') || 'REQUEST CHANGE'}
                   </Button>
                 </div>
               </div>

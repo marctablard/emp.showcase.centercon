@@ -82,7 +82,6 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
     updateApprovalStatus,
     updateApproverComment,
     updateRequestorComment,
-    deleteApproval,
     refreshApproval,
   } = useApproval(approvalId, initialApproval);
 
@@ -199,20 +198,6 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
       setActionError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsOrderCreationPending(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (confirm(t('confirmDeleteApproval'))) {
-      try {
-        setActionError(null);
-        setActionSuccess(null);
-        setCreateOrderResult(null);
-        await deleteApproval();
-        setActionSuccess(t('approvalSuccessfullyDeleted'));
-      } catch (err) {
-        setActionError(err instanceof Error ? err.message : String(err));
-      }
     }
   };
 
@@ -612,9 +597,6 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
       <CardFooter className="flex justify-between">
         <Button variant="neutral" onClick={() => window.history.back()}>
           {t('back')}
-        </Button>
-        <Button variant="secondary" onClick={handleDelete}>
-          {t('delete')}
         </Button>
       </CardFooter>
     </Card>

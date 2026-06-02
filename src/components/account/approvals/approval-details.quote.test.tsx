@@ -4,7 +4,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Approval } from '@/platform/services/model/approval';
-import { ApprovalDetails } from './approval-details';
+import { ApprovalDetails } from './approval-details.quote';
 
 const updateApprovalStatus = jest.fn();
 const updateApproverComment = jest.fn();

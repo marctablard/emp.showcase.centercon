@@ -127,6 +127,10 @@ describe('QuoteDetails approval flow', () => {
     pushMock.mockReset();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('routes to the linked approval when direct quote acceptance is not permitted', async () => {
     checkApprovalPermitted.mockResolvedValue({
       action: 'CHECKOUT',
@@ -336,5 +340,54 @@ describe('QuoteDetails approval flow', () => {
     await waitFor(() => {
       expect(screen.getByText('account.quoteDetails.confirmationTitle')).toBeInTheDocument();
     });
+  });
+
+  it('opens a decline dialog with a required reason selector and comment field', async () => {
+    checkApprovalPermitted.mockResolvedValue({
+      action: 'CHECKOUT',
+      permitted: true,
+    });
+
+    render(<QuoteDetails quoteId="Q-1000" initialQuote={initialQuote as never} />);
+
+    await waitFor(() => {
+      expect(checkApprovalPermitted).toHaveBeenCalledWith({
+        resourceId: 'Q-1000',
+        resourceType: 'QUOTE',
+        action: 'CHECKOUT',
+      });
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'account.quoteDetails.reject' }));
+
+    expect(screen.getByText('account.quoteDetails.rejectConfirmationTitle')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'account.quoteDetails.decisionReasonLabel' })).toBeInTheDocument();
+    expect(screen.getByLabelText('account.quoteDetails.yourComment')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'account.quoteDetails.rejectQuote' })).toBeDisabled();
+  });
+
+  it('opens a request-change dialog with a required reason selector and comment field', async () => {
+    checkApprovalPermitted.mockResolvedValue({
+      action: 'CHECKOUT',
+      permitted: true,
+    });
+
+    render(<QuoteDetails quoteId="Q-1000" initialQuote={initialQuote as never} />);
+
+    await waitFor(() => {
+      expect(checkApprovalPermitted).toHaveBeenCalledWith({
+        resourceId: 'Q-1000',
+        resourceType: 'QUOTE',
+        action: 'CHECKOUT',
+      });
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'account.quoteDetails.requestChange' }));
+
+    expect(screen.getByText('account.quoteDetails.requestChangeConfirmationTitle')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'account.quoteDetails.decisionReasonLabel' })).toBeInTheDocument();
+    expect(screen.getByLabelText('account.quoteDetails.yourComment')).toBeInTheDocument();
+    expect(screen.getByRole('dialog').querySelector('button[type="button"], button')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'account.quoteDetails.requestChange' })).toBeDisabled();
   });
 });
