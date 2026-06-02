@@ -3,7 +3,6 @@ import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixApprovalApi } from '@/platform/integrations/emporix/approval/EmporixApprovalApi';
 import type { EmporixIamApi } from '@/platform/integrations/emporix/iam/EmporixIamApi';
 import type {
-  EmporixApprovalResponse,
   EmporixApprovalSearchUsersRequest,
   EmporixApprovalUpdateRequest,
 } from '@/platform/integrations/emporix/model/approval';
