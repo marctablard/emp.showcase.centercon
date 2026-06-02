@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
@@ -24,6 +25,7 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
   constructor(
     @inject('EmporixApiInvoker') protected apiClient: EmporixApiClient,
     @inject('EmporixConfig') protected config: EmporixConfig,
+    @inject('LoggerService') private logger: LoggerService,
   ) {}
 
   /**
@@ -34,8 +36,14 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
     body: any,
     scope: 'public' | 'session' | 'customer-saas' | 'service' = 'public',
   ): Promise<void> {
+    const endpoint = `/quote/${this.config.tenant}/quotes/${quoteId}`;
+    const firstOpPath =
+      Array.isArray(body) && body[0] && typeof body[0] === 'object' && 'path' in body[0]
+        ? String((body[0] as { path?: string }).path)
+        : undefined;
+
     const response = await this.apiClient.authenticatedFetch(
-      `/quote/${this.config.tenant}/quotes/${quoteId}`,
+      endpoint,
       {
         method: 'PATCH',
         headers: {
@@ -49,14 +57,25 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
       createQuoteMetrics('/quote/{tenant}/quotes/{id}'),
     );
 
+    const responseBody = await response.text();
+
     if (!response.ok) {
-      const errorDetails = await response.text();
-      const firstOpPath =
-        Array.isArray(body) && body[0] && typeof body[0] === 'object' && 'path' in body[0]
-          ? String((body[0] as { path?: string }).path)
-          : undefined;
+      this.logger.error(
+        {
+          endpoint,
+          method: 'PATCH',
+          quoteId,
+          scope,
+          operationPath: firstOpPath,
+          status: response.status,
+          statusText: response.statusText,
+          responseBody,
+          payload: body,
+        },
+        'Emporix quote patch failed',
+      );
       throw new Error(
-        `Failed to update quote ${quoteId}${firstOpPath ? ` (${firstOpPath})` : ''}: ${response.statusText} ${errorDetails}`,
+        `Failed to update quote ${quoteId}${firstOpPath ? ` (${firstOpPath})` : ''}: ${response.statusText} ${responseBody}`,
       );
     }
   }

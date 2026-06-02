@@ -9,10 +9,8 @@ import { ApprovalDetails } from './approval-details';
 const updateApprovalStatus = jest.fn();
 const updateApproverComment = jest.fn();
 const updateRequestorComment = jest.fn();
+const refreshApproval = jest.fn();
 const productListResolverMock = jest.fn();
-const pushMock = jest.fn();
-const checkoutFromQuoteMock = jest.fn();
-const mockUseSite = jest.fn();
 const buildApproval = (overrides: Partial<Approval> = {}): Approval => ({
   id: 'approval-1',
   status: 'PENDING',
@@ -33,9 +31,11 @@ jest.mock('next-intl', () => ({
 }));
 
 jest.mock('@/i18n/navigation', () => ({
-  useRouter: () => ({
-    push: pushMock,
-  }),
+  Link: ({ children, href, className }: { children: React.ReactNode; href: string; className?: string }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
 }));
 
 jest.mock('@/components/product/product-list-resolver', () => ({
@@ -43,14 +43,6 @@ jest.mock('@/components/product/product-list-resolver', () => ({
     productListResolverMock(props);
     return <div>ProductListResolver</div>;
   },
-}));
-
-jest.mock('@/lib/client/checkout', () => ({
-  checkoutFromQuote: (request: unknown) => checkoutFromQuoteMock(request),
-}));
-
-jest.mock('@/hooks/site/useSite', () => ({
-  useSite: () => mockUseSite(),
 }));
 
 jest.mock('@/hooks/approval/useApproval', () => ({
@@ -62,14 +54,13 @@ jest.mock('@/hooks/approval/useApproval', () => ({
     updateApproverComment,
     updateRequestorComment,
     deleteApproval: jest.fn(),
-    refreshApproval: jest.fn(),
+    refreshApproval,
   }),
 }));
 
 describe('Company quote approval details', () => {
   beforeEach(() => {
     productListResolverMock.mockReset();
-    pushMock.mockReset();
     mockApproval = buildApproval({
       details: {
         currency: 'USD',
@@ -126,46 +117,27 @@ describe('Company quote approval details', () => {
     updateApproverComment.mockResolvedValue(undefined);
     updateRequestorComment.mockReset();
     updateRequestorComment.mockResolvedValue(undefined);
-    checkoutFromQuoteMock.mockReset();
-    checkoutFromQuoteMock.mockResolvedValue({ orderId: 'order-123' });
-    mockUseSite.mockReset();
-    mockUseSite.mockReturnValue({
-      paymentModes: [
-        {
-          id: 'payment-mode-fallback',
-          code: 'invoice',
-          active: true,
-        },
-      ],
-      loading: false,
-    });
+    refreshApproval.mockReset();
+    refreshApproval.mockResolvedValue(undefined);
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue({ success: true }),
     });
   });
 
-  it('approves the approval before accepting the linked quote', async () => {
+  it('keeps the initial accept action UI-only and reveals the create-order state', async () => {
     render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
 
     fireEvent.click(screen.getByText('approve'));
 
-    await waitFor(() => {
-      expect(updateApprovalStatus).toHaveBeenCalledWith('APPROVED');
-      expect(global.fetch).toHaveBeenCalledWith(
-        '/api/quote/update-status',
-        expect.objectContaining({
-          method: 'POST',
-        }),
-      );
-    });
-
-    expect(updateApprovalStatus.mock.invocationCallOrder[0]).toBeLessThan(
-      (global.fetch as jest.Mock).mock.invocationCallOrder[0],
-    );
+    expect(updateApprovalStatus).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(screen.getByText('createOrderAfterApprovalTitle')).toBeInTheDocument();
+    expect(screen.getByLabelText('yourComment')).toBeInTheDocument();
+    expect(screen.getByText('createOrder')).toBeInTheDocument();
   });
 
-  it('disables approval actions while the approve flow is in progress', async () => {
+  it('disables approval actions while the decline flow is in progress', async () => {
     let resolveApprovalStatus: (() => void) | undefined;
     updateApprovalStatus.mockReturnValueOnce(
       new Promise<void>((resolve) => {
@@ -175,7 +147,7 @@ describe('Company quote approval details', () => {
 
     render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
 
-    fireEvent.click(screen.getByText('approve'));
+    fireEvent.click(screen.getByText('decline'));
 
     await waitFor(() => {
       expect(screen.getByText('approve')).toBeDisabled();
@@ -187,38 +159,6 @@ describe('Company quote approval details', () => {
     await waitFor(() => {
       expect(screen.getByText('approve')).not.toBeDisabled();
     });
-  });
-
-  it('does not attempt quote acceptance when approval status update fails', async () => {
-    updateApprovalStatus.mockRejectedValueOnce(new Error('approval update failed'));
-
-    render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
-
-    fireEvent.click(screen.getByText('approve'));
-
-    await waitFor(() => {
-      expect(updateApprovalStatus).toHaveBeenCalledTimes(1);
-    });
-
-    expect(global.fetch).not.toHaveBeenCalled();
-  });
-
-  it('does not reopen the quote when approval succeeds but saving the approver comment fails', async () => {
-    updateApproverComment.mockRejectedValueOnce(new Error('comment update failed'));
-
-    render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
-
-    fireEvent.change(screen.getByPlaceholderText('enterApproverComment'), {
-      target: { value: 'Needs approval note' },
-    });
-    fireEvent.click(screen.getByText('approve'));
-
-    await waitFor(() => {
-      expect(updateApprovalStatus).toHaveBeenCalledWith('APPROVED');
-      expect(updateApproverComment).toHaveBeenCalledWith('Needs approval note');
-    });
-
-    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('shows a create-order form after a quote approval is approved', async () => {
@@ -233,144 +173,61 @@ describe('Company quote approval details', () => {
     });
   });
 
-  it('creates an order from the approved quote and redirects to confirmation', async () => {
-    mockApproval = buildApproval({
-      status: 'APPROVED',
-      details: {
-        currency: 'USD',
-        paymentMethods: [
-          {
-            id: 'payment-mode-1',
-            provider: 'stripe',
-            method: 'invoice',
-          },
-        ],
-      },
-      resource: {
-        id: 'Q-1000',
-        items: [],
-        totalPrice: {
-          currency: 'USD',
-          netValue: 200,
-          grossValue: 238,
-          taxValue: 38,
-        },
-      },
-    });
-
+  it('creates an order through the quote status update path and exposes the related quote link', async () => {
     render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
 
+    fireEvent.click(screen.getByText('approve'));
     fireEvent.change(screen.getByLabelText('yourComment'), {
       target: { value: 'Please ship fast' },
     });
     fireEvent.click(screen.getByText('createOrder'));
 
     await waitFor(() => {
-      expect(checkoutFromQuoteMock).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/quote/update-status?quoteId=Q-1000&locale=en&approvalId=approval-1',
         expect.objectContaining({
-          quoteId: 'Q-1000',
-          currency: 'USD',
-          paymentMethod: expect.objectContaining({
-            id: 'payment-mode-1',
-          }),
-          customer: expect.objectContaining({
-            userId: 'requestor-1',
-            email: 'requestor@example.com',
-          }),
-        }),
-      );
-      expect(pushMock).toHaveBeenCalledWith('/confirmation/order-123');
-    });
-  });
-
-  it('falls back to the first configured payment mode when approval details omit one', async () => {
-    mockApproval = buildApproval({
-      status: 'APPROVED',
-      details: {
-        currency: 'USD',
-        paymentMethods: [],
-      },
-    });
-
-    render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
-
-    fireEvent.click(screen.getByText('createOrder'));
-
-    await waitFor(() => {
-      expect(checkoutFromQuoteMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          paymentMethod: expect.objectContaining({
-            id: 'payment-mode-fallback',
-            provider: 'none',
-          }),
+          method: 'POST',
+          body: JSON.stringify([
+            {
+              op: 'REPLACE',
+              path: '/status',
+              value: {
+                value: 'ACCEPTED',
+                comment: 'Please ship fast',
+              },
+            },
+          ]),
         }),
       );
     });
+
+    expect(updateApprovalStatus).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByText('quoteSuccessfullyAcceptedOrderAutomaticallyCreated')).toBeInTheDocument();
+      expect(screen.getByText('viewRelatedQuote')).toHaveAttribute('href', '/account/quotes/Q-1000');
+      expect(screen.queryByText('viewCreatedOrder')).not.toBeInTheDocument();
+    });
   });
 
-  it('falls back to quote resource currency when approval details are missing', async () => {
-    mockApproval = buildApproval({
-      status: 'APPROVED',
-      details: undefined,
-      resource: {
-        id: 'Q-1000',
-        items: [],
-        totalPrice: {
-          currency: 'USD',
-          netValue: 200,
-          grossValue: 238,
-          taxValue: 38,
-        },
-      },
+  it('shows an error without leaving a fake success state when create order fails', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: false,
+      json: jest.fn().mockResolvedValue({ error: 'create order failed' }),
     });
 
     render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
 
+    fireEvent.click(screen.getByText('approve'));
     fireEvent.click(screen.getByText('createOrder'));
 
     await waitFor(() => {
-      expect(checkoutFromQuoteMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currency: 'USD',
-        }),
-      );
-    });
-  });
-
-  it('shows a clear error when quote checkout data is incomplete and no payment mode is configured', async () => {
-    mockApproval = buildApproval({
-      status: 'APPROVED',
-      details: {
-        currency: 'USD',
-        paymentMethods: [],
-      },
-    });
-    mockUseSite.mockReturnValueOnce({ paymentModes: [], loading: false });
-
-    render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
-
-    fireEvent.click(screen.getByText('createOrder'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Missing payment method for quote checkout')).toBeInTheDocument();
+      expect(screen.getByText('create order failed')).toBeInTheDocument();
     });
 
-    expect(checkoutFromQuoteMock).not.toHaveBeenCalled();
-  });
-
-  it('disables create order while waiting for site payment modes when approval details omit one', () => {
-    mockApproval = buildApproval({
-      status: 'APPROVED',
-      details: {
-        currency: 'USD',
-        paymentMethods: [],
-      },
-    });
-    mockUseSite.mockReturnValueOnce({ paymentModes: undefined, loading: true });
-
-    render(<ApprovalDetails approvalId="approval-1" currentUserId="approver-1" />);
-
-    expect(screen.getByText('createOrder')).toBeDisabled();
+    expect(screen.queryByText('quoteSuccessfullyAcceptedOrderAutomaticallyCreated')).not.toBeInTheDocument();
+    expect(screen.queryByText('viewRelatedQuote')).not.toBeInTheDocument();
+    expect(screen.queryByText('viewCreatedOrder')).not.toBeInTheDocument();
+    expect(updateApprovalStatus).not.toHaveBeenCalled();
   });
 
   it('declines a quote approval from the canonical company approval route', async () => {

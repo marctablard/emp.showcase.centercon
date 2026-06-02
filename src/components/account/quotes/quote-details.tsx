@@ -779,6 +779,20 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
             <p className="text-sm font-medium text-text-placeholders">{t('totalAmount')}</p>
             <p className="mt-2 text-text-heading font-semibold">{formatPrice(quote.totalGross, quote.currency)}</p>
           </div>
+
+          {quote.orderId ? (
+            <div>
+              <p className="text-sm font-medium text-text-placeholders">{t('relatedOrder')}</p>
+              <UiLink
+                type="Link"
+                href={`/account/orders/${quote.orderId}`}
+                variant="text"
+                className="mt-2 inline-flex underline"
+              >
+                #{quote.orderId}
+              </UiLink>
+            </div>
+          ) : null}
         </div>
 
         {/* Quote History Section */}

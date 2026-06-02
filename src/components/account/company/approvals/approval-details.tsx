@@ -13,12 +13,10 @@ import { Spinner } from '@/components/ui/spinner';
 import { SummaryCard, SummaryRow } from '@/components/ui/summary-card';
 import { Textarea } from '@/components/ui/textarea';
 import { useApproval } from '@/hooks/approval/useApproval';
-import { useSite } from '@/hooks/site/useSite';
-import { useRouter } from '@/i18n/navigation';
-import { checkoutFromQuote } from '@/lib/client/checkout';
+import { Link } from '@/i18n/navigation';
 import { formatCurrency } from '@/lib/utils';
 import type { Approval } from '@/platform/services/model/approval';
-import type { CheckoutPaymentMethod, QuoteCheckoutRequest } from '@/platform/services/model/checkout';
+import type { QuoteUpdateRequest } from '@/platform/services/model/quote';
 
 interface ApprovalDetailsProps {
   approvalId: string;
@@ -57,21 +55,25 @@ type ApprovalQuoteResource = Approval['resource'] & {
   subtotalAggregate?: ApprovalResourcePrice;
 };
 
+interface ApprovalCreateOrderResult {
+  quoteId: string;
+}
+
 export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: ApprovalDetailsProps) {
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
   const tQuote = useTranslations('account.quoteDetails');
   const locale = useLocale();
-  const router = useRouter();
   const maxCommentLength = 250;
   const [approverComment, setApproverComment] = useState<string>('');
   const [requestorComment, setRequestorComment] = useState<string>('');
   const [orderComment, setOrderComment] = useState<string>('');
+  const [isCreateOrderStepOpen, setIsCreateOrderStepOpen] = useState(false);
+  const [createOrderResult, setCreateOrderResult] = useState<ApprovalCreateOrderResult | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [isApprovalActionPending, setIsApprovalActionPending] = useState(false);
   const [isOrderCreationPending, setIsOrderCreationPending] = useState(false);
-  const { paymentModes, loading: isSiteLoading } = useSite();
 
   const {
     approval,
@@ -84,131 +86,43 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
     refreshApproval,
   } = useApproval(approvalId, initialApproval);
 
-  const updateQuoteStatus = async (
-    quoteId: string,
-    status: string,
-    comment?: string,
-    linkedApprovalId?: string,
-  ): Promise<void> => {
-    const response = await fetch('/api/quote/update-status', {
+  const updateQuoteStatus = async (quoteId: string, comment?: string, linkedApprovalId?: string): Promise<void> => {
+    const operations: QuoteUpdateRequest[] = [
+      {
+        op: 'REPLACE',
+        path: '/status',
+        value: {
+          value: 'ACCEPTED',
+          comment: comment || '',
+        },
+      },
+    ];
+
+    const params = new URLSearchParams({ quoteId, locale });
+
+    if (linkedApprovalId) {
+      params.set('approvalId', linkedApprovalId);
+    }
+
+    const response = await fetch(`/api/quote/update-status?${params.toString()}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        quoteId,
-        status,
-        comment,
-        approvalId: linkedApprovalId,
-        locale,
-      }),
+      body: JSON.stringify(operations),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.error || `Failed to update quote status to ${status}`);
+      throw new Error(errorData?.error || 'Failed to update quote status to ACCEPTED');
     }
-  };
-
-  const acceptQuote = async (quoteId: string, comment?: string): Promise<void> => {
-    await updateQuoteStatus(quoteId, 'ACCEPTED', comment, approvalId);
-  };
-
-  const reopenQuote = async (quoteId: string): Promise<void> => {
-    await updateQuoteStatus(quoteId, 'OPEN', undefined, approvalId);
-  };
-
-  const resolveQuoteCheckoutPaymentMethod = async (): Promise<CheckoutPaymentMethod> => {
-    const approvalPaymentMethod = approval?.details?.paymentMethods?.[0];
-
-    if (approvalPaymentMethod) {
-      return approvalPaymentMethod;
-    }
-
-    const fallbackPaymentMode = paymentModes?.[0];
-
-    if (!fallbackPaymentMode) {
-      throw new Error('Missing payment method for quote checkout');
-    }
-
-    return {
-      ...fallbackPaymentMode,
-      // TODO: remove this synthetic provider fallback once the payment mode source includes provider for quote checkout.
-      provider: 'none',
-    };
-  };
-
-  const resolveQuoteCheckoutCurrency = (): string | undefined => {
-    return (
-      approval?.details?.currency ??
-      quoteResource?.totalPrice?.currency ??
-      quoteResource?.subTotalPrice?.currency ??
-      quoteResource?.subtotalAggregate?.currency
-    );
-  };
-
-  const checkoutApprovedQuote = async (): Promise<string> => {
-    if (!approval || !quoteResource) {
-      throw new Error('Quote approval data is missing');
-    }
-
-    const paymentMethod = await resolveQuoteCheckoutPaymentMethod();
-
-    const request: QuoteCheckoutRequest = {
-      quoteId: quoteResource.id,
-      paymentMethod,
-      customer: {
-        userId: approval.requestor.userId,
-        firstName: approval.requestor.firstName,
-        lastName: approval.requestor.lastName,
-        email: approval.requestor.email,
-        emailConfirmation: approval.requestor.email,
-      },
-      currency: resolveQuoteCheckoutCurrency(),
-    };
-
-    const response = await checkoutFromQuote(request);
-
-    if (!response.orderId) {
-      throw new Error('Order ID is missing in quote checkout response');
-    }
-
-    return response.orderId;
   };
 
   const handleApprove = async () => {
-    if (isApprovalActionPending) {
-      return;
-    }
-
-    try {
-      setIsApprovalActionPending(true);
-      setActionError(null);
-      await updateApprovalStatus('APPROVED');
-
-      if (approval?.resourceType === 'QUOTE') {
-        await acceptQuote(approval.resource.id, approverComment || undefined);
-      }
-      setActionSuccess(t('approvalSuccessfullyApproved'));
-
-      if (approverComment) {
-        await updateApproverComment(approverComment);
-        setApproverComment('');
-      }
-    } catch (err) {
-      if (approval?.resourceType === 'QUOTE' && approval?.status === 'APPROVED') {
-        try {
-          await reopenQuote(approval.resource.id);
-        } catch (revertError) {
-          setActionError(revertError instanceof Error ? revertError.message : String(revertError));
-          return;
-        }
-      }
-
-      setActionError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setIsApprovalActionPending(false);
-    }
+    setActionError(null);
+    setActionSuccess(null);
+    setCreateOrderResult(null);
+    setIsCreateOrderStepOpen(true);
   };
 
   const handleDecline = async () => {
@@ -219,6 +133,9 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
     try {
       setIsApprovalActionPending(true);
       setActionError(null);
+      setActionSuccess(null);
+      setCreateOrderResult(null);
+      setIsCreateOrderStepOpen(false);
       await updateApprovalStatus('DECLINED');
       setActionSuccess(t('approvalSuccessfullyDeclined'));
 
@@ -236,6 +153,8 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
   const handleUpdateApproverComment = async () => {
     try {
       setActionError(null);
+      setActionSuccess(null);
+      setCreateOrderResult(null);
       await updateApproverComment(approverComment);
       setActionSuccess(t('approverCommentUpdated'));
       setApproverComment('');
@@ -247,6 +166,8 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
   const handleUpdateRequestorComment = async () => {
     try {
       setActionError(null);
+      setActionSuccess(null);
+      setCreateOrderResult(null);
       await updateRequestorComment(requestorComment);
       setActionSuccess(t('requestorCommentUpdated'));
       setRequestorComment('');
@@ -263,13 +184,18 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
     try {
       setIsOrderCreationPending(true);
       setActionError(null);
+      setActionSuccess(null);
+      setCreateOrderResult(null);
 
-      const orderId = await checkoutApprovedQuote();
+      await updateQuoteStatus(quoteResource.id, orderComment.trim() || undefined, approvalId);
 
-      setActionSuccess(t('orderSuccessfullySubmitted'));
+      setCreateOrderResult({ quoteId: quoteResource.id });
+      setActionSuccess(t('quoteSuccessfullyAcceptedOrderAutomaticallyCreated'));
       setOrderComment('');
-      router.push(`/confirmation/${orderId}`);
+      setIsCreateOrderStepOpen(false);
+      void refreshApproval();
     } catch (err) {
+      setCreateOrderResult(null);
       setActionError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsOrderCreationPending(false);
@@ -280,6 +206,8 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
     if (confirm(t('confirmDeleteApproval'))) {
       try {
         setActionError(null);
+        setActionSuccess(null);
+        setCreateOrderResult(null);
         await deleteApproval();
         setActionSuccess(t('approvalSuccessfullyDeleted'));
       } catch (err) {
@@ -316,9 +244,8 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
   const isApprover = !!approval && currentUserId === approval.approver.userId;
   const canComment = approval?.status !== 'CLOSED' && approval?.status !== 'EXPIRED' && (isRequestor || isApprover);
   const canApprovalAction = canApprove && isApprover;
-  const canCreateOrder = approval?.status === 'APPROVED' && approval?.resourceType === 'QUOTE' && isApprover;
-  const hasApprovalPaymentMethod = !!approval?.details?.paymentMethods?.length;
-  const isCreateOrderWaitingForSitePayment = !hasApprovalPaymentMethod && isSiteLoading;
+  const canCreateOrder =
+    approval?.status === 'PENDING' && approval?.resourceType === 'QUOTE' && isApprover && isCreateOrderStepOpen;
 
   if (loading) {
     return (
@@ -386,7 +313,18 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
           <Alert variant="default" className="mb-4">
             <CheckCircle2 className="h-4 w-4" />
             <AlertTitle>{t('success')}</AlertTitle>
-            <AlertDescription>{actionSuccess}</AlertDescription>
+            <AlertDescription>
+              <div className="space-y-2">
+                <p>{actionSuccess}</p>
+                {createOrderResult && (
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    <Link href={`/account/quotes/${createOrderResult.quoteId}`} className="font-bold underline">
+                      {t('viewRelatedQuote')}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </AlertDescription>
           </Alert>
         )}
 
@@ -423,11 +361,18 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
                   </div>
 
                   <div className="flex gap-3">
-                    <Button variant="secondary" disabled={isOrderCreationPending} onClick={() => setOrderComment('')}>
+                    <Button
+                      variant="secondary"
+                      disabled={isOrderCreationPending}
+                      onClick={() => {
+                        setOrderComment('');
+                        setIsCreateOrderStepOpen(false);
+                      }}
+                    >
                       {tQuote('cancel')}
                     </Button>
                     <Button
-                      disabled={isOrderCreationPending || isCreateOrderWaitingForSitePayment}
+                      disabled={isOrderCreationPending}
                       onClick={() => {
                         void handleCreateOrder();
                       }}

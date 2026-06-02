@@ -421,7 +421,8 @@
     "statusChanged": "Status Changed to {currentStatus}",
     "loadingHistory": "Loading history...",
     "quoteActionFailedTitle": "We couldn't complete this action",
-    "quoteActionFailedDescription": "Please try again or contact support if the problem persists."
+    "quoteActionFailedDescription": "Please try again or contact support if the problem persists.",
+    "relatedOrder": "Related Order"
   },
   "quotesList": {
     "title": "Quotes",
@@ -437,6 +438,7 @@
     "totalAmount": "Total amount",
     "numberOfProducts": "Number of Products",
     "products": "Products",
+    "relatedOrder": "Related Order",
     "noQuotes": "You don't have any quotes yet",
     "viewQuote": "View quote",
     "next": "Next",

@@ -9,6 +9,7 @@ import { LocalizedString } from '../common';
  */
 export interface Quote {
   id: string;
+  orderId?: string;
   reference?: string;
   status: QuoteStatus;
   submittedDate: string;

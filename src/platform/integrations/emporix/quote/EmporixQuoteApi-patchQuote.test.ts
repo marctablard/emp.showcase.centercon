@@ -1,3 +1,4 @@
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type EmporixApiInvoker from '../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../config';
 import EmporixQuoteApi from './impl/EmporixQuoteApi';
@@ -20,12 +21,25 @@ describe('EmporixQuoteApi.patchQuote error message', () => {
         text: jest.fn().mockResolvedValue('{"message":"Missing field"}'),
       } as unknown as Response),
     } as unknown as jest.Mocked<EmporixApiInvoker>;
+    const logger = {
+      info: jest.fn(),
+      error: jest.fn(),
+    } as unknown as LoggerService;
 
-    const quoteApi = new EmporixQuoteApi(mockApiClient, mockConfig);
+    const quoteApi = new EmporixQuoteApi(mockApiClient, mockConfig, logger);
     const ops = [{ op: 'REPLACE', path: '/mixins/additionalInfo', value: {} }];
 
     await expect(quoteApi.patchQuote('Q-123', ops, 'service')).rejects.toThrow(
       'Failed to update quote Q-123 (/mixins/additionalInfo): Bad Request',
+    );
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: '/quote/test-tenant/quotes/Q-123',
+        responseBody: '{"message":"Missing field"}',
+        payload: ops,
+      }),
+      'Emporix quote patch failed',
     );
   });
 });
