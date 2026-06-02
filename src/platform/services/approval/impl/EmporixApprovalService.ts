@@ -92,7 +92,7 @@ export class EmporixApprovalService implements ApprovalService {
         sort: sort ?? null,
         query: query ?? null,
         approvalsCount: emporixApprovals.length,
-        approvals: emporixApprovals.map((approval) => this.createApprovalLogSummary(approval)),
+        approvalIds: emporixApprovals.map((approval) => approval.id),
       },
       'Emporix approvals list response summary',
     );
@@ -265,32 +265,6 @@ export class EmporixApprovalService implements ApprovalService {
     } catch {
       return undefined;
     }
-  }
-
-  private createApprovalLogSummary(approval: EmporixApprovalResponse): Record<string, unknown> {
-    return {
-      id: approval.id,
-      resourceType: approval.resourceType,
-      action: approval.action,
-      status: approval.status,
-      resourceId: approval.resource?.id,
-      requestor: {
-        userId: approval.requestor?.userId,
-        firstName: approval.requestor?.firstName,
-        lastName: approval.requestor?.lastName,
-      },
-      approver: {
-        userId: approval.approver?.userId,
-        firstName: approval.approver?.firstName,
-        lastName: approval.approver?.lastName,
-      },
-      comment: approval.comment,
-      approverComment: approval.approverComment,
-      expiryDate: approval.expiryDate,
-      createdAt: approval.metadata?.createdAt,
-      updatedAt: approval.metadata?.updatedAt,
-      version: approval.metadata?.version,
-    };
   }
 }
 export default EmporixApprovalService;

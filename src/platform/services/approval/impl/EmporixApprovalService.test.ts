@@ -123,7 +123,7 @@ describe('EmporixApprovalService', () => {
     await expect(approvalService.createApproval(approvalRequest)).rejects.toBe(createError);
   });
 
-  it('logs a redacted summary of the raw Emporix approvals response before mapping', async () => {
+  it('logs only aggregate approval identifiers before mapping', async () => {
     mockApprovalApi.getApprovals.mockResolvedValueOnce([
       {
         id: 'approval-1',
@@ -162,31 +162,7 @@ describe('EmporixApprovalService', () => {
         sort: 'createdAt:desc',
         query: null,
         approvalsCount: 1,
-        approvals: [
-          {
-            id: 'approval-1',
-            resourceType: 'QUOTE',
-            action: 'CHECKOUT',
-            status: 'PENDING',
-            resourceId: 'quote-1',
-            requestor: {
-              userId: 'requestor-1',
-              firstName: 'Requester',
-              lastName: 'One',
-            },
-            approver: {
-              userId: 'approver-1',
-              firstName: 'Approver',
-              lastName: 'One',
-            },
-            comment: 'Please review',
-            approverComment: undefined,
-            expiryDate: undefined,
-            createdAt: '2026-06-01T10:00:00.000Z',
-            updatedAt: '2026-06-01T11:00:00.000Z',
-            version: 3,
-          },
-        ],
+        approvalIds: ['approval-1'],
       },
       'Emporix approvals list response summary',
     );

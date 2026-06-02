@@ -36,8 +36,9 @@ describe('EmporixQuoteApi.patchQuote error message', () => {
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: '/quote/test-tenant/quotes/Q-123',
-        responseBody: '{"message":"Missing field"}',
-        payload: ops,
+        operationCount: 1,
+        hasResponseBody: true,
+        responseBodyLength: '{"message":"Missing field"}'.length,
       }),
       'Emporix quote patch failed',
     );

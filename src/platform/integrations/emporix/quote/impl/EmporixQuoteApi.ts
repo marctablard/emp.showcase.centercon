@@ -65,10 +65,11 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
           quoteId,
           scope,
           operationPath: firstOpPath,
+          operationCount: Array.isArray(body) ? body.length : undefined,
           status: response.status,
           statusText: response.statusText,
-          responseBody,
-          payload: body,
+          hasResponseBody: responseBody.length > 0,
+          responseBodyLength: responseBody.length,
         },
         'Emporix quote patch failed',
       );

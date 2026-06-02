@@ -118,7 +118,7 @@ describe('Order cross-links', () => {
       </>,
     );
 
-    expect(screen.queryByText('Related Quote')).not.toBeInTheDocument();
+    expect(screen.queryByText('relatedQuote')).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: '#Q-1000' })).not.toBeInTheDocument();
   });
 });
