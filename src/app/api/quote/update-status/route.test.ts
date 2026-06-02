@@ -188,6 +188,45 @@ describe('POST /api/quote/update-status', () => {
     );
   });
 
+  it('rewrites status patch operations to include the resolved quoteReasonId', async () => {
+    quoteService.resolveQuoteReasonId.mockResolvedValueOnce('reason-3');
+
+    const response = await POST(
+      createRequest(
+        [
+          {
+            op: 'REPLACE',
+            path: '/status',
+            value: {
+              value: 'DECLINED',
+              comment: 'Need different pricing',
+              reasonCode: 'PRICE_TOO_HIGH',
+            },
+          },
+        ],
+        'https://example.test/api/quote/update-status?quoteId=Q-1000',
+      ) as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(quoteService.resolveQuoteReasonId).toHaveBeenCalledWith('DECLINE', 'PRICE_TOO_HIGH');
+    expect(quoteService.updateQuote).toHaveBeenCalledWith(
+      'Q-1000',
+      [
+        {
+          op: 'REPLACE',
+          path: '/status',
+          value: {
+            value: 'DECLINED',
+            comment: 'Need different pricing',
+            quoteReasonId: 'reason-3',
+          },
+        },
+      ],
+      'session',
+    );
+  });
+
   it('rejects requester-side decline and change transitions without a reason code', async () => {
     const declineResponse = await POST(
       createRequest({

@@ -132,13 +132,22 @@ export async function POST(request: NextRequest) {
       statusValue.quoteReasonId = quoteReasonId;
     }
 
-    const updateList: QuoteUpdateRequest[] = operations ?? [
-      {
-        op: 'REPLACE',
-        path: '/status',
-        value: statusValue,
-      },
-    ];
+    const updateList: QuoteUpdateRequest[] = operations
+      ? operations.map((operation) =>
+          operation.path === '/status'
+            ? {
+                ...operation,
+                value: statusValue,
+              }
+            : operation,
+        )
+      : [
+          {
+            op: 'REPLACE',
+            path: '/status',
+            value: statusValue,
+          },
+        ];
     await quoteService.updateQuote(quoteId, updateList, quoteUpdateScope);
 
     if (approvalService && approvalId && status === 'ACCEPTED') {
