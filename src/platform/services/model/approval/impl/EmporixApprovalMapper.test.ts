@@ -46,6 +46,8 @@ describe('EmporixApprovalMapper', () => {
         productId: 'product-1',
       }),
     ]);
+    expect(approval.modifiedAt).toBe('2026-06-01T00:00:00.000Z');
+    expect(approval.updatedAt).toBe('2026-06-01T00:00:00.000Z');
   });
 
   it('maps approval modifiedAt and optional resource orderId', () => {
@@ -81,5 +83,39 @@ describe('EmporixApprovalMapper', () => {
     expect(approval.modifiedAt).toBe('2026-06-02T12:00:00.000Z');
     expect(approval.updatedAt).toBe('2026-06-02T12:00:00.000Z');
     expect(approval.resource.orderId).toBe('O-2000');
+  });
+
+  it('preserves updatedAt when both updatedAt and modifiedAt are present', () => {
+    const mapper = new EmporixApprovalMapper({} as never, {} as never, {} as never);
+
+    const approval = mapper.mapToService({
+      id: 'approval-3',
+      resourceType: 'QUOTE',
+      action: 'CHECKOUT',
+      status: 'APPROVED',
+      resource: {
+        id: 'Q-3000',
+      },
+      requestor: {
+        userId: 'requestor-3',
+        firstName: 'Req',
+        lastName: 'User',
+        email: 'req3@example.com',
+      },
+      approver: {
+        userId: 'approver-3',
+        firstName: 'App',
+        lastName: 'User',
+      },
+      metadata: {
+        version: 3,
+        createdAt: '2026-06-01T00:00:00.000Z',
+        updatedAt: '2026-06-02T08:00:00.000Z',
+        modifiedAt: '2026-06-03T12:00:00.000Z',
+      },
+    } as never);
+
+    expect(approval.modifiedAt).toBe('2026-06-03T12:00:00.000Z');
+    expect(approval.updatedAt).toBe('2026-06-02T08:00:00.000Z');
   });
 });

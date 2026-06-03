@@ -17,6 +17,7 @@ describe('EmporixQuoteApi.patchQuote error message', () => {
     const mockApiClient = {
       authenticatedFetch: jest.fn().mockResolvedValue({
         ok: false,
+        status: 400,
         statusText: 'Bad Request',
         text: jest.fn().mockResolvedValue('{"message":"Missing field"}'),
       } as unknown as Response),
@@ -30,7 +31,7 @@ describe('EmporixQuoteApi.patchQuote error message', () => {
     const ops = [{ op: 'REPLACE', path: '/mixins/additionalInfo', value: {} }];
 
     await expect(quoteApi.patchQuote('Q-123', ops, 'service')).rejects.toThrow(
-      'Failed to update quote Q-123 (/mixins/additionalInfo): Bad Request',
+      'Failed to update quote Q-123 (/mixins/additionalInfo) failed with upstream status 400 Bad Request: {"message":"Missing field"}',
     );
 
     expect(logger.error).toHaveBeenCalledWith(

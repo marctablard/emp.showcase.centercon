@@ -18,7 +18,7 @@ import type { QuoteService } from '@/platform/services/quote/QuoteService';
 import type { SchemaService } from '@/platform/services/schema/SchemaService';
 import type { SearchParams, SearchResult } from '../../model/common';
 
-const DEFAULT_QUOTE_SORT = 'createdAt:desc';
+const DEFAULT_QUOTE_SORT = 'metadata.createdAt:desc';
 
 @injectable('QuoteService', 'Singleton')
 class EmporixQuoteService implements QuoteService {

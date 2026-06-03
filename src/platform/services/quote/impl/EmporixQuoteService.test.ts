@@ -43,7 +43,7 @@ describe('EmporixQuoteService', () => {
 
     expect(mockQuoteApi.getQuotes).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: 'createdAt:desc',
+        sort: 'metadata.createdAt:desc',
         criteria: {
           'customer.customerId': 'customer-1',
         },

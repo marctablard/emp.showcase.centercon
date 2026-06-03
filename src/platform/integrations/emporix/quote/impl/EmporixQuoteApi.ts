@@ -1,6 +1,7 @@
 import { inject } from 'inversify';
 import 'server-only';
 import { injectable } from '@/platform/core/di/injectable';
+import { createEmporixApiError } from '@/platform/integrations/emporix/common/EmporixApiError';
 import { createFetchMetricsParams } from '@/platform/integrations/emporix/metrics-utils';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
@@ -55,9 +56,9 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
       createQuoteMetrics('/quote/{tenant}/quotes/{id}'),
     );
 
-    const responseBody = await response.text();
-
     if (!response.ok) {
+      const responseBody = await response.text();
+
       this.logger.error(
         {
           endpoint,
@@ -73,8 +74,13 @@ class EmporixQuoteApi implements IEmporixQuoteApi {
         },
         'Emporix quote patch failed',
       );
-      throw new Error(
-        `Failed to update quote ${quoteId}${firstOpPath ? ` (${firstOpPath})` : ''}: ${response.statusText} ${responseBody}`,
+
+      throw await createEmporixApiError(
+        `Failed to update quote ${quoteId}${firstOpPath ? ` (${firstOpPath})` : ''}`,
+        new Response(responseBody, {
+          status: response.status,
+          statusText: response.statusText,
+        }),
       );
     }
   }

@@ -53,6 +53,8 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
    * @returns The internal Approval model
    */
   mapToService(source: EmporixApprovalResponse): Approval {
+    const modifiedAt = source.metadata.modifiedAt ?? source.metadata.updatedAt;
+
     return {
       id: source.id,
       resourceType: source.resourceType,
@@ -65,8 +67,8 @@ export class EmporixApprovalMapper implements ApprovalMapper<EmporixApprovalResp
       approverComment: source.approverComment,
       expiryDate: source.expiryDate,
       createdAt: source.metadata.createdAt!,
-      modifiedAt: source.metadata.modifiedAt,
-      updatedAt: source.metadata.modifiedAt,
+      modifiedAt,
+      updatedAt: source.metadata.updatedAt ?? modifiedAt,
       details: source.details ? this.mapDetails(source.details) : undefined,
       version: source.metadata.version,
     };
