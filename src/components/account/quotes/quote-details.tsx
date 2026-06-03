@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 import { QuoteStatusBadge } from '@/components/account/quotes/quote-status-badge';
 import { QuoteSummary } from '@/components/account/quotes/quote-summary';
@@ -31,10 +31,11 @@ import { useQuote } from '@/hooks/quotes/useQuotes';
 import { useRouter } from '@/i18n/navigation';
 import { createQuoteApprovalRequest } from '@/lib/approval/contracts';
 import { checkApprovalPermitted, createApproval } from '@/lib/client/approval';
+import { getQuoteStatusDisplayLabel } from '@/lib/common/quote-status-message-keys';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn } from '@/lib/utils';
 import { ApprovalAlreadyExistsError } from '@/platform/services/approval/errors';
-import type { Quote } from '@/platform/services/model/quote';
+import type { Quote, QuoteHistoryItem } from '@/platform/services/model/quote';
 
 interface QuoteDetailsProps {
   quoteId: string;
@@ -60,7 +61,9 @@ const QUOTE_DECISION_REASON_OPTIONS = {
 type QuoteDecisionMode = keyof typeof QUOTE_DECISION_REASON_OPTIONS;
 
 export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
+  const locale = useLocale();
   const t = useTranslations('account.quoteDetails');
+  const tQuoteStatus = useTranslations('account.quoteStatus');
   const tApproval = useTranslations('checkout.approval');
   const router = useRouter();
 
@@ -316,10 +319,21 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('de-DE', {
+    return new Date(dateString).toLocaleDateString(locale, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+    });
+  };
+
+  const formatHistoryDate = (dateString?: string) => {
+    if (!dateString || dateString === '-') return '-';
+    return new Date(dateString).toLocaleString(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -332,20 +346,34 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
     }).format(price);
   };
 
-  const getHistoryAction = (fieldChanged: string) => {
-    return fieldChanged === '/comment' || fieldChanged.startsWith('/mixins/')
+  const getHistoryAction = (historyItem: Pick<QuoteHistoryItem, 'fieldChanged' | 'statusValue'>) => {
+    return historyItem.fieldChanged === '/comment' || historyItem.fieldChanged.startsWith('/mixins/')
       ? t('commentAdded')
-      : t('statusChanged', { currentStatus: quote?.status || 'UNKNOWN' });
+      : t('statusChanged', {
+          currentStatus: historyItem.statusValue
+            ? getQuoteStatusDisplayLabel(historyItem.statusValue, tQuoteStatus)
+            : 'UNKNOWN',
+        });
   };
 
-  const getHistoryUserName = (historyItem: { fieldChanged: string; userFullName: string }) => {
-    if (historyItem.fieldChanged === '/comment') {
-      return quote?.approverName || historyItem.userFullName;
-    }
-    if (historyItem.fieldChanged.startsWith('/mixins/')) {
-      return quote?.customerName || historyItem.userFullName;
-    }
+  const getHistoryUserName = (historyItem: Pick<QuoteHistoryItem, 'userFullName'>) => {
     return historyItem.userFullName;
+  };
+
+  const getHistoryReason = (quoteReason?: string): string | undefined => {
+    if (!quoteReason) {
+      return undefined;
+    }
+
+    return t.has(`decisionReasons.${quoteReason}` as any) ? t(`decisionReasons.${quoteReason}` as any) : quoteReason;
+  };
+
+  const getHistoryComment = (historyItem: Pick<QuoteHistoryItem, 'comment'>): React.ReactNode => {
+    if (!historyItem.comment || historyItem.comment === '-') {
+      return '-';
+    }
+
+    return historyItem.comment;
   };
 
   const showInquiryCta = approvalPermission?.permitted === false;
@@ -736,39 +764,56 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
               </UiLink>
             </div>
           ) : null}
+
+          {approvalPermission?.approvalId ? (
+            <div>
+              <p className="text-sm font-medium text-text-placeholders">{t('relatedApproval')}</p>
+              <UiLink
+                type="Link"
+                href={`/account/approval/${approvalPermission.approvalId}`}
+                variant="text"
+                className="mt-2 inline-flex underline"
+              >
+                #{approvalPermission.approvalId}
+              </UiLink>
+            </div>
+          ) : null}
         </div>
 
         {/* Quote History Section */}
         <div className="space-y-4">
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr]">
+          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4">
             <p className="col-start-1 font-bold font-headlines">{t('editor')}</p>
             <p className="col-start-2 font-bold font-headlines">{t('action')}</p>
             <p className="col-start-3 font-bold font-headlines">{t('comment')}</p>
-            <p className="col-start-4 font-bold font-headlines">{t('date')}</p>
+            <p className="col-start-4 font-bold font-headlines">{t('reason')}</p>
+            <p className="col-start-5 font-bold font-headlines">{t('date')}</p>
           </div>
 
           {/* Always show initial quote request as first entry */}
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-border-primary">
+          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4 py-4 border-t border-border-primary">
             <p className="col-start-1">{quote.customerName || 'Unknown User'}</p>
             <p className="col-start-2">{t('initialQuoteRequest')}</p>
             <p className="col-start-3">{'-'}</p>
-            <p className="col-start-4">{formatDate(quote.submittedDate)}</p>
+            <p className="col-start-4">{'-'}</p>
+            <p className="col-start-5">{formatDate(quote.submittedDate)}</p>
           </div>
 
           {historyLoading ? (
-            <div className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-border-primary">
+            <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4 py-4 border-t border-border-primary">
               <p className="col-start-1">{t('loadingHistory')}</p>
             </div>
           ) : (
             quoteHistory.map((historyItem) => (
               <div
                 key={historyItem.id}
-                className="grid grid-cols-[1fr_1fr_1fr_1fr] py-4 border-t border-border-primary"
+                className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4 py-4 border-t border-border-primary"
               >
                 <p className="col-start-1">{getHistoryUserName(historyItem)}</p>
-                <p className="col-start-2">{getHistoryAction(historyItem.fieldChanged)}</p>
-                <p className="col-start-3">{historyItem.comment}</p>
-                <p className="col-start-4">{historyItem.modifiedAt}</p>
+                <p className="col-start-2">{getHistoryAction(historyItem)}</p>
+                <p className="col-start-3">{getHistoryComment(historyItem)}</p>
+                <p className="col-start-4">{getHistoryReason(historyItem.quoteReason) || '-'}</p>
+                <p className="col-start-5">{formatHistoryDate(historyItem.rawModifiedAt || historyItem.modifiedAt)}</p>
               </div>
             ))
           )}

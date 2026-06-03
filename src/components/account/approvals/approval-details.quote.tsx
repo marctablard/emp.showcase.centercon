@@ -204,7 +204,7 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -386,7 +386,15 @@ export function ApprovalDetails({ approvalId, initialApproval, currentUserId }: 
           </div>
           <div>
             <p className="text-sm font-medium text-text-placeholders">{t('resourceId')}</p>
-            <p className="text-base">{approval.resource.id}</p>
+            <p className="text-base">
+              {approval.resourceType === 'QUOTE' ? (
+                <Link href={`/account/quotes/${approval.resource.id}`} className="underline">
+                  {approval.resource.id}
+                </Link>
+              ) : (
+                approval.resource.id
+              )}
+            </p>
           </div>
           <div>
             <p className="text-sm font-medium text-text-placeholders">{t('action')}</p>

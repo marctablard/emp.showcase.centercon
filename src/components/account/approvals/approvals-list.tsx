@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,6 +62,7 @@ function getApprovalHref(approval: Approval, currentUserId?: string): string {
 }
 
 export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsListProps) {
+  const locale = useLocale();
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
   const tAction = useTranslations('orders.ApprovalAction');
@@ -93,7 +94,7 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -198,7 +199,15 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
                 <TableRow key={approval.id}>
                   <TableCell className="font-medium">{approval.id}</TableCell>
                   <TableCell>{approval.resourceType}</TableCell>
-                  <TableCell>{approval.resourceType === 'QUOTE' ? approval.resource.id : '-'}</TableCell>
+                  <TableCell>
+                    {approval.resourceType === 'QUOTE' ? (
+                      <Link href={`/account/quotes/${approval.resource.id}`} className="underline">
+                        {approval.resource.id}
+                      </Link>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
                   <TableCell>{approval.resource.orderId ?? '-'}</TableCell>
                   <TableCell>{tAction(approval.action)}</TableCell>
                   <TableCell>

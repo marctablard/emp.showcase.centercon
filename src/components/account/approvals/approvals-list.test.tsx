@@ -8,6 +8,7 @@ import { ApprovalsList } from './approvals-list';
 
 jest.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => 'en-US',
 }));
 
 jest.mock('@/i18n/navigation', () => ({
@@ -58,7 +59,7 @@ describe('ApprovalsList', () => {
     expect(screen.getByText('CART')).toBeInTheDocument();
     expect(screen.getByText('quoteId')).toBeInTheDocument();
     expect(screen.getByText('orderId')).toBeInTheDocument();
-    expect(screen.getByText('quote-1')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'quote-1' })).toHaveAttribute('href', '/account/quotes/quote-1');
     expect(screen.getByText('order-1')).toBeInTheDocument();
     expect(screen.getByText('Requester One')).toBeInTheDocument();
     expect(screen.getByText('Approver One')).toBeInTheDocument();

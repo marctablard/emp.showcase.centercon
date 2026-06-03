@@ -428,6 +428,8 @@
     "requestingChange": "REQUESTING CHANGE...",
     "commentAdded": "Comment Added",
     "initialQuoteRequest": "Initial Quote Request",
+    "reason": "Reason",
+    "relatedApproval": "Related Approval",
     "statusChanged": "Status Changed to {currentStatus}",
     "loadingHistory": "Loading history...",
     "quoteActionFailedTitle": "We couldn't complete this action",

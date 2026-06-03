@@ -290,7 +290,7 @@ describe('Company quote approval details', () => {
 
     expect(screen.getByText('approval-1')).toBeInTheDocument();
     expect(screen.getByText('QUOTE')).toBeInTheDocument();
-    expect(screen.getAllByText('Q-1000').length).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: 'Q-1000' })).toHaveAttribute('href', '/account/quotes/Q-1000');
     expect(screen.getByText('ProductListResolver')).toBeInTheDocument();
   });
 

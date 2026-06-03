@@ -8,9 +8,46 @@ import type { Quote } from '@/platform/services/model/quote';
 import { QuoteDetails } from './quote-details';
 import { QuotesTable } from './quotes-table';
 
+let mockHistory: Array<{
+  id: string;
+  userFullName: string;
+  comment: string;
+  modifiedAt: string;
+  rawModifiedAt?: string;
+  fieldChanged: string;
+  statusValue?: string;
+  quoteReason?: string;
+}> = [];
+
+const mockCheckApprovalPermitted = jest.fn();
+
 jest.mock('next-intl', () => ({
-  useTranslations: (namespace: string) => (key: string) => `${namespace}.${key}`,
-  useLocale: () => 'en',
+  useTranslations: (namespace: string) => {
+    const translate = (key: string, values?: Record<string, string>) => {
+      if (namespace === 'account.quoteDetails' && key === 'statusChanged') {
+        return `Status Changed to ${values?.currentStatus}`;
+      }
+
+      if (namespace === 'account.quoteStatus' && key === 'in_progress') {
+        return 'In Progress';
+      }
+
+      if (namespace === 'account.quoteDetails' && key === 'reason') {
+        return 'Reason';
+      }
+
+      if (namespace === 'account.quoteDetails' && key.startsWith('decisionReasons.')) {
+        return key.replace('decisionReasons.', '');
+      }
+
+      return `${namespace}.${key}`;
+    };
+
+    translate.has = (key: string) => namespace === 'account.quoteDetails' && key.startsWith('decisionReasons.');
+
+    return translate;
+  },
+  useLocale: () => 'de-DE',
 }));
 
 jest.mock('@/i18n/navigation', () => ({
@@ -30,7 +67,7 @@ jest.mock('@/hooks/quotes/useQuotes', () => ({
 
 jest.mock('@/hooks/quotes/useQuoteHistory', () => ({
   useQuoteHistory: () => ({
-    history: [],
+    history: mockHistory,
     loading: false,
   }),
 }));
@@ -61,6 +98,11 @@ jest.mock('@/lib/logger/use-logger-client', () => ({
   getLogger: () => ({
     error: jest.fn(),
   }),
+}));
+
+jest.mock('@/lib/client/approval', () => ({
+  checkApprovalPermitted: (...args: unknown[]) => mockCheckApprovalPermitted(...args),
+  createApproval: jest.fn(),
 }));
 
 const baseQuote: Quote = {
@@ -102,6 +144,12 @@ const baseQuote: Quote = {
 };
 
 describe('Quote cross-links', () => {
+  beforeEach(() => {
+    mockHistory = [];
+    mockCheckApprovalPermitted.mockReset();
+    mockCheckApprovalPermitted.mockResolvedValue({ permitted: false, approvalId: 'approval-123' });
+  });
+
   it('renders the related order link on quote list and detail views when orderId is present', () => {
     const quoteWithOrder = { ...baseQuote, orderId: 'order-123' };
 
@@ -127,5 +175,51 @@ describe('Quote cross-links', () => {
 
     expect(screen.queryByText('account.quotesList.relatedOrder')).not.toBeInTheDocument();
     expect(screen.queryByText('account.quoteDetails.relatedOrder')).not.toBeInTheDocument();
+  });
+
+  it('renders quote history with the changed-to status, visible reason/comment, and timestamp including time', () => {
+    mockHistory = [
+      {
+        id: 'history-1',
+        userFullName: 'Ada Lovelace (CUSTOMER)',
+        comment: 'Please adjust delivery window',
+        modifiedAt: '2026-06-02T14:35:00.000Z',
+        rawModifiedAt: '2026-06-02T14:35:00.000Z',
+        fieldChanged: '/status',
+        statusValue: 'IN_PROGRESS',
+        quoteReason: 'DELIVERY_TIME_LATE',
+      },
+    ];
+
+    render(<QuoteDetails quoteId={baseQuote.id} initialQuote={baseQuote} />);
+
+    expect(screen.getByText('Ada Lovelace (CUSTOMER)')).toBeInTheDocument();
+    expect(screen.getByText('Status Changed to In Progress')).toBeInTheDocument();
+    expect(screen.getByText(/Please adjust delivery window/)).toBeInTheDocument();
+    expect(screen.getByText('Reason')).toBeInTheDocument();
+    expect(screen.getByText('DELIVERY_TIME_LATE')).toBeInTheDocument();
+
+    const historyTimestamp = screen.getByText(/02\.06\.2026/);
+
+    expect(historyTimestamp).toHaveTextContent(/\d{2}:\d{2}/);
+  });
+
+  it('renders a related approval link when an existing approval id is already available from permission state', async () => {
+    render(<QuoteDetails quoteId="quote-open-1" initialQuote={{ ...baseQuote, status: 'OPEN' }} />);
+
+    expect(await screen.findByText('account.quoteDetails.relatedApproval')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '#approval-123' })).toHaveAttribute(
+      'href',
+      '/account/approval/approval-123',
+    );
+  });
+
+  it('omits related approval UI when existing permission state does not include an approval id', async () => {
+    mockCheckApprovalPermitted.mockResolvedValueOnce({ permitted: true, approvalId: undefined });
+
+    render(<QuoteDetails quoteId="quote-open-2" initialQuote={{ ...baseQuote, status: 'OPEN' }} />);
+
+    expect(await screen.findByText('account.quoteDetails.totalAmount')).toBeInTheDocument();
+    expect(screen.queryByText('account.quoteDetails.relatedApproval')).not.toBeInTheDocument();
   });
 });
