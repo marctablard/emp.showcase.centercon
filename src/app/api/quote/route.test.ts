@@ -193,6 +193,26 @@ describe('POST /api/quote', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
+  it('ignores inquiry-only request fields and still creates a plain quote', async () => {
+    const response = await POST(
+      createRequest({
+        cartId: 'cart-1',
+        intent: 'INQUIRY',
+        approverId: 'approver-1',
+        userComment: 'approval note',
+      }) as never,
+    );
+
+    expect(response.status).toBe(201);
+    expect(quoteService.createQuote).toHaveBeenCalledWith({
+      cartId: 'cart-1',
+      billingAddressId: undefined,
+      shippingAddressId: undefined,
+      shipping: undefined,
+    });
+    await expect(response.json()).resolves.toEqual({ quoteId: 'Q-1000' });
+  });
+
   it('returns 500 when QuoteService.createQuote throws', async () => {
     quoteService.createQuote.mockRejectedValueOnce(new Error('upstream down'));
 

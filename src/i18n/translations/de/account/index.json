@@ -322,6 +322,9 @@
   "quoteDetails": {
     "title": "Angebotsdetails",
     "status": "Status",
+    "product": "Produkt",
+    "quantity": "Menge",
+    "price": "Preis",
     "quotationDate": "Angebotsdatum",
     "totalAmount": "Gesamtbetrag",
     "editor": "Bearbeiter",
@@ -347,6 +350,7 @@
     "quoteReference": "Angebotsnummer",
     "approver": "Genehmiger",
     "accept": "ANNEHMEN",
+    "inquireApproval": "GENEHMIGUNG ANFRAGEN",
     "reject": "ABLEHNEN",
     "requestChange": "ÄNDERUNG ANFORDERN",
     "confirmationTitle": "Möchten Sie das Angebot annehmen und eine Bestellung erstellen?",
@@ -361,6 +365,16 @@
     "creating": "WIRD ERSTELLT...",
     "rejectConfirmationTitle": "Möchten Sie das Angebot ablehnen?",
     "rejectConfirmationDescription": "Wenn Sie möchten, können Sie einen Kommentar hinterlassen, um uns mitzuteilen, warum Sie dieses Angebot ablehnen. Ihr Feedback hilft uns, unsere Angebote zu verbessern.",
+    "decisionReasonLabel": "Grund",
+    "decisionReasonPlaceholder": "Wählen Sie einen Grund aus",
+    "decisionReasons": {
+      "PRICE_TOO_HIGH": "Preis zu hoch",
+      "NO_LONGER_NEEDED": "Nicht mehr benötigt",
+      "DELIVERY_TIME_LATE": "Lieferzeit zu spät",
+      "OTHER": "Andere",
+      "WRONG_MATERIAL": "Falsches Material",
+      "PROVIDED_PRICE_TO_HIGH": "Angegebener Preis zu hoch"
+    },
     "rejectCommentPlaceholder": "Bitte geben Sie Gründe für die Ablehnung dieses Angebots an...",
     "rejectQuote": "ANGEBOT ABLEHNEN",
     "rejecting": "WIRD ABGELEHNT...",
@@ -370,10 +384,13 @@
     "requestingChange": "ÄNDERUNG WIRD ANGEFORDERT...",
     "commentAdded": "Kommentar hinzugefügt",
     "initialQuoteRequest": "Angebotsanfrage",
-    "statusChanged": "Status geändert {currentStatus}",
+    "reason": "Grund",
+    "relatedApproval": "Zugehörige Genehmigung",
+    "statusChanged": "Status geändert zu {currentStatus}",
     "loadingHistory": "Verlauf wird geladen...",
     "quoteActionFailedTitle": "Die Aktion konnte nicht ausgeführt werden",
-    "quoteActionFailedDescription": "Bitte versuchen Sie es erneut oder wenden Sie sich an den Support."
+    "quoteActionFailedDescription": "Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.",
+    "relatedOrder": "Zugehörige Bestellung"
   },
   "quotesList": {
     "title": "Angebote",
@@ -389,6 +406,7 @@
     "totalAmount": "Gesamtbetrag",
     "numberOfProducts": "Anzahl der Produkte",
     "products": "Produkte",
+    "relatedOrder": "Zugehörige Bestellung",
     "noQuotes": "Sie haben noch keine Angebote",
     "viewQuote": "Angebotsansicht",
     "next": "Weiter",

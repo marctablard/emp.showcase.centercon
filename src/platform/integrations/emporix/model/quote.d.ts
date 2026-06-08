@@ -151,6 +151,7 @@ export interface EmporixQuoteShipping {
  */
 export interface EmporixQuote {
   id: string;
+  orderId?: string;
   businessModel?: string;
   cartId?: string;
   customer: {

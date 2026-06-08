@@ -1,3 +1,4 @@
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type EmporixApiInvoker from '../common/impl/EmporixApiInvoker';
 import type { EmporixConfig } from '../config';
 import EmporixQuoteApi from './impl/EmporixQuoteApi';
@@ -24,6 +25,7 @@ describe('EmporixQuoteApi.createQuote', () => {
 
   let mockApiClient: jest.Mocked<EmporixApiInvoker>;
   let quoteApi: EmporixQuoteApi;
+  let logger: LoggerService;
 
   beforeEach(() => {
     mockApiClient = {
@@ -35,7 +37,12 @@ describe('EmporixQuoteApi.createQuote', () => {
       } as unknown as Response),
     } as unknown as jest.Mocked<EmporixApiInvoker>;
 
-    quoteApi = new EmporixQuoteApi(mockApiClient, mockConfig);
+    logger = {
+      info: jest.fn(),
+      error: jest.fn(),
+    } as unknown as LoggerService;
+
+    quoteApi = new EmporixQuoteApi(mockApiClient, mockConfig, logger);
   });
 
   it('uses the session token type (not service) so B2B legalEntityId resolves', async () => {

@@ -7,6 +7,7 @@ import { Ban, RotateCcw, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { H2, H3 } from '@/components/ui/h';
+import UiLink from '@/components/ui/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToastType, notify } from '@/components/ui/toast-notification';
@@ -141,6 +142,17 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
                   <p>{tPaymentModes(dk<PaymentModeKey>(order.payments[0].method.toLowerCase()))}</p>
                 </>
               )}
+
+              {order.quoteId ? (
+                <>
+                  <H3 variant="h5" className="mb-2 mt-4">
+                    {tOrder('relatedQuote')}
+                  </H3>
+                  <UiLink href={`/account/quotes/${order.quoteId}`} type="Link">
+                    #{order.quoteId}
+                  </UiLink>
+                </>
+              ) : null}
             </div>
 
             {order.shippingAddress && (
