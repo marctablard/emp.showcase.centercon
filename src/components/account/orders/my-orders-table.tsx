@@ -193,7 +193,7 @@ export function MyOrdersTable({
               >
                 <TableCell className="px-2 py-4 font-medium">
                   <UiLink type="Link" href={`/account/orders/${order.id}`} variant="primary" size="m">
-                    {order.id}
+                    #{order.id}
                   </UiLink>
                   {order.quoteId ? (
                     <div className="mt-1 text-sm text-text-placeholders" onClick={(event) => event.stopPropagation()}>

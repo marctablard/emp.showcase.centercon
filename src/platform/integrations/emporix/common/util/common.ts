@@ -25,7 +25,7 @@ export function buildSearchQuery<T>(
   if (params.expand) {
     queryParams.append('expand', params.expand.join(','));
   }
-  let query: string = '';
+  let query: string = params.query ?? '';
   if (params.criteria) {
     Object.entries(params.criteria).forEach(([key, value]) => {
       if (value === undefined || value === null) {

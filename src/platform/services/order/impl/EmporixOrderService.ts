@@ -74,9 +74,9 @@ class EmporixOrderService implements OrderService {
     }
   }
 
-  async getCustomerOrders(pageSize?: number, pageNumber?: number): Promise<Order[]> {
+  async getCustomerOrders(pageSize?: number, pageNumber?: number, sort?: string, query?: string): Promise<Order[]> {
     try {
-      const orders = await this.orderApi.getCustomerOrders(pageSize, pageNumber);
+      const orders = await this.orderApi.getCustomerOrders(pageSize, pageNumber, sort, query);
       return orders.map((order) => this.mapper.mapToService(order));
     } catch (error) {
       if (error instanceof Error) {

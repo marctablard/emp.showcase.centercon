@@ -35,6 +35,7 @@
   "deliveryAddress": "Delivery Address",
   "orderValue": "Order Value",
   "noOrders": "No orders found",
+  "noMatches": "No orders match your search",
   "ordersTotal": "Total orders",
   "orderActions": "Order Actions",
   "cancelOrder": "Cancel Order",
@@ -207,7 +208,9 @@
     "saveRequestorComment": "Save Requestor Comment",
     "previous": "Previous",
     "next": "Next",
-    "pageIndicator": "Page {current} / {total}"
+    "pageIndicator": "Page {current} / {total}",
+    "searchPlaceholder": "Search by approval ID...",
+    "noMatches": "No approvals match your search"
   },
   "ApprovalAction": {
     "CHECKOUT": "Order"

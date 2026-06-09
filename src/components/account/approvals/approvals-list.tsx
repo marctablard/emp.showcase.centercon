@@ -2,17 +2,22 @@
 
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { Search } from 'lucide-react';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { useApprovals } from '@/hooks/approval/useApprovals';
+import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
 import { Link } from '@/i18n/navigation';
 import type { Approval, ApprovalStatus } from '@/platform/services/model/approval';
 import { ApprovalStatusBadge } from './approval-status-badge';
+
+const SEARCH_DEBOUNCE_MS = 500;
 
 interface ApprovalsListProps {
   initialApprovals?: Approval[];
@@ -68,7 +73,24 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
   const tAction = useTranslations('orders.ApprovalAction');
   const [filterStatus, setFilterStatus] = useState<ApprovalStatus | '_ALL_'>('_ALL_');
   const [currentPage, setCurrentPage] = useState(1);
-  const { approvals, loading, error, filterApprovals, refreshApprovals } = useApprovals(initialApprovals);
+
+  const [quickSearch, setQuickSearch] = useState('');
+  const normalizedSearch = useDebouncedValue(quickSearch, SEARCH_DEBOUNCE_MS).trim();
+
+  const apiQuery = useMemo(() => {
+    const parts: string[] = [];
+    if (filterStatus !== '_ALL_') {
+      parts.push(`status:${filterStatus}`);
+    }
+    if (normalizedSearch.length > 0) {
+      parts.push(
+        `compoundLogicalQuery:((id:~(${normalizedSearch})) OR (status:~(${normalizedSearch.toUpperCase()})) OR (requestor.firstName:~(${normalizedSearch})) OR (requestor.lastName:~(${normalizedSearch})) OR (approver.firstName:~(${normalizedSearch})) OR (approver.lastName:~(${normalizedSearch})))`,
+      );
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }, [filterStatus, normalizedSearch]);
+
+  const { approvals, loading, error, refreshApprovals } = useApprovals(initialApprovals, undefined, apiQuery);
 
   const sortedApprovals = useMemo(
     () => [...approvals].sort((left, right) => getApprovalModifiedAt(right) - getApprovalModifiedAt(left)),
@@ -83,13 +105,8 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
   );
 
   const handleFilter = (status: ApprovalStatus | '_ALL_') => {
-    const filter: Partial<Approval> = {};
     setFilterStatus(status);
     setCurrentPage(1);
-    if (status !== '_ALL_') {
-      filter.status = status;
-    }
-    filterApprovals(filter);
   };
 
   const formatDate = (dateString: string) => {
@@ -103,7 +120,7 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
     }).format(date);
   };
 
-  if (loading) {
+  if (loading && normalizedSearch.length === 0 && filterStatus === '_ALL_') {
     return (
       <Card>
         <CardHeader>
@@ -139,7 +156,7 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
     );
   }
 
-  if (sortedApprovals.length === 0) {
+  if (approvals.length === 0 && normalizedSearch.length === 0 && filterStatus === '_ALL_') {
     return (
       <Card>
         <CardHeader>
@@ -153,6 +170,8 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
     );
   }
 
+  const isSearchLoading = loading && normalizedSearch.length > 0;
+
   return (
     <Card>
       <CardHeader>
@@ -161,8 +180,29 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex flex-wrap gap-4">
+          <div className="relative w-full max-w-[380px]">
+            <Input
+              value={quickSearch}
+              onChange={(event) => {
+                setCurrentPage(1);
+                setQuickSearch(event.target.value);
+              }}
+              placeholder={t('searchPlaceholder')}
+              className="pr-10"
+              endIcon={isSearchLoading ? undefined : Search}
+              aria-label={t('searchPlaceholder')}
+            />
+            {isSearchLoading && (
+              <Spinner
+                variant="sm"
+                color="primary"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                loadingText={t('loading')}
+              />
+            )}
+          </div>
           <div className="flex-1 min-w-[200px]">
-            <Select value={filterStatus} onValueChange={(value) => handleFilter(value as ApprovalStatus)}>
+            <Select value={filterStatus} onValueChange={(value) => handleFilter(value as ApprovalStatus | '_ALL_')}>
               <SelectTrigger>
                 <SelectValue placeholder={t('filterByStatus')} />
               </SelectTrigger>
@@ -177,6 +217,12 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
             </Select>
           </div>
         </div>
+
+        {!loading && approvals.length === 0 && (normalizedSearch.length > 0 || filterStatus !== '_ALL_') && (
+          <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
+            {t('noMatches')}
+          </div>
+        )}
 
         <div className="rounded-md border">
           <Table>
