@@ -91,6 +91,19 @@ export function QuotesTable({
                     >
                       {quote.id}
                     </UiLink>
+                    {quote.orderId ? (
+                      <div className="mt-1 text-sm text-text-placeholders">
+                        {t('relatedOrder')}{' '}
+                        <UiLink
+                          type="Link"
+                          href={`/account/orders/${quote.orderId}`}
+                          variant="text"
+                          className="underline"
+                        >
+                          #{quote.orderId}
+                        </UiLink>
+                      </div>
+                    ) : null}
                   </TableCell>
                   <TableCell className="px-2 py-4">{quote.reference || '-'}</TableCell>
                   <TableCell className="px-2 py-4">

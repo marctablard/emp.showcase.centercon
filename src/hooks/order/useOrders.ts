@@ -37,6 +37,14 @@ interface UseOrdersResult {
   refetchOrders: () => Promise<void>;
 }
 
+function createOrderQueryKey(searchQuery: { query: string; body: unknown }, freeTextQuery?: string): string {
+  return JSON.stringify({
+    query: searchQuery.query,
+    body: searchQuery.body,
+    search: freeTextQuery ?? null,
+  });
+}
+
 /**
  * Hook for managing collections of orders with pagination, filtering, and searching
  * This is now a simple pass-through to the order store
@@ -73,7 +81,7 @@ export const useOrders = (options: UseOrdersOptions = {}): UseOrdersResult => {
     size: pageSize,
     criteria: filters,
   });
-  const queryKey = query.query + query.body + (searchQuery ?? '');
+  const queryKey = createOrderQueryKey(query, searchQuery);
 
   useEffect(() => {
     // Initialize with initialOrders if provided and not already in store

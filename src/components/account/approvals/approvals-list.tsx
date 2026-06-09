@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
 import { Button } from '@/components/ui/button';
@@ -21,9 +21,53 @@ const SEARCH_DEBOUNCE_MS = 500;
 
 interface ApprovalsListProps {
   initialApprovals?: Approval[];
+  currentUserId?: string;
 }
 
-export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
+function getApprovalModifiedAt(approval: Approval): number {
+  const candidate = approval.modifiedAt ?? approval.updatedAt ?? approval.createdAt;
+  const timestamp = candidate ? new Date(candidate).getTime() : 0;
+
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function formatApprovalUserName(user: {
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  userId?: string;
+}): string {
+  if (user.fullName && user.fullName.trim() !== '') {
+    return user.fullName;
+  }
+
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  if (fullName !== '') {
+    return fullName;
+  }
+
+  return user.userId ?? '-';
+}
+
+function getApprovalHref(approval: Approval, currentUserId?: string): string {
+  if (
+    approval.resourceType === 'QUOTE' &&
+    currentUserId &&
+    approval.approver.userId === currentUserId &&
+    approval.requestor.userId !== currentUserId
+  ) {
+    return `/account/approval/${approval.id}`;
+  }
+
+  if (approval.resourceType === 'QUOTE') {
+    return `/account/quotes/${approval.resource.id}`;
+  }
+
+  return `/account/approvals/${approval.id}`;
+}
+
+export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsListProps) {
+  const locale = useLocale();
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
   const tAction = useTranslations('orders.ApprovalAction');
@@ -48,11 +92,16 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
 
   const { approvals, loading, error, refreshApprovals } = useApprovals(initialApprovals, undefined, apiQuery);
 
-  const totalPages = Math.max(1, Math.ceil(approvals.length / APPROVALS_PER_PAGE));
+  const sortedApprovals = useMemo(
+    () => [...approvals].sort((left, right) => getApprovalModifiedAt(right) - getApprovalModifiedAt(left)),
+    [approvals],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(sortedApprovals.length / APPROVALS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const visibleApprovals = useMemo(
-    () => approvals.slice((safeCurrentPage - 1) * APPROVALS_PER_PAGE, safeCurrentPage * APPROVALS_PER_PAGE),
-    [approvals, safeCurrentPage],
+    () => sortedApprovals.slice((safeCurrentPage - 1) * APPROVALS_PER_PAGE, safeCurrentPage * APPROVALS_PER_PAGE),
+    [safeCurrentPage, sortedApprovals],
   );
 
   const handleFilter = (status: ApprovalStatus | '_ALL_') => {
@@ -62,7 +111,7 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -180,6 +229,9 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('id')}</TableHead>
+                <TableHead>{t('resourceType')}</TableHead>
+                <TableHead>{t('quoteId')}</TableHead>
+                <TableHead>{t('orderId')}</TableHead>
                 <TableHead>{t('action')}</TableHead>
                 <TableHead>{t('status')}</TableHead>
                 <TableHead>{t('requestor')}</TableHead>
@@ -192,19 +244,26 @@ export function ApprovalsList({ initialApprovals }: ApprovalsListProps) {
               {visibleApprovals.map((approval) => (
                 <TableRow key={approval.id}>
                   <TableCell className="font-medium">{approval.id}</TableCell>
+                  <TableCell>{approval.resourceType}</TableCell>
+                  <TableCell>
+                    {approval.resourceType === 'QUOTE' ? (
+                      <Link href={`/account/quotes/${approval.resource.id}`} className="underline">
+                        {approval.resource.id}
+                      </Link>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
+                  <TableCell>{approval.resource.orderId ?? '-'}</TableCell>
                   <TableCell>{tAction(approval.action)}</TableCell>
                   <TableCell>
                     <ApprovalStatusBadge status={approval.status} />
                   </TableCell>
-                  <TableCell>
-                    {approval.requestor.fullName || `${approval.requestor.firstName} ${approval.requestor.lastName}`}
-                  </TableCell>
-                  <TableCell>
-                    {approval.approver.fullName || `${approval.approver.firstName} ${approval.approver.lastName}`}
-                  </TableCell>
+                  <TableCell>{formatApprovalUserName(approval.requestor)}</TableCell>
+                  <TableCell>{formatApprovalUserName(approval.approver)}</TableCell>
                   <TableCell>{formatDate(approval.createdAt)}</TableCell>
                   <TableCell>
-                    <Link href={`/account/approvals/${approval.id}`} passHref>
+                    <Link href={getApprovalHref(approval, currentUserId)}>
                       <Button variant="link" size="default">
                         {t('view')}
                       </Button>

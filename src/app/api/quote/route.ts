@@ -8,17 +8,6 @@ import type { QuoteService } from '@/platform/services/quote/QuoteService';
 import type { SchemaService } from '@/platform/services/schema/SchemaService';
 import type { SessionService } from '@/platform/services/session/SessionService';
 
-/**
- * POST /api/quote
- *
- * Creates a quote from the shopper's current cart using the Emporix
- * `QuoteCreateFromCartRequest` shape (customer session token, scope
- * `quote.quote_manage_own`). The client is allowed to send additional
- * metadata at the top level of the body (`reference`, `userComment`,
- * `comment`) — those are stripped from the Emporix payload and re-applied
- * via PATCH after the quote id is returned so the BFF contract is stable
- * across client callers.
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -38,6 +27,7 @@ export async function POST(request: NextRequest) {
       const customerService = server.get<CustomerService>('CustomerService');
       let customerBusinessModel: string | undefined;
       let customerLegalEntityId: string | undefined;
+
       try {
         const customer = await customerService.getCustomer();
         customerBusinessModel = customer?.businessModel;
@@ -46,6 +36,7 @@ export async function POST(request: NextRequest) {
         customerBusinessModel = undefined;
         customerLegalEntityId = undefined;
       }
+
       const sessionLegalEntityId = session?.legalEntityId;
       logger.info(
         {
@@ -61,32 +52,25 @@ export async function POST(request: NextRequest) {
           payloadShippingAddressId: shippingAddressId ?? null,
           tokenTypeUsed: 'session',
         },
-        'Quote create (from-cart) — B2B context snapshot',
+        'Quote create (from-cart) - B2B context snapshot',
       );
     } catch (diagError) {
       logger.warn(
         { error: diagError instanceof Error ? diagError.message : String(diagError) },
-        'Quote create — failed to collect B2B context snapshot',
+        'Quote create - failed to collect B2B context snapshot',
       );
     }
 
-    const wireBody = {
+    const result = await quoteService.createQuote({
       cartId,
       billingAddressId,
       shippingAddressId,
       shipping,
-    };
-
-    const result = await quoteService.createQuote(wireBody);
+    });
 
     if (result.quoteId) {
       try {
         const updateList: QuoteUpdateRequest[] = [];
-
-        // `shipping` is sent in the create body (QuoteCreateFromCartRequest
-        // accepts it natively — see Emporix Quote Tutorial). Patching it
-        // again here would be redundant, so it is intentionally omitted from
-        // the post-create update list.
 
         if (comment !== undefined && comment !== '') {
           updateList.push({ op: 'REPLACE', path: '/comment', value: comment });

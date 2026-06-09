@@ -39,6 +39,14 @@ interface OrderActions {
 }
 export type OrderStore = OrderState & OrderActions;
 
+function createOrderQueryKey(searchQuery: { query: string; body: unknown }, query?: string): string {
+  return JSON.stringify({
+    query: searchQuery.query,
+    body: searchQuery.body,
+    search: query ?? null,
+  });
+}
+
 const defaultState: OrderState = {
   orderQueries: {},
   orders: {},
@@ -95,7 +103,7 @@ export const createOrderStore = () =>
         size: pageSize,
         criteria: filters,
       });
-      const queryKey = searchQuery.query + searchQuery.body + (query ?? '');
+      const queryKey = createOrderQueryKey(searchQuery, query);
 
       // Check if we already have this data and it's not stale (skip when forceRefresh is true)
       if (!forceRefresh) {
