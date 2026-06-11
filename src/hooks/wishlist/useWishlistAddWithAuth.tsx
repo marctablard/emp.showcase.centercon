@@ -59,7 +59,7 @@ export function useWishlistAddWithAuth(): UseWishlistAddWithAuthResult {
     <LoginDialog
       open={loginDialogOpen}
       callbackUrl=""
-      onSuccessAction={handleLoginSuccess}
+      onLoginSuccess={handleLoginSuccess}
       onCloseAction={handleDialogClose}
     />
   );
