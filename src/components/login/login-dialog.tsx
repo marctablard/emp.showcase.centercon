@@ -12,6 +12,7 @@ type LoginDialogProps = {
   open?: boolean;
   onCloseAction?: () => void;
   onLoginSuccess?: () => void;
+  onSuccessAction?: () => void;
   guestCheckout?: boolean;
   onGuestAction?: () => void;
 };
@@ -23,6 +24,7 @@ export default function LoginDialog({
   open = false,
   onCloseAction,
   onLoginSuccess,
+  onSuccessAction,
   guestCheckout = false,
   onGuestAction,
 }: LoginDialogProps) {

@@ -12,6 +12,13 @@
     "productAdded": "Ihr gewähltes Produkt",
     "quantityAdded": "Hinzugefügte Menge"
   },
+  "addToWishlistResult": {
+    "title": "Zur Wunschliste hinzugefügt",
+    "itemNumber": "Artikelnummer",
+    "quantityAdded": "{count, plural, one {# Produkt zur Wunschliste hinzugefügt} other {# Produkte zur Wunschliste hinzugefügt}}",
+    "ok": "OK",
+    "close": "Schließen"
+  },
   "addToWishlist": "Produkt Merken",
   "share": "Teilen",
   "compare": "Vergleichen",

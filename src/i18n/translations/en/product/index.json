@@ -33,6 +33,13 @@
     "productAdded": "Your selected product",
     "quantityAdded": "Added Quantity"
   },
+  "addToWishlistResult": {
+    "title": "Added to wishlist",
+    "itemNumber": "Item number",
+    "quantityAdded": "{count, plural, one {# Product added to wishlist} other {# Products added to wishlist}}",
+    "ok": "OK",
+    "close": "Close"
+  },
   "shipping": {
     "deliveryDetails": "Delivery Details",
     "immediatelyDeliverable": "Immediately available",

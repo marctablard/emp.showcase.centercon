@@ -18,6 +18,7 @@ import { useSession } from '@/hooks/session/useSession';
 import { useSite } from '@/hooks/site/useSite';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useL10n } from '@/hooks/useL10n';
+import { useWishlistAddWithAuth } from '@/hooks/wishlist/useWishlistAddWithAuth';
 import { type ProductTemplateAttributeKey, type ProductVariantAttributeKey, dk } from '@/i18n/dynamic-key';
 import { fetchProductAvailability } from '@/lib/client/availability';
 import { fetchProductPrice } from '@/lib/client/prices';
@@ -66,6 +67,14 @@ export default function ProductDetail({ product: initialProduct, options, classN
   const { disabled: compareDisabled, tooltip: compareTooltip } = useValidateAddToComparison(product);
   const addToCartButton = useRef<HTMLDivElement>(null);
   const addToCartBar = useRef<HTMLDivElement>(null);
+  const { addToWishlist, loginDialog } = useWishlistAddWithAuth();
+  const [quantity, setQuantity] = useState(1);
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!product) return;
+    addToWishlist(product.id, quantity);
+  };
   const priceSyncGenerationRef = useRef(0);
   const availabilitySyncGenerationRef = useRef(0);
   const availabilityShopContextRef = useRef('');
@@ -361,7 +370,13 @@ export default function ProductDetail({ product: initialProduct, options, classN
                 </Tooltip>
                 <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
-                    <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      aria-label={t('addToWishlist')}
+                      onClick={handleAddToWishlist}
+                      disabled={!price}
+                    >
                       <Pin />
                     </Button>
                   </TooltipTrigger>
@@ -424,6 +439,8 @@ export default function ProductDetail({ product: initialProduct, options, classN
             price={price}
             availability={availability}
             availabilityLoading={availability === undefined}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
             className="mt-6"
           />
           <div className="flex md:hidden justify-center gap-2 mt-6">
@@ -446,7 +463,13 @@ export default function ProductDetail({ product: initialProduct, options, classN
                 {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
               </TooltipContent>
             </Tooltip>
-            <Button size="icon" variant="secondary" aria-label={t('addToWishlist')}>
+            <Button
+              size="icon"
+              variant="secondary"
+              aria-label={t('addToWishlist')}
+              onClick={handleAddToWishlist}
+              disabled={!price}
+            >
               <Pin />
             </Button>
             <Button size="icon" variant="secondary" aria-label={t('share')}>
@@ -534,6 +557,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
         overline={t('productRecommendations.overline')}
         headline={t('productRecommendations.headline')}
       />
+      {loginDialog}
     </>
   );
 }

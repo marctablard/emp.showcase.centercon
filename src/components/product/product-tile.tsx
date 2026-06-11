@@ -29,6 +29,7 @@ import { useValidateAddToComparison } from '@/hooks/comparison/useValidateAddToC
 import { useAvailableVariantValues } from '@/hooks/useAvailableVariantValues';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useL10n } from '@/hooks/useL10n';
+import { useWishlistAddWithAuth } from '@/hooks/wishlist/useWishlistAddWithAuth';
 import { type ProductTemplateAttributeKey, dk } from '@/i18n/dynamic-key';
 import { Link } from '@/i18n/navigation';
 import { getPublicDefaultLanguage } from '@/lib/common/public-default-env';
@@ -52,6 +53,7 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
   const { isInComparison, toggleProduct, isFull } = useComparison();
   const { disabled: cartDisabled, tooltip: cartTooltip } = useValidateAddToCart(product);
   const { disabled: compareDisabled, tooltip: compareTooltip } = useValidateAddToComparison(product);
+  const { addToWishlist, loginDialog } = useWishlistAddWithAuth();
   const horizontalScrollRef = useHorizontalScroll();
 
   const firstAttribute = product.variantAttributes?.[0];
@@ -82,6 +84,13 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
         type: ToastType.Error,
       });
     }
+  };
+
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!product) return;
+    addToWishlist(product.id, 1);
   };
 
   function getIcon(icon: unknown): LucideIcon {
@@ -115,189 +124,202 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
   };
 
   return (
-    <Link href={`/product/${product.id}`} className="block h-full">
-      <Card shadow="default" rounded="md" className="flex h-full flex-col gap-4 border-0 transition hover:shadow-xl">
-        <CardHeader className="flex-shrink-0 no-underline">
-          <CardDescription className="text-text-body h-6 text-base font-medium">
-            {l10n(
-              product.brand?.name || product.specifications?.find((spec) => spec.key === 'manufacturer')?.value || '',
-            )}
-          </CardDescription>
-          <CardTitle className="flex justify-between gap-2">
-            <Heading variant="h5" as="div" className="md:hidden">
-              <p className="line-clamp-3">{l10n(product.name)}</p>
-            </Heading>
-            <Heading variant="h6" as="div" className="hidden md:block">
-              <p className="line-clamp-2">{l10n(product.name)}</p>
-            </Heading>
-            <div className="flex flex-shrink-0 gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex">
-                    <Button
-                      variant={isInComparison(product.id) ? 'primary' : 'secondary'}
-                      size="icon"
-                      aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
-                      aria-pressed={isInComparison(product.id)}
-                      className="h-[50px] w-[50px]"
-                      onClick={handleCompareClick}
-                      disabled={compareDisabled}
-                    >
-                      <FlipHorizontal2 width="24" height="24" />
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
-                </TooltipContent>
-              </Tooltip>
-              <Button variant="secondary" size="icon" title={t('addToWishlist')} className="h-[50px] w-[50px]">
-                <Pin width="24" height="24" />
-              </Button>
-            </div>
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="flex flex-grow flex-col gap-4">
-          <div className="bg-surface-image-background relative p-4">
-            <div className="relative aspect-square rounded-ss-md rounded-ee-md p-4">
-              {product.primaryImage ? (
-                <div className="relative h-full w-full">
-                  <Image
-                    src={product.primaryImage.url}
-                    alt={product.primaryImage.altText ? l10n(product.primaryImage.altText) : l10n(product.name)}
-                    fill
-                    sizes={imageSizes}
-                    className="object-contain object-center"
-                  />
-                </div>
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <Image src={'/images/no_image_alt.png'} alt={l10n(product.name)} width={220} height={220} />
-                </div>
+    <>
+      <Link href={`/product/${product.id}`} className="block h-full">
+        <Card shadow="default" rounded="md" className="flex h-full flex-col gap-4 border-0 transition hover:shadow-xl">
+          <CardHeader className="flex-shrink-0 no-underline">
+            <CardDescription className="text-text-body h-6 text-base font-medium">
+              {l10n(
+                product.brand?.name || product.specifications?.find((spec) => spec.key === 'manufacturer')?.value || '',
               )}
-            </div>
-
-            <div className="absolute right-4 bottom-4 flex flex-row justify-end gap-2">
-              {!variantLoading && availableValues.length > 0 && (
-                <>
-                  {availableValues.slice(0, 3).map((value) => {
-                    const isColorAttribute = firstAttribute!.key === 'color' || firstAttribute!.key === 'farbe';
-
-                    return isColorAttribute ? (
-                      <ProductColorTile
-                        key={value.key}
-                        attributeKey={value.key}
-                        attributeName={value.name ? l10n(value.name) : value.key}
-                        size="sm"
-                        showCheckmark={false}
-                      />
-                    ) : (
-                      <ProductCharacteristic
-                        key={value.key}
-                        value={value.name ? l10n(value.name) : value.key}
-                        unit={firstAttribute!.name ? l10n(firstAttribute!.name) : firstAttribute!.key}
-                      />
-                    );
-                  })}
-                  {availableValues.length > 3 && (
-                    <div className="bg-surface-disabled text-text-on-disabled flex h-8 w-8 items-center justify-center rounded text-sm font-medium">
-                      +{availableValues.length - 3}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="absolute top-4 -left-6 flex flex-col gap-2">
-              {product.labels?.map((label) => (
-                <Badge key={label.id} variant="info" rounded="roundedRight">
-                  {label.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {product.templateAttributes && (
-              <div className="w-full">
-                {/* Dynamically display all template attributes */}
-                {product.templateAttributes &&
-                  Object.entries(product.templateAttributes).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <p className="text-sm">
-                        {t(dk<ProductTemplateAttributeKey>(`filters.mixins.productTemplateAttributes.${key}`), {
-                          defaultValue: key,
-                        })}
-                      </p>
-                      <p className="text-sm font-bold capitalize">
-                        {value}
-                        {/* Todo: get unit from product */}
-                        {key === 'length' || key === 'width' || key === 'height' ? 'cm' : ''}
-                      </p>
-                    </div>
-                  ))}
+            </CardDescription>
+            <CardTitle className="flex justify-between gap-2">
+              <Heading variant="h5" as="div" className="md:hidden">
+                <p className="line-clamp-3">{l10n(product.name)}</p>
+              </Heading>
+              <Heading variant="h6" as="div" className="hidden md:block">
+                <p className="line-clamp-2">{l10n(product.name)}</p>
+              </Heading>
+              <div className="flex flex-shrink-0 gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex">
+                      <Button
+                        variant={isInComparison(product.id) ? 'primary' : 'secondary'}
+                        size="icon"
+                        aria-label={isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd')}
+                        aria-pressed={isInComparison(product.id)}
+                        className="h-[50px] w-[50px]"
+                        onClick={handleCompareClick}
+                        disabled={compareDisabled}
+                      >
+                        <FlipHorizontal2 width="24" height="24" />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {compareTooltip ??
+                      (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
+                  </TooltipContent>
+                </Tooltip>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  title={t('addToWishlist')}
+                  className="h-[50px] w-[50px]"
+                  onClick={handleAddToWishlist}
+                  disabled={!product.price}
+                >
+                  <Pin width="24" height="24" />
+                </Button>
               </div>
-            )}
-            <div ref={horizontalScrollRef} className="hide-scrollbar flex max-w-full gap-2 overflow-x-scroll">
-              {product.usps?.map((usp) => (
-                <ProductTag icon={getIcon(usp.icon)} text={l10n(usp.description)} key={l10n(usp.description)} />
-              ))}
-            </div>
-          </div>
-        </CardContent>
+            </CardTitle>
+          </CardHeader>
 
-        <CardFooter>
-          <div className="flex w-full flex-col gap-1">
-            <div className="text-text-success flex items-center gap-2 text-sm">
-              {/* Todo: read availability from product */}
-              <Truck />
-              <p>{t('shipping.onlineAvailable')}</p>
-            </div>
-            <div className="text-text-success flex items-center gap-2 text-sm">
-              {/* Todo: read pickup availability from product */}
-              <MapPin />
-              <p>{t('shipping.canBeReservedExample')}</p>
-            </div>
-            <div className="flex items-end justify-between">
-              <div className="flex flex-col gap-1">
-                {product.price ? (
-                  product.price.originalAmount && product.price.originalAmount !== product.price.amount ? (
-                    <>
-                      <p className="line-through">
-                        {formatCurrency(product.price.originalAmount, product.price.currency)}
-                      </p>
-                      <p className="text-text-error text-lg font-bold">
-                        {formatCurrency(product.price.amount, product.price.currency)}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-lg font-bold">{formatCurrency(product.price.amount, product.price.currency)}</p>
-                  )
+          <CardContent className="flex flex-grow flex-col gap-4">
+            <div className="bg-surface-image-background relative p-4">
+              <div className="relative aspect-square rounded-ss-md rounded-ee-md p-4">
+                {product.primaryImage ? (
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={product.primaryImage.url}
+                      alt={product.primaryImage.altText ? l10n(product.primaryImage.altText) : l10n(product.name)}
+                      fill
+                      sizes={imageSizes}
+                      className="object-contain object-center"
+                    />
+                  </div>
                 ) : (
-                  <p className="text-lg font-bold">{t('price.priceNotAvailable')}</p>
+                  <div className="flex h-full items-center justify-center">
+                    <Image src={'/images/no_image_alt.png'} alt={l10n(product.name)} width={220} height={220} />
+                  </div>
                 )}
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex self-end">
-                    <Button
-                      size="icon"
-                      className="h-[50px] w-[50px]"
-                      onClick={(e) => handleAddToCart(e)}
-                      aria-label={t('addToCart')}
-                      disabled={cartLoading || cartDisabled}
-                    >
-                      <ShoppingCart width="24" height="24" />
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{cartTooltip ?? t('addToCart')}</TooltipContent>
-              </Tooltip>
+
+              <div className="absolute right-4 bottom-4 flex flex-row justify-end gap-2">
+                {!variantLoading && availableValues.length > 0 && (
+                  <>
+                    {availableValues.slice(0, 3).map((value) => {
+                      const isColorAttribute = firstAttribute!.key === 'color' || firstAttribute!.key === 'farbe';
+
+                      return isColorAttribute ? (
+                        <ProductColorTile
+                          key={value.key}
+                          attributeKey={value.key}
+                          attributeName={value.name ? l10n(value.name) : value.key}
+                          size="sm"
+                          showCheckmark={false}
+                        />
+                      ) : (
+                        <ProductCharacteristic
+                          key={value.key}
+                          value={value.name ? l10n(value.name) : value.key}
+                          unit={firstAttribute!.name ? l10n(firstAttribute!.name) : firstAttribute!.key}
+                        />
+                      );
+                    })}
+                    {availableValues.length > 3 && (
+                      <div className="bg-surface-disabled text-text-on-disabled flex h-8 w-8 items-center justify-center rounded text-sm font-medium">
+                        +{availableValues.length - 3}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="absolute top-4 -left-6 flex flex-col gap-2">
+                {product.labels?.map((label) => (
+                  <Badge key={label.id} variant="info" rounded="roundedRight">
+                    {label.name}
+                  </Badge>
+                ))}
+              </div>
             </div>
-          </div>
-        </CardFooter>
-      </Card>
-    </Link>
+
+            <div className="flex flex-col gap-2">
+              {product.templateAttributes && (
+                <div className="w-full">
+                  {/* Dynamically display all template attributes */}
+                  {product.templateAttributes &&
+                    Object.entries(product.templateAttributes).map(([key, value]) => (
+                      <div key={key} className="flex justify-between">
+                        <p className="text-sm">
+                          {t(dk<ProductTemplateAttributeKey>(`filters.mixins.productTemplateAttributes.${key}`), {
+                            defaultValue: key,
+                          })}
+                        </p>
+                        <p className="text-sm font-bold capitalize">
+                          {value}
+                          {/* Todo: get unit from product */}
+                          {key === 'length' || key === 'width' || key === 'height' ? 'cm' : ''}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              )}
+              <div ref={horizontalScrollRef} className="hide-scrollbar flex max-w-full gap-2 overflow-x-scroll">
+                {product.usps?.map((usp) => (
+                  <ProductTag icon={getIcon(usp.icon)} text={l10n(usp.description)} key={l10n(usp.description)} />
+                ))}
+              </div>
+            </div>
+          </CardContent>
+
+          <CardFooter>
+            <div className="flex w-full flex-col gap-1">
+              <div className="text-text-success flex items-center gap-2 text-sm">
+                {/* Todo: read availability from product */}
+                <Truck />
+                <p>{t('shipping.onlineAvailable')}</p>
+              </div>
+              <div className="text-text-success flex items-center gap-2 text-sm">
+                {/* Todo: read pickup availability from product */}
+                <MapPin />
+                <p>{t('shipping.canBeReservedExample')}</p>
+              </div>
+              <div className="flex items-end justify-between">
+                <div className="flex flex-col gap-1">
+                  {product.price ? (
+                    product.price.originalAmount && product.price.originalAmount !== product.price.amount ? (
+                      <>
+                        <p className="line-through">
+                          {formatCurrency(product.price.originalAmount, product.price.currency)}
+                        </p>
+                        <p className="text-text-error text-lg font-bold">
+                          {formatCurrency(product.price.amount, product.price.currency)}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-lg font-bold">
+                        {formatCurrency(product.price.amount, product.price.currency)}
+                      </p>
+                    )
+                  ) : (
+                    <p className="text-lg font-bold">{t('price.priceNotAvailable')}</p>
+                  )}
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex self-end">
+                      <Button
+                        size="icon"
+                        className="h-[50px] w-[50px]"
+                        onClick={(e) => handleAddToCart(e)}
+                        aria-label={t('addToCart')}
+                        disabled={cartLoading || cartDisabled || !product.price}
+                      >
+                        <ShoppingCart width="24" height="24" />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>{cartTooltip ?? t('addToCart')}</TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </CardFooter>
+        </Card>
+      </Link>
+      {loginDialog}
+    </>
   );
 }
