@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Coins, Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { Coins, Loader2, Minus, Package, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UiLink from '@/components/ui/link';
 import { UINotification } from '@/components/ui/molecules/ui-notification';
@@ -252,11 +252,13 @@ export function CartItemRow({ cart, item, showQty }: CartItemProps) {
             <Button
               variant="link"
               size="small"
-              className="normal-case text-sm tracking-normal p-0 justify-start"
+              className="normal-case text-sm tracking-normal p-0 justify-start gap-2"
               onClick={handleAddToWishlist}
               disabled={!item.product?.id || isAddingToWishlist}
+              aria-busy={isAddingToWishlist || undefined}
               data-testid={`cart-item-add-to-wishlist-${item.product?.id}`}
             >
+              {isAddingToWishlist && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
               {t('addToWishlist')}
             </Button>
           )}

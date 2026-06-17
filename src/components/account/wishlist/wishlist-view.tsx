@@ -45,8 +45,9 @@ export function WishlistView() {
   const handleBulkMoveCompleted = ({ moved, failed }: BulkMoveResult) => {
     if (moved.length === 0 && failed.length === 0) return;
     const hasInsufficientStock = moved.some((m) => m.result.statusDetailCode === 'addToCart.insufficientStock');
-    const hasPartialFailure = hasInsufficientStock || failed.length > 0;
-    setBulkResult({ mode: hasPartialFailure ? 'warning' : 'success' });
+    const hasWishlistRemoveFailed = moved.some((m) => m.result.partialFailure === 'wishlist-remove-failed');
+    const hasAnyIssue = hasInsufficientStock || hasWishlistRemoveFailed || failed.length > 0;
+    setBulkResult({ mode: hasAnyIssue ? 'warning' : 'success' });
   };
 
   const productForModal: Product | null = movedToCart

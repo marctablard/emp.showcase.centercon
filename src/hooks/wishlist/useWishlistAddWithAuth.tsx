@@ -2,7 +2,9 @@
 
 import { type ReactElement, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { LoginDialog } from '@/components/login';
+import { ToastType, notify } from '@/components/ui/toast-notification';
 import { useWishlist } from '@/hooks/wishlist/useWishlist';
 import { getLogger } from '@/lib/logger/use-logger-client';
 
@@ -19,6 +21,7 @@ interface UseWishlistAddWithAuthResult {
 export function useWishlistAddWithAuth(): UseWishlistAddWithAuthResult {
   const { addItem } = useWishlist();
   const { status: sessionStatus } = useSession();
+  const t = useTranslations('account.wishlist.notifications');
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [pendingAdd, setPendingAdd] = useState<{ productId: string; quantity: number } | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -29,6 +32,7 @@ export function useWishlistAddWithAuth(): UseWishlistAddWithAuthResult {
       await addItem(productId, quantity);
     } catch (error) {
       getLogger().error({ err: error, productId }, 'Failed to add product to wishlist');
+      notify({ title: t('addError'), type: ToastType.Error });
     } finally {
       setIsAdding(false);
     }

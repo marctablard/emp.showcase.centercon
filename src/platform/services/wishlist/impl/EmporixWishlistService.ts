@@ -17,7 +17,7 @@ import type { ProductPrice } from '@/platform/services/model/price/price';
 import type { Product } from '@/platform/services/model/product';
 import type { Session } from '@/platform/services/model/session/session';
 import type { WishlistMapper } from '@/platform/services/model/wishlist/WishlistMapper';
-import type { Wishlist } from '@/platform/services/model/wishlist/wishlist';
+import type { Wishlist, WishlistItemKeySpec } from '@/platform/services/model/wishlist/wishlist';
 import type { PriceService } from '@/platform/services/price/PriceService';
 import type { ProductService } from '@/platform/services/product/ProductService';
 import type { SessionService } from '@/platform/services/session/SessionService';
@@ -220,24 +220,32 @@ class EmporixWishlistService implements WishlistService {
         name: 'storefront',
         source: process.env.NEXT_PUBLIC_SERVER_URL || 'https://showcase.emporix.io',
       },
-      sessionValidated: true,
     };
 
-    let cartId: string;
-    try {
-      cartId = await this.cartApi.createCart(createRequest);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Duplicate key found for a unique index.')) {
-        const existing = await this.resolveWishlistCart(session.siteCode, customerId);
-        if (existing) return existing;
-      }
-      throw error;
-    }
-
+    const cartId = await this.createWishlistCartId(createRequest, session, customerId);
     const created = await this.cartApi.getCart(cartId);
     if (!created) throw new Error('Wishlist not found after creation');
     this.logger.info({ cartId, customerId, siteCode: session.siteCode }, 'Created default wishlist');
     return created;
+  }
+
+  private async createWishlistCartId(
+    request: EmporixCreateCartRequest,
+    session: Session,
+    customerId: string,
+  ): Promise<string> {
+    try {
+      return await this.cartApi.createCart(request);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      // Concurrent create collided on (siteCode, type, customerId) — fall back to the cart
+      // that the other request just created.
+      if (message.includes('Duplicate key found for a unique index.') || message.includes('Conflict')) {
+        const existing = await this.resolveWishlistCart(session.siteCode, customerId);
+        if (existing) return existing.id;
+      }
+      throw error;
+    }
   }
 
   private async resolveOrCreateShoppingCart(session: Session): Promise<Cart> {
@@ -377,7 +385,7 @@ class EmporixWishlistService implements WishlistService {
           isPurchasable: !!product && product.purchasable === true,
           hasCurrentPrice,
           price,
-          specifications: product?.specifications,
+          keySpecs: this.buildKeySpecs(product),
         };
       });
 
@@ -435,6 +443,37 @@ class EmporixWishlistService implements WishlistService {
       return { localizedName: { ...(name as { [language: string]: string }) } };
     }
     return {};
+  }
+
+  /** Same shape as the PDP "Key Specs" block — variant attributes then template attributes. */
+  private buildKeySpecs(product: Product | null | undefined): WishlistItemKeySpec[] | undefined {
+    if (!product) return undefined;
+    const specs: WishlistItemKeySpec[] = [];
+
+    for (const attribute of product.variantAttributes ?? []) {
+      const value = product.variantAttributeValues?.[attribute.key];
+      if (value === undefined || value === null || value === '') continue;
+      specs.push({
+        key: attribute.key,
+        labelKey: `filters.mixins.productVariantAttributes.${attribute.key}`,
+        value,
+        source: 'variant',
+      });
+    }
+
+    const template = product.templateAttributes ?? {};
+    for (const key of Object.keys(template)) {
+      const value = template[key];
+      if (value === undefined || value === null || value === '') continue;
+      specs.push({
+        key,
+        labelKey: `filters.mixins.productTemplateAttributes.${key}`,
+        value,
+        source: 'template',
+      });
+    }
+
+    return specs.length > 0 ? specs : undefined;
   }
 }
 

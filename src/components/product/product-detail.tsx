@@ -4,12 +4,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { ArrowDown, Copy, FlipHorizontal2, Pin, Share2, Sun } from 'lucide-react';
+import { ArrowDown, Copy, FlipHorizontal2, Share2, Sun } from 'lucide-react';
 import { ProductCarousel } from '@/components/product/product-carousel';
 import { Badge } from '@/components/ui/badge';
 import { BulletPoint } from '@/components/ui/bullet-point';
 import { Card, CardContent } from '@/components/ui/card';
 import { ToastType, notify } from '@/components/ui/toast-notification';
+import { WishlistPinButton } from '@/components/wishlist/wishlist-pin-button';
 import { useShopContextReady } from '@/hooks/common/useShopContextReady';
 import { useComparison } from '@/hooks/comparison/useComparison';
 import { useValidateAddToComparison } from '@/hooks/comparison/useValidateAddToComparison';
@@ -67,7 +68,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
   const { disabled: compareDisabled, tooltip: compareTooltip } = useValidateAddToComparison(product);
   const addToCartButton = useRef<HTMLDivElement>(null);
   const addToCartBar = useRef<HTMLDivElement>(null);
-  const { addToWishlist, loginDialog } = useWishlistAddWithAuth();
+  const { addToWishlist, isAdding: isAddingToWishlist, loginDialog } = useWishlistAddWithAuth();
   const [quantity, setQuantity] = useState(1);
   const handleAddToWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -368,22 +369,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
                       (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
                   </TooltipContent>
                 </Tooltip>
-                <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      aria-label={t('addToWishlist')}
-                      onClick={handleAddToWishlist}
-                      disabled={!price}
-                    >
-                      <Pin />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t('wishlistTooltip')}</p>
-                  </TooltipContent>
-                </Tooltip>
+                <WishlistPinButton hasPrice={!!price} isAdding={isAddingToWishlist} onClick={handleAddToWishlist} />
                 <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
                     <Button size="icon" variant="secondary" aria-label={t('share')}>
@@ -463,15 +449,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
                 {compareTooltip ?? (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
               </TooltipContent>
             </Tooltip>
-            <Button
-              size="icon"
-              variant="secondary"
-              aria-label={t('addToWishlist')}
-              onClick={handleAddToWishlist}
-              disabled={!price}
-            >
-              <Pin />
-            </Button>
+            <WishlistPinButton hasPrice={!!price} isAdding={isAddingToWishlist} onClick={handleAddToWishlist} />
             <Button size="icon" variant="secondary" aria-label={t('share')}>
               <Share2 />
             </Button>

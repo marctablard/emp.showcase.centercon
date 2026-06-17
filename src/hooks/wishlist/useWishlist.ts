@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { notifyWishlistAdded } from '@/components/wishlist/wishlist-added-notification';
+import { useSession as useShopSession } from '@/hooks/session/useSession';
 import type { MoveWishlistItemToCartResult } from '@/lib/client/wishlist';
 import type { Wishlist } from '@/platform/services/model/wishlist/wishlist';
 import { useCartStore, useWishlistStore } from '@/providers/StoreProvider';
@@ -70,6 +71,25 @@ export const useWishlist = (): UseWishlist => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionStatus]);
+
+  // Live wishlist prices depend on session currency + site. Refetch when either flips so totals
+  // and per-item prices reflect the new shop context.
+  const { session: shopSession } = useShopSession();
+  const lastShopContextRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') return;
+    if (!shopSession?.currency || !shopSession?.siteCode) return;
+    const shopContext = `${shopSession.siteCode}|${shopSession.currency}`;
+    if (lastShopContextRef.current === null) {
+      lastShopContextRef.current = shopContext;
+      return;
+    }
+    if (lastShopContextRef.current !== shopContext) {
+      lastShopContextRef.current = shopContext;
+      fetchWishlist();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shopSession?.currency, shopSession?.siteCode, sessionStatus]);
 
   return {
     wishlist: currentWishlist,

@@ -15,6 +15,7 @@ import { useValidateAddToComparison } from '@/hooks/comparison/useValidateAddToC
 import { useAvailability } from '@/hooks/product/useAvailability';
 import { useL10n } from '@/hooks/useL10n';
 import { useWishlist } from '@/hooks/wishlist/useWishlist';
+import { type ProductAttributeKey, dk } from '@/i18n/dynamic-key';
 import type { MoveWishlistItemToCartResult } from '@/lib/client/wishlist';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency } from '@/lib/utils';
@@ -89,6 +90,10 @@ export function WishlistItem({ item, onMovedToCart }: WishlistItemProps) {
     } catch (error) {
       getLogger().error({ err: error }, 'Failed to update wishlist quantity');
       setQuantity(item.quantity);
+      notify({
+        title: t('notifications.updateQuantityError', { product: l10n(item.name) || item.productId }),
+        type: ToastType.Error,
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -239,16 +244,15 @@ export function WishlistItem({ item, onMovedToCart }: WishlistItemProps) {
     </p>
   );
 
-  const specificationsLines =
-    item.specifications && item.specifications.length > 0 ? (
+  const keySpecsLines =
+    item.keySpecs && item.keySpecs.length > 0 ? (
       <div className="flex flex-col gap-1">
-        {item.specifications.slice(0, 3).map((spec) => (
-          <p key={spec.key} className="text-sm">
-            <span className="font-bold">{l10n(spec.label)}:</span>{' '}
-            <span>
-              {l10n(spec.value)}
-              {spec.unit ? ` ${l10n(spec.unit)}` : ''}
-            </span>
+        {item.keySpecs.map((spec) => (
+          <p key={`${spec.source}-${spec.key}`} className="text-sm">
+            <span className="font-bold">
+              {tProduct(dk<ProductAttributeKey>(spec.labelKey), { defaultValue: spec.key })}:
+            </span>{' '}
+            <span>{l10n(spec.value)}</span>
           </p>
         ))}
       </div>
@@ -382,7 +386,7 @@ export function WishlistItem({ item, onMovedToCart }: WishlistItemProps) {
           {priceBlock}
         </div>
         {itemNumberLine}
-        {specificationsLines}
+        {keySpecsLines}
         {statusLine}
         {removeButton}
         <div className="flex items-center justify-between gap-3">
@@ -397,7 +401,7 @@ export function WishlistItem({ item, onMovedToCart }: WishlistItemProps) {
         <div className="flex flex-col gap-2">
           {productNameLink}
           {itemNumberLine}
-          {specificationsLines}
+          {keySpecsLines}
           {statusLine}
           {removeButton}
         </div>

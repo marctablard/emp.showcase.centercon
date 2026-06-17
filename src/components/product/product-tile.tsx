@@ -2,18 +2,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import type { LucideIcon } from 'lucide-react';
-import {
-  Circle,
-  DropletOff,
-  FlipHorizontal2,
-  Globe,
-  MapPin,
-  Pin,
-  Shield,
-  ShoppingCart,
-  Trees,
-  Truck,
-} from 'lucide-react';
+import { Circle, DropletOff, FlipHorizontal2, Globe, MapPin, Shield, ShoppingCart, Trees, Truck } from 'lucide-react';
 import { ProductCharacteristic } from '@/components/product/product-characteristic';
 import { ProductColorTile } from '@/components/product/product-color-tile';
 import { ProductTag } from '@/components/product/product-tag';
@@ -22,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heading } from '@/components/ui/h';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { WishlistPinButton } from '@/components/wishlist/wishlist-pin-button';
 import { useCart } from '@/hooks/cart/useCart';
 import { useValidateAddToCart } from '@/hooks/cart/useValidateAddToCart';
 import { useComparison } from '@/hooks/comparison/useComparison';
@@ -53,7 +43,7 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
   const { isInComparison, toggleProduct, isFull } = useComparison();
   const { disabled: cartDisabled, tooltip: cartTooltip } = useValidateAddToCart(product);
   const { disabled: compareDisabled, tooltip: compareTooltip } = useValidateAddToComparison(product);
-  const { addToWishlist, loginDialog } = useWishlistAddWithAuth();
+  const { addToWishlist, isAdding: isAddingToWishlist, loginDialog } = useWishlistAddWithAuth();
   const horizontalScrollRef = useHorizontalScroll();
 
   const firstAttribute = product.variantAttributes?.[0];
@@ -162,16 +152,12 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
                       (isInComparison(product.id) ? t('compareTooltipRemove') : t('compareTooltipAdd'))}
                   </TooltipContent>
                 </Tooltip>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  title={t('addToWishlist')}
-                  className="h-[50px] w-[50px]"
+                <WishlistPinButton
+                  hasPrice={!!product.price}
+                  isAdding={isAddingToWishlist}
                   onClick={handleAddToWishlist}
-                  disabled={!product.price}
-                >
-                  <Pin width="24" height="24" />
-                </Button>
+                  className="h-[50px] w-[50px]"
+                />
               </div>
             </CardTitle>
           </CardHeader>

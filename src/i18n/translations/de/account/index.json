@@ -733,7 +733,10 @@
       "removeSuccess": "{product} wurde von der Wunschliste entfernt",
       "removeError": "{product} konnte nicht von der Wunschliste entfernt werden",
       "moveToCartError": "{product} konnte nicht in den Warenkorb gelegt werden",
-      "moveToCartPartialFailure": "{product} wurde in den Warenkorb gelegt, das Entfernen aus der Wunschliste schlug fehl"
-    }
+      "moveToCartPartialFailure": "{product} wurde in den Warenkorb gelegt, das Entfernen aus der Wunschliste schlug fehl",
+      "addError": "Produkt konnte nicht zur Wunschliste hinzugefügt werden",
+      "updateQuantityError": "Die Menge für {product} konnte nicht aktualisiert werden"
+    },
+    "noPriceTooltip": "Dieses Produkt hat keinen Preis und kann nicht zur Wunschliste hinzugefügt werden."
   }
 }

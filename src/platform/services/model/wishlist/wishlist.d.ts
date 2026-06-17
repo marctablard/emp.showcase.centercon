@@ -1,5 +1,4 @@
 import { LocalizedString, Price } from '../common';
-import { ProductSpecification } from '../product';
 
 export interface Wishlist {
   id: string;
@@ -13,6 +12,13 @@ export interface Wishlist {
     gross: Price;
     net: Price;
   };
+}
+
+export interface WishlistItemKeySpec {
+  key: string;
+  labelKey: string;
+  value: LocalizedString | string;
+  source: 'variant' | 'template';
 }
 
 export interface WishlistItem {
@@ -30,5 +36,5 @@ export interface WishlistItem {
   isPurchasable: boolean;
   hasCurrentPrice: boolean;
   unavailableReason?: string;
-  specifications?: ProductSpecification[];
+  keySpecs?: WishlistItemKeySpec[];
 }

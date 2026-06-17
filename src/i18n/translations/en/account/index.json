@@ -726,7 +726,10 @@
       "removeSuccess": "{product} was removed from your wishlist",
       "removeError": "Failed to remove {product} from your wishlist",
       "moveToCartError": "Failed to add {product} to your cart",
-      "moveToCartPartialFailure": "{product} was added to your cart, but removing it from the wishlist failed"
-    }
+      "moveToCartPartialFailure": "{product} was added to your cart, but removing it from the wishlist failed",
+      "addError": "Failed to add product to your wishlist",
+      "updateQuantityError": "Failed to update quantity for {product}"
+    },
+    "noPriceTooltip": "This product does not have a price and cannot be added to the wishlist."
   }
 }
