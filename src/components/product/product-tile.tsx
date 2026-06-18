@@ -42,6 +42,7 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
   const { addItem, loading: cartLoading } = useCart();
   const { isInComparison, toggleProduct, isFull } = useComparison();
   const { disabled: cartDisabled, tooltip: cartTooltip } = useValidateAddToCart(product);
+  const { disabled: wishlistDisabled, tooltip: wishlistTooltip } = useValidateAddToCart(product, undefined, 'wishlist');
   const { disabled: compareDisabled, tooltip: compareTooltip } = useValidateAddToComparison(product);
   const { addToWishlist, isAdding: isAddingToWishlist, loginDialog } = useWishlistAddWithAuth();
   const horizontalScrollRef = useHorizontalScroll();
@@ -153,7 +154,8 @@ export function ProductTile({ product, locale, skipVariantFetch = false }: Produ
                   </TooltipContent>
                 </Tooltip>
                 <WishlistPinButton
-                  hasPrice={!!product.price}
+                  disabled={wishlistDisabled}
+                  disabledTooltip={wishlistTooltip}
                   isAdding={isAddingToWishlist}
                   onClick={handleAddToWishlist}
                   className="h-[50px] w-[50px]"

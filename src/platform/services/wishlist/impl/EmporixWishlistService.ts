@@ -1,5 +1,6 @@
 import { inject } from 'inversify';
 import { isAuthenticatedSessionCustomerId } from '@/lib/common/customer-identity';
+import { baseUrl } from '@/lib/utils';
 import { injectable } from '@/platform/core/di/injectable';
 import type { EmporixCartApi } from '@/platform/integrations/emporix/cart/EmporixCartApi';
 import type EmporixCommonUtil from '@/platform/integrations/emporix/common/util/EmporixCommonUtil';
@@ -218,34 +219,26 @@ class EmporixWishlistService implements WishlistService {
       type: WISHLIST_CART_TYPE,
       channel: {
         name: 'storefront',
-        source: process.env.NEXT_PUBLIC_SERVER_URL || 'https://showcase.emporix.io',
+        source: baseUrl,
       },
+      sessionValidated: true,
     };
 
-    const cartId = await this.createWishlistCartId(createRequest, session, customerId);
+    let cartId: string;
+    try {
+      cartId = await this.cartApi.createCart(createRequest);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Duplicate key found for a unique index.')) {
+        const existing = await this.resolveWishlistCart(session.siteCode, customerId);
+        if (existing) return existing;
+      }
+      throw error;
+    }
+
     const created = await this.cartApi.getCart(cartId);
     if (!created) throw new Error('Wishlist not found after creation');
     this.logger.info({ cartId, customerId, siteCode: session.siteCode }, 'Created default wishlist');
     return created;
-  }
-
-  private async createWishlistCartId(
-    request: EmporixCreateCartRequest,
-    session: Session,
-    customerId: string,
-  ): Promise<string> {
-    try {
-      return await this.cartApi.createCart(request);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : '';
-      // Concurrent create collided on (siteCode, type, customerId) — fall back to the cart
-      // that the other request just created.
-      if (message.includes('Duplicate key found for a unique index.') || message.includes('Conflict')) {
-        const existing = await this.resolveWishlistCart(session.siteCode, customerId);
-        if (existing) return existing.id;
-      }
-      throw error;
-    }
   }
 
   private async resolveOrCreateShoppingCart(session: Session): Promise<Cart> {

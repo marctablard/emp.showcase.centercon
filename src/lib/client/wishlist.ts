@@ -13,6 +13,26 @@ export interface MoveWishlistItemToCartResult {
 }
 
 /**
+ * Read the most informative error fragment available from a non-ok response.
+ */
+async function readErrorDescription(response: Response): Promise<string> {
+  try {
+    const text = await response.text();
+    if (text) {
+      try {
+        const parsed = JSON.parse(text) as { error?: unknown; message?: unknown };
+        if (typeof parsed.error === 'string') return parsed.error;
+        if (typeof parsed.message === 'string') return parsed.message;
+      } catch {}
+      return text;
+    }
+  } catch {
+    // Body already consumed or unavailable; fall through to statusText.
+  }
+  return response.statusText || `HTTP ${response.status}`;
+}
+
+/**
  * Fetch the authenticated customer's default wishlist.
  */
 export async function fetchCurrentWishlist(): Promise<Wishlist | null> {
@@ -21,7 +41,7 @@ export async function fetchCurrentWishlist(): Promise<Wishlist | null> {
     return null;
   }
   if (!response.ok) {
-    throw new Error(`Failed to fetch wishlist: ${response.statusText}`);
+    throw new Error(`Failed to fetch wishlist: ${await readErrorDescription(response)}`);
   }
   return (await response.json()) as Wishlist;
 }
@@ -37,7 +57,7 @@ export async function addItemToWishlist(productId: string, quantity: number): Pr
     body: JSON.stringify({ productId, quantity }),
   });
   if (!response.ok) {
-    throw new Error(`Failed to add item to wishlist: ${response.statusText}`);
+    throw new Error(`Failed to add item to wishlist: ${await readErrorDescription(response)}`);
   }
   return (await response.json()) as Wishlist;
 }
@@ -50,7 +70,7 @@ export async function updateWishlistItemQuantity(productId: string, quantity: nu
     body: JSON.stringify({ quantity }),
   });
   if (!response.ok) {
-    throw new Error(`Failed to update wishlist item: ${response.statusText}`);
+    throw new Error(`Failed to update wishlist item: ${await readErrorDescription(response)}`);
   }
   return (await response.json()) as Wishlist;
 }
@@ -62,7 +82,7 @@ export async function removeWishlistItem(productId: string): Promise<Wishlist | 
     return null;
   }
   if (!response.ok) {
-    throw new Error(`Failed to remove wishlist item: ${response.statusText}`);
+    throw new Error(`Failed to remove wishlist item: ${await readErrorDescription(response)}`);
   }
   return (await response.json()) as Wishlist;
 }
@@ -71,7 +91,7 @@ export async function removeWishlistItem(productId: string): Promise<Wishlist | 
 export async function moveWishlistItemToCart(productId: string): Promise<MoveWishlistItemToCartResult> {
   const response = await fetch(`/api/wishlist/items/${encodeURIComponent(productId)}/cart`, { method: 'POST' });
   if (!response.ok) {
-    throw new Error(`Failed to move wishlist item to cart: ${response.statusText}`);
+    throw new Error(`Failed to move wishlist item to cart: ${await readErrorDescription(response)}`);
   }
   return (await response.json()) as MoveWishlistItemToCartResult;
 }

@@ -5,7 +5,7 @@ import type { LocalizedString, SearchParams } from '@/platform/services/model/co
 import type { Session } from '@/platform/services/model/session/session';
 
 function buildBaseUrl() {
-  const envUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SERVER_URL || 'emporix-showcase.com';
+  const envUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000';
   if (envUrl.startsWith('http://') || envUrl.startsWith('https://')) {
     return envUrl;
   }

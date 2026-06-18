@@ -8,7 +8,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 
 interface WishlistPinButtonProps {
-  hasPrice: boolean;
+  disabled: boolean;
+  disabledTooltip?: string;
   isAdding: boolean;
   onClick: (e: MouseEvent) => void;
   className?: string;
@@ -18,7 +19,8 @@ interface WishlistPinButtonProps {
 }
 
 export function WishlistPinButton({
-  hasPrice,
+  disabled,
+  disabledTooltip,
   isAdding,
   onClick,
   className,
@@ -27,9 +29,8 @@ export function WishlistPinButton({
   testId,
 }: WishlistPinButtonProps) {
   const tProduct = useTranslations('product');
-  const tAccount = useTranslations('account.wishlist');
-  const disabled = !hasPrice || isAdding;
-  const tooltip = !hasPrice ? tAccount('noPriceTooltip') : tProduct('addToWishlist');
+  const isBlocked = disabled || isAdding;
+  const tooltip = disabled && disabledTooltip ? disabledTooltip : tProduct('addToWishlist');
 
   return (
     <Tooltip delayDuration={200}>
@@ -42,7 +43,7 @@ export function WishlistPinButton({
             aria-busy={isAdding || undefined}
             title={tProduct('addToWishlist')}
             onClick={onClick}
-            disabled={disabled}
+            disabled={isBlocked}
             data-testid={testId}
             className={cn(className)}
           >
