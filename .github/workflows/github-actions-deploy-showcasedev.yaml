@@ -37,9 +37,6 @@ jobs:
       - name: Setup safe-chain
         run: safe-chain setup-ci
 
-      - name: Pull Vercel project settings
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
       - name: Pull Vercel environment
         run: vercel env pull .env --environment=production --yes --token=${{ secrets.VERCEL_TOKEN }}
 
@@ -60,13 +57,10 @@ jobs:
       #     NEXT_PUBLIC_BATTERY_INCLUDED_API_KEY: ${{ secrets.NEXT_PUBLIC_BATTERY_INCLUDED_API_KEY }}
       #     NEXT_PUBLIC_BATTERY_INCLUDED_COLLECTION: ${{ vars.NEXT_PUBLIC_BATTERY_INCLUDED_COLLECTION }}
 
-      - name: Build for Vercel
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
       - name: Deploy to Vercel
         id: deploy
         run: |
-          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          URL=$(vercel deploy --prod --force --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$URL" >> $GITHUB_OUTPUT
 
       - name: Deployment summary
