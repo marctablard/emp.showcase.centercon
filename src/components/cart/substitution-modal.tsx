@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Leaf, Package, ShoppingCart } from 'lucide-react';
+import { ServiceCockpitTicketDialog } from '@/components/cart/service-cockpit-ticket-dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { H3 } from '@/components/ui/h';
@@ -42,6 +43,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
   const [priceMap, setPriceMap] = useState<Record<string, ProductPrice>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isPriceLoading, setIsPriceLoading] = useState(true);
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
   const { availability } = useAvailability(cartItem.product?.id);
   // Get original product ID
   const originalProductId = cartItem.product?.id || '';
@@ -440,6 +442,9 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
               t('substitution.addSubstitution')
             )}
           </Button>
+          <Button variant="secondary" className="w-full" onClick={() => setShowHelpDialog(true)}>
+            {t('substitution.getHelp')}
+          </Button>
           <Button variant="secondary" className="w-full" onClick={handleReduceAmount}>
             {t('substitution.reduceAmount')}
           </Button>
@@ -448,6 +453,14 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
           </UiLink>
         </DialogFooter>
       </DialogContent>
+
+      <ServiceCockpitTicketDialog
+        open={showHelpDialog}
+        onOpenChange={setShowHelpDialog}
+        productId={originalProductId}
+        productName={l10n(productMap[originalProductId]?.name || originalProductId)}
+        quantity={cartItem.quantity}
+      />
     </Dialog>
   );
 }
