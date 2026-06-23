@@ -39,6 +39,7 @@ import MockTrackingService from './services/tracking/impl/MockTrackingService';
 import MockStockService from './services/stock/impl/MockStockService';
 import DefaultSsrService from './services/ssr/impl/DefaultSsrService';
 import EmporixSiteService from './services/site/impl/EmporixSiteService';
+import EmporixShoppingListService from './services/shopping-list/impl/EmporixShoppingListService';
 import EmporixShippingService from './services/shipping/impl/EmporixShippingService';
 import EmporixSetupService from './services/setup/impl/EmporixSetupService';
 import EmporixSessionService from './services/session/impl/EmporixSessionService';
@@ -49,6 +50,7 @@ import BatteryIncludedSearchService from './services/search/impl/BatteryIncluded
 import EmporixSchemaService from './services/schema/impl/EmporixSchemaService';
 import EmporixReturnService from './services/return/impl/EmporixReturnService';
 import EmporixQuoteService from './services/quote/impl/EmporixQuoteService';
+import EmporixProjectService from './services/project/impl/EmporixProjectService';
 import EmporixProductService from './services/product/impl/EmporixProductService';
 import EmporixPriceService from './services/price/impl/EmporixPriceService';
 import EmporixPaymentService from './services/payment/impl/EmporixPaymentService';
@@ -84,17 +86,20 @@ import EmporixApprovalService from './services/approval/impl/EmporixApprovalServ
 import AIServiceImpl from './services/ai/impl/AIServiceImpl';
 import OpenMeteoWeatherApi from './integrations/openmeteo/weather/impl/OpenMeteoWeatherApi';
 import EmporixSiteSettingsApi from './integrations/emporix/site-settings/impl/EmporixSiteSettingsApi';
+import EmporixShoppingListApi from './integrations/emporix/shopping-list/impl/EmporixShoppingListApi';
 import EmporixShippingApi from './integrations/emporix/shipping/impl/EmporixShippingApi';
 import EmporixSessionContextApi from './integrations/emporix/session/impl/EmporixSessionContextApi';
 import EmporixSchemaApi from './integrations/emporix/schema/impl/EmporixSchemaApi';
 import EmporixReturnApi from './integrations/emporix/return/impl/EmporixReturnApi';
 import EmporixQuoteApi from './integrations/emporix/quote/impl/EmporixQuoteApi';
+import EmporixProjectApi from './integrations/emporix/project/impl/EmporixProjectApi';
 import EmporixProductApi from './integrations/emporix/product/impl/EmporixProductApi';
 import EmporixLabelApi from './integrations/emporix/product/impl/EmporixLabelApi';
 import EmporixBrandApi from './integrations/emporix/product/impl/EmporixBrandApi';
 import EmporixPriceApi from './integrations/emporix/price/impl/EmporixPriceApi';
 import EmporixPaymentGatewayApi from './integrations/emporix/payment/impl/EmporixPaymentGatewayApi';
 import EmporixOrderApi from './integrations/emporix/order/impl/EmporixOrderApi';
+import EmporixMediaApi from './integrations/emporix/media/impl/EmporixMediaApi';
 import EmporixIamApi from './integrations/emporix/iam/impl/EmporixIamApi';
 import EmporixCustomerSegmentApi from './integrations/emporix/customer-segment/impl/EmporixCustomerSegmentApi';
 import EmporixCustomerManagementApi from './integrations/emporix/customer/impl/EmporixCustomerManagementApi';
@@ -124,7 +129,7 @@ import EmporixTokenManagerServer from './integrations/emporix/common/impl/Empori
 import EmporixApiInvokerServer from './integrations/emporix/common/impl/EmporixApiInvokerServer';
 
 // Array of all modules
-const modules : any[] = [EmporixWishlistService, OpenMeteoWeatherService, EmporixTicketSearchValidationService, EmporixShippingValidationService, EmporixRegistrationValidationService, EmporixProfileValidationService, EmporixPaymentValidationService, EmporixPasswordValidationService, EmporixPasswordResetValidationService, EmporixOrderSearchValidationService, EmporixLoginValidationService, EmporixInvoiceSearchValidationService, EmporixContactDataValidationService, EmporixCartDeliveryValidationService, EmporixAiHelperValidationService, EmporixAddressValidationService, DefaultSummaryValidationService, MockTrackingService, MockStockService, DefaultSsrService, EmporixSiteService, EmporixShippingService, EmporixSetupService, EmporixSessionService, SegmentFilterService, EmporixSearchService, CatalogPublishedRootCategoryService, BatteryIncludedSearchService, EmporixSchemaService, EmporixReturnService, EmporixQuoteService, EmporixProductService, EmporixPriceService, EmporixPaymentService, EmporixOrderService, EmporixWishlistMapper, OpenMeteoWeatherMapper, EmporixShippingMapper, EmporixSessionMapper, EmporixReturnMapper, EmporixQuoteMapper, EmporixQuoteHistoryMapper, EmporixProductMapper, BatteryIncludedProductMapper, EmporixPriceMapper, EmporixOrderMapper, EmporixCustomerSegmentMapper, EmporixAddressMapper, EmporixCheckoutMapper, EmporixCategoryMapper, EmporixCartMapper, EmporixApprovalMapper, EmporixCustomerSegmentService, EmporixCustomerService, DefaultCustomerNamingService, EmporixCompanyService, EmporixCheckoutValidator, EmporixCheckoutService, EmporixCategoryService, EmporixCartService, EmporixCartMigrationService, EmporixAuthService, EmporixApprovalService, AIServiceImpl, OpenMeteoWeatherApi, EmporixSiteSettingsApi, EmporixShippingApi, EmporixSessionContextApi, EmporixSchemaApi, EmporixReturnApi, EmporixQuoteApi, EmporixProductApi, EmporixLabelApi, EmporixBrandApi, EmporixPriceApi, EmporixPaymentGatewayApi, EmporixOrderApi, EmporixIamApi, EmporixCustomerSegmentApi, EmporixCustomerManagementApi, EmporixCustomerApi, EmporixCurrencyApi, EmporixCountryApi, EmporixCommonUtil, EmporixCheckoutApi, EmporixCategoryApi, EmporixCatalogApi, EmporixCartApi, EmporixAvailabilityApi, EmporixApprovalApi, EmporixAIApi, BatteryIncludedShopApi, BatteryIncludedConfig, BatteryIncludedApiInvoker, FileBasedSetupServiceServer, NextRequestContextServiceServer, EmporixNotificationServiceServer, DefaultNotificationPayloadServiceServer, PrometheusMetricsServiceServer, PinoLoggerServiceServer, EmporixOAuthApiServer, EmporixConfigServer, EmporixTokenManagerServer, EmporixApiInvokerServer];
+const modules : any[] = [EmporixWishlistService, OpenMeteoWeatherService, EmporixTicketSearchValidationService, EmporixShippingValidationService, EmporixRegistrationValidationService, EmporixProfileValidationService, EmporixPaymentValidationService, EmporixPasswordValidationService, EmporixPasswordResetValidationService, EmporixOrderSearchValidationService, EmporixLoginValidationService, EmporixInvoiceSearchValidationService, EmporixContactDataValidationService, EmporixCartDeliveryValidationService, EmporixAiHelperValidationService, EmporixAddressValidationService, DefaultSummaryValidationService, MockTrackingService, MockStockService, DefaultSsrService, EmporixSiteService, EmporixShoppingListService, EmporixShippingService, EmporixSetupService, EmporixSessionService, SegmentFilterService, EmporixSearchService, CatalogPublishedRootCategoryService, BatteryIncludedSearchService, EmporixSchemaService, EmporixReturnService, EmporixQuoteService, EmporixProjectService, EmporixProductService, EmporixPriceService, EmporixPaymentService, EmporixOrderService, EmporixWishlistMapper, OpenMeteoWeatherMapper, EmporixShippingMapper, EmporixSessionMapper, EmporixReturnMapper, EmporixQuoteMapper, EmporixQuoteHistoryMapper, EmporixProductMapper, BatteryIncludedProductMapper, EmporixPriceMapper, EmporixOrderMapper, EmporixCustomerSegmentMapper, EmporixAddressMapper, EmporixCheckoutMapper, EmporixCategoryMapper, EmporixCartMapper, EmporixApprovalMapper, EmporixCustomerSegmentService, EmporixCustomerService, DefaultCustomerNamingService, EmporixCompanyService, EmporixCheckoutValidator, EmporixCheckoutService, EmporixCategoryService, EmporixCartService, EmporixCartMigrationService, EmporixAuthService, EmporixApprovalService, AIServiceImpl, OpenMeteoWeatherApi, EmporixSiteSettingsApi, EmporixShoppingListApi, EmporixShippingApi, EmporixSessionContextApi, EmporixSchemaApi, EmporixReturnApi, EmporixQuoteApi, EmporixProjectApi, EmporixProductApi, EmporixLabelApi, EmporixBrandApi, EmporixPriceApi, EmporixPaymentGatewayApi, EmporixOrderApi, EmporixMediaApi, EmporixIamApi, EmporixCustomerSegmentApi, EmporixCustomerManagementApi, EmporixCustomerApi, EmporixCurrencyApi, EmporixCountryApi, EmporixCommonUtil, EmporixCheckoutApi, EmporixCategoryApi, EmporixCatalogApi, EmporixCartApi, EmporixAvailabilityApi, EmporixApprovalApi, EmporixAIApi, BatteryIncludedShopApi, BatteryIncludedConfig, BatteryIncludedApiInvoker, FileBasedSetupServiceServer, NextRequestContextServiceServer, EmporixNotificationServiceServer, DefaultNotificationPayloadServiceServer, PrometheusMetricsServiceServer, PinoLoggerServiceServer, EmporixOAuthApiServer, EmporixConfigServer, EmporixTokenManagerServer, EmporixApiInvokerServer];
 
 /**
  * Initialize the container with all modules

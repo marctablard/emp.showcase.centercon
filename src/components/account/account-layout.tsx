@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   CreditCard,
   FileText,
+  FolderKanban,
   HandHelping,
   History,
   LayoutDashboard,
@@ -135,6 +136,11 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
           href: '/account/wishlists',
           title: t('sidebar.items.wishlists'),
           icon: <Pin className="h-6 w-6" />,
+        },
+        {
+          href: '/account/projects',
+          title: t('sidebar.items.myProjects'),
+          icon: <FolderKanban className="h-6 w-6" />,
         },
         {
           href: '/account/products',
