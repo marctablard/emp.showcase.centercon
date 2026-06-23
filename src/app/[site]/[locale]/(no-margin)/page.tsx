@@ -1,5 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
-import CategoryGrid from '@/components/cms/category-grid';
+// Temporarily disabled: "Shop by Category" grid on the homepage.
+// import CategoryGrid from '@/components/cms/category-grid';
 import CMSPageComponent from '@/components/cms/storyblok/storyblok-cms-page';
 import { setRequestSite } from '@/site/server/';
 
@@ -10,12 +11,13 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   return (
     <>
       <CMSPageComponent slug="home" locale={locale} site={site} emptyOnNoResult={true} />
+      {/* Temporarily disabled: "Shop by Category" grid.
       <CategoryGrid
         title="Shop by Category"
         subtitle="Discover our wide range of premium products"
         columns={4}
         categoryId="productroot"
-      />
+      /> */}
     </>
   );
 }
