@@ -56,7 +56,9 @@ export function HealthMonitorModal({
   const [logs, setLogs] = useState<string[]>([]);
   const wasAboveThreshold = useRef(initialLevel >= HEALTH_THRESHOLD);
   const modeRef = useRef(mode);
-  modeRef.current = mode;
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
   const logsRef = useRef<HTMLDivElement>(null);
 
   const addLog = useCallback((message: string) => {
@@ -105,7 +107,9 @@ export function HealthMonitorModal({
   }, [addLog, customerId, device.companyId, device.productId, device.serialNumber]);
 
   const triggerWebhookRef = useRef(triggerWebhook);
-  triggerWebhookRef.current = triggerWebhook;
+  useEffect(() => {
+    triggerWebhookRef.current = triggerWebhook;
+  }, [triggerWebhook]);
 
   useEffect(() => {
     const isBelow = coolantLevel < HEALTH_THRESHOLD;
@@ -114,13 +118,14 @@ export function HealthMonitorModal({
       triggerWebhookRef.current();
     } else if (!isBelow) {
       wasAboveThreshold.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWebhookStatus('Ready');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coolantLevel]);
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMode('autonomous');
       setCoolantLevel(initialLevel);
       setWebhookStatus('Ready');

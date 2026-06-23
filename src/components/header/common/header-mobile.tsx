@@ -13,7 +13,8 @@ import { useHeaderSearch } from '@/components/header/search/search-context';
 import { HeaderWishlistButton } from '@/components/header/wishlist/header-wishlist-button';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { SubMenuItem, buildNavigationMenuItems } from '@/data/navigation-menu';
+import type { SubMenuItem } from '@/data/navigation-menu';
+import { buildNavigationMenuItems } from '@/data/navigation-menu';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { cn } from '@/lib/utils';
 

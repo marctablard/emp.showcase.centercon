@@ -1,11 +1,11 @@
 import { cache } from 'react';
-import { SubMenuItem } from '@/data/navigation-menu';
-import { CategoryService } from '@/platform/services/category/CategoryService';
+import type { SubMenuItem } from '@/data/navigation-menu';
+import type { CategoryService } from '@/platform/services/category/CategoryService';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
-import { Category } from '@/platform/services/model/category';
-import { LocalizedString } from '@/platform/services/model/common';
-import { Product } from '@/platform/services/model/product';
-import { ProductService } from '@/platform/services/product/ProductService';
+import type { Category } from '@/platform/services/model/category';
+import type { LocalizedString } from '@/platform/services/model/common';
+import type { Product } from '@/platform/services/model/product';
+import type { ProductService } from '@/platform/services/product/ProductService';
 import ssr from '@/platform/ssr';
 import { getRequestSite } from '@/site/server/RequestSite';
 

@@ -1,11 +1,11 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { CategoryProductGrid } from '@/components/category/category-product-grid';
 import { Heading } from '@/components/ui/h';
 import { getCategoryById, getProductsForCategory, resolveLocalizedName } from '@/lib/ssr/category';
 import { getPageTitle } from '@/lib/ssr/seo';
-import { LocalizedString } from '@/platform/services/model/common';
+import type { LocalizedString } from '@/platform/services/model/common';
 
 interface CategoryPageParams {
   params: Promise<{ locale: string; categoryId: string }>;

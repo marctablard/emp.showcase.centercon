@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProducts } from '@/hooks/product/useProducts';
 import { useL10n } from '@/hooks/useL10n';
-import { RelatedMaterialTypeKey, dk } from '@/i18n/dynamic-key';
+import type { RelatedMaterialTypeKey } from '@/i18n/dynamic-key';
+import { dk } from '@/i18n/dynamic-key';
 import { cn } from '@/lib/utils';
-import { RelatedItem } from '@/platform/services/model/product';
+import type { RelatedItem } from '@/platform/services/model/product';
 import { H2, Overline } from '../ui/h';
 import { RelatedMaterialItem } from './related-material-item';
 

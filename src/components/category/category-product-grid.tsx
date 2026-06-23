@@ -1,7 +1,7 @@
 'use client';
 
 import { ProductTile } from '@/components/product/product-tile';
-import { Product } from '@/platform/services/model/product';
+import type { Product } from '@/platform/services/model/product';
 
 interface CategoryProductGridProps {
   products: Product[];

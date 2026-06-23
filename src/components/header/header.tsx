@@ -3,7 +3,7 @@ import { HeaderActionBar } from '@/components/header/common/header-action-bar';
 import { HeaderMobile } from '@/components/header/common/header-mobile';
 import { HeaderTopBanner } from '@/components/header/common/header-top-banner';
 import { HeaderSearchProvider } from '@/components/header/search/search-context';
-import { SubMenuItem } from '@/data/navigation-menu';
+import type { SubMenuItem } from '@/data/navigation-menu';
 import { getNavCategories } from '@/lib/ssr/category';
 
 export async function Header() {

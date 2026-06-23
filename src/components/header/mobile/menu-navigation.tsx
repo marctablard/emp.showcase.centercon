@@ -6,7 +6,8 @@ import { ArrowLeft, ChevronDown, MapPin } from 'lucide-react';
 import { HeaderPromo } from '@/components/header/common/header-promo';
 import { LocationSettingsDialog } from '@/components/header/mobile/location-settings-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { MenuItem, navigationMenuItems, serviceMenuItems } from '@/data/navigation-menu';
+import type { MenuItem } from '@/data/navigation-menu';
+import { navigationMenuItems, serviceMenuItems } from '@/data/navigation-menu';
 import { Link } from '@/i18n/navigation';
 
 interface MobileMenuNavigationProps {

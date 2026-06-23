@@ -10,7 +10,7 @@ import { useCategoryTree } from '@/hooks/category/useCategoryTree';
 import { useL10n } from '@/hooks/useL10n';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { Category } from '@/platform/services/model/category';
+import type { Category } from '@/platform/services/model/category';
 
 interface CategoryGridProps {
   title?: string;

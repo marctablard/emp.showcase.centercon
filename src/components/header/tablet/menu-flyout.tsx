@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { HeaderPromo } from '@/components/header/common/header-promo';
-import { MenuItem, navigationMenuItems } from '@/data/navigation-menu';
+import type { MenuItem } from '@/data/navigation-menu';
+import { navigationMenuItems } from '@/data/navigation-menu';
 import { Link } from '@/i18n/navigation';
 
 interface TabletMenuFlyoutProps {
