@@ -99,6 +99,7 @@ export class EmporixProductMapper implements ProductMapper<EmporixProduct> {
       variantAttributeValues: normalizeProductAttributeStringMap(
         source.mixins?.productVariantAttributes as Record<string, unknown> | undefined,
       ),
+      relatedItems: source.relatedItems,
     };
   }
 

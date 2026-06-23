@@ -51,6 +51,11 @@ export interface ProductVariantAttribute {
   values: { key: string; name?: string | LocalizedString; selected: boolean }[];
 }
 
+export interface RelatedItem {
+  refId: string;
+  type: 'Accessory' | 'Compulsory' | 'Consumable' | 'Part' | 'Similar' | 'Upsell';
+}
+
 export interface Product {
   id: string;
   name: string | LocalizedString;
@@ -84,6 +89,7 @@ export interface Product {
   variantAttributeValues?: Record<string, string>;
   /** Emporix product category roots when provided by API */
   categoryIds?: string[];
+  relatedItems?: RelatedItem[];
 }
 
 export interface ProductRecommendations {

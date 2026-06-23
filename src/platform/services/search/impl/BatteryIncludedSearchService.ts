@@ -45,7 +45,7 @@ class BatteryIncludedSearchService implements SearchService {
     this.logger = logger;
   }
 
-  async searchProducts(params: SearchParams<Product>, locale?: string, site?: string): Promise<SearchResult<Product>> {
+  async searchProducts(params: SearchParams<Product>): Promise<SearchResult<Product>> {
     // Add filter with segmentIds if customer is logged in and has segments assigned.
     let filters = params.filters;
     if (params.customerSegments) {
@@ -61,6 +61,7 @@ class BatteryIncludedSearchService implements SearchService {
       }
     }
 
+    let site = params.site;
     if (!site) {
       const session = await this.sessionService.getCurrent();
       site = session?.siteCode;
@@ -116,10 +117,6 @@ class BatteryIncludedSearchService implements SearchService {
         }
       }
       const apiResponse = await this.shopApi.suggest(params.query || '', params.locale, segmentIds?.join(','));
-      if (!params.site) {
-        const session = await this.sessionService.getCurrent();
-        params.site = session?.siteCode;
-      }
       return this.suggestionsMapper.mapSearchSuggestions(apiResponse);
     } catch (error) {
       this.logger.error({ err: error }, '[SearchService] Error getting suggestions');

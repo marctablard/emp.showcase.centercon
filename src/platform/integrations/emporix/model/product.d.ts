@@ -33,6 +33,11 @@ export interface EmporixProductTemplate {
   metadata: EmporixMetadata;
 }
 
+export interface EmporixRelatedItem {
+  refId: string;
+  type: 'Accessory' | 'Compulsory' | 'Consumable' | 'Part' | 'Similar' | 'Upsell';
+}
+
 export interface EmporixProduct {
   id?: string;
   yrn?: string;
@@ -58,4 +63,5 @@ export interface EmporixProduct {
   };
   /** Catalog / navigation root category ids (Product Service). */
   categoryIds?: string[];
+  relatedItems?: EmporixRelatedItem[];
 }

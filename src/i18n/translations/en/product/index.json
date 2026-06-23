@@ -105,6 +105,27 @@
     "overline": "more to explore",
     "headline": "You might also be interested in"
   },
+  "relatedMaterials": {
+    "overline": "Related Products",
+    "title": "Related Materials",
+    "searchPlaceholder": "Search related materials...",
+    "filterByType": "Filter by type",
+    "loading": "Loading related materials...",
+    "noResults": "No related materials found",
+    "columnProduct": "Product",
+    "columnType": "Type",
+    "columnPrice": "Price",
+    "columnQuantity": "Quantity",
+    "types": {
+      "all": "All Types",
+      "accessory": "Accessory",
+      "compulsory": "Compulsory",
+      "consumable": "Consumable",
+      "part": "Part",
+      "similar": "Similar",
+      "upsell": "Upsell"
+    }
+  },
   "loadingVariants": "Loading variants...",
   "variantSelectPlaceholder": "Select variant",
   "addedToComparison": "{name} added to comparison list",

@@ -12,7 +12,16 @@
     "message": "Nachricht",
     "send": "Ticket senden",
     "subjectPlaceholder": "Betreff eingeben",
-    "messagePlaceholder": "Beschreiben Sie Ihr Anliegen hier..."
+    "messagePlaceholder": "Beschreiben Sie Ihr Anliegen hier...",
+    "titleView": "Service-Ticket anzeigen",
+    "validation": {
+      "subjectRequired": "Bitte wählen Sie einen Betreff aus",
+      "descriptionRequired": "Bitte geben Sie eine Beschreibung ein"
+    },
+    "errors": {
+      "submitFailed": "Fehler beim Senden des Tickets"
+    },
+    "sending": "Wird gesendet..."
   },
   "profile": {
     "title": "Profileinstellungen",
@@ -122,6 +131,7 @@
       "wishlists": "Wunschliste",
       "productsMaintenance": "Produkte & Wartung",
       "contractsAgreements": "Verträge & Vereinbarungen",
+      "devices": "Geräte",
       "personalData": "Persönliche Daten",
       "accountSettings": "Kontoeinstellungen",
       "approvals": "Freigaben",
@@ -738,5 +748,33 @@
       "updateQuantityError": "Die Menge für {product} konnte nicht aktualisiert werden"
     },
     "noPriceTooltip": "Dieses Produkt hat keinen Preis und kann nicht zur Wunschliste hinzugefügt werden."
+  },
+  "devices": {
+    "title": "Geräte",
+    "description": "Geräte anzeigen und verwalten, die für Ihr Unternehmen registriert sind",
+    "loading": "Geräte werden geladen...",
+    "errorLoading": "Fehler beim Laden der Geräte",
+    "tryAgain": "Erneut versuchen",
+    "noDevices": "Keine Geräte für Ihr Unternehmen gefunden",
+    "searchPlaceholder": "Nach Produkt, Seriennummer suchen...",
+    "viewHealthMonitor": "Gesundheitsmonitor anzeigen",
+    "columnProductName": "Produktname",
+    "columnSerialNumber": "Seriennummer",
+    "columnHealth": "Zustand",
+    "columnActions": "Aktionen",
+    "unknownProduct": "Unbekanntes Produkt",
+    "viewRelatedProducts": "Verwandte Produkte anzeigen",
+    "noRelatedProducts": "Keine verwandten Produkte",
+    "relatedProducts": {
+      "title": "Verwandte Produkte",
+      "description": "Verwandte Produkte für Gerät: {deviceName}",
+      "searchPlaceholder": "Verwandte Produkte durchsuchen...",
+      "loading": "Verwandte Produkte werden geladen...",
+      "noResults": "Keine verwandten Produkte gefunden",
+      "columnProduct": "Produkt",
+      "columnType": "Typ",
+      "columnPrice": "Preis",
+      "columnQuantity": "Menge"
+    }
   }
 }

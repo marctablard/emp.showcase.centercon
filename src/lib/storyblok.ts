@@ -12,6 +12,7 @@ import Page from '@/components/cms/page';
 import Segment from '@/components/cms/segment';
 import {
   StoryblokButton,
+  StoryblokCategoryGrid,
   StoryblokColumnTeaser,
   StoryblokHero,
   StoryblokQuickEntry,
@@ -48,6 +49,7 @@ export const getStoryblokApi = storyblokInit({
     navigation: Navigation,
     content_block: ContentBlock,
     category: Category,
+    category_grid: StoryblokCategoryGrid,
     segment: Segment,
     article: Article,
     button: StoryblokButton,

@@ -12,7 +12,16 @@
     "message": "Message",
     "send": "Send Ticket",
     "subjectPlaceholder": "Enter subject",
-    "messagePlaceholder": "Describe your issue here..."
+    "messagePlaceholder": "Describe your issue here...",
+    "titleView": "View Service Ticket",
+    "validation": {
+      "subjectRequired": "Please select a subject",
+      "descriptionRequired": "Please enter a description"
+    },
+    "errors": {
+      "submitFailed": "Failed to submit ticket"
+    },
+    "sending": "Sending..."
   },
   "Address": {
     "title": "Address Management",
@@ -175,6 +184,7 @@
       "wishlists": "Wishlist",
       "productsMaintenance": "Products & Maintenance",
       "contractsAgreements": "Contracts & Agreements",
+      "devices": "Devices",
       "personalData": "Personal Data",
       "accountSettings": "Account Settings",
       "approvals": "Approvals",
@@ -731,5 +741,33 @@
       "updateQuantityError": "Failed to update quantity for {product}"
     },
     "noPriceTooltip": "This product does not have a price and cannot be added to the wishlist."
+  },
+  "devices": {
+    "title": "Devices",
+    "description": "View and manage devices registered to your company",
+    "loading": "Loading devices...",
+    "errorLoading": "Error loading devices",
+    "tryAgain": "Try Again",
+    "noDevices": "No devices found for your company",
+    "searchPlaceholder": "Search by product, serial number...",
+    "viewHealthMonitor": "View Health Monitor",
+    "columnProductName": "Product Name",
+    "columnSerialNumber": "Serial Number",
+    "columnHealth": "Health",
+    "columnActions": "Actions",
+    "unknownProduct": "Unknown Product",
+    "viewRelatedProducts": "View Related Products",
+    "noRelatedProducts": "No related products",
+    "relatedProducts": {
+      "title": "Related Products",
+      "description": "Related products for device: {deviceName}",
+      "searchPlaceholder": "Search related products...",
+      "loading": "Loading related products...",
+      "noResults": "No related products found",
+      "columnProduct": "Product",
+      "columnType": "Type",
+      "columnPrice": "Price",
+      "columnQuantity": "Quantity"
+    }
   }
 }

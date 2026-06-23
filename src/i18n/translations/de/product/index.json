@@ -105,6 +105,27 @@
     "overline": "mehr zu entdecken",
     "headline": "Diese Produkte könnten auch interessant sein"
   },
+  "relatedMaterials": {
+    "overline": "Verwandte Produkte",
+    "title": "Zugehörige Materialien",
+    "searchPlaceholder": "Zugehörige Materialien suchen...",
+    "filterByType": "Nach Typ filtern",
+    "loading": "Zugehörige Materialien werden geladen...",
+    "noResults": "Keine zugehörigen Materialien gefunden",
+    "columnProduct": "Produkt",
+    "columnType": "Typ",
+    "columnPrice": "Preis",
+    "columnQuantity": "Menge",
+    "types": {
+      "all": "Alle Typen",
+      "accessory": "Zubehör",
+      "compulsory": "Erforderlich",
+      "consumable": "Verbrauchsmaterial",
+      "part": "Ersatzteil",
+      "similar": "Ähnlich",
+      "upsell": "Upgrade"
+    }
+  },
   "loadingVariants": "Varianten werden geladen...",
   "variantSelectPlaceholder": "Variante auswählen",
   "addedToComparison": "{name} wurde zur Vergleichsliste hinzugefügt",
