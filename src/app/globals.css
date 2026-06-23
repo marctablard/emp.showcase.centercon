@@ -228,6 +228,14 @@
   --color-gradient-secondary-start: var(--color-gradient-secondary-start);
   --color-gradient-secondary-end: var(--color-gradient-secondary-end);
 
+  /* Service Tickets accent — a calm teal, intentionally distinct from the
+     corporate blue, used to give the support experience its own identity. */
+  --color-ticket-accent: #0f766e;
+  --color-ticket-accent-hover: #115e59;
+  --color-ticket-accent-soft: #ccfbf1;
+  --color-ticket-accent-border: #5eead4;
+  --color-ticket-accent-contrast: #ffffff;
+
   /* Radius */
   --radius-*: initial;
   --radius: var(--border-radius-md);

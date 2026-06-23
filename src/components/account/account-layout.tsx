@@ -80,10 +80,8 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
       items: [
         {
           href: '/account/tickets',
-          title: t('sidebar.items.supportTickets'),
+          title: t('sidebar.items.serviceTickets'),
           icon: <HandHelping className="h-6 w-6" />,
-          counter: 4,
-          badgeVariant: 'success' as const,
         },
         {
           href: '/account/calendar',

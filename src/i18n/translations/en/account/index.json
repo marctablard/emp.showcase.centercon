@@ -170,6 +170,7 @@
     },
     "items": {
       "supportTickets": "Support Tickets",
+      "serviceTickets": "Service Tickets",
       "serviceCalendar": "Service Calendar",
       "trainingMaterial": "Training Material",
       "orderHistory": "Order History",
@@ -713,6 +714,83 @@
       "invoice": "Issue with invoice #INV-87634",
       "product": "Product information request",
       "return": "Return request for order #ORD-28746"
+    }
+  },
+  "serviceTickets": {
+    "title": "Service Tickets",
+    "description": "Create and track your service requests with our support team.",
+    "viewAll": "View all tickets",
+    "newTicket": "New Ticket",
+    "searchPlaceholder": "Search by id, subject or type",
+    "updatedAt": "Updated",
+    "empty": "You don't have any service tickets yet.",
+    "noMatches": "No tickets match your filters.",
+    "statusFallback": "In progress",
+    "previous": "Previous",
+    "next": "Next",
+    "pageIndicator": "Page {current} / {total}",
+    "filters": {
+      "all": "All",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "statuses": {
+      "open": "Open",
+      "reopened": "Reopened",
+      "under_investigation": "Under investigation",
+      "solution_provided": "Solution provided",
+      "closed": "Closed"
+    },
+    "priorities": {
+      "blocker": "Blocker",
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "createDialog": {
+      "title": "Create Service Ticket",
+      "description": "Tell us what you need help with and we'll get back to you.",
+      "requestType": "Request type",
+      "selectRequestType": "Select a request type",
+      "subject": "Subject",
+      "subjectPlaceholder": "Briefly summarize your request",
+      "summary": "Description",
+      "summaryPlaceholder": "Describe your issue in detail...",
+      "businessImpact": "Business impact",
+      "businessImpactPlaceholder": "How does this affect your business? (optional)",
+      "detailsSection": "Additional details",
+      "cancel": "Cancel",
+      "submit": "Create Ticket",
+      "success": "Your ticket has been created.",
+      "error": "Failed to create ticket"
+    },
+    "detail": {
+      "title": "Service Ticket",
+      "back": "Back to Service Tickets",
+      "created": "Created",
+      "conversation": "Conversation",
+      "noMessages": "There are no messages on this ticket yet.",
+      "you": "You",
+      "support": "Support",
+      "replyLabel": "Add a reply",
+      "replyPlaceholder": "Type your reply to support...",
+      "send": "Send",
+      "replySent": "Your reply has been sent.",
+      "replyError": "Failed to send reply",
+      "requestDetails": "Request details",
+      "requestType": "Request type",
+      "businessImpact": "Business impact",
+      "description": "Description",
+      "reopen": "Reopen ticket",
+      "reopened": "Your ticket has been reopened.",
+      "reopenError": "Failed to reopen ticket",
+      "feedbackTitle": "Your feedback",
+      "feedbackPrompt": "How satisfied are you with the resolution?",
+      "feedbackGiven": "Thanks for rating this ticket. You can update your rating below.",
+      "feedbackThanks": "Thanks for your feedback!",
+      "feedbackError": "Failed to submit feedback",
+      "rateStars": "Rate {count} out of 5"
     }
   },
   "Weather": {

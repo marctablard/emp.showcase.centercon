@@ -190,6 +190,30 @@ export type PaymentModeKey =
 export type { QuoteStatusMessageKey as QuoteStatusKey } from '@/lib/common/quote-status-message-keys';
 
 // ---------------------------------------------------------------------------
+// Namespace: account.serviceTickets (sub-path: statuses.*)
+// Used by: ticket-status-badge.tsx
+// Status ids come from the SERVICE_COCKPIT_STATUSES custom entity.
+// ---------------------------------------------------------------------------
+export type ServiceTicketStatusKey =
+  | 'statuses.open'
+  | 'statuses.reopened'
+  | 'statuses.under_investigation'
+  | 'statuses.solution_provided'
+  | 'statuses.closed';
+
+// ---------------------------------------------------------------------------
+// Namespace: account.serviceTickets (sub-path: priorities.*)
+// Used by: tickets-list.tsx, ticket-detail.tsx, ticket-card.tsx
+// Priority/SLA values come from the ticket and the structure availableSLAs.
+// ---------------------------------------------------------------------------
+export type ServiceTicketPriorityKey =
+  | 'priorities.blocker'
+  | 'priorities.critical'
+  | 'priorities.high'
+  | 'priorities.medium'
+  | 'priorities.low';
+
+// ---------------------------------------------------------------------------
 // Namespace: common.Languages
 // Used by: header-language-switcher.tsx
 // ---------------------------------------------------------------------------

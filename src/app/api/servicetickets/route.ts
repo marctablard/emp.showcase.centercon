@@ -1,147 +1,79 @@
-import { NextRequest, NextResponse } from 'next/server';
-import type EmporixApiInvoker from '@/platform/integrations/emporix/common/impl/EmporixApiInvoker';
-import type { EmporixCustomerApi } from '@/platform/integrations/emporix/customer/EmporixCustomerApi';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { getPublicDefaultLanguage } from '@/lib/common/public-default-env';
 import server from '@/platform/server';
-import type { CustomerService } from '@/platform/services/customer/CustomerService';
+import type { LoggerService } from '@/platform/services/logger/LoggerService';
+import type { CreateServiceTicketInput } from '@/platform/services/model/serviceticket';
+import type { ServiceTicketService } from '@/platform/services/serviceticket/ServiceTicketService';
 
-export async function GET(_request: NextRequest): Promise<NextResponse> {
+export const revalidate = 0;
+
+/**
+ * GET /api/servicetickets
+ * List the current customer's service tickets.
+ */
+export async function GET(request: NextRequest) {
   try {
-    const customerService = server.get<CustomerService>('CustomerService');
-    const currentCustomer = await customerService.getCustomer();
+    const { searchParams } = new URL(request.url);
+    const locale = searchParams.get('locale') || getPublicDefaultLanguage();
+    const pageNumber = searchParams.get('pageNumber') ? parseInt(searchParams.get('pageNumber')!, 10) : 1;
+    const pageSize = searchParams.get('pageSize') ? parseInt(searchParams.get('pageSize')!, 10) : 60;
 
-    if (!currentCustomer) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
+    const service = server.get<ServiceTicketService>('ServiceTicketService');
+    const { items, totalCount } = await service.listTickets(locale, pageNumber, pageSize);
 
-    const api = server.get<EmporixApiInvoker>('EmporixApiInvoker');
-    const config = server.get('EmporixConfig') as { tenant: string };
-
-    // Fetch raw Emporix customer profile to read customerNumber
-    const customerApi = server.get<EmporixCustomerApi>('EmporixCustomerApi');
-    const profile = await customerApi.getCustomerProfile();
-    const customerNumber = profile?.customerNumber || '';
-    const customerIdentifier = customerNumber || currentCustomer.id;
-
-    const path = `schema/${config.tenant}/custom-entities/SERVICETICKETS/instances`;
-    const q = `mixins.ticketinfo.ticketcustomer:${customerIdentifier}`;
-    const urlWithQuery = `${path}?q=${encodeURIComponent(q)}`;
-
-    const res = await api.authenticatedFetch(
-      urlWithQuery,
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Accept-Language': '*',
-        },
-        cache: 'no-store',
-      },
-      'service',
-      { scopes: ['schema.custominstance_read'] },
-    );
-
-    if (!res.ok) {
-      return NextResponse.json({ error: 'Upstream error' }, { status: res.status });
-    }
-
-    const instances = (await res.json()) as Array<any>;
-
-    const data = Array.isArray(instances)
-      ? instances.map((it) => {
-          const info = it?.mixins?.ticketinfo || {};
-          return {
-            Status: info.ticketstatus ?? 'open',
-            OrderID: info.ticketorder ?? null,
-            OwnerID: info.ticketowner ?? null,
-            TicketID: it?.id ?? '',
-            TicketName: it?.name?.en ?? it?.name?.de ?? it?.id ?? '',
-            ProductID: info.ticketproduct ?? null,
-            SubjectID: info.ticketsubject ?? null,
-            CustomerID: info.ticketcustomer ?? null,
-            Description: {
-              en: info.ticketdescription ?? undefined,
-              de: info.ticketdescription ?? undefined,
-            },
-            SubjectName: {
-              en: undefined,
-              de: undefined,
-            },
-            CreatedAt: it?.metadata?.createdAt ?? undefined,
-          };
-        })
-      : [];
-
-    return NextResponse.json(data);
-  } catch (e) {
-    console.error('Failed to fetch service tickets:', e);
+    return NextResponse.json(items, {
+      headers: totalCount !== undefined ? { 'x-total-count': String(totalCount) } : undefined,
+    });
+  } catch (error) {
+    server
+      .get<LoggerService>('LoggerService')
+      .error(
+        { error: error instanceof Error ? error.message : String(error), path: '/api/servicetickets', method: 'GET' },
+        'Error fetching service tickets',
+      );
     return NextResponse.json({ error: 'Failed to fetch service tickets' }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+/**
+ * POST /api/servicetickets
+ * Create a new service ticket for the current customer.
+ */
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const locale = body.locale || getPublicDefaultLanguage();
 
-    // Validate required fields
-    if (!body.subjectId || !body.descriptionEn) {
-      return NextResponse.json({ error: 'Subject and description are required' }, { status: 400 });
+    if (!body.typeId || typeof body.typeId !== 'string') {
+      return NextResponse.json({ error: 'A request type is required' }, { status: 400 });
+    }
+    if (!body.subject || typeof body.subject !== 'string' || body.subject.trim() === '') {
+      return NextResponse.json({ error: 'A subject is required' }, { status: 400 });
+    }
+    if (!body.summary || typeof body.summary !== 'string' || body.summary.trim() === '') {
+      return NextResponse.json({ error: 'A description is required' }, { status: 400 });
     }
 
-    // Get DI services
-    const api = server.get<EmporixApiInvoker>('EmporixApiInvoker');
-    const config = server.get('EmporixConfig') as { tenant: string };
-    const customerApi = server.get<EmporixCustomerApi>('EmporixCustomerApi');
-
-    // Determine customer number for ticketcustomer
-    const profile = await customerApi.getCustomerProfile();
-    const customerNumber = profile?.customerNumber;
-
-    // Generate TicketID and TicketName
-    const guid = crypto.randomUUID().replace(/-/g, '');
-    const ticketId = `ST-${guid}`;
-    const ticketName = ticketId.substring(0, 10);
-
-    // Build payload
-    const payload = {
-      name: {
-        en: ticketName,
-      },
-      mixins: {
-        ticketinfo: {
-          ticketcustomer: body.customerId || customerNumber || '',
-          ticketdescription: body.descriptionEn,
-          ticketowner: '',
-          ticketstatus: 'open',
-          ticketsubject: body.subjectId,
-          ...(body.orderId ? { ticketorder: body.orderId } : {}),
-          ...(body.productId ? { ticketproduct: body.productId } : {}),
-        },
-      },
+    const input: CreateServiceTicketInput = {
+      typeId: body.typeId,
+      subject: body.subject.trim(),
+      summary: body.summary.trim(),
+      businessImpact: typeof body.businessImpact === 'string' ? body.businessImpact : undefined,
+      properties: body.properties && typeof body.properties === 'object' ? body.properties : undefined,
     };
 
-    const putUrl = `schema/${config.tenant}/custom-entities/SERVICETICKETS/instances/${encodeURIComponent(ticketId)}`;
+    const service = server.get<ServiceTicketService>('ServiceTicketService');
+    const id = await service.createTicket(input, locale);
 
-    const res = await api.authenticatedFetch(
-      putUrl,
-      {
-        method: 'PUT',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      },
-      'service',
-      { scopes: ['schema.custominstance_manage'] },
-    );
-
-    if (!res.ok && res.status !== 204 && res.status !== 201) {
-      return NextResponse.json({ error: 'Upstream error' }, { status: res.status });
-    }
-
-    return NextResponse.json({ id: ticketId, name: { en: ticketName } }, { status: res.status === 201 ? 201 : 200 });
-  } catch (e) {
-    console.error('Failed to create service ticket:', e);
+    return NextResponse.json({ id }, { status: 201 });
+  } catch (error) {
+    server
+      .get<LoggerService>('LoggerService')
+      .error(
+        { error: error instanceof Error ? error.message : String(error), path: '/api/servicetickets', method: 'POST' },
+        'Error creating service ticket',
+      );
     return NextResponse.json({ error: 'Failed to create service ticket' }, { status: 500 });
   }
 }
