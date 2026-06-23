@@ -30,13 +30,10 @@ export function RelatedProductsModal({
   const { l10n } = useL10n(locale);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Extract product IDs from related items
   const productIds = useMemo(() => (relatedItems || []).map((item) => item.refId), [relatedItems]);
 
-  // Fetch all related products
   const { products, loading } = useProducts(productIds, { prices: true });
 
-  // Create a map of product ID to related item type
   const productTypeMap = useMemo(() => {
     const map = new Map<string, RelatedItem['type']>();
     (relatedItems || []).forEach((item) => {
@@ -45,7 +42,6 @@ export function RelatedProductsModal({
     return map;
   }, [relatedItems]);
 
-  // Filter by search query
   const filteredProducts = useMemo(() => {
     if (!products) return [];
 
@@ -69,7 +65,6 @@ export function RelatedProductsModal({
           <DialogDescription>{t('description', { deviceName })}</DialogDescription>
         </DialogHeader>
 
-        {/* Search Input */}
         <div className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-icon-neutral" />
@@ -83,7 +78,6 @@ export function RelatedProductsModal({
           </div>
         </div>
 
-        {/* Loading State */}
         {loading && (
           <div className="flex justify-center py-8">
             <div className="flex flex-col items-center space-y-2">
@@ -93,17 +87,14 @@ export function RelatedProductsModal({
           </div>
         )}
 
-        {/* No Results */}
         {!loading && filteredProducts.length === 0 && (
           <div className="text-center py-8">
             <p className="text-text-body">{t('noResults')}</p>
           </div>
         )}
 
-        {/* Products List */}
         {!loading && filteredProducts.length > 0 && (
           <div className="flex flex-col gap-3 overflow-y-auto flex-1 pr-1">
-            {/* Header Row */}
             <div className="hidden sm:flex items-center gap-4 px-4 py-2 bg-surface-disabled rounded-sm">
               <div className="w-20 flex-shrink-0"></div>
               <div className="flex-1 min-w-0">
@@ -121,7 +112,6 @@ export function RelatedProductsModal({
               <div className="w-10 flex-shrink-0"></div>
             </div>
 
-            {/* Product Rows */}
             {filteredProducts.map((product) => (
               <RelatedMaterialItem
                 key={product.id}
