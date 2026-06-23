@@ -108,6 +108,7 @@
     },
     "items": {
       "supportTickets": "Support-Tickets",
+      "serviceTickets": "Service-Tickets",
       "serviceCalendar": "Service-Kalender",
       "trainingMaterial": "Schulungsmaterial",
       "orderHistory": "Bestellhistorie",
@@ -579,6 +580,83 @@
       "invoice": "Problem mit Rechnung #INV-87634",
       "product": "Produktinformationsanfrage",
       "return": "Rückgabeanforderung für Bestellung #ORD-28746"
+    }
+  },
+  "serviceTickets": {
+    "title": "Service-Tickets",
+    "description": "Erstellen und verfolgen Sie Ihre Serviceanfragen bei unserem Support-Team.",
+    "viewAll": "Alle Tickets anzeigen",
+    "newTicket": "Neues Ticket",
+    "searchPlaceholder": "Nach ID, Betreff oder Typ suchen",
+    "updatedAt": "Aktualisiert",
+    "empty": "Sie haben noch keine Service-Tickets.",
+    "noMatches": "Keine Tickets entsprechen Ihren Filtern.",
+    "statusFallback": "In Bearbeitung",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "pageIndicator": "Seite {current} / {total}",
+    "filters": {
+      "all": "Alle",
+      "open": "Offen",
+      "closed": "Geschlossen"
+    },
+    "statuses": {
+      "open": "Offen",
+      "reopened": "Wieder geöffnet",
+      "under_investigation": "In Prüfung",
+      "solution_provided": "Lösung bereitgestellt",
+      "closed": "Geschlossen"
+    },
+    "priorities": {
+      "blocker": "Blocker",
+      "critical": "Kritisch",
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig"
+    },
+    "createDialog": {
+      "title": "Service-Ticket erstellen",
+      "description": "Sagen Sie uns, wobei Sie Hilfe benötigen, und wir melden uns bei Ihnen.",
+      "requestType": "Anfragetyp",
+      "selectRequestType": "Anfragetyp auswählen",
+      "subject": "Betreff",
+      "subjectPlaceholder": "Fassen Sie Ihre Anfrage kurz zusammen",
+      "summary": "Beschreibung",
+      "summaryPlaceholder": "Beschreiben Sie Ihr Anliegen im Detail...",
+      "businessImpact": "Geschäftliche Auswirkung",
+      "businessImpactPlaceholder": "Wie wirkt sich das auf Ihr Geschäft aus? (optional)",
+      "detailsSection": "Weitere Angaben",
+      "cancel": "Abbrechen",
+      "submit": "Ticket erstellen",
+      "success": "Ihr Ticket wurde erstellt.",
+      "error": "Ticket konnte nicht erstellt werden"
+    },
+    "detail": {
+      "title": "Service-Ticket",
+      "back": "Zurück zu Service-Tickets",
+      "created": "Erstellt",
+      "conversation": "Konversation",
+      "noMessages": "Zu diesem Ticket gibt es noch keine Nachrichten.",
+      "you": "Sie",
+      "support": "Support",
+      "replyLabel": "Antwort hinzufügen",
+      "replyPlaceholder": "Schreiben Sie Ihre Antwort an den Support...",
+      "send": "Senden",
+      "replySent": "Ihre Antwort wurde gesendet.",
+      "replyError": "Antwort konnte nicht gesendet werden",
+      "requestDetails": "Anfragedetails",
+      "requestType": "Anfragetyp",
+      "businessImpact": "Geschäftliche Auswirkung",
+      "description": "Beschreibung",
+      "reopen": "Ticket wieder öffnen",
+      "reopened": "Ihr Ticket wurde wieder geöffnet.",
+      "reopenError": "Ticket konnte nicht wieder geöffnet werden",
+      "feedbackTitle": "Ihr Feedback",
+      "feedbackPrompt": "Wie zufrieden sind Sie mit der Lösung?",
+      "feedbackGiven": "Danke für Ihre Bewertung. Sie können Ihre Bewertung unten anpassen.",
+      "feedbackThanks": "Danke für Ihr Feedback!",
+      "feedbackError": "Feedback konnte nicht gesendet werden",
+      "rateStars": "{count} von 5 bewerten"
     }
   },
   "Weather": {

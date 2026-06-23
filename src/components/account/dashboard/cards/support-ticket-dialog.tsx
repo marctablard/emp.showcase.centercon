@@ -1,86 +1,50 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { HelpingHand } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
+import { CreateTicketDialog } from '@/components/account/tickets/create-ticket-dialog';
+import { useRouter } from '@/i18n/navigation';
+import { fetchServiceTicketTypes } from '@/lib/client/servicetickets';
 import { getLogger } from '@/lib/logger/use-logger-client';
+import type { ServiceTicketType } from '@/platform/services/model/serviceticket';
 
+/**
+ * @deprecated Kept for backwards compatibility with the old dashboard dialog.
+ */
 export interface SupportTicketData {
   subject: string;
   message: string;
 }
 
 export interface SupportTicketDialogProps {
+  /** @deprecated No longer used - ticket creation is handled by the platform. */
   onSubmit?: (data: SupportTicketData) => void;
 }
 
-export function SupportTicketDialog({ onSubmit }: SupportTicketDialogProps) {
-  const t = useTranslations('account');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
+/**
+ * Dashboard entry point for creating a service ticket. Loads the available
+ * request types and delegates to the shared {@link CreateTicketDialog}.
+ */
+export function SupportTicketDialog(_props: SupportTicketDialogProps) {
+  const locale = useLocale();
+  const router = useRouter();
+  const [types, setTypes] = useState<ServiceTicketType[]>([]);
 
-  const handleSubmit = () => {
-    // Call the onSubmit callback if provided
-    if (onSubmit) {
-      onSubmit({ subject, message });
-    } else {
-      // Fallback behavior if no callback is provided
-      getLogger().debug({ subject, message }, 'Sending ticket');
-    }
+  useEffect(() => {
+    let active = true;
+    fetchServiceTicketTypes(locale)
+      .then((fetched) => {
+        if (active) {
+          setTypes(fetched);
+        }
+      })
+      .catch((error) => getLogger().error({ err: error }, 'Failed to load service ticket types'));
+    return () => {
+      active = false;
+    };
+  }, [locale]);
 
-    // Reset form fields
-    setSubject('');
-    setMessage('');
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button>
-          {t('newServiceTicket')}
-          <HelpingHand className="ml-2" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('serviceTicketDialog.title')}</DialogTitle>
-        </DialogHeader>
-
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <label htmlFor="subject">{t('serviceTicketDialog.subject')}</label>
-            <Input
-              id="subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder={t('serviceTicketDialog.subjectPlaceholder')}
-              data-testid="supportTicket-subject"
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <label htmlFor="message">{t('serviceTicketDialog.message')}</label>
-            <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={t('serviceTicketDialog.messagePlaceholder')}
-              maxLength={500}
-              data-testid="supportTicket-message"
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleSubmit} data-testid="supportTicket-sendButton">
-            {t('serviceTicketDialog.send')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+  return <CreateTicketDialog types={types} onCreated={(id) => router.push(`/account/tickets/${id}`)} />;
 }
+
+export default SupportTicketDialog;
