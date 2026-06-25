@@ -61,18 +61,9 @@ class BatteryIncludedSearchService implements SearchService {
       }
     }
 
-    let site = params.site;
-    if (!site) {
-      const session = await this.sessionService.getCurrent();
-      site = session?.siteCode;
-    }
-    if (site) {
-      filters = {
-        ...filters,
-        siteCode: site,
-      };
-    }
-
+    // NOTE: Do not add `siteCode` as a search filter. The BatteryIncluded collection
+    // schema has no `siteCode` facet field, so sending it makes the browse query fail
+    // with "Could not find a facet field named `siteCode` in the schema" (HTTP 500).
     const searchResult: BatteryIncludedSearchResponse<BatteryIncludedProduct> = await this.shopApi.browse({
       page: (params.page || 0) + 1, // normalize page
       size: params.size,
