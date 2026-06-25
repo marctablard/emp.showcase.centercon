@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Leaf, Package, ShoppingCart } from 'lucide-react';
+import { Clock, Leaf, Package, ShoppingCart } from 'lucide-react';
 import { ServiceCockpitTicketDialog } from '@/components/cart/service-cockpit-ticket-dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -272,19 +272,25 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
                 </div>
 
                 {availability && (
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 mt-3">
                     {availability.availableQuantity && (
-                      <p className="text-sm font-bold pr-4">
-                        {t('substitution.availableDescription', {
-                          available: availability.availableQuantity,
-                          total: cartItem.quantity,
-                        })}
-                      </p>
+                      <div className="flex items-center gap-2 rounded-md border border-border-primary bg-bg-surface px-3 py-2">
+                        <Package className="h-4 w-4 shrink-0 text-text-error" />
+                        <span className="text-sm font-semibold text-text-primary">
+                          {t('substitution.availableDescription', {
+                            available: availability.availableQuantity,
+                            total: cartItem.quantity,
+                          })}
+                        </span>
+                      </div>
                     )}
                     {availability.availableInDays && (
-                      <p className="text-sm font-bold text-text-warning pr-4 justify-end">
-                        {t('substitution.availableInDays', { days: availability.availableInDays })}
-                      </p>
+                      <div className="flex items-center gap-2 rounded-md border border-border-warning bg-bg-surface px-3 py-2">
+                        <Clock className="h-4 w-4 shrink-0 text-text-warning" />
+                        <span className="text-sm font-semibold text-text-warning">
+                          {t('substitution.availableInDays', { days: availability.availableInDays })}
+                        </span>
+                      </div>
                     )}
                   </div>
                 )}
