@@ -48,16 +48,27 @@ class SegmentFilterService {
   }
 
   async filterByCustomerSegments<T extends { id?: string }>(items: T[]): Promise<T[]> {
-    const currentCustomer = await this.customerService.getCustomer();
-    if (!currentCustomer) return items;
+    try {
+      const currentCustomer = await this.customerService.getCustomer();
+      if (!currentCustomer) return items;
 
-    const segmentIds = await this.getSegmentIds();
-    if (segmentIds.length === 0) return items;
+      const segmentIds = await this.getSegmentIds();
+      if (segmentIds.length === 0) return items;
 
-    const allowedProductIds = await this.getAllowedProductIds();
-    if (allowedProductIds.size === 0) return items;
+      const allowedProductIds = await this.getAllowedProductIds();
+      if (allowedProductIds.size === 0) return items;
 
-    return items.filter((item) => allowedProductIds.has(item.id!));
+      return items.filter((item) => allowedProductIds.has(item.id!));
+    } catch (error) {
+      // Segment resolution is a best-effort restriction layer. If it fails (e.g. the
+      // customer-segment API is unavailable or not enabled for the tenant/legal entity),
+      // fall back to the unfiltered items instead of failing the entire product search.
+      this.logger.warn(
+        { err: error instanceof Error ? error : String(error) },
+        'Customer segment filtering failed; returning unfiltered results',
+      );
+      return items;
+    }
   }
 
   /**
