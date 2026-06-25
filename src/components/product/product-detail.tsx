@@ -58,6 +58,11 @@ export interface ProductDetailProps {
 export default function ProductDetail({ product: initialProduct, options, className }: ProductDetailProps) {
   const { ready: shopContextReady } = useShopContextReady();
   const { product, loading, setAsCurrent } = useProduct(initialProduct, options);
+  const initialProductObject = initialProduct && typeof initialProduct === 'object' ? initialProduct : undefined;
+  const relatedItems =
+    product?.relatedItems && product.relatedItems.length > 0
+      ? product.relatedItems
+      : initialProductObject?.relatedItems;
   const { session } = useSession();
   const { site } = useSite();
   const [price, setPrice] = useState<ProductPrice | null | undefined>(product?.price);
@@ -545,7 +550,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
         </div>
       ) : null}
 
-      <RelatedMaterials relatedItems={product.relatedItems} locale={locale} className={cn(className)} />
+      <RelatedMaterials relatedItems={relatedItems} locale={locale} className={cn(className)} />
 
       <ProductDetailRecommendations productId={product.id} locale={locale} />
       {loginDialog}

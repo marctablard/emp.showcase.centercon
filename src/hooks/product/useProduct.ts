@@ -23,6 +23,23 @@ interface UseProductResult {
   setAsCurrent: (isCurrent?: boolean) => void;
 }
 
+function mergeRelatedItems(
+  product: Product | null | undefined,
+  ...fallbacks: (Product | null | undefined)[]
+): Product | null | undefined {
+  if (!product || product.relatedItems?.length) {
+    return product;
+  }
+
+  for (const fallback of fallbacks) {
+    if (fallback?.relatedItems?.length) {
+      return { ...product, relatedItems: fallback.relatedItems };
+    }
+  }
+
+  return product;
+}
+
 export const useProduct = (productOrId?: string | Product, options?: ProductFetchOptions): UseProductResult => {
   const { session, loading: sessionLoading } = useSession();
   const { site } = useSite();
@@ -73,6 +90,9 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
     async (forceRefresh = false, clientDedupeScope = '') => {
       if (!id) return;
 
+      const initialProductObject =
+        productOrId && typeof productOrId === 'object' ? (productOrId as Product) : undefined;
+
       try {
         setLoading(true);
         setError(null);
@@ -83,7 +103,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
             cachedProduct?.price?.currency &&
             isProductPriceDisplayableForPurchase(cachedProduct.price.currency, sessionPricingContext, site)
           ) {
-            setProduct(cachedProduct);
+            setProduct((current) => mergeRelatedItems(cachedProduct, current, initialProductObject) ?? cachedProduct);
             setLoading(false);
             return;
           }
@@ -100,10 +120,11 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
           data && sessionPricingContext?.currency
             ? stripProductPriceIfNotDisplayableForShopContext(data, sessionPricingContext, site)
             : data;
-        if (next) {
-          addProduct(next);
+        const merged = mergeRelatedItems(next, initialProductObject);
+        if (merged) {
+          addProduct(merged);
         }
-        setProduct(next);
+        setProduct(merged ?? null);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('An unknown error occurred'));
         getLogger().error({ err }, 'Error fetching product');
@@ -111,7 +132,7 @@ export const useProduct = (productOrId?: string | Product, options?: ProductFetc
         setLoading(false);
       }
     },
-    [id, getProduct, addProduct, options, sessionPricingContext, site],
+    [id, getProduct, addProduct, options, sessionPricingContext, site, productOrId],
   );
 
   const refetch = useCallback(async () => {
