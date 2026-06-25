@@ -91,8 +91,8 @@ export function ServiceCockpitTicketDialog({
         <div className="grid gap-5 py-1">
           {error ? <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">{error}</div> : null}
 
-          <section className="rounded-ss-md rounded-ee-md border border-border-primary bg-bg-surface overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-border-subtle bg-surface-action-hover-2 px-4 py-2.5">
+          <section className="rounded-ss-md rounded-ee-md border border-border-primary bg-surface-page overflow-hidden">
+            <div className="flex items-center gap-2 border-b border-border-primary bg-surface-action-hover-2 px-4 py-2.5">
               <ClipboardList className="size-4 shrink-0 text-icon-secondary" aria-hidden />
               <p className="text-xs font-semibold uppercase tracking-wider text-text-placeholders">
                 {t('substitution.serviceCockpitTicket.contextSectionTitle')}
