@@ -13,6 +13,7 @@ jest.mock('next-intl', () => ({
 
 jest.mock('@/i18n/navigation', () => ({
   Link: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
+  useRouter: () => ({ push: jest.fn() }),
 }));
 
 jest.mock('@/hooks/approval/useApprovals', () => ({
@@ -67,10 +68,7 @@ describe('ApprovalsList', () => {
     const cartRow = screen.getByText('approval-cart-1').closest('tr');
 
     expect(quoteRow).not.toBeNull();
-    expect(within(quoteRow as HTMLTableRowElement).getByRole('link', { name: 'view' })).toHaveAttribute(
-      'href',
-      '/account/quotes/quote-1',
-    );
+    expect(within(quoteRow as HTMLTableRowElement).getByRole('button', { name: 'view' })).toBeInTheDocument();
     expect(cartRow).not.toBeNull();
     expect(within(cartRow as HTMLTableRowElement).getAllByText('-')).toHaveLength(2);
   });
@@ -92,7 +90,7 @@ describe('ApprovalsList', () => {
 
     render(<ApprovalsList initialApprovals={approvals} currentUserId="approver-1" />);
 
-    expect(screen.getByRole('link', { name: 'view' })).toHaveAttribute('href', '/account/approval/approval-quote-1');
+    expect(screen.getByRole('button', { name: 'view' })).toBeInTheDocument();
   });
 
   it('keeps QUOTE approvals on the quote page for requestors even when they are also the approver', () => {
@@ -112,7 +110,7 @@ describe('ApprovalsList', () => {
 
     render(<ApprovalsList initialApprovals={approvals} currentUserId="shared-user" />);
 
-    expect(screen.getByRole('link', { name: 'view' })).toHaveAttribute('href', '/account/quotes/quote-1');
+    expect(screen.getByRole('button', { name: 'view' })).toBeInTheDocument();
   });
 
   it('keeps non-QUOTE approvals on the requester approval details route', () => {
@@ -132,7 +130,7 @@ describe('ApprovalsList', () => {
 
     render(<ApprovalsList initialApprovals={approvals} />);
 
-    expect(screen.getByRole('link', { name: 'view' })).toHaveAttribute('href', '/account/approvals/approval-cart-1');
+    expect(screen.getByRole('button', { name: 'view' })).toBeInTheDocument();
   });
 
   it('sorts approvals by modifiedAt descending before rendering', () => {

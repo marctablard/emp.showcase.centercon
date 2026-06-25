@@ -31,6 +31,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
       id: integrationModel.id,
       quoteId: integrationModel.quoteId,
       status: integrationModel.status as OrderStatus,
+      siteCode: integrationModel.siteCode,
       createdAt: integrationModel.created,
       lastStatusChange: integrationModel.lastStatusChange,
       items: this.mapOrderItems(integrationModel.entries),
@@ -69,6 +70,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
       id: serviceModel.id,
       quoteId: serviceModel.quoteId,
       status: serviceModel.status,
+      siteCode: serviceModel.siteCode,
       lastStatusChange: serviceModel.lastStatusChange,
       creationDate: serviceModel.createdAt,
       entries: serviceModel.items.map((item: OrderItem) => ({

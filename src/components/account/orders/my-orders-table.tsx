@@ -1,17 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, RotateCcw, ShoppingCart } from 'lucide-react';
 import { OrderStatusBadge } from '@/components/account/orders/order-status-badge';
+import { Button } from '@/components/ui/button';
 import UiLink from '@/components/ui/link';
+import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCart } from '@/hooks/cart/useCart';
+import { useToast } from '@/hooks/ui/useToast';
 import { useRouter } from '@/i18n/navigation';
 import { fetchReturnsForOrderIds } from '@/lib/client/returns';
+import { canReorder, reorderOrderItems } from '@/lib/common/orders/reorder';
 import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
+import { getLogger } from '@/lib/logger/use-logger-client';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Order, OrderStatus } from '@/platform/services/model/order/order';
 import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
@@ -73,10 +79,16 @@ export function MyOrdersTable({
 }: MyOrdersTableProps) {
   const t = useTranslations('orders');
   const router = useRouter();
+  const { addItem } = useCart();
+  const { toast } = useToast();
+  const logger = getLogger();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [returnabilityMap, setReturnabilityMap] = useState<Record<string, OrderReturnability>>({});
+  const [reorderingOrderId, setReorderingOrderId] = useState<string | null>(null);
+
+  const formatChannel = useCallback((order: Order): string => order.siteCode || '-', []);
 
   const visibleOrders = useMemo(
     () =>
@@ -128,6 +140,41 @@ export function MyOrdersTable({
     setDialogOpen(true);
   };
 
+  const handleReorderClick = useCallback(
+    async (order: Order): Promise<void> => {
+      if (!canReorder(order)) {
+        return;
+      }
+
+      setReorderingOrderId(order.id);
+
+      try {
+        const { total, failed } = await reorderOrderItems(order, addItem);
+
+        if (failed.length > 0) {
+          for (const item of failed) {
+            logger.error({ productId: item.productId, orderId: order.id }, 'Failed to reorder item');
+          }
+        }
+
+        if (failed.length === 0) {
+          toast({ title: t('reorderAddedToCart'), variant: 'success' });
+        } else if (failed.length < total) {
+          toast({
+            title: t('reorderPartialFailure', { failed: failed.length }),
+            variant: 'destructive',
+            persistent: true,
+          });
+        } else {
+          toast({ title: t('reorderFailed'), variant: 'destructive', persistent: true });
+        }
+      } finally {
+        setReorderingOrderId(null);
+      }
+    },
+    [addItem, logger, t, toast],
+  );
+
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return '-';
     return format(new Date(dateString), 'dd.MM.yyyy');
@@ -153,8 +200,8 @@ export function MyOrdersTable({
             <TableHead className="!h-14 w-[200px] font-bold">
               <span className="inline-flex items-center gap-1">{t('columns.orderDate')}</span>
             </TableHead>
-            <TableHead className="!h-14 w-[200px] font-bold">
-              <span className="inline-flex items-center gap-1">{t('columns.expectedDeliveryDate')}</span>
+            <TableHead className="!h-14 w-[180px] font-bold">
+              <span className="inline-flex items-center gap-1">{t('columns.channel')}</span>
             </TableHead>
             <TableHead className="!h-14 w-[240px] font-bold">
               <span className="inline-flex items-center gap-1">{t('columns.deliveryAddress')}</span>
@@ -214,23 +261,63 @@ export function MyOrdersTable({
                   {order.customer?.name || order.customer?.firstName || order.customer?.lastName}
                 </TableCell>
                 <TableCell className="px-2 py-4">{formatDate(order.createdAt)}</TableCell>
-                <TableCell className="px-2 py-4">
-                  {/* Use lastStatusChange as an approximation for delivery date */}
-                  {/*formatDate(order.lastStatusChange)*/}-
-                </TableCell>
+                <TableCell className="px-2 py-4">{formatChannel(order)}</TableCell>
                 <TableCell className="px-2 py-4">{formatAddress(order)}</TableCell>
                 <TableCell className="py-4 font-medium">
                   {formatOrderValue(order.shipping?.total.value, order.shipping?.total.currency)}
                 </TableCell>
                 <TableCell className="px-2 py-4">{formatPaymentMethod(order, t)}</TableCell>
                 <TableCell className="px-2 py-4 text-center">
-                  <div className="flex items-center justify-center gap-3" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    {canReorder(order) ? (
+                      <Button
+                        variant="neutral"
+                        size="icon"
+                        title={t('reorderLink')}
+                        aria-label={t('reorderLink')}
+                        disabled={reorderingOrderId === order.id}
+                        onClick={() => void handleReorderClick(order)}
+                      >
+                        {reorderingOrderId === order.id ? (
+                          <Spinner variant="sm" />
+                        ) : (
+                          <ShoppingCart className="h-4 w-4" />
+                        )}
+                      </Button>
+                    ) : (
+                      <Tooltip delayDuration={200}>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Button
+                              variant="neutral"
+                              size="icon"
+                              disabled
+                              title={t('reorderLink')}
+                              aria-label={t('reorderLink')}
+                            >
+                              <ShoppingCart className="h-4 w-4" />
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
+                          {t('reorderDisabledTooltip')}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                     {isReturnEnabled(order.status) ? (
                       returnabilityMap[order.id]?.hasAnyReturnableItem === false ? (
                         <Tooltip delayDuration={200}>
                           <TooltipTrigger asChild>
-                            <span className="text-base leading-6 font-bold text-text-disabled cursor-not-allowed">
-                              {t('returnLink')}
+                            <span>
+                              <Button
+                                variant="neutral"
+                                size="icon"
+                                disabled
+                                title={t('returnLink')}
+                                aria-label={t('returnLink')}
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
@@ -238,19 +325,29 @@ export function MyOrdersTable({
                           </TooltipContent>
                         </Tooltip>
                       ) : (
-                        <button
-                          type="button"
+                        <Button
+                          variant="neutral"
+                          size="icon"
+                          title={t('returnLink')}
+                          aria-label={t('returnLink')}
                           onClick={() => handleReturnClick(order)}
-                          className="text-base leading-6 font-bold underline text-text-action hover:text-text-action-hover"
                         >
-                          {t('returnLink')}
-                        </button>
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
                       )
                     ) : (
                       <Tooltip delayDuration={200}>
                         <TooltipTrigger asChild>
-                          <span className="text-text-disabled text-base leading-6 font-bold cursor-not-allowed">
-                            {t('returnLink')}
+                          <span>
+                            <Button
+                              variant="neutral"
+                              size="icon"
+                              disabled
+                              title={t('returnLink')}
+                              aria-label={t('returnLink')}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
                           </span>
                         </TooltipTrigger>
                         <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
@@ -258,9 +355,15 @@ export function MyOrdersTable({
                         </TooltipContent>
                       </Tooltip>
                     )}
-                    <UiLink type="Link" href={`/account/orders/${order.id}`} variant="primary" size="m">
-                      <ArrowRight className="h-6 w-6" />
-                    </UiLink>
+                    <Button
+                      variant="neutral"
+                      size="icon"
+                      title={t('columns.view')}
+                      aria-label={t('columns.view')}
+                      onClick={() => router.push(`/account/orders/${order.id}`)}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

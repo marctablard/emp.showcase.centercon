@@ -1,28 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { format } from 'date-fns';
-import { Ban, RotateCcw, Truck } from 'lucide-react';
+import Image from 'next/image';
+import { Ban, Package, RotateCcw, ShoppingCart, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { H2, H3 } from '@/components/ui/h';
-import UiLink from '@/components/ui/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToastType, notify } from '@/components/ui/toast-notification';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCart } from '@/hooks/cart/useCart';
 import { useOrder } from '@/hooks/order/useOrder';
-import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
+import { useSite } from '@/hooks/site/useSite';
+import { useToast } from '@/hooks/ui/useToast';
 import { useRouter } from '@/i18n/navigation';
 import { fetchReturnsForOrder } from '@/lib/client/returns';
 import { ORDER_CUSTOMER_DECLINE_NOT_ALLOWED_MESSAGE } from '@/lib/common/order-customer-decline-not-allowed';
+import { canReorder, reorderOrderItems } from '@/lib/common/orders/reorder';
 import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
 import { getLogger } from '@/lib/logger/use-logger-client';
-import type { Order, OrderStatus } from '@/platform/services/model/order/order';
+import { formatCurrency } from '@/lib/utils';
+import type { Order, OrderItem, OrderStatus } from '@/platform/services/model/order/order';
 import { ORDER_STATUS } from '@/platform/services/model/order/order-status';
 import { CreateReturnDialog } from './create-return-dialog';
 import { OrderStatusBadge } from './order-status-badge';
+import { OrderSummarySection } from './order-summary-section';
 import { TrackingDialog } from './tracking-dialog';
 
 function shouldShowCancelButton(status: OrderStatus, transitions: string[]): boolean {
@@ -33,19 +36,76 @@ function shouldShowReturnButton(status: OrderStatus): boolean {
   return status === ORDER_STATUS.COMPLETED;
 }
 
+function shouldShowTrackingButton(status: OrderStatus): boolean {
+  return (
+    [
+      ORDER_STATUS.PROCESSING,
+      ORDER_STATUS.READY_FOR_SHIPPING,
+      ORDER_STATUS.READY_FOR_PICKUP,
+      ORDER_STATUS.SHIPPED,
+      ORDER_STATUS.DELIVERED,
+      ORDER_STATUS.COMPLETED,
+    ] as OrderStatus[]
+  ).includes(status);
+}
+
+function OrderItemRow({ item, onNavigate }: { item: OrderItem; onNavigate: (productId: string) => void }) {
+  const imageUrl = item.images?.[0];
+
+  return (
+    <TableRow className="cursor-pointer hover:bg-surface-image-background" onClick={() => onNavigate(item.productId)}>
+      <TableCell className="w-[88px] px-4 py-3 align-middle">
+        <div className="flex h-[52px] w-20 items-center justify-center border border-border-primary bg-surface-image-background">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={item.name || item.productId}
+              width={80}
+              height={52}
+              className="h-full w-full object-contain"
+            />
+          ) : (
+            <Package className="h-5 w-5 text-icon-secondary opacity-40" aria-hidden="true" />
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="px-4 py-3 align-middle">
+        {item.vendorName ? <p className="text-xs text-text-placeholders">{item.vendorName}</p> : null}
+        <p className="text-sm font-bold text-text-headings">{item.name || item.productId}</p>
+        {item.sku ? <p className="mt-0.5 text-xs text-text-placeholders">SKU: {item.sku}</p> : null}
+      </TableCell>
+      <TableCell className="px-4 py-3 text-center align-middle text-sm font-medium tabular-nums">
+        {item.quantity}
+      </TableCell>
+      <TableCell className="px-4 py-3 text-right align-middle text-sm font-bold tabular-nums">
+        {item.price ? formatCurrency(item.price.value, item.price.currency) : '-'}
+      </TableCell>
+    </TableRow>
+  );
+}
+
 /**
  * Order Detail component
  * Displays detailed information for a single order
  */
 export function OrderDetail({ orderId, initialOrder }: { orderId: string; initialOrder?: Order | null }) {
   const tOrder = useTranslations('orders');
-  const tPaymentModes = useTranslations('checkout.PaymentModes');
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnability, setReturnability] = useState<OrderReturnability | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
   const router = useRouter();
+  const { addItem } = useCart();
+  const { availableSites } = useSite();
+  const { toast } = useToast();
+  const logger = getLogger();
 
   const { order, loading, error, cancelOrder, statusTransitions } = useOrder({ orderId, initialOrder });
+
+  const siteName = useMemo(() => {
+    if (!order?.siteCode) return null;
+    return availableSites?.find((site) => site.code === order.siteCode)?.name ?? order.siteCode;
+  }, [availableSites, order?.siteCode]);
 
   useEffect(() => {
     if (!order || order.status !== ORDER_STATUS.COMPLETED) return;
@@ -65,286 +125,244 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
     };
   }, [order]);
 
+  const handleReorder = useCallback(async () => {
+    if (!order || !canReorder(order)) {
+      return;
+    }
+
+    setIsReordering(true);
+    try {
+      const { total, failed } = await reorderOrderItems(order, addItem);
+
+      if (failed.length > 0) {
+        for (const item of failed) {
+          logger.error({ productId: item.productId, orderId: order.id }, 'Failed to reorder item');
+        }
+      }
+
+      if (failed.length === 0) {
+        toast({ title: tOrder('reorderAddedToCart'), variant: 'success' });
+      } else if (failed.length < total) {
+        toast({
+          title: tOrder('reorderPartialFailure', { failed: failed.length }),
+          variant: 'destructive',
+          persistent: true,
+        });
+      } else {
+        toast({ title: tOrder('reorderFailed'), variant: 'destructive', persistent: true });
+      }
+    } finally {
+      setIsReordering(false);
+    }
+  }, [addItem, logger, order, tOrder, toast]);
+
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-8 w-64" />
-          </CardTitle>
-          <CardDescription>
-            <Skeleton className="h-4 w-48" />
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="border border-border-primary bg-surface-page p-6">
+        <Skeleton className="h-8 w-72" />
+        <Skeleton className="mt-4 h-5 w-40" />
+        <Skeleton className="mt-6 h-40 w-full" />
+      </div>
     );
   }
 
   if (error || !order) {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <p className="text-text-error">{tOrder('errorFetchingOrder')}</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="border border-border-primary bg-surface-page p-6 text-center">
+        <p className="text-text-error">{tOrder('errorFetchingOrder')}</p>
+      </div>
     );
   }
 
+  const showActions =
+    canReorder(order) ||
+    shouldShowCancelButton(order.status, statusTransitions) ||
+    shouldShowReturnButton(order.status) ||
+    shouldShowTrackingButton(order.status);
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>
-                <H2 variant="h4">{tOrder('orderDetails')}</H2>
-              </CardTitle>
-              <CardDescription>
-                {tOrder('orderNumber')} #{order.id}
-              </CardDescription>
-            </div>
-            <div>
-              <OrderStatusBadge status={order.status} />
-            </div>
+    <article className="border border-border-primary bg-surface-page">
+      <header className="border-b border-border-primary px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.08em] text-text-placeholders">
+              {tOrder('orderDetails')}
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-text-headings">#{order.id}</h1>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <H3 variant="h5" className="mb-2">
-                {tOrder('orderDate')}
-              </H3>
-              <p>{order.createdAt ? format(new Date(order.createdAt), 'PPP') : '-'}</p>
+          <div className="flex items-center gap-3 border-l-0 border-border-primary sm:border-l sm:pl-6">
+            <span className="text-sm font-medium text-text-placeholders">{tOrder('columns.status')}</span>
+            <OrderStatusBadge status={order.status} emphasized />
+          </div>
+        </div>
+      </header>
 
-              {order.customerEmail && (
-                <>
-                  <H3 variant="h5" className="mb-2 mt-4">
-                    {tOrder('email')}
-                  </H3>
-                  <p>{order.customerEmail}</p>
-                </>
-              )}
+      <div className="border-b border-border-primary">
+        <OrderSummarySection order={order} siteName={siteName} />
+      </div>
 
-              {order.payments && order.payments.length > 0 && (
-                <>
-                  <H3 variant="h5" className="mb-2 mt-4">
-                    {tOrder('paymentMethod')}
-                  </H3>
-                  <p>{tPaymentModes(dk<PaymentModeKey>(order.payments[0].method.toLowerCase()))}</p>
-                </>
-              )}
+      <section className="border-b border-border-primary">
+        <div className="border-b border-border-primary bg-surface-image-background px-4 py-2 sm:px-6">
+          <h2 className="text-xs font-bold uppercase tracking-[0.08em] text-text-headings">{tOrder('orderItems')}</h2>
+        </div>
 
-              {order.quoteId ? (
-                <>
-                  <H3 variant="h5" className="mb-2 mt-4">
-                    {tOrder('relatedQuote')}
-                  </H3>
-                  <UiLink href={`/account/quotes/${order.quoteId}`} type="Link">
-                    #{order.quoteId}
-                  </UiLink>
-                </>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="w-[88px] px-4 font-bold">{tOrder('product')}</TableHead>
+              <TableHead className="px-4 font-bold" />
+              <TableHead className="w-28 px-4 text-center font-bold">{tOrder('quantity')}</TableHead>
+              <TableHead className="w-36 px-4 text-right font-bold">{tOrder('price')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {order.items.map((item) => (
+              <OrderItemRow
+                key={item.id}
+                item={item}
+                onNavigate={(productId) => router.push(`/product/${productId}`)}
+              />
+            ))}
+          </TableBody>
+        </Table>
+
+        <div className="border-t border-border-primary px-4 py-4 sm:px-6">
+          <table className="ml-auto w-full max-w-sm border-collapse text-sm">
+            <tbody>
+              <tr>
+                <td className="py-1 pr-8 text-text-body">{tOrder('subtotal')}</td>
+                <td className="py-1 text-right font-medium tabular-nums">
+                  {order.price?.subtotal.gross !== undefined && order.currency
+                    ? formatCurrency(order.price.subtotal.gross, order.currency)
+                    : '-'}
+                </td>
+              </tr>
+              {order.shipping ? (
+                <tr>
+                  <td className="py-1 pr-8 text-text-body">{tOrder('shipping')}</td>
+                  <td className="py-1 text-right font-medium tabular-nums">
+                    {order.shipping.total.value === 0
+                      ? tOrder('free')
+                      : formatCurrency(order.shipping.total.value, order.shipping.total.currency)}
+                  </td>
+                </tr>
               ) : null}
-            </div>
+              {order.discounts?.map((discount) => (
+                <tr key={discount.code}>
+                  <td className="py-1 pr-8 text-text-body">{tOrder('discount')}</td>
+                  <td className="py-1 text-right font-medium tabular-nums text-text-success">
+                    -{formatCurrency(discount.value, discount.currency)}
+                  </td>
+                </tr>
+              ))}
+              <tr className="border-t border-border-primary">
+                <td className="pt-3 pr-8 font-bold text-text-headings">{tOrder('total')}</td>
+                <td className="pt-3 text-right font-bold tabular-nums text-text-headings">
+                  {order.price?.total.gross !== undefined && order.currency
+                    ? formatCurrency(order.price.total.gross, order.currency)
+                    : '-'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-            {order.shippingAddress && (
-              <div>
-                <H3 variant="h5" className="mb-2">
-                  {tOrder('shippingAddress')}
-                </H3>
-                <p>
-                  {order.shippingAddress.contactName}
-                  <br />
-                  {order.shippingAddress.street} {order.shippingAddress.streetNumber || ''}
-                  <br />
-                  {order.shippingAddress.zipCode} {order.shippingAddress.city}
-                  <br />
-                  {order.shippingAddress.country}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-8">
-            <H3 variant="h5" className="mb-4">
-              {tOrder('orderItems')}
-            </H3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{tOrder('product')}</TableHead>
-                  <TableHead className="text-right">{tOrder('quantity')}</TableHead>
-                  <TableHead className="text-right">{tOrder('price')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {order.items.map((item) => (
-                  <TableRow
-                    className="cursor-pointer hover:bg-surface-action-hover-2"
-                    key={item.id}
-                    onClick={() => router.push(`/product/${item.productId}`)}
-                  >
-                    <TableCell>
-                      <div className="font-medium">{item.name || item.productId}</div>
-                      {item.sku && <div className="text-sm text-text-placeholders">SKU: {item.sku}</div>}
-                    </TableCell>
-                    <TableCell className="text-right">{item.quantity}</TableCell>
-                    <TableCell className="text-right">
-                      {item.price ? (
-                        <>
-                          {item.price.value} {item.price.currency}
-                        </>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="mt-6 border-t pt-6">
-            <div className="flex justify-between mb-2">
-              <span>{tOrder('subtotal')}</span>
-              <span>
-                {order.price?.subtotal.gross} {order.currency}
-              </span>
-            </div>
-
-            {order.shipping && (
-              <div className="flex justify-between mb-2">
-                <span>{tOrder('shipping')}</span>
-                <span>
-                  {order.shipping.total.value === 0
-                    ? tOrder('free')
-                    : `${order.shipping.total.value} ${order.shipping.total.currency}`}
-                </span>
-              </div>
+      {showActions ? (
+        <footer className="px-4 py-4 sm:px-6">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.08em] text-text-headings">
+            {tOrder('orderActions')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {canReorder(order) ? (
+              <Button variant="secondary" size="small" disabled={isReordering} onClick={() => void handleReorder()}>
+                {isReordering ? <Spinner variant="sm" className="mr-2" /> : <ShoppingCart className="mr-2 h-4 w-4" />}
+                {tOrder('reorderLink')}
+              </Button>
+            ) : (
+              <Tooltip delayDuration={200}>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Button variant="secondary" size="small" disabled>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      {tOrder('reorderLink')}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
+                  {tOrder('reorderDisabledTooltip')}
+                </TooltipContent>
+              </Tooltip>
             )}
 
-            {order.discounts && order.discounts.length > 0 && (
-              <div className="flex justify-between mb-2">
-                <span>{tOrder('discount')}</span>
-                <span>
-                  -{order.discounts[0].value} {order.discounts[0].currency}
-                </span>
-              </div>
-            )}
+            {shouldShowCancelButton(order.status, statusTransitions) && cancelOrder ? (
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={async () => {
+                  try {
+                    await cancelOrder();
+                  } catch (err) {
+                    getLogger().error({ err }, 'Failed to cancel order');
+                    const message = err instanceof Error ? err.message : '';
+                    const description =
+                      message === ORDER_CUSTOMER_DECLINE_NOT_ALLOWED_MESSAGE
+                        ? tOrder('cancelOrderNotAllowed')
+                        : message || tOrder('cancelOrderFailedUnknown');
+                    notify({
+                      title: tOrder('cancelOrderFailed'),
+                      description,
+                      type: ToastType.Error,
+                    });
+                  }
+                }}
+              >
+                <Ban className="mr-2 h-4 w-4" />
+                {tOrder('cancelOrder')}
+              </Button>
+            ) : null}
 
-            <div className="flex justify-between font-bold mt-4 pt-4 border-t">
-              <span>{tOrder('total')}</span>
-              <span>
-                {order.price?.total.gross} {order.currency}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-        {/* Order action buttons at the bottom */}
-        {(shouldShowCancelButton(order.status, statusTransitions) ||
-          shouldShowReturnButton(order.status) ||
-          (
-            [
-              ORDER_STATUS.PROCESSING,
-              ORDER_STATUS.READY_FOR_SHIPPING,
-              ORDER_STATUS.READY_FOR_PICKUP,
-              ORDER_STATUS.SHIPPED,
-
-              ORDER_STATUS.DELIVERED,
-            ] as OrderStatus[]
-          ).includes(order.status)) && (
-          <CardFooter className="flex flex-col items-start pt-6 border-t">
-            <H2 variant="h5" className="mb-3">
-              {tOrder('orderActions')}
-            </H2>
-            <div className="flex flex-wrap gap-2">
-              {shouldShowCancelButton(order.status, statusTransitions) && cancelOrder && (
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={async () => {
-                    try {
-                      await cancelOrder();
-                    } catch (err) {
-                      getLogger().error({ err }, 'Failed to cancel order');
-                      const message = err instanceof Error ? err.message : '';
-                      const description =
-                        message === ORDER_CUSTOMER_DECLINE_NOT_ALLOWED_MESSAGE
-                          ? tOrder('cancelOrderNotAllowed')
-                          : message || tOrder('cancelOrderFailedUnknown');
-                      notify({
-                        title: tOrder('cancelOrderFailed'),
-                        description,
-                        type: ToastType.Error,
-                      });
-                    }
-                  }}
-                >
-                  <Ban className="mr-2 h-4 w-4" />
-                  {tOrder('cancelOrder')}
+            {shouldShowReturnButton(order.status) ? (
+              returnability?.hasAnyReturnableItem === false ? (
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button variant="secondary" size="small" disabled>
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        {tOrder('returnOrder')}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
+                    {tOrder('noRemainingItems')}
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button variant="secondary" size="small" onClick={() => setReturnDialogOpen(true)}>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  {tOrder('returnOrder')}
                 </Button>
-              )}
-              {shouldShowReturnButton(order.status) &&
-                (returnability?.hasAnyReturnableItem === false ? (
-                  <Tooltip delayDuration={200}>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <Button variant="secondary" size="small" disabled>
-                          <RotateCcw className="mr-2 h-4 w-4" />
-                          {tOrder('returnOrder')}
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
-                      {tOrder('noRemainingItems')}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Button variant="secondary" size="small" onClick={() => setReturnDialogOpen(true)}>
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    {tOrder('returnOrder')}
-                  </Button>
-                ))}
-              {(
-                [
-                  ORDER_STATUS.PROCESSING,
-                  ORDER_STATUS.READY_FOR_SHIPPING,
-                  ORDER_STATUS.READY_FOR_PICKUP,
-                  ORDER_STATUS.SHIPPED,
+              )
+            ) : null}
 
-                  ORDER_STATUS.DELIVERED,
-                  ORDER_STATUS.COMPLETED,
-                ] as OrderStatus[]
-              ).includes(order.status) && (
-                <Button variant="secondary" size="small" onClick={() => setTrackingDialogOpen(true)}>
-                  <Truck className="mr-2 h-4 w-4" />
-                  {tOrder('trackOrder')}
-                </Button>
-              )}
-            </div>
-          </CardFooter>
-        )}
-      </Card>
+            {shouldShowTrackingButton(order.status) ? (
+              <Button variant="secondary" size="small" onClick={() => setTrackingDialogOpen(true)}>
+                <Truck className="mr-2 h-4 w-4" />
+                {tOrder('trackOrder')}
+              </Button>
+            ) : null}
+          </div>
+        </footer>
+      ) : null}
 
-      {/* Tracking Dialog */}
       <TrackingDialog orderId={orderId} open={trackingDialogOpen} onOpenChange={setTrackingDialogOpen} />
 
-      {order && (
-        <CreateReturnDialog
-          order={order}
-          open={returnDialogOpen}
-          onOpenChange={setReturnDialogOpen}
-          returnability={returnability ?? undefined}
-        />
-      )}
-    </div>
+      <CreateReturnDialog
+        order={order}
+        open={returnDialogOpen}
+        onOpenChange={setReturnDialogOpen}
+        returnability={returnability ?? undefined}
+      />
+    </article>
   );
 }

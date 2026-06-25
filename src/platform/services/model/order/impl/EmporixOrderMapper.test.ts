@@ -31,4 +31,14 @@ describe('EmporixOrderMapper', () => {
 
     expect(result.quoteId).toBeUndefined();
   });
+
+  it('maps siteCode from the upstream order', () => {
+    const result = mapper.mapToService(
+      buildOrder({
+        siteCode: 'main',
+      }),
+    );
+
+    expect(result.siteCode).toBe('main');
+  });
 });

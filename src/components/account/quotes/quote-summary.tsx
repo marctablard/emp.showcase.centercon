@@ -1,133 +1,98 @@
 'use client';
 
-import React from 'react';
 import { useTranslations } from 'next-intl';
-import { List, NotebookPen, ReceiptText, Truck } from 'lucide-react';
-import { SummaryCard, SummaryRow } from '@/components/ui/summary-card';
+import {
+  AccountSpecTable,
+  SpecFullWidthRow,
+  SpecRow,
+  SpecSection,
+} from '@/components/account/shared/account-spec-table';
+import UiLink from '@/components/ui/link';
 import { getPublicDefaultCurrency } from '@/lib/common/public-default-env';
 import { formatDate } from '@/lib/date-utils';
 import type { Quote } from '@/platform/services/model/quote';
 
 interface QuoteSummaryProps {
   quote: Quote;
+  relatedApprovalId?: string | null;
 }
 
-export const QuoteSummary: React.FC<QuoteSummaryProps> = ({ quote }) => {
+export function QuoteSummary({ quote, relatedApprovalId }: QuoteSummaryProps) {
   const t = useTranslations('account.quoteDetails');
+  const tList = useTranslations('account.quotesList');
 
-  // Get quote data
   const currency = quote.currency || getPublicDefaultCurrency();
   const itemCount = quote.items?.reduce((total, item) => total + (item.quantity.quantity || 0), 0) || 0;
-
-  // Format currency values
   const fmt = (amount: number) => `${amount.toFixed(2)} ${currency}`;
+  const baseTotal = quote.totalNet + quote.totalVat + quote.shippingCost;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* Details Card */}
-      <div className="p-6 rounded-md bg-surface-action-hover-2 shadow-sm">
-        <SummaryCard
-          heading={t('details')}
-          className="shadow-none rounded-md py-4 h-full gap-2"
-          icon={<NotebookPen className="h-8 w-8 text-text-action" />}
-          hasHeadline
-        >
-          <div className="space-y-3">
-            <div>
-              <div className="text-lg font-bold">{t('quotationDate')}</div>
-              <div className="text-base">{formatDate(quote.submittedDate)}</div>
+    <AccountSpecTable>
+      <SpecSection title={t('details')}>
+        <SpecRow
+          left={{ label: t('quotationDate'), value: formatDate(quote.submittedDate) }}
+          right={{ label: t('requestedBy'), value: quote.customerName || quote.customerId || '-' }}
+        />
+        <SpecRow
+          left={{ label: t('numberOfProducts'), value: itemCount }}
+          right={{ label: tList('quoteReference'), value: quote.reference || '-' }}
+        />
+        {quote.orderId ? (
+          <SpecRow
+            left={{
+              label: t('relatedOrder'),
+              value: (
+                <UiLink href={`/account/orders/${quote.orderId}`} type="Link" variant="primary" size="m">
+                  #{quote.orderId}
+                </UiLink>
+              ),
+            }}
+          />
+        ) : null}
+        {relatedApprovalId ? (
+          <SpecRow
+            left={{
+              label: t('relatedApproval'),
+              value: (
+                <UiLink href={`/account/approval/${relatedApprovalId}`} type="Link" variant="primary" size="m">
+                  #{relatedApprovalId}
+                </UiLink>
+              ),
+            }}
+          />
+        ) : null}
+      </SpecSection>
+
+      <SpecSection title={t('quotedPrice')}>
+        <SpecRow
+          left={{ label: t('netValue'), value: fmt(quote.totalNet) }}
+          right={{ label: t('vat'), value: fmt(quote.totalVat) }}
+        />
+        <SpecRow
+          left={{ label: t('transportCost'), value: fmt(quote.shippingCost) }}
+          right={{ label: t('quotedTotal'), value: fmt(baseTotal) }}
+        />
+        <SpecRow left={{ label: tList('totalAmount'), value: fmt(quote.totalGross) }} />
+      </SpecSection>
+
+      <SpecSection title={t('transport')}>
+        <SpecRow left={{ label: t('transportCondition'), value: quote.shippingMethod || '-' }} />
+        <SpecFullWidthRow label={t('deliveryAddress')}>
+          {quote.shippingAddress ? (
+            <div className="leading-relaxed">
+              {quote.shippingAddress.contactName}
+              <br />
+              {quote.shippingAddress.street}
+              <br />
+              {quote.shippingAddress.zipCode} {quote.shippingAddress.city}
+              <br />
+              {quote.shippingAddress.country}
             </div>
-
-            <div>
-              <div className="text-lg font-bold">{t('requestedBy')}</div>
-              <div className="text-base">{quote.customerName || quote.customerId}</div>
-            </div>
-
-            <div>
-              <div className="text-lg font-bold">{t('numberOfProducts')}</div>
-              <div className="text-base">{itemCount}</div>
-            </div>
-          </div>
-        </SummaryCard>
-      </div>
-
-      {/* Base Price Card */}
-      <div className="p-6 rounded-md bg-surface-action-hover-2 shadow-sm">
-        <SummaryCard
-          heading={t('basePrice')}
-          className="shadow-none rounded-md py-4 h-full gap-2"
-          icon={<List className="h-8 w-8 text-text-action" />}
-          hasHeadline
-        >
-          <div className="space-y-3">
-            <SummaryRow label={t('netValue')} className="text-base">
-              {fmt(quote.totalNet)}
-            </SummaryRow>
-            <SummaryRow label={t('vat')} className="text-base">
-              {fmt(quote.totalVat)}
-            </SummaryRow>
-            <SummaryRow label={t('deliveryCosts')} className="text-base">
-              {fmt(quote.shippingCost)}
-            </SummaryRow>
-            <SummaryRow label={t('baseTotal')} strong className="text-base">
-              {fmt(quote.totalNet + quote.totalVat + quote.shippingCost)}
-            </SummaryRow>
-          </div>
-        </SummaryCard>
-      </div>
-
-      {/* Transport Card */}
-      <div className="p-6 rounded-md bg-surface-action-hover-2 shadow-sm">
-        <SummaryCard
-          heading={t('transport')}
-          className="shadow-none rounded-md py-4 h-full gap-2"
-          icon={<Truck className="h-8 w-8 text-text-action" />}
-          hasHeadline
-        >
-          <div className="space-y-3">
-            <div>
-              <div className="text-lg font-bold">{t('transportCondition')}</div>
-              <div className="text-base">{quote.shippingMethod}</div>
-            </div>
-
-            <div>
-              <div className="text-lg font-bold">{t('deliveryAddress')}</div>
-              <div className="text-base">
-                {quote.shippingAddress.contactName}
-                <br />
-                {quote.shippingAddress.street}
-                <br />
-                {quote.shippingAddress.zipCode} {quote.shippingAddress.city}
-                <br />
-                {quote.shippingAddress.country}
-              </div>
-            </div>
-          </div>
-        </SummaryCard>
-      </div>
-
-      {/* Quoted Price Card */}
-      <div className="p-6 rounded-md bg-surface-action-hover-2 shadow-sm gap-2">
-        <SummaryCard
-          heading={t('quotedPrice')}
-          className="shadow-none rounded-md py-4 h-full gap-2"
-          icon={<ReceiptText className="h-8 w-8 text-text-action" />}
-          hasHeadline
-        >
-          <SummaryRow label={t('netValue')} className="text-base">
-            {fmt(quote.totalNet)}
-          </SummaryRow>
-          <SummaryRow label={t('vat')} className="text-base">
-            {fmt(quote.totalVat)}
-          </SummaryRow>
-          <SummaryRow label={t('transportCost')} className="text-base">
-            {fmt(quote.shippingCost)}
-          </SummaryRow>
-          <SummaryRow label={t('quotedTotal')} className="text-base" strong>
-            {fmt(quote.totalNet + quote.totalVat + quote.shippingCost)}
-          </SummaryRow>
-        </SummaryCard>
-      </div>
-    </div>
+          ) : (
+            <span className="text-text-placeholders">-</span>
+          )}
+        </SpecFullWidthRow>
+      </SpecSection>
+    </AccountSpecTable>
   );
-};
+}
