@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchRecommendations } from '@/lib/client/recommendations';
 import type { ProductRecommendations } from '@/platform/services/model/product';
 
@@ -7,35 +7,37 @@ export function useRecommendations(productId?: string, locale?: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!productId) {
-      setRecommendations(undefined);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    let isCancelled = false;
-
+  const loadRecommendations = useCallback(async (id: string, currentLocale?: string, isCancelled?: () => boolean) => {
     setRecommendations(undefined);
     setLoading(true);
     setError(null);
 
-    fetchRecommendations(productId, locale)
-      .then((result) => {
-        if (!isCancelled) setRecommendations(result);
-      })
-      .catch((err) => {
-        if (!isCancelled) setError((err as Error).message);
-      })
-      .finally(() => {
-        if (!isCancelled) setLoading(false);
-      });
+    try {
+      const result = await fetchRecommendations(id, currentLocale);
+      if (isCancelled?.()) return;
+      setRecommendations(result);
+    } catch (err) {
+      if (isCancelled?.()) return;
+      setError((err as Error).message);
+    } finally {
+      if (isCancelled?.()) return;
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!productId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void loadRecommendations(productId, locale, () => cancelled);
 
     return () => {
-      isCancelled = true;
+      cancelled = true;
     };
-  }, [productId, locale]);
+  }, [productId, locale, loadRecommendations]);
 
   const hasProduct = Boolean(productId);
   const pending = hasProduct && !loading && !error && recommendations === undefined;

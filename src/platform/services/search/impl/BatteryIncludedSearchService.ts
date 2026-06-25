@@ -48,7 +48,11 @@ class BatteryIncludedSearchService implements SearchService {
     this.logger = logger;
   }
 
-  async searchProducts(params: SearchParams<Product>, locale?: string, _site?: string): Promise<SearchResult<Product>> {
+  async searchProducts(
+    params: SearchParams<Product>,
+    _locale?: string,
+    _site?: string,
+  ): Promise<SearchResult<Product>> {
     // Add filter with segmentIds if customer is logged in and has segments assigned.
     let filters = params.filters ? { ...params.filters } : undefined;
     if (filters?.siteCode) {
