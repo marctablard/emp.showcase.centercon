@@ -29,6 +29,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
   mapToService(integrationModel: EmporixOrder): Order {
     return {
       id: integrationModel.id,
+      quoteId: integrationModel.quoteId,
       status: integrationModel.status as OrderStatus,
       createdAt: integrationModel.created,
       lastStatusChange: integrationModel.lastStatusChange,
@@ -66,6 +67,7 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
   mapToSource(serviceModel: Order): EmporixOrder {
     return {
       id: serviceModel.id,
+      quoteId: serviceModel.quoteId,
       status: serviceModel.status,
       lastStatusChange: serviceModel.lastStatusChange,
       creationDate: serviceModel.createdAt,
@@ -191,13 +193,19 @@ class EmporixOrderMapper implements OrderMapper<EmporixOrder> {
         value: shipping.total.amount,
         currency: shipping.total.currency,
       },
-      methods: shipping.lines?.map((line: any) => ({
-        id: line.id,
-        name: line.name,
-        description: line.description,
-        price: line.amount,
-        currency: line.currency,
-      })),
+      methods: shipping.lines?.map((line) => {
+        const localizedName = line.localizedName;
+        const firstLocalized =
+          localizedName && typeof localizedName === 'object' ? Object.values(localizedName)[0] : undefined;
+        return {
+          id: line.code,
+          name: line.name ?? firstLocalized ?? line.code,
+          localizedName,
+          description: line.description,
+          price: line.amount,
+          currency: line.currency,
+        };
+      }),
     };
   }
 

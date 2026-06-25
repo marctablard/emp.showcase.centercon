@@ -72,6 +72,24 @@ class EmporixSearchService implements SearchService {
     return true;
   }
 
+  /**
+   * Resolve the currency for price matching: explicit `params.currency` wins,
+   * otherwise fall back to the current session currency so we never price
+   * search results against a site's default currency when the shopper has
+   * picked another supported currency.
+   */
+  private async resolveSearchCurrency(explicitCurrency?: string): Promise<string | undefined> {
+    if (explicitCurrency) {
+      return explicitCurrency;
+    }
+    try {
+      const session = await this.sessionService.getCurrent();
+      return session?.currency;
+    } catch {
+      return undefined;
+    }
+  }
+
   private async mapAndEnrichSearchResults(
     items: EmporixProduct[],
     enrichOptions?: ProductFetchOptions,
@@ -94,12 +112,22 @@ class EmporixSearchService implements SearchService {
     return session?.siteCode;
   }
 
+  private buildQueryCriteria(query?: string, field: 'name' | 'id' = 'name'): Record<string, string> {
+    const trimmedQuery = query?.trim();
+    if (!trimmedQuery) {
+      return {};
+    }
+
+    return { [field]: `~${trimmedQuery}` };
+  }
+
   /**
    * Builds product search `q` criteria: optional name match plus catalog root `categoryIds` when scoped.
    */
   private async buildSearchCriteria(
     params: SearchParams<Product>,
     effectiveSite?: string,
+    queryCriteria: Record<string, string> = {},
   ): Promise<Partial<EmporixProduct> | null> {
     const scoped = !params.searchAllProducts && !isOmitCatalogCategoryFilterEnv();
 
@@ -123,7 +151,7 @@ class EmporixSearchService implements SearchService {
     }
 
     const criteriaRecord: Record<string, string> = {
-      ...(params.query ? { name: '~' + params.query } : {}),
+      ...queryCriteria,
       ...(scoped && categoryValue ? { categoryIds: categoryValue } : {}),
     };
 
@@ -140,12 +168,12 @@ class EmporixSearchService implements SearchService {
     const effectiveSite = params.site ?? positionalSite;
     void (params.locale ?? locale);
 
-    const criteria = await this.buildSearchCriteria(params, effectiveSite);
+    const criteria = await this.buildSearchCriteria(params, effectiveSite, this.buildQueryCriteria(params.query));
     if (criteria === null) {
       return this.emptySearchResult(page, requestedSize);
     }
 
-    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
+    let searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: page + 1,
       size: requestedSize,
       criteria,
@@ -153,8 +181,26 @@ class EmporixSearchService implements SearchService {
       filters: undefined,
     });
 
+    if (params.query && searchResult.items.length === 0) {
+      const idCriteria = await this.buildSearchCriteria(
+        params,
+        effectiveSite,
+        this.buildQueryCriteria(params.query, 'id'),
+      );
+      if (idCriteria !== null) {
+        searchResult = await this.productApi.searchProducts({
+          page: page + 1,
+          size: requestedSize,
+          criteria: idCriteria,
+          sort: params.sort,
+          filters: undefined,
+        });
+      }
+    }
+
+    const effectiveCurrency = await this.resolveSearchCurrency(params.currency);
     const enrichedProducts = await this.mapAndEnrichSearchResults(searchResult.items, {
-      prices: this.buildPriceOption(effectiveSite, params.currency),
+      prices: this.buildPriceOption(effectiveSite, effectiveCurrency),
       variants: false,
       categories: false,
     });
@@ -169,7 +215,7 @@ class EmporixSearchService implements SearchService {
   }
 
   async getSuggestions(params: SearchParams<Product>): Promise<SearchSuggestions> {
-    const criteria = await this.buildSearchCriteria(params, params.site);
+    const criteria = await this.buildSearchCriteria(params, params.site, this.buildQueryCriteria(params.query));
     if (criteria === null) {
       return {
         queryCompletions: [],
@@ -178,7 +224,7 @@ class EmporixSearchService implements SearchService {
       };
     }
 
-    const searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
+    let searchResult: EmporixPaginatedResponse<EmporixProduct> = await this.productApi.searchProducts({
       page: 1,
       size: 12,
       criteria,
@@ -186,8 +232,26 @@ class EmporixSearchService implements SearchService {
       filters: undefined,
     });
 
+    if (params.query && searchResult.items.length === 0) {
+      const idCriteria = await this.buildSearchCriteria(
+        params,
+        params.site,
+        this.buildQueryCriteria(params.query, 'id'),
+      );
+      if (idCriteria !== null) {
+        searchResult = await this.productApi.searchProducts({
+          page: 1,
+          size: 12,
+          criteria: idCriteria,
+          sort: undefined,
+          filters: undefined,
+        });
+      }
+    }
+
+    const effectiveCurrency = await this.resolveSearchCurrency(params.currency);
     const enrichedProducts = await this.mapAndEnrichSearchResults(searchResult.items, {
-      prices: this.buildPriceOption(params.site, params.currency),
+      prices: this.buildPriceOption(params.site, effectiveCurrency),
       variants: false,
       categories: false,
     });

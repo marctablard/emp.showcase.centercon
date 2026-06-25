@@ -30,6 +30,8 @@ jobs:
           node-version: 22
           cache: 'npm'
           cache-dependency-path: package-lock.json
+      - name: Align npm with packageManager
+        run: npm install -g "$(node -p 'const packageManager = require("./package.json").packageManager; if (!packageManager?.startsWith("npm@")) throw new Error("Expected packageManager to start with npm@"); packageManager')"
       - name: Setup safe-chain
         run: |
           npm i -g @aikidosec/safe-chain
@@ -73,7 +75,7 @@ jobs:
       - name: Deploy preview
         id: deploy
         run: |
-          DEPLOY_OUTPUT=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_OUTPUT=$(vercel deploy --force --token=${{ secrets.VERCEL_TOKEN }})
           DEPLOY_STATUS=$?
           PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -o 'https://.*vercel.app')
           echo "deploy_status=$DEPLOY_STATUS" >> $GITHUB_OUTPUT

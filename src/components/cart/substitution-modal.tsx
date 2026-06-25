@@ -11,9 +11,11 @@ import UiLink from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
 import { useCart } from '@/hooks/cart/useCart';
 import { useAvailability } from '@/hooks/product/useAvailability';
+import { useSession } from '@/hooks/session/useSession';
 import { useL10n } from '@/hooks/useL10n';
 import { fetchProductPrice } from '@/lib/client/prices';
 import { fetchProductById } from '@/lib/client/products';
+import { getPublicDefaultCurrency } from '@/lib/common/public-default-env';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import { formatCurrency } from '@/lib/utils';
 import type { CartItem, CartItemSubstitution } from '@/platform/services/model/cart/cart.d';
@@ -32,6 +34,7 @@ interface SubstitutionModalProps {
 export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onDone }: SubstitutionModalProps) {
   const t = useTranslations('cart');
   const { l10n } = useL10n();
+  const { session } = useSession();
   const { updateItemQuantity, addItem, loading } = useCart();
   const [selectedSubstitutions, setSelectedSubstitutions] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -45,7 +48,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
 
   // Get original product price
   const originalPrice = priceMap[originalProductId]?.originalAmount || 0;
-  const originalCurrency = priceMap[originalProductId]?.currency || 'EUR';
+  const originalCurrency = priceMap[originalProductId]?.currency || getPublicDefaultCurrency();
 
   // Calculate price difference between original and substitution
   const calculatePriceDifference = (substitutionPrice: number) => {
@@ -100,7 +103,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
         ); // Filter out empty IDs
 
         // Fetch prices for all products
-        const pricePromises = productIds.map((id) => fetchProductPrice(id));
+        const pricePromises = productIds.map((id) => fetchProductPrice(id, undefined, undefined, session?.currency));
         const prices = await Promise.all(pricePromises);
 
         // Create a map of product ID to price data
@@ -231,7 +234,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
                     width={100}
                     height={65}
                     src={String(cartItem.product.images[0].url)}
-                    alt={String(cartItem.product.name || 'Product')}
+                    alt={l10n(cartItem.product.name || 'Product')}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -311,7 +314,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
                             width={60}
                             height={60}
                             src={String(productMap[sub.productId]?.images?.[0]?.url || '')}
-                            alt={String(productMap[sub.productId]?.name || 'Product')}
+                            alt={l10n(productMap[sub.productId]?.name || 'Product')}
                             className="w-full h-full object-cover"
                           />
                         ) : (

@@ -10,7 +10,6 @@ import {
   CreditCard,
   FileText,
   FolderKanban,
-  Gauge,
   HandHelping,
   History,
   LayoutDashboard,
@@ -102,6 +101,11 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
       title: t('sidebar.groups.orderManagement'),
       items: [
         {
+          href: '/account/approvals',
+          title: t('sidebar.items.approvals'),
+          icon: <ClipboardCheck className="h-6 w-6" />,
+        },
+        {
           href: '/account/orders',
           title: t('sidebar.items.orderHistory'),
           icon: <History className="h-6 w-6" />,
@@ -122,22 +126,21 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
           icon: <PackageMinus className="h-6 w-6" />,
           counter: 1,
         },
-
-        {
-          href: '/account/approvals',
-          title: t('sidebar.items.approvals'),
-          icon: <ClipboardCheck className="h-6 w-6" />,
-        },
-        {
-          href: '/account/quick-order',
-          title: t('sidebar.items.quickOrder'),
-          icon: <Gauge className="h-6 w-6" />,
-        },
       ],
     },
     {
       title: t('sidebar.groups.myOrganisation'),
       items: [
+        {
+          href: '/account/wishlists',
+          title: t('sidebar.items.wishlists'),
+          icon: <Pin className="h-6 w-6" />,
+        },
+        {
+          href: '/account/products',
+          title: t('sidebar.items.productsMaintenance'),
+          icon: <Wrench className="h-6 w-6" />,
+        },
         {
           href: '/account/company',
           title: t('sidebar.items.companyManagement'),
@@ -159,19 +162,9 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
           icon: <CreditCard className="h-6 w-6" />,
         },
         {
-          href: '/account/wishlists',
-          title: t('sidebar.items.wishlists'),
-          icon: <Pin className="h-6 w-6" />,
-        },
-        {
           href: '/account/projects',
           title: t('sidebar.items.myProjects'),
           icon: <FolderKanban className="h-6 w-6" />,
-        },
-        {
-          href: '/account/products',
-          title: t('sidebar.items.productsMaintenance'),
-          icon: <Wrench className="h-6 w-6" />,
         },
         {
           href: '/account/contracts',

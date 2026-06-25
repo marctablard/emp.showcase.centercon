@@ -45,7 +45,7 @@
         "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
       },
       "phone": {
-        "invalid": "Bitte geben Sie eine gültige Telefonnummer ein."
+        "invalid": "Bitte geben Sie eine gültige Telefonnummer ein (7–15 Ziffern, z. B. +49 123 456 7890)."
       },
       "language": {
         "de": "Deutsch",
@@ -213,7 +213,7 @@
     "groups": {
       "selfService": "Self Service",
       "orderManagement": "Bestellverwaltung",
-      "myOrganisation": "Meine Organisation",
+      "myOrganisation": "Mein Unternehmen",
       "myAccount": "Mein Konto"
     },
     "items": {
@@ -224,12 +224,12 @@
       "invoicesPayments": "Rechnungen & Zahlungen",
       "quotes": "Angebote",
       "returnsClaims": "Retouren & Reklamationen",
-      "quickOrder": "Schnellbestellung",
+      "quickOrder": "Schnellauftrag",
       "companyManagement": "Unternehmensverwaltung",
       "addressManagement": "Adressverwaltung",
       "userManagement": "Benutzerverwaltung",
       "paymentOptions": "Zahlungsoptionen",
-      "wishlists": "Wunschlisten",
+      "wishlists": "Wunschliste",
       "productsMaintenance": "Produkte & Wartung",
       "contractsAgreements": "Verträge & Vereinbarungen",
       "personalData": "Persönliche Daten",
@@ -417,8 +417,7 @@
   "quotesPageDescription": "Angebote anzeigen und verwalten",
   "quotesPagePlaceholder": "Angebote werden hier angezeigt",
   "quoteStatus": {
-    "requested": "Angefordert",
-    "available": "Verfügbar",
+    "awaiting": "Wartet auf Freigabe",
     "in_progress": "In Bearbeitung",
     "declined": "Abgelehnt",
     "accepted": "Akzeptiert",
@@ -434,6 +433,9 @@
   "quoteDetails": {
     "title": "Angebotsdetails",
     "status": "Status",
+    "product": "Produkt",
+    "quantity": "Menge",
+    "price": "Preis",
     "quotationDate": "Angebotsdatum",
     "totalAmount": "Gesamtbetrag",
     "editor": "Bearbeiter",
@@ -459,6 +461,7 @@
     "quoteReference": "Angebotsnummer",
     "approver": "Genehmiger",
     "accept": "ANNEHMEN",
+    "inquireApproval": "GENEHMIGUNG ANFRAGEN",
     "reject": "ABLEHNEN",
     "requestChange": "ÄNDERUNG ANFORDERN",
     "confirmationTitle": "Möchten Sie das Angebot annehmen und eine Bestellung erstellen?",
@@ -473,6 +476,16 @@
     "creating": "WIRD ERSTELLT...",
     "rejectConfirmationTitle": "Möchten Sie das Angebot ablehnen?",
     "rejectConfirmationDescription": "Wenn Sie möchten, können Sie einen Kommentar hinterlassen, um uns mitzuteilen, warum Sie dieses Angebot ablehnen. Ihr Feedback hilft uns, unsere Angebote zu verbessern.",
+    "decisionReasonLabel": "Grund",
+    "decisionReasonPlaceholder": "Wählen Sie einen Grund aus",
+    "decisionReasons": {
+      "PRICE_TOO_HIGH": "Preis zu hoch",
+      "NO_LONGER_NEEDED": "Nicht mehr benötigt",
+      "DELIVERY_TIME_LATE": "Lieferzeit zu spät",
+      "OTHER": "Andere",
+      "WRONG_MATERIAL": "Falsches Material",
+      "PROVIDED_PRICE_TO_HIGH": "Angegebener Preis zu hoch"
+    },
     "rejectCommentPlaceholder": "Bitte geben Sie Gründe für die Ablehnung dieses Angebots an...",
     "rejectQuote": "ANGEBOT ABLEHNEN",
     "rejecting": "WIRD ABGELEHNT...",
@@ -482,8 +495,13 @@
     "requestingChange": "ÄNDERUNG WIRD ANGEFORDERT...",
     "commentAdded": "Kommentar hinzugefügt",
     "initialQuoteRequest": "Angebotsanfrage",
-    "statusChanged": "Status geändert {currentStatus}",
-    "loadingHistory": "Verlauf wird geladen..."
+    "reason": "Grund",
+    "relatedApproval": "Zugehörige Genehmigung",
+    "statusChanged": "Status geändert zu {currentStatus}",
+    "loadingHistory": "Verlauf wird geladen...",
+    "quoteActionFailedTitle": "Die Aktion konnte nicht ausgeführt werden",
+    "quoteActionFailedDescription": "Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.",
+    "relatedOrder": "Zugehörige Bestellung"
   },
   "quotesList": {
     "title": "Angebote",
@@ -491,6 +509,7 @@
     "latest": "Neueste",
     "oldest": "Altste",
     "filter": "Filter",
+    "quoteId": "Angebots-ID",
     "quoteReference": "Angebotsreferenz",
     "status": "Status",
     "quotationDate": "Angebotsdatum",
@@ -499,7 +518,10 @@
     "totalAmount": "Gesamtbetrag",
     "numberOfProducts": "Anzahl der Produkte",
     "products": "Produkte",
+    "relatedOrder": "Zugehörige Bestellung",
     "noQuotes": "Sie haben noch keine Angebote",
+    "searchPlaceholder": "Nach Angebots-ID oder Referenz suchen...",
+    "noMatches": "Keine Angebote entsprechen Ihrer Suche",
     "viewQuote": "Angebotsansicht",
     "next": "Weiter",
     "previous": "Zurück",
@@ -777,5 +799,55 @@
   "unknownError": "Ein unbekannter Fehler ist aufgetreten.",
   "Invoices": {
     "title": "Rechnungsdetails"
+  },
+  "wishlist": {
+    "title": "Wunschliste",
+    "breadcrumb": "Wunschliste",
+    "empty": "Ihre Wunschliste ist leer.",
+    "itemNumber": "Artikelnummer",
+    "net": "Netto",
+    "priceUnavailable": "-",
+    "quantity": "Menge",
+    "decrement": "Verringern",
+    "increment": "Erhöhen",
+    "columns": {
+      "product": "Produkt",
+      "quantity": "Menge",
+      "unitPrice": "Einheitspreis"
+    },
+    "statuses": {
+      "unavailable": "Deaktiviert",
+      "noPrice": "Kein Preis",
+      "onlineAvailable": "Online verfügbar"
+    },
+    "actions": {
+      "removeFromList": "Von Liste entfernen",
+      "addToCart": "In den Warenkorb",
+      "compare": "Vergleichen",
+      "addAllToCart": "Alles in den Warenkorb"
+    },
+    "totalValue": {
+      "title": "Gesamtwert",
+      "label": "Gesamtwert"
+    },
+    "bulkMoveResult": {
+      "success": {
+        "title": "Zum Warenkorb hinzugefügt",
+        "description": "Alle Produkte wurden zum Warenkorb hinzugefügt."
+      },
+      "warning": {
+        "title": "Eingeschränkte Verfügbarkeit",
+        "description": "Alle Produkte wurden zum Warenkorb hinzugefügt. Ein oder mehrere Produkte sind nicht in der gewünschten Menge verfügbar."
+      }
+    },
+    "notifications": {
+      "removeSuccess": "{product} wurde von der Wunschliste entfernt",
+      "removeError": "{product} konnte nicht von der Wunschliste entfernt werden",
+      "moveToCartError": "{product} konnte nicht in den Warenkorb gelegt werden",
+      "moveToCartPartialFailure": "{product} wurde in den Warenkorb gelegt, das Entfernen aus der Wunschliste schlug fehl",
+      "addError": "Produkt konnte nicht zur Wunschliste hinzugefügt werden",
+      "updateQuantityError": "Die Menge für {product} konnte nicht aktualisiert werden"
+    },
+    "noPriceTooltip": "Dieses Produkt hat keinen Preis und kann nicht zur Wunschliste hinzugefügt werden."
   }
 }

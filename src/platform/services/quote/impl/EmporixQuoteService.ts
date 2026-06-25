@@ -15,7 +15,10 @@ import type {
 import type { QuoteHistoryMapper } from '@/platform/services/model/quote/mapper/QuoteHistoryMapper';
 import type { QuoteMapper } from '@/platform/services/model/quote/mapper/QuoteMapper';
 import type { QuoteService } from '@/platform/services/quote/QuoteService';
+import type { SchemaService } from '@/platform/services/schema/SchemaService';
 import type { SearchParams, SearchResult } from '../../model/common';
+
+const DEFAULT_QUOTE_SORT = 'metadata.createdAt:desc';
 
 @injectable('QuoteService', 'Singleton')
 class EmporixQuoteService implements QuoteService {
@@ -24,6 +27,7 @@ class EmporixQuoteService implements QuoteService {
     @inject('CustomerService') private customerService: CustomerService,
     @inject('QuoteMapper') private quoteMapper: QuoteMapper<EmporixQuote>,
     @inject('QuoteHistoryMapper') private quoteHistoryMapper: QuoteHistoryMapper<EmporixQuoteHistory>,
+    @inject('SchemaService') private schemaService: SchemaService,
   ) {}
 
   async createQuote(input: CreateQuoteInput): Promise<{ quoteId: string }> {
@@ -36,6 +40,8 @@ class EmporixQuoteService implements QuoteService {
     if (!customer) {
       throw new Error('Customer not found');
     }
+    const sort = params.sort ?? DEFAULT_QUOTE_SORT;
+
     const searchResult: EmporixPaginatedResponse<EmporixQuote> = await this.quoteApi.getQuotes({
       page: (params.page || 0) + 1,
       size: params.size,
@@ -43,7 +49,7 @@ class EmporixQuoteService implements QuoteService {
       criteria: {
         'customer.customerId': customer.id,
       },
-      sort: params.sort,
+      sort,
     });
 
     // TODO fetch for quotes of subordinates
@@ -71,24 +77,54 @@ class EmporixQuoteService implements QuoteService {
     await this.quoteApi.patchQuote(quoteId, operations, scope);
   }
 
+  async addQuoteUserComment(quoteId: string, input: { comment: string; reference?: string }): Promise<void> {
+    const emporixQuote = await this.quoteApi.getQuote(quoteId);
+    const mixinValue = { reference: input.reference, userComment: input.comment };
+    const updateList: QuoteUpdateRequest[] = [];
+
+    if (emporixQuote.mixins?.additionalInfo !== undefined) {
+      updateList.push({
+        op: 'REPLACE',
+        path: '/mixins/additionalInfo',
+        value: mixinValue,
+      });
+    } else {
+      const quoteMixinSchema = await this.schemaService.getSchema('additionalInfo');
+      updateList.push({
+        op: 'ADD',
+        path: '/mixins/additionalInfo',
+        value: mixinValue,
+      });
+      if (quoteMixinSchema.metadata?.url) {
+        updateList.push({
+          op: 'ADD',
+          path: '/metadata/mixins/additionalInfo',
+          value: quoteMixinSchema.metadata.url,
+        });
+      }
+    }
+
+    await this.updateQuote(quoteId, updateList, 'service');
+  }
+
   async getQuoteReason(quoteReasonId: string): Promise<QuoteReason> {
     const emporixQuoteReason = await this.quoteApi.getQuoteReason(quoteReasonId);
     return emporixQuoteReason as QuoteReason;
   }
 
-  async createQuoteReason(quoteId: string, comment: string, locale: string, reasonType: string) {
-    const quoteId_current = `${quoteId}_${Date.now()}`;
-    const code = `${(comment || quoteId_current).toUpperCase().replace(/\s+/g, '_')}`;
+  async resolveQuoteReasonId(reasonType: string, reasonCode: string): Promise<string> {
+    const quoteReasons = await this.quoteApi.getQuoteReasons();
+    const normalizedReasonType = reasonType.toUpperCase();
+    const normalizedReasonCode = reasonCode.toUpperCase();
+    const quoteReason = quoteReasons.find(
+      ({ code, type }) => code === normalizedReasonCode && type === normalizedReasonType,
+    );
 
-    const message: Record<string, string> = {};
-    message[locale] = comment || 'Price too high';
+    if (!quoteReason) {
+      throw new Error(`Quote reason ${normalizedReasonType}:${normalizedReasonCode} not found`);
+    }
 
-    const response = await this.quoteApi.createQuoteReason({
-      code: code,
-      type: reasonType,
-      message: message,
-    });
-    return response.id;
+    return quoteReason.id;
   }
 
   async getQuoteHistory(quoteId: string): Promise<QuoteHistory> {
