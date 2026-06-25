@@ -274,9 +274,9 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
                 {availability && (
                   <div className="flex items-center gap-3 mt-3">
                     {availability.availableQuantity && (
-                      <div className="flex items-center gap-2 rounded-md border border-border-primary bg-bg-surface px-3 py-2">
+                      <div className="flex items-center gap-2 rounded-md bg-surface-disabled px-3 py-2 shadow-[inset_0_0_0_1px_var(--color-border-primary)]">
                         <Package className="h-4 w-4 shrink-0 text-text-error" />
-                        <span className="text-sm font-semibold text-text-primary">
+                        <span className="text-sm font-semibold text-text-body">
                           {t('substitution.availableDescription', {
                             available: availability.availableQuantity,
                             total: cartItem.quantity,
@@ -285,7 +285,7 @@ export function SubstitutionModal({ isOpen, onClose, cartItem, substitution, onD
                       </div>
                     )}
                     {availability.availableInDays && (
-                      <div className="flex items-center gap-2 rounded-md border border-border-warning bg-bg-surface px-3 py-2">
+                      <div className="flex items-center gap-2 rounded-md bg-surface-warning px-3 py-2 shadow-[inset_0_0_0_1px_var(--color-border-warning)]">
                         <Clock className="h-4 w-4 shrink-0 text-text-warning" />
                         <span className="text-sm font-semibold text-text-warning">
                           {t('substitution.availableInDays', { days: availability.availableInDays })}
