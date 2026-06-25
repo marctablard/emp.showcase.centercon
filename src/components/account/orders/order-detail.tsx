@@ -1,22 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { Ban, RotateCcw, Truck } from 'lucide-react';
+import { Ban, RotateCcw, ShoppingCart, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { H2, H3 } from '@/components/ui/h';
 import UiLink from '@/components/ui/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToastType, notify } from '@/components/ui/toast-notification';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCart } from '@/hooks/cart/useCart';
 import { useOrder } from '@/hooks/order/useOrder';
+import { useToast } from '@/hooks/ui/useToast';
 import { type PaymentModeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { fetchReturnsForOrder } from '@/lib/client/returns';
 import { ORDER_CUSTOMER_DECLINE_NOT_ALLOWED_MESSAGE } from '@/lib/common/order-customer-decline-not-allowed';
+import { canReorder, reorderOrderItems } from '@/lib/common/orders/reorder';
 import { type OrderReturnability, computeOrderReturnability } from '@/lib/common/returns/returnability';
 import { getLogger } from '@/lib/logger/use-logger-client';
 import type { Order, OrderStatus } from '@/platform/services/model/order/order';
@@ -43,7 +47,10 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnability, setReturnability] = useState<OrderReturnability | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
   const router = useRouter();
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
   const { order, loading, error, cancelOrder, statusTransitions } = useOrder({ orderId, initialOrder });
 
@@ -64,6 +71,37 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
       cancelled = true;
     };
   }, [order]);
+
+  const handleReorder = useCallback(async () => {
+    if (!order || !canReorder(order)) {
+      return;
+    }
+
+    setIsReordering(true);
+    try {
+      const { total, failed } = await reorderOrderItems(order, addItem);
+
+      if (failed.length > 0) {
+        for (const item of failed) {
+          getLogger().error({ productId: item.productId, orderId: order.id }, 'Failed to reorder item');
+        }
+      }
+
+      if (failed.length === 0) {
+        toast({ title: tOrder('reorderAddedToCart'), variant: 'success' });
+      } else if (failed.length < total) {
+        toast({
+          title: tOrder('reorderPartialFailure', { failed: failed.length }),
+          variant: 'destructive',
+          persistent: true,
+        });
+      } else {
+        toast({ title: tOrder('reorderFailed'), variant: 'destructive', persistent: true });
+      }
+    } finally {
+      setIsReordering(false);
+    }
+  }, [addItem, order, tOrder, toast]);
 
   if (loading) {
     return (
@@ -249,7 +287,8 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
           </div>
         </CardContent>
         {/* Order action buttons at the bottom */}
-        {(shouldShowCancelButton(order.status, statusTransitions) ||
+        {(canReorder(order) ||
+          shouldShowCancelButton(order.status, statusTransitions) ||
           shouldShowReturnButton(order.status) ||
           (
             [
@@ -266,6 +305,26 @@ export function OrderDetail({ orderId, initialOrder }: { orderId: string; initia
               {tOrder('orderActions')}
             </H2>
             <div className="flex flex-wrap gap-2">
+              {canReorder(order) ? (
+                <Button variant="secondary" size="small" disabled={isReordering} onClick={() => void handleReorder()}>
+                  {isReordering ? <Spinner variant="sm" className="mr-2" /> : <ShoppingCart className="mr-2 h-4 w-4" />}
+                  {tOrder('reorderLink')}
+                </Button>
+              ) : (
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button variant="secondary" size="small" disabled>
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        {tOrder('reorderLink')}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="w-[22rem] max-w-[calc(100vw-2rem)] text-wrap">
+                    {tOrder('reorderDisabledTooltip')}
+                  </TooltipContent>
+                </Tooltip>
+              )}
               {shouldShowCancelButton(order.status, statusTransitions) && cancelOrder && (
                 <Button
                   variant="secondary"

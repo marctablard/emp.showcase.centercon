@@ -28,6 +28,18 @@ jest.mock('@/hooks/order/useOrder', () => ({
   useOrder: (...args: unknown[]) => useOrderMock(...args),
 }));
 
+jest.mock('@/hooks/cart/useCart', () => ({
+  useCart: () => ({
+    addItem: jest.fn(),
+  }),
+}));
+
+jest.mock('@/hooks/ui/useToast', () => ({
+  useToast: () => ({
+    toast: jest.fn(),
+  }),
+}));
+
 jest.mock('@/components/ui/link', () => ({
   __esModule: true,
   default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
