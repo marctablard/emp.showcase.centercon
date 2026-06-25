@@ -35,7 +35,6 @@ import type { ProductPrice } from '@/platform/services/model/price';
 import type { GroupedSpecification, Product, ProductVariantAttribute } from '@/platform/services/model/product';
 import type { ProductFetchOptions } from '@/platform/services/product';
 import { MAX_COMPARISON_PRODUCTS } from '@/stores/comparison-store';
-import Recommendations from '../cms/recommendations';
 import { Button } from '../ui/button';
 import { H1, H2, Overline } from '../ui/h';
 import UiLink from '../ui/link';
@@ -44,6 +43,7 @@ import { Spinner } from '../ui/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import ProductAddToCart from './product-add-to-cart';
 import ProductAddToCartBar from './product-add-to-cart-bar';
+import { ProductDetailRecommendations } from './product-detail-recommendations';
 import { ProductPriceComponent, ProductPriceSkeleton, ProductPriceUnavailable } from './product-price';
 import { ProductShippingInfo } from './product-shipping-info';
 import ProductVariantSelector from './product-variant-selector';
@@ -86,7 +86,6 @@ export default function ProductDetail({ product: initialProduct, options, classN
   const availabilitySyncGenerationRef = useRef(0);
   const availabilityShopContextRef = useRef('');
   const [opacity, setOpacity] = React.useState(false);
-  //   const { recommendations, loading: recLoading } = useRecommendations(product?.id);
   useEffect(() => {
     if (product) {
       setAsCurrent();
@@ -545,12 +544,7 @@ export default function ProductDetail({ product: initialProduct, options, classN
         </div>
       ) : null}
 
-      <Recommendations
-        productId={product.id}
-        locale={locale}
-        overline={t('productRecommendations.overline')}
-        headline={t('productRecommendations.headline')}
-      />
+      <ProductDetailRecommendations productId={product.id} locale={locale} />
       {loginDialog}
     </>
   );

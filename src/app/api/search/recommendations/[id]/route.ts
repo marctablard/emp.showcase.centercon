@@ -12,6 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const { id: productId } = await params;
   const url = new URL(request.url);
   const sizeRaw = url.searchParams.get('size');
+  const locale = url.searchParams.get('locale') || undefined;
   const parsedSize = sizeRaw ? parseInt(sizeRaw, 10) : NaN;
   const limit = Number.isFinite(parsedSize) && parsedSize > 0 ? parsedSize : 12;
 
@@ -22,9 +23,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
     }
 
-    const recommendations = await searchService.getRecommendations(productId, undefined, undefined, limit);
+    const recommendations = await searchService.getRecommendations(productId, locale, undefined, limit);
 
-    return NextResponse.json({ products: recommendations });
+    return NextResponse.json(recommendations);
   } catch (error) {
     const logger = server.get<LoggerService>('LoggerService');
     logger.error(

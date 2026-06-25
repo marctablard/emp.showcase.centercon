@@ -103,7 +103,15 @@
   },
   "productRecommendations": {
     "overline": "mehr zu entdecken",
-    "headline": "Diese Produkte könnten auch interessant sein"
+    "headline": "Diese Produkte könnten auch interessant sein",
+    "crossSell": {
+      "overline": "runde deinen Einkauf ab",
+      "headline": "Oft zusammen gekauft"
+    },
+    "upSell": {
+      "overline": "upgrade deine Wahl",
+      "headline": "Das könnte dir auch gefallen"
+    }
   },
   "loadingVariants": "Varianten werden geladen...",
   "variantSelectPlaceholder": "Variante auswählen",

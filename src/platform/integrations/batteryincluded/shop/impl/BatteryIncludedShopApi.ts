@@ -9,6 +9,7 @@ import type {
   BatteryIncludedHighlight,
   BatteryIncludedPreset,
   BatteryIncludedProduct,
+  BatteryIncludedRecommendationHit,
   BatteryIncludedSearchParams,
   BatteryIncludedSearchResponse,
   BatteryIncludedSuggestion,
@@ -100,18 +101,33 @@ class BatteryIncludedShopApi implements IBatteryIncludedShopApi {
   /**
    * Get product recommendations based on a product ID
    */
-  async getRecommendations(id: string): Promise<BatteryIncludedProduct[]> {
+  async getRecommendations(id: string): Promise<BatteryIncludedRecommendationHit<BatteryIncludedProduct>[]> {
     const params = new URLSearchParams();
     params.append('id', id);
 
     const url = `/api/v1/collections/${this.config.collection}/documents/recommendations?${params.toString()}`;
 
-    const response = await this.apiClient.apiFetch(url, {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-    });
+    try {
+      const response = await this.apiClient.apiFetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+      });
 
-    return await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.error({ statusText: response.statusText, errorText }, 'ShopApi recommendations API error');
+        return [];
+      }
+
+      const data = await response.json();
+      return parseRecommendationHits(data);
+    } catch (error) {
+      this.logger.error(
+        { error: error instanceof Error ? error.message : String(error) },
+        'ShopApi exception in recommendations API call',
+      );
+      return [];
+    }
   }
 
   /**
@@ -128,6 +144,24 @@ class BatteryIncludedShopApi implements IBatteryIncludedShopApi {
     const data = await response.json();
     return data.presets || [];
   }
+}
+
+function parseRecommendationHits(data: unknown): BatteryIncludedRecommendationHit<BatteryIncludedProduct>[] {
+  if (Array.isArray(data)) {
+    return data as BatteryIncludedRecommendationHit<BatteryIncludedProduct>[];
+  }
+
+  if (data && typeof data === 'object') {
+    const record = data as Record<string, unknown>;
+    for (const key of ['recommendations', 'hits', 'items']) {
+      const value = record[key];
+      if (Array.isArray(value)) {
+        return value as BatteryIncludedRecommendationHit<BatteryIncludedProduct>[];
+      }
+    }
+  }
+
+  return [];
 }
 
 export default BatteryIncludedShopApi;

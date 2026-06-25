@@ -135,12 +135,12 @@ export function initializeContainer(): Container {
   });
 
   
-  // Alias: SearchService -> EmporixSearchService
-  if (container.isBound('EmporixSearchService')) {
+  // Alias: SearchService -> BatteryIncludedSearchService
+  if (container.isBound('BatteryIncludedSearchService')) {
     if (container.isBound('SearchService')) {
       container.unbind('SearchService');
     }
-    container.bind('SearchService').toService('EmporixSearchService');
+    container.bind('SearchService').toService('BatteryIncludedSearchService');
   }
 
   // Alias: ProductService -> EmporixProductService
