@@ -6,7 +6,7 @@ import type { EmporixProductApi } from '@/platform/integrations/emporix/product/
 import { buildProductCategoryIdsCriteriaValue } from '@/platform/integrations/emporix/product/buildProductCatalogScopeQ';
 import type { LoggerService } from '@/platform/services/logger/LoggerService';
 import type { SearchParams, SearchResult } from '@/platform/services/model/common';
-import type { Product } from '@/platform/services/model/product';
+import type { Product, ProductRecommendations } from '@/platform/services/model/product';
 import type { PriceFetchOptions } from '@/platform/services/price/PriceService';
 import type { ProductFetchOptions, ProductService } from '@/platform/services/product/ProductService';
 import type { SearchService } from '@/platform/services/search/SearchService';
@@ -267,8 +267,13 @@ class EmporixSearchService implements SearchService {
     return [];
   }
 
-  async getRecommendations(_productId: string, _locale?: string, _site?: string, _limit?: number): Promise<Product[]> {
-    return [];
+  async getRecommendations(
+    _productId: string,
+    _locale?: string,
+    _site?: string,
+    _limit?: number,
+  ): Promise<ProductRecommendations> {
+    return { products: [], crossSell: [], upSell: [] };
   }
 }
 

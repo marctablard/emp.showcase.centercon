@@ -1,59 +1,48 @@
 import { useEffect, useState } from 'react';
-import { useShopContextReady } from '@/hooks/common/useShopContextReady';
-import { useSession } from '@/hooks/session/useSession';
 import { fetchRecommendations } from '@/lib/client/recommendations';
 import type { ProductRecommendations } from '@/platform/services/model/product';
 
-export function useRecommendations(productId?: string) {
-  const { session } = useSession();
-  const { ready: shopContextReady } = useShopContextReady();
+export function useRecommendations(productId?: string, locale?: string) {
   const [recommendations, setRecommendations] = useState<ProductRecommendations | undefined>(undefined);
-  const [fetchLoading, setFetchLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!productId || !shopContextReady) {
+    if (!productId) {
+      setRecommendations(undefined);
+      setLoading(false);
+      setError(null);
       return;
     }
 
     let isCancelled = false;
 
-    const fetchData = async () => {
-      if (isCancelled) {
-        return;
-      }
+    setRecommendations(undefined);
+    setLoading(true);
+    setError(null);
 
-      setRecommendations(undefined);
-      setFetchLoading(true);
-      setError(null);
-
-      fetchRecommendations(productId)
-        .then((result) => {
-          if (!isCancelled) setRecommendations(result);
-        })
-        .catch((err) => {
-          if (!isCancelled) setError((err as Error).message);
-        })
-        .finally(() => {
-          if (!isCancelled) setFetchLoading(false);
-        });
-    };
-
-    void fetchData();
+    fetchRecommendations(productId, locale)
+      .then((result) => {
+        if (!isCancelled) setRecommendations(result);
+      })
+      .catch((err) => {
+        if (!isCancelled) setError((err as Error).message);
+      })
+      .finally(() => {
+        if (!isCancelled) setLoading(false);
+      });
 
     return () => {
       isCancelled = true;
-      setFetchLoading(false);
     };
-  }, [productId, shopContextReady, session?.currency, session?.siteCode]);
+  }, [productId, locale]);
 
   const hasProduct = Boolean(productId);
-  const waitingForShopContext = hasProduct && !shopContextReady;
-  const loading = hasProduct && (waitingForShopContext || fetchLoading);
+  const pending = hasProduct && !loading && !error && recommendations === undefined;
 
   return {
-    recommendations: hasProduct && shopContextReady ? recommendations : undefined,
-    loading: hasProduct ? loading : false,
+    recommendations: hasProduct ? recommendations : undefined,
+    loading: hasProduct && (loading || pending),
     error: hasProduct ? error : null,
   };
 }

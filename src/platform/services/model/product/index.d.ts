@@ -94,4 +94,6 @@ export interface Product {
 
 export interface ProductRecommendations {
   products: Product[];
+  crossSell?: Product[];
+  upSell?: Product[];
 }

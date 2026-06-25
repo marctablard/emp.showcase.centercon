@@ -1,6 +1,6 @@
 // c:\Workspace\emporix-showcase\src\platform\services\search\SearchService.d.ts
 import { SearchParams, SearchResult } from '../model/common';
-import { Product } from '../model/product';
+import { Product, ProductRecommendations } from '../model/product';
 import { SearchSuggestions } from '../model/search';
 
 export interface SearchService {
@@ -25,5 +25,10 @@ export interface SearchService {
   /**
    * Get product recommendations based on a product ID
    */
-  getRecommendations(productId: string, locale?: string, site?: string, limit?: number): Promise<Product[]>;
+  getRecommendations(
+    productId: string,
+    locale?: string,
+    site?: string,
+    limit?: number,
+  ): Promise<ProductRecommendations>;
 }

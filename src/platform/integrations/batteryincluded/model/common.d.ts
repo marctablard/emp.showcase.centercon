@@ -56,3 +56,11 @@ export interface BatteryIncludedSuggestion {
   text: string;
   count: number;
 }
+
+/** BI recommendation relation type returned by the recommendations endpoint */
+export type BatteryIncludedRecommendationType = 'also' | 'together' | 'related';
+
+export interface BatteryIncludedRecommendationHit<T = Record<string, unknown>> {
+  document: T;
+  type?: BatteryIncludedRecommendationType;
+}

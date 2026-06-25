@@ -1,4 +1,12 @@
-import { BatteryIncludedSearchResponse, Highlight, Preset, Product, SearchParams, Suggestion } from '../model';
+import {
+  BatteryIncludedRecommendationHit,
+  BatteryIncludedSearchResponse,
+  Highlight,
+  Preset,
+  Product,
+  SearchParams,
+  Suggestion,
+} from '../model';
 
 export interface BatteryIncludedShopApi {
   /**
@@ -30,7 +38,7 @@ export interface BatteryIncludedShopApi {
    * Get product recommendations based on a product ID
    * @param id Product ID
    */
-  getRecommendations(id: string): Promise<Product[]>;
+  getRecommendations(id: string): Promise<BatteryIncludedRecommendationHit<Product>[]>;
 
   /**
    * Get available presets

@@ -14,27 +14,48 @@ interface RecommendationsProps {
   headline?: string;
   productId?: Product['id'];
   products?: string;
+  items?: Product[];
+  loading?: boolean;
   locale?: string;
 }
 
-const Recommendations = ({ overline, headline, productId, products, locale }: RecommendationsProps) => {
-  const hasProductId = !!productId;
+const Recommendations = ({
+  overline,
+  headline,
+  productId,
+  products,
+  items,
+  loading = false,
+  locale,
+}: RecommendationsProps) => {
+  const hasItems = Array.isArray(items) && items.length > 0;
+  const hasProductId = !!productId && !hasItems && !loading;
   // get product ids as string because of storyblok and transform it to array
   const transformProducts = products?.split(', ');
-  const hasProducts = Array.isArray(transformProducts) && transformProducts.length > 0;
+  const hasProducts = !hasItems && Array.isArray(transformProducts) && transformProducts.length > 0;
 
   // Fetch recommendations or products
-  const { recommendations, loading: recLoading, error } = useRecommendations(productId);
+  const { recommendations, loading: recLoading, error } = useRecommendations(hasProductId ? productId : undefined);
   const { products: productList, loading: productsLoading } = useProducts(transformProducts, { prices: true });
 
-  const recommendationsToShow = hasProductId ? (recommendations?.products ?? []) : (productList ?? []);
+  const recommendationsToShow = hasItems
+    ? items
+    : hasProductId
+      ? (recommendations?.products ?? [])
+      : (productList ?? []);
+
+  const isLoading = loading || (!hasItems && ((hasProductId && recLoading) || (hasProducts && productsLoading)));
 
   // Handle error state
   if (error) {
     return null;
   }
 
-  if ((!hasProductId && !hasProducts) || recommendationsToShow.length === 0) {
+  if (!isLoading && !hasItems && !hasProductId && !hasProducts) {
+    return null;
+  }
+
+  if (!isLoading && recommendationsToShow.length === 0) {
     return null;
   }
 
@@ -55,7 +76,7 @@ const Recommendations = ({ overline, headline, productId, products, locale }: Re
           )}
 
           <CarouselContent className="mt-8 mb-8">
-            {(hasProductId && recLoading) || (hasProducts && productsLoading) ? (
+            {isLoading ? (
               <>
                 {Array.from({ length: 5 }, (_, i) => (
                   <CarouselItem key={i + 1} size="basis-1/5.5">
