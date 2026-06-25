@@ -2,18 +2,19 @@
 
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { APPROVALS_PER_PAGE } from '@/components/account/account-table-constants';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import UiLink from '@/components/ui/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { useApprovals } from '@/hooks/approval/useApprovals';
 import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
-import { Link } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 import type { Approval, ApprovalStatus } from '@/platform/services/model/approval';
 import { ApprovalStatusBadge } from './approval-status-badge';
 
@@ -66,8 +67,13 @@ function getApprovalHref(approval: Approval, currentUserId?: string): string {
   return `/account/approvals/${approval.id}`;
 }
 
+function ListStatePanel({ children }: { children: React.ReactNode }) {
+  return <div className="border border-border-primary bg-surface-page p-6">{children}</div>;
+}
+
 export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsListProps) {
   const locale = useLocale();
+  const router = useRouter();
   const t = useTranslations('orders.Approval');
   const tStatus = useTranslations('orders.ApprovalStatus');
   const tAction = useTranslations('orders.ApprovalAction');
@@ -122,169 +128,165 @@ export function ApprovalsList({ initialApprovals, currentUserId }: ApprovalsList
 
   if (loading && normalizedSearch.length === 0 && filterStatus === '_ALL_') {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('approvalsList')}</CardTitle>
-          <CardDescription>{t('approvalsListDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center py-8">
-          <div className="flex flex-col items-center space-y-2">
-            <Spinner color="primary" variant="md" />
-            <div>{t('loading')}</div>
-          </div>
-        </CardContent>
-      </Card>
+      <ListStatePanel>
+        <div className="flex flex-col items-center space-y-2 py-8">
+          <Spinner color="primary" variant="md" />
+          <div>{t('loading')}</div>
+        </div>
+      </ListStatePanel>
     );
   }
 
   if (error) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('approvalsList')}</CardTitle>
-          <CardDescription>{t('approvalsListDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-surface-error p-4 rounded-md text-text-error">
-            {t('errorLoadingApprovals')}: {error.message}
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={() => refreshApprovals()}>{t('tryAgain')}</Button>
-        </CardFooter>
-      </Card>
+      <ListStatePanel>
+        <div className="bg-surface-error p-4 text-text-error">
+          {t('errorLoadingApprovals')}: {error.message}
+        </div>
+        <Button className="mt-4" onClick={() => refreshApprovals()}>
+          {t('tryAgain')}
+        </Button>
+      </ListStatePanel>
     );
   }
 
   if (approvals.length === 0 && normalizedSearch.length === 0 && filterStatus === '_ALL_') {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('approvalsList')}</CardTitle>
-          <CardDescription>{t('approvalsListDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-text-placeholders">{t('noApprovalsFound')}</p>
-        </CardContent>
-      </Card>
+      <ListStatePanel>
+        <p className="py-8 text-center text-text-placeholders">{t('noApprovalsFound')}</p>
+      </ListStatePanel>
     );
   }
 
   const isSearchLoading = loading && normalizedSearch.length > 0;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('approvalsList')}</CardTitle>
-        <CardDescription>{t('approvalsListDescription')}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4 flex flex-wrap gap-4">
-          <div className="relative w-full max-w-[380px]">
-            <Input
-              value={quickSearch}
-              onChange={(event) => {
-                setCurrentPage(1);
-                setQuickSearch(event.target.value);
-              }}
-              placeholder={t('searchPlaceholder')}
-              className="pr-10"
-              endIcon={isSearchLoading ? undefined : Search}
-              aria-label={t('searchPlaceholder')}
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-4">
+        <div className="relative w-full max-w-[380px]">
+          <Input
+            value={quickSearch}
+            onChange={(event) => {
+              setCurrentPage(1);
+              setQuickSearch(event.target.value);
+            }}
+            placeholder={t('searchPlaceholder')}
+            className="pr-10"
+            endIcon={isSearchLoading ? undefined : Search}
+            aria-label={t('searchPlaceholder')}
+          />
+          {isSearchLoading && (
+            <Spinner
+              variant="sm"
+              color="primary"
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+              loadingText={t('loading')}
             />
-            {isSearchLoading && (
-              <Spinner
-                variant="sm"
-                color="primary"
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                loadingText={t('loading')}
-              />
-            )}
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            <Select value={filterStatus} onValueChange={(value) => handleFilter(value as ApprovalStatus | '_ALL_')}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('filterByStatus')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_ALL_">{t('allStatuses')}</SelectItem>
-                <SelectItem value="PENDING">{tStatus('PENDING')}</SelectItem>
-                <SelectItem value="APPROVED">{tStatus('APPROVED')}</SelectItem>
-                <SelectItem value="DECLINED">{tStatus('DECLINED')}</SelectItem>
-                <SelectItem value="EXPIRED">{tStatus('EXPIRED')}</SelectItem>
-                <SelectItem value="CLOSED">{tStatus('CLOSED')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          )}
         </div>
+        <div className="min-w-[200px] flex-1">
+          <Select value={filterStatus} onValueChange={(value) => handleFilter(value as ApprovalStatus | '_ALL_')}>
+            <SelectTrigger>
+              <SelectValue placeholder={t('filterByStatus')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_ALL_">{t('allStatuses')}</SelectItem>
+              <SelectItem value="PENDING">{tStatus('PENDING')}</SelectItem>
+              <SelectItem value="APPROVED">{tStatus('APPROVED')}</SelectItem>
+              <SelectItem value="DECLINED">{tStatus('DECLINED')}</SelectItem>
+              <SelectItem value="EXPIRED">{tStatus('EXPIRED')}</SelectItem>
+              <SelectItem value="CLOSED">{tStatus('CLOSED')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-        {!loading && approvals.length === 0 && (normalizedSearch.length > 0 || filterStatus !== '_ALL_') && (
-          <div className="rounded-md border border-border-primary p-4 text-sm text-text-on-disabled">
-            {t('noMatches')}
-          </div>
-        )}
+      {!loading && approvals.length === 0 && (normalizedSearch.length > 0 || filterStatus !== '_ALL_') && (
+        <div className="border border-border-primary p-4 text-sm text-text-on-disabled">{t('noMatches')}</div>
+      )}
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('id')}</TableHead>
-                <TableHead>{t('resourceType')}</TableHead>
-                <TableHead>{t('quoteId')}</TableHead>
-                <TableHead>{t('orderId')}</TableHead>
-                <TableHead>{t('action')}</TableHead>
-                <TableHead>{t('status')}</TableHead>
-                <TableHead>{t('requestor')}</TableHead>
-                <TableHead>{t('approver')}</TableHead>
-                <TableHead>{t('createdAt')}</TableHead>
-                <TableHead>{t('actions')}</TableHead>
+      <Table>
+        <TableHeader>
+          <TableRow className="text-base">
+            <TableHead className="!h-14 font-bold">{t('id')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('resourceType')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('quoteId')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('orderId')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('action')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('status')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('requestor')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('approver')}</TableHead>
+            <TableHead className="!h-14 font-bold">{t('createdAt')}</TableHead>
+            <TableHead className="!h-14 w-[160px] font-bold text-center">{t('actions')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {visibleApprovals.map((approval, index) => {
+            const href = getApprovalHref(approval, currentUserId);
+
+            return (
+              <TableRow
+                key={approval.id}
+                className={cn(
+                  'hover:bg-surface-image-background cursor-pointer text-base',
+                  index % 2 === 0 ? 'bg-surface-page' : 'bg-surface-image-background',
+                )}
+                onClick={() => router.push(href)}
+              >
+                <TableCell className="px-2 py-4 font-medium">{approval.id}</TableCell>
+                <TableCell className="px-2 py-4">{approval.resourceType}</TableCell>
+                <TableCell className="px-2 py-4">
+                  {approval.resourceType === 'QUOTE' ? (
+                    <UiLink type="Link" href={`/account/quotes/${approval.resource.id}`} variant="primary" size="m">
+                      {approval.resource.id}
+                    </UiLink>
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
+                <TableCell className="px-2 py-4">
+                  {approval.resource.orderId ? (
+                    <UiLink type="Link" href={`/account/orders/${approval.resource.orderId}`} variant="text">
+                      {approval.resource.orderId}
+                    </UiLink>
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
+                <TableCell className="px-2 py-4">{tAction(approval.action)}</TableCell>
+                <TableCell className="px-2 py-4">
+                  <ApprovalStatusBadge status={approval.status} />
+                </TableCell>
+                <TableCell className="px-2 py-4">{formatApprovalUserName(approval.requestor)}</TableCell>
+                <TableCell className="px-2 py-4">{formatApprovalUserName(approval.approver)}</TableCell>
+                <TableCell className="px-2 py-4">{formatDate(approval.createdAt)}</TableCell>
+                <TableCell className="px-2 py-4 text-center" onClick={(event) => event.stopPropagation()}>
+                  <Button
+                    variant="neutral"
+                    size="icon"
+                    title={t('view')}
+                    aria-label={t('view')}
+                    onClick={() => router.push(href)}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visibleApprovals.map((approval) => (
-                <TableRow key={approval.id}>
-                  <TableCell className="font-medium">{approval.id}</TableCell>
-                  <TableCell>{approval.resourceType}</TableCell>
-                  <TableCell>
-                    {approval.resourceType === 'QUOTE' ? (
-                      <Link href={`/account/quotes/${approval.resource.id}`} className="underline">
-                        {approval.resource.id}
-                      </Link>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell>{approval.resource.orderId ?? '-'}</TableCell>
-                  <TableCell>{tAction(approval.action)}</TableCell>
-                  <TableCell>
-                    <ApprovalStatusBadge status={approval.status} />
-                  </TableCell>
-                  <TableCell>{formatApprovalUserName(approval.requestor)}</TableCell>
-                  <TableCell>{formatApprovalUserName(approval.approver)}</TableCell>
-                  <TableCell>{formatDate(approval.createdAt)}</TableCell>
-                  <TableCell>
-                    <Link href={getApprovalHref(approval, currentUserId)}>
-                      <Button variant="link" size="default">
-                        {t('view')}
-                      </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <TablePagination
-          className="px-3"
-          currentPage={safeCurrentPage}
-          totalPages={totalPages}
-          pageIndicator={t('pageIndicator', { current: safeCurrentPage, total: totalPages })}
-          previousLabel={t('previous')}
-          nextLabel={t('next')}
-          onPreviousPage={() => setCurrentPage((p) => Math.max(1, Math.min(p, totalPages) - 1))}
-          onNextPage={() => setCurrentPage((p) => Math.min(totalPages, Math.min(p, totalPages) + 1))}
-        />
-      </CardContent>
-    </Card>
+            );
+          })}
+        </TableBody>
+      </Table>
+
+      <TablePagination
+        className="px-3"
+        currentPage={safeCurrentPage}
+        totalPages={totalPages}
+        pageIndicator={t('pageIndicator', { current: safeCurrentPage, total: totalPages })}
+        previousLabel={t('previous')}
+        nextLabel={t('next')}
+        onPreviousPage={() => setCurrentPage((p) => Math.max(1, Math.min(p, totalPages) - 1))}
+        onNextPage={() => setCurrentPage((p) => Math.min(totalPages, Math.min(p, totalPages) + 1))}
+      />
+    </div>
   );
 }

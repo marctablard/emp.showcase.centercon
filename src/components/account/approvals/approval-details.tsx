@@ -5,17 +5,22 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { ApprovalSummary } from '@/components/account/approvals/approval-summary';
+import {
+  AccountSpecTable,
+  SpecFullWidthRow,
+  SpecRow,
+  SpecSection,
+} from '@/components/account/shared/account-spec-table';
 import { ProductListResolver } from '@/components/product/product-list-resolver';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import UiLink from '@/components/ui/link';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useApproval } from '@/hooks/approval/useApproval';
 import useCustomer from '@/hooks/customer/useCustomer';
 import { useToast } from '@/hooks/ui/useToast';
-import { Link } from '@/i18n/navigation';
 import { checkoutApproval as checkoutApi } from '@/lib/client/checkout';
 import type { Approval } from '@/platform/services/model/approval';
 import type { CheckoutRequest } from '@/platform/services/model/checkout';
@@ -26,10 +31,28 @@ interface ApprovalDetailsProps {
   initialApproval?: Approval;
 }
 
+function formatApprovalUserName(user: {
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  userId?: string;
+}): string {
+  if (user.fullName?.trim()) {
+    return user.fullName;
+  }
+
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  if (fullName) {
+    return fullName;
+  }
+
+  return user.userId ?? '-';
+}
+
 export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetailsProps) {
   const locale = useLocale();
   const t = useTranslations('orders.Approval');
-  const tStatus = useTranslations('orders.ApprovalStatus');
+  const tAction = useTranslations('orders.ApprovalAction');
   const router = useRouter();
   const { toast } = useToast();
   const { customer, loading: customerLoading } = useCustomer();
@@ -64,7 +87,6 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
         throw new Error('Checkout failed');
       }
 
-      // Navigate after successful approve + checkout
       toast({ title: t('success'), description: t('orderSuccessfullySubmitted'), variant: 'success' });
       router.push(`/account/approvals`);
     } catch (err) {
@@ -175,125 +197,109 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
 
   if (loading || customerLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('approvalDetails')}</CardTitle>
-          <CardDescription>{t('approvalDetailsDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center py-8">
-          <div className="flex flex-col items-center space-y-2">
-            <Spinner color="primary" variant="md" />
-            <div>{t('loading')}</div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="border border-border-primary bg-surface-page p-6">
+        <Skeleton className="h-8 w-72" />
+        <Skeleton className="mt-4 h-5 w-40" />
+        <Skeleton className="mt-6 h-40 w-full" />
+      </div>
     );
   }
 
   if (error || !approval) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('approvalDetails')}</CardTitle>
-          <CardDescription>{t('approvalDetailsDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-surface-error p-4 rounded-md text-text-error">
-            {t('errorLoadingApproval')}: {error?.message || t('approvalNotFound')}
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={() => refreshApproval()}>{t('tryAgain')}</Button>
-        </CardFooter>
-      </Card>
+      <div className="border border-border-primary bg-surface-page p-6">
+        <div className="bg-surface-error p-4 text-text-error">
+          {t('errorLoadingApproval')}: {error?.message || t('approvalNotFound')}
+        </div>
+        <Button className="mt-4" onClick={() => refreshApproval()}>
+          {t('tryAgain')}
+        </Button>
+      </div>
     );
   }
 
   const isDesignatedApprover = approval.approver.userId === customer?.id;
   const canApprove = approval.status === 'PENDING' && isDesignatedApprover && !isRequestor;
   const canComment = approval.status === 'PENDING';
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <article className="border border-border-primary bg-surface-page">
+      <header className="border-b border-border-primary px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <CardTitle>{t('approvalDetails')}</CardTitle>
-            <CardDescription>{t('approvalDetailsDescription')}</CardDescription>
-          </div>
-          <ApprovalStatusBadge status={approval.status} />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {actionSuccess && (
-          <Alert variant="default" className="mb-4">
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertTitle>{t('success')}</AlertTitle>
-            <AlertDescription>{actionSuccess}</AlertDescription>
-          </Alert>
-        )}
-
-        {actionError && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>{t('error')}</AlertTitle>
-            <AlertDescription>{actionError}</AlertDescription>
-          </Alert>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('id')}</p>
-            <p className="text-base">{approval.id}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('status')}</p>
-            <p className="text-base">{tStatus(approval.status)}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('resourceType')}</p>
-            <p className="text-base">{approval.resourceType}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('resourceId')}</p>
-            <p className="text-base">
-              {approval.resourceType === 'QUOTE' ? (
-                <Link href={`/account/quotes/${approval.resource.id}`} className="underline">
-                  {approval.resource.id}
-                </Link>
-              ) : (
-                approval.resource.id
-              )}
+            <p className="text-xs font-bold uppercase tracking-[0.08em] text-text-placeholders">
+              {t('approvalDetails')}
             </p>
+            <h1 className="mt-1 text-2xl font-bold text-text-headings">#{approval.id}</h1>
           </div>
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('action')}</p>
-            <p className="text-base">{approval.action}</p>
+          <div className="flex items-center gap-3 border-l-0 border-border-primary sm:border-l sm:pl-6">
+            <span className="text-sm font-medium text-text-placeholders">{t('status')}</span>
+            <ApprovalStatusBadge status={approval.status} emphasized />
           </div>
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('createdAt')}</p>
-            <p className="text-base">{formatDate(approval.createdAt)}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('requestorId')}</p>
-            <p className="text-base">{approval.requestor.userId}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('approverId')}</p>
-            <p className="text-base">{approval.approver.userId}</p>
-          </div>
-          {approval.updatedAt && (
-            <div>
-              <p className="text-sm font-medium text-text-placeholders">{t('updatedAt')}</p>
-              <p className="text-base">{formatDate(approval.updatedAt)}</p>
-            </div>
-          )}
         </div>
+      </header>
 
-        <Separator />
+      {(actionSuccess || actionError) && (
+        <div className="space-y-4 border-b border-border-primary px-4 py-4 sm:px-6">
+          {actionSuccess ? (
+            <Alert variant="default">
+              <CheckCircle2 className="h-4 w-4" />
+              <AlertTitle>{t('success')}</AlertTitle>
+              <AlertDescription>{actionSuccess}</AlertDescription>
+            </Alert>
+          ) : null}
 
+          {actionError ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>{t('error')}</AlertTitle>
+              <AlertDescription>{actionError}</AlertDescription>
+            </Alert>
+          ) : null}
+        </div>
+      )}
+
+      <div className="border-b border-border-primary">
+        <AccountSpecTable>
+          <SpecSection title={t('approvalInformation')}>
+            <SpecRow
+              left={{ label: t('resourceType'), value: approval.resourceType }}
+              right={{ label: t('action'), value: tAction(approval.action) }}
+            />
+            <SpecRow
+              left={{
+                label: t('resourceId'),
+                value:
+                  approval.resourceType === 'QUOTE' ? (
+                    <UiLink href={`/account/quotes/${approval.resource.id}`} type="Link" variant="primary" size="m">
+                      {approval.resource.id}
+                    </UiLink>
+                  ) : (
+                    approval.resource.id
+                  ),
+              }}
+              right={{ label: t('createdAt'), value: formatDate(approval.createdAt) }}
+            />
+            <SpecRow
+              left={{ label: t('requestor'), value: formatApprovalUserName(approval.requestor) }}
+              right={{ label: t('approver'), value: formatApprovalUserName(approval.approver) }}
+            />
+            {approval.updatedAt ? (
+              <SpecRow left={{ label: t('updatedAt'), value: formatDate(approval.updatedAt) }} />
+            ) : null}
+          </SpecSection>
+        </AccountSpecTable>
+      </div>
+
+      <div className="border-b border-border-primary">
         <ApprovalSummary approval={approval} />
+      </div>
 
-        {approval.resource.items && approval.resource.items.length > 0 && (
+      {approval.resource.items && approval.resource.items.length > 0 ? (
+        <section className="border-b border-border-primary">
+          <div className="border-b border-border-primary bg-surface-image-background px-4 py-2 sm:px-6">
+            <h2 className="text-xs font-bold uppercase tracking-[0.08em] text-text-headings">{t('orderItems')}</h2>
+          </div>
           <ProductListResolver
             items={approval.resource.items.map((it) => ({
               productId: it.productId,
@@ -303,72 +309,69 @@ export function ApprovalDetails({ approvalId, initialApproval }: ApprovalDetails
               currency: it.itemPrice.currency,
             }))}
           />
-        )}
+        </section>
+      ) : null}
 
-        <div>
-          <p className="text-sm font-medium mb-2">{t('requestorComment')}</p>
-          {approval.comment ? (
-            <div className="bg-surface-disabled p-3 rounded-md">{approval.comment}</div>
-          ) : (
-            <p className="text-text-placeholders">{t('noRequestorComment')}</p>
-          )}
-        </div>
+      <div className="border-b border-border-primary">
+        <AccountSpecTable>
+          <SpecFullWidthRow label={t('requestorComment')}>
+            {approval.comment ? (
+              <span>{approval.comment}</span>
+            ) : (
+              <span className="text-text-placeholders">{t('noRequestorComment')}</span>
+            )}
+          </SpecFullWidthRow>
+          <SpecFullWidthRow label={t('approverComment')}>
+            {approval.approverComment ? (
+              <span>{approval.approverComment}</span>
+            ) : (
+              <span className="text-text-placeholders">{t('noApproverComment')}</span>
+            )}
+          </SpecFullWidthRow>
+        </AccountSpecTable>
+      </div>
 
-        <div>
-          <p className="text-sm font-medium mb-2">{t('approverComment')}</p>
-          {approval.approverComment ? (
-            <div className="bg-surface-disabled p-3 rounded-md">{approval.approverComment}</div>
-          ) : (
-            <p className="text-text-placeholders">{t('noApproverComment')}</p>
-          )}
-        </div>
+      {canComment ? (
+        <section className="border-b border-border-primary px-4 py-4 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.08em] text-text-headings">{t('addComment')}</p>
+          <Textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder={t('enterComment')}
+            className="mb-2"
+          />
+          <Button onClick={handleComment} disabled={!comment.trim()}>
+            {t('saveComment')}
+          </Button>
+        </section>
+      ) : null}
 
-        {canApprove && (
-          <>
-            <Separator />
+      {canApprove ? (
+        <footer className="border-b border-border-primary px-4 py-4 sm:px-6">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.08em] text-text-headings">
+            {t('approvalActions')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={handleApprove}
+              disabled={isProcessing}
+              className="bg-surface-success hover:bg-surface-action-hover-2"
+            >
+              {isProcessing ? <Spinner variant="sm" className="mr-2" /> : null}
+              {t('approve')}
+            </Button>
+            <Button onClick={handleDecline} disabled={isProcessing} variant="secondary">
+              {t('decline')}
+            </Button>
+          </div>
+        </footer>
+      ) : null}
 
-            <div>
-              <p className="text-sm font-medium mb-2">{t('approvalActions')}</p>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleApprove}
-                  disabled={isProcessing}
-                  className="bg-surface-success hover:bg-surface-action-hover-2"
-                >
-                  {t('approve')}
-                </Button>
-                <Button onClick={handleDecline} disabled={isProcessing} variant="secondary">
-                  {t('decline')}
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {canComment && (
-          <>
-            <Separator />
-
-            <div>
-              <p className="text-sm font-medium mb-2">{t('addComment')}</p>
-              <Textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder={t('enterComment')}
-                className="mb-2"
-              />
-              <Button onClick={handleComment} disabled={!comment.trim()}>
-                {t('saveComment')}
-              </Button>
-            </div>
-          </>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between">
+      <footer className="px-4 py-4 sm:px-6">
         <Button variant="neutral" onClick={() => window.history.back()}>
           {t('back')}
         </Button>
-      </CardFooter>
-    </Card>
+      </footer>
+    </article>
   );
 }

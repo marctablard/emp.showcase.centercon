@@ -82,7 +82,23 @@ jest.mock('@/hooks/approval/useApproverSearch', () => ({
 }));
 
 jest.mock('@/components/account/quotes/quote-summary', () => ({
-  QuoteSummary: () => <div>QuoteSummary</div>,
+  QuoteSummary: ({ quote, relatedApprovalId }: { quote: { orderId?: string }; relatedApprovalId?: string | null }) => (
+    <div data-testid="quote-summary">
+      {quote.orderId ? (
+        <>
+          <span>account.quoteDetails.relatedOrder</span>
+          <a href={`/account/orders/${quote.orderId}`}>#{quote.orderId}</a>
+        </>
+      ) : null}
+      {relatedApprovalId ? (
+        <>
+          <span>account.quoteDetails.relatedApproval</span>
+          <a href={`/account/approval/${relatedApprovalId}`}>#{relatedApprovalId}</a>
+        </>
+      ) : null}
+      <span>account.quotesList.totalAmount</span>
+    </div>
+  ),
 }));
 
 jest.mock('@/components/product/product-list-resolver', () => ({
@@ -219,7 +235,7 @@ describe('Quote cross-links', () => {
 
     render(<QuoteDetails quoteId="quote-open-2" initialQuote={{ ...baseQuote, status: 'OPEN' }} />);
 
-    expect(await screen.findByText('account.quoteDetails.totalAmount')).toBeInTheDocument();
+    expect(await screen.findByText('account.quotesList.totalAmount')).toBeInTheDocument();
     expect(screen.queryByText('account.quoteDetails.relatedApproval')).not.toBeInTheDocument();
   });
 });

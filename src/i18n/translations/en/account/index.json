@@ -434,7 +434,10 @@
     "loadingHistory": "Loading history...",
     "quoteActionFailedTitle": "We couldn't complete this action",
     "quoteActionFailedDescription": "Please try again or contact support if the problem persists.",
-    "relatedOrder": "Related Order"
+    "relatedOrder": "Related Order",
+    "quotedProducts": "Quoted Products",
+    "history": "History",
+    "quoteActions": "Quote Actions"
   },
   "quotesList": {
     "title": "Quotes",

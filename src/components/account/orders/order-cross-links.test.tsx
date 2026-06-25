@@ -16,6 +16,7 @@ jest.mock('next-intl', () => ({
     translate.has = () => false;
     return translate;
   },
+  useLocale: () => 'en',
 }));
 
 jest.mock('@/i18n/navigation', () => ({
@@ -34,10 +35,21 @@ jest.mock('@/hooks/cart/useCart', () => ({
   }),
 }));
 
+jest.mock('@/hooks/site/useSite', () => ({
+  useSite: () => ({
+    availableSites: [],
+  }),
+}));
+
 jest.mock('@/hooks/ui/useToast', () => ({
   useToast: () => ({
     toast: jest.fn(),
   }),
+}));
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ alt }: { alt?: string }) => <img alt={alt} />,
 }));
 
 jest.mock('@/components/ui/link', () => ({

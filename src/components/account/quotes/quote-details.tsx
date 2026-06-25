@@ -2,14 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowLeft } from 'lucide-react';
 import { QuoteStatusBadge } from '@/components/account/quotes/quote-status-badge';
 import { QuoteSummary } from '@/components/account/quotes/quote-summary';
 import { ProductListResolver } from '@/components/product/product-list-resolver';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -18,11 +16,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { H2, H3, H4 } from '@/components/ui/h';
 import { Label } from '@/components/ui/label';
 import UiLink from '@/components/ui/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { ToastType, notify } from '@/components/ui/toast-notification';
 import { useApproverSearch } from '@/hooks/approval/useApproverSearch';
@@ -337,15 +336,6 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
     });
   };
 
-  const formatPrice = (price: number | undefined, currency: string | undefined) => {
-    if (price === undefined || currency === undefined) return '-';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 2,
-    }).format(price);
-  };
-
   const getHistoryAction = (historyItem: Pick<QuoteHistoryItem, 'fieldChanged' | 'statusValue'>) => {
     return historyItem.fieldChanged === '/comment' || historyItem.fieldChanged.startsWith('/mixins/')
       ? t('commentAdded')
@@ -383,36 +373,20 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
   // Loading state
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-          <CardDescription>{t('title')}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center py-8">
-          <div className="flex flex-col items-center space-y-2">
-            <Spinner color="primary" variant="md" />
-            <div>{t('loading')}</div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="border border-border-primary bg-surface-page p-6">
+        <Skeleton className="h-8 w-72" />
+        <Skeleton className="mt-4 h-5 w-40" />
+        <Skeleton className="mt-6 h-40 w-full" />
+      </div>
     );
   }
 
   // Error state
   if (error || !quote) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-          <CardDescription>{t('title')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-surface-error p-4 rounded-md text-text-error">{error?.message || 'Quote not found'}</div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={() => router.back()}>{t('backToQuotes')}</Button>
-        </CardFooter>
-      </Card>
+      <div className="border border-border-primary bg-surface-page p-6 text-center">
+        <p className="text-text-error">{error?.message || 'Quote not found'}</p>
+      </div>
     );
   }
 
@@ -590,255 +564,208 @@ export function QuoteDetails({ quoteId, initialQuote }: QuoteDetailsProps) {
         </DialogContent>
       </Dialog>
 
-      <div>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex flex-col px-4 gap-6">
-            <div className="flex items-center gap-6 mb-1">
-              <H2>{quote.reference || `#${quoteId}`}</H2>
-              <QuoteStatusBadge status={quote.status} />
-            </div>
-            <H4>{t('title')}</H4>
-          </div>
-          {/* Only show action buttons when confirmation dialogs are not visible and quote status is not ACCEPTED or DECLINED */}
-          {!showAcceptConfirmation &&
-            !activeDecisionDialog &&
-            quote.status !== 'ACCEPTED' &&
-            quote.status !== 'DECLINED' && (
-              <div className="flex gap-6">
-                <Button
-                  variant="outlineError"
-                  size="small"
-                  className={cn('disabled:border-none')}
-                  disabled={!(quote.status === 'OPEN')}
-                  onClick={() => {
-                    handleDecisionDialogChange('DECLINE');
-                  }}
-                >
-                  {t('reject')}
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  size="small"
-                  className={cn('disabled:border-none')}
-                  disabled={!(quote.status === 'OPEN')}
-                  onClick={() => {
-                    handleDecisionDialogChange('CHANGE');
-                  }}
-                >
-                  {t('requestChange')}
-                </Button>
-
-                <Button
-                  variant="outlineSuccess"
-                  size="small"
-                  className={cn('disabled:border-none')}
-                  disabled={isPrimaryActionDisabled}
-                  onClick={() => {
-                    void handleQuotePrimaryAction();
-                  }}
-                >
-                  {primaryActionLabel}
-                </Button>
-              </div>
-            )}
-        </div>
-      </div>
-
-      <CardContent className="space-y-6 mt-6">
-        {/* Quote acceptance confirmation dialog */}
-        {showAcceptConfirmation && (
-          <div className="grid grid-cols-1 mb-6 gap-6">
-            <div className="p-6 rounded-md bg-surface-action-hover-2 shadow-sm">
-              <div className="shadow-none rounded-md py-4 h-full gap-2 bg-surface-page p-6">
-                <H3 variant="h5" className="mb-2">
-                  {t('confirmationTitle')}
-                </H3>
-                <p className="text-sm text-text-on-disabled mb-4">{t('confirmationDescription')}</p>
-
-                <div className="mb-4">
-                  <label htmlFor="accept-comment" className="block text-sm font-medium mb-1">
-                    {t('yourComment')}
-                  </label>
-                  <Textarea
-                    id="accept-comment"
-                    placeholder={t('commentPlaceholder')}
-                    className="w-full h-32 resize-none"
-                    value={acceptComment}
-                    onChange={(e) => setAcceptComment(e.target.value)}
-                    maxLength={maxCommentLength}
-                  />
-                </div>
-
-                <div className="mb-4">
-                  {t('termsAgreement')}{' '}
-                  <UiLink type="Link" variant="text" href="/privacy-policy">
-                    {t('privacyPolicy')}
-                  </UiLink>
-                  and{' '}
-                  <UiLink type="Link" variant="text" href="/terms-and-conditions">
-                    {t('termsOfUse')}
-                  </UiLink>
-                </div>
-
-                {processError ? (
-                  <Alert variant="destructive" className="mb-4" role="alert">
-                    <AlertDescription>{processError}</AlertDescription>
-                  </Alert>
-                ) : null}
-
-                <div className="flex space-x-3">
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setProcessError(null);
-                      setShowAcceptConfirmation(false);
-                      setAcceptComment('');
-                    }}
-                  >
-                    {t('cancel')}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    disabled={isProcessing}
-                    onClick={async () => {
-                      try {
-                        setProcessError(null);
-                        setIsProcessing(true);
-
-                        await updateQuoteStatus(quoteId, 'ACCEPTED', acceptComment);
-
-                        setShowAcceptConfirmation(false);
-                        setAcceptComment('');
-                      } catch (error) {
-                        getLogger().error({ err: error }, 'Failed to process quote');
-                        const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
-                        setProcessError(msg);
-                        notify({
-                          title: t('quoteActionFailedTitle'),
-                          description: msg,
-                          type: ToastType.Error,
-                        });
-                      } finally {
-                        setIsProcessing(false);
-                      }
-                    }}
-                  >
-                    {isProcessing ? t('creating') : t('createOrder')}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Quote details grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('quotationDate')}</p>
-            <p className="mt-2 text-text-heading">{formatDate(quote.submittedDate)}</p>
-          </div>
-
-          {quote.customerId && (
+      <article className="border border-border-primary bg-surface-page">
+        <header className="border-b border-border-primary px-4 py-4 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-medium text-text-placeholders">{t('requestedBy')}</p>
-              <p className="mt-2 text-text-heading">{quote.customerName || quote.customerId}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.08em] text-text-placeholders">{t('title')}</p>
+              <h1 className="mt-1 text-2xl font-bold text-text-headings">{quote.reference || `#${quoteId}`}</h1>
             </div>
-          )}
-
-          <div>
-            <p className="text-sm font-medium text-text-placeholders">{t('totalAmount')}</p>
-            <p className="mt-2 text-text-heading font-semibold">{formatPrice(quote.totalGross, quote.currency)}</p>
+            <div className="flex items-center gap-3 border-l-0 border-border-primary sm:border-l sm:pl-6">
+              <span className="text-sm font-medium text-text-placeholders">{t('status')}</span>
+              <QuoteStatusBadge status={quote.status} emphasized />
+            </div>
           </div>
+        </header>
 
-          {quote.orderId ? (
-            <div>
-              <p className="text-sm font-medium text-text-placeholders">{t('relatedOrder')}</p>
-              <UiLink
-                type="Link"
-                href={`/account/orders/${quote.orderId}`}
-                variant="text"
-                className="mt-2 inline-flex underline"
-              >
-                #{quote.orderId}
+        {showAcceptConfirmation ? (
+          <section className="border-b border-border-primary px-4 py-4 sm:px-6">
+            <p className="text-xs font-bold uppercase tracking-[0.08em] text-text-headings">{t('confirmationTitle')}</p>
+            <p className="mt-2 text-sm text-text-body">{t('confirmationDescription')}</p>
+
+            <div className="mt-4">
+              <label htmlFor="accept-comment" className="block text-sm font-medium">
+                {t('yourComment')}
+              </label>
+              <Textarea
+                id="accept-comment"
+                placeholder={t('commentPlaceholder')}
+                className="mt-1 h-32 w-full resize-none"
+                value={acceptComment}
+                onChange={(e) => setAcceptComment(e.target.value)}
+                maxLength={maxCommentLength}
+              />
+            </div>
+
+            <div className="mt-4 text-sm">
+              {t('termsAgreement')}{' '}
+              <UiLink type="Link" variant="text" href="/privacy-policy">
+                {t('privacyPolicy')}
+              </UiLink>
+              {' and '}
+              <UiLink type="Link" variant="text" href="/terms-and-conditions">
+                {t('termsOfUse')}
               </UiLink>
             </div>
-          ) : null}
 
-          {approvalPermission?.approvalId ? (
-            <div>
-              <p className="text-sm font-medium text-text-placeholders">{t('relatedApproval')}</p>
-              <UiLink
-                type="Link"
-                href={`/account/approval/${approvalPermission.approvalId}`}
-                variant="text"
-                className="mt-2 inline-flex underline"
+            {processError ? (
+              <Alert variant="destructive" className="mt-4" role="alert">
+                <AlertDescription>{processError}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            <div className="mt-4 flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setProcessError(null);
+                  setShowAcceptConfirmation(false);
+                  setAcceptComment('');
+                }}
               >
-                #{approvalPermission.approvalId}
-              </UiLink>
+                {t('cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={isProcessing}
+                onClick={async () => {
+                  try {
+                    setProcessError(null);
+                    setIsProcessing(true);
+
+                    await updateQuoteStatus(quoteId, 'ACCEPTED', acceptComment);
+
+                    setShowAcceptConfirmation(false);
+                    setAcceptComment('');
+                  } catch (error) {
+                    getLogger().error({ err: error }, 'Failed to process quote');
+                    const msg = error instanceof Error ? error.message : t('quoteActionFailedDescription');
+                    setProcessError(msg);
+                    notify({
+                      title: t('quoteActionFailedTitle'),
+                      description: msg,
+                      type: ToastType.Error,
+                    });
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+              >
+                {isProcessing ? t('creating') : t('createOrder')}
+              </Button>
             </div>
-          ) : null}
+          </section>
+        ) : null}
+
+        <div className="border-b border-border-primary">
+          <QuoteSummary quote={quote} relatedApprovalId={approvalPermission?.approvalId} />
         </div>
 
-        {/* Quote History Section */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4">
-            <p className="col-start-1 font-bold font-headlines">{t('editor')}</p>
-            <p className="col-start-2 font-bold font-headlines">{t('action')}</p>
-            <p className="col-start-3 font-bold font-headlines">{t('comment')}</p>
-            <p className="col-start-4 font-bold font-headlines">{t('reason')}</p>
-            <p className="col-start-5 font-bold font-headlines">{t('date')}</p>
+        <section className="border-b border-border-primary">
+          <div className="border-b border-border-primary bg-surface-image-background px-4 py-2 sm:px-6">
+            <h2 className="text-xs font-bold uppercase tracking-[0.08em] text-text-headings">{t('quotedProducts')}</h2>
           </div>
-
-          {/* Always show initial quote request as first entry */}
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4 py-4 border-t border-border-primary">
-            <p className="col-start-1">{quote.customerName || 'Unknown User'}</p>
-            <p className="col-start-2">{t('initialQuoteRequest')}</p>
-            <p className="col-start-3">{'-'}</p>
-            <p className="col-start-4">{'-'}</p>
-            <p className="col-start-5">{formatDate(quote.submittedDate)}</p>
-          </div>
-
-          {historyLoading ? (
-            <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4 py-4 border-t border-border-primary">
-              <p className="col-start-1">{t('loadingHistory')}</p>
-            </div>
-          ) : (
-            quoteHistory.map((historyItem) => (
-              <div
-                key={historyItem.id}
-                className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-4 py-4 border-t border-border-primary"
-              >
-                <p className="col-start-1">{getHistoryUserName(historyItem)}</p>
-                <p className="col-start-2">{getHistoryAction(historyItem)}</p>
-                <p className="col-start-3">{getHistoryComment(historyItem)}</p>
-                <p className="col-start-4">{getHistoryReason(historyItem.quoteReason) || '-'}</p>
-                <p className="col-start-5">{formatHistoryDate(historyItem.rawModifiedAt || historyItem.modifiedAt)}</p>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Quote Summary Cards */}
-        <QuoteSummary quote={quote} />
-        {
           <ProductListResolver
             items={quote.items.map((it) => ({
               productId: it.product.id,
-              quantity: it.quantity.quantity, // Extract just the numeric quantity value
+              quantity: it.quantity.quantity,
               unitPrice: it.product.itemPrice.amount,
               currency: it.product.itemPrice.currency,
             }))}
           />
-        }
-      </CardContent>
+        </section>
 
-      <div>
-        <Button variant="neutral" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {t('backToQuotes')}
-        </Button>
-      </div>
+        <section className="border-b border-border-primary">
+          <div className="border-b border-border-primary bg-surface-image-background px-4 py-2 sm:px-6">
+            <h2 className="text-xs font-bold uppercase tracking-[0.08em] text-text-headings">{t('history')}</h2>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="px-4 font-bold">{t('editor')}</TableHead>
+                <TableHead className="px-4 font-bold">{t('action')}</TableHead>
+                <TableHead className="px-4 font-bold">{t('comment')}</TableHead>
+                <TableHead className="px-4 font-bold">{t('reason')}</TableHead>
+                <TableHead className="px-4 font-bold">{t('date')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="px-4 py-3">{quote.customerName || 'Unknown User'}</TableCell>
+                <TableCell className="px-4 py-3">{t('initialQuoteRequest')}</TableCell>
+                <TableCell className="px-4 py-3">-</TableCell>
+                <TableCell className="px-4 py-3">-</TableCell>
+                <TableCell className="px-4 py-3">{formatDate(quote.submittedDate)}</TableCell>
+              </TableRow>
+              {historyLoading ? (
+                <TableRow>
+                  <TableCell className="px-4 py-3" colSpan={5}>
+                    {t('loadingHistory')}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                quoteHistory.map((historyItem) => (
+                  <TableRow key={historyItem.id}>
+                    <TableCell className="px-4 py-3">{getHistoryUserName(historyItem)}</TableCell>
+                    <TableCell className="px-4 py-3">{getHistoryAction(historyItem)}</TableCell>
+                    <TableCell className="px-4 py-3">{getHistoryComment(historyItem)}</TableCell>
+                    <TableCell className="px-4 py-3">{getHistoryReason(historyItem.quoteReason) || '-'}</TableCell>
+                    <TableCell className="px-4 py-3">
+                      {formatHistoryDate(historyItem.rawModifiedAt || historyItem.modifiedAt)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </section>
+
+        {!showAcceptConfirmation &&
+        !activeDecisionDialog &&
+        quote.status !== 'ACCEPTED' &&
+        quote.status !== 'DECLINED' ? (
+          <footer className="border-b border-border-primary px-4 py-4 sm:px-6">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.08em] text-text-headings">{t('quoteActions')}</p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outlineError"
+                size="small"
+                className={cn('disabled:border-none')}
+                disabled={!(quote.status === 'OPEN')}
+                onClick={() => {
+                  handleDecisionDialogChange('DECLINE');
+                }}
+              >
+                {t('reject')}
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="small"
+                className={cn('disabled:border-none')}
+                disabled={!(quote.status === 'OPEN')}
+                onClick={() => {
+                  handleDecisionDialogChange('CHANGE');
+                }}
+              >
+                {t('requestChange')}
+              </Button>
+
+              <Button
+                variant="outlineSuccess"
+                size="small"
+                className={cn('disabled:border-none')}
+                disabled={isPrimaryActionDisabled}
+                onClick={() => {
+                  void handleQuotePrimaryAction();
+                }}
+              >
+                {primaryActionLabel}
+              </Button>
+            </div>
+          </footer>
+        ) : null}
+      </article>
     </div>
   );
 }

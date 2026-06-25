@@ -103,6 +103,7 @@ export interface Order {
   id: string;
   quoteId?: string;
   status: OrderStatus;
+  siteCode?: string;
   createdAt?: string;
   lastStatusChange?: string;
   items: OrderItem[];
