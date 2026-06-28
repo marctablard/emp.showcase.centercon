@@ -131,18 +131,8 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
       title: t('sidebar.groups.myOrganisation'),
       items: [
         {
-          href: '/account/wishlists',
-          title: t('sidebar.items.wishlists'),
-          icon: <Pin className="h-6 w-6" />,
-        },
-        {
-          href: '/account/products',
-          title: t('sidebar.items.productsMaintenance'),
-          icon: <Wrench className="h-6 w-6" />,
-        },
-        {
           href: '/account/company',
-          title: t('sidebar.items.companyManagement'),
+          title: t('sidebar.items.companyDetails'),
           icon: <Building2 className="h-6 w-6" />,
         },
         {
@@ -152,8 +142,18 @@ export function AccountLayout({ children, breadcrumbs }: AccountLayoutProps) {
         },
         {
           href: '/account/users',
-          title: t('sidebar.items.userManagement'),
+          title: t('sidebar.items.teamManagement'),
           icon: <UserCog className="h-6 w-6" />,
+        },
+        {
+          href: '/account/wishlists',
+          title: t('sidebar.items.wishlists'),
+          icon: <Pin className="h-6 w-6" />,
+        },
+        {
+          href: '/account/products',
+          title: t('sidebar.items.productsMaintenance'),
+          icon: <Wrench className="h-6 w-6" />,
         },
         {
           href: '/account/payment-options',

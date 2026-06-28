@@ -80,6 +80,16 @@ export interface EmporixGroupAssignmentRequest {
 }
 
 /**
+ * A user assignment document returned when listing the users of a group.
+ */
+export interface EmporixGroupAssignment {
+  id?: string;
+  groupId?: string;
+  userId: string;
+  userType?: 'CUSTOMER' | 'EMPLOYEE';
+}
+
+/**
  * User entity
  */
 export interface EmporixIamUser {
