@@ -17,6 +17,27 @@ const securedPatterns = [accountRegex, authSubpageRegex];
 const startsWithAny = (path: string, prefixes: string[]) => prefixes.some((p) => path.startsWith(p));
 
 /**
+ * NextAuth middleware rewrites absolute redirect Location headers to NEXTAUTH_URL.
+ * Path-only redirects keep the browser on the current deployment host.
+ */
+function asPathOnlyRedirect(req: NextRequest, response: NextResponse): NextResponse {
+  const location = response.headers.get('location');
+  if (!location) {
+    return response;
+  }
+
+  const target = new URL(location, req.url);
+  const pathOnlyLocation = `${target.pathname}${target.search}${target.hash}`;
+  const redirect = NextResponse.redirect(pathOnlyLocation, response.status === 308 ? 308 : 307);
+
+  response.cookies.getAll().forEach((cookie) => {
+    redirect.cookies.set(cookie);
+  });
+
+  return redirect;
+}
+
+/**
  * Redirect Management Dashboard assisted-buying links to the server processor before
  * the page renders. Client-side detection is unreliable in dev (React Strict Mode)
  * and may miss tokens after middleware locale/site redirects.
@@ -72,15 +93,14 @@ const authMiddleware = auth(async (req: NextAuthRequest, _event: NextFetchEvent)
   // Account routes are protected by default
   if (!req.auth?.user && accountRegex.test(pathname)) {
     // to protect all account routes without requiring explicit protection
-    return NextResponse.redirect(new URL('/account', req.nextUrl));
+    return asPathOnlyRedirect(req, NextResponse.redirect('/account'));
   }
 
   // Invoke site middleware to get actual pathes and handle potential redirects after authentication
   let response = siteMiddleware(req);
   const siteLocation = response.headers.get('location');
   if (siteLocation) {
-    // leave redirect untouched
-    return response;
+    return asPathOnlyRedirect(req, response);
   }
   const siteRewriteHeader = response.headers.get(NEXT_REWRITE_HEADER);
   const url = siteRewriteHeader ? new URL(siteRewriteHeader) : req.nextUrl.clone();
