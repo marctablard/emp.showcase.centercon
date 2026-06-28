@@ -6,7 +6,13 @@ import type EmporixApiClient from '../../common/impl/EmporixApiInvoker';
 import { buildPaginatedResponse, buildSearchQuery } from '../../common/util/common';
 import type { EmporixConfig } from '../../config';
 import type { EmporixPaginatedResponse, EmporixSearchParams } from '../../model';
-import type { EmporixAccessControl, EmporixGroup, EmporixGroupAssignmentRequest, EmporixRole } from '../../model/iam';
+import type {
+  EmporixAccessControl,
+  EmporixGroup,
+  EmporixGroupAssignment,
+  EmporixGroupAssignmentRequest,
+  EmporixRole,
+} from '../../model/iam';
 import type { EmporixIamApi as IEmporixIamApi } from '../EmporixIamApi';
 
 const createIamMetrics = (route: string) => createFetchMetricsParams('iam', route);
@@ -188,6 +194,23 @@ class EmporixIamApi implements IEmporixIamApi {
     if (!response.ok) {
       throw new Error(`Failed to delete group with ID ${id}: ${response.statusText}`);
     }
+  }
+
+  async getGroupUsers(groupId: string): Promise<EmporixGroupAssignment[]> {
+    const url = `/iam/${this.config.tenant}/groups/${groupId}/users?pageSize=200`;
+    const response = await this.apiClient.authenticatedFetch(
+      url,
+      { method: 'GET' },
+      'service',
+      undefined,
+      createIamMetrics('/iam/{tenant}/groups/{id}/users'),
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to retrieve users for group ${groupId}: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 
   async addUserToGroup(groupId: string, groupAssignment: EmporixGroupAssignmentRequest): Promise<{ id: string }> {

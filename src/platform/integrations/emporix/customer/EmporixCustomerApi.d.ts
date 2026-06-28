@@ -14,6 +14,24 @@ export interface EmporixCustomerApi {
   getCustomerProfile(expand?: string): Promise<EmporixCustomer>;
 
   /**
+   * Retrieves a specific customer's profile by id. Requires the
+   * `customer.customer_read_own` scope to read profiles within the same company.
+   * @param customerId The customer id (equal to the customer number in Emporix)
+   * @param expand Optional list of additional attributes to retrieve
+   * @returns Promise with the customer profile
+   */
+  getCustomerById(customerId: string, expand?: string): Promise<EmporixCustomer>;
+
+  /**
+   * Looks up a customer by their contact email address. Used by company admins
+   * to recover an already-registered customer (e.g. when re-inviting a team
+   * member whose account already exists). Requires elevated read scope.
+   * @param email The customer's contact email
+   * @returns The matching customer profile, or null when none exists
+   */
+  findCustomerByEmail(email: string): Promise<EmporixCustomer | null>;
+
+  /**
    * Updates a customer's profile
    * @param customerData The customer data to update
    * @returns Promise that resolves when the update is complete

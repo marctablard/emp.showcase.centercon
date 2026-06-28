@@ -92,11 +92,23 @@ export interface EmporixLegalEntity {
   mixins?: EmporixMixins;
 }
 
+/**
+ * Customer reference on a contact assignment. When listing/retrieving
+ * assignments the customer object is expanded with profile fields; when
+ * creating an assignment only the `id` is required.
+ */
+export interface EmporixContactAssignmentCustomer extends EmporixResourceId {
+  name?: string;
+  surname?: string;
+  email?: string;
+  phone?: string;
+}
+
 export interface EmporixContactAssignment {
   id?: string;
   legalEntity: EmporixResourceId;
-  customer: EmporixResourceId;
-  type: 'PRIMARY' | 'BILLING' | 'LOGISTICS';
+  customer: EmporixContactAssignmentCustomer;
+  type: 'PRIMARY' | 'BILLING' | 'LOGISTICS' | 'CONTACT';
   primary?: boolean;
   metadata?: EmporixMetadata;
   mixins?: EmporixMixins;
@@ -128,6 +140,8 @@ export interface EmporixLegalInfo {
 export interface EmporixCustomerGroup {
   id: string;
   name: EmporixLocalizedString;
+  /** Customer group role, e.g. "Admin", "Buyer", "Requester", "Contact". */
+  role?: string;
 }
 
 export interface EmporixResourceId {
