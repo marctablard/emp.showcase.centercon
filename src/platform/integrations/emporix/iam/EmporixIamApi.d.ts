@@ -3,6 +3,7 @@ import {
   AccessControlQueryParams,
   EmporixAccessControl,
   EmporixGroup,
+  EmporixGroupAssignment,
   EmporixGroupAssignmentRequest,
   EmporixIamUser,
   EmporixPermission,
@@ -84,11 +85,25 @@ export interface EmporixIamApi {
   deleteGroup(id: string): Promise<void>;
 
   /**
+   * Retrieves the users assigned to a specific group.
+   * @param groupId Group ID
+   * @returns List of group user assignments
+   */
+  getGroupUsers(groupId: string): Promise<EmporixGroupAssignment[]>;
+
+  /**
    * Adds a User to a group
    * @param groupId
    * @param groupAssignment
    */
   addUserToGroup(groupId: string, groupAssignment: EmporixGroupAssignmentRequest): Promise<{ id: string }>;
+
+  /**
+   * Removes a user from a group.
+   * @param groupId Group ID
+   * @param userId User ID
+   */
+  removeUserFromGroup(groupId: string, userId: string): Promise<void>;
 
   /**
    * Adds a User to a group

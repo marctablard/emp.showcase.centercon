@@ -46,6 +46,56 @@ class EmporixCustomerApi implements IEmporixCustomerApi {
     return (await response.json()) as EmporixCustomer;
   }
 
+  async getCustomerById(customerId: string, expand?: string): Promise<EmporixCustomer> {
+    const url = `customer/${this.config.tenant}/customers/${encodeURIComponent(customerId)}${expand ? `?expand=${expand}` : ''}`;
+
+    const response = await this.apiInvoker.authenticatedFetch(
+      url,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+      'session',
+      undefined,
+      createCustomerMetrics('/customer/{tenant}/customers/{id}'),
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to get customer ${customerId}: ${response.statusText}`);
+    }
+
+    return (await response.json()) as EmporixCustomer;
+  }
+
+  async findCustomerByEmail(email: string): Promise<EmporixCustomer | null> {
+    const url = `customer/${this.config.tenant}/customers?q=${encodeURIComponent(`contactEmail:${email}`)}&pageSize=1`;
+
+    const response = await this.apiInvoker.authenticatedFetch(
+      url,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+      // Reading another customer's profile requires elevated scope (used by
+      // company admins to look up team members), so use the service token.
+      'service',
+      undefined,
+      createCustomerMetrics('/customer/{tenant}/customers'),
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to look up customer by email: ${response.statusText}`);
+    }
+
+    const results = (await response.json()) as EmporixCustomer[];
+    const normalized = email.trim().toLowerCase();
+    return results.find((customer) => customer.contactEmail?.trim().toLowerCase() === normalized) ?? results[0] ?? null;
+  }
+
   async updateCustomerProfile(customerData: Partial<EmporixCustomer>): Promise<void> {
     const url = `customer/${this.config.tenant}/me`;
 

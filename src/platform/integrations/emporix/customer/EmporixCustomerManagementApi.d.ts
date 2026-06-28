@@ -8,6 +8,7 @@ export interface EmporixCustomerManagementApi {
   createContactAssignment(contactAssignment: EmporixContactAssignment): Promise<EmporixContactAssignment>;
   updateContactAssignment(id: string, contactAssignment: EmporixContactAssignment): Promise<EmporixContactAssignment>;
   getContactAssignmentsByCustomerId(customerId: string): Promise<EmporixContactAssignment[]>;
+  getContactAssignmentsByLegalEntityId(legalEntityId: string): Promise<EmporixContactAssignment[]>;
   getContactAssignmentById(id: string): Promise<EmporixContactAssignment | null>;
   deleteContactAssignment(id: string): Promise<void>;
   createLocation(location: EmporixLocation): Promise<EmporixLocation>;
