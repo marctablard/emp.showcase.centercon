@@ -204,7 +204,6 @@ export function inferVariantAttributesFromNameSuffix(
     prefixLength += 1;
   }
 
-  const prefix = names[0].slice(0, prefixLength);
   const suffixes = names.map((name) => name.slice(prefixLength).trim()).filter(Boolean);
   if (suffixes.length < 2 || new Set(suffixes).size < 2) {
     return { attributeDefinitions: [], attributeMaps: new Map() };
