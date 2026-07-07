@@ -18,8 +18,8 @@ export function AiStarsIcon(props: SVGProps<SVGSVGElement>) {
           y2="36.6666"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#0F77D9" />
-          <stop offset="1" stopColor="#87F4B5" />
+          <stop stopColor="#702283" />
+          <stop offset="1" stopColor="#E94E24" />
         </linearGradient>
       </defs>
     </svg>

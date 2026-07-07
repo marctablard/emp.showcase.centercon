@@ -5,7 +5,7 @@
   "start_url": "https://showcase.emporix.io/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#702283",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",

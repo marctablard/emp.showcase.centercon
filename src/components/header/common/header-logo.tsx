@@ -22,16 +22,21 @@ export const HeaderLogo = ({ scrolled, className, title, largeImageBreakpoint }:
   largeImageBreakpoint = largeImageBreakpoint || 'md';
 
   return (
-    <Link href="/" title={linkTitle} className={cn('shrink-0', showSearch ? 'sm:hidden' : '', className)}>
+    <Link
+      href="/"
+      title={linkTitle}
+      className={cn('flex shrink-0 items-center', showSearch ? 'sm:hidden' : '', className)}
+    >
       <picture>
         {!scrolled && <source media={`(min-width: ${breakpoints[largeImageBreakpoint]}px)`} srcSet={desktopLogo} />}
         <img
           src={mobileLogo}
-          alt="Emporix Shop"
+          alt="Centercon"
           className={cn(
-            'w-[18px] h-[16px] aspect-18/16 md:w-[148px] md:h-[22px] md:aspect-148/22',
-            largeImageBreakpoint === 'sm' && 'sm:w-[148px] sm:h-[22px] sm:aspect-148/22',
-            scrolled && 'md:w-[25px] md:aspect-25/22',
+            'block h-[32px] w-auto',
+            largeImageBreakpoint === 'sm' && 'sm:h-[58px]',
+            !scrolled && 'md:h-[58px]',
+            scrolled && 'md:h-[34px]',
           )}
         />
       </picture>

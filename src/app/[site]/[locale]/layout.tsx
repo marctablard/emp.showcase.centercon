@@ -64,7 +64,7 @@ function stripLocalePrefix(appPath: string, locale: string): string {
 }
 
 export const viewport = {
-  themeColor: '#192A42',
+  themeColor: '#702283',
   width: 'device-width',
   initialScale: 1,
 };
