@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { CirclePause, CirclePlay } from 'lucide-react';
 import { H1 } from '@/components/ui/h';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { cn } from '@/lib/utils';
 import type { ButtonData } from './button';
 import Button from './button';
 import type { VideoData } from './video';
