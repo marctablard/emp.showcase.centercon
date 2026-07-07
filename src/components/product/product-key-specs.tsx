@@ -5,7 +5,8 @@ import { Copy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { H2 } from '@/components/ui/h';
 import { useL10n } from '@/hooks/useL10n';
-import { type ProductTemplateAttributeKey, type ProductVariantAttributeKey, dk } from '@/i18n/dynamic-key';
+import { type ProductTemplateAttributeKey, dk } from '@/i18n/dynamic-key';
+import { resolveProductVariantAttributeLabel } from '@/lib/product/variant-attribute-label';
 import { cn } from '@/lib/utils';
 import type { Product, ProductVariantAttribute } from '@/platform/services/model/product';
 
@@ -39,11 +40,7 @@ export function ProductKeySpecs({ product, className, onScrollToTechnicalInfo }:
           {product.variantAttributes?.map((attribute: ProductVariantAttribute) => (
             <div key={attribute.key} className="min-w-0">
               <dt className="text-xs uppercase tracking-wide text-text-placeholders">
-                {l10n(
-                  t(dk<ProductVariantAttributeKey>(`filters.mixins.productVariantAttributes.${attribute.key}`), {
-                    defaultValue: attribute.key,
-                  }),
-                )}
+                {resolveProductVariantAttributeLabel(attribute, t, l10n)}
               </dt>
               <dd className="mt-0.5 text-sm font-medium text-text-headings">
                 {l10n(product.variantAttributeValues?.[attribute.key] ?? '')}

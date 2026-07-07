@@ -75,7 +75,11 @@
         "ampere": "Ampere",
         "length": "Length",
         "farbe": "Color",
-        "format": "Format"
+        "format": "Format",
+        "Breite": "Width",
+        "Thickness": "Thickness",
+        "Länge": "Length",
+        "COREVariante": "Core variant"
       },
       "productTemplateAttributes": {
         "length": "Product Length",
