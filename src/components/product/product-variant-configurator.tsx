@@ -132,14 +132,14 @@ function VariantConfiguratorRow({
   const stockLabel =
     availability === undefined
       ? '…'
-      : !availability.isAvailable
-        ? t('variantConfigurator.outOfStock')
-        : String(availability.availableQuantity);
+      : availability.availableQuantity > 0
+        ? String(availability.availableQuantity)
+        : t('variantConfigurator.outOfStock');
 
   const stockClass =
     availability === undefined
       ? 'bg-surface-disabled'
-      : !availability.isAvailable
+      : !availability.isAvailable || availability.availableQuantity <= 0
         ? 'bg-surface-error'
         : availability.availableQuantity <= 5
           ? 'bg-surface-warning'
@@ -168,7 +168,7 @@ function VariantConfiguratorRow({
       <TableCell>
         <div className="flex items-center gap-2">
           <span className={cn('inline-block h-2 w-2 rounded-full', stockClass)} />
-          <span className="text-text-body">{availability === undefined ? '…' : stockLabel}</span>
+          <span className="text-text-body">{stockLabel}</span>
         </div>
       </TableCell>
       <TableCell className="font-medium">
