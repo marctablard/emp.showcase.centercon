@@ -40,7 +40,7 @@ export interface EmporixProduct {
   name: string | EmporixLocalizedString;
   description?: string | EmporixLocalizedString;
   media?: EmporixMedia[];
-  productType?: 'BASIC' | 'VARIANT' | 'PARENT_VARIANT';
+  productType?: 'BASIC' | 'VARIANT' | 'PARENT_VARIANT' | 'DYNAMIC_VARIANT' | 'BUNDLE';
   parentVariantId?: string;
   parentVariant?: EmporixProduct;
   brandId?: string;

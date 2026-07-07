@@ -20,6 +20,7 @@ export interface ProductSpecification {
   label: LocalizedString;
   value: LocalizedString;
   unit?: LocalizedString;
+  highlight?: boolean;
 }
 
 export interface GroupedSpecification {
@@ -51,11 +52,14 @@ export interface ProductVariantAttribute {
   values: { key: string; name?: string | LocalizedString; selected: boolean }[];
 }
 
+export type ProductType = 'BASIC' | 'VARIANT' | 'PARENT_VARIANT' | 'DYNAMIC_VARIANT' | 'BUNDLE';
+
 export interface Product {
   id: string;
   name: string | LocalizedString;
   description: string | LocalizedString;
   sku?: string;
+  productType?: ProductType;
   brand?: {
     id: string;
     name?: string | LocalizedString;
