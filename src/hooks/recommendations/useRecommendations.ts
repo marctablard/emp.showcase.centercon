@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useShopContextReady } from '@/hooks/common/useShopContextReady';
 import { useSession } from '@/hooks/session/useSession';
 import { fetchRecommendations } from '@/lib/client/recommendations';
+import { buildSessionPricingScopeKey } from '@/lib/common/price-fetch-options';
 import type { ProductRecommendations } from '@/platform/services/model/product';
 
 export function useRecommendations(productId?: string) {
   const { session } = useSession();
   const { ready: shopContextReady } = useShopContextReady();
+  const sessionPricingScope = buildSessionPricingScopeKey(session);
   const [recommendations, setRecommendations] = useState<ProductRecommendations | undefined>(undefined);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export function useRecommendations(productId?: string) {
       isCancelled = true;
       setFetchLoading(false);
     };
-  }, [productId, shopContextReady, session?.currency, session?.siteCode]);
+  }, [productId, shopContextReady, sessionPricingScope]);
 
   const hasProduct = Boolean(productId);
   const waitingForShopContext = hasProduct && !shopContextReady;

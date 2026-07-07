@@ -24,6 +24,7 @@ import { useWishlistAddWithAuth } from '@/hooks/wishlist/useWishlistAddWithAuth'
 import { type ProductTemplateAttributeKey, type ProductVariantAttributeKey, dk } from '@/i18n/dynamic-key';
 import { fetchProductAvailability } from '@/lib/client/availability';
 import { fetchProductPrice } from '@/lib/client/prices';
+import { isAuthenticatedSessionCustomerId } from '@/lib/common/customer-identity';
 import {
   isProductPriceDisplayableForPurchase,
   isPurchaseShopContextReady,
@@ -117,7 +118,9 @@ export default function ProductDetail({ product: initialProduct, options, classN
     }
 
     const embedded = product.price;
+    const hasAuthenticatedPricingContext = isAuthenticatedSessionCustomerId(session.customerId);
     if (
+      !hasAuthenticatedPricingContext &&
       embedded !== undefined &&
       embedded !== null &&
       embedded.currency &&
