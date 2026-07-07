@@ -24,6 +24,7 @@ export default function ProductAddToCartButton({
   className,
   availability,
   availabilityLoading = false,
+  compact = false,
 }: {
   product: Product;
   price?: ProductPrice | null;
@@ -32,6 +33,8 @@ export default function ProductAddToCartButton({
   /** When set, block add while loading or when stock is not available for the current shop context. */
   availability?: StockAvailability | null;
   availabilityLoading?: boolean;
+  /** Avoid full-width flex layout (e.g. variant table rows). */
+  compact?: boolean;
 }) {
   const t = useTranslations('product');
   const { addItem, cart } = useCart();
@@ -98,16 +101,24 @@ export default function ProductAddToCartButton({
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex flex-1 w-full">
+          <span className={cn('inline-flex', !compact && 'flex-1 w-full')}>
             <Button
-              className={cn('flex-1 w-full', className)}
+              className={cn(!compact && 'flex-1 w-full', compact && 'h-8 w-8 px-0', className)}
+              size={compact ? 'icon' : undefined}
               onClick={handleAddToCart}
               disabled={isDisabled}
               title={syncTitle}
+              aria-label={compact ? t('addToCart') : undefined}
               data-testid="product-addToCartButton"
             >
-              {t('addToCart')}
-              <ShoppingCart className="hidden sm:inline" />
+              {compact ? (
+                <ShoppingCart className="h-4 w-4" />
+              ) : (
+                <>
+                  {t('addToCart')}
+                  <ShoppingCart className="hidden sm:inline" />
+                </>
+              )}
             </Button>
           </span>
         </TooltipTrigger>
