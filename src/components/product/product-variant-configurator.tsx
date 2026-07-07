@@ -13,10 +13,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useVariantConfigurator } from '@/hooks/product/useVariantConfigurator';
 import { useSession } from '@/hooks/session/useSession';
 import { useL10n } from '@/hooks/useL10n';
-import { type ProductVariantAttributeKey, dk } from '@/i18n/dynamic-key';
 import { useRouter } from '@/i18n/navigation';
 import { fetchProductAvailability } from '@/lib/client/availability';
 import { fetchProductPrice } from '@/lib/client/prices';
+import { resolveProductVariantAttributeLabel } from '@/lib/product/variant-attribute-label';
 import {
   getVariantAttributeMap,
   isColorAttributeKey,
@@ -40,13 +40,7 @@ function getAttributeLabel(
   t: ReturnType<typeof useTranslations<'product'>>,
   l10n: ReturnType<typeof useL10n>['l10n'],
 ): string {
-  if (attribute.name) {
-    return l10n(attribute.name);
-  }
-
-  return t(dk<ProductVariantAttributeKey>(`filters.mixins.productVariantAttributes.${attribute.key}`), {
-    defaultValue: attribute.key,
-  });
+  return resolveProductVariantAttributeLabel(attribute, t, l10n);
 }
 
 function getAttributeLabelByKey(
