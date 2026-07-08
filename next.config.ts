@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 import createNextIntlSplitPlugin from 'next-intl-split/plugin';
-import path from 'path';
+import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { validateEnvVars } from './src/platform/healthcheck/env-validation';
 
