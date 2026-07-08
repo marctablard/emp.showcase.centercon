@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import createNextIntlSplitPlugin from 'next-intl-split/plugin';
+import path from 'node:path';
 import { validateEnvVars } from './src/platform/healthcheck/env-validation';
 
 // ── Tier 1: Build-time environment variable validation ──────────────────────
@@ -43,6 +44,10 @@ switch (process.env.NEXT_SERVER_OUTPUTMODE) {
 }
 
 let nextConfig: NextConfig = {
+  // Prevent Turbopack from using ~/package-lock.json as the workspace root.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   images: {
     remotePatterns: [
       {
